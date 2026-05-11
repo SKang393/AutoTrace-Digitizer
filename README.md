@@ -35,7 +35,7 @@ Current Auto Axis behavior includes:
 - Detecting the bottom x-axis from an imported graph image
 - Handling mild image tilt before calibration
 - Creating normal editable axis points
-- Setting the x-axis starting value to 1
+- Setting the x-axis starting value to 0
 - Setting the y-axis minimum to 0
 - Prompting the user to enter the y-axis maximum
 
