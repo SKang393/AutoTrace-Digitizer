@@ -1,0 +1,533 @@
+/******************************************************************************************************
+ * (C) 2014 markummitchell@github.com. This file is part of Engauge Digitizer, which is released      *
+ * under GNU General Public License version 2 (GPLv2) or (at your option) any later version. See file *
+ * LICENSE or go to gnu.org/licenses for details. Distribution requires prior written permission.     *
+ ******************************************************************************************************/
+
+#include "CallbackAxisPointsAbstract.h"
+#include "EngaugeAssert.h"
+#include "Logger.h"
+#include "Point.h"
+#include <qmath.h>
+#include "QtToString.h"
+#include "Transformation.h"
+
+// Epsilon test values
+const double ONE_PIXEL = 1.0; // Screen coordinates
+const double ZERO_EPSILON = 0.0; // Graph coordinates
+
+// There is some confusion about the bottom transformation row. Some references have the vaules (other than the
+// last unity value) as 0 and others have it as 1. Using either value works with existing dig files, but import
+// fails with 0
+const double AFFINE_BOTTOM_ROW_NONUNITY = 1.0;
+
+CallbackAxisPointsAbstract::CallbackAxisPointsAbstract(const DocumentModelCoords &modelCoords,
+                                                       DocumentAxesPointsRequired documentAxesPointsRequired) :
+  m_modelCoords (modelCoords),
+  m_isError (false),
+  m_documentAxesPointsRequired (documentAxesPointsRequired)
+{
+}
+
+CallbackAxisPointsAbstract::CallbackAxisPointsAbstract(const DocumentModelCoords &modelCoords,
+                                                       const QString pointIdentifierOverride,
+                                                       const QPointF &posScreenOverride,
+                                                       const QPointF &posGraphOverride,
+                                                       DocumentAxesPointsRequired documentAxesPointsRequired) :
+  m_modelCoords (modelCoords),
+  m_pointIdentifierOverride (pointIdentifierOverride),
+  m_posScreenOverride (posScreenOverride),
+  m_posGraphOverride (posGraphOverride),
+  m_isError (false),
+  m_documentAxesPointsRequired (documentAxesPointsRequired)
+{
+}
+
+bool CallbackAxisPointsAbstract::anyPointsRepeatPair (const CoordPairVector &vector,
+                                                      double epsilon) const
+{
+  for (int pointLeft = 0; pointLeft < vector.count(); pointLeft++) {
+    for (int pointRight = pointLeft + 1; pointRight < vector.count(); pointRight++) {
+
+      if (qAbs (vector.at(pointLeft).x() - vector.at(pointRight).x()) <= epsilon &&
+          qAbs (vector.at(pointLeft).y() - vector.at(pointRight).y()) <= epsilon) {
+
+        // Points pointLeft and pointRight repeat each other, which means matrix cannot be inverted
+        return true;
+      }
+    }
+  }
+
+  // No columns repeat
+  return false;
+}
+
+bool CallbackAxisPointsAbstract::anyPointsRepeatSingle (const CoordSingleVector &vector,
+                                                        double epsilon) const
+{
+  for (int pointLeft = 0; pointLeft < vector.count(); pointLeft++) {
+    for (int pointRight = pointLeft + 1; pointRight < vector.count(); pointRight++) {
+
+      if (qAbs (vector.at(pointLeft) - vector.at(pointRight)) <= epsilon) {
+
+        // Points pointLeft and pointRight repeat each other, which means matrix cannot be inverted
+        return true;
+      }
+    }
+  }
+
+  // No columns repeat
+  return false;
+}
+
+CallbackSearchReturn CallbackAxisPointsAbstract::callback (const QString & /* curveName */,
+                                                           const Point &point)
+{
+  QPointF posScreen = point.posScreen ();
+  QPointF posGraph = point.posGraph ();
+
+  if (m_pointIdentifierOverride == point.identifier ()) {
+
+    // Override the old point coordinates with its new (if all tests are passed) coordinates
+    posScreen = m_posScreenOverride;
+    posGraph = m_posGraphOverride;
+  }
+
+  // Try to compute transform
+  if (m_documentAxesPointsRequired == DOCUMENT_AXES_POINTS_REQUIRED_2) {
+    return callbackRequire2AxisPoints (posScreen,
+                                       posGraph);
+  } else if (m_documentAxesPointsRequired == DOCUMENT_AXES_POINTS_REQUIRED_3) {
+    return callbackRequire3AxisPoints (posScreen,
+                                       posGraph);
+  } else {
+    return callbackRequire4AxisPoints (point.isXOnly(),
+                                       posScreen,
+                                       posGraph);
+  }
+}
+
+CallbackSearchReturn CallbackAxisPointsAbstract::callbackRequire2AxisPoints (const QPointF &posScreen,
+                                                                             const QPointF &posGraph)
+{
+  CallbackSearchReturn rtn = CALLBACK_SEARCH_RETURN_CONTINUE;
+
+  // Update range variables. The same nonzero length value is stored in every x and y coordinate of every axis point
+  m_xGraphLow = 0;
+  m_yGraphLow = 0;
+  m_xGraphHigh = posGraph.x();
+  m_yGraphHigh = posGraph.x();
+
+  int numberPoints = m_screenInputs.count();
+  if (numberPoints < 2) {
+
+    // Append new point
+    m_screenInputs.push_back (posScreen);
+    m_graphOutputs.push_back (posGraph);
+    numberPoints = m_screenInputs.count();
+
+    if (numberPoints == 2) {
+      loadTransforms2 ();
+    }
+
+    // Error checking
+    if (anyPointsRepeatPair (m_screenInputs,
+                             ONE_PIXEL)) {
+
+      m_isError = true;
+      m_errorMessage = QObject::tr ("New axis point cannot be at the same screen position as an existing axis point");
+      rtn = CALLBACK_SEARCH_RETURN_INTERRUPT;
+
+    }
+  }
+
+  if (m_screenInputs.count() > 1) {
+
+    // There are enough axis points so quit
+    rtn = CALLBACK_SEARCH_RETURN_INTERRUPT;
+
+  }
+
+  return rtn;
+}
+
+CallbackSearchReturn CallbackAxisPointsAbstract::callbackRequire3AxisPoints (const QPointF &posScreen,
+                                                                             const QPointF &posGraph)
+{
+  CallbackSearchReturn rtn = CALLBACK_SEARCH_RETURN_CONTINUE;
+
+  // Update range variables
+  int numberPoints = m_screenInputs.count();
+  if ((numberPoints == 0) || (posGraph.x () < m_xGraphLow)) { m_xGraphLow = posGraph.x (); }
+  if ((numberPoints == 0) || (posGraph.y () < m_yGraphLow)) { m_yGraphLow = posGraph.y (); }
+  if ((numberPoints == 0) || (posGraph.x () > m_xGraphHigh)) { m_xGraphHigh = posGraph.x (); }
+  if ((numberPoints == 0) || (posGraph.y () > m_yGraphHigh)) { m_yGraphHigh = posGraph.y (); }
+
+  if (numberPoints < 3) {
+
+    // Append new point
+    m_screenInputs.push_back (posScreen);
+    m_graphOutputs.push_back (posGraph);
+    numberPoints = m_screenInputs.count();
+
+    if (numberPoints == 3) {
+      loadTransforms3 ();
+    }
+
+    // Error checking
+    if ((m_documentAxesPointsRequired == DOCUMENT_AXES_POINTS_REQUIRED_2 ||
+         m_documentAxesPointsRequired == DOCUMENT_AXES_POINTS_REQUIRED_3) &&
+        anyPointsRepeatPair (m_screenInputs, ONE_PIXEL)) {
+
+      m_isError = true;
+      m_errorMessage = QObject::tr ("New axis point cannot be at the same screen position as an existing axis point");
+      rtn = CALLBACK_SEARCH_RETURN_INTERRUPT;
+
+    } else if ((m_documentAxesPointsRequired == DOCUMENT_AXES_POINTS_REQUIRED_2 ||
+                m_documentAxesPointsRequired == DOCUMENT_AXES_POINTS_REQUIRED_3) &&
+               anyPointsRepeatPair (m_graphOutputs, ZERO_EPSILON)) {
+
+      m_isError = true;
+      m_errorMessage = QObject::tr ("New axis point cannot have the same graph coordinates as an existing axis point");
+      rtn = CALLBACK_SEARCH_RETURN_INTERRUPT;
+
+    } else if ((numberPoints == 3) && threePointsAreCollinear (m_screenInputsTransform,
+                                                               COORD_IS_LINEAR,
+                                                               COORD_IS_LINEAR)) {
+
+      m_isError = true;
+      m_errorMessage = QObject::tr ("No more than two axis points can lie along the same line on the screen");
+      rtn = CALLBACK_SEARCH_RETURN_INTERRUPT;
+
+    } else if ((numberPoints == 3) && threePointsAreCollinear (m_graphOutputsTransform,
+                                                               logXGraph (),
+                                                               logYGraph ())) {
+
+      m_isError = true;
+      m_errorMessage = QObject::tr ("No more than two axis points can lie along the same line in graph coordinates");
+      rtn = CALLBACK_SEARCH_RETURN_INTERRUPT;
+
+    }
+  }
+
+  if (m_screenInputs.count() > 2) {
+
+    // There are enough axis points so quit
+    rtn = CALLBACK_SEARCH_RETURN_INTERRUPT;
+
+  }
+
+  return rtn;
+}
+
+CallbackSearchReturn CallbackAxisPointsAbstract::callbackRequire4AxisPoints (bool isXOnly,
+                                                                             const QPointF &posScreen,
+                                                                             const QPointF &posGraph)
+{
+  CallbackSearchReturn rtn = CALLBACK_SEARCH_RETURN_CONTINUE;
+
+  // Update range variables
+  int numberPoints = m_screenInputsX.count() + m_screenInputsY.count();
+  if ((numberPoints == 0) || (posGraph.x () < m_xGraphLow)) { m_xGraphLow = posGraph.x (); }
+  if ((numberPoints == 0) || (posGraph.y () < m_yGraphLow)) { m_yGraphLow = posGraph.y (); }
+  if ((numberPoints == 0) || (posGraph.x () > m_xGraphHigh)) { m_xGraphHigh = posGraph.x (); }
+  if ((numberPoints == 0) || (posGraph.y () > m_yGraphHigh)) { m_yGraphHigh = posGraph.y (); }
+
+  if (numberPoints < 4) {
+
+    // Append the new point
+    if (isXOnly) {
+
+      m_screenInputsX.push_back (posScreen);
+      m_graphOutputsX.push_back (posGraph.x());
+
+    } else {
+
+      m_screenInputsY.push_back (posScreen);
+      m_graphOutputsY.push_back (posGraph.y());
+
+    }
+
+    numberPoints = m_screenInputsX.count() + m_screenInputsY.count();
+    if (numberPoints == 4) {
+      loadTransforms4 ();
+    }
+  }
+
+  if (m_screenInputsX.count() > 2) {
+
+    m_isError = true;
+    m_errorMessage = QObject::tr ("Too many x axis points. There should only be two");
+    rtn = CALLBACK_SEARCH_RETURN_INTERRUPT;
+
+  } else if (m_screenInputsY.count() > 2) {
+
+    m_isError = true;
+    m_errorMessage = QObject::tr ("Too many y axis points. There should only be two");
+    rtn = CALLBACK_SEARCH_RETURN_INTERRUPT;
+
+  } else {
+
+    if ((m_screenInputsX.count() == 2) &&
+        (m_screenInputsY.count() == 2)) {
+
+      // Done, although an error may intrude
+      rtn = CALLBACK_SEARCH_RETURN_INTERRUPT;
+    }
+
+    // Error checking
+    if (anyPointsRepeatPair (m_screenInputsX,
+                             ONE_PIXEL) ||
+        anyPointsRepeatPair (m_screenInputsY,
+                             ONE_PIXEL)) {
+
+      m_isError = true;
+      m_errorMessage = QObject::tr ("New axis point cannot be at the same screen position as an existing axis point");
+      rtn = CALLBACK_SEARCH_RETURN_INTERRUPT;
+
+    } else if (anyPointsRepeatSingle (m_graphOutputsX,
+                                      ZERO_EPSILON) ||
+               anyPointsRepeatSingle (m_graphOutputsY,
+                                      ZERO_EPSILON)) {
+
+      m_isError = true;
+      m_errorMessage = QObject::tr ("New axis point cannot have the same graph coordinates as an existing axis point");
+      rtn = CALLBACK_SEARCH_RETURN_INTERRUPT;
+
+    } else if ((numberPoints == 4) && threePointsAreCollinear (m_screenInputsTransform,
+                                                               COORD_IS_LINEAR,
+                                                               COORD_IS_LINEAR)) {
+
+      m_isError = true;
+      m_errorMessage = QObject::tr ("No more than two axis points can lie along the same line on the screen");
+      rtn = CALLBACK_SEARCH_RETURN_INTERRUPT;
+
+    } else if ((numberPoints == 4) && threePointsAreCollinear (m_graphOutputsTransform,
+                                                               logXGraph (),
+                                                               logYGraph ())) {
+
+      m_isError = true;
+      m_errorMessage = QObject::tr ("No more than two axis points can lie along the same line in graph coordinates");
+      rtn = CALLBACK_SEARCH_RETURN_INTERRUPT;
+
+    }
+  }
+
+  return rtn;
+}
+
+DocumentAxesPointsRequired CallbackAxisPointsAbstract::documentAxesPointsRequired() const
+{
+  return m_documentAxesPointsRequired;
+}
+
+void CallbackAxisPointsAbstract::loadTransforms2 ()
+{
+  // To get a third point from two existing points we compute the vector between the first 2 points and then take
+  // the cross product with the out-of-plane unit vector to get the perpendicular vector, and the endpoint of that
+  // is used as the third point. This implicitly assumes that the graph-to-screen coordinates scaling is the
+  // same in both directions. The advantage of this approach is that no assumptions are made about the inputs
+
+  double d0To1ScreenX = m_screenInputs.at (1).x () - m_screenInputs.at (0).x ();
+  double d0To1ScreenY = m_screenInputs.at (1).y () - m_screenInputs.at (0).y ();
+  double d0To1ScreenZ = 0;
+  double d0To1GraphX = m_graphOutputs.at (1).x () - m_graphOutputs.at (0).x ();
+  double d0To1GraphY = m_graphOutputs.at (1).y () - m_graphOutputs.at (0).y ();
+  double d0To1GraphZ = 0;
+
+  double unitNormalX = 0;
+  double unitNormalY = 0;
+  double unitNormalZ = 1;
+
+  double d0To2ScreenX = unitNormalY * d0To1ScreenZ - unitNormalZ * d0To1ScreenY;
+  double d0To2ScreenY = unitNormalZ * d0To1ScreenX - unitNormalX * d0To1ScreenZ;
+  double d0To2GraphX = unitNormalY * d0To1GraphZ - unitNormalZ * d0To1GraphY;
+  double d0To2GraphY = unitNormalZ * d0To1GraphX - unitNormalX * d0To1GraphZ;
+
+  // Hack since +Y for screen coordinates is down but up for graph coordinates. Users expect +Y to be up
+  // so we rotate screen delta by 180 degrees
+  const double FLIP_Y_SCREEN = -1.0;
+
+  double screenX2 = m_screenInputs.at (0).x () + FLIP_Y_SCREEN * d0To2ScreenX;
+  double screenY2 = m_screenInputs.at (0).y () + FLIP_Y_SCREEN * d0To2ScreenY;
+  double graphX2 = m_graphOutputs.at (0).x () + d0To2GraphX;
+  double graphY2 = m_graphOutputs.at (0).y () + d0To2GraphY;
+
+  // Screen coordinates
+  m_screenInputsTransform = QTransform (m_screenInputs.at(0).x(), m_screenInputs.at(1).x(), screenX2,
+                                        m_screenInputs.at(0).y(), m_screenInputs.at(1).y(), screenY2,
+                                        AFFINE_BOTTOM_ROW_NONUNITY    , AFFINE_BOTTOM_ROW_NONUNITY    , 1.0     );
+
+  // Graph coordinates
+  m_graphOutputsTransform = QTransform (m_graphOutputs.at(0).x(), m_graphOutputs.at(1).x(), graphX2,
+                                        m_graphOutputs.at(0).y(), m_graphOutputs.at(1).y(), graphY2,
+                                        AFFINE_BOTTOM_ROW_NONUNITY    , AFFINE_BOTTOM_ROW_NONUNITY    , 1.0     );
+}
+
+void CallbackAxisPointsAbstract::loadTransforms3 ()
+{
+  // Screen coordinates
+  m_screenInputsTransform = QTransform (m_screenInputs.at(0).x(), m_screenInputs.at(1).x(), m_screenInputs.at(2).x(),
+                                        m_screenInputs.at(0).y(), m_screenInputs.at(1).y(), m_screenInputs.at(2).y(),
+                                        AFFINE_BOTTOM_ROW_NONUNITY    , AFFINE_BOTTOM_ROW_NONUNITY    , 1.0                     );
+  
+  // Graph coordinates
+  m_graphOutputsTransform = QTransform (m_graphOutputs.at(0).x(), m_graphOutputs.at(1).x(), m_graphOutputs.at(2).x(),
+                                        m_graphOutputs.at(0).y(), m_graphOutputs.at(1).y(), m_graphOutputs.at(2).y(),
+                                        AFFINE_BOTTOM_ROW_NONUNITY    , AFFINE_BOTTOM_ROW_NONUNITY    , 1.0                     );
+}
+
+void CallbackAxisPointsAbstract::loadTransforms4 ()
+{
+  double x1Screen = m_screenInputsX.at(0).x();
+  double y1Screen = m_screenInputsX.at(0).y();
+  double x2Screen = m_screenInputsX.at(1).x();
+  double y2Screen = m_screenInputsX.at(1).y();
+  double x3Screen = m_screenInputsY.at(0).x();
+  double y3Screen = m_screenInputsY.at(0).y();
+  double x4Screen = m_screenInputsY.at(1).x();
+  double y4Screen = m_screenInputsY.at(1).y();
+
+  // Each of the four axes points has only one coordinate
+  double x1Graph = m_graphOutputsX.at(0);
+  double x2Graph = m_graphOutputsX.at(1);
+  double y3Graph = m_graphOutputsY.at(0);
+  double y4Graph = m_graphOutputsY.at(1);
+
+  // Intersect the two lines of the two axes. The lines are defined parametrically for the screen coordinates, with
+  // points 1 and 2 on the x axis and points 3 and 4 on the y axis, as:
+  //   x = (1 - sx) * x1 + sx * x2
+  //   y = (1 - sx) * y1 + sx * y2
+  //   x = (1 - sy) * x3 + sy * x4
+  //   y = (1 - sy) * y3 + sy * y4
+  // Intersection of the 2 lines is at (x,y). Solving for sx and sy using Cramer's rule where Ax=b
+  // (x1 - x3)   (x1 - x2     x4 - x3) (sx)
+  // (y1 - y3) = (y1 - y2     y4 - y3) (sy)
+  double A00 = x1Screen - x2Screen;
+  double A01 = x4Screen - x3Screen;
+  double A10 = y1Screen - y2Screen;
+  double A11 = y4Screen - y3Screen;
+  double b0 = x1Screen - x3Screen;
+  double b1 = y1Screen - y3Screen;
+  double numeratorx = (b0 * A11 - A01 * b1);
+  double numeratory = (A00 * b1 - b0 * A10);
+  double denominator = (A00 * A11 - A01 * A10);
+  double sx = numeratorx / denominator;
+  double sy = numeratory / denominator;
+
+  // Intersection point. For the graph coordinates, the initial implementation assumes cartesian coordinates
+  double xIntScreen = (1.0 - sx) * x1Screen + sx * x2Screen;
+  double yIntScreen = (1.0 - sy) * y3Screen + sy * y4Screen;
+  double xIntGraph, yIntGraph;
+  if (m_modelCoords.coordScaleXTheta() == COORD_SCALE_LINEAR) {
+    xIntGraph = (1.0 - sx) * x1Graph + sx * x2Graph;
+  } else {
+    xIntGraph = qExp ((1.0 - sx) * qLn (x1Graph) + sx * qLn (x2Graph));
+  }
+  if (m_modelCoords.coordScaleYRadius() == COORD_SCALE_LINEAR) {
+    yIntGraph = (1.0 - sy) * y3Graph + sy * y4Graph;
+  } else {
+    yIntGraph = qExp ((1.0 - sy) * qLn (y3Graph) + sy * qLn (y4Graph));
+  }
+
+  // Distances of 4 axis points from interception
+  double distance1 = qSqrt ((x1Screen - xIntScreen) * (x1Screen - xIntScreen) +
+                            (y1Screen - yIntScreen) * (y1Screen - yIntScreen));
+  double distance2 = qSqrt ((x2Screen - xIntScreen) * (x2Screen - xIntScreen) +
+                            (y2Screen - yIntScreen) * (y2Screen - yIntScreen));
+  double distance3 = qSqrt ((x3Screen - xIntScreen) * (x3Screen - xIntScreen) +
+                            (y3Screen - yIntScreen) * (y3Screen - yIntScreen));
+  double distance4 = qSqrt ((x4Screen - xIntScreen) * (x4Screen - xIntScreen) +
+                            (y4Screen - yIntScreen) * (y4Screen - yIntScreen));
+
+  // We now have too many data points with both x and y coordinates:
+  // (xInt,yInt) (xInt,y3) (xInt,y4) (x1,yInt) (x2,yInt)
+  // so we pick just 3, making sure that those 3 are widely separated
+  // (xInt,yInt) (x axis point furthest from xInt,yInt) (y axis point furthest from xInt,yInt)
+  double xFurthestXAxisScreen, yFurthestXAxisScreen, xFurthestYAxisScreen, yFurthestYAxisScreen;
+  double xFurthestXAxisGraph, yFurthestXAxisGraph, xFurthestYAxisGraph, yFurthestYAxisGraph;
+  if (distance1 < distance2) {
+    xFurthestXAxisScreen = x2Screen;
+    yFurthestXAxisScreen = y2Screen;
+    xFurthestXAxisGraph = x2Graph;
+    yFurthestXAxisGraph = yIntGraph;
+  } else {
+    xFurthestXAxisScreen = x1Screen;
+    yFurthestXAxisScreen = y1Screen;
+    xFurthestXAxisGraph = x1Graph;
+    yFurthestXAxisGraph = yIntGraph;
+  }
+  if (distance3 < distance4) {
+    xFurthestYAxisScreen = x4Screen;
+    yFurthestYAxisScreen = y4Screen;
+    xFurthestYAxisGraph = xIntGraph;
+    yFurthestYAxisGraph = y4Graph;
+  } else {
+    xFurthestYAxisScreen = x3Screen;
+    yFurthestYAxisScreen = y3Screen;
+    xFurthestYAxisGraph = xIntGraph;
+    yFurthestYAxisGraph = y3Graph;
+  }
+
+  // Screen coordinates
+  m_screenInputsTransform = QTransform (xIntScreen              , xFurthestXAxisScreen, xFurthestYAxisScreen,
+                                        yIntScreen              , yFurthestXAxisScreen, yFurthestYAxisScreen,
+                                        AFFINE_BOTTOM_ROW_NONUNITY    , AFFINE_BOTTOM_ROW_NONUNITY, 1.0                 );
+
+  // Graph coordinates
+  m_graphOutputsTransform = QTransform (xIntGraph, xFurthestXAxisGraph, xFurthestYAxisGraph,
+                                        yIntGraph, yFurthestXAxisGraph, yFurthestYAxisGraph,
+                                        AFFINE_BOTTOM_ROW_NONUNITY    , AFFINE_BOTTOM_ROW_NONUNITY, 1.0                 );
+}
+
+CallbackAxisPointsAbstract::LinearOrLog CallbackAxisPointsAbstract::logXGraph () const
+{
+  return m_modelCoords.coordScaleXTheta() == COORD_SCALE_LOG ? COORD_IS_LOG : COORD_IS_LINEAR;
+}
+
+CallbackAxisPointsAbstract::LinearOrLog CallbackAxisPointsAbstract::logYGraph () const
+{
+  return m_modelCoords.coordScaleYRadius() == COORD_SCALE_LOG ? COORD_IS_LOG : COORD_IS_LINEAR;
+}
+
+QTransform CallbackAxisPointsAbstract::matrixGraph () const
+{
+  return m_graphOutputsTransform;
+}
+
+QTransform CallbackAxisPointsAbstract::matrixScreen () const
+{
+  return m_screenInputsTransform;
+}
+
+unsigned int CallbackAxisPointsAbstract::numberAxisPoints () const
+{
+  if (m_documentAxesPointsRequired == DOCUMENT_AXES_POINTS_REQUIRED_2) {
+    return unsigned (m_screenInputs.count());
+  } else if (m_documentAxesPointsRequired == DOCUMENT_AXES_POINTS_REQUIRED_3) {
+    return unsigned (m_screenInputs.count());
+  } else {
+    return unsigned (m_screenInputsX.count() + m_screenInputsY.count());
+  }
+}
+
+bool CallbackAxisPointsAbstract::threePointsAreCollinear (const QTransform &transformIn,
+                                                          LinearOrLog logX,
+                                                          LinearOrLog logY) const
+{
+  double m11 = (logX == COORD_IS_LOG) ? qLn (transformIn.m11()) : transformIn.m11();
+  double m12 = (logX == COORD_IS_LOG) ? qLn (transformIn.m12()) : transformIn.m12();
+  double m13 = (logX == COORD_IS_LOG) ? qLn (transformIn.m13()) : transformIn.m13();
+  double m21 = (logY == COORD_IS_LOG) ? qLn (transformIn.m21()) : transformIn.m21();
+  double m22 = (logY == COORD_IS_LOG) ? qLn (transformIn.m22()) : transformIn.m22();
+  double m23 = (logY == COORD_IS_LOG) ? qLn (transformIn.m23()) : transformIn.m23();
+  double m31 = transformIn.m31();
+  double m32 = transformIn.m32();
+  double m33 = transformIn.m33();
+
+  QTransform transform (m11, m12, m13,
+                        m21, m22, m23,
+                        m31, m32, m33);
+
+  return !transform.isInvertible ();
+}

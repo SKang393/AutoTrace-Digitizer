@@ -1,0 +1,16 @@
+Engauge can be installed in two ways:
+
+Easy      - Installing a Linux package that is bundled in most versions of Linux. Sample commands are:
+
+                  emerge media-gfx/engauge               (Gentoo)
+                  sudo apt-get install engauge-digitizer (Debian and Ubuntu)
+                  sudo yum install engauge-digitizer     (Fedora and RedHat)
+
+Difficult - By downloading the source code and building Engauge according to the steps in the INSTALL file in
+            the highest level directory. The initial build process can take as little as 15 minutes or as long
+	    as several hours, depending on the current compiler configuration, and the installed software 
+	    packages (such as Qt, and libraries for graphics, fonts and math). WARNING - the git master source is
+            updated frequently, and may be less reliable than the releases (which receive more thorough testing)
+
+Currently there are no official prebuilt binaries available for download.
+

@@ -1,0 +1,153 @@
+#!/bin/bash
+
+function signAppArray {
+    array=($@)
+    for i in "${array[@]}"
+    do
+	signAppFile "$i"
+    done
+}
+
+function signAppFile {
+    # sandboxing is triggered and controlled by engauge.entitlements file, which was created in 
+    # code for a dummy project
+    file="$1"
+    echo "$file"
+    codesign \
+	-s "3rd Party Mac Developer Application: Mark Mitchell" \
+	--entitlements dev/osx/engauge.entitlements \
+	"Engauge Digitizer.app/$file"
+}
+
+function signAppFramework {
+    vc=/Contents/Frameworks/$1.framework/Versions/Current/$1
+    signAppFile "$vc"
+}
+
+# Make sure we are in the correct directory
+if [ ! -e dev ]; then
+   echo "This must be run from the root directory of Engauge (dev/osx/build_installable_package)"
+   exit
+fi
+
+# Make sure environment variables are correctly set
+exe=`which macdeployqt`
+if [ -z "$exe" ]; then
+    echo "'source dev/osx/macosx_setup' must be run before this script. Quitting"
+    exit
+fi
+
+if [[ $LOG4CPP_HOME != *"null"* ]]; then
+    echo "Releases require log4cpp_null rather than log4cpp. Stopping"
+    exit
+fi
+
+# Xcode updates seem to update minimum target OS which is newer than this build system
+# Release dates:
+# 10.10 2014
+# 10.11 2015
+# 10.12 2016
+# 10.13 2017
+# 10.14 2018
+TARGETVER=`awk 'f{print;f=0} /LSMinimumSystemVersion/{f=1}' dev/osx/Info_valid.plist  | sed 's/[[:space:]]<string>//' | sed 's/<\/string>//'`
+echo "MinimumSystemVersion:   $TARGETVER"
+sw_vers | grep ProductVersion | sed 's/Product/BuildSystem/'
+read -p "Press any key to continue"
+echo "Continuing"
+
+# Remove old build. Need root privileges. Note that this step implicitly removes any leftover 
+# engauge.log file, which would other break the sandbox
+sudo rm Engauge\ Digitizer.dmg
+sudo rm Engauge\ Digitizer.pkg
+sudo rm -rf Engauge\ Digitizer.app 2>/dev/null
+
+# Make into Engauge Digitizer.app
+qmake engauge.pro CONFIG+=log4cpp_null
+make clean
+make -j8
+
+# Help
+cd help
+./build_qt5_12_0.bash
+cd ..
+cp -r bin/documentation/engauge.* Engauge\ Digitizer.app/Contents/Resources
+
+# Translations
+lrelease engauge.pro
+mkdir -p Engauge\ Digitizer.app/Contents/Resources/translations
+mv translations/*.qm Engauge\ Digitizer.app/Contents/Resources/translations
+
+# Icons
+cp src/img/digitizer.icns Engauge\ Digitizer.app/Contents/Resources/
+
+# License
+cp LICENSE Engauge\ Digitizer.app/Contents/Resources/
+
+# Debug symbols are just dropped for now
+dsymutil Engauge\ Digitizer.app/Contents/MacOS/Engauge\ Digitizer -o Engauge\ Digitizer.app.dSYM
+
+# Manually insert version numbering
+cp dev/osx/Info_valid.plist Engauge\ Digitizer.app/Contents/Info.plist
+egrep '>\d+\.\d' Engauge\ Digitizer.app/Contents/Info.plist
+echo "If submitting to app store, then in another window..."
+echo '1. <editor> Engauge\ Digitizer.app/Contents/Info.plist'
+echo '2. append/add .1 to version number)'
+echo '3. save the file and exit)'
+read -p "Press any key to continue"
+echo "Continuing"
+
+# Insert Qt libraries. This step will output an error unless log4cpp.1.dylib has been copied to /usr/lib
+# so there is a check at the top of this script (before the length recompilation)
+macdeployqt Engauge\ Digitizer.app -appstore-compliant -dmg 
+
+sudo rm -rf Engauge\ Digitizer.app/Contents/Frameworks/QtNetwork.framework
+sudo rm -rf Engauge\ Digitizer.app/Contents/Frameworks/QtSql.framework
+
+# Signing. QtNetwork, QtDbus and QtSql were removed recently.
+# QtLucene was removed even more recently (between 5.8 and 5.10)
+frameworks=(QtCore QtDBus QtGui QtPrintSupport QtSvg QtWidgets QtXml)
+for i in "${frameworks[@]}"
+do
+    signAppFramework $i
+done
+
+signAppArray `find Engauge\ Digitizer.app | grep '/Frameworks/lib'           | sed 's/Engauge\ Digitizer\.app//g'` # xcode 5 and 6
+signAppArray `find Engauge\ Digitizer.app | grep '/engauge_'                 | sed 's/Engauge\ Digitizer\.app//g'`
+signAppArray `find Engauge\ Digitizer.app | grep '/PlugIns/bearer/lib'       | sed 's/Engauge\ Digitizer\.app//g'`
+signAppArray `find Engauge\ Digitizer.app | grep '/PlugIns/iconengines/lib'  | sed 's/Engauge\ Digitizer\.app//g'`
+signAppArray `find Engauge\ Digitizer.app | grep '/PlugIns/imageformats/lib' | sed 's/Engauge\ Digitizer\.app//g'`
+signAppArray `find Engauge\ Digitizer.app | grep '/PlugIns/platforms/lib'    | sed 's/Engauge\ Digitizer\.app//g'`
+signAppArray `find Engauge\ Digitizer.app | grep '/PlugIns/printsupport/lib' | sed 's/Engauge\ Digitizer\.app//g'`
+signAppArray `find Engauge\ Digitizer.app | grep '/PlugIns/styles/lib'       | sed 's/Engauge\ Digitizer\.app//g'`
+# Next line is needed for newer versions of xcode but not for xcode 5 and 6. Update - probably should manually remove unwanted 
+# plugins after the macdeployqt line
+#signAppArray `find Engauge\ Digitizer.app | grep '/PlugIns/sqldrivers/lib'   | sed 's/Engauge\ Digitizer\.app//g'`
+signAppFile /Contents/MacOS/Engauge\ Digitizer
+
+echo "******************************************************************************"
+echo "* If previous line says 'code object is not signed at all' then stop and fix *"
+echo "******************************************************************************"
+
+# Build package
+productbuild --component Engauge\ Digitizer.app /Applications Engauge\ Digitizer.pkg
+
+# Sign package
+productsign --sign "3rd Party Mac Developer Installer: Mark Mitchell" Engauge\ Digitizer.pkg Engauge\ Digitizer.pkg.signed
+mv Engauge\ Digitizer.pkg.signed Engauge\ Digitizer.pkg
+
+# Code signing checks. Note that spctl seems to give false alarms, while codesign seems to be happy
+#spctl --assess --type execute Engauge\ Digitizer.app 2>&1 | grep -i rejected
+#spctl --assess --type install Engauge\ Digitizer.app 2>&1 | grep -i rejected
+echo "******************** codesign validations ************************"
+# Note --strict is for newer xcode (osx 10.10) only
+codesign --verbose --deep Engauge\ Digitizer.app
+echo "******************** codesign entitlements ***********************"
+codesign --display --verbose=4 --entitlements - Engauge\ Digitizer.app
+echo "******************************************************************"
+
+# Test the built package
+echo "Testing the built package. Output should have lines like 0% complete, 20% complete, ..., 100% complete"
+sudo installer -store -pkg Engauge\ Digitizer.pkg -target /
+
+echo "Assuming the test results show '0% complete, ..., 100% complete', open Xcode and then select Xcode / Open Developer Tools / Application Loader to upload Engauge Digitizer.pkg"
+

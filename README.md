@@ -1,86 +1,55 @@
 # AutoTrace Digitizer
 
-**Current Version:** v1.0.0  
-**Platform:** Windows portable release  
-**Project Type:** Modified educational fork of Engauge Digitizer
+AutoTrace Digitizer is a modified fork of Engauge Digitizer. It is not the official upstream Engauge Digitizer release.
 
-## Overview
+This project preserves the original Engauge Digitizer copyright and license notices. Engauge Digitizer was written and maintained by Mark Mitchell. The currently maintained upstream fork used by many Linux distributions is the [GitHub `akhuettel/engauge-digitizer` project](https://github.com/akhuettel/engauge-digitizer).
 
-**AutoTrace Digitizer** is a modified version of Engauge Digitizer focused on reducing manual setup and repetitive point-clicking during graph digitizing.
+| Resource | Description |
+| --- | --- |
+| [Original project information](http://akhuettel.github.io/engauge-digitizer) | Explains what Engauge Digitizer does and how it is used |
+| [Active upstream fork](https://github.com/akhuettel/engauge-digitizer) | Upstream Engauge Digitizer source and releases |
+| [License](LICENSE) | Original GPL license file preserved from Engauge Digitizer |
 
-This version keeps the core Engauge Digitizer workflow while adding automated tools for:
+## Version
 
-- Axis setup
-- Curve-point placement
-- Portable Windows use
+Current AutoTrace Digitizer release: `v1.0.0`.
 
-The project is intended for classroom, research, instructional, and data-extraction contexts where users need to convert graph images into editable digitized data points more efficiently.
+## AutoTrace Digitizer v1.0.0 Features
 
-## Relationship to Engauge Digitizer
+AutoTrace Digitizer adds Windows portable packaging and early automation tools for graph digitizing workflows:
 
-AutoTrace Digitizer is a modified fork of Engauge Digitizer.
+- Windows portable release generated locally for GitHub Releases.
+- Auto Axis button.
+- Auto Curve button.
+- Auto Axis detects the bottom x-axis, supports mild image tilt correction, creates editable axis points, sets x start to 1, sets y minimum to 0, and prompts for y maximum.
+- Auto Curve detects visible plotted markers inside the calibrated plot area and creates editable curve points on the selected curve.
+- Auto Axis and Auto Curve are available from the Digitize menu and drawing toolbar.
+- Portable settings support through `portable-settings.ini`, `ENGAUGE_PORTABLE=1`, and a local `settings` folder beside the executable.
+- Default locale is US English (`en_US`) unless the user selects another locale in Settings / Main Window.
+- Portable paths are resolved relative to the application directory with Qt Unicode-safe path APIs for non-English and Unicode Windows folders.
 
-This project is **not** the official upstream Engauge Digitizer release. The core interface and many core digitizing functions are based on the original Engauge Digitizer project. This version adds automation-focused features and a portable Windows packaging workflow.
+## Windows Portable Release
 
-Original license and attribution notices are preserved. New modifications are documented in this repository.
+The portable ZIP is a generated release artifact and should not be committed to Git.
 
-## What This Version Adds
+Expected local release artifact:
 
-### Auto Axis
+`release/AutoTrace-Digitizer-v1.0.0-Windows-Portable.zip`
 
-The **Auto Axis** feature helps users begin graph calibration more quickly.
+Expected portable folder:
 
-Current Auto Axis behavior includes:
+`release/AutoTrace-Digitizer-Windows-Portable/`
 
-- Detecting the bottom x-axis from an imported graph image
-- Handling mild image tilt before calibration
-- Creating normal editable axis points
-- Setting the x-axis starting value to 0
-- Setting the y-axis minimum to 0
-- Prompting the user to enter the y-axis maximum
+Run AutoTrace Digitizer with:
 
-The generated axis points remain editable, so users can manually adjust calibration after automatic placement.
+`Start AutoTrace Digitizer.cmd`
 
-### Auto Curve
+or directly with:
 
-The **Auto Curve** feature helps place curve points automatically on the selected curve.
+`AutoTraceDigitizer.exe`
 
-Current Auto Curve behavior includes:
+## Current Limitations
 
-- Detecting visible point markers inside the calibrated plot area
-- Adding detected points to the selected curve
-- Creating normal editable Engauge curve points
-- Clamping detected y-values within the calibrated axis range
-
-Auto Curve is intended to reduce repetitive manual clicking when graph images contain visible plotted markers.
-
-## Interface Changes
-
-AutoTrace Digitizer adds Auto Axis and Auto Curve access through the standard interface:
-
-- Digitize menu
-- Drawing toolbar
-
-## Portable Windows Release
-
-AutoTrace Digitizer v1.0.0 is distributed as a portable Windows package.
-
-The portable build includes:
-
-- AutoTrace/Engauge executable
-- Required Qt runtime files
-- Portable launcher support
-- `portable-settings.ini`
-- Local portable settings folder
-- App-local runtime behavior
-
-The application can be launched without installing the full development environment.
-
-## Download
-
-Download the current portable Windows release from the GitHub Releases page.
-
-Recommended release asset:
-
-```text
-EngaugeDigitizer-Windows-Portable.zip
+- Auto Axis does not read axis numbers automatically.
+- Auto Curve is an early implementation and may be inaccurate with multiple marker shapes, dense gridlines, low-resolution images, overlapping labels, open/closed marker types, or connecting lines touching markers.
+- Manual review of digitized points is recommended before using exported data.

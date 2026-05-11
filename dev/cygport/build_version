@@ -1,0 +1,80 @@
+#!/usr/bin/bash
+
+# Required packages:
+#   cygwin32-gcc (for 32 bit builds)
+#   cygwin32-w32api-runtime (for 32 bit builds)
+#   cygport
+#   gcc-g++
+#   libfftw3-devel
+#   libGL-devel
+#   libQt5Core-devel (for qmake-qt5)
+#   libQt5Help-devel
+#   qt5-devel-tools
+#   qt5-doc-tools
+#
+# Run this after a (pre)release has been made at github so zip file is available for download
+#
+# ftp stage uses password and ssh key as explained at www.cygwin.com/package-upload.html
+
+show_usage_and_quit() {
+    echo "Usage: build_version <versiontag> <32|64>"
+    echo "where versiontag has the format #.# or #.#.#"
+    exit
+}
+
+if [ "$#" -ne 2 ]; then
+    show_usage_and_quit
+fi
+
+# Version number format is documented in show_usage_and_quit
+VERSION=$1
+BITS=$2
+BITSARG=--$BITS
+
+# Formats are like 11 (for version 11.0) or 11.2
+if [[ ! $VERSION =~ ^[0-9]+$ ]] && [[ ! $VERSION =~ ^[0-9]+\.[0-9]+$ ]]; then
+    show_usage_and_quit
+fi
+
+if [[ ! $BITSARG =~ ^(--32|--64)$ ]]; then
+    show_usage_and_quit
+fi
+
+echo "Cleaning old build directory"
+if [ $BITS == 32 ]; then
+    TARGETDIR='engauge-digitizer-'"$VERSION"'-1.i686'
+else
+    TARGETDIR='engauge-digitizer-'"$VERSION"'-1.x86_64'
+fi
+rm -rf $TARGETDIR 2>/dev/null
+
+echo
+
+# Cygport file must have the format <package name>.cygport
+CYGFILE=engauge-digitizer.cygport
+
+echo "Creating engauge-digitizer.cygport file from engauge-digitizer.cygport.template"
+dos2unix engauge-digitizer.cygport.template
+sed 's/<VERSION>/'"$VERSION"'/' engauge-digitizer.cygport.template >$CYGFILE
+echo
+
+#DEBUG=--debug
+
+cygport $DEBUG $BITSARG $CYGFILE download 2>&1 | tee build_version.log
+cygport $DEBUG $BITSARG $CYGFILE prep     2>&1 | tee -a build_version.log
+cygport $DEBUG $BITSARG $CYGFILE compile  2>&1 | tee -a build_version.log
+cygport $DEBUG $BITSARG $CYGFILE install  2>&1 | tee -a build_version.log
+cygport $DEBUG $BITSARG $CYGFILE package  2>&1 | tee -a build_version.log
+
+echo "Output was logged to build_version.log"
+
+# Upload steps are documented at https://cygwin.com/package-upload.html#uploading-files
+echo "For convenience, the upload is done by this script before testing"
+cygport $BITSARG engauge-digitizer.cygport up
+
+echo "Test using the following steps:"
+echo "  cd $TARGETDIR/inst/usr/bin/"
+echo "  ./engauge-digitizer.exe"
+
+echo "After uploading and testing both 32 and 64 bit releases, release according to https://cygwin.com/packaging-contributors-guide.html#acceptance"
+echo "Remember to send email as text and not text/html so it will not be rejected. In gmail, click on 3 dots at bottom then Plain Text Mode"

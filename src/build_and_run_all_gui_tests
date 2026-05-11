@@ -1,0 +1,101 @@
+#!/bin/bash
+
+# Description: Script that runs gui tests after the command-line tests have been run
+#
+# Usage: build_and_run_all_gui_tests [jpeg2000] [pdf]
+#
+# where: jpeg2000 = run jpeg2000 test(s). Requires CONFIG+=jpeg2000 in qmake build
+#        pdf      = run pdf test(s). Requires CONFIG+=pdf in qmake build
+
+DEBUG=0
+
+FILTERJPEG2000="skip"
+FILTERPDF="skip"
+while test $# -gt 0
+do
+    case "$1" in
+	jpeg2000) FILTERJPEG2000=""
+	    ;; 
+        pdf) FILTERPDF=""
+	    ;;
+    esac
+    shift
+done
+
+SCRIPTS=`find ../test -name "*.test.commandline" | sort`
+
+for script in $SCRIPTS
+do
+
+    # Skip unwanted tests
+    skip=0
+    if [[ -n $FILTERJPEG2000 && $script =~ jpeg2000 ]]; then skip=1; fi
+    if [[ -n $FILTERPDF      && $script =~ pdf      ]]; then skip=1; fi
+
+    if [ $skip == 0 ]; then
+
+	# Set the timezone that was used to generate the expected files containing date/time information.
+	# Less instrusive approach, used here, is to set TZ. Some may prefer using timedatectl
+	export TZ='America/Los_Angeles'
+	
+	# Run regression test. Standard error is redirected to standard out so we can strip out unimportant
+	# 'QXcbXSettings::QXcbXSettings(QXcbScreen*) Failed to get selection owner for XSETTINGS_S atom' errors
+	commandLineArgs=`cat $script`
+	if [ $DEBUG == 1 ]; then
+	    echo " "
+	    echo "engauge $commandLineArgs"
+	fi
+	../bin/Engauge $commandLineArgs 2>&1 | grep -v 'Failed to get selection owner'
+
+	# Compare actual and desired output files. There is one pair for each coordinate system
+	scriptfile=`basename $script`
+	root=${scriptfile/.test.commandline/}
+	EXPECTED_FILES=`find ../test -name "$root.csv_expected_*"`
+	COUNT=0
+	COUNTER=1
+	for EXPECTED in $EXPECTED_FILES
+	do
+	    let COUNT=COUNT+1;
+	done
+	for EXPECTED in $EXPECTED_FILES
+	do
+	    actual=${EXPECTED/expected/actual}
+	    if [[ COUNT -gt 1 ]]; then
+		COUNTERSTRING="[$COUNTER/$COUNT]";
+	    else
+		COUNTERSTRING="";
+	    fi
+	    if [ -f $actual ]; then
+		# If there is a line that contains 'XXX' then it must be skipped because one of the values
+		# is so small that roundoff error will give a false positive error result
+		cp $EXPECTED .expected
+		cp $actual   .actual
+		# Transition from ubuntu 16.04 to 18.04 required addition of tr in next line to get all line numbers
+		LINES=`sed -n '\|XXX|=' .expected | tr '\n' ' '`
+		read -r -a LINEARR <<< $LINES
+		# Iterate backwards through line numbers so deletions are applied to the right lines
+		for ((idx=${#LINEARR[@]}-1; idx>=0; idx--))
+		do
+		    LINE=${LINEARR[idx]}
+		    # Skip the specified line
+		    awk "NR != $LINE" .expected >.expected2
+		    awk "NR != $LINE" .actual   >.actual2
+		    mv .expected2 .expected
+		    mv .actual2   .actual
+		done
+		if cmp --silent .expected .actual
+		then
+		    echo -e "$(tput setaf 2)PASS$(tput sgr0)   : $root $COUNTERSTRING"
+		else
+		    echo -e "$(tput setaf 1)FAIL$(tput sgr0)   : $root $COUNTERSTRING"
+		    diff -C2 .expected .actual
+		fi
+	    else
+		# Branch for failed OSX testing
+		echo "SKIPPED: $root $COUNTERSTRING"
+	    fi
+	    let COUNTER=COUNTER+1
+	done
+    fi
+done
+

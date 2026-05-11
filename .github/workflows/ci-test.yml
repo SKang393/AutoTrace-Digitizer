@@ -1,0 +1,31 @@
+name: CI build test
+
+on:
+  push:
+    branches:
+      - master
+      - gh-actions-test
+  pull_request:
+
+env:
+  DISPLAY: ':99.0'
+  ENGAUGE_EXECUTABLE: '../bin/Engauge'
+
+jobs:
+  'ci-build':
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+      - run: lsb_release -a
+      - run: sudo apt-get update
+      - run: sudo apt-get install --yes --no-install-recommends qt6-base-dev qt6-tools-dev liblog4cpp5-dev libfftw3-dev xvfb python3 python3-pip python3-lxml python3-numpy python3-pandas gdb libpoppler-qt6-dev qt6-documentation-tools
+      - run: Xvfb :99 &
+      - run: sleep 5s
+      - run: qmake6 engauge.pro
+      - run: make
+      - run: cd help && ./build.bash && cd ..
+      - run: cd src && ./build_and_run_all_gui_tests && cd ..
+      - run: cd test && ./DumpGraphAndScreenCoordinates_test.py && cd ..
+      - run: cd src && ./build_and_run_all_cli_tests && cd ..
+      - run: file bin/Engauge*

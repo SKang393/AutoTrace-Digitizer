@@ -1,3 +1,4 @@
 *.bat -linguist-detectable
 *.cmd -linguist-detectable
 *.zip linguist-generated
+dev/windows/cygport/engauge.cygport=lf
