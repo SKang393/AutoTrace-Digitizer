@@ -8,7 +8,19 @@
 #
 # This version is for qt 5.12.0 or newer, for which qcollectiongenerator is deprecated in favor of
 # qhelpgenerator. Earlier versions of qcollectiongenerator fail since qch file is NOT generated
-VER=`qmake6 -query QT_VERSION`
+QMAKE=${QMAKE:-}
+if [ -z "$QMAKE" ]; then
+    if command -v qmake6 >/dev/null 2>&1; then
+        QMAKE=qmake6
+    elif command -v qmake >/dev/null 2>&1; then
+        QMAKE=qmake
+    else
+        echo "Warning: qmake was not found. Skipping optional searchable help generation."
+        exit 0
+    fi
+fi
+
+VER=`$QMAKE -query QT_VERSION`
 MAJOR=$(echo $VER | cut -f1 -d. )
 MINOR=$(echo $VER | cut -f2 -d. )
 SUBMINOR=$(echo $VER | cut -f3 -d. )
@@ -36,10 +48,10 @@ fi
 # this script rather than outside
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 WORKPATH=`pwd`
-WORKDIR=`basename $WORKPATH`
+WORKDIR=`basename "$WORKPATH"`
 if [[ $WORKDIR != "help" ]]; then
     # Changing to script directory
-    cd $SCRIPTDIR
+    cd "$SCRIPTDIR"
 fi
 
 if [ $# -eq 0 ]; then
@@ -53,12 +65,30 @@ fi
 # Outputs:
 #   engauge.qch 3MB binary file
 #   engauge.qhc 32K SQLite file
-qhelpgenerator engauge.qhp
+HELPGENERATOR=${HELPGENERATOR:-}
+if [ -z "$HELPGENERATOR" ]; then
+    if command -v qhelpgenerator >/dev/null 2>&1; then
+        HELPGENERATOR=qhelpgenerator
+    elif command -v qhelpgenerator-qt6 >/dev/null 2>&1; then
+        HELPGENERATOR=qhelpgenerator-qt6
+    elif command -v qhelpgenerator6 >/dev/null 2>&1; then
+        HELPGENERATOR=qhelpgenerator6
+    elif [ -n "`$QMAKE -query QT_INSTALL_BINS 2>/dev/null`" ] && [ -x "`$QMAKE -query QT_INSTALL_BINS`/qhelpgenerator" ]; then
+        HELPGENERATOR="`$QMAKE -query QT_INSTALL_BINS`/qhelpgenerator"
+    elif [ -n "`$QMAKE -query QT_INSTALL_BINS 2>/dev/null`" ] && [ -x "`$QMAKE -query QT_INSTALL_BINS`/qhelpgenerator.exe" ]; then
+        HELPGENERATOR="`$QMAKE -query QT_INSTALL_BINS`/qhelpgenerator.exe"
+    else
+        echo "Warning: qhelpgenerator was not found. Skipping optional searchable help generation."
+        exit 0
+    fi
+fi
+
+"$HELPGENERATOR" engauge.qhp
 
 # Move to target directory which is relative to the help subdirectory. OSX does not use qhc file
-mkdir -p $DESTDIR
-mv engauge.qch $DESTDIR
+mkdir -p "$DESTDIR"
+mv engauge.qch "$DESTDIR"
 if [ -f engauge.qhc ]; then
-    mv engauge.qhc $DESTDIR
+    mv engauge.qhc "$DESTDIR"
 fi
 

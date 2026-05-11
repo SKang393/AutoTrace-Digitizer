@@ -23,14 +23,53 @@ Set-StrictMode -Version Latest
 
 $ProductName = "AutoTrace Digitizer"
 $ReleaseVersion = "v1.0.0"
-$ExecutableBaseName = "AutoTraceDigitizer"
-$ExecutableFileName = "$ExecutableBaseName.exe"
+$BuildExecutableFileName = "Engauge.exe"
+$PortableExecutableBaseName = "AutoTraceDigitizer"
+$PortableExecutableFileName = "$PortableExecutableBaseName.exe"
 $PortableFolderName = "AutoTrace-Digitizer-Windows-Portable"
 $ReleaseZipName = "AutoTrace-Digitizer-$ReleaseVersion-Windows-Portable.zip"
 
 function ConvertTo-FullPath {
   param([Parameter(Mandatory = $true)][string] $Path)
   return [System.IO.Path]::GetFullPath($Path)
+}
+
+function ConvertTo-BuildToolPath {
+  param([Parameter(Mandatory = $true)][string] $Path)
+
+  $fullPath = ConvertTo-FullPath $Path
+
+  if (-not [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)) {
+    return $fullPath
+  }
+
+  if ($null -eq ("Kernel32ShortPath" -as [type])) {
+    Add-Type -TypeDefinition @"
+using System;
+using System.Text;
+using System.Runtime.InteropServices;
+
+public static class Kernel32ShortPath
+{
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    public static extern uint GetShortPathName(string longPath, StringBuilder shortPath, uint bufferLength);
+}
+"@
+  }
+
+  $buffer = New-Object System.Text.StringBuilder 32768
+  $length = [Kernel32ShortPath]::GetShortPathName($fullPath, $buffer, [uint32] $buffer.Capacity)
+
+  if ($length -gt 0 -and $length -lt $buffer.Capacity) {
+    return $buffer.ToString()
+  }
+
+  return $fullPath
+}
+
+function ConvertTo-QMakeProjectPath {
+  param([Parameter(Mandatory = $true)][string] $Path)
+  return (ConvertTo-BuildToolPath $Path) -replace "\\", "/"
 }
 
 function Assert-PathInside {
@@ -375,11 +414,13 @@ function Copy-Translations {
 
   $translationBuildDir = Join-Path $BuildDir "translations"
   Reset-Directory -Path $translationBuildDir -RepoRoot $RepoRoot
+  $translationBuildDirForTool = ConvertTo-BuildToolPath $translationBuildDir
 
   Get-ChildItem -LiteralPath (Join-Path $RepoRoot "translations") -Filter "engauge_*.ts" |
     ForEach-Object {
       $qmFile = Join-Path $translationBuildDir ($_.BaseName + ".qm")
-      Invoke-Native -FilePath $lrelease -Arguments @($_.FullName, "-qm", $qmFile)
+      $qmFileForTool = Join-Path $translationBuildDirForTool ($_.BaseName + ".qm")
+      Invoke-Native -FilePath $lrelease -Arguments @((ConvertTo-BuildToolPath $_.FullName), "-qm", $qmFileForTool)
       Copy-RequiredFile -Source $qmFile -Destination $translationPackageDir
     }
 }
@@ -430,7 +471,7 @@ Limitations: Auto Axis does not read axis numbers automatically. Auto Curve is a
 $scriptDir = $PSScriptRoot
 $repoRoot = ConvertTo-FullPath (Join-Path $scriptDir "..\..")
 $projectFile = Join-Path $repoRoot "engauge.pro"
-$projectFileForQMake = $projectFile -replace "\\", "/"
+$projectFileForQMake = ConvertTo-QMakeProjectPath $projectFile
 
 if ([string]::IsNullOrWhiteSpace($BuildDir)) {
   $BuildDir = Join-Path $repoRoot "dev\windows\staging\windows-portable-build"
@@ -462,7 +503,7 @@ if ($Clean) {
   Ensure-Directory $BuildDir
 }
 
-$fftwHome = Resolve-FftwHome -RepoRoot $repoRoot -BuildDir $BuildDir -Bits $bits -QMakeSpec $qmakeSpec
+$fftwHome = ConvertTo-BuildToolPath (Resolve-FftwHome -RepoRoot $repoRoot -BuildDir $BuildDir -Bits $bits -QMakeSpec $qmakeSpec)
 $env:FFTW_HOME = $fftwHome
 
 if (-not $SkipBuild) {
@@ -478,23 +519,23 @@ if (-not $SkipBuild) {
 }
 
 $builtExe = if ($SkipBuild) {
-  Join-Path $repoRoot "bin\$ExecutableFileName"
+  Join-Path $repoRoot "bin\$BuildExecutableFileName"
 } else {
-  Join-Path $BuildDir "bin\$ExecutableFileName"
+  Join-Path $BuildDir "bin\$BuildExecutableFileName"
 }
 
 if (-not (Test-Path -LiteralPath $builtExe)) {
-  throw "$ExecutableFileName was not found: $builtExe"
+  throw "$BuildExecutableFileName was not found: $builtExe"
 }
 
 Reset-Directory -Path $packageDir -RepoRoot $repoRoot
-Copy-RequiredFile -Source $builtExe -Destination $packageDir
+Copy-RequiredFile -Source $builtExe -Destination (Join-Path $packageDir $PortableExecutableFileName)
 Copy-RequiredFile -Source (Join-Path $repoRoot "LICENSE") -Destination $packageDir
 Copy-RequiredFile -Source (Join-Path $repoRoot "README.md") -Destination $packageDir
 Copy-RuntimeDlls -PackageDir $packageDir -FftwHome $fftwHome -Config $Config
 
 $deployMode = if ($Configuration -eq "debug") { "--debug" } else { "--release" }
-Invoke-Native -FilePath $windeployqt -Arguments @($deployMode, "--compiler-runtime", (Join-Path $packageDir $ExecutableFileName))
+Invoke-Native -FilePath $windeployqt -Arguments @($deployMode, "--compiler-runtime", (Join-Path $packageDir $PortableExecutableFileName))
 
 Copy-Documentation -RepoRoot $repoRoot -BuildDir $BuildDir -PackageDir $packageDir -QMake $qmake
 Copy-Translations -RepoRoot $repoRoot -BuildDir $BuildDir -PackageDir $packageDir -QMake $qmake

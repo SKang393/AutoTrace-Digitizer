@@ -1016,7 +1016,7 @@ macx-* {
 } else {
   CONFIG += qt warn_on thread
   TEMPLATE = app
-  TARGET = AutoTraceDigitizer
+  TARGET = Engauge
   DESTDIR = bin
 }
 
