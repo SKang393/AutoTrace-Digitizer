@@ -1,2 +1,0 @@
--errorreport ../test/guidelines_cartesian.xml -regression -reset
-
