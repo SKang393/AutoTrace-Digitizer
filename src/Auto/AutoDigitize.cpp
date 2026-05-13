@@ -10,6 +10,7 @@
 #include <QObject>
 #include <QPainter>
 #include <QQueue>
+#include <QSet>
 #include <QTransform>
 #include <QVector>
 #include <QtGlobal>
@@ -23,6 +24,7 @@ const double AXIS_ROTATION_THRESHOLD_DEGREES = 0.7;
 const double MAX_AXIS_ROTATION_DEGREES = 8.0;
 const double PI = 3.14159265358979323846;
 const int CURVE_POINT_MIN_SPACING = 6;
+const int AUTO_CURVE_MAX_RAW_CANDIDATES = 250;
 const int MARKER_PATCH_SIZE = 32;
 const int MARKER_PATCH_FEATURE_SIZE = 16;
 const double MARKER_CLUSTER_DISTANCE_THRESHOLD = 0.19;
@@ -459,6 +461,245 @@ QVector<unsigned char> suppressLongRuns(const QVector<unsigned char> &mask,
   return filtered;
 }
 
+QVector<unsigned char> suppressColumnAndRowArtifacts(const QVector<unsigned char> &mask,
+                                                     int width,
+                                                     int height,
+                                                     const QRect &rect,
+                                                     int *rejectedLineLikeCount)
+{
+  QVector<unsigned char> filtered = mask;
+  const QRect bounds = rect.intersected(QRect(0, 0, width, height));
+  const int verticalCountMinimum = qMax(10, bounds.height() / 12);
+  const int horizontalCountMinimum = qMax(10, bounds.width() / 12);
+  const int verticalSpanMinimum = qMax(24, bounds.height() / 3);
+  const int horizontalSpanMinimum = qMax(24, bounds.width() / 3);
+
+  for (int x = bounds.left(); x <= bounds.right(); ++x) {
+    int count = 0;
+    int minY = std::numeric_limits<int>::max();
+    int maxY = std::numeric_limits<int>::min();
+
+    for (int y = bounds.top(); y <= bounds.bottom(); ++y) {
+      if (mask [indexFor(x, y, width)]) {
+        ++count;
+        minY = qMin(minY, y);
+        maxY = qMax(maxY, y);
+      }
+    }
+
+    if (count >= verticalCountMinimum &&
+        maxY - minY + 1 >= verticalSpanMinimum) {
+      for (int xx = qMax(bounds.left(), x - 3); xx <= qMin(bounds.right(), x + 3); ++xx) {
+        for (int y = bounds.top(); y <= bounds.bottom(); ++y) {
+          filtered [indexFor(xx, y, width)] = 0;
+        }
+      }
+      if (rejectedLineLikeCount != nullptr) {
+        ++(*rejectedLineLikeCount);
+      }
+    }
+  }
+
+  for (int y = bounds.top(); y <= bounds.bottom(); ++y) {
+    int count = 0;
+    int minX = std::numeric_limits<int>::max();
+    int maxX = std::numeric_limits<int>::min();
+
+    for (int x = bounds.left(); x <= bounds.right(); ++x) {
+      if (mask [indexFor(x, y, width)]) {
+        ++count;
+        minX = qMin(minX, x);
+        maxX = qMax(maxX, x);
+      }
+    }
+
+    if (count >= horizontalCountMinimum &&
+        maxX - minX + 1 >= horizontalSpanMinimum) {
+      for (int yy = qMax(bounds.top(), y - 3); yy <= qMin(bounds.bottom(), y + 3); ++yy) {
+        for (int x = bounds.left(); x <= bounds.right(); ++x) {
+          filtered [indexFor(x, yy, width)] = 0;
+        }
+      }
+      if (rejectedLineLikeCount != nullptr) {
+        ++(*rejectedLineLikeCount);
+      }
+    }
+  }
+
+  return filtered;
+}
+
+QVector<Component> connectedComponents(const QVector<unsigned char> &mask,
+                                       int width,
+                                       int height,
+                                       const QRect &bounds)
+{
+  QVector<Component> components;
+  QVector<unsigned char> visited(width * height, 0);
+
+  for (int y = bounds.top(); y <= bounds.bottom(); ++y) {
+    for (int x = bounds.left(); x <= bounds.right(); ++x) {
+      const int startIndex = indexFor(x, y, width);
+      if (!mask [startIndex] || visited [startIndex]) {
+        continue;
+      }
+
+      Component component;
+      QQueue<QPoint> queue;
+      queue.enqueue(QPoint(x, y));
+      visited [startIndex] = 1;
+
+      while (!queue.isEmpty()) {
+        const QPoint point = queue.dequeue();
+        addComponentPixel(component, point.x(), point.y());
+
+        for (int yy = point.y() - 1; yy <= point.y() + 1; ++yy) {
+          for (int xx = point.x() - 1; xx <= point.x() + 1; ++xx) {
+            if (xx < bounds.left() || xx > bounds.right() ||
+                yy < bounds.top() || yy > bounds.bottom()) {
+              continue;
+            }
+
+            const int neighborIndex = indexFor(xx, yy, width);
+            if (!mask [neighborIndex] || visited [neighborIndex]) {
+              continue;
+            }
+
+            visited [neighborIndex] = 1;
+            queue.enqueue(QPoint(xx, yy));
+          }
+        }
+      }
+
+      components << component;
+    }
+  }
+
+  return components;
+}
+
+QRect componentRect(const Component &component)
+{
+  return QRect(QPoint(component.minX, component.minY),
+               QPoint(component.maxX, component.maxY));
+}
+
+bool componentsShouldMerge(const Component &left,
+                           const Component &right)
+{
+  const QRect leftExpanded = componentRect(left).adjusted(-5, -5, 5, 5);
+  const QRect rightRect = componentRect(right);
+
+  if (leftExpanded.intersects(rightRect)) {
+    return true;
+  }
+
+  const QPoint leftCenter = componentRect(left).center();
+  const QPoint rightCenter = rightRect.center();
+  const int dx = leftCenter.x() - rightCenter.x();
+  const int dy = leftCenter.y() - rightCenter.y();
+  const int maxSize = qMax(qMax(componentRect(left).width(), componentRect(left).height()),
+                           qMax(rightRect.width(), rightRect.height()));
+
+  return dx * dx + dy * dy <= qMax(36, maxSize * maxSize);
+}
+
+void mergeComponent(Component &target,
+                    const Component &source)
+{
+  target.area += source.area;
+  target.sumX += source.sumX;
+  target.sumY += source.sumY;
+  target.minX = qMin(target.minX, source.minX);
+  target.maxX = qMax(target.maxX, source.maxX);
+  target.minY = qMin(target.minY, source.minY);
+  target.maxY = qMax(target.maxY, source.maxY);
+}
+
+QVector<Component> mergeNearbyComponents(const QVector<Component> &components)
+{
+  QVector<Component> merged = components;
+  bool changed = true;
+
+  while (changed) {
+    changed = false;
+    for (int left = 0; left < merged.count() && !changed; ++left) {
+      for (int right = left + 1; right < merged.count(); ++right) {
+        if (!componentsShouldMerge(merged.at(left), merged.at(right))) {
+          continue;
+        }
+
+        mergeComponent(merged [left], merged.at(right));
+        merged.remove(right);
+        changed = true;
+        break;
+      }
+    }
+  }
+
+  return merged;
+}
+
+bool componentIsLineLike(const Component &component,
+                         const QRect &bounds)
+{
+  const int componentWidth = component.maxX - component.minX + 1;
+  const int componentHeight = component.maxY - component.minY + 1;
+  const int longSide = qMax(componentWidth, componentHeight);
+  const int shortSide = qMax(1, qMin(componentWidth, componentHeight));
+  const double aspect = static_cast<double> (longSide) / shortSide;
+
+  if (componentHeight >= qMax(24, bounds.height() / 5) && componentWidth <= qMax(5, bounds.width() / 80)) {
+    return true;
+  }
+
+  if (componentWidth >= qMax(24, bounds.width() / 5) && componentHeight <= qMax(5, bounds.height() / 80)) {
+    return true;
+  }
+
+  if (aspect > 3.0 && longSide >= 18) {
+    return true;
+  }
+
+  if (componentHeight >= bounds.height() / 4 || componentWidth >= bounds.width() / 4) {
+    return true;
+  }
+
+  return false;
+}
+
+bool componentIsMarkerLike(const Component &component,
+                           const QRect &bounds)
+{
+  const int componentWidth = component.maxX - component.minX + 1;
+  const int componentHeight = component.maxY - component.minY + 1;
+  const int longSide = qMax(componentWidth, componentHeight);
+  const int shortSide = qMax(1, qMin(componentWidth, componentHeight));
+  const double density = static_cast<double> (component.area) /
+                         qMax(1, componentWidth * componentHeight);
+  const int maxMarkerWidth = qMax(16, qMin(52, bounds.width() / 10));
+  const int maxMarkerHeight = qMax(16, qMin(52, bounds.height() / 4));
+
+  if (component.area < 6 ||
+      component.area > 1800 ||
+      componentWidth < 3 ||
+      componentHeight < 3 ||
+      componentWidth > maxMarkerWidth ||
+      componentHeight > maxMarkerHeight) {
+    return false;
+  }
+
+  if (static_cast<double> (longSide) / shortSide > 2.7) {
+    return false;
+  }
+
+  if (density < 0.05 || density > 0.95) {
+    return false;
+  }
+
+  return true;
+}
+
 QVector<unsigned char> extractNormalizedPatch(const QVector<unsigned char> &mask,
                                               int width,
                                               int height,
@@ -697,214 +938,56 @@ QVector<MarkerCandidate> markerCandidatesFromComponents(const QVector<unsigned c
                                                         const QRect &bounds,
                                                         const Transformation &transformation,
                                                         double yMinimum,
-                                                        double yMaximum)
+                                                        double yMaximum,
+                                                        int *rawCandidateCount,
+                                                        int *rejectedLineLikeCount)
 {
   QVector<MarkerCandidate> candidates;
-  QVector<unsigned char> visited(width * height, 0);
-  const int maxMarkerWidth = qMax(18, qMin(96, bounds.width() / 5));
-  const int maxMarkerHeight = qMax(18, qMin(96, bounds.height() / 5));
-
-  for (int y = bounds.top(); y <= bounds.bottom(); ++y) {
-    for (int x = bounds.left(); x <= bounds.right(); ++x) {
-      const int startIndex = indexFor(x, y, width);
-      if (!mask [startIndex] || visited [startIndex]) {
-        continue;
-      }
-
-      Component component;
-      QQueue<QPoint> queue;
-      queue.enqueue(QPoint(x, y));
-      visited [startIndex] = 1;
-
-      while (!queue.isEmpty()) {
-        const QPoint point = queue.dequeue();
-        addComponentPixel(component, point.x(), point.y());
-
-        for (int yy = point.y() - 1; yy <= point.y() + 1; ++yy) {
-          for (int xx = point.x() - 1; xx <= point.x() + 1; ++xx) {
-            if (xx < bounds.left() || xx > bounds.right() ||
-                yy < bounds.top() || yy > bounds.bottom()) {
-              continue;
-            }
-
-            const int neighborIndex = indexFor(xx, yy, width);
-            if (!mask [neighborIndex] || visited [neighborIndex]) {
-              continue;
-            }
-
-            visited [neighborIndex] = 1;
-            queue.enqueue(QPoint(xx, yy));
-          }
-        }
-      }
-
-      const int componentWidth = component.maxX - component.minX + 1;
-      const int componentHeight = component.maxY - component.minY + 1;
-      const double aspect = componentHeight == 0 ?
-                            999.0 :
-                            static_cast<double> (qMax(componentWidth, componentHeight)) /
-                            qMax(1, qMin(componentWidth, componentHeight));
-      const double density = static_cast<double> (component.area) /
-                             qMax(1, componentWidth * componentHeight);
-
-      if (component.area < 5 ||
-          component.area > 2600 ||
-          componentWidth < 3 ||
-          componentHeight < 3 ||
-          componentWidth > maxMarkerWidth ||
-          componentHeight > maxMarkerHeight ||
-          aspect > 4.2 ||
-          density < 0.08) {
-        continue;
-      }
-
-      const QPointF centerRaw(static_cast<double> (component.sumX) / component.area,
-                              static_cast<double> (component.sumY) / component.area);
-      const QPoint center = clampPointToYRange(centerRaw,
-                                               transformation,
-                                               yMinimum,
-                                               yMaximum);
-      if (!bounds.contains(center)) {
-        continue;
-      }
-
-      MarkerCandidate candidate;
-      candidate.center = center;
-      candidate.bounds = QRect(QPoint(component.minX, component.minY),
-                               QPoint(component.maxX, component.maxY));
-      candidate.area = component.area;
-      candidate.size = qMax(componentWidth, componentHeight);
-      candidate.patch = extractNormalizedPatch(mask,
-                                               width,
-                                               height,
-                                               component);
-      candidate.features = markerFeatures(candidate);
-      candidates << candidate;
-    }
+  const QVector<Component> components = connectedComponents(mask,
+                                                            width,
+                                                            height,
+                                                            bounds);
+  if (rawCandidateCount != nullptr) {
+    *rawCandidateCount = components.count();
   }
 
-  return candidates;
-}
-
-bool pointIsNearExistingCandidate(const QPoint &point,
-                                  const QVector<MarkerCandidate> &candidates,
-                                  int minimumDistance)
-{
-  const int minimumDistanceSquared = minimumDistance * minimumDistance;
-  for (int index = 0; index < candidates.count(); ++index) {
-    const QPoint delta = candidates.at(index).center - point;
-    if (delta.x() * delta.x() + delta.y() * delta.y() < minimumDistanceSquared) {
-      return true;
-    }
+  if (components.count() > AUTO_CURVE_MAX_RAW_CANDIDATES) {
+    return candidates;
   }
 
-  return false;
-}
+  const QVector<Component> mergedComponents = mergeNearbyComponents(components);
+  for (int componentIndex = 0; componentIndex < mergedComponents.count(); ++componentIndex) {
+    const Component &component = mergedComponents.at(componentIndex);
 
-QVector<MarkerCandidate> markerCandidatesFromDensity(const QVector<unsigned char> &mask,
-                                                     int width,
-                                                     int height,
-                                                     const QRect &bounds,
-                                                     const Transformation &transformation,
-                                                     double yMinimum,
-                                                     double yMaximum,
-                                                     const QVector<MarkerCandidate> &existingCandidates)
-{
-  QVector<MarkerCandidate> candidates;
-  const int radius = 5;
-  const int diameter = radius * 2 + 1;
-  const int minimumForeground = 10;
-
-  struct DensityPeak
-  {
-    QPoint center;
-    int foreground;
-  };
-  QVector<DensityPeak> peaks;
-
-  for (int y = bounds.top() + radius; y <= bounds.bottom() - radius; y += 2) {
-    for (int x = bounds.left() + radius; x <= bounds.right() - radius; x += 2) {
-      int foreground = 0;
-      for (int yy = y - radius; yy <= y + radius; ++yy) {
-        for (int xx = x - radius; xx <= x + radius; ++xx) {
-          foreground += mask [indexFor(xx, yy, width)];
-        }
+    if (componentIsLineLike(component, bounds)) {
+      if (rejectedLineLikeCount != nullptr) {
+        ++(*rejectedLineLikeCount);
       }
-
-      if (foreground < minimumForeground) {
-        continue;
-      }
-
-      bool localMaximum = true;
-      for (int yy = y - 2; yy <= y + 2 && localMaximum; yy += 2) {
-        for (int xx = x - 2; xx <= x + 2; xx += 2) {
-          if (xx == x && yy == y) {
-            continue;
-          }
-
-          int neighborForeground = 0;
-          for (int wy = yy - radius; wy <= yy + radius; ++wy) {
-            for (int wx = xx - radius; wx <= xx + radius; ++wx) {
-              if (wx < bounds.left() || wx > bounds.right() ||
-                  wy < bounds.top() || wy > bounds.bottom()) {
-                continue;
-              }
-              neighborForeground += mask [indexFor(wx, wy, width)];
-            }
-          }
-
-          if (neighborForeground > foreground) {
-            localMaximum = false;
-            break;
-          }
-        }
-      }
-
-      if (localMaximum) {
-        DensityPeak peak;
-        peak.center = QPoint(x, y);
-        peak.foreground = foreground;
-        peaks << peak;
-      }
-    }
-  }
-
-  std::sort(peaks.begin(),
-            peaks.end(),
-            [] (const DensityPeak &left, const DensityPeak &right) {
-              return left.foreground > right.foreground;
-            });
-
-  for (int index = 0; index < peaks.count(); ++index) {
-    if (candidates.count() >= 500) {
-      break;
-    }
-
-    const QPoint center = clampPointToYRange(peaks.at(index).center,
-                                             transformation,
-                                             yMinimum,
-                                             yMaximum);
-    if (!bounds.contains(center) ||
-        pointIsNearExistingCandidate(center, existingCandidates, CURVE_POINT_MIN_SPACING) ||
-        pointIsNearExistingCandidate(center, candidates, CURVE_POINT_MIN_SPACING)) {
       continue;
     }
 
-    Component component;
-    component.area = peaks.at(index).foreground;
-    component.sumX = static_cast<long long> (center.x()) * peaks.at(index).foreground;
-    component.sumY = static_cast<long long> (center.y()) * peaks.at(index).foreground;
-    component.minX = qMax(bounds.left(), center.x() - radius);
-    component.maxX = qMin(bounds.right(), center.x() + radius);
-    component.minY = qMax(bounds.top(), center.y() - radius);
-    component.maxY = qMin(bounds.bottom(), center.y() + radius);
+    if (!componentIsMarkerLike(component, bounds)) {
+      continue;
+    }
+
+    const int componentWidth = component.maxX - component.minX + 1;
+    const int componentHeight = component.maxY - component.minY + 1;
+    const QPointF centerRaw((component.minX + component.maxX) / 2.0,
+                            (component.minY + component.maxY) / 2.0);
+    const QPoint center = clampPointToYRange(centerRaw,
+                                             transformation,
+                                             yMinimum,
+                                             yMaximum);
+    if (!bounds.contains(center)) {
+      continue;
+    }
 
     MarkerCandidate candidate;
     candidate.center = center;
     candidate.bounds = QRect(QPoint(component.minX, component.minY),
                              QPoint(component.maxX, component.maxY));
-    candidate.area = peaks.at(index).foreground;
-    candidate.size = diameter;
+    candidate.area = component.area;
+    candidate.size = qMax(componentWidth, componentHeight);
     candidate.patch = extractNormalizedPatch(mask,
                                              width,
                                              height,
@@ -914,6 +997,150 @@ QVector<MarkerCandidate> markerCandidatesFromDensity(const QVector<unsigned char
   }
 
   return candidates;
+}
+
+double medianCandidateSize(const QVector<MarkerCandidate> &candidates)
+{
+  if (candidates.isEmpty()) {
+    return 8.0;
+  }
+
+  QVector<double> sizes;
+  for (int index = 0; index < candidates.count(); ++index) {
+    sizes << candidates.at(index).size;
+  }
+
+  std::sort(sizes.begin(), sizes.end());
+  return sizes.at(sizes.count() / 2);
+}
+
+QVector<MarkerCandidate> rejectVerticalCandidateClusters(const QVector<MarkerCandidate> &candidates,
+                                                         const QRect &bounds,
+                                                         int *rejectedLineLikeCount)
+{
+  if (candidates.count() < 4) {
+    return candidates;
+  }
+
+  QSet<int> rejectedIndexes;
+  const int xWindow = qMax(4, qRound(medianCandidateSize(candidates) * 0.7));
+  const int spanMinimum = qMax(24, bounds.height() / 6);
+
+  for (int seedIndex = 0; seedIndex < candidates.count(); ++seedIndex) {
+    QList<int> alignedIndexes;
+    int minY = std::numeric_limits<int>::max();
+    int maxY = std::numeric_limits<int>::min();
+
+    for (int index = 0; index < candidates.count(); ++index) {
+      if (std::abs(candidates.at(index).center.x() - candidates.at(seedIndex).center.x()) > xWindow) {
+        continue;
+      }
+
+      alignedIndexes << index;
+      minY = qMin(minY, candidates.at(index).center.y());
+      maxY = qMax(maxY, candidates.at(index).center.y());
+    }
+
+    if (alignedIndexes.count() >= 4 && maxY - minY + 1 >= spanMinimum) {
+      for (int index = 0; index < alignedIndexes.count(); ++index) {
+        rejectedIndexes.insert(alignedIndexes.at(index));
+      }
+    }
+  }
+
+  QVector<MarkerCandidate> filtered;
+  for (int index = 0; index < candidates.count(); ++index) {
+    if (!rejectedIndexes.contains(index)) {
+      filtered << candidates.at(index);
+    }
+  }
+
+  if (rejectedLineLikeCount != nullptr) {
+    *rejectedLineLikeCount += rejectedIndexes.count();
+  }
+
+  return filtered;
+}
+
+QVector<MarkerCandidate> rejectTextLikeCandidateClusters(const QVector<MarkerCandidate> &candidates,
+                                                         int *rejectedTextLikeCount)
+{
+  if (candidates.count() < 5) {
+    return candidates;
+  }
+
+  QSet<int> rejectedIndexes;
+  const double medianSize = medianCandidateSize(candidates);
+  const int yWindow = qMax(8, qRound(medianSize * 1.2));
+  const int xGapMaximum = qMax(12, qRound(medianSize * 1.8));
+  const int xSpanMinimum = qMax(26, qRound(medianSize * 4.0));
+  const int ySpanMaximum = qMax(18, qRound(medianSize * 2.2));
+
+  QVector<int> order;
+  for (int index = 0; index < candidates.count(); ++index) {
+    order << index;
+  }
+
+  std::sort(order.begin(),
+            order.end(),
+            [&candidates] (int left, int right) {
+              if (candidates.at(left).center.y() == candidates.at(right).center.y()) {
+                return candidates.at(left).center.x() < candidates.at(right).center.x();
+              }
+              return candidates.at(left).center.y() < candidates.at(right).center.y();
+            });
+
+  for (int startOrder = 0; startOrder < order.count(); ++startOrder) {
+    QList<int> run;
+    int minX = std::numeric_limits<int>::max();
+    int maxX = std::numeric_limits<int>::min();
+    int minY = std::numeric_limits<int>::max();
+    int maxY = std::numeric_limits<int>::min();
+    int previousX = -1;
+    const int seedY = candidates.at(order.at(startOrder)).center.y();
+
+    for (int orderIndex = startOrder; orderIndex < order.count(); ++orderIndex) {
+      const MarkerCandidate &candidate = candidates.at(order.at(orderIndex));
+      if (std::abs(candidate.center.y() - seedY) > yWindow) {
+        if (candidate.center.y() > seedY + yWindow) {
+          break;
+        }
+        continue;
+      }
+
+      if (!run.isEmpty() && candidate.center.x() - previousX > xGapMaximum) {
+        break;
+      }
+
+      run << order.at(orderIndex);
+      previousX = candidate.center.x();
+      minX = qMin(minX, candidate.bounds.left());
+      maxX = qMax(maxX, candidate.bounds.right());
+      minY = qMin(minY, candidate.bounds.top());
+      maxY = qMax(maxY, candidate.bounds.bottom());
+    }
+
+    if (run.count() >= 5 &&
+        maxX - minX + 1 >= xSpanMinimum &&
+        maxY - minY + 1 <= ySpanMaximum) {
+      for (int index = 0; index < run.count(); ++index) {
+        rejectedIndexes.insert(run.at(index));
+      }
+    }
+  }
+
+  QVector<MarkerCandidate> filtered;
+  for (int index = 0; index < candidates.count(); ++index) {
+    if (!rejectedIndexes.contains(index)) {
+      filtered << candidates.at(index);
+    }
+  }
+
+  if (rejectedTextLikeCount != nullptr) {
+    *rejectedTextLikeCount += rejectedIndexes.count();
+  }
+
+  return filtered;
 }
 
 void updateClusterCentroid(MarkerCluster &cluster,
@@ -1000,6 +1227,29 @@ QVector<MarkerCluster> clusterMarkerCandidates(const QVector<MarkerCandidate> &c
   return clusters;
 }
 
+bool pointsLookLikeVerticalArtifact(const QList<QPoint> &points)
+{
+  if (points.count() < 4) {
+    return false;
+  }
+
+  int minX = std::numeric_limits<int>::max();
+  int maxX = std::numeric_limits<int>::min();
+  int minY = std::numeric_limits<int>::max();
+  int maxY = std::numeric_limits<int>::min();
+
+  for (int index = 0; index < points.count(); ++index) {
+    minX = qMin(minX, points.at(index).x());
+    maxX = qMax(maxX, points.at(index).x());
+    minY = qMin(minY, points.at(index).y());
+    maxY = qMax(maxY, points.at(index).y());
+  }
+
+  const int xSpan = maxX - minX + 1;
+  const int ySpan = maxY - minY + 1;
+  return xSpan <= qMax(5, ySpan / 12) && ySpan >= 24;
+}
+
 QList<AutoCurveGroup> groupsFromClusters(const QVector<MarkerCluster> &clusters,
                                          const QVector<MarkerCandidate> &candidates)
 {
@@ -1024,6 +1274,10 @@ QList<AutoCurveGroup> groupsFromClusters(const QVector<MarkerCluster> &clusters,
     }
 
     if (group.points.count() < minimumGroupSize) {
+      continue;
+    }
+
+    if (pointsLookLikeVerticalArtifact(group.points)) {
       continue;
     }
 
@@ -1093,7 +1347,11 @@ AutoCurveGroup::AutoCurveGroup() :
 {
 }
 
-AutoCurveResult::AutoCurveResult()
+AutoCurveResult::AutoCurveResult() :
+  rawCandidateCount (0),
+  rejectedLineLikeCount (0),
+  rejectedTextLikeCount (0),
+  finalCandidateCount (0)
 {
 }
 
@@ -1198,17 +1456,26 @@ AutoCurveResult AutoDigitize::detectCurvePointGroups(const QImage &image,
   const int width = working.width();
   const int height = working.height();
   const QRect imageRect(0, 0, width, height);
-  const QRect bounds = plotRect.adjusted(4, 4, -4, -4).intersected(imageRect);
+  const int borderMargin = qMax(6, qMin(plotRect.width(), plotRect.height()) / 80);
+  const QRect bounds = plotRect.adjusted(borderMargin,
+                                         borderMargin,
+                                         -borderMargin,
+                                         -borderMargin).intersected(imageRect);
   if (bounds.isEmpty()) {
     result.message = QObject::tr("No calibrated image area is available for Auto Curve.");
     return result;
   }
 
   const QVector<unsigned char> mask = foregroundMask(working);
-  const QVector<unsigned char> lineSuppressedMask = suppressLongRuns(mask,
-                                                                     width,
-                                                                     height,
-                                                                     bounds);
+  QVector<unsigned char> lineSuppressedMask = suppressLongRuns(mask,
+                                                               width,
+                                                               height,
+                                                               bounds);
+  lineSuppressedMask = suppressColumnAndRowArtifacts(lineSuppressedMask,
+                                                     width,
+                                                     height,
+                                                     bounds,
+                                                     &result.rejectedLineLikeCount);
   const QVector<unsigned char> denseMask = denseForegroundMask(lineSuppressedMask,
                                                               width,
                                                               height,
@@ -1219,16 +1486,27 @@ AutoCurveResult AutoDigitize::detectCurvePointGroups(const QImage &image,
                                                                        bounds,
                                                                        transformation,
                                                                        yMinimum,
-                                                                       yMaximum);
-  const QVector<MarkerCandidate> densityCandidates = markerCandidatesFromDensity(lineSuppressedMask,
-                                                                                width,
-                                                                                height,
-                                                                                bounds,
-                                                                                transformation,
-                                                                                yMinimum,
-                                                                                yMaximum,
-                                                                                candidates);
-  candidates += densityCandidates;
+                                                                       yMaximum,
+                                                                       &result.rawCandidateCount,
+                                                                       &result.rejectedLineLikeCount);
+  if (result.rawCandidateCount > AUTO_CURVE_MAX_RAW_CANDIDATES) {
+    result.message = QObject::tr("Auto Curve found too many candidates. No points were added. Try a clearer graph or crop the plot area.");
+    return result;
+  }
+
+  candidates = rejectVerticalCandidateClusters(candidates,
+                                               bounds,
+                                               &result.rejectedLineLikeCount);
+  candidates = rejectTextLikeCandidateClusters(candidates,
+                                               &result.rejectedTextLikeCount);
+  result.finalCandidateCount = candidates.count();
+
+  if (result.finalCandidateCount > AUTO_CURVE_MAX_RAW_CANDIDATES) {
+    result.groups.clear();
+    result.message = QObject::tr("Auto Curve found too many candidates. No points were added. Try a clearer graph or crop the plot area.");
+    return result;
+  }
+
   const QVector<MarkerCluster> clusters = clusterMarkerCandidates(candidates);
   result.groups = groupsFromClusters(clusters,
                                      candidates);

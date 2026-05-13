@@ -22,7 +22,8 @@ AutoTrace Digitizer adds Windows portable packaging and early automation tools f
 - Auto Axis button.
 - Auto Curve button.
 - Auto Axis detects the bottom x-axis, supports mild image tilt correction, creates editable axis points, sets x start to 1, sets y minimum to 0, and prompts for y maximum.
-- Auto Curve detects visible plotted markers inside the calibrated plot area and creates editable curve points on the selected curve.
+- Auto Curve detects marker objects inside the calibrated plot area, rejects axes, gridlines, phase dividers, labels, and text boxes, then creates one editable curve point at each marker center on the selected curve.
+- Repeated Auto Curve clicks cycle through visually similar marker groups and replace only the previous auto-created points.
 - Auto Axis and Auto Curve are available from the Digitize menu and drawing toolbar.
 - Portable settings support through `portable-settings.ini`, `ENGAUGE_PORTABLE=1`, and a local `settings` folder beside the executable.
 - Default locale is US English (`en_US`) unless the user selects another locale in Settings / Main Window.
@@ -51,5 +52,5 @@ or directly with:
 ## Current Limitations
 
 - Auto Axis does not read axis numbers automatically.
-- Auto Curve is an early implementation and may be inaccurate with multiple marker shapes, dense gridlines, low-resolution images, overlapping labels, open/closed marker types, or connecting lines touching markers.
+- Auto Curve is experimental. It is designed to reject common single-case design artifacts, but it may still need correction on low-resolution images, dense gridlines, overlapping labels, unusual marker symbols, or connecting lines touching markers.
 - Manual review of digitized points is recommended before using exported data.

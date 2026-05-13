@@ -17,10 +17,10 @@ Auto Axis detects the bottom x-axis, supports mild image tilt correction, create
 
 ## Auto Curve
 
-Auto Curve detects visible plotted markers inside the calibrated plot area and creates editable curve points on the selected curve. The current implementation groups visually matching markers and cycles detected marker groups on repeated clicks.
+Auto Curve now detects marker objects rather than raw foreground pixels. It rejects axes, gridlines, phase dividers, labels, and text boxes, places one editable curve point at each detected marker center, groups visually matching markers, and cycles detected marker groups on repeated clicks.
 
 ## Limitations
 
 - Auto Axis does not read axis numbers automatically.
-- Auto Curve is an early implementation and may be inaccurate with multiple marker shapes, dense gridlines, low-resolution images, overlapping labels, open/closed marker types, or connecting lines touching markers.
+- Auto Curve is experimental. It is designed to reject common single-case design artifacts, but it may still need correction on low-resolution images, dense gridlines, overlapping labels, unusual marker symbols, or connecting lines touching markers.
 - Manual review of digitized points is recommended before using exported data.

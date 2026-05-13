@@ -229,6 +229,30 @@ bool graphBoundsFromAxisPoints(const Document &document,
   return !plotRect.isEmpty();
 }
 
+QStringList existingPointIdentifiers(const Document &document,
+                                     const QStringList &identifiers)
+{
+  QStringList existing;
+  for (int identifierIndex = 0; identifierIndex < identifiers.count(); ++identifierIndex) {
+    const QString identifier = identifiers.at(identifierIndex);
+    const QString curveName = Point::curveNameFromPointIdentifier(identifier);
+    const Curve *curve = document.curveForCurveName(curveName);
+    if (curve == nullptr) {
+      continue;
+    }
+
+    const Points points = curve->points();
+    for (int pointIndex = 0; pointIndex < points.count(); ++pointIndex) {
+      if (points.at(pointIndex).identifier() == identifier) {
+        existing << identifier;
+        break;
+      }
+    }
+  }
+
+  return existing;
+}
+
 QString autoCurveCycleKey(const QString &fileName,
                           qint64 imageCacheKey,
                           const QString &curveName,
@@ -2498,22 +2522,32 @@ void MainWindow::slotDigitizeAutoCurve ()
     }
   }
 
-  if (!m_autoCurveCycleState.previousPointIdentifiers.isEmpty()) {
-    CmdDelete *deleteCmd = new CmdDelete(*this,
-                                         document,
-                                         m_autoCurveCycleState.previousPointIdentifiers);
-    m_cmdMediator->push(deleteCmd);
-    m_autoCurveCycleState.previousPointIdentifiers.clear();
-  }
-
   const int groupIndex = m_autoCurveCycleState.nextGroupIndex %
                          m_autoCurveCycleState.markerGroups.count();
   const QList<QPoint> points = m_autoCurveCycleState.markerGroups.at(groupIndex);
+  if (points.count() < 2) {
+    QMessageBox::warning(this,
+                         tr("Auto Curve"),
+                         tr("Auto Curve found fewer than 2 points in this marker group. No points were added."));
+    return;
+  }
 
   QList<double> ordinals;
   const int firstOrdinal = document.nextOrdinalForCurve(curveName);
   for (int index = 0; index < points.count(); ++index) {
     ordinals << firstOrdinal + index;
+  }
+
+  const QStringList previousExisting = existingPointIdentifiers(document,
+                                                               m_autoCurveCycleState.previousPointIdentifiers);
+  m_autoCurveCycleState.previousPointIdentifiers.clear();
+
+  m_cmdMediator->beginMacro(tr("Auto Curve"));
+  if (!previousExisting.isEmpty()) {
+    CmdDelete *deleteCmd = new CmdDelete(*this,
+                                         document,
+                                         previousExisting);
+    m_cmdMediator->push(deleteCmd);
   }
 
   CmdAddPointsGraph *cmd = new CmdAddPointsGraph(*this,
@@ -2522,6 +2556,7 @@ void MainWindow::slotDigitizeAutoCurve ()
                                                  points,
                                                  ordinals);
   m_cmdMediator->push(cmd);
+  m_cmdMediator->endMacro();
   m_autoCurveCycleState.previousPointIdentifiers = cmd->identifiersAdded();
   m_autoCurveCycleState.nextGroupIndex = (groupIndex + 1) %
                                         m_autoCurveCycleState.markerGroups.count();
@@ -2529,9 +2564,13 @@ void MainWindow::slotDigitizeAutoCurve ()
   m_actionDigitizeSelect->setChecked(true);
   slotDigitizeSelect();
 
-  showTemporaryMessage(tr("Auto Curve: added %1 points from Marker Group %2. Click Auto Curve again for the next detected marker group.")
-                       .arg(points.count())
-                       .arg(groupIndex + 1));
+  if (m_autoCurveCycleState.markerGroups.count() == 1) {
+    showTemporaryMessage(tr("Auto Curve: one marker group found. Replaced previous auto-created points."));
+  } else {
+    showTemporaryMessage(tr("Auto Curve: added %1 points from Marker Group %2. Click Auto Curve again for the next detected marker group.")
+                         .arg(points.count())
+                         .arg(groupIndex + 1));
+  }
 }
 
 void MainWindow::slotDigitizeAxis ()

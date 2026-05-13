@@ -115,14 +115,26 @@ void CmdAddPointsGraph::cmdRedo ()
   saveOrCheckPreCommandDocumentStateHash (document ());
   saveDocumentState (document ());
 
+  const QStringList identifiersToReuse = m_identifiersAdded;
+  m_identifiersAdded.clear();
+
   int index;
   for (index = 0; index < m_points.count(); index++) {
 
     QString identifierAdded;
-    document().addPointGraphWithGeneratedIdentifier (m_curveName,
-                                                     m_points.at (index),
-                                                     identifierAdded,
-                                                     m_ordinals.at (index));
+    if (index < identifiersToReuse.count() &&
+        !identifiersToReuse.at(index).isEmpty()) {
+      identifierAdded = identifiersToReuse.at(index);
+      document().addPointGraphWithSpecifiedIdentifier (m_curveName,
+                                                       m_points.at (index),
+                                                       identifierAdded,
+                                                       m_ordinals.at (index));
+    } else {
+      document().addPointGraphWithGeneratedIdentifier (m_curveName,
+                                                       m_points.at (index),
+                                                       identifierAdded,
+                                                       m_ordinals.at (index));
+    }
     m_identifiersAdded.push_back (identifierAdded);
   }
 

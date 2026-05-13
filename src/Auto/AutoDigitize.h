@@ -30,6 +30,10 @@ struct AutoCurveResult
 
   QList<AutoCurveGroup> groups;
   QString message;
+  int rawCandidateCount;
+  int rejectedLineLikeCount;
+  int rejectedTextLikeCount;
+  int finalCandidateCount;
 };
 
 struct AutoAxisResult

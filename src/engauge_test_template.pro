@@ -29,6 +29,7 @@ MOC_DIR = .moc_test
 RCC_DIR = .rcc_test
 
 HEADERS  += \
+    Auto/AutoDigitize.h \
     Background/BackgroundImage.h \
     Background/BackgroundStateAbstractBase.h \
     Background/BackgroundStateContext.h \
@@ -501,6 +502,7 @@ HEADERS  += \
     util/ZValues.h
 
 SOURCES += \
+    Auto/AutoDigitize.cpp \
     Background/BackgroundImage.cpp \
     Background/BackgroundStateAbstractBase.cpp \
     Background/BackgroundStateContext.cpp \
@@ -947,14 +949,24 @@ TARGET = ../bin/TEST
 
 QT += core gui network printsupport testlib widgets xml help
 
-LIBS += -L$$(LOG4CPP_HOME)/lib -L$$(FFTW_HOME)/lib
-
 win32-g++* {
 CONFIG += windows
 }
 
-LIBS += -llog4cpp -lfftw3
+win32-msvc* {
+  LIBS += $$(FFTW_HOME)/lib/libfftw3-3.lib
+  !log4cpp_null {
+    LIBS += $$(LOG4CPP_HOME)/lib/log4cpp.lib
+  }
+} else {
+  LIBS += -L$$(FFTW_HOME)/lib -lfftw3
+  !log4cpp_null {
+    LIBS += -L$$(LOG4CPP_HOME)/lib -llog4cpp
+  }
+}
+
 INCLUDEPATH += Background \
+               Auto \
                Callback \
                Centipede \
                Checker \
@@ -1010,8 +1022,39 @@ INCLUDEPATH += Background \
                Window \
                Zoom
 
-INCLUDEPATH += $$(FFTW_HOME)/include \
-               $$(LOG4CPP_HOME)/include
+INCLUDEPATH += $$(FFTW_HOME)/include
+
+!log4cpp_null {
+  INCLUDEPATH += $$(LOG4CPP_HOME)/include
+}
+
+log4cpp_null {
+  INCLUDEPATH += log4cpp_null/include
+  HEADERS += log4cpp_null/include/log4cpp/Appender.hh \
+             log4cpp_null/include/log4cpp/Category.hh \
+             log4cpp_null/include/log4cpp/CategoryStream.hh \
+             log4cpp_null/include/log4cpp/Configurator.hh \
+             log4cpp_null/include/log4cpp/convenience.h \
+             log4cpp_null/include/log4cpp/FileAppender.hh \
+             log4cpp_null/include/log4cpp/Layout.hh \
+             log4cpp_null/include/log4cpp/LayoutAppender.hh \
+             log4cpp_null/include/log4cpp/LoggingEvent.hh \
+             log4cpp_null/include/log4cpp/PatternLayout.hh \
+             log4cpp_null/include/log4cpp/Priority.hh \
+             log4cpp_null/include/log4cpp/PropertyConfigurator.hh \
+             log4cpp_null/include/log4cpp/RollingFileAppender.hh
+  SOURCES += log4cpp_null/src/Appender.cpp \
+             log4cpp_null/src/Category.cpp \
+             log4cpp_null/src/CategoryStream.cpp \
+             log4cpp_null/src/Configurator.cpp \
+             log4cpp_null/src/FileAppender.cpp \
+             log4cpp_null/src/Layout.cpp \
+             log4cpp_null/src/LayoutAppender.cpp \
+             log4cpp_null/src/LoggingEvent.cpp \
+             log4cpp_null/src/PatternLayout.cpp \
+             log4cpp_null/src/PropertyConfigurator.cpp \
+             log4cpp_null/src/RollingFileAppender.cpp
+}
 
 RESOURCES += \
     engauge.qrc
