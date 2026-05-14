@@ -457,7 +457,7 @@ Original Engauge Digitizer license and attribution notices are preserved.
 Run Start AutoTrace Digitizer.cmd or AutoTraceDigitizer.exe.
 Settings are stored under .\settings because portable-settings.ini is present.
 This folder can be copied to another Windows computer without installing AutoTrace Digitizer.
-Auto Axis detects the bottom x-axis, supports mild tilt correction, creates editable axis points, sets x start to 1, sets y minimum to 0, and prompts for y maximum.
+Auto Axis detects the bottom x-axis, supports mild tilt correction, creates editable axis points, sets x minimum to 0, sets y minimum to 0, and prompts for y maximum.
 Auto Curve detects visible plotted markers in the calibrated plot area and creates editable curve points on the selected curve.
 Auto Curve groups visually matching markers and cycles detected marker groups on repeated clicks.
 The default locale is US English unless the user selects another locale in Settings / Main Window.

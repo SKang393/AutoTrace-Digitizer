@@ -2501,6 +2501,7 @@ void MainWindow::slotDigitizeAutoCurve ()
       m_autoCurveCycleState.markerGroups.isEmpty()) {
     m_autoCurveCycleState.key = cycleKey;
     m_autoCurveCycleState.markerGroups.clear();
+    m_autoCurveCycleState.markerGroupNames.clear();
     m_autoCurveCycleState.nextGroupIndex = 0;
     m_autoCurveCycleState.previousPointIdentifiers.clear();
 
@@ -2519,6 +2520,7 @@ void MainWindow::slotDigitizeAutoCurve ()
 
     for (int index = 0; index < result.groups.count(); ++index) {
       m_autoCurveCycleState.markerGroups << result.groups.at(index).points;
+      m_autoCurveCycleState.markerGroupNames << result.groups.at(index).name;
     }
   }
 
@@ -2567,9 +2569,13 @@ void MainWindow::slotDigitizeAutoCurve ()
   if (m_autoCurveCycleState.markerGroups.count() == 1) {
     showTemporaryMessage(tr("Auto Curve: one marker group found. Replaced previous auto-created points."));
   } else {
-    showTemporaryMessage(tr("Auto Curve: added %1 points from Marker Group %2. Click Auto Curve again for the next detected marker group.")
+    const QString groupName = groupIndex < m_autoCurveCycleState.markerGroupNames.count() &&
+                              !m_autoCurveCycleState.markerGroupNames.at(groupIndex).isEmpty() ?
+                              m_autoCurveCycleState.markerGroupNames.at(groupIndex) :
+                              tr("Marker Group %1").arg(groupIndex + 1);
+    showTemporaryMessage(tr("Auto Curve: added %1 points from %2. Click Auto Curve again for the next marker group.")
                          .arg(points.count())
-                         .arg(groupIndex + 1));
+                         .arg(groupName));
   }
 }
 

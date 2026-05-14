@@ -8,6 +8,7 @@
 #include <QImage>
 #include <QPainter>
 #include <QPolygon>
+#include <QStringList>
 #include <QtTest/QtTest>
 
 QTEST_MAIN (TestAutoDigitize)
@@ -29,6 +30,23 @@ QList<QPoint> allPointsFromGroups(const QList<AutoCurveGroup> &groups)
 QString pointText(const QPoint &point)
 {
   return QString ("(%1,%2)").arg(point.x()).arg(point.y());
+}
+
+QString groupsText(const QList<AutoCurveGroup> &groups)
+{
+  QStringList lines;
+  for (int groupIndex = 0; groupIndex < groups.count(); ++groupIndex) {
+    QStringList points;
+    for (int pointIndex = 0; pointIndex < groups.at(groupIndex).points.count(); ++pointIndex) {
+      points << pointText(groups.at(groupIndex).points.at(pointIndex));
+    }
+    lines << QString("%1:%2:%3")
+             .arg(groupIndex)
+             .arg(groups.at(groupIndex).name)
+             .arg(points.join(","));
+  }
+
+  return lines.join(" | ");
 }
 
 } // namespace
@@ -160,6 +178,142 @@ Transformation TestAutoDigitize::regressionTransformation() const
   return transformation;
 }
 
+QImage TestAutoDigitize::singleCaseCircleImage() const
+{
+  QImage image(850, 259, QImage::Format_ARGB32);
+  image.fill(Qt::white);
+
+  QPainter painter(&image);
+  painter.setRenderHint(QPainter::Antialiasing, false);
+
+  painter.setPen(QPen(Qt::black, 1));
+  painter.drawLine(55, 239, 789, 239);
+  painter.drawLine(55, 31, 55, 239);
+
+  for (int y = 31; y <= 239; y += 52) {
+    painter.drawLine(51, y, 55, y);
+  }
+  for (int x = 84; x <= 789; x += 28) {
+    painter.drawLine(x, 239, x, 244);
+  }
+
+  painter.drawText(12, 36, "100");
+  painter.drawText(21, 88, "75");
+  painter.drawText(21, 140, "50");
+  painter.drawText(21, 192, "25");
+  painter.drawText(31, 202, "0");
+
+  painter.setPen(QPen(Qt::black, 1, Qt::DashLine));
+  painter.drawLine(214, 24, 214, 239);
+  painter.drawLine(782, 24, 782, 239);
+
+  painter.setPen(QPen(Qt::black, 1));
+  painter.setBrush(Qt::NoBrush);
+  painter.drawRect(706, 207, 70, 23);
+  painter.drawText(QRect(706, 207, 70, 23),
+                   Qt::AlignCenter,
+                   "Ann");
+
+  const QList<QPoint> baselineOpenCircles = {
+    QPoint(84, 197),
+    QPoint(112, 197),
+    QPoint(140, 197),
+    QPoint(168, 197),
+    QPoint(196, 197)
+  };
+  const QList<QPoint> interventionOpenCircles = {
+    QPoint(251, 86),
+    QPoint(307, 44),
+    QPoint(363, 44),
+    QPoint(419, 31),
+    QPoint(447, 31)
+  };
+  const QList<QPoint> filledCircles = {
+    QPoint(223, 59),
+    QPoint(279, 44),
+    QPoint(335, 31),
+    QPoint(391, 31)
+  };
+
+  painter.setPen(QPen(Qt::black, 1));
+  for (int index = 1; index < baselineOpenCircles.count(); ++index) {
+    painter.drawLine(baselineOpenCircles.at(index - 1),
+                     baselineOpenCircles.at(index));
+  }
+
+  QList<QPoint> interventionSeries;
+  interventionSeries << filledCircles.at(0)
+                     << interventionOpenCircles.at(0)
+                     << filledCircles.at(1)
+                     << interventionOpenCircles.at(1)
+                     << filledCircles.at(2)
+                     << interventionOpenCircles.at(2)
+                     << filledCircles.at(3)
+                     << interventionOpenCircles.at(3)
+                     << interventionOpenCircles.at(4);
+  for (int index = 1; index < interventionSeries.count(); ++index) {
+    painter.drawLine(interventionSeries.at(index - 1),
+                     interventionSeries.at(index));
+  }
+
+  painter.setBrush(Qt::NoBrush);
+  for (int index = 0; index < baselineOpenCircles.count(); ++index) {
+    painter.drawEllipse(baselineOpenCircles.at(index), 7, 7);
+  }
+  for (int index = 0; index < interventionOpenCircles.count(); ++index) {
+    painter.drawEllipse(interventionOpenCircles.at(index), 7, 7);
+  }
+
+  painter.setBrush(Qt::black);
+  for (int index = 0; index < filledCircles.count(); ++index) {
+    painter.drawEllipse(filledCircles.at(index), 7, 7);
+  }
+
+  QPolygon triangle;
+  triangle << QPoint(808, 23)
+           << QPoint(799, 40)
+           << QPoint(817, 40);
+  painter.drawPolygon(triangle);
+
+  painter.end();
+  return image;
+}
+
+Transformation TestAutoDigitize::singleCaseCircleTransformation() const
+{
+  DocumentModelCoords modelCoords;
+  modelCoords.setCoordScaleXTheta(COORD_SCALE_LINEAR);
+  modelCoords.setCoordScaleYRadius(COORD_SCALE_LINEAR);
+  modelCoords.setCoordsType(COORDS_TYPE_CARTESIAN);
+  modelCoords.setCoordUnitsDate(COORD_UNITS_DATE_YEAR_MONTH_DAY);
+  modelCoords.setCoordUnitsRadius(COORD_UNITS_NON_POLAR_THETA_NUMBER);
+  modelCoords.setCoordUnitsTheta(COORD_UNITS_POLAR_THETA_DEGREES);
+  modelCoords.setCoordUnitsTime(COORD_UNITS_TIME_HOUR_MINUTE_SECOND);
+  modelCoords.setCoordUnitsX(COORD_UNITS_NON_POLAR_THETA_NUMBER);
+  modelCoords.setCoordUnitsY(COORD_UNITS_NON_POLAR_THETA_NUMBER);
+  modelCoords.setOriginRadius(0.0);
+
+  DocumentModelGeneral modelGeneral;
+  modelGeneral.setCursorSize(5);
+  modelGeneral.setExtraPrecision(1);
+
+  MainWindowModel mainWindowModel;
+  QTransform matrixScreen(55, 789, 55,
+                          239, 239, 31,
+                          1, 1, 1);
+  QTransform matrixGraph(0, 27, 0,
+                         0, 0, 100,
+                         1, 1, 1);
+
+  Transformation transformation;
+  transformation.setModelCoords(modelCoords,
+                                modelGeneral,
+                                mainWindowModel);
+  transformation.updateTransformFromMatrices(matrixScreen,
+                                             matrixGraph);
+  return transformation;
+}
+
 void TestAutoDigitize::testSingleCaseArtifactsRejected()
 {
   const AutoCurveResult result = AutoDigitize::detectCurvePointGroups(regressionImage(),
@@ -187,6 +341,96 @@ void TestAutoDigitize::testSingleCaseArtifactsRejected()
   }
 }
 
+void TestAutoDigitize::testSingleCaseOpenAndFilledCirclesDetected()
+{
+  const AutoCurveResult result = AutoDigitize::detectCurvePointGroups(singleCaseCircleImage(),
+                                                                      QRect(QPoint(55, 31), QPoint(789, 239)),
+                                                                      singleCaseCircleTransformation(),
+                                                                      0.0,
+                                                                      100.0);
+  QVERIFY2(result.groups.count() >= 2,
+           qPrintable(QString ("groups=%1 candidates=%2 message=%3")
+                      .arg(result.groups.count())
+                      .arg(result.finalCandidateCount)
+                      .arg(result.message + " " + groupsText(result.groups))));
+
+  QVERIFY2(result.groups.at(0).points.count() == 10,
+           qPrintable(groupsText(result.groups)));
+  QVERIFY2(result.groups.at(1).points.count() == 4,
+           qPrintable(groupsText(result.groups)));
+  QVERIFY2(result.groups.at(0).name.contains("open", Qt::CaseInsensitive),
+           qPrintable(QString ("first group name=%1").arg(result.groups.at(0).name)));
+  QVERIFY2(result.groups.at(1).name.contains("filled", Qt::CaseInsensitive),
+           qPrintable(QString ("second group name=%1").arg(result.groups.at(1).name)));
+
+  const QList<QPoint> openPoints = result.groups.at(0).points;
+  const QList<QPoint> filledPoints = result.groups.at(1).points;
+  const QList<QPoint> expectedOpen = {
+    QPoint(84, 197),
+    QPoint(112, 197),
+    QPoint(140, 197),
+    QPoint(168, 197),
+    QPoint(196, 197),
+    QPoint(251, 86),
+    QPoint(307, 44),
+    QPoint(363, 44),
+    QPoint(419, 31),
+    QPoint(447, 31)
+  };
+  const QList<QPoint> expectedFilled = {
+    QPoint(223, 59),
+    QPoint(279, 44),
+    QPoint(335, 31),
+    QPoint(391, 31)
+  };
+
+  for (int index = 0; index < expectedOpen.count(); ++index) {
+    QVERIFY2(containsPointNear(openPoints, expectedOpen.at(index), 4),
+             qPrintable(QString ("open marker center was not detected near %1")
+                        .arg(pointText(expectedOpen.at(index)))));
+  }
+  for (int index = 0; index < expectedFilled.count(); ++index) {
+    QVERIFY2(containsPointNear(filledPoints, expectedFilled.at(index), 4),
+             qPrintable(QString ("filled marker center was not detected near %1")
+                        .arg(pointText(expectedFilled.at(index)))));
+  }
+
+  const QList<QPoint> points = allPointsFromGroups(result.groups);
+  const QRect annRegion(706, 207, 70, 23);
+  for (int index = 0; index < points.count(); ++index) {
+    const QPoint point = points.at(index);
+    QVERIFY2(!(point.x() >= 210 && point.x() <= 218),
+             qPrintable(QString ("point on baseline/intervention phase divider %1").arg(pointText(point))));
+    QVERIFY2(!(point.x() >= 778 && point.x() <= 786),
+             qPrintable(QString ("point on right phase divider %1").arg(pointText(point))));
+    QVERIFY2(!annRegion.adjusted(-4, -4, 4, 4).contains(point),
+             qPrintable(QString ("point in Ann label/text box region %1").arg(pointText(point))));
+    const QPoint triangleDelta = point - QPoint(808, 31);
+    QVERIFY2(triangleDelta.x() * triangleDelta.x() + triangleDelta.y() * triangleDelta.y() > 12 * 12,
+             qPrintable(QString ("singleton triangle was detected as data %1").arg(pointText(point))));
+  }
+
+  for (int left = 0; left < points.count(); ++left) {
+    for (int right = left + 1; right < points.count(); ++right) {
+      const QPoint delta = points.at(left) - points.at(right);
+      QVERIFY2(delta.x() * delta.x() + delta.y() * delta.y() >= 36,
+               qPrintable(QString ("duplicate marker-sized neighborhood %1 and %2")
+                          .arg(pointText(points.at(left)))
+                          .arg(pointText(points.at(right)))));
+    }
+  }
+}
+
+void TestAutoDigitize::testAutoAxisStartsAtZero()
+{
+  const AutoAxisResult result = AutoDigitize::detectAxes(singleCaseCircleImage(),
+                                                         100.0);
+  QVERIFY2(result.success, qPrintable(result.message));
+  QCOMPARE(result.pointsGraph.count(), 3);
+  QCOMPARE(result.pointsGraph.at(0), QPointF(0.0, 0.0));
+  QCOMPARE(result.pointsGraph.at(2), QPointF(0.0, 100.0));
+}
+
 void TestAutoDigitize::testMarkerGroupsAreDistinctAndCentered()
 {
   const AutoCurveResult result = AutoDigitize::detectCurvePointGroups(regressionImage(),
@@ -195,7 +439,10 @@ void TestAutoDigitize::testMarkerGroupsAreDistinctAndCentered()
                                                                       0.0,
                                                                       100.0);
   QVERIFY2(result.groups.count() >= 2,
-           qPrintable(QString ("groups=%1 message=%2").arg(result.groups.count()).arg(result.message)));
+           qPrintable(QString ("groups=%1 message=%2 %3")
+                      .arg(result.groups.count())
+                      .arg(result.message)
+                      .arg(groupsText(result.groups))));
 
   const QList<QPoint> points = allPointsFromGroups(result.groups);
   QVERIFY2(containsPointNear(points, QPoint(96, 220), 3), "filled marker center was not detected");

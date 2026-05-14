@@ -427,6 +427,7 @@ private:
 
     QString key;
     QList<QList<QPoint> > markerGroups;
+    QStringList markerGroupNames;
     int nextGroupIndex;
     QStringList previousPointIdentifiers;
   };

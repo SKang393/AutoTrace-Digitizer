@@ -13,7 +13,7 @@ AutoTrace Digitizer is a modified fork of Engauge Digitizer. It is not the offic
 
 ## Auto Axis
 
-Auto Axis detects the bottom x-axis, supports mild image tilt correction, creates editable axis points, sets x start to 1, sets y minimum to 0, and prompts for y maximum.
+Auto Axis detects the bottom x-axis, supports mild image tilt correction, creates editable axis points, sets x minimum to 0, sets y minimum to 0, and prompts for y maximum.
 
 ## Auto Curve
 

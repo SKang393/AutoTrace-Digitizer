@@ -21,6 +21,8 @@ private slots:
 
   void testSingleCaseArtifactsRejected ();
   void testMarkerGroupsAreDistinctAndCentered ();
+  void testSingleCaseOpenAndFilledCirclesDetected ();
+  void testAutoAxisStartsAtZero ();
 
 private:
   bool containsPointNear (const QList<QPoint> &points,
@@ -28,6 +30,8 @@ private:
                           int tolerance) const;
   QImage regressionImage () const;
   Transformation regressionTransformation () const;
+  QImage singleCaseCircleImage () const;
+  Transformation singleCaseCircleTransformation () const;
 };
 
 #endif // TEST_AUTO_DIGITIZE_H
