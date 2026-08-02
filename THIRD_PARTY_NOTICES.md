@@ -33,6 +33,17 @@ checksums, and packaging status with the exact shipped values.
 - Required action: preserve the complete notice set generated for the exact
   published runtime.
 
+## Imazen.WebP and libwebp
+
+- Components: `Imazen.WebP` managed bindings and the Windows x64 libwebp runtime.
+- Versions: Imazen.WebP 11.0.0; native runtime and libwebp 1.6.1.
+- Sources: NuGet packages from Imazen's `libwebp-net` repository, commits
+  `a2d53ed552b46e7f3a9a1a1f8ccd23e19f6f1595` and
+  `462cd4a3bb76c171ff818cd16b0779614c3f8044`.
+- Licenses: MIT for the managed bindings and BSD 3-Clause for libwebp.
+- Notices: `LICENSES/MIT.txt` and `LICENSES/libwebp-BSD-3-Clause.txt`.
+- Use: bundled Windows x64 WebP decoding for immutable image import.
+
 
 ## OpenCV and OpenCvSharp
 
@@ -81,6 +92,8 @@ checksums, and packaging status with the exact shipped values.
 | ONNX Runtime | TBD | TBD | MIT | TBD | TBD | No | No |
 | OpenCV | TBD | TBD | Apache-2.0 | TBD | TBD | No | No |
 | .NET 10 / WPF | TBD | official .NET distribution | MIT + notices | TBD | Yes | No | No |
+| Imazen.WebP | 11.0.0 | NuGet / imazen/libwebp-net | MIT | `f78a8f874f127bfa4688595950aa6292a8e20ea55fc2b60321523e1d005d5dff` | Yes | `LICENSES/MIT.txt` | Yes |
+| Imazen WebP native runtime win-x64 | 1.6.1 | NuGet / imazen/libwebp-net | MIT + libwebp BSD-3-Clause | `32df07f31f18b5f4e35409a73621d776d97761f4b601cbbbdc4efbacb6ab62f6` | Yes | `LICENSES/libwebp-BSD-3-Clause.txt` | Yes |
 
 A release is blocked while any shipped row remains unreviewed.
 
