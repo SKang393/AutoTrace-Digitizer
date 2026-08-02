@@ -52,8 +52,28 @@ checksums, and packaging status with the exact shipped values.
 
 ## ONNX Runtime
 
-- License: MIT.
-- Required action: preserve notice and notices for any packaged execution provider.
+- Component: Microsoft.ML.OnnxRuntime.DirectML 1.24.4, including CPU and
+  DirectML execution providers.
+- Source: Microsoft ONNX Runtime commit
+  `2d924974ef147392ced8409d36bd6d2e7fcc8a74`.
+- License: MIT with bundled third-party notices.
+- Notices: `LICENSES/ONNX-Runtime-1.24.4-License.txt` and
+  `LICENSES/ONNX-Runtime-1.24.4-ThirdPartyNotices.txt`.
+- Transitive managed packages: Microsoft.ML.OnnxRuntime.Managed 1.24.4 and
+  System.Numerics.Tensors 9.0.0. The latter's exact notice is stored at
+  `LICENSES/System.Numerics.Tensors-9.0.0-ThirdPartyNotices.txt`.
+
+## Microsoft DirectML redistributable
+
+- Component: Microsoft.AI.DirectML 1.15.4, transitively bundled by ONNX
+  Runtime DirectML for Windows GPU execution.
+- License: Microsoft DirectML redistributable terms permit distribution in
+  applications that run on Windows and Xbox; third-party code is MIT/BSD.
+- Notices: `LICENSES/DirectML-1.15.4-License.txt`,
+  `LICENSES/DirectML-1.15.4-Code-License.txt`, and
+  `LICENSES/DirectML-1.15.4-ThirdPartyNotices.txt`.
+- Platform/privacy: Windows-only; no application telemetry is enabled. The
+  exact redistributable license remains part of the release notice set.
 
 ## PaddleOCR / PaddleDetection
 
@@ -89,7 +109,10 @@ checksums, and packaging status with the exact shipped values.
 |---|---|---|---|---|---|---|---|
 | Real-ESRGAN model | TBD | TBD | BSD-3-Clause | TBD | TBD | No | No |
 | NCNN runtime | TBD | TBD | TBD | TBD | TBD | No | No |
-| ONNX Runtime | TBD | TBD | MIT | TBD | TBD | No | No |
+| ONNX Runtime DirectML | 1.24.4 | NuGet / microsoft/onnxruntime | MIT + notices | `57e9f11b73437bef7a309496135d4c1f96b1a8e9ddba60013fa27bfc1d788681` | Yes | `LICENSES/ONNX-Runtime-1.24.4-License.txt` | Yes |
+| ONNX Runtime managed | 1.24.4 | NuGet / microsoft/onnxruntime | MIT + notices | `95cc5d366e876bcc9c39e87af277278aa3df56108fb572c884bf21f6b9e22182` | Yes | `LICENSES/ONNX-Runtime-1.24.4-License.txt` | Yes |
+| Microsoft DirectML redistributable | 1.15.4 | NuGet / Microsoft.AI.DirectML | Microsoft redistributable + MIT/BSD notices | `4e7cb7ddce8cf837a7a75dc029209b520ca0101470fcdf275c1f49736a3615b9` | Yes | `LICENSES/DirectML-1.15.4-License.txt` and code license | Yes |
+| System.Numerics.Tensors | 9.0.0 | NuGet / dotnet/runtime | MIT + notices | `b750243c36002a62b28b1ac5d3fbc284ad340ba1494cc36aca110611a0b1f959` | Yes | `LICENSES/System.Numerics.Tensors-9.0.0-ThirdPartyNotices.txt` | Yes |
 | OpenCV | TBD | TBD | Apache-2.0 | TBD | TBD | No | No |
 | .NET 10 / WPF | TBD | official .NET distribution | MIT + notices | TBD | Yes | No | No |
 | Imazen.WebP | 11.0.0 | NuGet / imazen/libwebp-net | MIT | `f78a8f874f127bfa4688595950aa6292a8e20ea55fc2b60321523e1d005d5dff` | Yes | `LICENSES/MIT.txt` | Yes |
