@@ -55,7 +55,11 @@ public sealed class RepositoryFoundationTests
         Assert.AreEqual("true", PropertyValue(buildProperties, "Deterministic"));
         Assert.AreEqual("true", PropertyValue(buildProperties, "TreatWarningsAsErrors"));
         Assert.AreEqual("true", PropertyValue(buildProperties, "EnableNETAnalyzers"));
-        Assert.AreEqual("0.0.1", PropertyValue(buildProperties, "Version"));
+        string version = PropertyValue(buildProperties, "Version") ?? string.Empty;
+        StringAssert.Matches(version, new System.Text.RegularExpressions.Regex(@"^\d{1,2}\.\d{1,2}\.\d{1,2}$"));
+        Assert.AreEqual($"{version}.0", PropertyValue(buildProperties, "AssemblyVersion"));
+        Assert.AreEqual($"{version}.0", PropertyValue(buildProperties, "FileVersion"));
+        Assert.AreEqual(version, PropertyValue(buildProperties, "InformationalVersion"));
         Assert.AreEqual("true", PropertyValue(packageProperties, "ManagePackageVersionsCentrally"));
     }
 

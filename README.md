@@ -120,5 +120,5 @@ dotnet build -c Release
 dotnet test -c Release
 ```
 
-The internal foundation version is `0.0.1`. This version is not evidence that
+The current internal version is defined centrally in `Directory.Build.props`. A pre-release version is not evidence that
 a public release or functional digitization workflow exists.
