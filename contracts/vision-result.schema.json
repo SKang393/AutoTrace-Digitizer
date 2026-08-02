@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://graph-auto-reader.local/contracts/vision-result.schema.json",
+  "title": "Graph Auto Reader Vision Result",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "run_id",
+    "project_id",
+    "panel_id",
+    "stage",
+    "stage_version",
+    "input_sha256",
+    "coordinate_space",
+    "timing_ms",
+    "confidence",
+    "warnings",
+    "payload"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "run_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "project_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "panel_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "import",
+        "panelization",
+        "enhancement",
+        "axis",
+        "ocr",
+        "markers",
+        "legends",
+        "phases"
+      ]
+    },
+    "stage_version": {
+      "type": "string"
+    },
+    "input_sha256": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{64}$"
+    },
+    "coordinate_space": {
+      "type": "string",
+      "const": "original_pixels"
+    },
+    "model": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "model_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provider": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "cpu",
+            "directml",
+            "winml",
+            "cuda",
+            "openvino",
+            "vulkan",
+            null
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "timing_ms": {
+      "type": "object",
+      "required": [
+        "total"
+      ],
+      "properties": {
+        "preprocess": {
+          "type": "number",
+          "minimum": 0
+        },
+        "inference": {
+          "type": "number",
+          "minimum": 0
+        },
+        "postprocess": {
+          "type": "number",
+          "minimum": 0
+        },
+        "total": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "version": "0.0.1",
+  "rid": "win-x64",
+  "commonPublish": "common/publish",
+  "installer": {
+    "definition": "installer/installer.json",
+    "fileName": "GraphAutoReader-0.0.1-win-x64-setup.exe",
+    "stagingDirectory": "installer/staging"
+  },
+  "portable": {
+    "definition": "portable/portable.json",
+    "fileName": "GraphAutoReader-0.0.1-win-x64-portable.zip",
+    "stagingDirectory": "portable/staging"
+  }
+}

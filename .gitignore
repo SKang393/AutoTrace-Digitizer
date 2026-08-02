@@ -1,0 +1,150 @@
+# Operating system
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE and editor
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# .NET build
+**/bin/
+**/obj/
+artifacts/
+TestResults/
+coverage/
+*.trx
+
+# Native/runtime output
+*.dll
+*.exe
+*.pdb
+*.so
+*.dylib
+*.nupkg
+*.snupkg
+
+# Python training
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+ml/**/runs/
+ml/**/wandb/
+ml/**/checkpoints/
+ml/**/datasets/
+ml/**/cache/
+ml/**/*.pt
+ml/**/*.pth
+ml/**/*.onnx
+ml/**/*.pdparams
+
+# Model files: commit manifests only
+models/*
+!models/manifest/
+!models/manifest/**
+*.bin
+*.param
+*.engine
+*.plan
+
+# Private research material
+private/
+data/private/
+data/articles/
+data/real-cases/
+data/human-annotations/
+**/*.dig
+**/*_manual.csv
+**/*_manual.xlsx
+**/*article*.pdf
+
+# User projects and autosaves
+*.garproj
+*.garproj.autosave
+*.garrecovery
+autosave/
+recovery/
+
+# Generated image and OCR cache
+.cache/
+cache/
+derived/
+enhanced/
+ocr-cache/
+vision-cache/
+*.vision.json
+*.overlay.png
+
+# Packaging and releases
+dist/
+release/
+packages/
+installers/
+checksums/
+packaging/**/staging/
+portable.mode
+Data/
+
+# Logs and diagnostics
+*.log
+logs/
+diagnostics/
+crash-dumps/
+
+# Local Codex/agent documents: never commit
+AGENTS.md
+CODEX_START_HERE.md
+CODEX_GOAL_*.md
+DOCUMENT_MAP.md
+MASTER_DEVELOPMENT_PLAN.md
+ARCHITECTURE_CONTRACTS.md
+WINDOWS_DISTRIBUTION.md
+VERSIONING.md
+RESEARCH_REPORT.md
+NEW_PROJECT_START_CHECKLIST.md
+GOLDEN_CASE_CHANDLER_SPEC.md
+DEPENDENCY_PROVENANCE_LEDGER.csv
+REVISION_LOG.md
+KIT_MANIFEST.json
+CLAUDE.md
+goal.md
+prompt.md
+prompts/
+.agents/
+.codex/
+.omo/
+.ai/
+.ai-*/
+*_AI_*
+*_AGENT_*
+*agent-session*
+*codex-session*
+
+# Local provenance and legal work product
+provenance-private/
+legal-review-private/
+dependency-audit.local.*
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets.json
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+~$*

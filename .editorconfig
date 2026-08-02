@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sungwoo Kang
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{cs,xaml}]
+indent_style = space
+indent_size = 4
+
+[*.cs]
+file_header_template = SPDX-License-Identifier: Apache-2.0\nCopyright 2026 Sungwoo Kang
+dotnet_diagnostic.IDE0073.severity = error
+
+[*.{json,props,targets,csproj,slnx}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

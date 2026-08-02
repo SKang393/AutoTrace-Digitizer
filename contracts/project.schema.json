@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://graph-auto-reader.local/contracts/project.schema.json",
+  "title": "Graph Auto Reader Project",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "project_id",
+    "app_version",
+    "sources",
+    "panels",
+    "audit"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "project_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "app_version": {
+      "type": "string",
+      "pattern": "^[0-9]{1,2}\\.[0-9]{1,2}\\.[0-9]{1,2}$"
+    },
+    "created_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "modified_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "require_first_session_one": {
+          "type": "boolean",
+          "default": true
+        },
+        "default_enhancement_scale": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            4
+          ],
+          "default": 2
+        },
+        "phase_overlay_visible": {
+          "type": "boolean",
+          "default": true
+        },
+        "appearance": {
+          "type": "string",
+          "enum": [
+            "system",
+            "light",
+            "dark"
+          ],
+          "default": "system"
+        },
+        "locale": {
+          "type": "string",
+          "default": "en-US"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source_id",
+          "kind",
+          "sha256",
+          "display_name"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "image",
+              "pdf"
+            ]
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "local_path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "article_metadata": {
+            "type": [
+              "object",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "panels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "panel_id",
+          "source_id",
+          "crop",
+          "transforms",
+          "series",
+          "points",
+          "phases"
+        ],
+        "properties": {
+          "panel_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "page_number": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "participant": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "crop": {
+            "type": "object",
+            "required": [
+              "x",
+              "y",
+              "width",
+              "height"
+            ],
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "width": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "height": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "additionalProperties": false
+          },
+          "transforms": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "enhancement": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "calibration": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "ocr_regions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "series": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "phases": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "validation": {
+            "type": [
+              "object",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "audit": {
+      "type": "object",
+      "required": [
+        "events"
+      ],
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "last_autosave_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

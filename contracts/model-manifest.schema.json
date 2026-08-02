@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://graph-auto-reader.local/contracts/model-manifest.schema.json",
+  "title": "Graph Auto Reader Model Manifest",
+  "type": "object",
+  "required": [
+    "manifest_version",
+    "model_id",
+    "model_version",
+    "task",
+    "source",
+    "license",
+    "sha256",
+    "files",
+    "inputs",
+    "outputs",
+    "commercial_use",
+    "redistribution",
+    "providers"
+  ],
+  "properties": {
+    "manifest_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "model_id": {
+      "type": "string"
+    },
+    "model_version": {
+      "type": "string"
+    },
+    "task": {
+      "type": "string",
+      "enum": [
+        "super_resolution",
+        "ocr_detection",
+        "ocr_recognition",
+        "marker_center",
+        "marker_classifier",
+        "panelization"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "name",
+        "url",
+        "revision"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "license": {
+      "type": "object",
+      "required": [
+        "spdx",
+        "notice_path",
+        "reviewed"
+      ],
+      "properties": {
+        "spdx": {
+          "type": "string"
+        },
+        "notice_path": {
+          "type": "string"
+        },
+        "reviewed": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{64}$"
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "preprocessing": {
+      "type": "object"
+    },
+    "postprocessing": {
+      "type": "object"
+    },
+    "commercial_use": {
+      "type": "boolean"
+    },
+    "redistribution": {
+      "type": "boolean"
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "cpu",
+          "directml",
+          "winml",
+          "cuda",
+          "openvino",
+          "vulkan"
+        ]
+      },
+      "minItems": 1
+    },
+    "benchmarks": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "additionalProperties": false
+}

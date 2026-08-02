@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "project": "src/GraphReader.App/GraphReader.App.csproj",
+  "configuration": "Release",
+  "selfContained": true,
+  "publishSingleFile": false,
+  "requiredContent": [
+    {
+      "source": "contracts",
+      "target": "contracts"
+    },
+    {
+      "source": "models/manifest",
+      "target": "models/manifest"
+    },
+    {
+      "source": "LICENSE",
+      "target": "LICENSE"
+    },
+    {
+      "source": "NOTICE",
+      "target": "NOTICE"
+    },
+    {
+      "source": "THIRD_PARTY_NOTICES.md",
+      "target": "THIRD_PARTY_NOTICES.md"
+    },
+    {
+      "source": "LICENSES",
+      "target": "LICENSES"
+    }
+  ]
+}

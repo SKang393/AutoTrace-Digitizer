@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "kind": "portable",
+  "format": "zip",
+  "architecture": "x64",
+  "requiresAdministrator": false,
+  "offlineCoreWorkflow": true,
+  "commonPublishOnly": true,
+  "sentinel": "portable.mode",
+  "mutableDataRoot": ".\\Data",
+  "registryConfigurationRequired": false,
+  "startMenuShortcut": false,
+  "uninstallEntry": false,
+  "status": "definition-only"
+}

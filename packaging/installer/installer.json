@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "kind": "installer",
+  "format": "setup-exe",
+  "architecture": "x64",
+  "scope": "perUser",
+  "requiresAdministrator": false,
+  "offlineCoreWorkflow": true,
+  "commonPublishOnly": true,
+  "mutableDataRoot": "%LOCALAPPDATA%\\GraphAutoReader",
+  "startMenuShortcut": true,
+  "uninstallEntry": true,
+  "projectFileRegistration": false,
+  "authoringTool": null,
+  "status": "definition-only"
+}

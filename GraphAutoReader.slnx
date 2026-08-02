@@ -1,0 +1,32 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Copyright 2026 Sungwoo Kang -->
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GraphReader.App/GraphReader.App.csproj" />
+    <Project Path="src/GraphReader.Axis/GraphReader.Axis.csproj" />
+    <Project Path="src/GraphReader.Domain/GraphReader.Domain.csproj" />
+    <Project Path="src/GraphReader.Export/GraphReader.Export.csproj" />
+    <Project Path="src/GraphReader.Imaging/GraphReader.Imaging.csproj" />
+    <Project Path="src/GraphReader.Inference/GraphReader.Inference.csproj" />
+    <Project Path="src/GraphReader.Legends/GraphReader.Legends.csproj" />
+    <Project Path="src/GraphReader.Markers/GraphReader.Markers.csproj" />
+    <Project Path="src/GraphReader.Ocr/GraphReader.Ocr.csproj" />
+    <Project Path="src/GraphReader.Pdf/GraphReader.Pdf.csproj" />
+    <Project Path="src/GraphReader.Phases/GraphReader.Phases.csproj" />
+    <Project Path="src/GraphReader.SuperResolution/GraphReader.SuperResolution.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GraphReader.Axis.Tests/GraphReader.Axis.Tests.csproj" />
+    <Project Path="tests/GraphReader.Domain.Tests/GraphReader.Domain.Tests.csproj" />
+    <Project Path="tests/GraphReader.Export.Tests/GraphReader.Export.Tests.csproj" />
+    <Project Path="tests/GraphReader.Imaging.Tests/GraphReader.Imaging.Tests.csproj" />
+    <Project Path="tests/GraphReader.Inference.Tests/GraphReader.Inference.Tests.csproj" />
+    <Project Path="tests/GraphReader.Integration.Tests/GraphReader.Integration.Tests.csproj" />
+    <Project Path="tests/GraphReader.Legends.Tests/GraphReader.Legends.Tests.csproj" />
+    <Project Path="tests/GraphReader.Markers.Tests/GraphReader.Markers.Tests.csproj" />
+    <Project Path="tests/GraphReader.Ocr.Tests/GraphReader.Ocr.Tests.csproj" />
+    <Project Path="tests/GraphReader.Pdf.Tests/GraphReader.Pdf.Tests.csproj" />
+    <Project Path="tests/GraphReader.Phases.Tests/GraphReader.Phases.Tests.csproj" />
+    <Project Path="tests/GraphReader.SuperResolution.Tests/GraphReader.SuperResolution.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,31 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Copyright 2026 Sungwoo Kang -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="MSTest.TestFramework" />
+    <PackageReference Include="MSTest.TestAdapter" />
+    <PackageReference Include="JsonSchema.Net" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\GraphReader.App\GraphReader.App.csproj" />
+    <ProjectReference Include="..\..\src\GraphReader.Domain\GraphReader.Domain.csproj" />
+    <ProjectReference Include="..\..\src\GraphReader.Imaging\GraphReader.Imaging.csproj" />
+    <ProjectReference Include="..\..\src\GraphReader.Pdf\GraphReader.Pdf.csproj" />
+    <ProjectReference Include="..\..\src\GraphReader.SuperResolution\GraphReader.SuperResolution.csproj" />
+    <ProjectReference Include="..\..\src\GraphReader.Axis\GraphReader.Axis.csproj" />
+    <ProjectReference Include="..\..\src\GraphReader.Ocr\GraphReader.Ocr.csproj" />
+    <ProjectReference Include="..\..\src\GraphReader.Markers\GraphReader.Markers.csproj" />
+    <ProjectReference Include="..\..\src\GraphReader.Legends\GraphReader.Legends.csproj" />
+    <ProjectReference Include="..\..\src\GraphReader.Phases\GraphReader.Phases.csproj" />
+    <ProjectReference Include="..\..\src\GraphReader.Export\GraphReader.Export.csproj" />
+    <ProjectReference Include="..\..\src\GraphReader.Inference\GraphReader.Inference.csproj" />
+  </ItemGroup>
+</Project>
