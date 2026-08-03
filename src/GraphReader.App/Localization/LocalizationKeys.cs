@@ -16,6 +16,10 @@ public static class LocalizationKeys
     public const string WorkflowAutoDetectToolTip = "Workflow.AutoDetect.ToolTip";
     public const string WorkflowReviewToolTip = "Workflow.Review.ToolTip";
     public const string WorkflowExportToolTip = "Workflow.Export.ToolTip";
+    public const string ApplicationPathsUnavailable = "Errors.ApplicationPathsUnavailable";
+    public const string ApplicationDataNotWritable = "Errors.ApplicationDataNotWritable";
+    public const string PortableDataNotWritable = "Errors.PortableDataNotWritable";
+    public const string ProductionWorkflowUnavailable = "Errors.ProductionWorkflowUnavailable";
     public const string NavigationTitle = "Navigation.Title";
     public const string NavigationGraphs = "Navigation.Graphs";
     public const string NavigationEmpty = "Navigation.Empty";
@@ -83,6 +87,10 @@ public static class LocalizationKeys
         WorkflowAutoDetectToolTip,
         WorkflowReviewToolTip,
         WorkflowExportToolTip,
+        ApplicationPathsUnavailable,
+        ApplicationDataNotWritable,
+        PortableDataNotWritable,
+        ProductionWorkflowUnavailable,
         NavigationTitle,
         NavigationGraphs,
         NavigationEmpty,

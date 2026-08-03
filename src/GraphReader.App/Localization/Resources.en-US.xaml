@@ -17,6 +17,10 @@
   <sys:String x:Key="Workflow.AutoDetect.ToolTip">Detect graph structure and data</sys:String>
   <sys:String x:Key="Workflow.Review.ToolTip">Review and correct detections</sys:String>
   <sys:String x:Key="Workflow.Export.ToolTip">Export phase-labeled data</sys:String>
+  <sys:String x:Key="Errors.ApplicationPathsUnavailable">Application storage paths could not be resolved. Repair or reinstall the application.</sys:String>
+  <sys:String x:Key="Errors.ApplicationDataNotWritable">Application data is not writable. Check your Local AppData permissions.</sys:String>
+  <sys:String x:Key="Errors.PortableDataNotWritable">This portable folder is read-only. Move it to a writable folder and try again.</sys:String>
+  <sys:String x:Key="Errors.ProductionWorkflowUnavailable">Production digitization is unavailable in this internal build because approved workflow adapters and models are missing.</sys:String>
 
   <sys:String x:Key="Navigation.Title">Project</sys:String>
   <sys:String x:Key="Navigation.Graphs">Graphs</sys:String>

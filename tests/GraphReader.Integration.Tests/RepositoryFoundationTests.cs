@@ -44,6 +44,19 @@ public sealed class RepositoryFoundationTests
         "BUSL",
     ];
 
+    private static readonly string[] RequiredSourceProjectNames =
+    [
+        "GraphReader.App",
+        .. ModuleNames.Select(static moduleName => $"GraphReader.{moduleName}"),
+    ];
+
+    private static readonly string[] RequiredTestProjectNames =
+    [
+        "GraphReader.App.Tests",
+        "GraphReader.Integration.Tests",
+        .. ModuleNames.Select(static moduleName => $"GraphReader.{moduleName}.Tests"),
+    ];
+
     [TestMethod]
     public void RootBuildConfigurationIsDeterministicStrictAndVersioned()
     {
@@ -125,7 +138,14 @@ public sealed class RepositoryFoundationTests
             .Append(Path.Combine(root, "Directory.Packages.props"))
             .ToArray();
 
-        Assert.AreEqual(24, projectFiles.Length, "Expected 12 production and 12 test projects.");
+        AssertRequiredProjectMembership(
+            projectFiles,
+            RequiredSourceProjectNames,
+            "production");
+        AssertRequiredProjectMembership(
+            projectFiles,
+            RequiredTestProjectNames,
+            "test");
 
         foreach (string projectFile in projectDefinitionFiles)
         {
@@ -145,7 +165,10 @@ public sealed class RepositoryFoundationTests
         string testsDirectory = Path.Combine(RepositoryRoot.Find(), "tests");
         string[] projectFiles = Directory.GetFiles(testsDirectory, "*.csproj", SearchOption.AllDirectories);
 
-        Assert.AreEqual(12, projectFiles.Length);
+        AssertRequiredProjectMembership(
+            projectFiles,
+            RequiredTestProjectNames,
+            "test");
 
         foreach (string projectFile in projectFiles)
         {
@@ -207,4 +230,23 @@ public sealed class RepositoryFoundationTests
     private static bool HasPathSegment(string path, string segment) =>
         path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
             .Contains(segment, StringComparer.OrdinalIgnoreCase);
+
+    private static void AssertRequiredProjectMembership(
+        IEnumerable<string> projectFiles,
+        IEnumerable<string> requiredProjectNames,
+        string category)
+    {
+        HashSet<string> projectNames = projectFiles
+            .Select(Path.GetFileNameWithoutExtension)
+            .Where(static projectName => projectName is not null)
+            .Select(static projectName => projectName!)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (string requiredProjectName in requiredProjectNames)
+        {
+            Assert.IsTrue(
+                projectNames.Contains(requiredProjectName),
+                $"Missing required {category} project: {requiredProjectName}");
+        }
+    }
 }

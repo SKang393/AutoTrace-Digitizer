@@ -296,21 +296,27 @@
             Background="{DynamicResource App.Brush.SurfaceRaised}"
             BorderBrush="{DynamicResource App.Brush.Border}"
             BorderThickness="0,1,0,0">
-      <ProgressBar Width="160"
-                   Height="4"
-                   HorizontalAlignment="Right"
-                   IsIndeterminate="True">
-        <ProgressBar.Style>
-          <Style TargetType="ProgressBar">
-            <Setter Property="Visibility" Value="Collapsed" />
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding IsBusy}" Value="True">
-                <Setter Property="Visibility" Value="Visible" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </ProgressBar.Style>
-      </ProgressBar>
+      <Grid>
+        <TextBlock VerticalAlignment="Center"
+                   Foreground="{DynamicResource App.Brush.TextMuted}"
+                   Text="{Binding StatusMessage}"
+                   automation:AutomationProperties.AutomationId="Workflow.Status" />
+        <ProgressBar Width="160"
+                     Height="4"
+                     HorizontalAlignment="Right"
+                     IsIndeterminate="True">
+          <ProgressBar.Style>
+            <Style TargetType="ProgressBar">
+              <Setter Property="Visibility" Value="Collapsed" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                  <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </ProgressBar.Style>
+        </ProgressBar>
+      </Grid>
     </Border>
   </Grid>
 </Window>

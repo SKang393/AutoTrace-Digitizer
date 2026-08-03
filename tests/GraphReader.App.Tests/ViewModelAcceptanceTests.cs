@@ -3,6 +3,7 @@
 
 using System.ComponentModel;
 using GraphReader.App.Appearance;
+using GraphReader.App.Services;
 using GraphReader.App.ViewModels;
 
 namespace GraphReader.App.Tests;
@@ -11,10 +12,10 @@ namespace GraphReader.App.Tests;
 public sealed class ViewModelAcceptanceTests
 {
     [TestMethod]
-    public void ParameterlessWorkspaceIsDeterministicAndReviewReady()
+    public void ExplicitRecordedWorkspaceIsDeterministicAndReviewReady()
     {
-        var first = new MainWindowViewModel();
-        var second = new MainWindowViewModel();
+        var first = new MainWindowViewModel(new FakeWorkspaceService());
+        var second = new MainWindowViewModel(new FakeWorkspaceService());
 
         Assert.IsNotEmpty(first.Tabs);
         Assert.IsNotNull(first.SelectedTab);
@@ -189,7 +190,7 @@ public sealed class ViewModelAcceptanceTests
 
     private static MainWindowViewModel CreateWorkspace()
     {
-        var viewModel = new MainWindowViewModel();
+        var viewModel = new MainWindowViewModel(new FakeWorkspaceService());
         Assert.IsNotNull(viewModel.SelectedTab);
         Assert.IsGreaterThanOrEqualTo(2, viewModel.SeriesCards.Count);
         Assert.IsGreaterThanOrEqualTo(2, viewModel.SelectedTab.Points.Count);

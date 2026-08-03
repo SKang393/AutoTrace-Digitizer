@@ -14,6 +14,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 {
     private readonly IWorkspaceService _workspaceService;
     private readonly ILocalizationService? _localizationService;
+    private readonly bool _isWorkflowAvailable;
     private readonly CancellationTokenSource _shutdown = new();
     private WorkspaceTabViewModel? _selectedTab;
     private WorkflowStage _currentStage = WorkflowStage.Review;
@@ -27,11 +28,6 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
     private CancellationTokenSource? _activeOperation;
     private bool _disposed;
 
-    public MainWindowViewModel()
-        : this(new FakeWorkspaceService())
-    {
-    }
-
     public MainWindowViewModel(IWorkspaceService workspaceService)
         : this(workspaceService, null)
     {
@@ -39,10 +35,16 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
     public MainWindowViewModel(
         IWorkspaceService workspaceService,
-        ILocalizationService? localizationService)
+        ILocalizationService? localizationService,
+        string? startupErrorMessageKey = null)
     {
         _workspaceService = workspaceService ?? throw new ArgumentNullException(nameof(workspaceService));
         _localizationService = localizationService;
+        _isWorkflowAvailable = string.IsNullOrWhiteSpace(startupErrorMessageKey);
+        if (!_isWorkflowAvailable)
+        {
+            _statusMessageKey = startupErrorMessageKey!;
+        }
         Tabs = new ObservableCollection<WorkspaceTabViewModel>(_workspaceService.CreateWorkspace());
         _selectedTab = Tabs.FirstOrDefault();
         _selectedPointId = _selectedTab?.Points.FirstOrDefault()?.PointId;
@@ -134,8 +136,16 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
     public string StatusMessageKey
     {
         get => _statusMessageKey;
-        private set => SetProperty(ref _statusMessageKey, value);
+        private set
+        {
+            if (SetProperty(ref _statusMessageKey, value))
+            {
+                OnPropertyChanged(nameof(StatusMessage));
+            }
+        }
     }
+
+    public string StatusMessage => GetLocalizedString(StatusMessageKey);
 
     public bool IsPhaseOverlayVisible
     {
@@ -329,7 +339,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
     {
         AsyncRelayCommand command = new(
             cancellationToken => RunWorkflowStageAsync(stage, statusMessageKey, cancellationToken),
-            () => !IsBusy);
+            () => !IsBusy && _isWorkflowAvailable);
         return command;
     }
 

@@ -4,6 +4,7 @@
 using System.ComponentModel;
 using System.Windows;
 using GraphReader.App.Appearance;
+using GraphReader.App.Localization;
 using GraphReader.App.Services;
 using GraphReader.App.ViewModels;
 
@@ -23,9 +24,11 @@ public partial class MainWindow : Window
         _themeService = themeService;
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
+        App? application = Application.Current as App;
         DataContext = new MainWindowViewModel(
-            new FakeWorkspaceService(),
-            (Application.Current as App)?.LocalizationService);
+            application?.WorkspaceService ?? new UnavailableWorkspaceService(),
+            application?.LocalizationService,
+            application?.StartupErrorMessageKey ?? LocalizationKeys.ProductionWorkflowUnavailable);
         Closed += OnClosed;
     }
 

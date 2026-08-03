@@ -89,7 +89,7 @@ public sealed class ScreenshotSmokeTests
 
     private static FrameworkElement CreateFakeWorkspace(string themeSource, bool showPhaseOverlay)
     {
-        var viewModel = new MainWindowViewModel
+        var viewModel = new MainWindowViewModel(new FakeWorkspaceService())
         {
             IsPhaseOverlayVisible = showPhaseOverlay,
         };

@@ -16,6 +16,7 @@
     <Project Path="src/GraphReader.SuperResolution/GraphReader.SuperResolution.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/GraphReader.App.Tests/GraphReader.App.Tests.csproj" />
     <Project Path="tests/GraphReader.Axis.Tests/GraphReader.Axis.Tests.csproj" />
     <Project Path="tests/GraphReader.Domain.Tests/GraphReader.Domain.Tests.csproj" />
     <Project Path="tests/GraphReader.Export.Tests/GraphReader.Export.Tests.csproj" />
@@ -28,5 +29,11 @@
     <Project Path="tests/GraphReader.Pdf.Tests/GraphReader.Pdf.Tests.csproj" />
     <Project Path="tests/GraphReader.Phases.Tests/GraphReader.Phases.Tests.csproj" />
     <Project Path="tests/GraphReader.SuperResolution.Tests/GraphReader.SuperResolution.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/GraphReader.Benchmarks/GraphReader.Benchmarks.csproj" />
+  </Folder>
+  <Folder Name="/packaging/">
+    <Project Path="packaging/installer/GraphReader.Installer.csproj" />
   </Folder>
 </Solution>
