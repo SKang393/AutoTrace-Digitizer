@@ -47,8 +47,27 @@ checksums, and packaging status with the exact shipped values.
 
 ## OpenCV and OpenCvSharp
 
-- License: Apache-2.0 for current selected releases.
-- Required action: verify native binary provenance and include exact notices.
+- Development dependency only. Not approved for installer or portable
+  distribution.
+- Managed package: `OpenCvSharp4` 4.13.0.20260627, SHA-256
+  `8acee778364e5eee6495d923732cacd8d895c7f683d2144f622b54418623d12c`.
+- Native package: `OpenCvSharp4.runtime.win.slim` 4.13.0.20260627, SHA-256
+  `281551a6c032d1aab316db9c1817bcded5a85188b24b2efd12c02665e7233817`.
+- Upstream source revision: OpenCvSharp
+  `b161e7e012f5101f6d5dc68a835c59db6cc88b18`; OpenCV
+  `fe38fc608f6acb8b68953438a62305d8318f4fcd`.
+- Package license metadata: Apache-2.0. This does not constitute a complete
+  license inventory for the statically linked native DLL.
+- Extracted native payload: `OpenCvSharpExtern.dll`, 55,547,904 bytes, SHA-256
+  `1fa122bdb8e94175e7719fb8aaf2ab211268a756f5d0c7a13c710ed79ae30cd`.
+- The published runtime ships no third-party notice bundle, SBOM, link map, or
+  object-to-dependency map. Its actual scope also conflicts with the package
+  description: the Windows slim workflow disables only contrib, `videoio`,
+  `highgui`, and `dnn`; artifact inspection finds additional OpenCV modules and
+  embedded build metadata reports non-free algorithms enabled.
+- Release status: BLOCKED. Do not bundle this runtime until a source-audited
+  win-x64 native build, exact dependency lock, binary hash, and complete
+  third-party notice set are produced and verified.
 
 ## ONNX Runtime
 
@@ -115,7 +134,8 @@ checksums, and packaging status with the exact shipped values.
 | ONNX Runtime managed | 1.24.4 | NuGet / microsoft/onnxruntime | MIT + notices | `95cc5d366e876bcc9c39e87af277278aa3df56108fb572c884bf21f6b9e22182` | Yes | `LICENSES/ONNX-Runtime-1.24.4-License.txt` | Yes |
 | Microsoft DirectML redistributable | 1.15.4 | NuGet / Microsoft.AI.DirectML | Microsoft redistributable + MIT/BSD notices | `4e7cb7ddce8cf837a7a75dc029209b520ca0101470fcdf275c1f49736a3615b9` | Yes | `LICENSES/DirectML-1.15.4-License.txt` and code license | Yes |
 | System.Numerics.Tensors | 9.0.0 | NuGet / dotnet/runtime | MIT + notices | `b750243c36002a62b28b1ac5d3fbc284ad340ba1494cc36aca110611a0b1f959` | Yes | `LICENSES/System.Numerics.Tensors-9.0.0-ThirdPartyNotices.txt` | Yes |
-| OpenCV | TBD | TBD | Apache-2.0 | TBD | TBD | No | No |
+| OpenCvSharp managed bindings | 4.13.0.20260627 | NuGet / shimat/opencvsharp `b161e7e012f5101f6d5dc68a835c59db6cc88b18` | Apache-2.0 | `8acee778364e5eee6495d923732cacd8d895c7f683d2144f622b54418623d12c` | Yes | root `LICENSE` | Yes |
+| OpenCvSharp Windows x64 slim runtime | 4.13.0.20260627 | NuGet / shimat/opencvsharp, OpenCV `fe38fc608f6acb8b68953438a62305d8318f4fcd` | Apache-2.0 plus linked native notices pending | `281551a6c032d1aab316db9c1817bcded5a85188b24b2efd12c02665e7233817` | Yes | root `LICENSE`; native inventory pending | No, release blocked |
 | .NET 10 / WPF | TBD | official .NET distribution | MIT + notices | TBD | Yes | No | No |
 | Imazen.WebP | 11.0.0 | NuGet / imazen/libwebp-net | MIT | `f78a8f874f127bfa4688595950aa6292a8e20ea55fc2b60321523e1d005d5dff` | Yes | `LICENSES/MIT.txt` | Yes |
 | Imazen WebP native runtime win-x64 | 1.6.1 | NuGet / imazen/libwebp-net | MIT + libwebp BSD-3-Clause | `32df07f31f18b5f4e35409a73621d776d97761f4b601cbbbdc4efbacb6ab62f6` | Yes | `LICENSES/libwebp-BSD-3-Clause.txt` | Yes |

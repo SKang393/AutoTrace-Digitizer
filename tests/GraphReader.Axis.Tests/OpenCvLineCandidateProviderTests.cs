@@ -1,0 +1,97 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2026 Sungwoo Kang
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace GraphReader.Axis.Tests;
+
+[TestClass]
+public sealed class OpenCvLineCandidateProviderTests
+{
+    [TestMethod]
+    public async Task NativeProviderReturnsLsdAndHoughCandidatesForCleanAxes()
+    {
+        GrayscaleLineCandidateFrame frame = CreateCleanAxisFrame();
+        var provider = new OpenCvLineCandidateProvider(new OpenCvLineCandidateOptions
+        {
+            HoughThreshold = 12,
+            HoughMinimumLineLengthPixels = 20,
+            HoughMaximumLineGapPixels = 2,
+        });
+
+        IReadOnlyList<GeometryLineCandidate> candidates =
+            await provider.DetectLinesAsync(frame, CancellationToken.None);
+
+        Assert.IsTrue(candidates.Any(candidate => candidate.Source == LineCandidateSource.OpenCvLsd));
+        Assert.IsTrue(candidates.Any(candidate => candidate.Source == LineCandidateSource.OpenCvHough));
+        Assert.IsTrue(candidates.All(candidate => candidate.Segment.Start.IsFinite));
+        Assert.IsTrue(candidates.All(candidate => candidate.Segment.End.IsFinite));
+        Assert.IsTrue(candidates.All(candidate => candidate.Segment.Length > 0));
+    }
+
+    [TestMethod]
+    public async Task NativeCandidatesFeedGeometryDetectorInOriginalPixels()
+    {
+        GrayscaleLineCandidateFrame frame = CreateCleanAxisFrame();
+        var provider = new OpenCvLineCandidateProvider(new OpenCvLineCandidateOptions
+        {
+            HoughThreshold = 12,
+            HoughMinimumLineLengthPixels = 20,
+            HoughMaximumLineGapPixels = 2,
+        });
+
+        AxisGeometryResult result = await new AxisGeometryDetector().DetectAsync(frame, provider);
+
+        Assert.AreEqual(AxisGeometryCoordinateSpaces.OriginalPixels, result.CoordinateSpace);
+        Assert.AreEqual(30.5d, result.PlotPolygon.BottomLeft.X, 4d);
+        Assert.AreEqual(130.5d, result.PlotPolygon.BottomLeft.Y, 4d);
+        Assert.IsTrue(result.Diagnostics.AcceptedCandidateCount > 0);
+    }
+
+    [TestMethod]
+    public async Task NativeProviderValidatesOriginalPixelsBufferAndCancellation()
+    {
+        GrayscaleLineCandidateFrame valid = CreateCleanAxisFrame();
+        var provider = new OpenCvLineCandidateProvider();
+
+        await Assert.ThrowsExactlyAsync<ArgumentException>(async () =>
+            await provider.DetectLinesAsync(
+                valid with { CoordinateSpace = "enhanced_pixels" },
+                CancellationToken.None));
+
+        await Assert.ThrowsExactlyAsync<ArgumentException>(async () =>
+            await provider.DetectLinesAsync(
+                valid with { Pixels = valid.Pixels[..^1] },
+                CancellationToken.None));
+
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
+            await provider.DetectLinesAsync(valid, cancellation.Token));
+    }
+
+    private static GrayscaleLineCandidateFrame CreateCleanAxisFrame()
+    {
+        const int width = 256;
+        const int height = 160;
+        var pixels = new byte[width * height];
+        Array.Fill(pixels, byte.MaxValue);
+
+        for (int x = 30; x <= 225; x++)
+        {
+            SetBlack(pixels, width, x, 130);
+            SetBlack(pixels, width, x, 131);
+        }
+
+        for (int y = 20; y <= 131; y++)
+        {
+            SetBlack(pixels, width, 30, y);
+            SetBlack(pixels, width, 31, y);
+        }
+
+        return new GrayscaleLineCandidateFrame(width, height, width, pixels);
+    }
+
+    private static void SetBlack(byte[] pixels, int stride, int x, int y) =>
+        pixels[(y * stride) + x] = 0;
+}
