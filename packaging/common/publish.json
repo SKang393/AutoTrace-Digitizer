@@ -1,9 +1,10 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "project": "src/GraphReader.App/GraphReader.App.csproj",
   "configuration": "Release",
   "selfContained": true,
   "publishSingleFile": false,
+  "debugSymbols": false,
   "requiredContent": [
     {
       "source": "contracts",
@@ -28,6 +29,10 @@
     {
       "source": "LICENSES",
       "target": "LICENSES"
+    },
+    {
+      "source": "packaging/common/release-audit.json",
+      "target": "release-audit.json"
     }
   ]
 }

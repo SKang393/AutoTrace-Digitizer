@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "kind": "portable",
   "format": "zip",
   "architecture": "x64",
@@ -11,5 +11,7 @@
   "registryConfigurationRequired": false,
   "startMenuShortcut": false,
   "uninstallEntry": false,
-  "status": "definition-only"
+  "implementationStatus": "partial",
+  "runtimeVerificationStatus": "unverified-application-path-consumption-and-read-only-handling",
+  "status": "packaging-implemented-application-integration-pending"
 }

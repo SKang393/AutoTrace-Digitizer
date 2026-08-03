@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "kind": "installer",
   "format": "setup-exe",
   "architecture": "x64",
@@ -8,9 +8,15 @@
   "offlineCoreWorkflow": true,
   "commonPublishOnly": true,
   "mutableDataRoot": "%LOCALAPPDATA%\\GraphAutoReader",
+  "installRoot": "%LOCALAPPDATA%\\Programs\\GraphAutoReader",
   "startMenuShortcut": true,
   "uninstallEntry": true,
+  "preserveUserDataOnUninstall": true,
   "projectFileRegistration": false,
-  "authoringTool": null,
-  "status": "definition-only"
+  "authoringTool": "GraphReader.Installer",
+  "upgradePolicy": "allow-newer-and-repair-same",
+  "downgradePolicy": "blocked-by-default",
+  "implementationStatus": "implemented",
+  "runtimeVerificationStatus": "unverified-clean-machine",
+  "status": "implementation-complete-runtime-unverified"
 }

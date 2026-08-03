@@ -1,0 +1,166 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sungwoo Kang
+
+name: Windows CI and release validation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build, test, and validate packaging
+    runs-on: windows-2025
+    timeout-minutes: 45
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release_eligible: ${{ steps.version.outputs.release_eligible }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Read and classify build version
+        id: version
+        shell: pwsh
+        run: |
+          [xml]$properties = Get-Content -LiteralPath Directory.Build.props -Raw
+          $versionNode = $properties.SelectSingleNode('/Project/PropertyGroup/Version')
+          if ($null -eq $versionNode) {
+              throw 'Directory.Build.props does not define Version.'
+          }
+
+          $version = $versionNode.InnerText.Trim()
+          if ($version -notmatch '^(?<major>\d{1,2})\.(?<minor>\d{1,2})\.(?<build>\d{1,2})$') {
+              throw "Version '$version' does not follow the required x.y.z numeric format."
+          }
+
+          $components = @(
+              [int]$Matches.major,
+              [int]$Matches.minor,
+              [int]$Matches.build
+          )
+          if ($components.Where({ $_ -lt 0 -or $_ -gt 99 }).Count -ne 0) {
+              throw "Version '$version' contains a component outside 0 through 99."
+          }
+
+          $releaseBuilds = @(1, 21, 41, 61, 81)
+          $releaseEligible = $releaseBuilds -contains $components[2]
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "release_eligible=$($releaseEligible.ToString().ToLowerInvariant())" |
+              Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          Write-Host "Build version: $version"
+          Write-Host "Release-version eligible: $releaseEligible"
+
+      - name: Restore
+        shell: pwsh
+        run: dotnet restore GraphAutoReader.slnx
+
+      - name: Build
+        shell: pwsh
+        run: dotnet build GraphAutoReader.slnx --configuration Release --no-restore --nologo
+
+      - name: Test
+        shell: pwsh
+        run: dotnet test GraphAutoReader.slnx --configuration Release --no-build --no-restore --nologo
+
+      - name: Test localization audit
+        shell: pwsh
+        run: >-
+          powershell -NoProfile -ExecutionPolicy Bypass
+          -File "${{ github.workspace }}\packaging\localization\Test-LocalizationAudit.ps1"
+
+      - name: Test release artifact validation
+        shell: pwsh
+        run: >-
+          powershell -NoProfile -ExecutionPolicy Bypass
+          -File "${{ github.workspace }}\packaging\tests\Test-ReleaseArtifact.Tests.ps1"
+
+      - name: Validate packaging definitions
+        shell: pwsh
+        run: >-
+          powershell -NoProfile -ExecutionPolicy Bypass
+          -File "${{ github.workspace }}\packaging\Test-ReleaseArtifact.ps1"
+
+      - name: Audit packaging without producing release artifacts
+        shell: pwsh
+        run: >-
+          powershell -NoProfile -ExecutionPolicy Bypass
+          -File "${{ github.workspace }}\packaging\Build-Windows.ps1" -AuditOnly
+
+  package-release-candidate:
+    name: Build validated Windows release candidates
+    needs: build-and-test
+    if: needs.build-and-test.outputs.release_eligible == 'true'
+    runs-on: windows-2025
+    timeout-minutes: 45
+    env:
+      RELEASE_ROOT: artifacts/windows/${{ needs.build-and-test.outputs.version }}-win-x64/release
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Validate release-version gate
+        shell: pwsh
+        run: >-
+          powershell -NoProfile -ExecutionPolicy Bypass
+          -File "${{ github.workspace }}\packaging\Test-ReleaseArtifact.ps1"
+          -RequireReleaseVersion
+
+      - name: Build Windows artifacts from the common publish output
+        shell: pwsh
+        run: >-
+          powershell -NoProfile -ExecutionPolicy Bypass
+          -File "${{ github.workspace }}\packaging\Build-Windows.ps1" -Force
+
+      - name: Validate release artifacts
+        shell: pwsh
+        run: >-
+          powershell -NoProfile -ExecutionPolicy Bypass
+          -File "${{ github.workspace }}\packaging\Test-ReleaseArtifact.ps1"
+          -RequireReleaseVersion -ArtifactRoot $env:RELEASE_ROOT
+
+      - name: Upload validated installer, portable ZIP, checksums, and SBOM
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: GraphAutoReader-${{ needs.build-and-test.outputs.version }}-win-x64
+          path: |
+            ${{ env.RELEASE_ROOT }}/GraphAutoReader-${{ needs.build-and-test.outputs.version }}-win-x64-setup.exe
+            ${{ env.RELEASE_ROOT }}/GraphAutoReader-${{ needs.build-and-test.outputs.version }}-win-x64-portable.zip
+            ${{ env.RELEASE_ROOT }}/SHA256SUMS.txt
+            ${{ env.RELEASE_ROOT }}/sbom.cdx.json
+            ${{ env.RELEASE_ROOT }}/release-metadata.json
+            ${{ env.RELEASE_ROOT }}/RELEASE_NOTES.md
+            ${{ env.RELEASE_ROOT }}/KNOWN_LIMITATIONS.md
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 14

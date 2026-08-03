@@ -1,16 +1,17 @@
 {
-  "schemaVersion": 1,
-  "version": "0.0.1",
+  "schemaVersion": 2,
+  "versionSource": "Directory.Build.props#Project/PropertyGroup/Version",
   "rid": "win-x64",
   "commonPublish": "common/publish",
+  "releaseDirectory": "release",
   "installer": {
     "definition": "installer/installer.json",
-    "fileName": "GraphAutoReader-0.0.1-win-x64-setup.exe",
+    "fileNameTemplate": "GraphAutoReader-{version}-{rid}-setup.exe",
     "stagingDirectory": "installer/staging"
   },
   "portable": {
     "definition": "portable/portable.json",
-    "fileName": "GraphAutoReader-0.0.1-win-x64-portable.zip",
+    "fileNameTemplate": "GraphAutoReader-{version}-{rid}-portable.zip",
     "stagingDirectory": "portable/staging"
   }
 }
