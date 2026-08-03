@@ -96,9 +96,16 @@ checksums, and packaging status with the exact shipped values.
 
 ## PaddleOCR / PaddleDetection
 
-- License: Apache-2.0.
-- Required action: record the exact exported model source, version, checksum,
-  training modifications, and applicable model notice.
+- Development candidates only: `PP-OCRv5_mobile_det` and
+  `en_PP-OCRv4_mobile_rec`.
+- Repository license evidence: Apache-2.0 at PaddleOCR tag `v3.5.0`, commit
+  `33cbdd9deb2e00f61e7966db70669b249c005a37`.
+- Bundled status: no PaddleOCR model archive, ONNX model, weight, dictionary,
+  or runtime asset is distributed by this project.
+- Release status: blocked until artifact-specific redistribution rights, an
+  immutable source revision, exact SHA-256 checksums, conversion provenance,
+  tensor contracts, provider compatibility, and benchmark results are
+  independently verified and recorded in a schema-valid manifest.
 
 ## PdfPig
 

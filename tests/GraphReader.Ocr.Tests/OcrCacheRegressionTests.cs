@@ -1,0 +1,116 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2026 Sungwoo Kang
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace GraphReader.Ocr.Tests;
+
+[TestClass]
+public sealed class OcrCacheRegressionTests
+{
+    private static readonly string[] ExpectedWarnings = ["initial_warning"];
+
+    [TestMethod]
+    public async Task PublicMemoryCacheDefensivelyFreezesCallerOwnedCollections()
+    {
+        var regions = new List<OcrRegion>
+        {
+            Region("first", "10"),
+        };
+        var masks = new List<OcrMask>
+        {
+            new(
+                "first",
+                OcrPolygon.FromRectangle(new OcrRectangle(10, 10, 12, 6)),
+                0.9),
+        };
+        var warnings = new List<string> { "initial_warning" };
+        var payload = new OcrCachedPayload(regions, masks, 0.9, warnings, 1, 1, "content-key");
+        var cache = new MemoryOcrResultCache();
+
+        await cache.PutAsync("cache-key", payload, CancellationToken.None);
+        regions.Add(Region("injected", "999"));
+        masks.Clear();
+        warnings[0] = "mutated_warning";
+        OcrCachedPayload? restored = await cache.TryGetAsync("cache-key", CancellationToken.None);
+
+        Assert.IsNotNull(restored);
+        Assert.HasCount(1, restored.Regions);
+        Assert.AreEqual("first", restored.Regions[0].RegionId);
+        Assert.HasCount(1, restored.Masks);
+        CollectionAssert.AreEqual(ExpectedWarnings, restored.Warnings.ToArray());
+        Assert.AreNotSame(payload, restored);
+    }
+
+    [TestMethod]
+    public async Task PublicRecognitionCacheDefensivelyFreezesCallerOwnedAlternatives()
+    {
+        var alternatives = new List<OcrRecognitionAlternative>
+        {
+            new("10", 0.9, OcrSourceImage.Original),
+        };
+        var recognitions = new List<OcrRecognition>
+        {
+            new("first", OcrSourceImage.Original, alternatives, 0.1),
+        };
+        IOcrResultCache cache = new MemoryOcrResultCache();
+
+        await cache.PutRecognitionAsync(
+            "recognition-key",
+            new OcrRecognitionCachePayload(recognitions),
+            CancellationToken.None);
+        alternatives.Add(new OcrRecognitionAlternative("100", 0.99, OcrSourceImage.Original));
+        recognitions.Clear();
+        OcrRecognitionCachePayload? restored = await cache.TryGetRecognitionAsync(
+            "recognition-key",
+            CancellationToken.None);
+
+        Assert.IsNotNull(restored);
+        Assert.HasCount(1, restored.Recognitions);
+        Assert.HasCount(1, restored.Recognitions[0].Alternatives);
+        Assert.AreEqual("10", restored.Recognitions[0].Alternatives[0].Text);
+    }
+
+    [TestMethod]
+    public void HollowMarkerRepairDetectorAndStageRevisionInvalidatePriorCacheKeys()
+    {
+        var detector = new ConnectedComponentTextRegionDetector();
+        var recognizer = new StubTextRecognizer(
+            new Dictionary<(string RegionId, OcrSourceImage Source), IReadOnlyList<OcrRecognitionAlternative>>());
+        var options = new OcrPipelineOptions();
+        OcrRequest request = OcrTestFixtures.Request([]);
+        const string priorDetectorFingerprint = "cc-v2:2:0.15:0.2:2.5:0.35:auto";
+
+        string repairedKey = OcrCacheKeyDeriver.CreateRequestAlias(
+            request,
+            recognizer,
+            options,
+            detector.ConfigurationFingerprint);
+        string priorDetectorKey = OcrCacheKeyDeriver.CreateRequestAlias(
+            request,
+            recognizer,
+            options,
+            priorDetectorFingerprint);
+        string priorStageKey = OcrCacheKeyDeriver.CreateRequestAlias(
+            request,
+            recognizer,
+            options with { StageVersion = "0.2.0" },
+            detector.ConfigurationFingerprint);
+
+        Assert.IsTrue(detector.ConfigurationFingerprint.StartsWith("cc-v3:", StringComparison.Ordinal));
+        Assert.AreEqual("0.3.0", options.StageVersion);
+        Assert.AreNotEqual(priorDetectorKey, repairedKey);
+        Assert.AreNotEqual(priorStageKey, repairedKey);
+    }
+
+    private static OcrRegion Region(string id, string text) =>
+        new(
+            id,
+            OcrPolygon.FromRectangle(new OcrRectangle(10, 10, 12, 6)),
+            text,
+            [new OcrRecognitionAlternative(text, 0.9, OcrSourceImage.Original)],
+            OcrTextRole.Other,
+            0.9,
+            OcrSourceImage.Original,
+            OcrReviewStatus.Unreviewed);
+}
