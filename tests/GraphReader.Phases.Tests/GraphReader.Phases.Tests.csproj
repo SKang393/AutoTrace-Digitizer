@@ -16,4 +16,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\GraphReader.Phases\GraphReader.Phases.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Fixtures\phase-divider-synthetic-heldout-v1.csv" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
