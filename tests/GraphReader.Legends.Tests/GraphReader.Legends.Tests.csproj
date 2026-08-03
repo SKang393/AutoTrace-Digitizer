@@ -15,5 +15,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\GraphReader.Legends\GraphReader.Legends.csproj" />
+    <ProjectReference Include="..\..\src\GraphReader.Markers\GraphReader.Markers.csproj" />
+    <ProjectReference Include="..\..\src\GraphReader.Ocr\GraphReader.Ocr.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Fixtures\heldout-legend-mappings.csv" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
