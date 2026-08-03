@@ -1,0 +1,98 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Copyright 2026 Sungwoo Kang -->
+<UserControl x:Class="GraphReader.App.Controls.SeriesCardControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             IsTabStop="False"
+             AutomationProperties.Name="{Binding AccessibleSymbolName, ElementName=Root}">
+  <Border Padding="10"
+          Background="{DynamicResource App.Brush.SurfaceRaised}"
+          BorderBrush="{DynamicResource App.Brush.Border}"
+          BorderThickness="1"
+          CornerRadius="8">
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+
+      <Grid Grid.Row="0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="40" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0"
+                Width="32"
+                Height="32"
+                HorizontalAlignment="Left"
+                Background="{DynamicResource App.Brush.Surface}"
+                BorderBrush="{DynamicResource App.Brush.Text}"
+                BorderThickness="1"
+                CornerRadius="4"
+                AutomationProperties.Name="{Binding AccessibleSymbolName, ElementName=Root}">
+          <TextBlock HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     FontSize="18"
+                     FontWeight="SemiBold"
+                     Text="{Binding SymbolGlyph, ElementName=Root}" />
+        </Border>
+
+        <StackPanel Grid.Column="1" Margin="8,0">
+          <TextBlock FontWeight="SemiBold"
+                     Text="{Binding InferredLabel, ElementName=Root}"
+                     TextTrimming="CharacterEllipsis" />
+          <TextBlock Text="{Binding AccessibleSymbolName, ElementName=Root}"
+                     TextTrimming="CharacterEllipsis" />
+        </StackPanel>
+
+        <ToggleButton Grid.Column="2"
+                      Padding="8,4"
+                      VerticalAlignment="Center"
+                      IsChecked="{Binding IsSeriesVisible, ElementName=Root, Mode=TwoWay}"
+                      Style="{DynamicResource App.Style.ToggleButton}"
+                      AutomationProperties.Name="{DynamicResource SeriesCard.Visibility}"
+                      Content="{DynamicResource SeriesCard.Visibility}" />
+      </Grid>
+
+      <Grid Grid.Row="1" Margin="0,8,0,0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Column="0" Margin="0,0,8,0"
+                   Text="{DynamicResource SeriesCard.MarkerCount}" />
+        <TextBlock Grid.Column="1" Margin="0,0,12,0"
+                   Text="{Binding MarkerCount, ElementName=Root}"
+                   AutomationProperties.Name="{DynamicResource SeriesCard.MarkerCount}" />
+        <TextBlock Grid.Column="2" Margin="0,0,8,0"
+                   Text="{DynamicResource SeriesCard.Confidence}" />
+        <TextBlock x:Name="ConfidenceText" Grid.Column="3"
+                   AutomationProperties.Name="{DynamicResource SeriesCard.Confidence}" />
+      </Grid>
+
+      <UniformGrid Grid.Row="2" Margin="0,8,0,0" Columns="2">
+        <Button Margin="0,0,4,0"
+                Padding="8,4"
+                Style="{DynamicResource App.Style.Button}"
+                Command="{Binding SelectCommand, ElementName=Root}"
+                CommandParameter="{Binding CommandParameter, ElementName=Root}"
+                AutomationProperties.Name="{DynamicResource SeriesCard.Select}"
+                Content="{DynamicResource SeriesCard.Select}" />
+        <Button Margin="4,0,0,0"
+                Padding="8,4"
+                Style="{DynamicResource App.Style.Button}"
+                Command="{Binding ReassignCommand, ElementName=Root}"
+                CommandParameter="{Binding CommandParameter, ElementName=Root}"
+                AutomationProperties.Name="{DynamicResource SeriesCard.Reassign}"
+                Content="{DynamicResource SeriesCard.Reassign}" />
+      </UniformGrid>
+    </Grid>
+  </Border>
+</UserControl>

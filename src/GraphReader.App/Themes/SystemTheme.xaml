@@ -1,0 +1,30 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Copyright 2026 Sungwoo Kang -->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!--
+    This dictionary keeps the shell usable before ThemeService resolves the
+    Windows app-mode preference. Dynamic system brushes also preserve Windows
+    high-contrast overrides.
+  -->
+  <SolidColorBrush x:Key="App.Brush.Window" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.Surface" Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.SurfaceRaised" Color="{DynamicResource {x:Static SystemColors.ControlLightColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.Canvas" Color="{DynamicResource {x:Static SystemColors.AppWorkspaceColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.Border" Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.Primary" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.PrimaryHover" Color="{DynamicResource {x:Static SystemColors.HotTrackColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.PrimaryPressed" Color="{DynamicResource {x:Static SystemColors.MenuHighlightColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.Text" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.TextOnPrimary" Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.TextMuted" Color="{DynamicResource {x:Static SystemColors.GrayTextColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.TextDisabled" Color="{DynamicResource {x:Static SystemColors.GrayTextColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.Focus" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.Selection" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.Danger" Color="#FFC42B1C" />
+  <SolidColorBrush x:Key="App.Brush.Warning" Color="#FF9A6700" />
+  <SolidColorBrush x:Key="App.Brush.Success" Color="#FF107C41" />
+  <SolidColorBrush x:Key="App.Brush.Overlay" Color="#99000000" />
+</ResourceDictionary>

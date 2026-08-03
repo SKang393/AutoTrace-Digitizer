@@ -1,0 +1,25 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Copyright 2026 Sungwoo Kang -->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <SolidColorBrush x:Key="App.Brush.Window" Color="#FF17191D" />
+  <SolidColorBrush x:Key="App.Brush.Surface" Color="#FF21242A" />
+  <SolidColorBrush x:Key="App.Brush.SurfaceRaised" Color="#FF2B2F36" />
+  <SolidColorBrush x:Key="App.Brush.Canvas" Color="#FF111317" />
+  <SolidColorBrush x:Key="App.Brush.Border" Color="#FF515761" />
+  <SolidColorBrush x:Key="App.Brush.Primary" Color="#FF76B7FF" />
+  <SolidColorBrush x:Key="App.Brush.PrimaryHover" Color="#FF9AC9FF" />
+  <SolidColorBrush x:Key="App.Brush.PrimaryPressed" Color="#FF4F96E5" />
+  <SolidColorBrush x:Key="App.Brush.Text" Color="#FFF4F6F8" />
+  <SolidColorBrush x:Key="App.Brush.TextOnPrimary" Color="#FF101820" />
+  <SolidColorBrush x:Key="App.Brush.TextMuted" Color="#FFBDC3CC" />
+  <SolidColorBrush x:Key="App.Brush.TextDisabled" Color="#FF858B94" />
+  <SolidColorBrush x:Key="App.Brush.Focus" Color="#FF8CC8FF" />
+  <SolidColorBrush x:Key="App.Brush.Selection" Color="#FF274D73" />
+  <SolidColorBrush x:Key="App.Brush.Danger" Color="#FFFF9B8F" />
+  <SolidColorBrush x:Key="App.Brush.Warning" Color="#FFFFCA70" />
+  <SolidColorBrush x:Key="App.Brush.Success" Color="#FF7AD6A6" />
+  <SolidColorBrush x:Key="App.Brush.Overlay" Color="#B3000000" />
+</ResourceDictionary>

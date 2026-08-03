@@ -3,7 +3,314 @@
 <Window x:Class="GraphReader.App.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Width="1024"
-        Height="640">
-  <Grid />
+        xmlns:appearance="clr-namespace:GraphReader.App.Appearance"
+        xmlns:automation="clr-namespace:System.Windows.Automation;assembly=PresentationCore"
+        xmlns:controls="clr-namespace:GraphReader.App.Controls"
+        Title="{DynamicResource App.Title}"
+        Width="1280"
+        Height="800"
+        MinWidth="1040"
+        MinHeight="680"
+        Background="{DynamicResource App.Brush.Window}"
+        FontFamily="{DynamicResource App.FontFamily.Default}"
+        FontSize="{DynamicResource App.FontSize.Body}"
+        Foreground="{DynamicResource App.Brush.Text}"
+        UseLayoutRounding="True"
+        WindowStartupLocation="CenterScreen"
+        automation:AutomationProperties.Name="{DynamicResource App.Title}">
+  <Window.InputBindings>
+    <KeyBinding Key="I" Modifiers="Control" Command="{Binding ImportCommand}" />
+    <KeyBinding Key="E" Modifiers="Control" Command="{Binding EnhanceCommand}" />
+    <KeyBinding Key="F5" Command="{Binding AutoDetectCommand}" />
+    <KeyBinding Key="R" Modifiers="Control" Command="{Binding ReviewCommand}" />
+    <KeyBinding Key="E" Modifiers="Control+Shift" Command="{Binding ExportCommand}" />
+    <KeyBinding Key="P" Modifiers="Control" Command="{Binding TogglePhaseOverlayCommand}" />
+    <KeyBinding Key="Escape" Command="{Binding CancelCommand}" />
+  </Window.InputBindings>
+
+  <Grid Background="{DynamicResource App.Brush.Window}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <Border Grid.Row="0"
+            Padding="16,12"
+            Background="{DynamicResource App.Brush.SurfaceRaised}"
+            BorderBrush="{DynamicResource App.Brush.Border}"
+            BorderThickness="0,0,0,1">
+      <Grid KeyboardNavigation.TabNavigation="Local">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" Orientation="Horizontal">
+          <Button x:Name="WorkflowImportButton"
+                TabIndex="0"
+                Margin="0,0,8,0"
+                Command="{Binding ImportCommand}"
+                Style="{DynamicResource App.Style.PrimaryButton}"
+                automation:AutomationProperties.AutomationId="Workflow.Import"
+                automation:AutomationProperties.Name="{DynamicResource Workflow.Import}">
+          <AccessText Text="{DynamicResource Workflow.Import}" />
+        </Button>
+        <Button x:Name="WorkflowEnhanceButton"
+                TabIndex="1"
+                Margin="0,0,8,0"
+                Command="{Binding EnhanceCommand}"
+                Style="{DynamicResource App.Style.Button}"
+                automation:AutomationProperties.AutomationId="Workflow.Enhance"
+                automation:AutomationProperties.Name="{DynamicResource Workflow.Enhance}">
+          <AccessText Text="{DynamicResource Workflow.Enhance}" />
+        </Button>
+        <Button x:Name="WorkflowAutoDetectButton"
+                TabIndex="2"
+                Margin="0,0,8,0"
+                Command="{Binding AutoDetectCommand}"
+                Style="{DynamicResource App.Style.PrimaryButton}"
+                automation:AutomationProperties.AutomationId="Workflow.AutoDetect"
+                automation:AutomationProperties.Name="{DynamicResource Workflow.AutoDetect}">
+          <AccessText Text="{DynamicResource Workflow.AutoDetect}" />
+        </Button>
+        <Button x:Name="WorkflowReviewButton"
+                TabIndex="3"
+                Margin="0,0,8,0"
+                Command="{Binding ReviewCommand}"
+                Style="{DynamicResource App.Style.Button}"
+                automation:AutomationProperties.AutomationId="Workflow.Review"
+                automation:AutomationProperties.Name="{DynamicResource Workflow.Review}">
+          <AccessText Text="{DynamicResource Workflow.Review}" />
+        </Button>
+        <Button x:Name="WorkflowExportButton"
+                TabIndex="4"
+                Command="{Binding ExportCommand}"
+                Style="{DynamicResource App.Style.PrimaryButton}"
+                automation:AutomationProperties.AutomationId="Workflow.Export"
+                automation:AutomationProperties.Name="{DynamicResource Workflow.Export}">
+          <AccessText Text="{DynamicResource Workflow.Export}" />
+          </Button>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+          <TextBlock Margin="0,0,8,0"
+                     VerticalAlignment="Center"
+                     Text="{DynamicResource Theme.Label}" />
+          <ComboBox x:Name="ThemeSelector"
+                    Width="112"
+                    TabIndex="5"
+                    SelectedValuePath="Tag"
+                    SelectedValue="{Binding AppearanceMode, Mode=TwoWay}"
+                    Style="{DynamicResource App.Style.ComboBox}"
+                    automation:AutomationProperties.AutomationId="Theme.Select"
+                    automation:AutomationProperties.Name="{DynamicResource Theme.Select.AutomationName}">
+            <ComboBoxItem Tag="{x:Static appearance:ApplicationTheme.System}"
+                          Content="{DynamicResource Theme.System}" />
+            <ComboBoxItem Tag="{x:Static appearance:ApplicationTheme.Light}"
+                          Content="{DynamicResource Theme.Light}" />
+            <ComboBoxItem Tag="{x:Static appearance:ApplicationTheme.Dark}"
+                          Content="{DynamicResource Theme.Dark}" />
+          </ComboBox>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="240" MinWidth="200" />
+        <ColumnDefinition Width="1" />
+        <ColumnDefinition Width="*" MinWidth="420" />
+        <ColumnDefinition Width="1" />
+        <ColumnDefinition Width="340" MinWidth="300" />
+      </Grid.ColumnDefinitions>
+
+      <Grid Grid.Column="0" Margin="16">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock FontSize="{DynamicResource App.FontSize.Title}"
+                   FontWeight="SemiBold"
+                   Text="{DynamicResource Navigation.Title}" />
+        <TextBlock Grid.Row="1"
+                   Margin="0,16,0,8"
+                   Foreground="{DynamicResource App.Brush.TextMuted}"
+                   FontSize="{DynamicResource App.FontSize.Caption}"
+                   Text="{DynamicResource Navigation.Graphs}" />
+        <ListBox x:Name="ProjectNavigator"
+                 Grid.Row="2"
+                 TabIndex="10"
+                 ItemsSource="{Binding Tabs}"
+                 SelectedItem="{Binding SelectedTab}"
+                 DisplayMemberPath="DisplayName"
+                 BorderThickness="0"
+                 Background="Transparent"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 automation:AutomationProperties.AutomationId="Navigation.ProjectTabs"
+                 automation:AutomationProperties.Name="{DynamicResource Navigation.AutomationName}" />
+      </Grid>
+
+      <Border Grid.Column="1" Background="{DynamicResource App.Brush.Border}" />
+
+      <Grid Grid.Column="2" Margin="16">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <CheckBox x:Name="PhaseOverlayToggle"
+                  TabIndex="20"
+                  Margin="0,0,0,12"
+                  Command="{Binding TogglePhaseOverlayCommand}"
+                  IsChecked="{Binding IsPhaseOverlayVisible, Mode=OneWay}"
+                  Style="{DynamicResource App.Style.CheckBox}"
+                  automation:AutomationProperties.AutomationId="Canvas.PhaseOverlayToggle"
+                  automation:AutomationProperties.Name="{DynamicResource Canvas.PhaseOverlay}">
+          <AccessText Text="{DynamicResource Canvas.PhaseOverlay}" />
+        </CheckBox>
+
+        <Border Grid.Row="1"
+                Background="{DynamicResource App.Brush.Canvas}"
+                BorderBrush="{DynamicResource App.Brush.Border}"
+                BorderThickness="1"
+                CornerRadius="8"
+                ClipToBounds="True">
+          <Grid>
+            <TextBlock HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource App.Brush.TextMuted}"
+                       Text="{DynamicResource Canvas.Empty}">
+              <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding SelectedTab}" Value="{x:Null}">
+                      <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            </TextBlock>
+            <controls:GraphCanvasControl x:Name="GraphCanvasHost"
+                                         TabIndex="21"
+                                         Focusable="True"
+                                         ImageSource="{Binding SelectedTab.ImageSource}"
+                                         OverlayContent="{Binding SelectedTab.OverlayContent}"
+                                         PhaseOverlayContent="{Binding SelectedTab.PhaseOverlayContent}"
+                                         PhaseOverlayVisible="{Binding IsPhaseOverlayVisible}"
+                                         ShowCrosshair="{Binding Magnifier.IsCrosshairVisible}"
+                                         CrosshairPosition="{Binding Magnifier.CrosshairPosition}"
+                                         ZoomLevel="{Binding SelectedTab.ZoomLevel}"
+                                         automation:AutomationProperties.AutomationId="Canvas.GraphHost"
+                                         automation:AutomationProperties.Name="{DynamicResource GraphCanvas.AutomationName}" />
+          </Grid>
+        </Border>
+      </Grid>
+
+      <Border Grid.Column="3" Background="{DynamicResource App.Brush.Border}" />
+
+      <Grid x:Name="InspectorPane" Grid.Column="4" Margin="16">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock FontSize="{DynamicResource App.FontSize.Title}"
+                   FontWeight="SemiBold"
+                   Text="{DynamicResource Inspector.Title}"
+                   automation:AutomationProperties.AutomationId="Inspector.Panel" />
+
+        <controls:MagnifierControl x:Name="MagnifierInspector"
+                                   Grid.Row="1"
+                                   TabIndex="30"
+                                   Margin="0,16,0,20"
+                                   OriginalImageSource="{Binding SelectedTab.ImageSource}"
+                                   EnhancedImageSource="{Binding SelectedTab.EnhancedImageSource}"
+                                   ShowEnhanced="{Binding Magnifier.IsEnhanced, Mode=TwoWay}"
+                                   CrosshairPosition="{Binding Magnifier.CrosshairPosition}"
+                                   PixelPosition="{Binding Magnifier.PixelPosition}"
+                                   GraphPosition="{Binding Magnifier.GraphPosition}"
+                                   NearestDetectionName="{Binding Magnifier.NearestDetectionName}"
+                                   NearestDetectionConfidence="{Binding Magnifier.NearestDetectionConfidence}"
+                                   ZoomLevel="{Binding Magnifier.ZoomLevel}"
+                                   automation:AutomationProperties.AutomationId="Inspector.Magnifier"
+                                   automation:AutomationProperties.Name="{DynamicResource Magnifier.Title}" />
+
+        <TextBlock Grid.Row="2"
+                   Margin="0,0,0,8"
+                   FontSize="{DynamicResource App.FontSize.Subtitle}"
+                   FontWeight="SemiBold"
+                   Text="{DynamicResource Series.Title}" />
+
+        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
+          <Grid>
+            <TextBlock Foreground="{DynamicResource App.Brush.TextMuted}"
+                       Text="{DynamicResource Series.Empty}">
+              <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding SeriesCards.Count}" Value="0">
+                      <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            </TextBlock>
+            <ItemsControl x:Name="SeriesList"
+                          ItemsSource="{Binding SeriesCards}"
+                          automation:AutomationProperties.AutomationId="Inspector.Series"
+                          automation:AutomationProperties.Name="{DynamicResource Series.Title}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <controls:SeriesCardControl Margin="0,0,0,10"
+                                              SymbolGlyph="{Binding Symbol}"
+                                              AccessibleSymbolName="{Binding AccessibleName}"
+                                              InferredLabel="{Binding Label}"
+                                              MarkerCount="{Binding Count}"
+                                              Confidence="{Binding Confidence}"
+                                              IsSeriesVisible="{Binding IsVisible, Mode=TwoWay}"
+                                              SelectCommand="{Binding SelectCommand}"
+                                              ReassignCommand="{Binding DataContext.ReassignPointCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                              CommandParameter="{Binding SeriesId}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+              <ItemsControl.Style>
+                <Style TargetType="ItemsControl">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding Items.Count, RelativeSource={RelativeSource Self}}" Value="0">
+                      <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </ItemsControl.Style>
+            </ItemsControl>
+          </Grid>
+        </ScrollViewer>
+      </Grid>
+    </Grid>
+
+    <Border Grid.Row="2"
+            MinHeight="32"
+            Padding="16,6"
+            Background="{DynamicResource App.Brush.SurfaceRaised}"
+            BorderBrush="{DynamicResource App.Brush.Border}"
+            BorderThickness="0,1,0,0">
+      <ProgressBar Width="160"
+                   Height="4"
+                   HorizontalAlignment="Right"
+                   IsIndeterminate="True">
+        <ProgressBar.Style>
+          <Style TargetType="ProgressBar">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </ProgressBar.Style>
+      </ProgressBar>
+    </Border>
+  </Grid>
 </Window>

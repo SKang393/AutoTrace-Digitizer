@@ -1,0 +1,77 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Copyright 2026 Sungwoo Kang -->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+
+  <sys:String x:Key="App.Title">Graph Auto Reader</sys:String>
+
+  <sys:String x:Key="Workflow.Import">Import</sys:String>
+  <sys:String x:Key="Workflow.Enhance">Enhance</sys:String>
+  <sys:String x:Key="Workflow.AutoDetect">Auto Detect</sys:String>
+  <sys:String x:Key="Workflow.Review">Review</sys:String>
+  <sys:String x:Key="Workflow.Export">Export</sys:String>
+  <sys:String x:Key="Workflow.Import.ToolTip">Import one or more graph images</sys:String>
+  <sys:String x:Key="Workflow.Enhance.ToolTip">Create a derived enhanced image</sys:String>
+  <sys:String x:Key="Workflow.AutoDetect.ToolTip">Detect graph structure and data</sys:String>
+  <sys:String x:Key="Workflow.Review.ToolTip">Review and correct detections</sys:String>
+  <sys:String x:Key="Workflow.Export.ToolTip">Export phase-labeled data</sys:String>
+
+  <sys:String x:Key="Navigation.Title">Project</sys:String>
+  <sys:String x:Key="Navigation.Graphs">Graphs</sys:String>
+  <sys:String x:Key="Navigation.Empty">No graphs imported</sys:String>
+  <sys:String x:Key="Navigation.AutomationName">Project graph navigator</sys:String>
+
+  <sys:String x:Key="Canvas.Empty">Import a graph to begin.</sys:String>
+  <sys:String x:Key="Canvas.PhaseOverlay">Phase overlay</sys:String>
+  <sys:String x:Key="Canvas.ZoomIn">Zoom in</sys:String>
+  <sys:String x:Key="Canvas.ZoomOut">Zoom out</sys:String>
+  <sys:String x:Key="Canvas.Fit">Fit graph</sys:String>
+  <sys:String x:Key="GraphCanvas.AutomationName">Editable graph canvas</sys:String>
+  <sys:String x:Key="GraphCanvas.EmptyState">No graph is open</sys:String>
+  <sys:String x:Key="GraphCanvas.PhaseOverlay.AutomationName">Show phase boundaries and labels</sys:String>
+  <sys:String x:Key="GraphCanvas.Crosshair.AutomationName">Graph cursor crosshair</sys:String>
+
+  <sys:String x:Key="Inspector.Title">Inspector</sys:String>
+
+  <sys:String x:Key="Magnifier.Title">Magnifier</sys:String>
+  <sys:String x:Key="Magnifier.Original">Original</sys:String>
+  <sys:String x:Key="Magnifier.Enhanced">Enhanced</sys:String>
+  <sys:String x:Key="Magnifier.ImageMode.GroupName">Magnifier image source</sys:String>
+  <sys:String x:Key="Magnifier.ImageMode.Original">Original</sys:String>
+  <sys:String x:Key="Magnifier.ImageMode.Enhanced">Enhanced</sys:String>
+  <sys:String x:Key="Magnifier.Viewport.AutomationName">Fixed graph magnifier viewport</sys:String>
+  <sys:String x:Key="Magnifier.Crosshair.AutomationName">Magnifier crosshair</sys:String>
+  <sys:String x:Key="Magnifier.EmptyImage">No graph preview</sys:String>
+  <sys:String x:Key="Magnifier.PixelCoordinates">Pixel coordinates</sys:String>
+  <sys:String x:Key="Magnifier.GraphCoordinates">Graph coordinates</sys:String>
+  <sys:String x:Key="Magnifier.NearestDetection">Nearest detection</sys:String>
+  <sys:String x:Key="Magnifier.NearestDetection.None">None</sys:String>
+  <sys:String x:Key="Magnifier.Confidence">Confidence</sys:String>
+  <sys:String x:Key="Magnifier.Zoom">Zoom</sys:String>
+  <sys:String x:Key="Magnifier.CoordinateFormat">{0:0.##}, {1:0.##}</sys:String>
+  <sys:String x:Key="Magnifier.ConfidenceFormat">{0:P0}</sys:String>
+  <sys:String x:Key="Magnifier.ZoomFormat">{0:0.##}×</sys:String>
+
+  <sys:String x:Key="Series.Title">Series</sys:String>
+  <sys:String x:Key="Series.Empty">No series detected</sys:String>
+  <sys:String x:Key="SeriesCard.GroupName">Detected series</sys:String>
+  <sys:String x:Key="SeriesCard.Symbol.AutomationName">Series symbol</sys:String>
+  <sys:String x:Key="SeriesCard.InferredLabel">Inferred label</sys:String>
+  <sys:String x:Key="SeriesCard.MarkerCount">Marker count</sys:String>
+  <sys:String x:Key="SeriesCard.Confidence">Confidence</sys:String>
+  <sys:String x:Key="SeriesCard.Visibility">Visible</sys:String>
+  <sys:String x:Key="SeriesCard.Select">Select series</sys:String>
+  <sys:String x:Key="SeriesCard.Reassign">Reassign points</sys:String>
+  <sys:String x:Key="SeriesCard.MarkerCountFormat">{0}</sys:String>
+  <sys:String x:Key="SeriesCard.ConfidenceFormat">{0:P0}</sys:String>
+  <sys:String x:Key="Series.Split.SymbolName">Diamond</sys:String>
+  <sys:String x:Key="Series.Split.Label">Split series</sys:String>
+
+  <sys:String x:Key="Theme.Label">Theme</sys:String>
+  <sys:String x:Key="Theme.System">System</sys:String>
+  <sys:String x:Key="Theme.Light">Light</sys:String>
+  <sys:String x:Key="Theme.Dark">Dark</sys:String>
+  <sys:String x:Key="Theme.Select.AutomationName">Application theme</sys:String>
+</ResourceDictionary>

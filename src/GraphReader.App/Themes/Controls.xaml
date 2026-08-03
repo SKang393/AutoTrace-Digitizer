@@ -1,0 +1,167 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Copyright 2026 Sungwoo Kang -->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <Style x:Key="App.Style.FocusVisual" TargetType="Control">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Border
+              Margin="-3"
+              BorderBrush="{DynamicResource App.Brush.Focus}"
+              BorderThickness="{DynamicResource App.Thickness.Focus}"
+              CornerRadius="{DynamicResource App.CornerRadius.Medium}">
+            <AdornedElementPlaceholder />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="App.Style.Button" TargetType="Button">
+    <Setter Property="MinHeight" Value="{DynamicResource App.Control.Height}" />
+    <Setter Property="Padding" Value="{DynamicResource App.Thickness.ControlPadding}" />
+    <Setter Property="Background" Value="{DynamicResource App.Brush.SurfaceRaised}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource App.Control.BorderWidth}" />
+    <Setter Property="Foreground" Value="{DynamicResource App.Brush.Text}" />
+    <Setter Property="FontFamily" Value="{DynamicResource App.FontFamily.Default}" />
+    <Setter Property="FontSize" Value="{DynamicResource App.FontSize.Body}" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource App.Style.FocusVisual}" />
+  </Style>
+
+  <Style x:Key="App.Style.PrimaryButton" BasedOn="{StaticResource App.Style.Button}" TargetType="Button">
+    <Setter Property="Background" Value="{DynamicResource App.Brush.Primary}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Primary}" />
+    <Setter Property="Foreground" Value="{DynamicResource App.Brush.TextOnPrimary}" />
+  </Style>
+
+  <Style x:Key="App.Style.ToggleButton" TargetType="ToggleButton">
+    <Setter Property="MinHeight" Value="{DynamicResource App.Control.Height}" />
+    <Setter Property="Padding" Value="{DynamicResource App.Thickness.ControlPadding}" />
+    <Setter Property="Background" Value="{DynamicResource App.Brush.SurfaceRaised}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource App.Control.BorderWidth}" />
+    <Setter Property="Foreground" Value="{DynamicResource App.Brush.Text}" />
+    <Setter Property="FontFamily" Value="{DynamicResource App.FontFamily.Default}" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource App.Style.FocusVisual}" />
+    <Style.Triggers>
+      <Trigger Property="IsChecked" Value="True">
+        <Setter Property="Background" Value="{DynamicResource App.Brush.Selection}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Primary}" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="App.Style.TextBox" TargetType="TextBox">
+    <Setter Property="MinHeight" Value="{DynamicResource App.Control.Height}" />
+    <Setter Property="Padding" Value="{DynamicResource App.Thickness.CompactPadding}" />
+    <Setter Property="Background" Value="{DynamicResource App.Brush.Surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Border}" />
+    <Setter Property="Foreground" Value="{DynamicResource App.Brush.Text}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource App.Brush.Text}" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource App.Style.FocusVisual}" />
+  </Style>
+
+  <Style x:Key="App.Style.ComboBox" TargetType="ComboBox">
+    <Setter Property="MinHeight" Value="{DynamicResource App.Control.Height}" />
+    <Setter Property="Padding" Value="{DynamicResource App.Thickness.CompactPadding}" />
+    <Setter Property="Background" Value="{DynamicResource App.Brush.Surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Border}" />
+    <Setter Property="Foreground" Value="{DynamicResource App.Brush.Text}" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource App.Style.FocusVisual}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ComboBox">
+          <Grid>
+            <ToggleButton x:Name="DropDownToggle"
+                          Background="{TemplateBinding Background}"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          ClickMode="Press"
+                          Focusable="False"
+                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+              <ToggleButton.Template>
+                <ControlTemplate TargetType="ToggleButton">
+                  <Border Background="{TemplateBinding Background}"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          CornerRadius="{DynamicResource App.CornerRadius.Small}">
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="24" />
+                      </Grid.ColumnDefinitions>
+                      <ContentPresenter Margin="8,2,4,2"
+                                        VerticalAlignment="Center"
+                                        Content="{Binding SelectionBoxItem, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                        TextElement.Foreground="{DynamicResource App.Brush.Text}" />
+                      <Path Grid.Column="1"
+                            Width="8"
+                            Height="5"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Data="M 0 0 L 4 4 L 8 0 Z"
+                            Fill="{DynamicResource App.Brush.Text}" />
+                    </Grid>
+                  </Border>
+                </ControlTemplate>
+              </ToggleButton.Template>
+            </ToggleButton>
+            <Popup x:Name="PART_Popup"
+                   AllowsTransparency="True"
+                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                   Placement="Bottom"
+                   PopupAnimation="Fade">
+              <Border MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                      MaxHeight="240"
+                      Background="{DynamicResource App.Brush.Surface}"
+                      BorderBrush="{DynamicResource App.Brush.Border}"
+                      BorderThickness="1">
+                <ScrollViewer>
+                  <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained" />
+                </ScrollViewer>
+              </Border>
+            </Popup>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="ComboBoxItem">
+    <Setter Property="Padding" Value="8,4" />
+    <Setter Property="Background" Value="{DynamicResource App.Brush.Surface}" />
+    <Setter Property="Foreground" Value="{DynamicResource App.Brush.Text}" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource App.Style.FocusVisual}" />
+    <Style.Triggers>
+      <Trigger Property="IsHighlighted" Value="True">
+        <Setter Property="Background" Value="{DynamicResource App.Brush.Selection}" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="App.Style.CheckBox" TargetType="CheckBox">
+    <Setter Property="Foreground" Value="{DynamicResource App.Brush.Text}" />
+    <Setter Property="FontFamily" Value="{DynamicResource App.FontFamily.Default}" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource App.Style.FocusVisual}" />
+  </Style>
+
+  <Style x:Key="App.Style.ListBoxItem" TargetType="ListBoxItem">
+    <Setter Property="Foreground" Value="{DynamicResource App.Brush.Text}" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource App.Style.FocusVisual}" />
+    <Style.Triggers>
+      <Trigger Property="IsSelected" Value="True">
+        <Setter Property="Background" Value="{DynamicResource App.Brush.Selection}" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="App.Style.TabItem" TargetType="TabItem">
+    <Setter Property="Foreground" Value="{DynamicResource App.Brush.Text}" />
+    <Setter Property="FontFamily" Value="{DynamicResource App.FontFamily.Default}" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource App.Style.FocusVisual}" />
+  </Style>
+</ResourceDictionary>

@@ -1,0 +1,125 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Copyright 2026 Sungwoo Kang -->
+<UserControl x:Class="GraphReader.App.Controls.MagnifierControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:GraphReader.App.Controls"
+             x:Name="Root"
+             MinWidth="240"
+             IsTabStop="False"
+             AutomationProperties.Name="{DynamicResource Magnifier.Title}">
+  <Border Padding="12"
+          Background="{DynamicResource App.Brush.SurfaceRaised}"
+          BorderBrush="{DynamicResource App.Brush.Border}"
+          BorderThickness="1"
+          CornerRadius="12">
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="160" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+
+      <TextBlock Grid.Row="0"
+                 Margin="0,0,0,8"
+                 FontSize="16"
+                 FontWeight="SemiBold"
+                 Text="{DynamicResource Magnifier.Title}" />
+
+      <UniformGrid Grid.Row="1"
+                   Margin="0,0,0,8"
+                   Columns="2"
+                   AutomationProperties.Name="{DynamicResource Magnifier.ImageMode.GroupName}">
+        <RadioButton x:Name="OriginalModeButton"
+                     Margin="0,0,4,0"
+                     Padding="8,4"
+                     Foreground="{DynamicResource App.Brush.Text}"
+                     GroupName="MagnifierImageMode"
+                     IsChecked="True"
+                     Checked="OnOriginalModeChecked"
+                     AutomationProperties.Name="{DynamicResource Magnifier.ImageMode.Original}"
+                     Content="{DynamicResource Magnifier.ImageMode.Original}" />
+        <RadioButton x:Name="EnhancedModeButton"
+                     Margin="4,0,0,0"
+                     Padding="8,4"
+                     Foreground="{DynamicResource App.Brush.Text}"
+                     GroupName="MagnifierImageMode"
+                     Checked="OnEnhancedModeChecked"
+                     AutomationProperties.Name="{DynamicResource Magnifier.ImageMode.Enhanced}"
+                     Content="{DynamicResource Magnifier.ImageMode.Enhanced}" />
+      </UniformGrid>
+
+      <Border Grid.Row="2"
+              ClipToBounds="True"
+              Background="{DynamicResource App.Brush.Canvas}"
+              BorderBrush="{DynamicResource App.Brush.Border}"
+              BorderThickness="1"
+              CornerRadius="8"
+              AutomationProperties.Name="{DynamicResource Magnifier.Viewport.AutomationName}">
+        <Grid>
+          <Image x:Name="ViewportImage"
+                 Stretch="Uniform"
+                 SnapsToDevicePixels="True"
+                 RenderOptions.BitmapScalingMode="NearestNeighbor"
+                 RenderTransformOrigin="{Binding CrosshairPosition, ElementName=Root}">
+            <Image.RenderTransform>
+              <ScaleTransform ScaleX="{Binding ZoomLevel, ElementName=Root}"
+                              ScaleY="{Binding ZoomLevel, ElementName=Root}" />
+            </Image.RenderTransform>
+          </Image>
+          <controls:CrosshairOverlay Position="{Binding CrosshairPosition, ElementName=Root}"
+                                     Stroke="{DynamicResource App.Brush.Focus}"
+                                     AutomationProperties.Name="{DynamicResource Magnifier.Crosshair.AutomationName}" />
+          <TextBlock x:Name="EmptyImageText"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     Text="{DynamicResource Magnifier.EmptyImage}" />
+        </Grid>
+      </Border>
+
+      <Grid Grid.Row="3" Margin="0,8,0,0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,2,12,2"
+                   Text="{DynamicResource Magnifier.PixelCoordinates}" />
+        <TextBlock x:Name="PixelPositionText" Grid.Row="0" Grid.Column="1" Margin="0,2"
+                   TextAlignment="Right" />
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,2,12,2"
+                   Text="{DynamicResource Magnifier.GraphCoordinates}" />
+        <TextBlock x:Name="GraphPositionText" Grid.Row="1" Grid.Column="1" Margin="0,2"
+                   TextAlignment="Right" />
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,2,12,2"
+                   Text="{DynamicResource Magnifier.NearestDetection}" />
+        <Grid Grid.Row="2" Grid.Column="1" Margin="0,2">
+          <TextBlock x:Name="NearestDetectionText" TextAlignment="Right" />
+          <TextBlock x:Name="NoDetectionText"
+                     Text="{DynamicResource Magnifier.NearestDetection.None}"
+                     TextAlignment="Right" />
+        </Grid>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,2,12,2"
+                   Text="{DynamicResource Magnifier.Confidence}" />
+        <TextBlock x:Name="ConfidenceText" Grid.Row="3" Grid.Column="1" Margin="0,2"
+                   TextAlignment="Right" />
+
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,2,12,2"
+                   Text="{DynamicResource Magnifier.Zoom}" />
+        <TextBlock x:Name="ZoomText" Grid.Row="4" Grid.Column="1" Margin="0,2"
+                   TextAlignment="Right" />
+      </Grid>
+    </Grid>
+  </Border>
+</UserControl>

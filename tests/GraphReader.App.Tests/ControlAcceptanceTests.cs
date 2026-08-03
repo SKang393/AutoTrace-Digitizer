@@ -1,0 +1,244 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2026 Sungwoo Kang
+
+using System.ComponentModel;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Xml.Linq;
+using GraphReader.App.Controls;
+using GraphReader.App.Models;
+
+namespace GraphReader.App.Tests;
+
+[TestClass]
+public sealed class ControlAcceptanceTests
+{
+    [TestMethod]
+    public void EditingControlPropertiesHaveSafeDefaultsAndTwoWayMetadata()
+    {
+        StaTestHost.Run(
+            () =>
+            {
+                var canvas = new GraphCanvasControl();
+                var magnifier = new MagnifierControl();
+                var series = new SeriesCardControl();
+
+                Assert.IsTrue(canvas.PhaseOverlayVisible);
+                Assert.IsFalse(canvas.ShowCrosshair);
+                Assert.AreEqual(1d, canvas.ZoomLevel);
+                Assert.AreEqual(new Point(0.5, 0.5), canvas.CrosshairPosition);
+                Assert.IsTrue(((FrameworkPropertyMetadata)GraphCanvasControl.PhaseOverlayVisibleProperty.GetMetadata(typeof(GraphCanvasControl))).BindsTwoWayByDefault);
+
+                Assert.IsFalse(magnifier.ShowEnhanced);
+                Assert.AreEqual(2d, magnifier.ZoomLevel);
+                Assert.IsTrue(((FrameworkPropertyMetadata)MagnifierControl.ShowEnhancedProperty.GetMetadata(typeof(MagnifierControl))).BindsTwoWayByDefault);
+
+                Assert.AreEqual(string.Empty, series.SymbolGlyph);
+                Assert.AreEqual(0, series.MarkerCount);
+                Assert.AreEqual(0d, series.Confidence);
+                Assert.IsTrue(series.IsSeriesVisible);
+                Assert.IsTrue(((FrameworkPropertyMetadata)SeriesCardControl.IsSeriesVisibleProperty.GetMetadata(typeof(SeriesCardControl))).BindsTwoWayByDefault);
+            });
+    }
+
+    [TestMethod]
+    public void SeriesCardBindingUpdatesCountAndAccessibleSymbolImmediately()
+    {
+        StaTestHost.Run(
+            () =>
+            {
+                var source = new MutableCount(2);
+                var card = new SeriesCardControl
+                {
+                    AccessibleSymbolName = "Filled circle",
+                    SymbolGlyph = "●",
+                    InferredLabel = "Intervention",
+                };
+                BindingOperations.SetBinding(
+                    card,
+                    SeriesCardControl.MarkerCountProperty,
+                    new Binding(nameof(MutableCount.Count)) { Source = source });
+
+                Assert.AreEqual(2, card.MarkerCount);
+                source.Count = 5;
+
+                Assert.AreEqual(5, card.MarkerCount);
+                Assert.AreEqual("Filled circle", AutomationProperties.GetName(card));
+            });
+    }
+
+    [TestMethod]
+    public void CanvasTogglesPhaseAndCrosshairPresentationWithoutColorIdentity()
+    {
+        StaTestHost.Run(
+            () =>
+            {
+                var canvas = new GraphCanvasControl
+                {
+                    PhaseOverlayContent = new PhaseDivider(0.5, 0.1, 0.9),
+                    PhaseOverlayVisible = false,
+                    ShowCrosshair = true,
+                    CrosshairPosition = new Point(0.25, 0.75),
+                };
+
+                var phasePresenter = (ContentPresenter)canvas.FindName("PhaseOverlayPresenter");
+                var crosshair = (CrosshairOverlay)canvas.FindName("Crosshair");
+
+                Assert.AreEqual(Visibility.Collapsed, phasePresenter.Visibility);
+                Assert.IsInstanceOfType<PhaseDivider>(phasePresenter.Content);
+                Assert.AreEqual(Visibility.Visible, crosshair.Visibility);
+                Assert.AreEqual(new Point(0.25, 0.75), crosshair.Position);
+            });
+    }
+
+    [TestMethod]
+    public void CanvasOverlaysShareUniformImageCoordinateSurface()
+    {
+        StaTestHost.Run(
+            () =>
+            {
+                var canvas = new GraphCanvasControl
+                {
+                    ImageSource = new WriteableBitmap(520, 280, 96, 96, PixelFormats.Bgra32, null),
+                    PhaseOverlayContent = new PhaseDivider(0.47, 0.1, 0.9),
+                    ShowCrosshair = true,
+                };
+
+                canvas.Measure(new Size(520, 520));
+                canvas.Arrange(new Rect(0, 0, 520, 520));
+                canvas.UpdateLayout();
+
+                var image = (Image)canvas.FindName("GraphImage");
+                var coordinateSurface = (Grid)canvas.FindName("ImageCoordinateSurface");
+                var phasePresenter = (ContentPresenter)canvas.FindName("PhaseOverlayPresenter");
+                var crosshair = (CrosshairOverlay)canvas.FindName("Crosshair");
+
+                Assert.AreEqual(520d, coordinateSurface.ActualWidth, 0.01);
+                Assert.AreEqual(280d, coordinateSurface.ActualHeight, 0.01);
+                Assert.AreEqual(image.ActualWidth, phasePresenter.ActualWidth, 0.01);
+                Assert.AreEqual(image.ActualHeight, phasePresenter.ActualHeight, 0.01);
+                Assert.AreEqual(image.ActualWidth, crosshair.ActualWidth, 0.01);
+                Assert.AreEqual(image.ActualHeight, crosshair.ActualHeight, 0.01);
+            });
+    }
+
+    [TestMethod]
+    public void MagnifierSwitchesImageAndFormatsCoordinatesAndDetectionPlaceholder()
+    {
+        StaTestHost.Run(
+            () =>
+            {
+                var magnifier = new MagnifierControl();
+                magnifier.Resources.MergedDictionaries.Add(
+                    new ResourceDictionary
+                    {
+                        Source = new Uri(
+                            "/GraphReader.App;component/Localization/Resources.en-US.xaml",
+                            UriKind.RelativeOrAbsolute),
+                    });
+                var original = new WriteableBitmap(8, 8, 96, 96, System.Windows.Media.PixelFormats.Bgra32, null);
+                var enhanced = new WriteableBitmap(16, 16, 96, 96, System.Windows.Media.PixelFormats.Bgra32, null);
+
+                magnifier.OriginalImageSource = original;
+                magnifier.EnhancedImageSource = enhanced;
+                magnifier.PixelPosition = new Point(12.5, 42.25);
+                magnifier.GraphPosition = new Point(3, 18.5);
+                magnifier.NearestDetectionName = "Open circle";
+                magnifier.NearestDetectionConfidence = 0.875;
+                magnifier.ZoomLevel = 3;
+                magnifier.ShowEnhanced = true;
+
+                var viewportImage = (Image)magnifier.FindName("ViewportImage");
+                Assert.AreSame(enhanced, viewportImage.Source);
+                var scale = (ScaleTransform)viewportImage.RenderTransform;
+                Assert.AreEqual(3d, scale.ScaleX);
+                Assert.AreEqual(3d, scale.ScaleY);
+                Assert.AreEqual(magnifier.CrosshairPosition, viewportImage.RenderTransformOrigin);
+                Assert.AreEqual("12.5, 42.25", ((TextBlock)magnifier.FindName("PixelPositionText")).Text);
+                Assert.AreEqual("3, 18.5", ((TextBlock)magnifier.FindName("GraphPositionText")).Text);
+                Assert.AreEqual("Open circle", ((TextBlock)magnifier.FindName("NearestDetectionText")).Text);
+                Assert.AreEqual(Visibility.Collapsed, ((TextBlock)magnifier.FindName("NoDetectionText")).Visibility);
+
+                magnifier.NearestDetectionName = null;
+                Assert.AreEqual(Visibility.Visible, ((TextBlock)magnifier.FindName("NoDetectionText")).Visibility);
+            });
+    }
+
+    [TestMethod]
+    public void InvalidControlValuesAreRejected()
+    {
+        StaTestHost.Run(
+            () =>
+            {
+                var canvas = new GraphCanvasControl();
+                var magnifier = new MagnifierControl();
+                var series = new SeriesCardControl();
+
+                Assert.ThrowsExactly<ArgumentException>(() => canvas.ZoomLevel = 0);
+                Assert.ThrowsExactly<ArgumentException>(() => magnifier.ZoomLevel = double.NaN);
+                Assert.ThrowsExactly<ArgumentException>(() => series.Confidence = -0.01);
+                Assert.ThrowsExactly<ArgumentException>(() => series.Confidence = 1.01);
+            });
+    }
+
+    [TestMethod]
+    public void ControlXamlContainsNoVisibleHardCodedStrings()
+    {
+        var controlsDirectory = Path.Combine(RepositoryTestPaths.Root, "src", "GraphReader.App", "Controls");
+        var violations = new List<string>();
+        foreach (var path in Directory.EnumerateFiles(controlsDirectory, "*.xaml", SearchOption.TopDirectoryOnly))
+        {
+            var document = XDocument.Load(path);
+            foreach (var attribute in document.Descendants().Attributes())
+            {
+                bool isAutomationName = attribute.Name.LocalName == "Name"
+                    && attribute.Name.NamespaceName.Contains("System.Windows.Automation", StringComparison.Ordinal);
+                bool isVisibleAttribute = isAutomationName || new[] { "Text", "Content", "Header", "ToolTip" }
+                    .Contains(attribute.Name.LocalName, StringComparer.Ordinal);
+                if (!isVisibleAttribute || string.IsNullOrWhiteSpace(attribute.Value))
+                {
+                    continue;
+                }
+
+                if (!attribute.Value.StartsWith("{DynamicResource ", StringComparison.Ordinal)
+                    && !attribute.Value.StartsWith("{Binding ", StringComparison.Ordinal))
+                {
+                    violations.Add($"{Path.GetFileName(path)}: {attribute.Name.LocalName}='{attribute.Value}'");
+                }
+            }
+        }
+
+        Assert.IsEmpty(violations, string.Join(Environment.NewLine, violations));
+    }
+
+    private sealed class MutableCount(int count) : INotifyPropertyChanged
+    {
+        private int _count = count;
+
+        public int Count
+        {
+            get => _count;
+            set
+            {
+                if (_count == value)
+                {
+                    return;
+                }
+
+                _count = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}

@@ -1,0 +1,33 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Copyright 2026 Sungwoo Kang -->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+
+  <FontFamily x:Key="App.FontFamily.Default">IBM Plex Sans, Noto Sans, Segoe UI</FontFamily>
+
+  <sys:Double x:Key="App.FontSize.Caption">11</sys:Double>
+  <sys:Double x:Key="App.FontSize.Body">13</sys:Double>
+  <sys:Double x:Key="App.FontSize.Subtitle">16</sys:Double>
+  <sys:Double x:Key="App.FontSize.Title">22</sys:Double>
+
+  <sys:Double x:Key="App.Spacing.2">2</sys:Double>
+  <sys:Double x:Key="App.Spacing.4">4</sys:Double>
+  <sys:Double x:Key="App.Spacing.8">8</sys:Double>
+  <sys:Double x:Key="App.Spacing.12">12</sys:Double>
+  <sys:Double x:Key="App.Spacing.16">16</sys:Double>
+  <sys:Double x:Key="App.Spacing.24">24</sys:Double>
+  <sys:Double x:Key="App.Spacing.32">32</sys:Double>
+
+  <sys:Double x:Key="App.Control.Height">36</sys:Double>
+  <Thickness x:Key="App.Control.BorderWidth">1</Thickness>
+
+  <CornerRadius x:Key="App.CornerRadius.Small">3</CornerRadius>
+  <CornerRadius x:Key="App.CornerRadius.Medium">6</CornerRadius>
+  <CornerRadius x:Key="App.CornerRadius.Large">10</CornerRadius>
+
+  <Thickness x:Key="App.Thickness.ControlPadding">12,6</Thickness>
+  <Thickness x:Key="App.Thickness.CompactPadding">8,4</Thickness>
+  <Thickness x:Key="App.Thickness.Focus">2</Thickness>
+</ResourceDictionary>
