@@ -107,8 +107,10 @@ checksums, and packaging status with the exact shipped values.
 
 | Item | Version | Source | License | SHA-256 | Bundled | Notice included | Reviewed |
 |---|---|---|---|---|---|---|---|
-| Real-ESRGAN model | TBD | TBD | BSD-3-Clause | TBD | TBD | No | No |
-| NCNN runtime | TBD | TBD | TBD | TBD | TBD | No | No |
+| RealESRGAN_x2plus reference weight | v0.2.1 | Official Real-ESRGAN release | BSD-3-Clause | `49fafd45f8fd7aa8d31ab2a22d14d91b536c34494a5cfe31eb5d89c2fa266abb` | No | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | Yes, metadata only |
+| realesr-general-x4v3 reference weight | v0.2.5.0 | Official Real-ESRGAN release | BSD-3-Clause | `8dc7edb9ac80ccdc30c3a5dca6616509367f05fbc184ad95b731f05bece96292` | No | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | Yes, metadata only |
+| realesr-animevideov3 NCNN x2 model package | v0.2.5.0 | Official Real-ESRGAN Windows NCNN package | BSD-3-Clause | `abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d` | No | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | Yes, metadata only |
+| NCNN runtime | v0.2.0 | Official Real-ESRGAN NCNN Vulkan release | MIT plus transitive notices pending | `1bbbdb12d470af80b035c773682e144c6c2f6ece9210832a289af0a48ce3fa9a` | No | No | No, bundling blocked |
 | ONNX Runtime DirectML | 1.24.4 | NuGet / microsoft/onnxruntime | MIT + notices | `57e9f11b73437bef7a309496135d4c1f96b1a8e9ddba60013fa27bfc1d788681` | Yes | `LICENSES/ONNX-Runtime-1.24.4-License.txt` | Yes |
 | ONNX Runtime managed | 1.24.4 | NuGet / microsoft/onnxruntime | MIT + notices | `95cc5d366e876bcc9c39e87af277278aa3df56108fb572c884bf21f6b9e22182` | Yes | `LICENSES/ONNX-Runtime-1.24.4-License.txt` | Yes |
 | Microsoft DirectML redistributable | 1.15.4 | NuGet / Microsoft.AI.DirectML | Microsoft redistributable + MIT/BSD notices | `4e7cb7ddce8cf837a7a75dc029209b520ca0101470fcdf275c1f49736a3615b9` | Yes | `LICENSES/DirectML-1.15.4-License.txt` and code license | Yes |

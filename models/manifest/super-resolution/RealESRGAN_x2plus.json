@@ -1,0 +1,103 @@
+{
+  "manifest_version": 1,
+  "model_id": "RealESRGAN_x2plus",
+  "model_version": "v0.2.1",
+  "task": "super_resolution",
+  "source": {
+    "name": "xinntao/Real-ESRGAN official v0.2.1 release asset",
+    "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth",
+    "revision": "v0.2.1@64ad194ddaf9c4d8c4b0d1b98cac6d89d3ea0d11"
+  },
+  "license": {
+    "spdx": "BSD-3-Clause",
+    "notice_path": "LICENSES/Real-ESRGAN-BSD-3-Clause.txt",
+    "reviewed": true
+  },
+  "sha256": "49fafd45f8fd7aa8d31ab2a22d14d91b536c34494a5cfe31eb5d89c2fa266abb",
+  "files": [
+    "RealESRGAN_x2plus.pth"
+  ],
+  "inputs": [
+    {
+      "name": "input_image",
+      "kind": "raster_image",
+      "element_types": [
+        "uint8",
+        "uint16"
+      ],
+      "channels": [
+        1,
+        3,
+        4
+      ],
+      "source_layout": "HWC",
+      "source_color_order": "grayscale, BGR, or BGRA as loaded unchanged by OpenCV",
+      "model_tensor_layout": "NCHW",
+      "model_tensor_color_order": "RGB",
+      "model_tensor_element_type": "float32, optionally float16 on CUDA",
+      "model_tensor_range": [
+        0.0,
+        1.0
+      ],
+      "coordinate_space": "original_pixels"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "enhanced_image",
+      "kind": "raster_image",
+      "element_type": "matches the uint8 or uint16 input depth",
+      "layout": "HWC",
+      "color_order": "grayscale, BGR, or BGRA matching the source mode",
+      "configured_output_scale": 2,
+      "width": "2 * input_width",
+      "height": "2 * input_height",
+      "coordinate_space": "enhanced_pixels",
+      "inverse_coordinate_mapping": "original_x = enhanced_x / 2; original_y = enhanced_y / 2"
+    }
+  ],
+  "preprocessing": {
+    "loader": "cv2.imread with IMREAD_UNCHANGED",
+    "normalization": "Divide by 65535 when the maximum sample is greater than 256; otherwise divide by 255",
+    "channel_handling": "Convert grayscale to RGB; separate BGRA alpha; convert BGR to RGB",
+    "tensor_conversion": "HWC to NCHW, add batch dimension, move to selected torch device",
+    "native_network_scale": 2,
+    "default_tile_size": 0,
+    "default_tile_padding": 10,
+    "default_pre_padding": 0,
+    "mod_padding": "Reflect-pad the right and bottom edges to even dimensions for the native x2 network"
+  },
+  "postprocessing": {
+    "tensor_processing": "Remove mod/pre padding, clamp to [0,1], convert RGB CHW to BGR HWC",
+    "depth_conversion": "Round after multiplying by 255 for uint8 or 65535 for uint16",
+    "alpha_handling": "Upsample the separated alpha channel with Real-ESRGAN by default, then merge it",
+    "native_network_scale": 2,
+    "configured_output_scale": 2,
+    "final_resize": "none",
+    "original_preservation": "Output is a derived image; the source image must not be overwritten"
+  },
+  "commercial_use": true,
+  "redistribution": true,
+  "providers": [
+    "cpu",
+    "cuda"
+  ],
+  "benchmarks": [
+    {
+      "profile": "session-05-super-resolution-x2",
+      "status": "not_run",
+      "configured_output_scale": 2,
+      "adapter_compatibility": "PyTorch reference weight; not directly consumable by realesrgan-ncnn-vulkan",
+      "metrics_required": [
+        "marker_center_f1",
+        "shape_fill_classification_f1",
+        "numeric_ocr_exact_match",
+        "axis_line_localization_error_pixels",
+        "hallucinated_structure_rate",
+        "runtime_ms",
+        "peak_memory_bytes"
+      ],
+      "quality_claims": "none"
+    }
+  ]
+}

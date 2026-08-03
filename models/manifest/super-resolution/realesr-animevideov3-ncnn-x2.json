@@ -1,0 +1,100 @@
+{
+  "manifest_version": 1,
+  "model_id": "realesr-animevideov3",
+  "model_version": "v0.2.5.0-ncnn-x2",
+  "task": "super_resolution",
+  "source": {
+    "name": "xinntao/Real-ESRGAN official v0.2.5.0 Windows NCNN package",
+    "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-windows.zip",
+    "revision": "Real-ESRGAN v0.2.5.0@685d429c81888252bdb10f56c7754baededc3823; Real-ESRGAN-ncnn-vulkan v0.2.0@37026f49824c5cf84062e7c6a5dd71445dcf610f"
+  },
+  "license": {
+    "spdx": "BSD-3-Clause",
+    "notice_path": "LICENSES/Real-ESRGAN-BSD-3-Clause.txt",
+    "reviewed": true
+  },
+  "sha256": "abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d",
+  "files": [
+    "models/realesr-animevideov3-x2.param",
+    "models/realesr-animevideov3-x2.bin"
+  ],
+  "inputs": [
+    {
+      "name": "input_image",
+      "kind": "raster_image",
+      "formats": [
+        "jpeg",
+        "png",
+        "webp"
+      ],
+      "element_type": "uint8",
+      "channels": [
+        1,
+        3,
+        4
+      ],
+      "source_layout": "HWC",
+      "source_color_order": "decoded grayscale, RGB, or RGBA handled by the NCNN executable",
+      "coordinate_space": "original_pixels"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "enhanced_image",
+      "kind": "raster_image",
+      "formats": [
+        "jpeg",
+        "png",
+        "webp"
+      ],
+      "element_type": "uint8",
+      "layout": "HWC",
+      "configured_output_scale": 2,
+      "width": "2 * input_width",
+      "height": "2 * input_height",
+      "coordinate_space": "enhanced_pixels",
+      "inverse_coordinate_mapping": "original_x = enhanced_x / 2; original_y = enhanced_y / 2"
+    }
+  ],
+  "preprocessing": {
+    "runtime": "realesrgan-ncnn-vulkan",
+    "runtime_model_name": "realesr-animevideov3",
+    "runtime_scale_argument": 2,
+    "default_tile_size": 0,
+    "tile_padding_pixels": 10,
+    "model_payload_sha256": {
+      "models/realesr-animevideov3-x2.param": "b88ff4f00ebf019a7fdac17fdd45a7fd3665d37509efc5baf2e4da2e24420a04",
+      "models/realesr-animevideov3-x2.bin": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d"
+    },
+    "manifest_sha256_scope": "SHA-256 of the official Windows package containing both listed model files"
+  },
+  "postprocessing": {
+    "configured_output_scale": 2,
+    "output_dimension_validation": "Require exact width and height equal to twice the source dimensions",
+    "tiling_note": "The official runtime may tile and stitch, which can differ from PyTorch inference",
+    "original_preservation": "Output is a derived image; the source image must not be overwritten"
+  },
+  "commercial_use": true,
+  "redistribution": true,
+  "providers": [
+    "vulkan"
+  ],
+  "benchmarks": [
+    {
+      "profile": "session-05-super-resolution-x2",
+      "status": "not_run",
+      "configured_output_scale": 2,
+      "adapter_compatibility": "Official NCNN param/bin payload for Vulkan process inference",
+      "metrics_required": [
+        "marker_center_f1",
+        "shape_fill_classification_f1",
+        "numeric_ocr_exact_match",
+        "axis_line_localization_error_pixels",
+        "hallucinated_structure_rate",
+        "runtime_ms",
+        "peak_memory_bytes"
+      ],
+      "quality_claims": "none"
+    }
+  ]
+}
