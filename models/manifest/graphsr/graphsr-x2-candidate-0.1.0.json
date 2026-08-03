@@ -1,0 +1,215 @@
+{
+  "manifest_version": 1,
+  "model_id": "graphsr-x2-candidate",
+  "model_version": "0.1.0-local-candidate",
+  "task": "super_resolution",
+  "source": {
+    "name": "Graph Auto Reader original compact chart-preserving x2 candidate",
+    "url": "local://ml/graphsr",
+    "revision": "graphsr-x2-pytorch-v1"
+  },
+  "license": {
+    "spdx": "Apache-2.0",
+    "notice_path": "models/manifest/graphsr/GRAPHSR_X2_CANDIDATE_NOTICE.md",
+    "reviewed": true
+  },
+  "sha256": "4b0237683cd61ecd639015380bad9323a5fe79b295ffebf0c93720f51ef0d667",
+  "files": [
+    "graphsr-x2.onnx"
+  ],
+  "inputs": [
+    {
+      "name": "image",
+      "element_type": "float32",
+      "layout": "NCHW",
+      "shape": [
+        "N",
+        3,
+        "H",
+        "W"
+      ],
+      "dynamic_axes": [
+        "N",
+        "H",
+        "W"
+      ],
+      "color_order": "RGB",
+      "value_range": [
+        0.0,
+        1.0
+      ],
+      "coordinate_space": "model_tensor"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "enhanced",
+      "element_type": "float32",
+      "layout": "NCHW",
+      "shape": [
+        "N",
+        3,
+        "2H",
+        "2W"
+      ],
+      "dynamic_axes": [
+        "N",
+        "2H",
+        "2W"
+      ],
+      "color_order": "RGB",
+      "value_range": [
+        0.0,
+        1.0
+      ],
+      "configured_output_scale": 2,
+      "coordinate_space": "enhanced_pixels",
+      "inverse_coordinate_mapping": "original_x = enhanced_x / 2 and original_y = enhanced_y / 2, followed by the recorded earlier inverse transforms"
+    }
+  ],
+  "preprocessing": {
+    "source": "immutable original or explicitly transformed panel crop",
+    "channel_handling": "decode locally, convert to RGB, preserve a separate reversible transform record",
+    "tensor_conversion": "HWC to NCHW float32 with a batch dimension",
+    "normalization": "divide uint8 samples by 255 and require finite values in [0,1]",
+    "configured_output_scale": 2,
+    "training_data": "deterministic procedural Graph Auto Reader scenes only",
+    "private_data": false,
+    "pretrained_weights": false,
+    "original_preservation": "the source image is immutable and may not be overwritten",
+    "architecture": "graphsr-srvgg-x2-v1 with 24 channels, four residual blocks, bilinear x2 geometry anchor, and PixelShuffle correction",
+    "initialization_seed": 20260803,
+    "loss_weights": {
+      "charbonnier_reconstruction": 1.0,
+      "edge_consistency": 0.2,
+      "marker_center_consistency": 0.15,
+      "ocr_proxy_consistency": 0.1,
+      "adversarial": 0.0,
+      "maximum_allowed_adversarial": 0.01
+    },
+    "training_revision": "graphsr-x2-pytorch-v1",
+    "dataset_identity": "sha256:74a5d03366808d8c1ae0b41439d0f6e613490a400296c8de21c0b85c0e39bfc6",
+    "checkpoint_sha256": "9524033b57b37b78e4f35bcc6256412bf087ec1cace4c5f857eb1eb51632847a",
+    "artifact_sha256_status": "exact SHA-256 of the deterministic ignored 100-step public-synthetic candidate; the held-out fidelity gate failed and release is prohibited",
+    "source_revision_status": "bind to the final tracked source commit before release review"
+  },
+  "postprocessing": {
+    "tensor_processing": "require finite NCHW output, clamp to [0,1], and convert to the caller's derived-image encoding",
+    "output_dimension_validation": "require output width and height to equal exactly twice the input dimensions",
+    "public_coordinate_mapping": "map enhanced detections back through inverse scale 0.5 and all recorded earlier inverse transforms",
+    "original_preservation": "write a derived image only; never replace the immutable source",
+    "disagreement_policy": "reduce confidence and require review when original and enhanced evidence disagree materially"
+  },
+  "commercial_use": true,
+  "redistribution": false,
+  "providers": [
+    "cpu"
+  ],
+  "benchmarks": [
+    {
+      "profile": "onnx-export-cpu-parity",
+      "status": "pass",
+      "release_eligible": false,
+      "evidence_path": "ml/graphsr/runs/session07-final-v2/model/onnx-parity.json",
+      "evidence_sha256": "389c93e2c1a30a96e8f4be1e92cca6624f49f275903fd00e7b2ed470bfa00745",
+      "artifact_sha256": "4b0237683cd61ecd639015380bad9323a5fe79b295ffebf0c93720f51ef0d667",
+      "artifact_size_bytes": 207110,
+      "checkpoint_sha256": "9524033b57b37b78e4f35bcc6256412bf087ec1cace4c5f857eb1eb51632847a",
+      "dataset_identity": "sha256:74a5d03366808d8c1ae0b41439d0f6e613490a400296c8de21c0b85c0e39bfc6",
+      "training_scope": "attempt 2 of 3; 100 optimizer steps on 16 deterministic public-synthetic crops from four training-family scenes using repaired per-marker loss; held-out scenes were opened only after training",
+      "onnx_checker": "pass",
+      "opset": 18,
+      "provider": "cpu",
+      "provider_runtime": "onnxruntime 1.27.0",
+      "parity_cases": 2,
+      "parity_maximum_absolute_error": 2.384185791015625e-07,
+      "parity_tolerance": 0.00001,
+      "dynamic_even_and_odd_shapes": true,
+      "quality_claims": "numerical parity only; held-out fidelity acceptance failed"
+    },
+    {
+      "profile": "session-07-graphsr-x2",
+      "status": "fail",
+      "artifact_status": "local_bounded_candidate_rejected_by_heldout_gate",
+      "release_eligible": false,
+      "default_selected": false,
+      "provider_status": "cpu benchmark passed; directml and cuda not verified",
+      "onnx_parity_status": "pass at 2.384185791015625e-07 against 1e-05",
+      "quality_claims": "GraphSR failed marker-center, thin-line, and open-marker thresholds and is not eligible for selection",
+      "measurement_contract": {
+        "runtime": "input decode through output RGB uint8 materialization; common shape validation and metric scoring excluded",
+        "memory": "maximum combined resident working set of the benchmark host and candidate child processes sampled every 1 ms over the runtime boundary"
+      },
+      "benchmark_manifest_path": "ml/graphsr/runs/session07-final-v2/benchmark-manifest.json",
+      "benchmark_manifest_sha256": "e9d4cb39bf4974469045ad690fdbdaa7e8eed5fed92be5574bac9143e4d7ba11",
+      "benchmark_report_path": "ml/graphsr/runs/session07-final-v2/benchmark-report.json",
+      "benchmark_report_sha256": "dab65f55e74b7a17271dcf03dc109912c86de88d1c6d6614eed3c493d5d29d03",
+      "heldout_dataset_id": "public-synthetic-hand-drawn-heldout-v1",
+      "heldout_case_count": 2,
+      "heldout_dataset_evidence_sha256": "75da7c37d25fffe2c30100ed47e70750fdcb98c58e3fc42acc431e7c70d81899",
+      "candidate_order": [
+        "RealESRGAN_x2plus",
+        "realesr-general-x4v3",
+        "realesr-animevideov3",
+        "GraphSR-x2",
+        "baseline-bicubic-x2"
+      ],
+      "metrics_required": [
+        "numeric_ocr_exact_match",
+        "numeric_ocr_proxy_exact_match",
+        "marker_center_f1",
+        "marker_center_mean_error_pixels",
+        "shape_fill_classification_f1",
+        "axis_thin_line_recall",
+        "axis_line_localization_error_pixels",
+        "open_marker_preservation_rate",
+        "hallucinated_structure_rate",
+        "runtime_ms_mean",
+        "peak_memory_bytes"
+      ],
+      "selection_policy": "select no default unless all five candidates are measured, all absolute downstream gates pass, no downstream metric regresses against bicubic, and the selected candidate improves both actual numeric OCR exact match and marker-center F1; the image-only OCR proxy cannot satisfy the OCR gate",
+      "graphsr_metrics": {
+        "numeric_ocr_exact_match": null,
+        "numeric_ocr_proxy_exact_match": 0.75,
+        "marker_center_f1": null,
+        "marker_center_mean_error_pixels": 0.9537280553297839,
+        "shape_fill_classification_f1": null,
+        "axis_thin_line_recall": 0.845170925987388,
+        "axis_line_localization_error_pixels": 0.8257793431532947,
+        "open_marker_preservation_rate": 0.9852941176470589,
+        "hallucinated_structure_rate": 0.002459281630892029,
+        "runtime_ms_mean": 297.7762499358505,
+        "peak_memory_bytes": 305905664
+      },
+      "bicubic_metrics": {
+        "numeric_ocr_exact_match": null,
+        "numeric_ocr_proxy_exact_match": 1.0,
+        "marker_center_f1": null,
+        "marker_center_mean_error_pixels": 0.7227277310938609,
+        "shape_fill_classification_f1": null,
+        "axis_thin_line_recall": 1.0,
+        "axis_line_localization_error_pixels": 0.00033189512114171923,
+        "open_marker_preservation_rate": 0.9352941176470588,
+        "hallucinated_structure_rate": 0.05444297761413344,
+        "runtime_ms_mean": 18.216800061054528,
+        "peak_memory_bytes": 74432512
+      },
+      "acceptance_thresholds": {
+        "marker_center_mean_error_pixels_max": 0.25,
+        "axis_thin_line_recall_min": 0.98,
+        "open_marker_preservation_rate_min": 1.0,
+        "hallucinated_structure_rate_max": 0.01
+      },
+      "blockers": [
+        "GraphSR marker-center mean error 0.9537280553297839 exceeds 0.25",
+        "GraphSR thin-line recall 0.845170925987388 is below 0.98",
+        "GraphSR open-marker preservation 0.9852941176470589 is below 1.0",
+        "official candidate runtimes are not approved or locally configured",
+        "actual numeric OCR, marker detector, and shape/fill classifier adapters are unavailable",
+        "DirectML and CUDA providers have not been verified",
+        "source revision is not bound to a tracked commit",
+        "reviewed release storage and package parity have not been verified"
+      ]
+    }
+  ]
+}
