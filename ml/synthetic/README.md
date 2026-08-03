@@ -1,0 +1,34 @@
+# Synthetic SCD Graph Generator
+
+This package creates deterministic, declarative single-case design graph scenes
+and perfect original-pixel annotations. It uses no published figures, private
+images, downloaded assets, or bundled font files.
+
+    python -m ml.synthetic.generate --preset smoke --seed 393
+    python -m pytest ml/synthetic/tests -q
+
+The default output is written below ml/synthetic/datasets/, which is ignored by
+the repository. Each case contains its scene declaration, PNG image, binary
+marker mask, annotation JSON, and source graph CSV. Dataset-level output
+contains deterministic seed and split manifests, a contact sheet, and a sanity
+report.
+
+## Split policy
+
+Train, validation, and test membership is assigned by renderer, system-font,
+degradation, chart-template, and marker-style families. Families are disjoint
+across splits. This prevents superficially different images from the same
+rendering recipe leaking into held-out evaluation.
+
+## Fonts and dependencies
+
+No font binaries are included. The renderer resolves only fonts already
+installed on the host, or a user-supplied font path. The selected font family
+and file name are recorded in annotations. Generation fails clearly when no
+eligible installed font can be found.
+
+- Pillow: MIT-CMU license, runtime raster drawing and PNG encoding.
+- jsonschema: MIT license, scene-schema validation.
+- pytest: MIT license, test-only.
+
+Generated scenes are original project output and contain no copied study data.
