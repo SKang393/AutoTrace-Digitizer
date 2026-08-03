@@ -1,0 +1,51 @@
+{
+  "spec_version": 1,
+  "case_id": "supplied-chandler-local-only",
+  "fixture_policy": {
+    "image_included": false,
+    "redistributable": false,
+    "private_case_required": true
+  },
+  "structure": {
+    "non_marker_artifacts": [
+      "x_axis",
+      "y_axis",
+      "tick_marks",
+      "phase_dividers",
+      "top_condition_brackets",
+      "axis_title",
+      "annotation_text",
+      "participant_text",
+      "annotation_arrows",
+      "line_intersections"
+    ],
+    "participant_text": "Chandler",
+    "axis_title": "Session",
+    "annotation_text": "Generalization",
+    "vertical_phase_divider_count": 2
+  },
+  "markers": {
+    "one_center_per_observation": true,
+    "duplicate_center_count": 0,
+    "filled_and_open_circles_are_distinct": true,
+    "open_circle_probe_count": 2,
+    "open_circle_probe_approximate_sessions": [21, 22],
+    "annotation_strokes_are_triangle_markers": false
+  },
+  "semantics": {
+    "participant_text_is_series_name": false,
+    "generalization_text_is_triangle_series_name": false,
+    "confirmed_probe_phase_code": "g"
+  },
+  "export": {
+    "minimal_csv_columns": ["x_value", "y_value", "phase"],
+    "audit_coordinates": "original_pixels",
+    "baseline_rows_available_to_intervention": true
+  },
+  "intentionally_unspecified": [
+    "exact_observation_count",
+    "marker_pixel_coordinates",
+    "marker_graph_y_values",
+    "series_scientific_labels"
+  ]
+}
