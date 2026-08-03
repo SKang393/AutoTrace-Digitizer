@@ -1,0 +1,236 @@
+{
+  "manifest_version": 1,
+  "model_id": "graph-marker-center",
+  "model_version": "0.1.0",
+  "task": "marker_center",
+  "source": {
+    "name": "Graph Auto Reader original compact PP-LCNet depthwise-FPN marker-center model",
+    "url": "local://ml/markers/center",
+    "revision": "marker-center-pytorch-v1; canonical-lf-source-bundle-sha256=a8cfd538b164d0e7a3c19c262daf55413eaea9a7639f3a1bc87d0c341b9734ac"
+  },
+  "license": {
+    "spdx": "Apache-2.0",
+    "notice_path": "models/manifest/markers/MARKER_CENTER_MODEL_NOTICE.md",
+    "reviewed": true
+  },
+  "sha256": "061a496167382d1bd11bb580bed383d2d1725da2001f9c440b7f1acc59ac116a",
+  "files": [
+    "marker-center.onnx"
+  ],
+  "inputs": [
+    {
+      "name": "image_and_masks",
+      "element_type": "float32",
+      "layout": "NCHW",
+      "shape": [
+        "N",
+        3,
+        "H",
+        "W"
+      ],
+      "dynamic_axes": [
+        "N",
+        "H",
+        "W"
+      ],
+      "value_range": [
+        0.0,
+        1.0
+      ],
+      "channels": [
+        "ink_probability",
+        "text_mask",
+        "artifact_mask"
+      ],
+      "coordinate_space": "model_tensor"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "marker_heads",
+      "element_type": "float32",
+      "layout": "NCHW",
+      "shape": [
+        "N",
+        3,
+        "H",
+        "W"
+      ],
+      "dynamic_axes": [
+        "N",
+        "H",
+        "W"
+      ],
+      "channels": [
+        "center_probability",
+        "radius_pixels",
+        "artifact_probability"
+      ],
+      "activation": "center and artifact are sigmoid probabilities; radius is softplus plus one pixel",
+      "output_stride": 1,
+      "coordinate_space": "model_tensor",
+      "inverse_coordinate_mapping": "frame_x = crop_left + ((tensor_x + 0.5) * crop_width / W) - 0.5 and likewise for y; then apply the recorded frame-to-original inverse"
+    }
+  ],
+  "preprocessing": {
+    "source": "original or enhanced immutable plot-region crop",
+    "channel_order": [
+      "ink_probability",
+      "text_mask",
+      "artifact_mask"
+    ],
+    "ink_probability": "1 - luminance, where luminance is finite float32 in [0,1]",
+    "mask_contract": "text and artifact masks are finite float32 planes in [0,1] aligned to the source frame",
+    "normalization_mean": 0.0,
+    "normalization_scale": 1.0,
+    "resize": "runtime-configured plot crop to tensor H x W with the reversible crop and frame transforms retained",
+    "original_preservation": "never overwrite the original image",
+    "training_revision": "marker-center-pytorch-v1",
+    "architecture": "compact-pplcnet-depthwise-fpn-v1",
+    "source_bundle_sha256": "a8cfd538b164d0e7a3c19c262daf55413eaea9a7639f3a1bc87d0c341b9734ac",
+    "source_bundle_algorithm": "For __init__.py, benchmark.py, dataset.py, export.py, metrics.py, model.py, postprocess.py, and train.py: normalize CRLF to LF, SHA-256 each UTF-8 file, sort by file name, concatenate name=sha followed by LF, then SHA-256 the UTF-8 material",
+    "dataset_manifest_sha256": "f313278c0fa987ec2b9225b3dbdf3ed218fbe8f5c8d6d32aa339ccad2dc4a6c7",
+    "dataset_split_scope": "Input-family and degradation-family identifiers are disjoint; geometry and layout templates repeat across splits, so no novel-layout or real-data generalization is claimed",
+    "checkpoint_sha256": "72471156daec005b7617916a3d81c3966c0a5e36cb93c6c88aaa58f4d1272fb9",
+    "onnx_opset": 18,
+    "audited_local_artifact": "ml/markers/center/artifacts/session10-final/marker-center.onnx"
+  },
+  "postprocessing": {
+    "center_threshold": 0.36,
+    "artifact_threshold": 0.35,
+    "artifact_score": "At each candidate center, max-gate the model artifact head, sampled raw text mask, and sampled raw artifact mask",
+    "artifact_rejection_rule": "Reject when max(model_artifact_probability, sampled_text_mask, sampled_artifact_mask) is greater than or equal to 0.35",
+    "local_maximum_window": 9,
+    "local_maximum_tie_order": "descending center confidence, then ascending tensor y and x",
+    "minimum_radius_tensor_pixels": 2.5,
+    "minimum_nms_distance_tensor_pixels": 5.0,
+    "radius_nms_scale": 1.25,
+    "nms_rule": "suppress when center distance is less than max(5, 1.25 * (candidate_radius + accepted_radius))",
+    "coordinate_mapping": "map half-pixel-aligned tensor centers through the reversible crop transform and then the recorded frame-to-original inverse",
+    "radius_mapping": "map tensor radius through crop scale and the geometric-mean inverse frame scale",
+    "consensus": "minimum-cost maximum one-to-one matching within 5 original pixels for original and enhanced detections",
+    "unmatched_source_confidence_scale": 0.75,
+    "unmatched_review_status": "needs_review",
+    "public_coordinate_space": "original_pixels"
+  },
+  "commercial_use": true,
+  "redistribution": true,
+  "providers": [
+    "cpu",
+    "directml"
+  ],
+  "benchmarks": [
+    {
+      "profile": "onnx-export-cpu-parity",
+      "status": "pass",
+      "evidence_path": "ml/markers/center/artifacts/session10-final/onnx-parity.json",
+      "evidence_sha256": "2851185f999dcbda67cabf04e820c185545eb76de864ff9033ee66c31bce9db4",
+      "onnx_checker": "pass",
+      "provider": "cpu",
+      "provider_runtime": "onnxruntime 1.27.0",
+      "parity_cases": 2,
+      "parity_max_absolute_difference": 0.000002384185791015625,
+      "parity_tolerance": 0.00001
+    },
+    {
+      "profile": "graphreader-inference-cpu-directml-parity",
+      "status": "pass",
+      "evidence_path": "tests/GraphReader.Markers.Tests/Detection/TestResults/session10-final-provider-probe.json",
+      "evidence_sha256": "f6f8d641f58284fe07d7c191df9d72fae8353cf24e5b8d923621ef1249503e01",
+      "input_shape": [
+        1,
+        3,
+        128,
+        128
+      ],
+      "output_shape": [
+        1,
+        3,
+        128,
+        128
+      ],
+      "maximum_absolute_difference": 0.000001430511474609375,
+      "mean_absolute_difference": 0.00000011235996074295447,
+      "tolerance": 0.0001,
+      "directml_inference_ms": 601.636,
+      "cpu_inference_ms": 5.1175,
+      "directml_assignment_note": "DirectML session execution passed, but ONNX Runtime assigned some shape-related nodes to CPU; this is a mixed-node DirectML run"
+    },
+    {
+      "profile": "session-10-historical-heldout-artifact-head-only",
+      "status": "fail",
+      "release_eligible": false,
+      "evidence_scope": "Historical frozen artifact-head-only postprocessing evidence that predates raw-mask max-gating parity repair",
+      "production_runtime_acceptance": false,
+      "heldout_rerun_after_mask_parity_repair": false,
+      "metrics_preserved_unmodified": true,
+      "evidence_path": "ml/markers/center/artifacts/session10-final/benchmark.json",
+      "evidence_sha256": "1fb8a69b17163f044e6108dd318e076ad7fa9f16c1a78fe83f6996ce8399e7a7",
+      "dataset_manifest_sha256": "f313278c0fa987ec2b9225b3dbdf3ed218fbe8f5c8d6d32aa339ccad2dc4a6c7",
+      "heldout_evaluation_count": 1,
+      "selected_after_model_selection": true,
+      "heldout_families": [
+        "golden_dense",
+        "golden_open_touch",
+        "golden_same_column"
+      ],
+      "standard_masks": {
+        "truth_centers": 38,
+        "true_positives_3px": 38,
+        "false_positives_3px": 1,
+        "false_negatives_3px": 0,
+        "precision_3px": 0.9743589743589743,
+        "recall_3px": 1.0,
+        "f1_3px": 0.9870129870129869,
+        "true_positives_5px": 38,
+        "false_positives_5px": 1,
+        "false_negatives_5px": 0,
+        "precision_5px": 0.9743589743589743,
+        "recall_5px": 1.0,
+        "f1_5px": 0.9870129870129869,
+        "duplicate_rate_5px": 0.0,
+        "hard_negative_hits": {
+          "arrowhead": 0,
+          "axis": 0,
+          "bracket": 0,
+          "divider": 0,
+          "legend": 0,
+          "line_intersection": 0,
+          "text": 0,
+          "tick": 0
+        },
+        "exact_fixture_count": 5,
+        "fixture_count": 6
+      },
+      "zero_mask_diagnostic": {
+        "f1_5px": 0.9620253164556963,
+        "duplicate_rate_5px": 0.0,
+        "false_positives_5px": 3,
+        "legend_hits": 2,
+        "exact_fixture_count": 3,
+        "fixture_count": 6
+      },
+      "inference_total_two_modes_ms": 20.431,
+      "benchmark_total_ms": 161.552,
+      "failed_criteria": [
+        "one center per golden fixture",
+        "zero-mask legend rejection"
+      ]
+    },
+    {
+      "profile": "deterministic-mask-parity-no-heldout-reproduction",
+      "status": "pass",
+      "release_eligible": false,
+      "evidence_path": "ml/markers/center/artifacts/session10-mask-parity-proof/evidence-index.json",
+      "evidence_sha256": "91191738ffaee38c145f162c3a619305e1336f0646c85bc3bc2755f5225ee87c",
+      "heldout_benchmark_invoked": false,
+      "heldout_test_evaluations": 0,
+      "checkpoint_sha256": "72471156daec005b7617916a3d81c3966c0a5e36cb93c6c88aaa58f4d1272fb9",
+      "onnx_sha256": "061a496167382d1bd11bb580bed383d2d1725da2001f9c440b7f1acc59ac116a",
+      "dataset_manifest_sha256": "f313278c0fa987ec2b9225b3dbdf3ed218fbe8f5c8d6d32aa339ccad2dc4a6c7",
+      "canonical_source_sha256": "a8cfd538b164d0e7a3c19c262daf55413eaea9a7639f3a1bc87d0c341b9734ac",
+      "mask_gate_regression": "Raw text or artifact mask value 0.4 suppresses an otherwise identical candidate at threshold 0.35",
+      "generalization_claim": "Only input-family and degradation-family identifiers are disjoint; geometry and layout templates repeat"
+    }
+  ]
+}
