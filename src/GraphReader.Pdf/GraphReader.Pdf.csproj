@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PdfPig" VersionOverride="0.1.14" />
+  </ItemGroup>
 </Project>
