@@ -22,6 +22,7 @@ ml/markers/center/artifacts/production-repair-v2/P2-preregistration/** text eol=
 ml/markers/center/artifacts/production-repair-v2/P3-preregistration/** text eol=lf
 ml/markers/training-seals/marker-center/marker-center-production-repair-v2/P1/** text eol=lf
 ml/markers/training-seals/marker-center/marker-center-production-repair-v2/P2/** text eol=lf
+ml/markers/training-seals/marker-center/marker-center-production-repair-v2/P3/** text eol=lf
 ml/markers/gate-seals/marker-center/946b3e68e8908c67147e20b006487eb1d180577fcad1937432e512f2575fce16/** text eol=lf
 ml/markers/center/dataset.py text eol=crlf
 ml/markers/center/model.py text eol=crlf

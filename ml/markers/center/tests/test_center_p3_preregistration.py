@@ -10,7 +10,6 @@ from pathlib import Path
 import pytest
 import torch
 
-from ml.markers.center import production_train_v2_p3 as p3_runner
 from ml.markers.center.dataset import build_fixed_dataset
 from ml.markers.center.dataset_v2_p3 import (
     MINIMUM_TRUE_CENTER_DISTANCE,
@@ -19,6 +18,7 @@ from ml.markers.center.dataset_v2_p3 import (
 )
 from ml.markers.center.production_train_v2_p3 import CONFIG_PATH, RUNNER_SOURCE_PATHS
 from ml.markers.gate_seal import canonical_json_bytes, sha256_file, source_bundle_sha256
+from ml.markers.training_budget import acquire_training_candidate
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -63,7 +63,7 @@ def test_p3_changes_only_hard_negative_placement_and_prevents_truth_overlap() ->
             ) >= MINIMUM_TRUE_CENTER_DISTANCE
 
 
-def test_p3_is_final_hash_bound_single_factor_and_refuses_before_authorization(
+def test_p3_is_final_hash_bound_selected_and_cannot_rerun(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -106,25 +106,44 @@ def test_p3_is_final_hash_bound_single_factor_and_refuses_before_authorization(
     entry = next(
         item for item in ledger["revisions"] if item["revision"] == "marker-center-production-repair-v2"
     )
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["status"] == "candidate_3_selected_public_gate_authorized"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["authorized_candidate_id"] is None
     assert entry["candidate_config_sha256"]["P3"] == sha256_file(p3_path)
     assert entry["p3_selection_dataset_manifest_sha256"] == EXPECTED_MANIFEST_SHA256
     assert entry["p3_runner_source_bundle_sha256"] == EXPECTED_RUNNER_SHA256
 
-    output = tmp_path / "p3-must-not-run-without-authorization"
-
-    def refuse_authorization(*_args: object, **_kwargs: object) -> object:
-        raise RuntimeError("controlled authorization refusal")
-
-    monkeypatch.setattr(p3_runner, "acquire_training_candidate", refuse_authorization)
-    with pytest.raises(RuntimeError, match="controlled authorization refusal"):
-        p3_runner.train_candidate(output)
-    assert not output.exists()
-    assert not (
+    assert entry["candidate_checkpoint_sha256"]["P3"] == (
+        "43d2ed0d386e5c84a805893d214488c37985cc8db255225ed8eba218a5268cfa"
+    )
+    assert entry["candidate_onnx_sha256"]["P3"] == (
+        "2a165078f7ca5bbdb07a865d9e2b22ab0d9f1e7ab40575fa559fba165cb59f8d"
+    )
+    assert entry["p3_public_gate_evaluations"] == 0
+    assert entry["p3_public_gate_authorized"] is True
+    assert entry["p3_public_gate_candidate_key"] == (
+        "7197d72650a5fba3eae55131e981174de01a518e7c283ecae4c31c351c772413"
+    )
+    seal_root = (
         REPO_ROOT
         / "ml/markers/training-seals/marker-center/marker-center-production-repair-v2/P3"
-    ).exists()
+    )
+    assert sha256_file(seal_root / "opened.json") == entry["p3_training_opened_seal_sha256"]
+    assert sha256_file(seal_root / "result.json") == entry["p3_training_result_seal_sha256"]
+
+    monkeypatch.setattr(
+        "ml.markers.training_budget.require_committed_sources",
+        lambda *_args, **_kwargs: None,
+    )
+    with pytest.raises(RuntimeError, match="not authorized"):
+        acquire_training_candidate(
+            REPO_ROOT,
+            task="marker-center",
+            revision="marker-center-production-repair-v2",
+            candidate_id="P3",
+            config_path=CONFIG_PATH,
+            runner_source_paths=RUNNER_SOURCE_PATHS,
+        )
+    assert not (tmp_path / "ml/markers/training-seals").exists()

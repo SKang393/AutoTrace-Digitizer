@@ -86,11 +86,11 @@ def test_p2_is_hash_bound_consumed_and_cannot_rerun(
 
     ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-production-repair-v2")
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["status"] == "candidate_3_selected_public_gate_authorized"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["authorized_candidate_id"] is None
     assert entry["candidate_config_sha256"]["P2"] == sha256_file(p2_path)
     assert entry["p2_selection_dataset_manifest_sha256"] == EXPECTED_MANIFEST_SHA256
     assert entry["p2_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)

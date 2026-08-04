@@ -338,11 +338,11 @@ def test_v2_candidate_one_is_hash_bound_consumed_and_cannot_rerun(tmp_path: Path
     historical_runner_source_sha256 = "0dc41fbb2b44e67267266b5d5d86c3433f14adfc909027b177bd87de415c6c7c"
     assert config["expected_runner_source_bundle_sha256"] == historical_runner_source_sha256
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(config_path)
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["status"] == "candidate_3_selected_public_gate_authorized"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["candidate_checkpoint_sha256"]["P1"] == "2292f516ed7263f741549fb6b127a62d1d1cf4368153d23953bca3fa9812deab"
     assert entry["candidate_onnx_sha256"]["P1"] == "f8f543dee4e80e55f5e7ab316e6ddfd3884219c191b5378a967ed186f4c5b6a6"
     output = tmp_path / "v2-p1-must-not-rerun"

@@ -1,0 +1,26 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/markers/center/training/production-repair-v2-p3.json",
+    "candidate_config_sha256": "2526956577d6db282ca49e24921d25bfd8f5f0e5b64c55d8b384c266f5889d67",
+    "candidate_id": "P3",
+    "committed_source_enforcement": true,
+    "revision": "marker-center-production-repair-v2",
+    "runner_source_bundle_sha256": "e24c1bb4384e85e6270f7f75c6c3ac6041ddc3da88d88f296868cdcfc11a792d",
+    "runner_source_paths": [
+      "ml/markers/center/dataset.py",
+      "ml/markers/center/dataset_v2_p3.py",
+      "ml/markers/center/export.py",
+      "ml/markers/center/model.py",
+      "ml/markers/center/production_train.py",
+      "ml/markers/center/production_train_v2.py",
+      "ml/markers/center/production_train_v2_p3.py",
+      "ml/markers/center/train.py",
+      "ml/markers/training_budget.py"
+    ],
+    "task": "marker-center",
+    "training_budget_ledger_sha256": "8fb85d513eb0e0f755c159438e195da93313c28a6733d627127d2eb820e71d92"
+  },
+  "opened_utc": "2026-08-04T22:55:45.080337+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

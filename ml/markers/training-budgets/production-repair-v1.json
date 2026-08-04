@@ -53,14 +53,13 @@
     {
       "task": "marker-center",
       "revision": "marker-center-production-repair-v2",
-      "status": "candidate_3_preregistered",
+      "status": "candidate_3_selected_public_gate_authorized",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [
-        "P3"
-      ],
+      "preregistered_candidate_ids": [],
       "consumed_candidate_ids": [
         "P1",
-        "P2"
+        "P2",
+        "P3"
       ],
       "remaining_unregistered_candidate_ids": [],
       "candidate_config_paths": {
@@ -85,15 +84,24 @@
       "p3_selection_dataset_manifest_sha256": "5d2192aa2cefcb646abcddea4b87be05898a242d2d8f43a6b23100ec36cbfe02",
       "p3_sealed_selection_manifest_path": "ml/markers/center/artifacts/production-repair-v2/P3-preregistration/dataset-manifest.json",
       "p3_runner_source_bundle_sha256": "e24c1bb4384e85e6270f7f75c6c3ac6041ddc3da88d88f296868cdcfc11a792d",
+      "p3_training_report_path": "ml/markers/center/artifacts/production-repair-v2/P3-run/production-training-report.json",
+      "p3_training_report_sha256": "a08d8fd81cae978266e2c676212740fbb0f444e1d0c9926dcf22e4772b716428",
+      "p3_training_opened_seal_sha256": "b0c6636e154768a854503f0a69dc31a66317a45025a2569ca7d259464fff14e7",
+      "p3_training_result_seal_sha256": "f37b83132f4d17614527ef5fea483ea3cca2fb8ad84062135d5644e02a2c8a6f",
+      "p3_public_gate_evaluations": 0,
+      "p3_public_gate_authorized": true,
+      "p3_public_gate_candidate_key": "7197d72650a5fba3eae55131e981174de01a518e7c283ecae4c31c351c772413",
       "trigger_evidence_path": "ml/markers/center/artifacts/production-repair-v2/P2-run/production-training-report.json",
       "trigger_evidence_sha256": "eadab74837b7851d7b577664b2f1470be060d09e50955cb9bcbc7b71670597f9",
       "candidate_checkpoint_sha256": {
         "P1": "2292f516ed7263f741549fb6b127a62d1d1cf4368153d23953bca3fa9812deab",
-        "P2": "e9bdf74d36d7d460a5c2222e5a777a113150f69b3a8d1232466806e0f67ff33f"
+        "P2": "e9bdf74d36d7d460a5c2222e5a777a113150f69b3a8d1232466806e0f67ff33f",
+        "P3": "43d2ed0d386e5c84a805893d214488c37985cc8db255225ed8eba218a5268cfa"
       },
       "candidate_onnx_sha256": {
         "P1": "f8f543dee4e80e55f5e7ab316e6ddfd3884219c191b5378a967ed186f4c5b6a6",
-        "P2": "d0cbfdf691dc7c6c96bf59eaf2b67f969afaab8e25da502eba1e9c0b66e1f8ae"
+        "P2": "d0cbfdf691dc7c6c96bf59eaf2b67f969afaab8e25da502eba1e9c0b66e1f8ae",
+        "P3": "2a165078f7ca5bbdb07a865d9e2b22ab0d9f1e7ab40575fa559fba165cb59f8d"
       },
       "p1_training_report_sha256": "56cbd7042d6a1041aa61a3a9266dd26afbba5678de5ba2f065d85497ee3d084c",
       "p1_training_opened_seal_sha256": "6d3366eba0b47722268a6840696aa35bfbe4bdae0117e4521ce9edae86dc8178",
@@ -101,9 +109,9 @@
       "p1_public_gate_report_sha256": "1a06406f85d54917391fe558dadc8cbe62709bc22244818ebcb07b37cb5129f1",
       "p1_public_gate_opened_seal_sha256": "9c0dde09250a1ba0a80a85f6e4396aca7129df9b209821156ad557aabe12bd2a",
       "p1_public_gate_result_seal_sha256": "e16acf799568def2c5dcde1a2ac8946ec53bfe929212a22553fbf58edfa6201c",
-      "execution_authorized": true,
-      "authorized_candidate_id": "P3",
-      "execution_blocker": "P3 must not run until its config, dataset, runner, canonical budget, P2 failure evidence, and sealed dataset manifest are reviewed, committed, and clean.",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "The three-candidate training budget is consumed. P3 training cannot rerun; only its exact hash-bound once-only public gate is authorized.",
       "refusal_required_before_output": true
     }
   ]

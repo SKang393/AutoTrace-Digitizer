@@ -3,9 +3,9 @@
   "protocol_id": "graph-numeric-project-v1-20260804",
   "sources": {
     "audit_record": {
-      "bytes": 4063,
+      "bytes": 5133,
       "path": "models/manifest/ocr/PROJECT_NUMERIC_V1_PREREGISTRATION.md",
-      "sha256": "ffee65d54d3577fcb59c0fa28b4c1d9b53adb61fc2121ceb43a69d08335a218a"
+      "sha256": "04e14e1165953f530b1c660184d6f42a03a1406885f9ba44f6168e7cbf8b6a53"
     },
     "binding_verifier": {
       "bytes": 5430,
@@ -18,9 +18,9 @@
       "sha256": "5d56f4129793d9ac7d2633c78ee064e6a7fd5c56c1d167a1706e89d83ce0716f"
     },
     "experiment_plan": {
-      "bytes": 4952,
+      "bytes": 5169,
       "path": "ml/ocr/project_numeric_v1/EXPERIMENT_PLAN.md",
-      "sha256": "a1a5df56f386c98a8f370875e1b7c1767940bda413d688533e7ca32a25952e0b"
+      "sha256": "ef5dba8dd5cf9543b8147acd96f3d16d5cff123794849e16bbabb2d314431dec"
     },
     "frozen_protocol": {
       "bytes": 3104,
@@ -48,9 +48,9 @@
       "sha256": "4896bc73e62f412fb9ede8ac829348d17acdec28ed462270abb966bb95f2a008"
     },
     "readme": {
-      "bytes": 1139,
+      "bytes": 1224,
       "path": "ml/ocr/project_numeric_v1/README.md",
-      "sha256": "ed5339d4b473b3f56ede0dd3c93835eb23dc70f0d4c62bc003e10f6424e1e3d7"
+      "sha256": "a8b639d37d561eadb163542da2b5e9787fae84e67abb526e796845d1433810ed"
     },
     "tests": {
       "bytes": 7969,
@@ -68,5 +68,5 @@
     "train": "3217f58667ca497e8b5de60b4b493c92efd75e7f2e49b71a4f847ff6b7a5c8d2",
     "validation": "dec5869ac463b24c41616dafda34eb5817b8392a3da88ce09fd60fb47d7520f3"
   },
-  "training_state": "candidate_1_checkpoint_recovery_commit_required"
+  "training_state": "candidate_1_failed_recovery_complete_candidates_2_3_unregistered"
 }

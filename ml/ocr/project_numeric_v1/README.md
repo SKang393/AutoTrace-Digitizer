@@ -25,8 +25,9 @@ reviewed and committed, the exact retained checkpoint may be evaluated once:
 python -m ml.ocr.project_numeric_v1.train --resume-evaluation-only
 ```
 
-Candidates 2 and 3 are reserved, not executable. No model is approved or
-package eligible by this preregistration.
+The recovery completed without retraining and Candidate 1 failed the frozen
+quality gates. Candidates 2 and 3 are reserved, unregistered, and not
+executable. No model is approved or package eligible.
 
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <!-- Copyright 2026 Sungwoo Kang -->

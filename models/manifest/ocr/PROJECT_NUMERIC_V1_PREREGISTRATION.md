@@ -81,3 +81,26 @@ This is not a new candidate and does not authorize retraining. The tracked
 recovery record permits one evaluation-only load of those exact bytes after the
 fix is committed. It requires zero optimizer steps, immutable weights, the same
 frozen validation and sealed fingerprints, and the same fail-closed gates.
+
+## Candidate 1 recovery result
+
+The recovery ran once from committed source `0108b15`, performed zero optimizer
+steps, and retained checkpoint SHA-256
+`6e941b2b3b746e092f01bf04a28faea61d0ba0bf584dc83b0530594ddddd8235`.
+The ignored report is 10,509 bytes with SHA-256
+`889c07252c3b592d039e3a8eee33b394ddf7cf98559d484714e15ac387365fab`.
+
+| Gate evidence | Result | Required |
+| --- | ---: | ---: |
+| Validation exact match | `0.3359375` | at least `0.90` |
+| Sealed exact match | `0.119140625` | at least `0.90` |
+| Sealed CER | `0.4452018877818563` | at most `0.05` |
+| Validation role accuracy | `0.5828125` | at least `0.90` |
+| Sealed role accuracy | `0.9890625` | at least `0.90` |
+| Validation marker exclusion | `1.0` | `1.0` |
+| Sealed marker exclusion | `1.0` | `1.0` |
+
+Candidate 1 is consumed and rejected. Recognition quality failed before ONNX
+export, so no parity or provider claim exists. No downstream marker-creation,
+private graph, production resolver, packaging, or approval gate was run.
+Candidates 2 and 3 remain unregistered and are not executable.

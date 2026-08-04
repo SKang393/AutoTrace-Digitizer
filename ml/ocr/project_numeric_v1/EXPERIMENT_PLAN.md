@@ -89,8 +89,10 @@ pair-based metric API. Exact checkpoint SHA-256
 `6e941b2b3b746e092f01bf04a28faea61d0ba0bf584dc83b0530594ddddd8235`
 was retained. No report or ONNX was created, and the sealed split was not built.
 
-Candidate 1 must not retrain. `RECOVERY_EVALUATION.json` authorizes one
-evaluation-only recovery after the corrected evaluator and complete source
-binding are reviewed and committed. Recovery must load the exact checkpoint,
-perform zero optimizer steps, change no weights, and fail closed under the
-original public gates.
+Candidate 1 did not retrain. The committed recovery loaded the exact checkpoint,
+performed zero optimizer steps, changed no weights, and failed the original
+public gates. Validation exact match was `0.3359375`, sealed exact match was
+`0.119140625`, sealed CER was `0.4452018877818563`, and validation role
+accuracy was `0.5828125`. Marker exclusion was `1.0` on both splits, but that
+does not offset the failed recognition and role gates. No ONNX was exported.
+Candidate 1 is consumed and rejected. Candidates 2 and 3 remain unregistered.

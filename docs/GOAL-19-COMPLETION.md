@@ -105,7 +105,7 @@ in Production composition. Automatic stages currently report:
 | --- | --- | --- |
 | Enhancement | Unavailable | Exact runtime redistribution provenance is reviewed, but local-adapter, scientific, CPU fallback, clean-machine, production, and release approvals remain false. |
 | Axis | Unavailable | Deterministic adapter exists; OpenCvSharp native redistribution audit is blocked. |
-| OCR | Unavailable | Prior CTC, spatial V2, and canonical-slot experiments are closed. Whole-crop project numeric Candidate 1 trained once, then its evaluator stopped before a report, ONNX, or sealed split. Exact-checkpoint evaluation-only recovery is pending and no approved payload exists. |
+| OCR | Unavailable | Prior CTC, spatial V2, and canonical-slot experiments are closed. Whole-crop project numeric Candidate 1 completed evaluation-only recovery without retraining, failed the frozen recognition and role gates, and produced no ONNX. Candidates 2 and 3 are unregistered. |
 | Markers | Unavailable | Marker-center acceptance failed and the classifier candidate missed its shape gate. |
 | Legends | Unavailable | Deterministic reasoner requires approved OCR and marker evidence. |
 | Phases | Unavailable | Deterministic reasoner requires approved axis, OCR, and marker evidence. |
@@ -130,14 +130,13 @@ approving any model:
 - The official `RealESRGAN_x2plus` hash was reverified, but its PyTorch
   checkpoint is incompatible with the current NCNN adapter and no conversion
   is authorized.
-- Repair-v2 marker-center `P1` is consumed and rejected after its once-only
-  sealed public gate. `P2` achieved exact counts and F1 `1.0` across all six
-  standard and robust selection scenes with zero false positives, false
-  negatives, and duplicates, plus CPU ONNX parity
-  `3.814697265625e-06`. It failed because one preregistered hard-negative was
-  exactly 8 pixels from a correct true marker. P2 is consumed, its public gate
-  was never opened, and final Candidate `P3` is source-only preregistration
-  that changes only the non-overlapping placement.
+- Repair-v2 marker-center `P1` is consumed after its failed sealed public gate,
+  and `P2` is consumed after an overlapping selection annotation. Final
+  Candidate `P3` changed only that placement, then passed exact counts and F1
+  `1.0` across all six standard and six robust selection scenes with zero false
+  positives, false negatives, duplicates, and prohibited-structure hits. CPU
+  ONNX parity is `3.0994415283203125e-06`. P3 is selected for one hash-bound
+  public evaluation, but that gate is not open and no model is approved.
 - The sealed current packed marker classifier reached shape, fill, artifact,
   and minority-shape F1 `1.0`, but its direct packed ONNX maximum absolute
   error was `2.288818359375e-05`, above the `1e-5` gate. Retraining remains
@@ -156,13 +155,12 @@ approving any model:
   still lack artifact-specific redistribution evidence, immutable artifact
   revisions, and published SHA-256 values. The exact repository dictionary is
   recorded, but it does not approve the uninspected archive.
-- Project numeric OCR Candidate 1 completed its one authorized training pass,
-  then the evaluator stopped on a metric API signature error before creating a
-  report, ONNX, or sealed split. The exact 2,150,341-byte checkpoint SHA-256 is
-  `6e941b2b...8235`. A tracked recovery permits one evaluation-only continuation
-  after commit with zero optimizer steps and no weight changes. No model,
-  private result, or approval exists, and the report cannot claim the separate
-  downstream no-marker-creation gate.
+- Project numeric OCR Candidate 1 completed its recovery with zero optimizer
+  steps and unchanged checkpoint SHA-256 `6e941b2b...8235`. It failed with
+  validation exact `0.3359375`, sealed exact `0.119140625`, sealed CER
+  `0.4452018877818563`, and validation role accuracy `0.5828125`; no ONNX was
+  exported. Candidate 1 is consumed and rejected. Candidates 2 and 3 are
+  unregistered, and no model, private result, or approval exists.
 
 The exact OpenCvSharp slim package remains blocked:
 
