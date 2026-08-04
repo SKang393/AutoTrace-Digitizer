@@ -9,11 +9,12 @@ from pathlib import Path
 import pytest
 import torch
 
+from ml.markers.center import production_train_v2_p2 as p2_runner
 from ml.markers.gate_seal import canonical_json_bytes, sha256_file, source_bundle_sha256
 from ml.markers.training_budget import CANONICAL_LEDGER_PATH, acquire_training_candidate
 from ml.markers.center.dataset import build_fixed_dataset
 from ml.markers.center.dataset_v2_p2 import build_p2_selection_dataset, p2_dataset_manifest
-from ml.markers.center.production_train_v2_p2 import CONFIG_PATH, RUNNER_SOURCE_PATHS, train_candidate
+from ml.markers.center.production_train_v2_p2 import CONFIG_PATH, RUNNER_SOURCE_PATHS
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -62,7 +63,10 @@ def test_p2_fixed_split_adds_only_deterministic_tick_joint_selection_families() 
             assert all(kind in {"tick", "line_intersection"} for kind, _, _ in scene.hard_negatives[-6:])
 
 
-def test_p2_is_hash_bound_to_one_dataset_factor_and_refuses_before_commit(tmp_path: Path) -> None:
+def test_p2_is_hash_bound_to_one_dataset_factor_and_refuses_before_authorization(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     p1 = json.loads((REPO_ROOT / "ml/markers/center/training/production-repair-v2-p1.json").read_text(encoding="utf-8"))
     p2_path = REPO_ROOT / CONFIG_PATH
     p2 = json.loads(p2_path.read_text(encoding="utf-8"))
@@ -92,9 +96,14 @@ def test_p2_is_hash_bound_to_one_dataset_factor_and_refuses_before_commit(tmp_pa
     assert entry["p2_selection_dataset_manifest_sha256"] == EXPECTED_MANIFEST_SHA256
     assert entry["p2_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
 
-    output = tmp_path / "p2-must-not-run-before-commit"
-    with pytest.raises(RuntimeError, match="committed before use|committed revision"):
-        train_candidate(output)
+    output = tmp_path / "p2-must-not-run-without-authorization"
+
+    def refuse_authorization(*_args: object, **_kwargs: object) -> object:
+        raise RuntimeError("controlled authorization refusal")
+
+    monkeypatch.setattr(p2_runner, "acquire_training_candidate", refuse_authorization)
+    with pytest.raises(RuntimeError, match="controlled authorization refusal"):
+        p2_runner.train_candidate(output)
     assert not output.exists()
     assert not (REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-production-repair-v2/P2").exists()
     assert not (REPO_ROOT / "ml/markers/center/training/production-repair-v2-p3.json").exists()
