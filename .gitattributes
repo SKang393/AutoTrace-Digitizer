@@ -1,1 +1,4 @@
 packaging/pdfium-source/native/pdfium-windows-hdc.patch whitespace=-blank-at-eol
+packaging/pdfium-source/review/third-party-notices.dependency-mapped.txt text eol=lf whitespace=-blank-at-eol,-blank-at-eof
+packaging/pdfium-source/review/target-dependencies.reviewed.txt text eol=crlf
+packaging/pdfium-source/review/pe-imports.reviewed.txt text eol=crlf

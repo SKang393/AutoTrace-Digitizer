@@ -26,6 +26,9 @@ clean-machine distribution evidence.
   production evidence is approved.
 - Added atomic development-portable build, launch, and watcher scripts.
 - Added independent packaging and verification for multi-file model payloads.
+- Added a checksum-bound PDFium dependency review that maps every retained
+  target label and system import to an explicit source, license, notice, or
+  build-only disposition without promoting the runner.
 - Added a bounded WPF composition regression that exercises the real manual
   ViewModel commands, canvas edits, save, recovery, reopen, and export without
   selecting recorded fake graph data.
@@ -106,7 +109,7 @@ approving any model:
   debug OpenMP DLL, demos, and unused models. It passed 2/2 real-adapter Vulkan
   runs at exact 2x dimensions in 2366.1442 ms and 1046.5886 ms, with a
   73.0172 ms cache hit. Required graph accuracy, memory, CPU fallback,
-  complete notices, and authorized `vcomp140.dll` provenance remain open.
+  authorized `vcomp140.dll` provenance remain open.
 - The official `RealESRGAN_x2plus` hash was reverified, but its PyTorch
   checkpoint is incompatible with the current NCNN adapter and no conversion
   is authorized.
@@ -162,12 +165,23 @@ DLL, and isolated package/source WPF publishes both exited `--portable-smoke`
 with code 0. The source build has not replaced the blocked NuGet runtime because
 clean-machine load and workflow evidence remain mandatory.
 
+The exact minimal PDFium runner is also reproducible: two builds from revision
+`2870fa9244b0f0f69fb743fab1e08deefcb07b2b` produced byte-identical SHA-256
+`efd13a38cf3cd8e04d8284a42fff42923267293170424153b1a2a96dbf6fe8ea`.
+Independent review confirms all 240 retained target labels map exactly once to
+15 component dispositions, 16 checksum-bound notice sources cover linked code,
+NASM is build-only and unshipped, and the PE imports are exactly four Windows
+system APIs. Runtime packaging, clean-machine execution, and release approval
+remain mandatory and absent.
+
 ## Files changed
 
 - WPF application, controls, localization, composition, runtime paths, models,
   services, and ViewModels under `src/GraphReader.App/`
 - application and integration regressions under `tests/`
 - development portable scripts and tests under `packaging/`
+- PDFium review policy, exact public inventories, deterministic notice, and
+  fail-closed tests under `packaging/pdfium-source/review/`
 - Windows build and artifact verifier multi-file model support
 - pinned, fail-closed OpenCV source-build scaffold under
   `packaging/opencv-source/`
@@ -209,6 +223,9 @@ files are not tracked.
 - OpenCV public-axis runtime parity: 4/4 fixed procedural families produced
   exact canonical output; 92/92 executed integration tests and both WPF smoke
   publishes passed with the source DLL.
+- PDFium dependency review policy: 4/4 positive and negative cases passed under
+  Windows PowerShell and PowerShell 7. The exact policy validates 240 labels,
+  16 notices, and 4 system imports while approval remains false.
 - Portable validation self-tests: 7/7 in Windows PowerShell and PowerShell 7.
 - Live local portable validation after Goal 20 classification repair: 7/7;
   55 allowed portable `Data` events, 12 attributed external warnings, zero
@@ -260,6 +277,9 @@ Microsoft source and license record.
 - OpenCV local source-runtime parity: PASS.
 - OpenCV release replacement: still blocked on clean-machine load and workflow
   evidence.
+- PDFium dependency/license closure: resolved for the exact unbundled runner;
+  runtime packaging, clean-machine execution, and release approval remain
+  blocked.
 - Local portable path, diagnostic, endpoint, registry-key, and write tracing:
   recorded with one fail-closed isolation gate.
 - Current release audit: 13 legitimate blockers. The false single-file-only
@@ -278,6 +298,9 @@ Microsoft source and license record.
 - OpenCvSharp source inventory, notices, scoped Microsoft attestation,
   reproducibility, exact public-axis parity, integration tests, and local WPF
   smoke pass. Clean-machine load and workflow checks remain open.
+- The PDFium binary and dependency notice closure pass reproducibility and
+  independent review, but the runner is not bundled or release approved and
+  has no clean-machine execution evidence.
 - A purpose-aware local isolated-profile simulation passed, but it is not a
   clean profile or VM. Network remained enabled and polling can miss brief
   connections. FileSystemWatcher cannot directly identify the writer process.
@@ -301,6 +324,8 @@ Microsoft source and license record.
 - `artifacts/goal19-opencv-source/evidence-repro-pass2-final-a/`
 - `artifacts/goal19-opencv-source/evidence-repro-pass2-final-b/`
 - `artifacts/goal19-opencv-source/runtime-parity/run-20260804T195149029Z-487978feedc04c248ffab7b315191fc2/runtime-parity-summary.json`
+- `artifacts/pdfium-source/evidence/`
+- `artifacts/pdfium-source/evidence-second/`
 - `artifacts/portable-validation/20260803T224522086Z-940006c1/portable-clean-profile-report.json`
 
 ## Integration notes

@@ -1,0 +1,171 @@
+
+Dump of file graphreader_pdfium_renderer.exe
+
+File Type: EXECUTABLE IMAGE
+
+  Section contains the following imports:
+
+    ADVAPI32.dll
+             140EAF680 Import Address Table
+             140EAF278 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          C2 CryptAcquireContextW
+                          D2 CryptGenRandom
+                          DC CryptReleaseContext
+
+    GDI32.dll
+             140EAF6A0 Import Address Table
+             140EAF298 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          31 CreateCompatibleDC
+                          3F CreateFontA
+                          40 CreateFontIndirectA
+                         192 DeleteDC
+                         195 DeleteObject
+                         1D4 EnumFontFamiliesExA
+                         282 GetCharWidthW
+                         2A0 GetFontData
+                         2C6 GetOutlineTextMetricsW
+                         2EB GetTextFaceA
+                         2EF GetTextMetricsW
+                         37C SelectObject
+
+    USER32.dll
+             140EAF708 Import Address Table
+             140EAF300 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                         14B GetDC
+                         311 ReleaseDC
+
+    KERNEL32.dll
+             140EAF720 Import Address Table
+             140EAF318 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                           0 AcquireSRWLockExclusive
+                          9D CloseHandle
+                          B3 CompareStringW
+                          E6 CreateFileW
+                          F6 CreateMutexW
+                         12F DeleteCriticalSection
+                         136 DeleteFileW
+                         153 EncodePointer
+                         157 EnterCriticalSection
+                         17B EnumSystemLocalesW
+                         186 ExitProcess
+                         19D FindClose
+                         1A2 FindFirstFileExA
+                         1A3 FindFirstFileExW
+                         1B2 FindNextFileA
+                         1B4 FindNextFileW
+                         1C2 FlsAlloc
+                         1C3 FlsFree
+                         1C4 FlsGetValue
+                         1C6 FlsSetValue
+                         1C8 FlushFileBuffers
+                         1D3 FreeEnvironmentStringsW
+                         1D4 FreeLibrary
+                         1DB GetACP
+                         1EA GetCPInfo
+                         1FF GetCommandLineA
+                         200 GetCommandLineW
+                         225 GetConsoleMode
+                         229 GetConsoleOutputCP
+                         241 GetCurrentProcess
+                         242 GetCurrentProcessId
+                         246 GetCurrentThreadId
+                         24C GetDateFormatW
+                         262 GetEnvironmentStringsW
+                         278 GetFileSizeEx
+                         27A GetFileType
+                         28D GetLastError
+                         291 GetLocaleInfoW
+                         295 GetLogicalProcessorInformation
+                         2A1 GetModuleFileNameW
+                         2A4 GetModuleHandleExW
+                         2A5 GetModuleHandleW
+                         2C6 GetOEMCP
+                         2DD GetProcAddress
+                         2E4 GetProcessHeap
+                         301 GetStartupInfoW
+                         303 GetStdHandle
+                         308 GetStringTypeW
+                         310 GetSystemDirectoryA
+                         314 GetSystemInfo
+                         318 GetSystemTime
+                         31A GetSystemTimeAsFileTime
+                         341 GetTimeFormatW
+                         343 GetTimeZoneInformation
+                         349 GetUserDefaultLCID
+                         35C GetWindowsDirectoryA
+                         37C HeapAlloc
+                         380 HeapFree
+                         382 HeapQueryInformation
+                         383 HeapReAlloc
+                         385 HeapSize
+                         390 InitOnceExecuteOnce
+                         395 InitializeCriticalSection
+                         396 InitializeCriticalSectionAndSpinCount
+                         397 InitializeCriticalSectionEx
+                         39A InitializeSListHead
+                         3B0 IsDebuggerPresent
+                         3B8 IsProcessorFeaturePresent
+                         3BE IsValidCodePage
+                         3C0 IsValidLocale
+                         3E4 LCMapStringW
+                         3F0 LeaveCriticalSection
+                         3F4 LoadLibraryA
+                         3F6 LoadLibraryExW
+                         423 MultiByteToWideChar
+                         481 QueryPerformanceCounter
+                         498 RaiseException
+                         4A6 ReadConsoleW
+                         4A9 ReadFile
+                         4E6 ReleaseMutex
+                         4EA ReleaseSRWLockExclusive
+                         509 RtlCaptureContext
+                         511 RtlLookupFunctionEntry
+                         513 RtlPcToFileHeader
+                         516 RtlUnwind
+                         517 RtlUnwindEx
+                         518 RtlVirtualUnwind
+                         556 SetEndOfFile
+                         55A SetEnvironmentVariableW
+                         569 SetFilePointerEx
+                         578 SetLastError
+                         593 SetStdHandle
+                         5B8 SetUnhandledExceptionFilter
+                         5C8 Sleep
+                         5CA SleepConditionVariableSRW
+                         5D8 TerminateProcess
+                         5EA TlsAlloc
+                         5EB TlsFree
+                         5EC TlsGetValue
+                         5EE TlsSetValue
+                         5FB UnhandledExceptionFilter
+                         614 VirtualAlloc
+                         61A VirtualProtect
+                         625 WaitForSingleObject
+                         62D WakeAllConditionVariable
+                         64C WideCharToMultiByte
+                         65F WriteConsoleW
+                         660 WriteFile
+
+  Summary
+
+        8000 .data
+        1000 .fptable
+        F000 .pdata
+      BFB000 .rdata
+        3000 .reloc
+      2C0000 .text
+        1000 .tls
+        1000 _RDATA
+        1000 malloc_h

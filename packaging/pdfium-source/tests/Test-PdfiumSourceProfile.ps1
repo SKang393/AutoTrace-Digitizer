@@ -43,4 +43,34 @@ foreach ($required in @('reviewed-approval.json', 'reviewApproved', 'redistribut
     if ($validator.IndexOf($required, [StringComparison]::Ordinal) -lt 0) { throw "Evidence validator is missing fail-closed check: $required" }
 }
 
+$runnerSmoke = Get-Content -LiteralPath (Join-Path $profileRoot 'Test-PdfiumRunner.ps1') -Raw
+foreach ($required in @("PSObject.Properties['ArgumentList']", '$startInfo.Arguments', 'cannot contain a quotation mark')) {
+    if ($runnerSmoke.IndexOf($required, [StringComparison]::Ordinal) -lt 0) { throw "Runner smoke is missing cross-PowerShell argument handling: $required" }
+}
+
+$reviewRoot = Join-Path $profileRoot 'review'
+$reviewPolicy = Get-Content -LiteralPath (Join-Path $reviewRoot 'dependency-review-policy.json') -Raw | ConvertFrom-Json
+if ([string]$reviewPolicy.overallReviewStatus -ne 'dependency-mapped-not-approved' -or
+    [string]$reviewPolicy.noticeBundle.reviewStatus -ne 'dependency-mapped-not-approved') {
+    throw 'PDFium dependency policy must remain explicitly not approved.'
+}
+if (@($reviewPolicy.components).Count -ne 15 -or @($reviewPolicy.permittedPeImports).Count -ne 4) {
+    throw 'PDFium dependency policy component or system-import count changed without review.'
+}
+foreach ($inventory in @(
+    @{ Path = [string]$reviewPolicy.reviewInventory.targetDependenciesPath; Hash = [string]$reviewPolicy.reviewInventory.targetDependenciesSha256 },
+    @{ Path = [string]$reviewPolicy.reviewInventory.peImportsPath; Hash = [string]$reviewPolicy.reviewInventory.peImportsSha256 },
+    @{ Path = [string]$reviewPolicy.noticeBundle.path; Hash = [string]$reviewPolicy.noticeBundle.sha256 }
+)) {
+    $inventoryPath = Join-Path $reviewRoot $inventory.Path
+    if (-not (Test-Path -LiteralPath $inventoryPath -PathType Leaf) -or
+        (Get-FileHash -LiteralPath $inventoryPath -Algorithm SHA256).Hash.ToLowerInvariant() -ne $inventory.Hash) {
+        throw "PDFium tracked review inventory hash mismatch: $($inventory.Path)"
+    }
+}
+$noticeFirstLine = Get-Content -LiteralPath (Join-Path $reviewRoot ([string]$reviewPolicy.noticeBundle.path)) -TotalCount 1
+if ($noticeFirstLine.Trim() -ne 'REVIEW STATUS: DEPENDENCY-MAPPED') {
+    throw 'PDFium mapped notice must not claim release approval.'
+}
+
 Write-Host 'PDFium source profile static policy: PASS'

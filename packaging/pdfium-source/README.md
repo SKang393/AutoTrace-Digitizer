@@ -30,6 +30,9 @@ powershell -File packaging/pdfium-source/Initialize-WindowsSdkDebuggingTools.ps1
 powershell -File packaging/pdfium-source/Build-ReviewedPdfium.ps1 -Phase All
 powershell -File packaging/pdfium-source/Test-PdfiumRunner.ps1 -RunnerPath <runner> -EvidenceRoot <smoke-evidence>
 powershell -File packaging/pdfium-source/Compare-PdfiumBuilds.ps1 -FirstEvidenceRoot <first> -SecondEvidenceRoot <second>
+powershell -File packaging/pdfium-source/review/New-PdfiumDependencyNotice.ps1
+powershell -File packaging/pdfium-source/review/Test-PdfiumDependencyReviewPolicy.ps1
+powershell -File packaging/pdfium-source/review/tests/Test-PdfiumDependencyReviewPolicy.Tests.ps1
 powershell -File packaging/pdfium-source/Test-ReviewedPdfiumEvidence.ps1
 ```
 
@@ -48,3 +51,14 @@ write `third-party-notices.reviewed.txt` with `REVIEW STATUS: COMPLETE` as its
 first line, and create `reviewed-approval.json` with exact binary, source-lock,
 build-manifest, and notice SHA-256 values. Runtime loading and evidence
 validation both fail closed until those inputs exist and match exactly.
+
+The tracked `review/dependency-review-policy.json`, exact reviewed target and
+PE-import inventories, and deterministic
+`third-party-notices.dependency-mapped.txt` close the mechanical mapping gap
+without claiming approval. The policy maps all 240 retained target labels to
+15 exact component dispositions, binds 16 notice sources by checksum, records
+NASM as a build-only tool, and permits only the four observed Windows system
+API imports. Both the policy and notice remain explicitly
+`dependency-mapped-not-approved` until independent review promotes a separate
+reviewed notice and ignored approval. Clean-machine evidence remains a distinct
+mandatory gate.

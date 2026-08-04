@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 Copyright 2026 Sungwoo Kang
 -->
 
-This audit covers the dependency and model set present on 2026-08-03. It does
+This audit covers the dependency and model set present on 2026-08-04. It does
 not authorize a public release. A release remains blocked until every shipped
 binary is present in the generated SBOM and checksum file and every row marked
 blocked below is removed by new, independently verified evidence.
@@ -13,14 +13,15 @@ blocked below is removed by new, independently verified evidence.
 Current release blockers are:
 
 1. The reviewed source-built `OpenCvSharpExtern.dll` has not replaced the
-   NuGet native payload and has not passed the mandatory application parity and
-   clean-machine gates.
+   NuGet native payload and has not passed the mandatory clean-machine gate.
 2. No marker-center model has passed the production-runtime held-out gate.
 3. No default super-resolution model and runtime pair has passed the required
    benchmark and packaging gates.
 4. No OCR detector, OCR recognizer, or marker shape/fill classifier has an
    approved, checksum-pinned release artifact and schema-valid manifest.
-5. PDFium has no selected binary, checksum, or build-specific notice set.
+5. The exact PDFium candidate and build-specific dependency notice set are
+   checksum-mapped, but runtime packaging, clean-machine execution, and release
+   approval remain absent.
 
 ## Real-ESRGAN
 
@@ -184,10 +185,21 @@ Current release blockers are:
 
 ## PDFium
 
-- No PDFium package or binary is selected or bundled.
-- Release status: BLOCKED for bundling until an exact build, binary checksum,
-  redistribution review, and complete build-specific third-party notice set
-  exist.
+- Candidate: minimal Windows x64 runner from official PDFium revision
+  `2870fa9244b0f0f69fb743fab1e08deefcb07b2b`, with V8, XFA, Skia,
+  Fontations, PartitionAlloc, and the ICU sidecar disabled.
+- Candidate SHA-256:
+  `efd13a38cf3cd8e04d8284a42fff42923267293170424153b1a2a96dbf6fe8ea`.
+- Reproducibility: two retained builds are byte-identical and have identical
+  source lock, GN arguments, native overlays, 240-label target dependency
+  closure, and PE import evidence.
+- Dependency notice: `packaging/pdfium-source/review/third-party-notices.dependency-mapped.txt`.
+  It binds 16 exact notice sources for 15 component dispositions. NASM is
+  recorded as build-only and not shipped. PE imports are limited to
+  `ADVAPI32.dll`, `GDI32.dll`, `KERNEL32.dll`, and `USER32.dll`.
+- Release status: BLOCKED. Dependency/license closure is independently reviewed
+  for this exact candidate, but the runner is not selected or bundled and has
+  no runtime-package, clean-machine, or release-approval evidence.
 
 ## IBM Plex Sans
 
@@ -259,7 +271,7 @@ Current release blockers are:
 | Imazen.WebP | 11.0.0 | NuGet / imazen/libwebp-net | MIT | `f78a8f874f127bfa4688595950aa6292a8e20ea55fc2b60321523e1d005d5dff` | Yes | `LICENSES/Imazen.WebP-11.0.0-License.txt` | Yes |
 | Imazen WebP native runtime win-x64 | 1.6.1 | NuGet / imazen/libwebp-net | MIT + libwebp BSD-3-Clause | `32df07f31f18b5f4e35409a73621d776d97761f4b601cbbbdc4efbacb6ab62f6` | Yes | Imazen MIT and libwebp BSD-3-Clause texts | Yes |
 | PdfPig | 0.1.14 | NuGet / UglyToad/PdfPig `88172af1c4d4f440949f59c94966c3880e3f6032` | Apache-2.0 plus bundled external terms | `fe50ec7757adbb487bb52a30f1621384bbb5781fd0bff2169d9f18bc4bb91220` | Yes | `LICENSES/PdfPig-0.1.14-License.txt` | Yes |
-| PDFium renderer | Not selected | No approved build | BSD-style plus build-specific notices | Not available | No | No | No, bundling blocked |
+| PDFium minimal renderer candidate | `2870fa9244b0f0f69fb743fab1e08deefcb07b2b` | Official PDFium source build | BSD-3-Clause plus 15-component dependency notice closure | `efd13a38cf3cd8e04d8284a42fff42923267293170424153b1a2a96dbf6fe8ea` | No | `packaging/pdfium-source/review/third-party-notices.dependency-mapped.txt` | Dependency closure reviewed; runtime packaging, clean-machine, and release approval blocked |
 
 A release is blocked while any shipped row remains unreviewed or any required
 core model class remains absent or unapproved.

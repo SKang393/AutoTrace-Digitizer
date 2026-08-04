@@ -1,0 +1,383 @@
+{
+  "schemaVersion": 1,
+  "profileId": "graphreader-pdfium-minimal-win-x64",
+  "overallReviewStatus": "dependency-mapped-not-approved",
+  "evidenceRootName": "evidence",
+  "sourceRevision": "2870fa9244b0f0f69fb743fab1e08deefcb07b2b",
+  "evidenceBinding": {
+    "binarySha256": "efd13a38cf3cd8e04d8284a42fff42923267293170424153b1a2a96dbf6fe8ea",
+    "sourceLockSha256": "026c87468d315f42642e8507b50aaf810dc26461a837454ede20ff9f2335d800",
+    "buildManifestSha256": "b3744c369982dca6a37377ce1e69daa9d8f269b9052d8a8d5f5a84c1ed120e13",
+    "targetDependenciesSha256": "96b6d3d4b3f0421896cd5d036f52369b58bdf59f003fd03b376af5b40c94cc8b",
+    "peImportsSha256": "4cb9c8e65ddfb8ed33bed4940e63705aef71d752b9bd2a629e0a3be6c6033d90"
+  },
+  "noticeBundle": {
+    "path": "third-party-notices.dependency-mapped.txt",
+    "reviewStatus": "dependency-mapped-not-approved",
+    "sha256": "586d3e93f1eaaa412654e008aa3ca03c003c903270555de761650acb92c457d9"
+  },
+  "reviewInventory": {
+    "targetDependenciesPath": "target-dependencies.reviewed.txt",
+    "targetDependenciesSha256": "96b6d3d4b3f0421896cd5d036f52369b58bdf59f003fd03b376af5b40c94cc8b",
+    "peImportsPath": "pe-imports.reviewed.txt",
+    "peImportsSha256": "4cb9c8e65ddfb8ed33bed4940e63705aef71d752b9bd2a629e0a3be6c6033d90"
+  },
+  "permittedPeImports": [
+    "ADVAPI32.dll",
+    "GDI32.dll",
+    "KERNEL32.dll",
+    "USER32.dll"
+  ],
+  "components": [
+    {
+      "id": "pdfium-internal",
+      "classification": "linked-static-code",
+      "source": "https://pdfium.googlesource.com/pdfium",
+      "sourceRoot": ".",
+      "sourceRevision": "2870fa9244b0f0f69fb743fab1e08deefcb07b2b",
+      "licenseSpdx": "BSD-3-Clause",
+      "noticeDisposition": "included",
+      "exactLabels": [
+        "//:pdfium",
+        "//:pdfium_public_headers",
+        "//:pdfium_public_headers_impl"
+      ],
+      "labelPrefixes": [
+        "//constants:",
+        "//core/",
+        "//fpdfsdk:",
+        "//fpdfsdk/",
+        "//fxjs:"
+      ],
+      "licenses": [
+        {
+          "noticeId": "pdfium-bsd-3-clause",
+          "path": "LICENSE",
+          "sha256": "1fe9dea718fbd75cf149adaf4d8a22a4335604d964ddb76d1b45383dec8668c9",
+          "includeInNotice": true
+        }
+      ]
+    },
+    {
+      "id": "chromium-build-config",
+      "classification": "generated-build-support",
+      "source": "https://chromium.googlesource.com/chromium/src/build",
+      "sourceRoot": "build",
+      "sourceRevision": "73c0fa98c5cf963c60ea685c57826fa7ba6253d8",
+      "licenseSpdx": "BSD-3-Clause",
+      "noticeDisposition": "covered-by-pdfium-bsd-notice",
+      "exactLabels": [],
+      "labelPrefixes": [
+        "//build:",
+        "//build/"
+      ],
+      "licenses": [
+        {
+          "noticeId": "pdfium-bsd-3-clause",
+          "path": "LICENSE",
+          "sha256": "1fe9dea718fbd75cf149adaf4d8a22a4335604d964ddb76d1b45383dec8668c9",
+          "includeInNotice": true
+        }
+      ]
+    },
+    {
+      "id": "agg23",
+      "classification": "linked-static-code",
+      "source": "PDFium third_party/agg23 at the pinned PDFium revision",
+      "sourceRoot": ".",
+      "sourceRevision": "2870fa9244b0f0f69fb743fab1e08deefcb07b2b",
+      "licenseSpdx": "LicenseRef-AGG-2.3-permissive",
+      "noticeDisposition": "included",
+      "exactLabels": [
+        "//third_party:fx_agg"
+      ],
+      "labelPrefixes": [],
+      "licenses": [
+        {
+          "noticeId": "agg23-permissive",
+          "path": "third_party/agg23/copying",
+          "sha256": "f38e5ffa23343d10f46369318df1c7aeab46e0c32517cb69f72f26dad1dae5ed",
+          "includeInNotice": true
+        }
+      ]
+    },
+    {
+      "id": "freetype",
+      "classification": "linked-static-code",
+      "source": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git",
+      "sourceRoot": "third_party/freetype/src",
+      "sourceRevision": "656cb777798fa420a13faba3758779e9ed6c4798",
+      "licenseSpdx": "LicenseRef-FreeType",
+      "noticeDisposition": "included-ftl-option",
+      "exactLabels": [
+        "//:freetype_common",
+        "//third_party:fx_freetype"
+      ],
+      "labelPrefixes": [],
+      "licenses": [
+        {
+          "noticeId": "freetype-license-summary",
+          "path": "third_party/freetype/src/LICENSE.TXT",
+          "sha256": "84f47dc7f0887dd56b05f2f218060581c055e443bd7af18e46677bec3dcc2473",
+          "includeInNotice": true
+        },
+        {
+          "noticeId": "freetype-project-license",
+          "path": "third_party/freetype/src/docs/FTL.TXT",
+          "sha256": "308dca54b5aaa4a6ba0880621fe3bcf287956821aa948430263062a8333625c0",
+          "includeInNotice": true
+        }
+      ]
+    },
+    {
+      "id": "lcms2",
+      "classification": "linked-static-code",
+      "source": "PDFium third_party/lcms at the pinned PDFium revision",
+      "sourceRoot": ".",
+      "sourceRevision": "2870fa9244b0f0f69fb743fab1e08deefcb07b2b",
+      "licenseSpdx": "MIT",
+      "noticeDisposition": "included",
+      "exactLabels": [
+        "//third_party:fx_lcms2",
+        "//third_party:lcms2"
+      ],
+      "labelPrefixes": [],
+      "licenses": [
+        {
+          "noticeId": "lcms2-mit",
+          "path": "third_party/lcms/LICENSE",
+          "sha256": "6dbd60437f8ef91d8de1f08ad75882547fd4931bfcc3566a0735f28db1484d31",
+          "includeInNotice": true
+        }
+      ]
+    },
+    {
+      "id": "openjpeg",
+      "classification": "linked-static-code",
+      "source": "PDFium third_party/libopenjpeg at the pinned PDFium revision",
+      "sourceRoot": ".",
+      "sourceRevision": "2870fa9244b0f0f69fb743fab1e08deefcb07b2b",
+      "licenseSpdx": "BSD-2-Clause",
+      "noticeDisposition": "included",
+      "exactLabels": [
+        "//third_party:fx_libopenjpeg",
+        "//third_party:libopenjpeg2"
+      ],
+      "labelPrefixes": [],
+      "licenses": [
+        {
+          "noticeId": "openjpeg-bsd-2-clause",
+          "path": "third_party/libopenjpeg/LICENSE",
+          "sha256": "a6af136f3e15038a666b61f376612a07d9a4e48cb7c01adbf3e33b3f14ab49b6",
+          "includeInNotice": true
+        }
+      ]
+    },
+    {
+      "id": "libjpeg-turbo",
+      "classification": "linked-static-code",
+      "source": "https://chromium.googlesource.com/chromium/deps/libjpeg_turbo.git",
+      "sourceRoot": "third_party/libjpeg_turbo",
+      "sourceRevision": "640f254ad0fa03f6b1f29f89b7dd9366f2f6e533",
+      "licenseSpdx": "LicenseRef-IJG AND BSD-3-Clause AND Zlib",
+      "noticeDisposition": "included",
+      "exactLabels": [
+        "//third_party:jpeg"
+      ],
+      "labelPrefixes": [
+        "//third_party/libjpeg_turbo:"
+      ],
+      "licenses": [
+        {
+          "noticeId": "libjpeg-turbo-license",
+          "path": "third_party/libjpeg_turbo/LICENSE.md",
+          "sha256": "be2b2b5ab168bce87bc3e31f2a5c5adba4b7f6e9e51d618e958d1d46972ebd95",
+          "includeInNotice": true
+        },
+        {
+          "noticeId": "independent-jpeg-group-readme",
+          "path": "third_party/libjpeg_turbo/README.ijg",
+          "sha256": "db16a04128171879c60708d171b88d97345a2dd20f9bfc173680a4497c73f704",
+          "includeInNotice": true
+        }
+      ]
+    },
+    {
+      "id": "zlib",
+      "classification": "linked-static-code",
+      "source": "https://chromium.googlesource.com/chromium/src/third_party/zlib.git",
+      "sourceRoot": "third_party/zlib",
+      "sourceRevision": "8b3aa8a1cd7585c0c4c67351481227b046a662a0",
+      "licenseSpdx": "Zlib",
+      "noticeDisposition": "included",
+      "exactLabels": [
+        "//third_party:zlib"
+      ],
+      "labelPrefixes": [
+        "//third_party/zlib:"
+      ],
+      "licenses": [
+        {
+          "noticeId": "zlib",
+          "path": "third_party/zlib/LICENSE",
+          "sha256": "439c75ab12b340c5362b9d4b08ff05ec3a4d0eb7667a6fff49a9b16d8795c78e",
+          "includeInNotice": true
+        }
+      ]
+    },
+    {
+      "id": "abseil",
+      "classification": "linked-static-code",
+      "source": "https://chromium.googlesource.com/chromium/src/third_party/abseil-cpp.git",
+      "sourceRoot": "third_party/abseil-cpp",
+      "sourceRevision": "d8e483edd8b44da1845874ee84b42489589bb90f",
+      "licenseSpdx": "Apache-2.0",
+      "noticeDisposition": "included",
+      "exactLabels": [],
+      "labelPrefixes": [
+        "//third_party/abseil-cpp:",
+        "//third_party/abseil-cpp/"
+      ],
+      "licenses": [
+        {
+          "noticeId": "abseil-apache-2.0",
+          "path": "third_party/abseil-cpp/LICENSE",
+          "sha256": "f54fff0b905df5b3464527c652a30e903b172d6dcab4d89b5e6f105d5e4a4603",
+          "includeInNotice": true
+        }
+      ]
+    },
+    {
+      "id": "fast-float",
+      "classification": "linked-header-code",
+      "source": "https://github.com/fastfloat/fast_float",
+      "sourceRoot": "third_party/fast_float/src",
+      "sourceRevision": "34164f547b7df3f5d794ff67e9f885c36819ebfc",
+      "licenseSpdx": "MIT",
+      "noticeDisposition": "included-mit-option",
+      "exactLabels": [],
+      "labelPrefixes": [
+        "//third_party/fast_float:"
+      ],
+      "licenses": [
+        {
+          "noticeId": "fast-float-mit",
+          "path": "third_party/fast_float/src/LICENSE-MIT",
+          "sha256": "bf1b57355feca8fce77ee95f48002f8d4789fb71b30ec7599c06cda4901fbb2b",
+          "includeInNotice": true
+        }
+      ]
+    },
+    {
+      "id": "harfbuzz",
+      "classification": "linked-static-code",
+      "source": "https://github.com/harfbuzz/harfbuzz",
+      "sourceRoot": "third_party/harfbuzz/src",
+      "sourceRevision": "28f4dc622fef010dab12f4275ac195b5d4a4a704",
+      "licenseSpdx": "MIT",
+      "noticeDisposition": "included-with-generated-data-attribution",
+      "exactLabels": [],
+      "labelPrefixes": [
+        "//third_party/harfbuzz:"
+      ],
+      "licenses": [
+        {
+          "noticeId": "harfbuzz-old-mit",
+          "path": "third_party/harfbuzz/src/COPYING",
+          "sha256": "bd836c0ddca8ea0bab54a03cd32b6ff7256cbb3840fca2edc1249a4ed92c5b02",
+          "includeInNotice": true
+        },
+        {
+          "noticeId": "harfbuzz-microsoft-use-data-mit",
+          "path": "third_party/harfbuzz/src/src/ms-use/COPYING",
+          "sha256": "9906940f61b1f0b533fa7d99baf55178b2808fbe113ea51dfbfad8572ccd5f2b",
+          "includeInNotice": true
+        }
+      ]
+    },
+    {
+      "id": "icu",
+      "classification": "linked-static-code-and-data",
+      "source": "https://chromium.googlesource.com/chromium/deps/icu.git",
+      "sourceRoot": "third_party/icu",
+      "sourceRevision": "d578f2e8b7bd5938e21cfb6bf15c079e0aa5b738",
+      "licenseSpdx": "Unicode-3.0",
+      "noticeDisposition": "included",
+      "exactLabels": [],
+      "labelPrefixes": [
+        "//third_party/icu:"
+      ],
+      "licenses": [
+        {
+          "noticeId": "icu-unicode-and-third-party-notices",
+          "path": "third_party/icu/LICENSE",
+          "sha256": "93679f4389d53b6835d89843f251844fb9bc455b35bab036d3c8e7abe497a47a",
+          "includeInNotice": true
+        }
+      ]
+    },
+    {
+      "id": "libcxx",
+      "classification": "linked-static-or-header-code",
+      "source": "https://github.com/llvm/llvm-project/tree/main/libcxx",
+      "sourceRoot": "third_party/libc++/src",
+      "sourceRevision": "5abc7f839700f0f17338434e1c1c6a8c87c00c11",
+      "licenseSpdx": "Apache-2.0 WITH LLVM-exception",
+      "noticeDisposition": "included",
+      "exactLabels": [],
+      "labelPrefixes": [
+        "//buildtools/third_party/libc++:"
+      ],
+      "licenses": [
+        {
+          "noticeId": "libcxx-apache-2.0-with-llvm-exception",
+          "path": "third_party/libc++/src/LICENSE.TXT",
+          "sha256": "a7de191338d328257ecec5ba1ea971ebd67633d0b4fce7d6272a39749547ec6b",
+          "includeInNotice": true
+        }
+      ]
+    },
+    {
+      "id": "llvm-libc",
+      "classification": "linked-static-or-header-code",
+      "source": "https://github.com/llvm/llvm-project/tree/main/libc",
+      "sourceRoot": "third_party/llvm-libc/src",
+      "sourceRevision": "9a821f4e58bbb7f6701f9951d087f8750f523647",
+      "licenseSpdx": "Apache-2.0 WITH LLVM-exception",
+      "noticeDisposition": "included",
+      "exactLabels": [],
+      "labelPrefixes": [
+        "//third_party/llvm-libc:"
+      ],
+      "licenses": [
+        {
+          "noticeId": "llvm-libc-apache-2.0-with-llvm-exception",
+          "path": "third_party/llvm-libc/src/LICENSE.TXT",
+          "sha256": "3b6226c32e168c83b891d8d6f0d3c29c2116dc3ef93dc93c307b54f279ecf383",
+          "includeInNotice": true
+        }
+      ]
+    },
+    {
+      "id": "nasm",
+      "classification": "build-only-tool",
+      "source": "https://chromium.googlesource.com/chromium/deps/nasm.git",
+      "sourceRoot": "third_party/nasm",
+      "sourceRevision": "525a09a813be0f75b646ee93fc2a31c27b87d722",
+      "licenseSpdx": "BSD-2-Clause",
+      "noticeDisposition": "not-linked-not-shipped",
+      "exactLabels": [],
+      "labelPrefixes": [
+        "//third_party/nasm:"
+      ],
+      "licenses": [
+        {
+          "noticeId": "nasm-bsd-2-clause-build-only",
+          "path": "third_party/nasm/LICENSE",
+          "sha256": "222b65a5fab7ba8ade645970ad21bd5c2e2e6533897d59d1ca0914681c1f9da6",
+          "includeInNotice": false
+        }
+      ]
+    }
+  ]
+}

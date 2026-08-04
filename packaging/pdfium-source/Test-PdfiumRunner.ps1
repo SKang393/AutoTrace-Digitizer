@@ -57,12 +57,20 @@ $startInfo.CreateNoWindow = $true
 $startInfo.RedirectStandardInput = $true
 $startInfo.RedirectStandardOutput = $true
 $startInfo.RedirectStandardError = $true
-[void]$startInfo.ArgumentList.Add('--output')
-[void]$startInfo.ArgumentList.Add($rawPath)
-[void]$startInfo.ArgumentList.Add('--page')
-[void]$startInfo.ArgumentList.Add('0')
-[void]$startInfo.ArgumentList.Add('--dpi')
-[void]$startInfo.ArgumentList.Add('72')
+if ($null -ne $startInfo.PSObject.Properties['ArgumentList']) {
+    [void]$startInfo.ArgumentList.Add('--output')
+    [void]$startInfo.ArgumentList.Add($rawPath)
+    [void]$startInfo.ArgumentList.Add('--page')
+    [void]$startInfo.ArgumentList.Add('0')
+    [void]$startInfo.ArgumentList.Add('--dpi')
+    [void]$startInfo.ArgumentList.Add('72')
+}
+else {
+    if ($rawPath.Contains('"')) {
+        throw 'PDFium smoke output path cannot contain a quotation mark.'
+    }
+    $startInfo.Arguments = '--output "' + $rawPath + '" --page 0 --dpi 72'
+}
 $process = New-Object Diagnostics.Process
 $process.StartInfo = $startInfo
 try {
