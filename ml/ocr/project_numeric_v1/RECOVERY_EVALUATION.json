@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "protocol_id": "graph-numeric-project-v1-20260804",
+  "candidate_id": "candidate-1",
+  "status": "training_complete_evaluation_incomplete",
+  "original_training_commit": "088f9d03cd0eb5a3ece8f6394e3f6aaeb8f7246f",
+  "checkpoint": {
+    "path": "graph-numeric-project-v1.pt",
+    "bytes": 2150341,
+    "sha256": "6e941b2b3b746e092f01bf04a28faea61d0ba0bf584dc83b0530594ddddd8235"
+  },
+  "failure": {
+    "type": "TypeError",
+    "message": "evaluate_predictions() takes 1 positional argument but 2 were given",
+    "location": "train.py::_evaluate",
+    "validation_metrics_persisted": false,
+    "sealed_test_built": false,
+    "report_created": false,
+    "onnx_created": false
+  },
+  "authorized_action": "load the exact checkpoint and run validation, sealed evaluation, and conditional ONNX parity once without optimizer or training steps",
+  "retraining_permitted": false,
+  "weight_changes_permitted": false,
+  "approval": false
+}

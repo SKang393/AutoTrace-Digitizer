@@ -17,10 +17,12 @@ preregistration is reviewed and committed:
 python -m ml.ocr.project_numeric_v1.verify_preregistration --require-committed
 ```
 
-Only after that command passes may Candidate 1 use the fixed entrypoint:
+Candidate 1 completed training once, but its original process stopped in the
+validation reporter. It must not retrain. After the evaluator recovery is
+reviewed and committed, the exact retained checkpoint may be evaluated once:
 
 ```powershell
-python -m ml.ocr.project_numeric_v1.train
+python -m ml.ocr.project_numeric_v1.train --resume-evaluation-only
 ```
 
 Candidates 2 and 3 are reserved, not executable. No model is approved or

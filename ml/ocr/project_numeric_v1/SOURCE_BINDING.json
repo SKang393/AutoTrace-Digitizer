@@ -3,14 +3,14 @@
   "protocol_id": "graph-numeric-project-v1-20260804",
   "sources": {
     "audit_record": {
-      "bytes": 3360,
+      "bytes": 4063,
       "path": "models/manifest/ocr/PROJECT_NUMERIC_V1_PREREGISTRATION.md",
-      "sha256": "502e111134a8bb664d45b94d4789fa285a03cac0c1392e8521d003c294bf1e1e"
+      "sha256": "ffee65d54d3577fcb59c0fa28b4c1d9b53adb61fc2121ceb43a69d08335a218a"
     },
     "binding_verifier": {
-      "bytes": 5349,
+      "bytes": 5430,
       "path": "ml/ocr/project_numeric_v1/verify_preregistration.py",
-      "sha256": "9cb206788f49bfe20e7a6705732275184dcdfc6c9cd3824ef94122ff5be1972e"
+      "sha256": "68e47fda78000738d265c9ddf8199bbbbc4b6bd799bb15db606b2f53e8e14fd2"
     },
     "dataset": {
       "bytes": 17894,
@@ -18,14 +18,19 @@
       "sha256": "5d56f4129793d9ac7d2633c78ee064e6a7fd5c56c1d167a1706e89d83ce0716f"
     },
     "experiment_plan": {
-      "bytes": 4247,
+      "bytes": 4952,
       "path": "ml/ocr/project_numeric_v1/EXPERIMENT_PLAN.md",
-      "sha256": "ecbf00398c4c07dc897222c23fad441cc279f6bfaa472a3233faa6a4830f5e7f"
+      "sha256": "a1a5df56f386c98a8f370875e1b7c1767940bda413d688533e7ca32a25952e0b"
     },
     "frozen_protocol": {
       "bytes": 3104,
       "path": "ml/ocr/project_numeric_v1/FROZEN_PROTOCOL.json",
       "sha256": "73b90898d40393bebc3e49d2994b892c1f2460275a7a47424c6f1ac41d23a0e9"
+    },
+    "recovery_evaluation": {
+      "bytes": 962,
+      "path": "ml/ocr/project_numeric_v1/RECOVERY_EVALUATION.json",
+      "sha256": "5ec5719e9809e02f348619e122ce675eae1e463f72a671897e58857ad317f15d"
     },
     "model": {
       "bytes": 2676,
@@ -43,19 +48,19 @@
       "sha256": "4896bc73e62f412fb9ede8ac829348d17acdec28ed462270abb966bb95f2a008"
     },
     "readme": {
-      "bytes": 959,
+      "bytes": 1139,
       "path": "ml/ocr/project_numeric_v1/README.md",
-      "sha256": "8f7d831781b36c6ebda31764a4f17673e34ca0fc1d6b3cfff653914f5368e9c8"
+      "sha256": "ed5339d4b473b3f56ede0dd3c93835eb23dc70f0d4c62bc003e10f6424e1e3d7"
     },
     "tests": {
-      "bytes": 6955,
+      "bytes": 7969,
       "path": "ml/ocr/project_numeric_v1/tests/test_project_numeric_v1.py",
-      "sha256": "d5d19d02a999a3ba9f796d0e173bdf7464c3ff91d72f49d14d30decafc00e694"
+      "sha256": "1e8c286a7259257ac9132281d2dd516da7ead61a5c0d53c04b0dfa5576be855b"
     },
     "training_entrypoint": {
-      "bytes": 12694,
+      "bytes": 19522,
       "path": "ml/ocr/project_numeric_v1/train.py",
-      "sha256": "47567e824926873d8779b9261fac476dd7ab56b4315e71f1ae5b019a834d978e"
+      "sha256": "46d1513ef646c04f3c1e7ca411685b23e213eb35f71cde533bee54aba7e860a6"
     }
   },
   "split_fingerprints": {
@@ -63,5 +68,5 @@
     "train": "3217f58667ca497e8b5de60b4b493c92efd75e7f2e49b71a4f847ff6b7a5c8d2",
     "validation": "dec5869ac463b24c41616dafda34eb5817b8392a3da88ce09fd60fb47d7520f3"
   },
-  "training_state": "not_started_commit_required"
+  "training_state": "candidate_1_checkpoint_recovery_commit_required"
 }

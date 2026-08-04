@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "task": "marker-center",
+  "revision": "marker-center-production-repair-v2",
+  "candidate_id": "P3",
+  "status": "preregistered",
+  "experiment_budget": 3,
+  "experiment_ordinal": 3,
+  "seed": 20260815,
+  "epochs": 130,
+  "learning_rate": 0.002,
+  "weight_decay": 0.00001,
+  "robustness_mode": "mixed_photometric",
+  "selection_dataset_manifest_sha256": "5d2192aa2cefcb646abcddea4b87be05898a242d2d8f43a6b23100ec36cbfe02",
+  "expected_runner_source_bundle_sha256": "e24c1bb4384e85e6270f7f75c6c3ac6041ddc3da88d88f296868cdcfc11a792d",
+  "selection_data": "fixed procedural train and validation splits with the P3 non-overlapping tick/joint family",
+  "public_gate_use_for_selection": false,
+  "isolated_change": "move P2 tick and joint hard negatives outside the true-marker exclusion zone",
+  "unchanged_from_p2": {
+    "architecture": true,
+    "seed": true,
+    "epochs": true,
+    "learning_rate": true,
+    "weight_decay": true,
+    "robustness_mode": true,
+    "loss_weights": true,
+    "mask_consensus_threshold": true,
+    "postprocessing": true,
+    "thresholds": [
+      0.28,
+      0.32,
+      0.36,
+      0.4
+    ],
+    "short_structure_drawing": true,
+    "family_counts": true
+  },
+  "changes": {
+    "hard_negative_center_suppression_weight": 1.0,
+    "hard_negative_artifact_weight": 0.75,
+    "mask_consensus": "pixelwise maximum of immutable text-mask and artifact-mask input channels",
+    "mask_consensus_threshold": 0.2,
+    "marker_mask_channels_preserved": true,
+    "architecture_change": false,
+    "postprocessing_change": false,
+    "selection_dataset_change": "move short perpendicular tick and joint centers from y 84..90 to y 108..114",
+    "minimum_true_center_distance": 32.0
+  },
+  "selection_order": [
+    "standard_exact_scene_count",
+    "robust_exact_scene_count",
+    "standard_f1_5px",
+    "robust_f1_5px",
+    "zero_duplicates",
+    "zero_hard_negative_hits"
+  ],
+  "trigger_evidence_path": "ml/markers/center/artifacts/production-repair-v2/P2-run/production-training-report.json",
+  "trigger_evidence_sha256": "eadab74837b7851d7b577664b2f1470be060d09e50955cb9bcbc7b71670597f9",
+  "trigger_diagnostic": "P2 detected a correct marker at (110,76) while a line-intersection hard-negative at (110,84) was exactly on the inclusive 8-pixel hit boundary",
+  "execution_preconditions": [
+    "this preregistration is reviewed, committed, and clean",
+    "the P3 dataset and runner source bundle is reviewed, committed, and clean",
+    "the canonical training budget ledger is reviewed, committed, and clean",
+    "no P3 output or training seal exists"
+  ],
+  "approval_policy": "final training and selection candidate only; no production approval without sealed public and independent confirmation gates"
+}

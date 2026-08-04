@@ -80,3 +80,17 @@ ignored output is `ml/ocr/project_numeric_v1/runs/candidate-1`.
 
 Preregistration status: frozen source only. No training, sealed evaluation,
 checkpoint, ONNX, manifest, approval, or promotion has occurred.
+
+## Candidate 1 evaluator incident
+
+Candidate 1 training completed once from commit `088f9d0`, then the process
+raised a `TypeError` because `_evaluate` passed two lists to the existing
+pair-based metric API. Exact checkpoint SHA-256
+`6e941b2b3b746e092f01bf04a28faea61d0ba0bf584dc83b0530594ddddd8235`
+was retained. No report or ONNX was created, and the sealed split was not built.
+
+Candidate 1 must not retrain. `RECOVERY_EVALUATION.json` authorizes one
+evaluation-only recovery after the corrected evaluator and complete source
+binding are reviewed and committed. Recovery must load the exact checkpoint,
+perform zero optimizer steps, change no weights, and fail closed under the
+original public gates.

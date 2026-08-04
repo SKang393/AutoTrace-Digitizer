@@ -68,3 +68,16 @@ and is intentionally not claimed by the model training report.
    portable, and release-audit gates.
 
 Until all mandatory gates pass, no manifest or approval is permitted.
+
+## Candidate 1 evaluator incident
+
+The one authorized training run completed from commit `088f9d0`, but its
+validation reporter called the repository metric API with the wrong signature.
+The process stopped before any report, ONNX, or sealed-test construction. The
+exact retained checkpoint is 2,150,341 bytes with SHA-256
+`6e941b2b3b746e092f01bf04a28faea61d0ba0bf584dc83b0530594ddddd8235`.
+
+This is not a new candidate and does not authorize retraining. The tracked
+recovery record permits one evaluation-only load of those exact bytes after the
+fix is committed. It requires zero optimizer steps, immutable weights, the same
+frozen validation and sealed fingerprints, and the same fail-closed gates.

@@ -9,7 +9,6 @@ from pathlib import Path
 import pytest
 import torch
 
-from ml.markers.center import production_train_v2_p2 as p2_runner
 from ml.markers.gate_seal import canonical_json_bytes, sha256_file, source_bundle_sha256
 from ml.markers.training_budget import CANONICAL_LEDGER_PATH, acquire_training_candidate
 from ml.markers.center.dataset import build_fixed_dataset
@@ -63,7 +62,7 @@ def test_p2_fixed_split_adds_only_deterministic_tick_joint_selection_families() 
             assert all(kind in {"tick", "line_intersection"} for kind, _, _ in scene.hard_negatives[-6:])
 
 
-def test_p2_is_hash_bound_to_one_dataset_factor_and_refuses_before_authorization(
+def test_p2_is_hash_bound_consumed_and_cannot_rerun(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -87,32 +86,45 @@ def test_p2_is_hash_bound_to_one_dataset_factor_and_refuses_before_authorization
 
     ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-production-repair-v2")
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["candidate_config_sha256"]["P2"] == sha256_file(p2_path)
     assert entry["p2_selection_dataset_manifest_sha256"] == EXPECTED_MANIFEST_SHA256
     assert entry["p2_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
 
-    output = tmp_path / "p2-must-not-run-without-authorization"
+    assert entry["candidate_checkpoint_sha256"]["P2"] == (
+        "e9bdf74d36d7d460a5c2222e5a777a113150f69b3a8d1232466806e0f67ff33f"
+    )
+    assert entry["candidate_onnx_sha256"]["P2"] == (
+        "d0cbfdf691dc7c6c96bf59eaf2b67f969afaab8e25da502eba1e9c0b66e1f8ae"
+    )
+    seal_root = REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-production-repair-v2/P2"
+    assert sha256_file(seal_root / "opened.json") == entry["p2_training_opened_seal_sha256"]
+    assert sha256_file(seal_root / "result.json") == entry["p2_training_result_seal_sha256"]
 
-    def refuse_authorization(*_args: object, **_kwargs: object) -> object:
-        raise RuntimeError("controlled authorization refusal")
-
-    monkeypatch.setattr(p2_runner, "acquire_training_candidate", refuse_authorization)
-    with pytest.raises(RuntimeError, match="controlled authorization refusal"):
-        p2_runner.train_candidate(output)
-    assert not output.exists()
-    assert not (REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-production-repair-v2/P2").exists()
-    assert not (REPO_ROOT / "ml/markers/center/training/production-repair-v2-p3.json").exists()
+    monkeypatch.setattr(
+        "ml.markers.training_budget.require_committed_sources",
+        lambda *_args, **_kwargs: None,
+    )
+    with pytest.raises(RuntimeError, match="not authorized"):
+        acquire_training_candidate(
+            REPO_ROOT,
+            task="marker-center",
+            revision="marker-center-production-repair-v2",
+            candidate_id="P2",
+            config_path=CONFIG_PATH,
+            runner_source_paths=RUNNER_SOURCE_PATHS,
+        )
+    assert not (tmp_path / "ml/markers/training-seals").exists()
 
 
 @pytest.mark.parametrize(
     ("status", "consumed", "error_match"),
     (
-        ("candidate_2_consumed_failed_public_gate", [], "exact preregistered status"),
+        ("candidate_2_consumed_failed_selection", [], "exact preregistered status"),
         ("candidate_2_preregistered", ["P2"], "unused single-candidate authorization"),
     ),
 )

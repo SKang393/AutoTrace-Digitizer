@@ -32,6 +32,7 @@ from .model import GlobalSemanticSlotRecognizer
 from .protocol import (
     BATCH_SIZE,
     BLANK_CLASS_INDEX,
+    CANONICAL_OUTPUT_PATH,
     CANDIDATE_ID,
     CER_GATE,
     CLASS_COUNT,
@@ -99,7 +100,7 @@ def _evaluate(
     ]
     expected = [samples[index].target_text for index in positive_indices]
     observed = [predictions[index] for index in positive_indices]
-    metrics = evaluate_predictions(expected, observed)
+    metrics = evaluate_predictions(zip(expected, observed, strict=True))
     role_correct = sum(
         int(prediction == sample.role)
         for prediction, sample in zip(role_predictions, samples)
@@ -337,6 +338,159 @@ def run(output: Path, candidate_id: str) -> dict[str, object]:
     return report
 
 
+def _load_recovery_record(output: Path, candidate_id: str) -> dict[str, object]:
+    if candidate_id != CANDIDATE_ID or output.resolve() != CANONICAL_OUTPUT_PATH.resolve():
+        raise RuntimeError("Evaluation recovery is authorized only for canonical Candidate 1.")
+    record_path = Path(__file__).with_name("RECOVERY_EVALUATION.json")
+    record = json.loads(record_path.read_text(encoding="utf-8"))
+    if set(record) != {
+        "schema_version",
+        "protocol_id",
+        "candidate_id",
+        "status",
+        "original_training_commit",
+        "checkpoint",
+        "failure",
+        "authorized_action",
+        "retraining_permitted",
+        "weight_changes_permitted",
+        "approval",
+    }:
+        raise RuntimeError("Evaluation recovery record has an unexpected shape.")
+    if (
+        record["schema_version"] != 1
+        or record["protocol_id"] != validate_frozen_protocol()["configuration"]["protocol_id"]
+        or record["candidate_id"] != candidate_id
+        or record["status"] != "training_complete_evaluation_incomplete"
+        or record["retraining_permitted"] is not False
+        or record["weight_changes_permitted"] is not False
+        or record["approval"] is not False
+    ):
+        raise RuntimeError("Evaluation recovery authorization is invalid.")
+    checkpoint_record = record["checkpoint"]
+    if not isinstance(checkpoint_record, dict) or set(checkpoint_record) != {
+        "path",
+        "bytes",
+        "sha256",
+    }:
+        raise RuntimeError("Evaluation recovery checkpoint record is invalid.")
+    checkpoint = output / str(checkpoint_record["path"])
+    if not checkpoint.is_file():
+        raise RuntimeError("Evaluation recovery checkpoint is missing.")
+    if checkpoint.stat().st_size != int(checkpoint_record["bytes"]) or _sha256(
+        checkpoint
+    ) != str(checkpoint_record["sha256"]):
+        raise RuntimeError("Evaluation recovery checkpoint bytes do not match the incident record.")
+    unexpected = sorted(path.name for path in output.iterdir() if path != checkpoint)
+    if unexpected:
+        raise RuntimeError(
+            "Evaluation recovery refuses an ambiguous candidate directory: "
+            + ", ".join(unexpected)
+        )
+    return record
+
+
+def evaluate_recovery(output: Path, candidate_id: str) -> dict[str, object]:
+    recovery_commit = verify_committed_preregistration()
+    frozen = validate_frozen_protocol()
+    record = _load_recovery_record(output, candidate_id)
+    torch.manual_seed(SEED)
+    np.random.seed(SEED)
+    torch.use_deterministic_algorithms(True)
+    torch.set_num_threads(8)
+    checkpoint_record = record["checkpoint"]
+    assert isinstance(checkpoint_record, dict)
+    checkpoint = output / str(checkpoint_record["path"])
+    payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
+    if set(payload) != {"candidate_id", "committed_preregistration", "state_dict"}:
+        raise RuntimeError("Evaluation recovery checkpoint payload has an unexpected shape.")
+    if (
+        payload["candidate_id"] != candidate_id
+        or payload["committed_preregistration"] != record["original_training_commit"]
+        or not isinstance(payload["state_dict"], dict)
+    ):
+        raise RuntimeError("Evaluation recovery checkpoint identity is invalid.")
+    model = GlobalSemanticSlotRecognizer()
+    model.load_state_dict(payload["state_dict"], strict=True)
+    model.eval()
+
+    validation_samples = build_split("validation")
+    sealed_samples = build_split("sealed_test")
+    for split_name, samples in (
+        ("validation", validation_samples),
+        ("sealed_test", sealed_samples),
+    ):
+        if split_fingerprint(samples) != frozen["split_fingerprints"][split_name]:
+            raise RuntimeError(f"Frozen {split_name} split fingerprint mismatch.")
+    validation = _evaluate(model, validation_samples)
+    sealed = _evaluate(model, sealed_samples)
+    quality_passed = _quality_passes(validation, sealed=False) and _quality_passes(
+        sealed, sealed=True
+    )
+    onnx_result = None
+    if quality_passed:
+        onnx_result = _export_and_measure_parity(
+            model, output, validation_samples + sealed_samples
+        )
+    public_gates_passed = quality_passed and bool(
+        onnx_result and onnx_result["gate_passed"]
+    )
+    report = {
+        "protocol_id": frozen["configuration"]["protocol_id"],
+        "candidate_id": candidate_id,
+        "status": "candidate_public_gates_only" if public_gates_passed else "failed",
+        "approved": False,
+        "original_training_commit": record["original_training_commit"],
+        "recovery_evaluation_commit": recovery_commit,
+        "architecture": frozen["configuration"]["architecture"],
+        "training_time_ms": None,
+        "epoch_losses": None,
+        "training_metrics_note": "unavailable because the original process crashed before its report was written",
+        "evaluation_recovery": {
+            "status": "completed_without_retraining",
+            "incident_record": "RECOVERY_EVALUATION.json",
+            "checkpoint_sha256": checkpoint_record["sha256"],
+            "optimizer_steps": 0,
+            "weights_changed": False,
+        },
+        "split_metadata": {
+            "validation": split_metadata(validation_samples),
+            "sealed_test": split_metadata(sealed_samples),
+        },
+        "validation": validation,
+        "sealed_test": sealed,
+        "onnx": onnx_result,
+        "checkpoint": {
+            "path": checkpoint.name,
+            "bytes": checkpoint.stat().st_size,
+            "sha256": _sha256(checkpoint),
+        },
+        "environment": {
+            "python": platform.python_version(),
+            "torch": torch.__version__,
+            "numpy": np.__version__,
+            "platform": platform.platform(),
+            "cpu_threads": torch.get_num_threads(),
+        },
+        "weights_license": "Apache-2.0",
+        "weights_git_eligible": False,
+        "data_scope": frozen["configuration"]["data_scope"],
+        "remaining_mandatory_blockers": [
+            "downstream no-marker-creation integration gate",
+            "private graph validation",
+            "DirectML provider evidence",
+            "production resolver discovery",
+            "packaged installer and portable parity",
+            "complete release audit",
+        ],
+    }
+    report_path = output / "report.json"
+    with report_path.open("x", encoding="utf-8", newline="\n") as stream:
+        json.dump(report, stream, indent=2, sort_keys=True)
+        stream.write("\n")
+    return report
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--candidate-id", default=CANDIDATE_ID)
@@ -345,8 +499,13 @@ def main() -> int:
         type=Path,
         default=Path(__file__).with_name("runs") / CANDIDATE_ID,
     )
+    parser.add_argument("--resume-evaluation-only", action="store_true")
     arguments = parser.parse_args()
-    report = run(arguments.output, arguments.candidate_id)
+    report = (
+        evaluate_recovery(arguments.output, arguments.candidate_id)
+        if arguments.resume_evaluation_only
+        else run(arguments.output, arguments.candidate_id)
+    )
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0 if report["status"] == "candidate_public_gates_only" else 1
 

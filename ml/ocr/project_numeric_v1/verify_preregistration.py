@@ -21,6 +21,7 @@ REQUIRED_SOURCE_ROLES = {
     "package_init": "ml/ocr/project_numeric_v1/__init__.py",
     "protocol": "ml/ocr/project_numeric_v1/protocol.py",
     "frozen_protocol": "ml/ocr/project_numeric_v1/FROZEN_PROTOCOL.json",
+    "recovery_evaluation": "ml/ocr/project_numeric_v1/RECOVERY_EVALUATION.json",
     "dataset": "ml/ocr/project_numeric_v1/dataset.py",
     "model": "ml/ocr/project_numeric_v1/model.py",
     "training_entrypoint": "ml/ocr/project_numeric_v1/train.py",

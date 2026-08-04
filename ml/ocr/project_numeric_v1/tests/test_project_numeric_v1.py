@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import inspect
+import json
 from pathlib import Path
 import shutil
 import subprocess
@@ -110,6 +111,34 @@ def test_model_report_does_not_claim_downstream_marker_creation_evidence() -> No
     assert '"marker_creation_count": 0' not in source
     assert '"marker_creation_evaluated": False' in source
     assert "requires downstream application integration" in source
+
+
+def test_metric_adapter_uses_reference_prediction_pairs() -> None:
+    samples = build_split("validation", positive_count=8, negative_count=2)
+    model = GlobalSemanticSlotRecognizer().eval()
+
+    result = train_module._evaluate(model, samples)
+
+    assert result["positive_count"] == 8
+    assert result["negative_count"] == 2
+    assert 0.0 <= result["exact_match"] <= 1.0
+    assert result["marker_creation_evaluated"] is False
+
+
+def test_recovery_record_binds_exact_checkpoint_and_prohibits_retraining() -> None:
+    record = json.loads(
+        (Path(train_module.__file__).with_name("RECOVERY_EVALUATION.json")).read_text(
+            encoding="utf-8"
+        )
+    )
+
+    assert record["candidate_id"] == "candidate-1"
+    assert record["checkpoint"]["sha256"] == (
+        "6e941b2b3b746e092f01bf04a28faea61d0ba0bf584dc83b0530594ddddd8235"
+    )
+    assert record["retraining_permitted"] is False
+    assert record["weight_changes_permitted"] is False
+    assert record["approval"] is False
 
 
 def test_slot_encoding_supports_all_required_characters_and_padding() -> None:
