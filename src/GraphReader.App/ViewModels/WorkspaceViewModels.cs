@@ -6,6 +6,8 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using GraphReader.App.Models;
+using GraphReader.Domain;
+using AppGraphPoint = GraphReader.App.Models.GraphPoint;
 
 namespace GraphReader.App.ViewModels;
 
@@ -21,12 +23,12 @@ public enum WorkflowStage
 public sealed class MagnifierViewModel : ObservableObject
 {
     private bool _isEnhanced;
-    private bool _isCrosshairVisible = true;
+    private bool _isCrosshairVisible;
     private Point _crosshairPosition = new(0.5, 0.5);
-    private Point _pixelPosition = new(282, 128);
-    private Point? _graphPosition = new Point(4, 58);
-    private string? _nearestDetectionName = "Filled circle";
-    private double? _nearestDetectionConfidence = 0.96;
+    private Point _pixelPosition;
+    private Point? _graphPosition;
+    private string? _nearestDetectionName;
+    private double? _nearestDetectionConfidence;
     private double _zoomLevel = 3;
 
     public bool IsEnhanced
@@ -88,8 +90,10 @@ public sealed class MagnifierViewModel : ObservableObject
 
 public sealed class SeriesCardViewModel : ObservableObject
 {
-    private readonly ObservableCollection<GraphPoint> _points;
+    private readonly ObservableCollection<AppGraphPoint> _points;
     private bool _isVisible = true;
+    private string _label;
+    private Action<string>? _selectAction;
 
     public SeriesCardViewModel(
         string seriesId,
@@ -97,7 +101,10 @@ public sealed class SeriesCardViewModel : ObservableObject
         string accessibleName,
         string label,
         double confidence,
-        ObservableCollection<GraphPoint> points)
+        ObservableCollection<AppGraphPoint> points,
+        MarkerShape shape = MarkerShape.Other,
+        MarkerFill fill = MarkerFill.Unknown,
+        SemanticRole semanticRole = SemanticRole.Unknown)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(seriesId);
         ArgumentException.ThrowIfNullOrWhiteSpace(symbol);
@@ -111,10 +118,13 @@ public sealed class SeriesCardViewModel : ObservableObject
         SeriesId = seriesId;
         Symbol = symbol;
         AccessibleName = accessibleName;
-        Label = label;
+        _label = label;
         Confidence = confidence;
+        Shape = shape;
+        Fill = fill;
+        SemanticRole = semanticRole;
         _points = points ?? throw new ArgumentNullException(nameof(points));
-        SelectCommand = new RelayCommand(_ => { });
+        SelectCommand = new RelayCommand(_ => _selectAction?.Invoke(SeriesId));
     }
 
     public string SeriesId { get; }
@@ -123,7 +133,17 @@ public sealed class SeriesCardViewModel : ObservableObject
 
     public string AccessibleName { get; }
 
-    public string Label { get; }
+    public string Label
+    {
+        get => _label;
+        internal set => SetProperty(ref _label, value);
+    }
+
+    public MarkerShape Shape { get; }
+
+    public MarkerFill Fill { get; }
+
+    public SemanticRole SemanticRole { get; }
 
     public int Count => _points.Count(point => point.SeriesId == SeriesId);
 
@@ -137,22 +157,36 @@ public sealed class SeriesCardViewModel : ObservableObject
 
     public ICommand SelectCommand { get; }
 
+    internal void SetSelectAction(Action<string> selectAction)
+    {
+        _selectAction = selectAction ?? throw new ArgumentNullException(nameof(selectAction));
+    }
+
     internal void NotifyCountChanged() => OnPropertyChanged(nameof(Count));
 }
 
 public sealed class WorkspaceTabViewModel : ObservableObject
 {
-    private readonly object? _overlayContent;
+    private object? _overlayContent;
     private double _zoomLevel = 1;
 
     public WorkspaceTabViewModel(
         string tabId,
         string displayName,
-        ObservableCollection<GraphPoint> points,
+        ObservableCollection<AppGraphPoint> points,
         ObservableCollection<SeriesCardViewModel> seriesCards,
         ImageSource? imageSource,
         ImageSource? enhancedImageSource,
-        object? phaseOverlayContent)
+        object? phaseOverlayContent,
+        string? panelId = null,
+        string? sourceId = null,
+        string? sourcePath = null,
+        string? sourceSha256 = null,
+        int pixelWidth = 0,
+        int pixelHeight = 0,
+        ManualCalibrationState? calibration = null,
+        ObservableCollection<EditablePhaseDivider>? phaseDividers = null,
+        object? overlayContent = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(tabId);
         ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
@@ -162,15 +196,23 @@ public sealed class WorkspaceTabViewModel : ObservableObject
         SeriesCards = seriesCards ?? throw new ArgumentNullException(nameof(seriesCards));
         ImageSource = imageSource;
         EnhancedImageSource = enhancedImageSource;
-        _overlayContent = null;
+        _overlayContent = overlayContent;
         PhaseOverlayContent = phaseOverlayContent;
+        PanelId = panelId;
+        SourceId = sourceId;
+        SourcePath = sourcePath;
+        SourceSha256 = sourceSha256;
+        PixelWidth = pixelWidth;
+        PixelHeight = pixelHeight;
+        Calibration = calibration;
+        PhaseDividers = phaseDividers ?? [];
     }
 
     public string TabId { get; }
 
     public string DisplayName { get; }
 
-    public ObservableCollection<GraphPoint> Points { get; }
+    public ObservableCollection<AppGraphPoint> Points { get; }
 
     public ObservableCollection<SeriesCardViewModel> SeriesCards { get; }
 
@@ -180,7 +222,32 @@ public sealed class WorkspaceTabViewModel : ObservableObject
 
     public object? OverlayContent => _overlayContent;
 
+    internal void SetOverlayContent(object? overlayContent)
+    {
+        if (!ReferenceEquals(_overlayContent, overlayContent))
+        {
+            _overlayContent = overlayContent;
+            OnPropertyChanged(nameof(OverlayContent));
+        }
+    }
+
     public object? PhaseOverlayContent { get; }
+
+    public string? PanelId { get; }
+
+    public string? SourceId { get; }
+
+    public string? SourcePath { get; }
+
+    public string? SourceSha256 { get; }
+
+    public int PixelWidth { get; }
+
+    public int PixelHeight { get; }
+
+    public ManualCalibrationState? Calibration { get; internal set; }
+
+    public ObservableCollection<EditablePhaseDivider> PhaseDividers { get; }
 
     public double ZoomLevel
     {

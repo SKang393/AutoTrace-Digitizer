@@ -300,9 +300,6 @@ function Get-ModelAudit {
             if (@($manifest.files).Count -eq 0 -or @($manifest.files | Where-Object { $_ -isnot [string] -or [string]::IsNullOrWhiteSpace([string]$_) }).Count -gt 0) {
                 $issues.Add("Model manifest '$($manifestFile.Name)' requires nonempty string file paths.")
             }
-            elseif (@($manifest.files).Count -ne 1) {
-                $issues.Add("Model manifest '$($manifestFile.Name)' must reference exactly one packaged model artifact.")
-            }
             $allowedProviders = @('cpu', 'directml', 'winml', 'cuda', 'openvino', 'vulkan')
             if (@($manifest.providers).Count -eq 0 -or @($manifest.providers | Where-Object { $_ -isnot [string] -or $_ -notin $allowedProviders }).Count -gt 0) {
                 $issues.Add("Model manifest '$($manifestFile.Name)' has invalid execution providers.")
@@ -315,6 +312,53 @@ function Get-ModelAudit {
 
             if ([string]$manifest.sha256 -notmatch '^[a-fA-F0-9]{64}$') {
                 $issues.Add("Model manifest '$($manifestFile.Name)' has an invalid SHA-256 value.")
+            }
+
+            $artifactHashes = [System.Collections.Generic.Dictionary[string,string]]::new([System.StringComparer]::Ordinal)
+            $declaredModelFiles = @($manifest.files | ForEach-Object { ([string]$_).Replace('\', '/') })
+            if ($declaredModelFiles.Count -eq 1) {
+                if ([string]$manifest.sha256 -match '^[a-fA-F0-9]{64}$') {
+                    $artifactHashes.Add($declaredModelFiles[0], ([string]$manifest.sha256).ToLowerInvariant())
+                }
+            }
+            elseif ($declaredModelFiles.Count -gt 1) {
+                $payloadHashProperty = $null
+                if ($null -ne $manifest.preprocessing -and
+                    $null -ne $manifest.preprocessing.PSObject.Properties['model_payload_sha256']) {
+                    $payloadHashProperty = $manifest.preprocessing.PSObject.Properties['model_payload_sha256'].Value
+                }
+
+                if ($null -eq $payloadHashProperty -or
+                    $payloadHashProperty -is [string] -or
+                    $payloadHashProperty -is [System.Array]) {
+                    $issues.Add("Multi-file model manifest '$($manifestFile.Name)' requires preprocessing.model_payload_sha256 object entries for every file.")
+                }
+                else {
+                    foreach ($hashProperty in @($payloadHashProperty.PSObject.Properties)) {
+                        $normalizedHashPath = ([string]$hashProperty.Name).Replace('\', '/')
+                        $hashValue = [string]$hashProperty.Value
+                        if ($hashValue -notmatch '^[a-fA-F0-9]{64}$') {
+                            $issues.Add("Multi-file model manifest '$($manifestFile.Name)' has an invalid payload SHA-256 for '$normalizedHashPath'.")
+                        }
+                        elseif ($artifactHashes.ContainsKey($normalizedHashPath)) {
+                            $issues.Add("Multi-file model manifest '$($manifestFile.Name)' duplicates payload checksum path '$normalizedHashPath'.")
+                        }
+                        else {
+                            $artifactHashes.Add($normalizedHashPath, $hashValue.ToLowerInvariant())
+                        }
+                    }
+
+                    foreach ($declaredModelFile in $declaredModelFiles) {
+                        if (-not $artifactHashes.ContainsKey($declaredModelFile)) {
+                            $issues.Add("Multi-file model manifest '$($manifestFile.Name)' has no payload checksum for '$declaredModelFile'.")
+                        }
+                    }
+                    foreach ($artifactHashPath in @($artifactHashes.Keys)) {
+                        if ($declaredModelFiles -cnotcontains $artifactHashPath) {
+                            $issues.Add("Multi-file model manifest '$($manifestFile.Name)' has a payload checksum for undeclared file '$artifactHashPath'.")
+                        }
+                    }
+                }
             }
 
             $noticeRelativePath = [string]$manifest.license.notice_path
@@ -366,7 +410,17 @@ function Get-ModelAudit {
                     $located = $locatedCandidates[0]
                     $discoveredModelFileCount++
                     $actualHash = (Get-FileHash -LiteralPath $located -Algorithm SHA256).Hash.ToLowerInvariant()
-                    if ($actualHash -ne ([string]$manifest.sha256).ToLowerInvariant()) {
+                    $normalizedModelRelativePath = ([string]$modelRelativePath).Replace('\', '/')
+                    $expectedArtifactHash = if ($artifactHashes.ContainsKey($normalizedModelRelativePath)) {
+                        $artifactHashes[$normalizedModelRelativePath]
+                    }
+                    else {
+                        $null
+                    }
+                    if ($null -eq $expectedArtifactHash) {
+                        $issues.Add("Model manifest '$($manifestFile.Name)' has no usable checksum for '$modelRelativePath'.")
+                    }
+                    elseif ($actualHash -ne $expectedArtifactHash) {
                         $issues.Add("Model file checksum does not match manifest '$($manifestFile.Name)': $modelRelativePath.")
                     }
                     elseif ([bool]$manifest.redistribution) {
@@ -421,6 +475,14 @@ function Get-ModelAudit {
         }
         catch {
             $issues.Add("Model manifest '$($manifestFile.Name)' is invalid JSON or cannot be audited: $($_.Exception.Message)")
+        }
+    }
+
+    foreach ($modelIdGroup in @($models | Group-Object { [string]$_.modelId } | Sort-Object Name)) {
+        if (-not [string]::IsNullOrWhiteSpace([string]$modelIdGroup.Name) -and
+            $modelIdGroup.Count -gt 1) {
+            $manifests = @($modelIdGroup.Group | ForEach-Object { [string]$_.manifest } | Sort-Object) -join ', '
+            $issues.Add("Model ID '$($modelIdGroup.Name)' is duplicated by manifests: $manifests.")
         }
     }
 
@@ -1194,8 +1256,7 @@ foreach ($model in @($modelAudit.Models)) {
         New-Item -ItemType Directory -Path (Split-Path -Parent $targetPath) -Force | Out-Null
         Copy-Item -LiteralPath ([string]$artifact.sourcePath) -Destination $targetPath
         $packagedHash = (Get-FileHash -LiteralPath $targetPath -Algorithm SHA256).Hash.ToLowerInvariant()
-        if ($packagedHash -ne [string]$artifact.sha256 -or
-            $packagedHash -ne [string]$model.modelSha256) {
+        if ($packagedHash -ne [string]$artifact.sha256) {
             throw "Packaged model checksum differs from manifest '$($model.manifest)': $($artifact.archivePath)"
         }
 

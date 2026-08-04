@@ -8,6 +8,7 @@ namespace GraphReader.App.Integration.Workflow;
 public enum WorkflowRuntimeEnvironment
 {
     Production,
+    ManualPreview,
     RecordedFake,
 }
 

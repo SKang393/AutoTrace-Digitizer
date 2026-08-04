@@ -82,9 +82,69 @@
   "benchmarks": [
     {
       "profile": "session-05-super-resolution-x2",
-      "status": "not_run",
+      "status": "partial_runtime_only",
       "configured_output_scale": 2,
       "adapter_compatibility": "Official NCNN param/bin payload for Vulkan process inference",
+      "artifact_verification": {
+        "status": "verified",
+        "package_size_bytes": 45474481,
+        "package_sha256": "abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d",
+        "runtime_sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
+        "audit_date": "2026-08-03"
+      },
+      "minimal_runtime_verification": {
+        "status": "execution_verified_not_redistribution_approved",
+        "files": [
+          "realesrgan-ncnn-vulkan.exe",
+          "vcomp140.dll",
+          "models/realesr-animevideov3-x2.param",
+          "models/realesr-animevideov3-x2.bin"
+        ],
+        "excluded_from_runtime": [
+          "vcomp140d.dll",
+          "input.jpg",
+          "input2.jpg",
+          "onepiece_demo.mp4",
+          "unused model families"
+        ],
+        "adapter_success_count": 2,
+        "cache_hit_verified": true,
+        "evidence_sha256": "c480f97e09cf6117a86d5e8b565afa6e47aa3f85c14d9e46e3ef1932161fa967"
+      },
+      "fixed_public_synthetic_runtime": {
+        "dataset_seed": 393,
+        "dataset_generator_version": "0.1.0",
+        "case_ids": [
+          "a1b41e74-1808-5dec-99c9-59f4c88f4004",
+          "4b57ae01-eed3-55e3-bd47-cbae601ce431"
+        ],
+        "adapter_success_count": 2,
+        "exact_two_x_dimension_count": 2,
+        "source_dimensions": "1200x350",
+        "output_dimensions": "2400x700",
+        "adapter_total_ms": [
+          978.6905,
+          916.0614
+        ],
+        "adapter_inference_ms": [
+          846.537,
+          869.624
+        ],
+        "cache_repeat_status": "cache_hit",
+        "cache_repeat_wall_clock_ms": 72.9273,
+        "provider": "vulkan",
+        "gpu": "AMD Radeon RX 6600 XT",
+        "windows_build": "10.0.26200",
+        "evidence_sha256": "26b8b7fa0ce02b3fbbbfc647bcb6993bacc6073a21841c07bbb4c2e46720e98e"
+      },
+      "production_approval": false,
+      "blockers": [
+        "Marker-center, shape/fill, numeric OCR, axis localization, hallucinated-structure, and peak-memory metrics are not measured.",
+        "The official archive contains nonredistributable vcomp140d.dll; the execution-verified minimal runtime excludes it, demo media, and unused models.",
+        "The retained release vcomp140.dll still needs an authorized Microsoft redistributable source and maintainer license attestation.",
+        "The runtime notice set must retain Real-ESRGAN-ncnn-vulkan, NCNN, libwebp, and dirent terms.",
+        "The Vulkan runtime has no CPU or DirectML provider for the required offline CPU fallback gate."
+      ],
       "metrics_required": [
         "marker_center_f1",
         "shape_fill_classification_f1",

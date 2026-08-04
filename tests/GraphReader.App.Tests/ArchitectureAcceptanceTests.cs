@@ -70,22 +70,33 @@ public sealed class ArchitectureAcceptanceTests
     }
 
     [TestMethod]
-    public void ApplicationAssemblyDoesNotReferenceVisionModules()
+    public void ApplicationAssemblyReferencesOnlyApprovedManualIntegrationModules()
     {
-        string[] forbiddenAssemblyPrefixes =
+        string[] requiredManualAssemblyPrefixes =
         {
             "GraphReader.Imaging",
+            "GraphReader.Axis",
+            "GraphReader.Phases",
+            "GraphReader.Export",
+        };
+        string[] forbiddenAssemblyPrefixes =
+        {
             "GraphReader.Pdf",
             "GraphReader.SuperResolution",
-            "GraphReader.Axis",
             "GraphReader.Ocr",
             "GraphReader.Markers",
             "GraphReader.Legends",
-            "GraphReader.Phases",
             "GraphReader.Inference",
         };
 
         var referencedAssemblies = typeof(MainWindow).Assembly.GetReferencedAssemblies();
+        foreach (string prefix in requiredManualAssemblyPrefixes)
+        {
+            Assert.IsTrue(
+                referencedAssemblies.Any(reference => reference.Name?.StartsWith(prefix, StringComparison.Ordinal) is true),
+                $"The ManualPreview composition must reference real integration module {prefix}.");
+        }
+
         foreach (var prefix in forbiddenAssemblyPrefixes)
         {
             Assert.IsFalse(

@@ -704,40 +704,83 @@ function Assert-ModelManifests {
         }
 
         $modelFiles = @($manifest.files | ForEach-Object { ([string]$_).Replace('\', '/') })
-        if ($modelFiles.Count -ne 1) {
-            throw "Model manifest '$entryName' must identify exactly one packaged model artifact."
+        if ($modelFiles.Count -eq 0 -or
+            @($modelFiles | Where-Object { [string]::IsNullOrWhiteSpace($_) }).Count -gt 0) {
+            throw "Model manifest '$entryName' must identify at least one packaged model artifact."
         }
-        $declaredModelPath = $modelFiles[0]
-        if ([string]::IsNullOrWhiteSpace($declaredModelPath) -or
-            [IO.Path]::IsPathRooted($declaredModelPath) -or
-            @($declaredModelPath.Split('/')) -contains '..') {
-            throw "Model manifest '$entryName' uses an unsafe packaged model path '$declaredModelPath'."
-        }
-        $archiveModelPath = if ($declaredModelPath.StartsWith('models/', [StringComparison]::OrdinalIgnoreCase)) {
-            $declaredModelPath
-        }
-        else {
-            "models/runtime/$declaredModelPath"
-        }
-        if ($archiveModelPath.StartsWith('models/manifest/', [StringComparison]::OrdinalIgnoreCase)) {
-            throw "Model manifest '$entryName' cannot package model bytes below models/manifest."
-        }
-        $matchingEntries = @($Archive.Entries | Where-Object {
-                $_.FullName.Replace('\', '/') -ceq $archiveModelPath
-            })
-        if ($matchingEntries.Count -ne 1) {
-            throw "Model manifest '$entryName' must resolve exactly one packaged model artifact '$archiveModelPath'."
+        if (@($modelFiles | Sort-Object -Unique).Count -ne $modelFiles.Count) {
+            throw "Model manifest '$entryName' contains duplicate packaged model paths."
         }
 
-        $stream = $matchingEntries[0].Open()
-        try {
-            $modelHash = Get-StreamSha256 -Stream $stream
+        $artifactHashes = [System.Collections.Generic.Dictionary[string,string]]::new([StringComparer]::Ordinal)
+        if ($modelFiles.Count -eq 1) {
+            $artifactHashes.Add($modelFiles[0], ([string]$manifest.sha256).ToLowerInvariant())
         }
-        finally {
-            $stream.Dispose()
+        else {
+            $payloadHashProperty = $null
+            if ($null -ne $manifest.preprocessing -and
+                $null -ne $manifest.preprocessing.PSObject.Properties['model_payload_sha256']) {
+                $payloadHashProperty = $manifest.preprocessing.PSObject.Properties['model_payload_sha256'].Value
+            }
+            if ($null -eq $payloadHashProperty -or
+                $payloadHashProperty -is [string] -or
+                $payloadHashProperty -is [System.Array]) {
+                throw "Multi-file model manifest '$entryName' requires preprocessing.model_payload_sha256 object entries for every file."
+            }
+            foreach ($hashProperty in @($payloadHashProperty.PSObject.Properties)) {
+                $hashPath = ([string]$hashProperty.Name).Replace('\', '/')
+                $hashValue = [string]$hashProperty.Value
+                if ($hashValue -notmatch '^[a-fA-F0-9]{64}$') {
+                    throw "Multi-file model manifest '$entryName' has an invalid payload SHA-256 for '$hashPath'."
+                }
+                if ($artifactHashes.ContainsKey($hashPath)) {
+                    throw "Multi-file model manifest '$entryName' duplicates payload checksum path '$hashPath'."
+                }
+                $artifactHashes.Add($hashPath, $hashValue.ToLowerInvariant())
+            }
+            foreach ($modelFile in $modelFiles) {
+                if (-not $artifactHashes.ContainsKey($modelFile)) {
+                    throw "Multi-file model manifest '$entryName' has no payload checksum for '$modelFile'."
+                }
+            }
+            foreach ($hashPath in @($artifactHashes.Keys)) {
+                if ($modelFiles -cnotcontains $hashPath) {
+                    throw "Multi-file model manifest '$entryName' has a payload checksum for undeclared file '$hashPath'."
+                }
+            }
         }
-        Assert-Equal -Actual $modelHash -Expected ([string]$manifest.sha256).ToLowerInvariant() -Description "Model checksum differs for '$entryName'"
-        $modelArtifactPaths.Add($archiveModelPath)
+
+        foreach ($declaredModelPath in $modelFiles) {
+            if ([IO.Path]::IsPathRooted($declaredModelPath) -or
+                @($declaredModelPath.Split('/')) -contains '..') {
+                throw "Model manifest '$entryName' uses an unsafe packaged model path '$declaredModelPath'."
+            }
+            $archiveModelPath = if ($declaredModelPath.StartsWith('models/', [StringComparison]::OrdinalIgnoreCase)) {
+                $declaredModelPath
+            }
+            else {
+                "models/runtime/$declaredModelPath"
+            }
+            if ($archiveModelPath.StartsWith('models/manifest/', [StringComparison]::OrdinalIgnoreCase)) {
+                throw "Model manifest '$entryName' cannot package model bytes below models/manifest."
+            }
+            $matchingEntries = @($Archive.Entries | Where-Object {
+                    $_.FullName.Replace('\', '/') -ceq $archiveModelPath
+                })
+            if ($matchingEntries.Count -ne 1) {
+                throw "Model manifest '$entryName' must resolve exactly one packaged model artifact '$archiveModelPath'."
+            }
+
+            $stream = $matchingEntries[0].Open()
+            try {
+                $modelHash = Get-StreamSha256 -Stream $stream
+            }
+            finally {
+                $stream.Dispose()
+            }
+            Assert-Equal -Actual $modelHash -Expected $artifactHashes[$declaredModelPath] -Description "Model checksum differs for '$entryName' payload '$declaredModelPath'"
+            $modelArtifactPaths.Add($archiveModelPath)
+        }
     }
 
     return @($modelArtifactPaths)

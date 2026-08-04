@@ -11,6 +11,11 @@ public sealed class GraphPoint : INotifyPropertyChanged
     private string _seriesId;
     private double _pixelX;
     private double _pixelY;
+    private double _graphX;
+    private double _graphY;
+    private string _phaseCode;
+    private string? _phaseId;
+    private int _observationIndex;
 
     public GraphPoint(
         string pointId,
@@ -19,7 +24,9 @@ public sealed class GraphPoint : INotifyPropertyChanged
         double pixelY,
         double graphX,
         double graphY,
-        string phaseCode)
+        string phaseCode,
+        string? phaseId = null,
+        int observationIndex = 1)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(pointId);
         ArgumentException.ThrowIfNullOrWhiteSpace(seriesId);
@@ -29,9 +36,11 @@ public sealed class GraphPoint : INotifyPropertyChanged
         _seriesId = seriesId;
         _pixelX = pixelX;
         _pixelY = pixelY;
-        GraphX = graphX;
-        GraphY = graphY;
-        PhaseCode = phaseCode;
+        _graphX = graphX;
+        _graphY = graphY;
+        _phaseCode = phaseCode;
+        _phaseId = phaseId;
+        ObservationIndex = observationIndex;
     }
 
     public string PointId { get; }
@@ -54,11 +63,39 @@ public sealed class GraphPoint : INotifyPropertyChanged
         internal set => SetProperty(ref _pixelY, value);
     }
 
-    public double GraphX { get; }
+    public double GraphX
+    {
+        get => _graphX;
+        internal set => SetProperty(ref _graphX, value);
+    }
 
-    public double GraphY { get; }
+    public double GraphY
+    {
+        get => _graphY;
+        internal set => SetProperty(ref _graphY, value);
+    }
 
-    public string PhaseCode { get; }
+    public string PhaseCode
+    {
+        get => _phaseCode;
+        internal set => SetProperty(ref _phaseCode, value);
+    }
+
+    public string? PhaseId
+    {
+        get => _phaseId;
+        internal set => SetProperty(ref _phaseId, value);
+    }
+
+    public int ObservationIndex
+    {
+        get => _observationIndex;
+        internal set
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(value, 1);
+            SetProperty(ref _observationIndex, value);
+        }
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

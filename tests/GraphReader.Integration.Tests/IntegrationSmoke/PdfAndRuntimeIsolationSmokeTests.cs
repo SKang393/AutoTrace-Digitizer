@@ -93,6 +93,50 @@ public sealed class PdfAndRuntimeIsolationSmokeTests
     }
 
     [TestMethod]
+    public void DevelopmentDataOverrideIsAcceptedOnlyInPortableMode()
+    {
+        using var environment = new IntegrationSmokeTestEnvironment();
+        string executableRoot = environment.PathFor("portable path 한글");
+        string localRoot = environment.PathFor("LocalAppData");
+        string sharedDataRoot = environment.PathFor("shared preview Data");
+        Directory.CreateDirectory(executableRoot);
+        File.WriteAllText(Path.Combine(executableRoot, "portable.mode"), string.Empty);
+        var access = new RecordingDirectoryAccess();
+        var bootstrapper = new RuntimePathBootstrapper(
+            new RecordedRuntimeEnvironment(executableRoot, localRoot, sharedDataRoot),
+            access);
+
+        DomainResult<IApplicationPaths> initialized = bootstrapper.Initialize();
+
+        Assert.IsTrue(initialized.IsSuccess, Format(initialized.Errors));
+        Assert.AreEqual(DistributionMode.Portable, initialized.Value!.Mode);
+        Assert.IsTrue(access.Paths.All(path => IsUnder(path, sharedDataRoot)));
+        Assert.IsFalse(access.Paths.Any(path => IsUnder(path, executableRoot)));
+        Assert.IsFalse(access.Paths.Any(path => IsUnder(path, localRoot)));
+    }
+
+    [TestMethod]
+    public void DevelopmentDataOverrideIsIgnoredWithoutPortableSentinel()
+    {
+        using var environment = new IntegrationSmokeTestEnvironment();
+        string executableRoot = environment.PathFor("installed app");
+        string localRoot = environment.PathFor("LocalAppData");
+        string rejectedOverride = environment.PathFor("rejected preview Data");
+        Directory.CreateDirectory(executableRoot);
+        var access = new RecordingDirectoryAccess();
+        var bootstrapper = new RuntimePathBootstrapper(
+            new RecordedRuntimeEnvironment(executableRoot, localRoot, rejectedOverride),
+            access);
+
+        DomainResult<IApplicationPaths> initialized = bootstrapper.Initialize();
+
+        Assert.IsTrue(initialized.IsSuccess, Format(initialized.Errors));
+        Assert.AreEqual(DistributionMode.Installed, initialized.Value!.Mode);
+        Assert.IsTrue(access.Paths.All(path => IsUnder(path, Path.Combine(localRoot, "GraphAutoReader"))));
+        Assert.IsFalse(access.Paths.Any(path => IsUnder(path, rejectedOverride)));
+    }
+
+    [TestMethod]
     public void PortableReadOnlyFailureIsStructuredAndActionable()
     {
         using var environment = new IntegrationSmokeTestEnvironment();
@@ -221,7 +265,8 @@ public sealed class PdfAndRuntimeIsolationSmokeTests
 
     private sealed record RecordedRuntimeEnvironment(
         string ExecutableDirectory,
-        string LocalApplicationDataRoot) : IRuntimePathEnvironment;
+        string LocalApplicationDataRoot,
+        string? DevelopmentPortableDataRoot = null) : IRuntimePathEnvironment;
 
     private sealed class RecordingDirectoryAccess : IRuntimeDirectoryAccess
     {

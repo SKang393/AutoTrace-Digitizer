@@ -85,9 +85,17 @@
   "benchmarks": [
     {
       "profile": "session-05-super-resolution-x2",
-      "status": "not_run",
+      "status": "blocked_adapter_incompatible",
       "configured_output_scale": 2,
       "adapter_compatibility": "PyTorch reference weight; not directly consumable by realesrgan-ncnn-vulkan",
+      "artifact_verification": {
+        "status": "verified",
+        "verified_size_bytes": 67061725,
+        "verified_sha256": "49fafd45f8fd7aa8d31ab2a22d14d91b536c34494a5cfe31eb5d89c2fa266abb",
+        "audit_date": "2026-08-03"
+      },
+      "production_approval": false,
+      "blocker": "The authorized official artifact is a PyTorch checkpoint. The current separate-process adapter accepts only checksum-bound NCNN param/bin pairs, and no conversion workflow is approved.",
       "metrics_required": [
         "marker_center_f1",
         "shape_fill_classification_f1",

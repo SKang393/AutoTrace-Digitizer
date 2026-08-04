@@ -1,0 +1,181 @@
+{
+  "manifest_version": 1,
+  "model_id": "graph-marker-classifier",
+  "model_version": "0.1.0",
+  "task": "marker_classifier",
+  "source": {
+    "name": "Graph Auto Reader original compact spatial CNN marker classifier",
+    "url": "local://ml/markers/classifier",
+    "revision": "marker-classifier-pytorch-v2; source-bundle-sha256=6e9c0ff661d224e38363ad5cad6775e8b088623f6961902ee4a1cf2ad61dcd85; packed-export-source-sha256=ba985ef5488cd8e927a3982854feb319ea083a782e7fae2b09a8386d933ccfb9"
+  },
+  "license": {
+    "spdx": "Apache-2.0",
+    "notice_path": "models/manifest/markers/MARKER_CLASSIFIER_MODEL_NOTICE.md",
+    "reviewed": true
+  },
+  "sha256": "59b4af98fe40abd436f01a8c14bf0d12a7c82682ec072c65cef92881aa18b0ef",
+  "files": [
+    "marker-classifier-packed.onnx"
+  ],
+  "inputs": [
+    {
+      "name": "marker_patch",
+      "element_type": "float32",
+      "layout": "NCHW",
+      "shape": [
+        "N",
+        1,
+        32,
+        32
+      ],
+      "dynamic_axes": [
+        "N"
+      ],
+      "value_range": [
+        0.0,
+        1.0
+      ],
+      "channels": [
+        "ink_probability"
+      ],
+      "coordinate_space": "model_tensor"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "classification_heads",
+      "element_type": "float32",
+      "layout": "NC",
+      "shape": [
+        "N",
+        25
+      ],
+      "dynamic_axes": [
+        "N"
+      ],
+      "order": [
+        "temperature_scaled_shape_logits[9]",
+        "temperature_scaled_fill_logits[3]",
+        "artifact_logit[1]",
+        "l2_normalized_embedding[12]"
+      ]
+    }
+  ],
+  "preprocessing": {
+    "source": "marker-centered immutable original or enhanced frame crop",
+    "patch_size": [
+      32,
+      32
+    ],
+    "channel_order": [
+      "ink_probability"
+    ],
+    "ink_probability": "1 - luminance, finite float32 in [0,1]",
+    "normalization_mean": 0.0,
+    "normalization_scale": 1.0,
+    "shape_temperature": 1.35,
+    "fill_temperature": 0.7,
+    "training_seed": 20260803,
+    "training_revision": "marker-classifier-pytorch-v2",
+    "architecture": "compact-spatial-cnn-patch-classifier-v3",
+    "source_bundle_sha256": "6e9c0ff661d224e38363ad5cad6775e8b088623f6961902ee4a1cf2ad61dcd85",
+    "packed_export_source_sha256": "ba985ef5488cd8e927a3982854feb319ea083a782e7fae2b09a8386d933ccfb9",
+    "selection_dataset_manifest_sha256": "4832b281df860c9d433406346e397303b307ce74efcee75fbe09d00e969aa44f",
+    "checkpoint_sha256": "9f15d0d2ef067418b22ca625e405775c771dd63ea798f7c63fbed43d8d50b393",
+    "training_data_scope": "project-generated procedural marker patches only; no private study images, external figures, pretrained weights, or downloaded weights"
+  },
+  "postprocessing": {
+    "shape_order": [
+      "circle",
+      "square",
+      "triangle_up",
+      "triangle_down",
+      "diamond",
+      "star",
+      "asterisk",
+      "cross",
+      "other"
+    ],
+    "fill_order": [
+      "filled",
+      "open",
+      "unknown"
+    ],
+    "shape_rule": "softmax columns 0 through 8, then maximum probability",
+    "fill_rule": "softmax columns 9 through 11, then maximum probability",
+    "artifact_rule": "sigmoid column 12",
+    "embedding_rule": "L2 normalize columns 13 through 24",
+    "shape_and_fill_separate": true,
+    "public_coordinate_space": "original_pixels inherited from the input marker center"
+  },
+  "commercial_use": true,
+  "redistribution": true,
+  "providers": [
+    "cpu",
+    "directml"
+  ],
+  "benchmarks": [
+    {
+      "profile": "validation-selection",
+      "status": "fail",
+      "release_eligible": false,
+      "sample_count": 140,
+      "shape_macro_f1": 0.8710622710622711,
+      "fill_macro_f1": 0.9814671814671815,
+      "artifact_f1": 1.0,
+      "embedding_top1_retrieval_accuracy": 0.9722222222222222,
+      "local_shape_gate": 0.9,
+      "local_fill_gate": 0.9,
+      "gate_authority": "session-local preregistration; not maintainer-approved"
+    },
+    {
+      "profile": "historical-single-sealed-heldout-selected-checkpoint",
+      "status": "pass",
+      "release_eligible": false,
+      "evidence_path": "ml/markers/classifier/artifacts/session11-final-e3/benchmark.json",
+      "evidence_sha256": "b93e33b0c901870aa7d8b141dc936fd28dbf0a2727fee300e4da50772fa78382",
+      "checkpoint_sha256": "9f15d0d2ef067418b22ca625e405775c771dd63ea798f7c63fbed43d8d50b393",
+      "historical_separate_output_onnx_sha256": "03aabaf8b4793bf734f60164b2c98f43ce60050973fdda957975c4cf5b711a81",
+      "shape_macro_f1": 0.925106,
+      "fill_macro_f1": 0.966116,
+      "artifact_f1": 1.0,
+      "embedding_top1_retrieval_accuracy": 0.935185,
+      "minority_shape_macro_f1": 1.0,
+      "heldout_evaluation_count": 1,
+      "packed_runtime_heldout_benchmark": false,
+      "gate_authority": "session-local preregistration; not maintainer-approved"
+    },
+    {
+      "profile": "goal19-byte-exact-reproduction-without-heldout",
+      "status": "pass",
+      "release_eligible": false,
+      "evidence_path": "models/manifest/markers/MARKER_CLASSIFIER_CANDIDATE_AUDIT.md",
+      "heldout_test_evaluations": 0,
+      "checkpoint_sha256": "9f15d0d2ef067418b22ca625e405775c771dd63ea798f7c63fbed43d8d50b393",
+      "packed_onnx_sha256": "59b4af98fe40abd436f01a8c14bf0d12a7c82682ec072c65cef92881aa18b0ef",
+      "cpu_parity_max_absolute_difference": 0.000003814697265625,
+      "cpu_parity_tolerance": 0.00001
+    },
+    {
+      "profile": "goal19-exact-packed-provider-probe",
+      "status": "pass",
+      "release_eligible": false,
+      "evidence_path": "tests/GraphReader.Markers.Tests/Classification/CandidateClassifierProviderIntegrationTests.cs",
+      "input_shape": [
+        2,
+        1,
+        32,
+        32
+      ],
+      "output_shape": [
+        2,
+        25
+      ],
+      "cpu_inference_ms": 7.1318,
+      "directml_inference_ms": 253.1578,
+      "maximum_absolute_difference": 0.0000019073486328125,
+      "tolerance": 0.0001,
+      "directml_assignment_note": "DirectML session execution passed; exclusive GPU node assignment was not asserted"
+    }
+  ]
+}

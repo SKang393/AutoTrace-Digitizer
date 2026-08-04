@@ -177,6 +177,9 @@ public sealed class ViewModelAcceptanceTests
             viewModel.SplitSeriesCommand,
             viewModel.ReassignPointCommand,
             viewModel.TogglePhaseOverlayCommand,
+            viewModel.ZoomInCommand,
+            viewModel.ZoomOutCommand,
+            viewModel.FitZoomCommand,
         };
 
         Assert.IsTrue(commands.All(command => command is not null));
@@ -186,6 +189,34 @@ public sealed class ViewModelAcceptanceTests
         viewModel.TogglePhaseOverlayCommand.Execute(null);
 
         Assert.AreEqual(!original, viewModel.IsPhaseOverlayVisible);
+    }
+
+    [TestMethod]
+    public void SeriesSelectionZoomAndTabSwitchClearStaleInspectorState()
+    {
+        var viewModel = CreateWorkspace();
+        SeriesCardViewModel target = viewModel.SeriesCards[1];
+        viewModel.SelectedSeriesId = viewModel.SeriesCards[0].SeriesId;
+
+        target.SelectCommand.Execute(null);
+
+        Assert.AreEqual(target.SeriesId, viewModel.SelectedSeriesId);
+        double initialZoom = viewModel.SelectedTab!.ZoomLevel;
+        viewModel.ZoomInCommand.Execute(null);
+        Assert.IsGreaterThan(initialZoom, viewModel.SelectedTab.ZoomLevel);
+        viewModel.ZoomOutCommand.Execute(null);
+        viewModel.FitZoomCommand.Execute(null);
+        Assert.AreEqual(1, viewModel.SelectedTab.ZoomLevel);
+
+        viewModel.Magnifier.GraphPosition = new System.Windows.Point(12, 34);
+        viewModel.Magnifier.NearestDetectionName = "stale";
+        viewModel.Magnifier.NearestDetectionConfidence = 0.9;
+        viewModel.SelectedTab = null;
+
+        Assert.IsNull(viewModel.Magnifier.GraphPosition);
+        Assert.IsNull(viewModel.Magnifier.NearestDetectionName);
+        Assert.IsNull(viewModel.Magnifier.NearestDetectionConfidence);
+        Assert.IsFalse(viewModel.Magnifier.IsCrosshairVisible);
     }
 
     private static MainWindowViewModel CreateWorkspace()

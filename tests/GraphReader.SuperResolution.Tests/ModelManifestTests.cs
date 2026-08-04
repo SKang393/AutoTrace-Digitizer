@@ -108,7 +108,7 @@ public sealed class ModelManifestTests
     }
 
     [TestMethod]
-    public void BenchmarkEntriesMakeNoInventedQualityOrTimingClaims()
+    public void BenchmarkEntriesRecordOnlyDirectEvidenceAndNoInventedQualityClaims()
     {
         JsonDocument[] manifests = LoadManifests();
         try
@@ -117,7 +117,6 @@ public sealed class ModelManifestTests
             {
                 string modelId = GetModelId(manifest);
                 JsonElement benchmark = manifest.RootElement.GetProperty("benchmarks")[0];
-                Assert.AreEqual("not_run", benchmark.GetProperty("status").GetString(), modelId);
                 Assert.AreEqual("none", benchmark.GetProperty("quality_claims").GetString(), modelId);
                 Assert.AreEqual(2, benchmark.GetProperty("configured_output_scale").GetInt32(), modelId);
 
@@ -126,12 +125,65 @@ public sealed class ModelManifestTests
                     .Select(static metric => metric.GetString()!)
                     .ToArray();
                 CollectionAssert.AreEquivalent(RequiredMetrics, metrics, modelId);
+
+                string status = benchmark.GetProperty("status").GetString()!;
+                switch (modelId)
+                {
+                    case "RealESRGAN_x2plus":
+                        Assert.AreEqual("blocked_adapter_incompatible", status);
+                        Assert.IsFalse(benchmark.GetProperty("production_approval").GetBoolean());
+                        Assert.AreEqual(
+                            ExpectedModelHashes[modelId],
+                            benchmark.GetProperty("artifact_verification")
+                                .GetProperty("verified_sha256")
+                                .GetString());
+                        break;
+                    case "realesr-general-x4v3":
+                        Assert.AreEqual("not_run", status);
+                        break;
+                    case "realesr-animevideov3":
+                        Assert.AreEqual("partial_runtime_only", status);
+                        Assert.IsFalse(benchmark.GetProperty("production_approval").GetBoolean());
+                        JsonElement runtime = benchmark.GetProperty("fixed_public_synthetic_runtime");
+                        Assert.AreEqual(2, runtime.GetProperty("adapter_success_count").GetInt32());
+                        Assert.AreEqual(2, runtime.GetProperty("exact_two_x_dimension_count").GetInt32());
+                        Assert.AreEqual("cache_hit", runtime.GetProperty("cache_repeat_status").GetString());
+                        Assert.AreEqual("vulkan", runtime.GetProperty("provider").GetString());
+                        break;
+                    default:
+                        Assert.Fail($"Unexpected benchmark model '{modelId}'.");
+                        break;
+                }
             }
         }
         finally
         {
             DisposeAll(manifests);
         }
+    }
+
+    [TestMethod]
+    public async Task OfficialPyTorchX2PlusCannotBeMisrepresentedAsAnNcnnAdapterModel()
+    {
+        using var environment = new AdapterTestEnvironment();
+        var x2Plus = new EnhancementModel(
+            "RealESRGAN_x2plus",
+            "v0.2.1",
+            ExpectedModelHashes["RealESRGAN_x2plus"],
+            "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth",
+            "v0.2.1@64ad194ddaf9c4d8c4b0d1b98cac6d89d3ea0d11",
+            "BSD-3-Clause",
+            "LICENSES/Real-ESRGAN-BSD-3-Clause.txt",
+            [new ModelArtifact("RealESRGAN_x2plus.pth", ExpectedModelHashes["RealESRGAN_x2plus"])]);
+
+        EnhancementResult result = await environment.CreateAdapter().EnhanceAsync(
+            environment.CreateRequest(model: x2Plus),
+            CancellationToken.None);
+
+        Assert.AreEqual(EnhancementStatus.Failed, result.Status);
+        Assert.AreEqual(EnhancementFailureCode.InvalidRequest, result.Diagnostic.Code);
+        Assert.AreEqual(0, environment.Runner.InvocationCount);
+        StringAssert.Contains(result.Diagnostic.Message, "NCNN model");
     }
 
     [TestMethod]

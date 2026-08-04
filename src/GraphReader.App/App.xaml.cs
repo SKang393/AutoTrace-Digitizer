@@ -33,20 +33,56 @@ public partial class App : Application, IDisposable
 
     public IWorkspaceService WorkspaceService { get; private set; } = new UnavailableWorkspaceService();
 
+    public WorkflowRuntimeEnvironment RuntimeEnvironment { get; private set; }
+
     protected override void OnStartup(StartupEventArgs e)
     {
+        base.OnStartup(e);
         _themeService = new ThemeService(Resources);
         LocalizationService = new LocalizationService(Resources);
-        ApplicationCompositionResult composition =
-            ApplicationComposition.Create(WorkflowRuntimeEnvironment.Production);
-        WorkspaceService = composition.WorkspaceService;
-        WorkflowStartupError = composition.StartupError;
+        RuntimeEnvironment = RuntimeModeSelector.Select();
         DomainResult<IApplicationPaths> runtimePaths =
             RuntimePathBootstrapper.CreateDefault().Initialize();
         ApplicationPaths = runtimePaths.Value;
         StartupError = runtimePaths.Errors.Count > 0 ? runtimePaths.Errors[0] : null;
+        ApplicationCompositionResult composition =
+            ApplicationComposition.Create(RuntimeEnvironment, ApplicationPaths);
+        WorkspaceService = composition.WorkspaceService;
+        WorkflowStartupError = composition.StartupError;
         StartupErrorMessageKey = StartupError?.UserMessageKey ?? WorkflowStartupError?.UserMessageKey;
-        base.OnStartup(e);
+
+        bool portableSmoke = e.Args.Contains("--portable-smoke", StringComparer.OrdinalIgnoreCase);
+        if (portableSmoke)
+        {
+            int exitCode = RunPortableSmoke();
+            Shutdown(exitCode);
+            return;
+        }
+
+        var mainWindow = new MainWindow(_themeService);
+        MainWindow = mainWindow;
+        mainWindow.Show();
+    }
+
+    private int RunPortableSmoke()
+    {
+        if (StartupError is not null || WorkflowStartupError is not null ||
+            ApplicationPaths is null ||
+            RuntimeEnvironment != WorkflowRuntimeEnvironment.ManualPreview ||
+            WorkspaceService is not IRuntimeWorkspaceService runtimeWorkspace ||
+            runtimeWorkspace.UsesFakeGraphData ||
+            runtimeWorkspace.CreateWorkspace().Count != 0)
+        {
+            return 2;
+        }
+
+        var window = new MainWindow(_themeService)
+        {
+            ShowActivated = false,
+            ShowInTaskbar = false,
+        };
+        window.Close();
+        return 0;
     }
 
     protected override void OnExit(ExitEventArgs e)

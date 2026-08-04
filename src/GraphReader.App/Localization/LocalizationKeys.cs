@@ -16,10 +16,100 @@ public static class LocalizationKeys
     public const string WorkflowAutoDetectToolTip = "Workflow.AutoDetect.ToolTip";
     public const string WorkflowReviewToolTip = "Workflow.Review.ToolTip";
     public const string WorkflowExportToolTip = "Workflow.Export.ToolTip";
+    public const string WorkflowEnhanceUnavailable = "Workflow.Enhance.Unavailable";
+    public const string WorkflowAutoDetectUnavailable = "Workflow.AutoDetect.Unavailable";
     public const string ApplicationPathsUnavailable = "Errors.ApplicationPathsUnavailable";
     public const string ApplicationDataNotWritable = "Errors.ApplicationDataNotWritable";
     public const string PortableDataNotWritable = "Errors.PortableDataNotWritable";
     public const string ProductionWorkflowUnavailable = "Errors.ProductionWorkflowUnavailable";
+    public const string PreviewDevelopment = "Preview.Development";
+    public const string PreviewVersion = "Preview.Version";
+    public const string PreviewCommit = "Preview.Commit";
+    public const string PreviewRuntime = "Preview.Runtime";
+    public const string PreviewAvailableStages = "Preview.AvailableStages";
+    public const string PreviewMissingStages = "Preview.MissingStages";
+    public const string PreviewNone = "Preview.None";
+    public const string PreviewUnknown = "Preview.Unknown";
+    public const string ProjectOpen = "Project.Open";
+    public const string ProjectSave = "Project.Save";
+    public const string ProjectSaveAs = "Project.SaveAs";
+    public const string ProjectRecover = "Project.Recover";
+    public const string ProjectCloseTab = "Project.CloseTab";
+    public const string ManualTitle = "Manual.Title";
+    public const string ManualInstruction = "Manual.Instruction";
+    public const string ManualCalibration = "Manual.Calibration";
+    public const string ManualYMaximum = "Manual.YMaximum";
+    public const string ManualXMaximum = "Manual.XMaximum";
+    public const string ManualSeriesName = "Manual.SeriesName";
+    public const string ManualSeriesShape = "Manual.SeriesShape";
+    public const string ManualSeriesFill = "Manual.SeriesFill";
+    public const string ManualSeriesRole = "Manual.SeriesRole";
+    public const string ManualCreateSeries = "Manual.CreateSeries";
+    public const string ManualAddPoint = "Manual.AddPoint";
+    public const string ManualMovePoint = "Manual.MovePoint";
+    public const string ManualDeletePoint = "Manual.DeletePoint";
+    public const string ManualPhaseCode = "Manual.PhaseCode";
+    public const string ManualPhaseLabel = "Manual.PhaseLabel";
+    public const string ManualAddDivider = "Manual.AddDivider";
+    public const string ManualMoveDivider = "Manual.MoveDivider";
+    public const string ManualDeleteDivider = "Manual.DeleteDivider";
+    public const string ManualLabelDivider = "Manual.LabelDivider";
+    public const string ManualSharedBaseline = "Manual.SharedBaseline";
+    public const string ManualApplicableProbes = "Manual.ApplicableProbes";
+    public const string ManualNoSharedBaseline = "Manual.NoSharedBaseline";
+    public const string ManualApplySeriesRelations = "Manual.ApplySeriesRelations";
+    public const string ManualRelationsApplied = "Manual.Status.RelationsApplied";
+    public const string ManualDefaultIntervention = "Manual.Default.Intervention";
+    public const string ManualInstructionCalibration = "Manual.Instruction.Calibration";
+    public const string ManualInstructionAddPoint = "Manual.Instruction.AddPoint";
+    public const string ManualInstructionMovePoint = "Manual.Instruction.MovePoint";
+    public const string ManualInstructionAddDivider = "Manual.Instruction.AddDivider";
+    public const string ManualInstructionMoveDivider = "Manual.Instruction.MoveDivider";
+    public const string ManualInstructionSelect = "Manual.Instruction.Select";
+    public const string ManualCalibrationPrompt = "Manual.Status.CalibrationPrompt";
+    public const string ManualCalibrationSaved = "Manual.Status.CalibrationSaved";
+    public const string ManualSelectSeriesFirst = "Manual.Status.SelectSeriesFirst";
+    public const string ManualPointAdded = "Manual.Status.PointAdded";
+    public const string ManualPointMoved = "Manual.Status.PointMoved";
+    public const string ManualPointSelected = "Manual.Status.PointSelected";
+    public const string ManualDividerAdded = "Manual.Status.DividerAdded";
+    public const string ManualDividerMoved = "Manual.Status.DividerMoved";
+    public const string ManualDividerDeleted = "Manual.Status.DividerDeleted";
+    public const string ManualDividerLabeled = "Manual.Status.DividerLabeled";
+    public const string ManualDividerSelected = "Manual.Status.DividerSelected";
+    public const string ManualSeriesCreatedFormat = "Manual.Status.SeriesCreatedFormat";
+    public const string ManualSeriesSelectedFormat = "Manual.Status.SeriesSelectedFormat";
+    public const string ManualSeriesNameRequired = "Manual.Status.SeriesNameRequired";
+    public const string ManualPhaseLabelRequired = "Manual.Status.PhaseLabelRequired";
+    public const string MarkerShapeCircle = "MarkerShape.Circle";
+    public const string MarkerShapeSquare = "MarkerShape.Square";
+    public const string MarkerShapeTriangleUp = "MarkerShape.TriangleUp";
+    public const string MarkerShapeTriangleDown = "MarkerShape.TriangleDown";
+    public const string MarkerShapeDiamond = "MarkerShape.Diamond";
+    public const string MarkerShapeStar = "MarkerShape.Star";
+    public const string MarkerShapeAsterisk = "MarkerShape.Asterisk";
+    public const string MarkerShapeCross = "MarkerShape.Cross";
+    public const string MarkerShapeOther = "MarkerShape.Other";
+    public const string MarkerFillFilled = "MarkerFill.Filled";
+    public const string MarkerFillOpen = "MarkerFill.Open";
+    public const string MarkerFillUnknown = "MarkerFill.Unknown";
+    public const string SemanticRoleBaseline = "SemanticRole.Baseline";
+    public const string SemanticRoleIntervention = "SemanticRole.Intervention";
+    public const string SemanticRoleMaintenance = "SemanticRole.Maintenance";
+    public const string SemanticRoleGeneralization = "SemanticRole.Generalization";
+    public const string SemanticRoleUnknown = "SemanticRole.Unknown";
+    public const string StatusImportedFormat = "Status.ImportedFormat";
+    public const string StatusImportFailuresFormat = "Status.ImportFailuresFormat";
+    public const string StatusOpenedFormat = "Status.OpenedFormat";
+    public const string StatusSavedFormat = "Status.SavedFormat";
+    public const string StatusRecoveredFormat = "Status.RecoveredFormat";
+    public const string StatusExportedFormat = "Status.ExportedFormat";
+    public const string StatusCancelled = "Status.Cancelled";
+    public const string StatusManualEditRejectedFormat = "Status.ManualEditRejectedFormat";
+    public const string DialogGraphImages = "Dialog.GraphImages";
+    public const string DialogAllFiles = "Dialog.AllFiles";
+    public const string DialogProjectFiles = "Dialog.ProjectFiles";
+    public const string DialogExportFolder = "Dialog.ExportFolder";
     public const string NavigationTitle = "Navigation.Title";
     public const string NavigationGraphs = "Navigation.Graphs";
     public const string NavigationEmpty = "Navigation.Empty";
@@ -87,10 +177,100 @@ public static class LocalizationKeys
         WorkflowAutoDetectToolTip,
         WorkflowReviewToolTip,
         WorkflowExportToolTip,
+        WorkflowEnhanceUnavailable,
+        WorkflowAutoDetectUnavailable,
         ApplicationPathsUnavailable,
         ApplicationDataNotWritable,
         PortableDataNotWritable,
         ProductionWorkflowUnavailable,
+        PreviewDevelopment,
+        PreviewVersion,
+        PreviewCommit,
+        PreviewRuntime,
+        PreviewAvailableStages,
+        PreviewMissingStages,
+        PreviewNone,
+        PreviewUnknown,
+        ProjectOpen,
+        ProjectSave,
+        ProjectSaveAs,
+        ProjectRecover,
+        ProjectCloseTab,
+        ManualTitle,
+        ManualInstruction,
+        ManualCalibration,
+        ManualYMaximum,
+        ManualXMaximum,
+        ManualSeriesName,
+        ManualSeriesShape,
+        ManualSeriesFill,
+        ManualSeriesRole,
+        ManualCreateSeries,
+        ManualAddPoint,
+        ManualMovePoint,
+        ManualDeletePoint,
+        ManualPhaseCode,
+        ManualPhaseLabel,
+        ManualAddDivider,
+        ManualMoveDivider,
+        ManualDeleteDivider,
+        ManualLabelDivider,
+        ManualSharedBaseline,
+        ManualApplicableProbes,
+        ManualNoSharedBaseline,
+        ManualApplySeriesRelations,
+        ManualRelationsApplied,
+        ManualDefaultIntervention,
+        ManualInstructionCalibration,
+        ManualInstructionAddPoint,
+        ManualInstructionMovePoint,
+        ManualInstructionAddDivider,
+        ManualInstructionMoveDivider,
+        ManualInstructionSelect,
+        ManualCalibrationPrompt,
+        ManualCalibrationSaved,
+        ManualSelectSeriesFirst,
+        ManualPointAdded,
+        ManualPointMoved,
+        ManualPointSelected,
+        ManualDividerAdded,
+        ManualDividerMoved,
+        ManualDividerDeleted,
+        ManualDividerLabeled,
+        ManualDividerSelected,
+        ManualSeriesCreatedFormat,
+        ManualSeriesSelectedFormat,
+        ManualSeriesNameRequired,
+        ManualPhaseLabelRequired,
+        MarkerShapeCircle,
+        MarkerShapeSquare,
+        MarkerShapeTriangleUp,
+        MarkerShapeTriangleDown,
+        MarkerShapeDiamond,
+        MarkerShapeStar,
+        MarkerShapeAsterisk,
+        MarkerShapeCross,
+        MarkerShapeOther,
+        MarkerFillFilled,
+        MarkerFillOpen,
+        MarkerFillUnknown,
+        SemanticRoleBaseline,
+        SemanticRoleIntervention,
+        SemanticRoleMaintenance,
+        SemanticRoleGeneralization,
+        SemanticRoleUnknown,
+        StatusImportedFormat,
+        StatusImportFailuresFormat,
+        StatusOpenedFormat,
+        StatusSavedFormat,
+        StatusRecoveredFormat,
+        StatusExportedFormat,
+        StatusCancelled,
+        StatusManualEditRejectedFormat,
+        DialogGraphImages,
+        DialogAllFiles,
+        DialogProjectFiles,
+        DialogExportFolder,
         NavigationTitle,
         NavigationGraphs,
         NavigationEmpty,

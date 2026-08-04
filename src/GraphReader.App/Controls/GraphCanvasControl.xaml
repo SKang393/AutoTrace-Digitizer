@@ -15,6 +15,8 @@
           CornerRadius="8">
     <ScrollViewer HorizontalScrollBarVisibility="Auto"
                   VerticalScrollBarVisibility="Auto"
+                  PanningMode="Both"
+                  CanContentScroll="False"
                   Focusable="False">
       <Grid x:Name="CanvasSurface" MinWidth="320" MinHeight="240">
         <Grid.LayoutTransform>

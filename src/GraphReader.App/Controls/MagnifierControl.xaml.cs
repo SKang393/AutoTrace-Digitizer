@@ -37,6 +37,12 @@ public partial class MagnifierControl : UserControl
         typeof(MagnifierControl),
         new PropertyMetadata(new Point(0.5, 0.5)));
 
+    public static readonly DependencyProperty ShowCrosshairProperty = DependencyProperty.Register(
+        nameof(ShowCrosshair),
+        typeof(bool),
+        typeof(MagnifierControl),
+        new PropertyMetadata(true));
+
     public static readonly DependencyProperty PixelPositionProperty = DependencyProperty.Register(
         nameof(PixelPosition),
         typeof(Point),
@@ -96,6 +102,12 @@ public partial class MagnifierControl : UserControl
     {
         get => (Point)GetValue(CrosshairPositionProperty);
         set => SetValue(CrosshairPositionProperty, value);
+    }
+
+    public bool ShowCrosshair
+    {
+        get => (bool)GetValue(ShowCrosshairProperty);
+        set => SetValue(ShowCrosshairProperty, value);
     }
 
     public Point PixelPosition
@@ -192,7 +204,10 @@ public partial class MagnifierControl : UserControl
             return;
         }
 
-        PixelPositionText.Text = FormatResource("Magnifier.CoordinateFormat", PixelPosition.X, PixelPosition.Y);
+        bool hasImage = OriginalImageSource is not null || EnhancedImageSource is not null;
+        PixelPositionText.Text = hasImage
+            ? FormatResource("Magnifier.CoordinateFormat", PixelPosition.X, PixelPosition.Y)
+            : ResourceText("Magnifier.NearestDetection.None");
         GraphPositionText.Text = GraphPosition is Point graphPosition
             ? FormatResource("Magnifier.CoordinateFormat", graphPosition.X, graphPosition.Y)
             : ResourceText("Magnifier.NearestDetection.None");

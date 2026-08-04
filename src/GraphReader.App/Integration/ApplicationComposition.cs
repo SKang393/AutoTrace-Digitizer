@@ -2,7 +2,6 @@
 // Copyright 2026 Sungwoo Kang
 
 using GraphReader.App.Integration.Workflow;
-using GraphReader.App.Localization;
 using GraphReader.App.Services;
 using GraphReader.Domain;
 
@@ -15,19 +14,22 @@ public sealed record ApplicationCompositionResult(
 
 public static class ApplicationComposition
 {
-    public static ApplicationCompositionResult Create(WorkflowRuntimeEnvironment environment) =>
+    public static ApplicationCompositionResult Create(
+        WorkflowRuntimeEnvironment environment,
+        IApplicationPaths? applicationPaths = null) =>
         environment switch
         {
             WorkflowRuntimeEnvironment.Production => new ApplicationCompositionResult(
                 environment,
-                new UnavailableWorkspaceService(),
-                new DomainError(
-                    "PRODUCTION_WORKFLOW_UNAVAILABLE",
-                    DomainErrorSeverity.Error,
-                    LocalizationKeys.ProductionWorkflowUnavailable,
-                    "Approved production workflow adapters and models are not available in this internal build.",
-                    Recoverable: true,
-                    "install_approved_workflow_assets")),
+                new ManualPreviewWorkspaceService(
+                    applicationPaths,
+                    runtimeEnvironment: WorkflowRuntimeEnvironment.Production,
+                    automaticStages: ProductionStageAvailabilityRegistry.Current),
+                null),
+            WorkflowRuntimeEnvironment.ManualPreview => new ApplicationCompositionResult(
+                environment,
+                new ManualPreviewWorkspaceService(applicationPaths),
+                null),
             WorkflowRuntimeEnvironment.RecordedFake => new ApplicationCompositionResult(
                 environment,
                 new FakeWorkspaceService(),

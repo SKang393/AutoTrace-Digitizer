@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "profileId": "graphreader-axis-minimal-win-x64",
+  "evidenceRootName": "evidence-repro-pass2-final-a",
+  "overallReviewStatus": "requires-maintainer-attestation",
+  "binarySha256": "87c12460daba638b36e916ea2bb832d0759fbf094b8639919a7ce11b0cca5791",
+  "sourceRevisions": {
+    "openCvSharp": "b161e7e012f5101f6d5dc68a835c59db6cc88b18",
+    "openCv": "fe38fc608f6acb8b68953438a62305d8318f4fcd",
+    "vcpkg": "1e199d32ad53aab1defda61ce41c380302e3f95c"
+  },
+  "noticeBundle": {
+    "path": "third-party-notices.candidate.txt",
+    "sections": [
+      { "id": "apache-2.0", "sha256": "60057bb16b269b49bdb6a04e0e9ccddc2cd55aef477ff5ef3d9f8eef2b674643" },
+      { "id": "zlib", "sha256": "477e8527bfd640e7b9f32bc645ade18a8e7ebc4643cba08336073e644361e226" },
+      { "id": "softfloat-bsd-3-clause", "sha256": "4fb87f8e5f8c133d6adefdd594d9cf448cf7db61bfedf2e8eb363dc9839ac275" },
+      { "id": "fdlibm", "sha256": "9e3690c40a04825877e6088d1ae16907b479bdfd9e491525f9cf5c83be6c5a42" }
+    ]
+  },
+  "microsoftStaticRuntimeAttestation": {
+    "status": "required",
+    "visualStudioInstallationVersion": "17.14.37216.2",
+    "vcToolsVersion": "14.44.35207",
+    "windowsSdkVersion": "10.0.26100.0",
+    "termReferences": [
+      "https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files?view=msvc-170",
+      "https://learn.microsoft.com/en-gb/visualstudio/releases/2022/redistribution"
+    ],
+    "requiredMaintainerStatement": "The release maintainer confirms authority to distribute the statically linked Microsoft runtime code under the applicable Visual Studio and Windows SDK terms."
+  },
+  "entries": [
+    { "kind": "static-library", "name": "LIBCMT.lib", "classification": "linked-microsoft-static-runtime", "source": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\lib\\x64\\libcmt.lib", "license": "LicenseRef-Microsoft-VisualStudio-2022", "noticeDisposition": "maintainer-attestation-required", "reviewStatus": "requires-maintainer-attestation" },
+    { "kind": "static-library", "name": "libconcrt.lib", "classification": "linked-microsoft-static-runtime", "source": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\lib\\x64\\libconcrt.lib", "license": "LicenseRef-Microsoft-VisualStudio-2022", "noticeDisposition": "maintainer-attestation-required", "reviewStatus": "requires-maintainer-attestation" },
+    { "kind": "static-library", "name": "libcpmt.lib", "classification": "linked-microsoft-static-runtime", "source": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\lib\\x64\\libcpmt.lib", "license": "LicenseRef-Microsoft-VisualStudio-2022", "noticeDisposition": "maintainer-attestation-required", "reviewStatus": "requires-maintainer-attestation" },
+    { "kind": "static-library", "name": "libucrt.lib", "classification": "linked-microsoft-static-runtime", "source": "C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64\\libucrt.lib", "license": "LicenseRef-Microsoft-Windows-SDK-10.0.26100.0", "noticeDisposition": "maintainer-attestation-required", "reviewStatus": "requires-maintainer-attestation" },
+    { "kind": "static-library", "name": "libvcruntime.lib", "classification": "linked-microsoft-static-runtime", "source": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\lib\\x64\\libvcruntime.lib", "license": "LicenseRef-Microsoft-VisualStudio-2022", "noticeDisposition": "maintainer-attestation-required", "reviewStatus": "requires-maintainer-attestation" },
+    { "kind": "static-library", "name": "odbccp32.lib", "classification": "unused-windows-import-library", "source": "Windows SDK 10.0.26100.0 um/x64/odbccp32.lib", "license": "LicenseRef-Microsoft-Windows-SDK-10.0.26100.0", "noticeDisposition": "not-required-not-shipped", "reviewStatus": "reviewed" },
+    { "kind": "static-library", "name": "opencv_core4130.lib", "classification": "linked-opencv-static-code", "source": "https://github.com/opencv/opencv/tree/fe38fc608f6acb8b68953438a62305d8318f4fcd", "license": "Apache-2.0 AND BSD-3-Clause AND LicenseRef-FDLIBM-notice", "noticeDisposition": "candidate-included", "noticeIds": ["apache-2.0", "softfloat-bsd-3-clause", "fdlibm"], "reviewStatus": "reviewed" },
+    { "kind": "static-library", "name": "opencv_imgcodecs4130.lib", "classification": "linked-opencv-static-code", "source": "https://github.com/opencv/opencv/tree/fe38fc608f6acb8b68953438a62305d8318f4fcd", "license": "Apache-2.0", "noticeDisposition": "candidate-included", "noticeIds": ["apache-2.0"], "reviewStatus": "reviewed" },
+    { "kind": "static-library", "name": "opencv_imgproc4130.lib", "classification": "linked-opencv-static-code", "source": "https://github.com/opencv/opencv/tree/fe38fc608f6acb8b68953438a62305d8318f4fcd", "license": "Apache-2.0 AND BSD-3-Clause AND LicenseRef-FDLIBM-notice", "noticeDisposition": "candidate-included", "noticeIds": ["apache-2.0", "softfloat-bsd-3-clause", "fdlibm"], "reviewStatus": "reviewed" },
+    { "kind": "static-library", "name": "zlib.lib", "classification": "linked-embedded-zlib", "source": "https://github.com/opencv/opencv/tree/fe38fc608f6acb8b68953438a62305d8318f4fcd/3rdparty/zlib", "license": "Zlib", "noticeDisposition": "candidate-included", "noticeIds": ["zlib"], "reviewStatus": "reviewed" },
+    { "kind": "pe-import", "name": "KERNEL32.dll", "classification": "windows-system-api-import", "source": "Windows system API", "license": "LicenseRef-Microsoft-Windows-System-API", "noticeDisposition": "not-required-not-shipped", "reviewStatus": "reviewed" },
+    { "kind": "pe-import", "name": "ole32.dll", "classification": "windows-system-api-import", "source": "Windows system API", "license": "LicenseRef-Microsoft-Windows-System-API", "noticeDisposition": "not-required-not-shipped", "reviewStatus": "reviewed" },
+    { "kind": "embedded-source-license", "name": "dlpack-LICENSE", "classification": "installed-license-artifact-not-linked", "source": "https://github.com/opencv/opencv/tree/fe38fc608f6acb8b68953438a62305d8318f4fcd/3rdparty/dlpack/LICENSE", "license": "Apache-2.0", "noticeDisposition": "not-required-not-linked", "reviewStatus": "reviewed" },
+    { "kind": "embedded-source-license", "name": "SoftFloat-COPYING.txt", "classification": "linked-code-license-evidence", "source": "https://github.com/opencv/opencv/tree/fe38fc608f6acb8b68953438a62305d8318f4fcd/modules/core/src/softfloat.cpp", "license": "BSD-3-Clause AND LicenseRef-FDLIBM-notice", "noticeDisposition": "candidate-included", "noticeIds": ["softfloat-bsd-3-clause", "fdlibm"], "reviewStatus": "reviewed" },
+    { "kind": "embedded-source-license", "name": "zlib-LICENSE", "classification": "merged-license-evidence", "source": "https://github.com/opencv/opencv/tree/fe38fc608f6acb8b68953438a62305d8318f4fcd/3rdparty/zlib/LICENSE", "license": "Zlib", "noticeDisposition": "merged-with-zlib-lib", "noticeIds": ["zlib"], "reviewStatus": "reviewed" }
+  ]
+}

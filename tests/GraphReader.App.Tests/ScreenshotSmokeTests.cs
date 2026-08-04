@@ -4,6 +4,7 @@
 using System.IO;
 using System.Windows;
 using GraphReader.App.Controls;
+using GraphReader.App.Localization;
 using GraphReader.App.Services;
 using GraphReader.App.ViewModels;
 
@@ -43,6 +44,43 @@ public sealed class ScreenshotSmokeTests
 
         Assert.AreNotEqual(visible.Sha256, hidden.Sha256);
         CollectionAssert.AreNotEqual(visible.PngBytes, hidden.PngBytes);
+    }
+
+    [TestMethod]
+    public void ManualPreviewRendersEmptyRealDataWorkspaceWithDevelopmentBanner()
+    {
+        var workspace = new ManualPreviewWorkspaceService();
+        Assert.HasCount(0, workspace.CreateWorkspace());
+        Assert.IsFalse(workspace.UsesFakeGraphData);
+        var viewModel = new MainWindowViewModel(
+            workspace,
+            new LocalizationService(new ResourceDictionary()));
+        Assert.IsNull(viewModel.Magnifier.GraphPosition);
+        Assert.IsNull(viewModel.Magnifier.NearestDetectionName);
+        Assert.IsNull(viewModel.Magnifier.NearestDetectionConfidence);
+        Assert.IsFalse(viewModel.Magnifier.IsCrosshairVisible);
+        Assert.IsFalse(viewModel.EnhanceCommand.CanExecute(null));
+        Assert.IsFalse(viewModel.AutoDetectCommand.CanExecute(null));
+        StringAssert.Contains(viewModel.EnhancementAvailabilityText, "unavailable");
+        StringAssert.Contains(viewModel.AutoDetectionAvailabilityText, "unavailable");
+
+        RenderedScreenshot rendered = WpfScreenshotHarness.Render(
+            () => CreateManualPreviewWorkspace(viewModel),
+            1400,
+            900);
+
+        Assert.AreEqual(1400, rendered.Width);
+        Assert.AreEqual(900, rendered.Height);
+        Assert.IsGreaterThan(2_000, rendered.PngBytes.Length);
+        string evidenceDirectory = Path.Combine(
+            RepositoryTestPaths.Root,
+            "artifacts",
+            "dev-portable",
+            "evidence");
+        Directory.CreateDirectory(evidenceDirectory);
+        File.WriteAllBytes(
+            Path.Combine(evidenceDirectory, "manual-preview-empty.png"),
+            rendered.PngBytes);
     }
 
     private static GraphCanvasControl CreatePhaseCanvas(bool showPhaseOverlay)
@@ -99,6 +137,16 @@ public sealed class ScreenshotSmokeTests
         };
         AddResources(window, themeSource);
 
+        return (FrameworkElement)window.Content;
+    }
+
+    private static FrameworkElement CreateManualPreviewWorkspace(MainWindowViewModel viewModel)
+    {
+        var window = new MainWindow
+        {
+            DataContext = viewModel,
+        };
+        AddResources(window, LightThemeSource);
         return (FrameworkElement)window.Content;
     }
 

@@ -70,7 +70,18 @@
           </Image>
           <controls:CrosshairOverlay Position="{Binding CrosshairPosition, ElementName=Root}"
                                      Stroke="{DynamicResource App.Brush.Focus}"
-                                     AutomationProperties.Name="{DynamicResource Magnifier.Crosshair.AutomationName}" />
+                                     AutomationProperties.Name="{DynamicResource Magnifier.Crosshair.AutomationName}">
+            <controls:CrosshairOverlay.Style>
+              <Style TargetType="controls:CrosshairOverlay">
+                <Setter Property="Visibility" Value="Visible" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding ShowCrosshair, ElementName=Root}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </controls:CrosshairOverlay.Style>
+          </controls:CrosshairOverlay>
           <TextBlock x:Name="EmptyImageText"
                      HorizontalAlignment="Center"
                      VerticalAlignment="Center"

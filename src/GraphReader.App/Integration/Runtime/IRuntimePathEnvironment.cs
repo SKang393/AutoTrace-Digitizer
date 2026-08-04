@@ -11,6 +11,8 @@ public interface IRuntimePathEnvironment
     string ExecutableDirectory { get; }
 
     string LocalApplicationDataRoot { get; }
+
+    string? DevelopmentPortableDataRoot => null;
 }
 
 /// <summary>
@@ -28,4 +30,7 @@ public sealed class SystemRuntimePathEnvironment : IRuntimePathEnvironment
 
     public string LocalApplicationDataRoot =>
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+    public string? DevelopmentPortableDataRoot =>
+        Environment.GetEnvironmentVariable("GRAPHREADER_DEV_PORTABLE_DATA_ROOT");
 }

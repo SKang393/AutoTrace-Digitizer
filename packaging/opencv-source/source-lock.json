@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "profileId": "graphreader-axis-minimal-win-x64",
+  "sources": {
+    "openCvSharp": {
+      "repository": "https://github.com/shimat/opencvsharp.git",
+      "revision": "b161e7e012f5101f6d5dc68a835c59db6cc88b18",
+      "license": "Apache-2.0"
+    },
+    "openCv": {
+      "repository": "https://github.com/opencv/opencv.git",
+      "revision": "fe38fc608f6acb8b68953438a62305d8318f4fcd",
+      "license": "Apache-2.0"
+    },
+    "vcpkg": {
+      "repository": "https://github.com/microsoft/vcpkg.git",
+      "revision": "1e199d32ad53aab1defda61ce41c380302e3f95c",
+      "toolVersion": "2026-03-04-4b3e4c276b5b87a649e66341e11553e8c577459c",
+      "license": "MIT"
+    }
+  },
+  "toolchain": {
+    "visualStudioInstallationVersion": "17.14.37216.2",
+    "generator": "Visual Studio 17 2022",
+    "platform": "x64",
+    "toolset": "v143",
+    "vcToolsVersion": "14.44.35207",
+    "windowsSdkVersion": "10.0.26100.0",
+    "cmakeVersion": "3.31.6-msvc6",
+    "configuration": "Release",
+    "crtLinkage": "static",
+    "canonicalInstallPrefix": "C:/GraphAutoReader/OpenCV-4.13.0-source-audit",
+    "canonicalEvidenceRoot": "C:/GraphAutoReader/OpenCV-source-audit-evidence"
+  },
+  "openCvPolicy": {
+    "buildList": [
+      "core",
+      "imgproc",
+      "imgcodecs"
+    ],
+    "nonFree": false,
+    "sharedLibraries": false,
+    "networkDownloadedComponents": false,
+    "cpuBaseline": "SSE3",
+    "cpuDispatch": "SSE4_1;SSE4_2;AVX;AVX2",
+    "requiredEmbeddedDependencies": [
+      "zlib"
+    ]
+  },
+  "openCvSharpPolicy": {
+    "disabledBindings": [
+      "contrib",
+      "stitching",
+      "calib3d",
+      "video",
+      "features2d",
+      "flann",
+      "dnn",
+      "ml",
+      "objdetect",
+      "photo",
+      "barcode",
+      "highgui",
+      "videoio"
+    ]
+  }
+}

@@ -944,6 +944,60 @@ internal static class Program
     }
 }
 
+function New-MultiFileModelBuildFixture {
+    param([Parameter(Mandatory)][string]$Name)
+
+    $fixture = New-ValidModelBuildFixture -Name $Name
+    $singlePayloadPath = Join-Path $fixture.Root 'models/valid-model.onnx'
+    if (-not (Test-Path -LiteralPath $singlePayloadPath -PathType Leaf)) {
+        throw 'The base multi-file fixture is missing its single model payload.'
+    }
+    Remove-Item -LiteralPath $singlePayloadPath -Force
+
+    $parameterPath = Join-Path $fixture.Root 'models/multi/model.param'
+    $binaryPath = Join-Path $fixture.Root 'models/multi/model.bin'
+    $null = New-Item -ItemType Directory -Path (Split-Path -Parent $parameterPath) -Force
+    [IO.File]::WriteAllBytes($parameterPath, [byte[]](10, 20, 30, 40))
+    [IO.File]::WriteAllBytes($binaryPath, [byte[]](50, 60, 70, 80, 90))
+    $parameterHash = Get-TestSha256 -Path $parameterPath
+    $binaryHash = Get-TestSha256 -Path $binaryPath
+    Write-JsonFile -Path (Join-Path $fixture.Root 'models/manifest/valid.json') -Value ([ordered]@{
+            manifest_version = 1
+            model_id = 'fixture-multi-file'
+            model_version = '1.0.0'
+            task = 'super_resolution'
+            source = @{ name = 'fixture package'; url = 'local://fixture-package'; revision = '1' }
+            license = @{ spdx = 'Apache-2.0'; notice_path = 'LICENSE'; reviewed = $true }
+            sha256 = $parameterHash
+            files = @('multi/model.param', 'multi/model.bin')
+            inputs = @(@{ name = 'input' })
+            outputs = @(@{ name = 'output' })
+            preprocessing = [ordered]@{
+                model_payload_sha256 = [ordered]@{
+                    'multi/model.param' = $parameterHash
+                    'multi/model.bin' = $binaryHash
+                }
+            }
+            commercial_use = $true
+            redistribution = $true
+            providers = @('cpu')
+            benchmarks = @(@{ status = 'pass'; release_eligible = $true })
+        })
+    & git -C $fixture.Root add --all
+    if ($LASTEXITCODE -ne 0) { throw 'Could not stage the multi-file model fixture.' }
+    & git -C $fixture.Root -c user.name=Fixture -c user.email=fixture@example.invalid commit --quiet -m 'Use multi-file model payload'
+    if ($LASTEXITCODE -ne 0) { throw 'Could not commit the multi-file model fixture.' }
+
+    return [pscustomobject]@{
+        Root = $fixture.Root
+        Manifest = $fixture.Manifest
+        OutputRoot = $fixture.OutputRoot
+        ExpectedArtifacts = @(
+            [pscustomobject]@{ ArchivePath = 'models/runtime/multi/model.param'; Sha256 = $parameterHash },
+            [pscustomobject]@{ ArchivePath = 'models/runtime/multi/model.bin'; Sha256 = $binaryHash })
+    }
+}
+
 function Invoke-Gate {
     param(
         [Parameter(Mandatory)]
@@ -1355,6 +1409,19 @@ try {
         Assert-ExitCode -Result $result -Expected 1 -Contains 'no passing release-eligible benchmark'
     }
 
+    Assert-Case 'Duplicate release model IDs are rejected' {
+        $fixture = New-ValidModelBuildFixture -Name 'duplicate-model-id'
+        Copy-Item `
+            -LiteralPath (Join-Path $fixture.Root 'models/manifest/valid.json') `
+            -Destination (Join-Path $fixture.Root 'models/manifest/duplicate.json')
+        $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
+        $audit = & $buildScript -ManifestPath $fixture.Manifest -OutputRoot $fixture.OutputRoot -AuditOnly
+        if ($audit.ReleaseReady -or $audit.ArtifactsEmitted -or
+            @($audit.Blockers | Where-Object { $_ -like "Model ID '*' is duplicated by manifests:*" }).Count -ne 1) {
+            throw "Duplicate release model ID was not rejected exactly. Actual blockers: $(@($audit.Blockers) -join ' | ')"
+        }
+    }
+
     Assert-Case 'A published binary missing from the SBOM is rejected' {
         $fixture = New-ReleaseFixture -Name 'sbom-coverage'
         $sbomPath = Join-Path $fixture.ReleaseRoot 'sbom.cdx.json'
@@ -1430,6 +1497,104 @@ try {
             [string]$packagedModels[0].archivePath -cne $fixture.ExpectedArchivePath -or
             [string]$packagedModels[0].sha256 -ne $fixture.ModelHash) {
             throw 'Build metadata does not record the exact packaged model path and checksum.'
+        }
+    }
+
+    Assert-Case 'Valid multi-file model payloads are emitted and verified independently' {
+        $fixture = New-MultiFileModelBuildFixture -Name 'valid-multi-file-model-build'
+        $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
+        $result = & $buildScript `
+            -ManifestPath $fixture.Manifest `
+            -OutputRoot $fixture.OutputRoot
+        if (-not $result.ArtifactsEmitted -or -not $result.ReleaseReady) {
+            throw 'The valid multi-file model fixture did not emit release-ready artifacts.'
+        }
+
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        $archive = [IO.Compression.ZipFile]::OpenRead([string]$result.PortableArtifact)
+        try {
+            foreach ($expected in $fixture.ExpectedArtifacts) {
+                $matches = @($archive.Entries | Where-Object {
+                        $_.FullName.Replace('\', '/') -ceq $expected.ArchivePath
+                    })
+                if ($matches.Count -ne 1) {
+                    throw "Expected one portable model payload at '$($expected.ArchivePath)', found $($matches.Count)."
+                }
+                $stream = $matches[0].Open()
+                $algorithm = [Security.Cryptography.SHA256]::Create()
+                try {
+                    $actualHash = ([BitConverter]::ToString($algorithm.ComputeHash($stream))).Replace('-', '').ToLowerInvariant()
+                }
+                finally {
+                    $algorithm.Dispose()
+                    $stream.Dispose()
+                }
+                if ($actualHash -ne $expected.Sha256) {
+                    throw "Portable model payload checksum differs for '$($expected.ArchivePath)'."
+                }
+            }
+        }
+        finally {
+            $archive.Dispose()
+        }
+
+        $metadata = Get-Content -LiteralPath (Join-Path $result.CommonPublish 'build-metadata.json') -Raw | ConvertFrom-Json
+        $packagedModels = @($metadata.packagedModelArtifacts)
+        if ($packagedModels.Count -ne 2) {
+            throw "Expected two packaged model metadata records, found $($packagedModels.Count)."
+        }
+        foreach ($expected in $fixture.ExpectedArtifacts) {
+            $metadataMatch = @($packagedModels | Where-Object {
+                    [string]$_.archivePath -ceq $expected.ArchivePath -and
+                    [string]$_.sha256 -eq $expected.Sha256
+                })
+            if ($metadataMatch.Count -ne 1) {
+                throw "Build metadata does not record exact multi-file payload '$($expected.ArchivePath)'."
+            }
+        }
+    }
+
+    Assert-Case 'Multi-file model missing a declared payload checksum is rejected' {
+        $fixture = New-MultiFileModelBuildFixture -Name 'multi-file-missing-checksum'
+        $modelManifestPath = Join-Path $fixture.Root 'models/manifest/valid.json'
+        $modelManifest = Get-Content -LiteralPath $modelManifestPath -Raw | ConvertFrom-Json
+        $modelManifest.preprocessing.model_payload_sha256.PSObject.Properties.Remove('multi/model.bin')
+        Write-JsonFile -Path $modelManifestPath -Value $modelManifest
+        $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
+        $audit = & $buildScript -ManifestPath $fixture.Manifest -OutputRoot $fixture.OutputRoot -AuditOnly
+        $expected = "Multi-file model manifest 'valid.json' has no payload checksum for 'multi/model.bin'."
+        if ($audit.ReleaseReady -or $audit.ArtifactsEmitted -or @($audit.Blockers) -notcontains $expected) {
+            throw "Missing-checksum multi-file manifest was not rejected exactly. Actual blockers: $(@($audit.Blockers) -join ' | ')"
+        }
+    }
+
+    Assert-Case 'Multi-file model checksum map with an undeclared payload is rejected' {
+        $fixture = New-MultiFileModelBuildFixture -Name 'multi-file-extra-checksum'
+        $modelManifestPath = Join-Path $fixture.Root 'models/manifest/valid.json'
+        $modelManifest = Get-Content -LiteralPath $modelManifestPath -Raw | ConvertFrom-Json
+        $modelManifest.preprocessing.model_payload_sha256 | Add-Member `
+            -NotePropertyName 'multi/extra.bin' `
+            -NotePropertyValue ('0' * 64)
+        Write-JsonFile -Path $modelManifestPath -Value $modelManifest
+        $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
+        $audit = & $buildScript -ManifestPath $fixture.Manifest -OutputRoot $fixture.OutputRoot -AuditOnly
+        $expected = "Multi-file model manifest 'valid.json' has a payload checksum for undeclared file 'multi/extra.bin'."
+        if ($audit.ReleaseReady -or $audit.ArtifactsEmitted -or @($audit.Blockers) -notcontains $expected) {
+            throw "Extra-checksum multi-file manifest was not rejected exactly. Actual blockers: $(@($audit.Blockers) -join ' | ')"
+        }
+    }
+
+    Assert-Case 'Multi-file model payload hash mismatch is rejected' {
+        $fixture = New-MultiFileModelBuildFixture -Name 'multi-file-hash-mismatch'
+        $modelManifestPath = Join-Path $fixture.Root 'models/manifest/valid.json'
+        $modelManifest = Get-Content -LiteralPath $modelManifestPath -Raw | ConvertFrom-Json
+        $modelManifest.preprocessing.model_payload_sha256.'multi/model.bin' = ('0' * 64)
+        Write-JsonFile -Path $modelManifestPath -Value $modelManifest
+        $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
+        $audit = & $buildScript -ManifestPath $fixture.Manifest -OutputRoot $fixture.OutputRoot -AuditOnly
+        $expected = "Model file checksum does not match manifest 'valid.json': multi/model.bin."
+        if ($audit.ReleaseReady -or $audit.ArtifactsEmitted -or @($audit.Blockers) -notcontains $expected) {
+            throw "Hash-mismatched multi-file payload was not rejected exactly. Actual blockers: $(@($audit.Blockers) -join ' | ')"
         }
     }
 

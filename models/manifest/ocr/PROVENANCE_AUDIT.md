@@ -5,7 +5,13 @@ Copyright 2026 Sungwoo Kang
 
 # PaddleOCR model candidate provenance audit
 
-Audit date: 2026-08-02
+Audit date: 2026-08-03
+
+Goal 19 also exercised the project-owned graph-numeric training path. That
+bounded experiment produced a runtime-compatible but quality-failed ONNX and
+did not create a model manifest. See
+`GRAPH_NUMERIC_CTC_EXPERIMENT_AUDIT.md`. Text detection and general text
+recognition remain separately blocked by the PaddleOCR evidence below.
 
 ## Scope and decision
 
@@ -40,6 +46,7 @@ commercial-use, redistribution, input/output, and provider assertions.
 - Root license raw SHA-256:
   `3840c5c0c61c294264d2dd77b8777be6ddd90121ef4e0e64abcd22edea581d6e`
 - Root repository license: Apache-2.0
+- GitHub release `v3.5.0` contains no downloadable model assets.
 
 The root license establishes the license of the pinned repository contents. It
 does not by itself prove that separately hosted model archives carry the same
@@ -72,6 +79,7 @@ A metadata-only HTTP `HEAD` request on 2026-08-02 returned:
 - `Last-Modified`: `Mon, 19 May 2025 20:17:44 GMT`
 - `ETag`: `"-cd090f2a008766d8fe7cdba8d15a38ea"`
 - `Content-Type`: `application/octet-stream`
+- Provider-reported CRC32: `447818556`
 
 The HTTP ETag is not treated as a SHA-256 checksum or immutable revision.
 
@@ -102,8 +110,28 @@ A metadata-only HTTP `HEAD` request on 2026-08-02 returned:
 - `Last-Modified`: `Thu, 05 Jun 2025 13:45:17 GMT`
 - `ETag`: `"-6a258098c2bacf7b2fc4add9327ad88e"`
 - `Content-Type`: `application/x-tar`
+- Provider-reported CRC32: `1715592068`
 
 The HTTP ETag is not treated as a SHA-256 checksum or immutable revision.
+
+### Recognition dictionary contract
+
+The pinned training configuration binds this candidate to
+`ppocr/utils/en_dict.txt` and enables spaces. The dictionary order is part of
+the output-index contract and cannot be replaced with a guessed numeric
+alphabet.
+
+- Configuration:
+  <https://github.com/PaddlePaddle/PaddleOCR/blob/33cbdd9deb2e00f61e7966db70669b249c005a37/configs/rec/PP-OCRv4/en_PP-OCRv4_mobile_rec.yml>
+- Dictionary:
+  <https://github.com/PaddlePaddle/PaddleOCR/blob/33cbdd9deb2e00f61e7966db70669b249c005a37/ppocr/utils/en_dict.txt>
+- Dictionary Git blob: `7677d31b9d3f08eef2823c2cf051beeab1f0470b`
+- Dictionary SHA-256:
+  `f27a6aa993c9cb67a588e7ea9aea90bb96b8e51dec6ce98bd7e76c104c1829fe`
+
+PaddleOCR export code serializes the configured character dictionary into the
+inference configuration. The separately hosted archive remains uninspected, so
+this source dictionary cannot yet be asserted as its exact deployed mapping.
 
 ## ONNX suitability
 

@@ -38,7 +38,7 @@ public sealed class RuntimePathBootstrapper
 
     public DomainResult<IApplicationPaths> Initialize()
     {
-        ApplicationPaths? paths = null;
+        IApplicationPaths? paths = null;
         string? currentDirectory = null;
 
         try
@@ -51,6 +51,14 @@ public sealed class RuntimePathBootstrapper
             paths = ApplicationPaths.Create(
                 executableDirectory,
                 localApplicationDataRoot);
+
+            if (paths.Mode == DistributionMode.Portable &&
+                !string.IsNullOrWhiteSpace(_environment.DevelopmentPortableDataRoot))
+            {
+                paths = ApplicationPathsOverride.Create(
+                    paths,
+                    _environment.DevelopmentPortableDataRoot!);
+            }
 
             foreach (string directory in GetMutableDirectories(paths))
             {
@@ -82,7 +90,38 @@ public sealed class RuntimePathBootstrapper
         }
     }
 
-    private static IEnumerable<string> GetMutableDirectories(ApplicationPaths paths)
+    private sealed class ApplicationPathsOverride : IApplicationPaths
+    {
+        private ApplicationPathsOverride(IApplicationPaths source, string mutableRoot)
+        {
+            Mode = source.Mode;
+            SettingsRoot = Path.Combine(mutableRoot, "Settings");
+            CacheRoot = Path.Combine(mutableRoot, "Cache");
+            LogsRoot = Path.Combine(mutableRoot, "Logs");
+            AutosaveRoot = Path.Combine(mutableRoot, "Autosave");
+            RecoveryRoot = Path.Combine(mutableRoot, "Recovery");
+            ModelRoot = source.ModelRoot;
+        }
+
+        public DistributionMode Mode { get; }
+
+        public string SettingsRoot { get; }
+
+        public string CacheRoot { get; }
+
+        public string LogsRoot { get; }
+
+        public string AutosaveRoot { get; }
+
+        public string RecoveryRoot { get; }
+
+        public string ModelRoot { get; }
+
+        public static ApplicationPathsOverride Create(IApplicationPaths source, string mutableRoot) =>
+            new ApplicationPathsOverride(source, Path.GetFullPath(mutableRoot));
+    }
+
+    private static IEnumerable<string> GetMutableDirectories(IApplicationPaths paths)
     {
         yield return paths.SettingsRoot;
         yield return paths.CacheRoot;

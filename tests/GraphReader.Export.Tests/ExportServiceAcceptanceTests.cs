@@ -262,6 +262,55 @@ public sealed class ExportServiceAcceptanceTests
     }
 
     [TestMethod]
+    public async Task CsvTextFieldsNeutralizeSpreadsheetFormulaPrefixesWithoutChangingNumbersOrJson()
+    {
+        const string phaseCode = "=SUM(1,2,\"quoted\")";
+        const string seriesSymbol = "+marker";
+        const string seriesName = " \t-HYPERLINK(\"https://example.invalid\",\"label\")";
+        ExportPoint point = Point(PointOne, InterventionOneId, PhaseB, 1, -1e-12, 1) with
+        {
+            SourceStage = "@manual",
+            ModelVersion = "-candidate",
+        };
+        var scenario = new Scenario(
+            [Phase(PhaseB, 1, phaseCode, ExportPhaseType.Intervention)],
+            [Series(InterventionOneId, seriesSymbol, seriesName, ExportSeriesRole.Intervention, PointOne)],
+            [point],
+            [new ExportSeriesRelation(InterventionOneId, null)]);
+
+        ExportResult result = await ExportAsync(
+            scenario,
+            mode: ExportMode.ObservationOrder,
+            auditMode: ExportAuditMode.ExtendedCsvAndJson);
+
+        Assert.IsTrue(result.Succeeded, FailureSummary(result));
+        MinimalCsvArtifact minimal = Minimal(result, InterventionOneId);
+        Assert.AreEqual(
+            "x_value,y_value,phase\n1,-1E-12,\"'=SUM(1,2,\"\"quoted\"\")\"\n",
+            minimal.Content,
+            "Numeric scientific values must bypass text-field neutralization.");
+        Assert.AreEqual(ExportContract.MinimalCsvHeader, minimal.Content.Split('\n')[0]);
+
+        ExtendedAuditArtifact auditCsv = Audit(result, InterventionOneId, ExportAuditArtifactFormat.Csv);
+        StringAssert.Contains(auditCsv.Content, "\"'=SUM(1,2,\"\"quoted\"\")\"");
+        StringAssert.Contains(auditCsv.Content, ",'+marker,");
+        StringAssert.Contains(
+            auditCsv.Content,
+            "\"' \t-HYPERLINK(\"\"https://example.invalid\"\",\"\"label\"\")\"");
+        StringAssert.Contains(auditCsv.Content, ",'@manual,'-candidate\n");
+        StringAssert.Contains(auditCsv.Content, "1,-1E-12,");
+
+        ExtendedAuditArtifact auditJson = Audit(result, InterventionOneId, ExportAuditArtifactFormat.Json);
+        using JsonDocument parsed = JsonDocument.Parse(auditJson.Content);
+        JsonElement jsonRow = parsed.RootElement.GetProperty("rows")[0];
+        Assert.AreEqual(phaseCode, jsonRow.GetProperty("phase").GetString());
+        Assert.AreEqual(seriesSymbol, jsonRow.GetProperty("series_symbol").GetString());
+        Assert.AreEqual(seriesName, jsonRow.GetProperty("series_name").GetString());
+        Assert.AreEqual("@manual", jsonRow.GetProperty("source_stage").GetString());
+        Assert.AreEqual("-candidate", jsonRow.GetProperty("model_version").GetString());
+    }
+
+    [TestMethod]
     public async Task OutputBytesAndHashesAreDeterministicAcrossInputEnumerationOrder()
     {
         Scenario ordered = TwoInterventionScenario();

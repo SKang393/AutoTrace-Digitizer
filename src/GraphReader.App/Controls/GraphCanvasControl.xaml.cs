@@ -3,6 +3,7 @@
 
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace GraphReader.App.Controls;
@@ -57,7 +58,10 @@ public partial class GraphCanvasControl : UserControl
     {
         InitializeComponent();
         Loaded += OnLoaded;
+        ImageCoordinateSurface.MouseLeftButtonDown += OnImageMouseLeftButtonDown;
     }
+
+    public event EventHandler<GraphImagePointEventArgs>? ImagePointInvoked;
 
     public ImageSource? ImageSource
     {
@@ -129,4 +133,27 @@ public partial class GraphCanvasControl : UserControl
         PhaseOverlayPresenter.Visibility = PhaseOverlayVisible ? Visibility.Visible : Visibility.Collapsed;
         Crosshair.Visibility = ShowCrosshair ? Visibility.Visible : Visibility.Collapsed;
     }
+
+    private void OnImageMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _ = sender;
+        if (ImageSource is null)
+        {
+            return;
+        }
+
+        Point point = e.GetPosition(GraphImage);
+        if (point.X < 0 || point.Y < 0 || point.X > GraphImage.ActualWidth || point.Y > GraphImage.ActualHeight)
+        {
+            return;
+        }
+
+        ImagePointInvoked?.Invoke(this, new GraphImagePointEventArgs(point));
+        e.Handled = true;
+    }
+}
+
+public sealed class GraphImagePointEventArgs(Point imagePoint) : EventArgs
+{
+    public Point ImagePoint { get; } = imagePoint;
 }

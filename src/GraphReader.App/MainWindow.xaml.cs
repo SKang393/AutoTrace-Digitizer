@@ -3,7 +3,9 @@
 
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Threading;
 using GraphReader.App.Appearance;
+using GraphReader.App.Controls;
 using GraphReader.App.Localization;
 using GraphReader.App.Services;
 using GraphReader.App.ViewModels;
@@ -13,6 +15,7 @@ namespace GraphReader.App;
 public partial class MainWindow : Window
 {
     private readonly IThemeService? _themeService;
+    private readonly DispatcherTimer _autosaveTimer;
 
     public MainWindow()
         : this((Application.Current as App)?.AvailableThemeService)
@@ -28,7 +31,14 @@ public partial class MainWindow : Window
         DataContext = new MainWindowViewModel(
             application?.WorkspaceService ?? new UnavailableWorkspaceService(),
             application?.LocalizationService,
-            application?.StartupErrorMessageKey ?? LocalizationKeys.ProductionWorkflowUnavailable);
+            application?.StartupErrorMessageKey,
+            new WindowsWorkspaceDialogService(application?.LocalizationService));
+        _autosaveTimer = new DispatcherTimer(DispatcherPriority.Background, Dispatcher)
+        {
+            Interval = TimeSpan.FromMinutes(1),
+        };
+        _autosaveTimer.Tick += OnAutosaveTimerTick;
+        _autosaveTimer.Start();
         Closed += OnClosed;
     }
 
@@ -60,6 +70,8 @@ public partial class MainWindow : Window
     {
         _ = sender;
         _ = e;
+        _autosaveTimer.Stop();
+        _autosaveTimer.Tick -= OnAutosaveTimerTick;
         DataContextChanged -= OnDataContextChanged;
         if (DataContext is IDisposable disposable)
         {
@@ -69,6 +81,25 @@ public partial class MainWindow : Window
             }
 
             disposable.Dispose();
+        }
+    }
+
+    private async void OnAutosaveTimerTick(object? sender, EventArgs e)
+    {
+        _ = sender;
+        _ = e;
+        if (DataContext is MainWindowViewModel viewModel)
+        {
+            await viewModel.RunTimerAutosaveAsync();
+        }
+    }
+
+    private async void OnGraphImagePointInvoked(object sender, GraphImagePointEventArgs e)
+    {
+        _ = sender;
+        if (DataContext is MainWindowViewModel viewModel)
+        {
+            await viewModel.HandleCanvasPointAsync(e.ImagePoint);
         }
     }
 }

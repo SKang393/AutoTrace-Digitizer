@@ -4,7 +4,7 @@
 
 - Deterministic seed: `20260803`
 - Experiment budget: 3
-- Training epochs: 28
+- Training epochs: 40
 - Selection data: `vector_thin` and `press_heavy` training families, then
   `scan_soft` validation family
 - Held-out data: sealed until the selected checkpoint and ONNX are fixed

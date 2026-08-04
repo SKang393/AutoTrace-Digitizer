@@ -248,6 +248,11 @@ internal static class ExportSerialization
         string normalized = value
             .Replace("\r\n", "\n", StringComparison.Ordinal)
             .Replace('\r', '\n');
+        if (HasSpreadsheetFormulaPrefix(normalized))
+        {
+            normalized = "'" + normalized;
+        }
+
         bool requiresQuotes = normalized.IndexOfAny([',', '"', '\n']) >= 0;
         if (!requiresQuotes)
         {
@@ -269,6 +274,17 @@ internal static class ExportSerialization
         }
 
         destination.Append('"');
+    }
+
+    private static bool HasSpreadsheetFormulaPrefix(string value)
+    {
+        int index = 0;
+        while (index < value.Length && char.IsWhiteSpace(value[index]))
+        {
+            index++;
+        }
+
+        return index < value.Length && value[index] is '=' or '+' or '-' or '@';
     }
 
     private static string NormalizeFileName(string value)

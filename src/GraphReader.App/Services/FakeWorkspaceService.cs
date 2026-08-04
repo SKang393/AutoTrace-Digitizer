@@ -4,15 +4,25 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Media;
+using GraphReader.App.Integration.Workflow;
 using GraphReader.App.Models;
 using GraphReader.App.ViewModels;
 
 namespace GraphReader.App.Services;
 
-public sealed class FakeWorkspaceService : IWorkspaceService
+public sealed class FakeWorkspaceService : IRuntimeWorkspaceService
 {
     private const string FilledSeriesId = "series-filled-circle";
     private const string OpenSeriesId = "series-open-circle";
+
+    public WorkflowRuntimeEnvironment RuntimeEnvironment => WorkflowRuntimeEnvironment.RecordedFake;
+
+    public IReadOnlyList<AutomaticStageStatus> AutomaticStages { get; } =
+    [
+        new("recorded-workflow", AutomaticStageState.Available, "Recorded test evidence is configured."),
+    ];
+
+    public bool UsesFakeGraphData => true;
 
     public IReadOnlyList<WorkspaceTabViewModel> CreateWorkspace()
     {

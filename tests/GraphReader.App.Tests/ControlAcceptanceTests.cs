@@ -36,6 +36,7 @@ public sealed class ControlAcceptanceTests
                 Assert.IsTrue(((FrameworkPropertyMetadata)GraphCanvasControl.PhaseOverlayVisibleProperty.GetMetadata(typeof(GraphCanvasControl))).BindsTwoWayByDefault);
 
                 Assert.IsFalse(magnifier.ShowEnhanced);
+                Assert.IsTrue(magnifier.ShowCrosshair);
                 Assert.AreEqual(2d, magnifier.ZoomLevel);
                 Assert.IsTrue(((FrameworkPropertyMetadata)MagnifierControl.ShowEnhancedProperty.GetMetadata(typeof(MagnifierControl))).BindsTwoWayByDefault);
 
