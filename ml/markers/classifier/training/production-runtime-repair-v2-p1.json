@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "task": "marker-classifier",
+  "revision": "marker-classifier-production-runtime-repair-v2",
+  "candidate_id": "P1",
+  "status": "preregistered",
+  "experiment_budget": 3,
+  "experiment_ordinal": 1,
+  "candidate_type": "unchanged-weight runtime contract repair",
+  "source_checkpoint_path": "ml/markers/classifier/artifacts/production-repair-v1/P2/marker-classifier.pt",
+  "source_checkpoint_sha256": "49a5ce6487b51a7426ebca5081fa3e2a15c9c30bd6302033ad7efa82b3ad8c7a",
+  "selection_dataset_manifest_path": "ml/markers/classifier/manifests/runtime-repair-v2-selection.json",
+  "selection_dataset_manifest_sha256": "54975fac156228587872652e5fef2df21bbb11aa2095552eb143baf4020776bf",
+  "expected_runner_source_bundle_sha256": "fee1db2f554e5d2c235a3fea45e0bc96b7958178bf8da12e85a9e08cf3788153",
+  "optimizer_steps": 0,
+  "weights_changed": false,
+  "isolated_change": "export calibrated shape, fill, and artifact probabilities instead of high-magnitude logits while preserving the normalized embedding",
+  "runtime_output_contract": {
+    "name": "classification_probabilities",
+    "shape": [
+      "N",
+      25
+    ],
+    "order": [
+      "calibrated_shape_probabilities[9]",
+      "calibrated_fill_probabilities[3]",
+      "artifact_probability[1]",
+      "l2_normalized_embedding[12]"
+    ]
+  },
+  "unchanged_decision_rules": {
+    "shape": "maximum probability",
+    "fill": "maximum probability",
+    "artifact": "probability at least 0.5",
+    "embedding": "L2-normalized identity vector"
+  },
+  "selection_gates": {
+    "shape_macro_f1": 0.9,
+    "fill_macro_f1": 0.9,
+    "artifact_f1": 1.0,
+    "minority_class_f1": 0.9,
+    "probability_packed_onnx_parity": 0.00001,
+    "weights_unchanged": true
+  },
+  "public_gate_use_for_selection": false,
+  "confirmation_gate_use_for_selection": false,
+  "private_data": false,
+  "diagnostic_budget": {
+    "maximum_exploratory_sweeps": 3,
+    "completed_before_preregistration": [
+      "ORT execution and optimization mode comparison on validation",
+      "fixed 1e-4 output quantization on validation",
+      "calibrated probability transport on validation and the already-open historical test split"
+    ],
+    "remaining_exploratory_sweeps": 0
+  },
+  "execution_preconditions": [
+    "this preregistration, the frozen selection manifest, and all runner sources are reviewed, committed, and clean",
+    "the exact checksum-bound source checkpoint remains in the ignored local artifact store",
+    "the canonical training budget ledger authorizes only P1",
+    "no P1 training seal or output exists"
+  ],
+  "approval_policy": "selection only; production approval requires the separately sealed public and disjoint confirmation gates plus production discovery and packaging evidence"
+}

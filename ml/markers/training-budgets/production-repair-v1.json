@@ -53,7 +53,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-production-repair-v2",
-      "status": "candidate_3_selected_public_gate_authorized",
+      "status": "exhausted_failed_public_gate",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [],
       "consumed_candidate_ids": [
@@ -88,9 +88,19 @@
       "p3_training_report_sha256": "a08d8fd81cae978266e2c676212740fbb0f444e1d0c9926dcf22e4772b716428",
       "p3_training_opened_seal_sha256": "b0c6636e154768a854503f0a69dc31a66317a45025a2569ca7d259464fff14e7",
       "p3_training_result_seal_sha256": "f37b83132f4d17614527ef5fea483ea3cca2fb8ad84062135d5644e02a2c8a6f",
-      "p3_public_gate_evaluations": 0,
-      "p3_public_gate_authorized": true,
+      "p3_public_gate_evaluations": 1,
+      "p3_public_gate_authorized": false,
       "p3_public_gate_candidate_key": "7197d72650a5fba3eae55131e981174de01a518e7c283ecae4c31c351c772413",
+      "p3_public_gate_report_path": "ml/markers/center/artifacts/production-public-gate-v2-p3-20260804/public-gate-report.json",
+      "p3_public_gate_report_sha256": "6f92923bcc54dd60e4cb0e69a2ad759437abc99c0314e496c37b4c285bd99386",
+      "p3_public_gate_opened_seal_sha256": "e9e2255bc9f307bc930fa8bba443ba63521ee18959ab6b0cd2221d0ec295adbb",
+      "p3_public_gate_result_seal_sha256": "536731c66afd0b31b7697c5cfad0bf0b3e8f7a7c74305970bd68d4a676996012",
+      "p3_public_gate_exact_scene_count": 2,
+      "p3_public_gate_scene_count": 3,
+      "p3_public_gate_false_positives": 1,
+      "p3_public_gate_false_negatives": 0,
+      "p3_public_gate_duplicate_count": 0,
+      "p3_public_gate_prohibited_structure_hits": 0,
       "trigger_evidence_path": "ml/markers/center/artifacts/production-repair-v2/P2-run/production-training-report.json",
       "trigger_evidence_sha256": "eadab74837b7851d7b577664b2f1470be060d09e50955cb9bcbc7b71670597f9",
       "candidate_checkpoint_sha256": {
@@ -111,8 +121,43 @@
       "p1_public_gate_result_seal_sha256": "e16acf799568def2c5dcde1a2ac8946ec53bfe929212a22553fbf58edfa6201c",
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "execution_blocker": "The three-candidate training budget is consumed. P3 training cannot rerun; only its exact hash-bound once-only public gate is authorized.",
+      "execution_blocker": "The three-candidate training budget is exhausted. P3 failed its once-only public exact-count gate and cannot rerun; independent confirmation is not authorized.",
       "refusal_required_before_output": true
+    },
+    {
+      "task": "marker-classifier",
+      "revision": "marker-classifier-production-runtime-repair-v2",
+      "status": "candidate_1_preregistered",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "candidate_config_paths": {
+        "P1": "ml/markers/classifier/training/production-runtime-repair-v2-p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "39d440bf9c5130cd2544bca82a9c1a1d57546d7f0d1dbd02e7aa29fb87c9b679"
+      },
+      "trigger_evidence_path": "models/manifest/markers/graph-marker-classifier-0.1.0.json",
+      "trigger_evidence": "The unchanged selected classifier passes classification gates but its logit-packed public and disjoint confirmation parity exceeds 1e-5.",
+      "isolated_change": "probability-packed runtime output contract with the exact unchanged P2 checkpoint",
+      "selection_manifest_path": "ml/markers/classifier/manifests/runtime-repair-v2-selection.json",
+      "selection_manifest_sha256": "54975fac156228587872652e5fef2df21bbb11aa2095552eb143baf4020776bf",
+      "public_gate_manifest_path": "ml/markers/classifier/manifests/public-v3.json",
+      "public_gate_manifest_sha256": "475b78354453bf8e50d1f287c79cd855b39f790e27521d57552f2be9c9328a87",
+      "confirmation_gate_manifest_path": "ml/markers/classifier/manifests/confirmation-v3.json",
+      "confirmation_gate_manifest_sha256": "b32e0b0f4c42ede6913eaa2ac26e7315f4f11f9d7d8c4dd234fe941dd92abb98",
+      "source_checkpoint_sha256": "49a5ce6487b51a7426ebca5081fa3e2a15c9c30bd6302033ad7efa82b3ad8c7a",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "public_gate_authorized": false,
+      "confirmation_gate_authorized": false,
+      "refusal_required_before_output": false
     }
   ]
 }

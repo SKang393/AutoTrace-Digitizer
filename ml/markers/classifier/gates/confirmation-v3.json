@@ -1,0 +1,31 @@
+{
+  "case_count": 140,
+  "task": "marker-classifier",
+  "revision": "marker-classifier-confirmation-gate-v3",
+  "expected_candidate_hash_keys": [
+    "checkpoint_sha256",
+    "probability_packed_onnx_sha256"
+  ],
+  "expected_dataset_manifest_path": "ml/markers/classifier/manifests/confirmation-v3.json",
+  "expected_dataset_manifest_sha256": "b32e0b0f4c42ede6913eaa2ac26e7315f4f11f9d7d8c4dd234fe941dd92abb98",
+  "expected_evaluator_source_bundle_sha256": "02cbdaff33b47eda340b643e2c07be13de8eac6b193ebb4b7ebda2a9d935f2d7",
+  "expected_gate_config_sha256": "c51bcbec0737057c76c12b8797af2231f08bb8841e1c10817ee3988f53af96b9",
+  "families": [
+    "dot_matrix_echo",
+    "scanner_shadow"
+  ],
+  "templates": [
+    "left_center_tall",
+    "right_center_compact"
+  ],
+  "gate": {
+    "shape_macro_f1": 0.9,
+    "fill_macro_f1": 0.9,
+    "artifact_f1": 1.0,
+    "minority_class_f1": 0.9,
+    "probability_packed_onnx_parity": 0.00001
+  },
+  "split_status": "hash-pinned before candidate execution; never evaluated",
+  "selection_use": false,
+  "private_data": false
+}

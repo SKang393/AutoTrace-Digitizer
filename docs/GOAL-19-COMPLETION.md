@@ -106,7 +106,7 @@ in Production composition. Automatic stages currently report:
 | Enhancement | Unavailable | Exact runtime redistribution provenance is reviewed, but local-adapter, scientific, CPU fallback, clean-machine, production, and release approvals remain false. |
 | Axis | Unavailable | Deterministic adapter exists; OpenCvSharp native redistribution audit is blocked. |
 | OCR | Unavailable | Prior CTC, spatial V2, and canonical-slot experiments are closed. Whole-crop project numeric Candidate 1 completed evaluation-only recovery without retraining, failed the frozen recognition and role gates, and produced no ONNX. Candidates 2 and 3 are unregistered. |
-| Markers | Unavailable | Marker-center acceptance failed and the classifier candidate missed its shape gate. |
+| Markers | Unavailable | Marker-center exhausted its budget after one public false positive. The historical classifier passed classification metrics but failed packed-runtime parity; a new unchanged-weight probability-runtime candidate is preregistered and has not run. |
 | Legends | Unavailable | Deterministic reasoner requires approved OCR and marker evidence. |
 | Phases | Unavailable | Deterministic reasoner requires approved axis, OCR, and marker evidence. |
 
@@ -130,17 +130,21 @@ approving any model:
 - The official `RealESRGAN_x2plus` hash was reverified, but its PyTorch
   checkpoint is incompatible with the current NCNN adapter and no conversion
   is authorized.
-- Repair-v2 marker-center `P1` is consumed after its failed sealed public gate,
-  and `P2` is consumed after an overlapping selection annotation. Final
-  Candidate `P3` changed only that placement, then passed exact counts and F1
-  `1.0` across all six standard and six robust selection scenes with zero false
-  positives, false negatives, duplicates, and prohibited-structure hits. CPU
-  ONNX parity is `3.0994415283203125e-06`. P3 is selected for one hash-bound
-  public evaluation, but that gate is not open and no model is approved.
+- Repair-v2 marker-center `P1`, `P2`, and `P3` are consumed. P3 passed all
+  selection and CPU ONNX parity gates, then failed its once-only public gate.
+  `public-zigzag` and `public-probes` were exact; `public-stair` produced one
+  false-positive center. There were zero false negatives, duplicates, and
+  prohibited text, axis, tick, divider, bracket, arrow, legend, or intersection
+  hits. The three-candidate budget is exhausted, confirmation was not
+  authorized, and no marker-center model is approved.
 - The sealed current packed marker classifier reached shape, fill, artifact,
   and minority-shape F1 `1.0`, but its direct packed ONNX maximum absolute
-  error was `2.288818359375e-05`, above the `1e-5` gate. Retraining remains
-  mandatory and no classifier asset is approved.
+  error was `2.288818359375e-05`, above the `1e-5` gate. A new
+  `marker-classifier-production-runtime-repair-v2` P1 is preregistered with the
+  exact unchanged checkpoint, calibrated probability outputs, a full fixed
+  validation gate, and new source-bound public-v3 and disjoint confirmation-v3
+  procedural splits. It has not executed, neither external gate is authorized,
+  and no classifier asset is approved.
 - The project-trained graph-numeric CTC experiment used only procedural vector
   glyphs. Candidate and single repair held-out exact match were both
   `0.015625`; the repair CER worsened to `0.932710`. Its exact ONNX passed an

@@ -69,6 +69,16 @@ generalization evidence. The disjoint v2 confirmation was then evaluated once
 and also failed packed ONNX parity at `1.1444091796875e-05` against the
 `1e-05` limit.
 
+`marker-classifier-production-runtime-repair-v2` is a separate preregistered
+three-candidate defect revision. P1 is authorized but not yet executed. It
+keeps the exact selected checkpoint unchanged and changes only the transport
+contract from high-magnitude logits to calibrated probabilities. The full
+fixed validation diagnostic preserved every shape, fill, and artifact decision
+and measured maximum CPU ONNX error `2.4437904357910156e-06`. New public-v3
+and disjoint confirmation-v3 procedural families, manifests, evaluator source
+hashes, and strict `1e-5` parity gates are frozen before P1 execution. Neither
+gate is authorized until P1 passes selection.
+
 The benchmark command is intentionally single-use for one output directory.
 The exact selected weights and evidence remain local until the separately owned
 model manifest, C# runtime, packaging, and maintainer gate are complete.

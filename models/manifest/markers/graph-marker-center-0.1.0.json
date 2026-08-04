@@ -439,7 +439,7 @@
     },
     {
       "profile": "marker-center-production-repair-v2-p3",
-      "status": "selected-public-gate-pending",
+      "status": "fail",
       "release_eligible": false,
       "production_approval": false,
       "training_revision": "marker-center-production-repair-v2",
@@ -493,12 +493,28 @@
       "onnx_provider": "CPUExecutionProvider",
       "onnx_parity_maximum_absolute_error": 0.0000030994415283203125,
       "onnx_parity_tolerance": 0.00001,
-      "public_gate_evaluations": 0,
+      "public_gate_evaluations": 1,
       "public_gate_candidate_key": "7197d72650a5fba3eae55131e981174de01a518e7c283ecae4c31c351c772413",
-      "public_gate_status": "authorized but not opened",
-      "independent_confirmation_status": "not authorized until public gate passes",
-      "provider_packaging_discovery_status": "not eligible until all scientific gates pass",
-      "promotion_decision": "selected for one hash-bound public evaluation only; not approved"
+      "public_gate_status": "fail",
+      "public_gate_report_path": "ml/markers/center/artifacts/production-public-gate-v2-p3-20260804/public-gate-report.json",
+      "public_gate_report_sha256": "6f92923bcc54dd60e4cb0e69a2ad759437abc99c0314e496c37b4c285bd99386",
+      "public_gate_opened_seal_sha256": "e9e2255bc9f307bc930fa8bba443ba63521ee18959ab6b0cd2221d0ec295adbb",
+      "public_gate_result_seal_sha256": "536731c66afd0b31b7697c5cfad0bf0b3e8f7a7c74305970bd68d4a676996012",
+      "public_gate_exact_scene_count": 2,
+      "public_gate_scene_count": 3,
+      "public_gate_false_positives": 1,
+      "public_gate_false_negatives": 0,
+      "public_gate_duplicate_count": 0,
+      "public_gate_prohibited_structure_hits": 0,
+      "public_gate_inference_total_ms": 6.461,
+      "public_gate_elapsed_ms": 38.217,
+      "public_gate_failed_scene": "public-stair",
+      "independent_confirmation_status": "not authorized because public gate failed",
+      "provider_packaging_discovery_status": "not eligible because public gate failed",
+      "failed_criteria": [
+        "exact count in every public fixture"
+      ],
+      "promotion_decision": "rejected; P3 and the three-candidate training budget are exhausted"
     }
   ]
 }

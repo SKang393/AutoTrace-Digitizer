@@ -63,7 +63,7 @@ def test_p3_changes_only_hard_negative_placement_and_prevents_truth_overlap() ->
             ) >= MINIMUM_TRUE_CENTER_DISTANCE
 
 
-def test_p3_is_final_hash_bound_selected_and_cannot_rerun(
+def test_p3_is_final_hash_bound_exhausted_and_cannot_rerun(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -106,7 +106,7 @@ def test_p3_is_final_hash_bound_selected_and_cannot_rerun(
     entry = next(
         item for item in ledger["revisions"] if item["revision"] == "marker-center-production-repair-v2"
     )
-    assert entry["status"] == "candidate_3_selected_public_gate_authorized"
+    assert entry["status"] == "exhausted_failed_public_gate"
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
@@ -121,8 +121,8 @@ def test_p3_is_final_hash_bound_selected_and_cannot_rerun(
     assert entry["candidate_onnx_sha256"]["P3"] == (
         "2a165078f7ca5bbdb07a865d9e2b22ab0d9f1e7ab40575fa559fba165cb59f8d"
     )
-    assert entry["p3_public_gate_evaluations"] == 0
-    assert entry["p3_public_gate_authorized"] is True
+    assert entry["p3_public_gate_evaluations"] == 1
+    assert entry["p3_public_gate_authorized"] is False
     assert entry["p3_public_gate_candidate_key"] == (
         "7197d72650a5fba3eae55131e981174de01a518e7c283ecae4c31c351c772413"
     )
@@ -132,6 +132,12 @@ def test_p3_is_final_hash_bound_selected_and_cannot_rerun(
     )
     assert sha256_file(seal_root / "opened.json") == entry["p3_training_opened_seal_sha256"]
     assert sha256_file(seal_root / "result.json") == entry["p3_training_result_seal_sha256"]
+    public_seal_root = (
+        REPO_ROOT
+        / "ml/markers/gate-seals/marker-center/7197d72650a5fba3eae55131e981174de01a518e7c283ecae4c31c351c772413"
+    )
+    assert sha256_file(public_seal_root / "opened.json") == entry["p3_public_gate_opened_seal_sha256"]
+    assert sha256_file(public_seal_root / "result.json") == entry["p3_public_gate_result_seal_sha256"]
 
     monkeypatch.setattr(
         "ml.markers.training_budget.require_committed_sources",

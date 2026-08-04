@@ -1,0 +1,31 @@
+{
+  "case_count": 140,
+  "task": "marker-classifier",
+  "revision": "marker-classifier-public-gate-v3",
+  "expected_candidate_hash_keys": [
+    "checkpoint_sha256",
+    "probability_packed_onnx_sha256"
+  ],
+  "expected_dataset_manifest_path": "ml/markers/classifier/manifests/public-v3.json",
+  "expected_dataset_manifest_sha256": "475b78354453bf8e50d1f287c79cd855b39f790e27521d57552f2be9c9328a87",
+  "expected_evaluator_source_bundle_sha256": "1acac06a37921eacf298c1105a2080e928d955e7997d197ebb7edb632ec86529",
+  "expected_gate_config_sha256": "c51bcbec0737057c76c12b8797af2231f08bb8841e1c10817ee3988f53af96b9",
+  "families": [
+    "newspaper_bleed",
+    "moire_reduction"
+  ],
+  "templates": [
+    "upper_right_square",
+    "lower_left_wide"
+  ],
+  "gate": {
+    "shape_macro_f1": 0.9,
+    "fill_macro_f1": 0.9,
+    "artifact_f1": 1.0,
+    "minority_class_f1": 0.9,
+    "probability_packed_onnx_parity": 0.00001
+  },
+  "split_status": "hash-pinned before candidate execution; never evaluated",
+  "selection_use": false,
+  "private_data": false
+}

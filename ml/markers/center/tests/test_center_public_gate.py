@@ -338,7 +338,7 @@ def test_v2_candidate_one_is_hash_bound_consumed_and_cannot_rerun(tmp_path: Path
     historical_runner_source_sha256 = "0dc41fbb2b44e67267266b5d5d86c3433f14adfc909027b177bd87de415c6c7c"
     assert config["expected_runner_source_bundle_sha256"] == historical_runner_source_sha256
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(config_path)
-    assert entry["status"] == "candidate_3_selected_public_gate_authorized"
+    assert entry["status"] == "exhausted_failed_public_gate"
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["execution_authorized"] is False
