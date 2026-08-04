@@ -224,7 +224,7 @@ public sealed class ManifestDrivenRealEsrganBackendTests
     }
 
     [TestMethod]
-    public async Task AuthorizedOfficialLocalRuntimeRunsPrimaryAndRejectsSecondary()
+    public async Task AuthorizedOfficialRuntimeFailsClosedUntilScientificApproval()
     {
         string? runtimeRoot = Environment.GetEnvironmentVariable("GRAPHREADER_REALESRGAN_RUNTIME_ROOT");
         string? datasetRoot = Environment.GetEnvironmentVariable("GRAPHREADER_REALESRGAN_DATASET_ROOT");
@@ -238,8 +238,6 @@ public sealed class ManifestDrivenRealEsrganBackendTests
             datasetRoot,
             "images",
             "a1b41e74-1808-5dec-99c9-59f4c88f4004.png");
-        var inspector = new PngOutputImageInspector();
-        PixelDimensions sourceDimensions = inspector.ReadDimensions(sourcePath);
         string sourceBefore = await EnhancementHashing.ComputeFileSha256Async(sourcePath, CancellationToken.None);
         string testRoot = Path.Combine(Path.GetTempPath(), $"graphreader-realesrgan-{Guid.NewGuid():N}");
         Directory.CreateDirectory(testRoot);
@@ -257,29 +255,11 @@ public sealed class ManifestDrivenRealEsrganBackendTests
                 Path.Combine(modelRoot, "cache"),
                 RealEsrganBackendPurpose.LocalEvaluation,
                 CancellationToken.None);
-            Assert.IsTrue(resolution.IsAvailable, resolution.Diagnostic?.TechnicalMessage);
-            Assert.IsNotNull(resolution.Service);
-            Assert.IsNotNull(resolution.Model);
-
-            string outputPath = Path.Combine(modelRoot, "enhanced.png");
-            Directory.CreateDirectory(modelRoot);
-            EnhancementResult result = await resolution.Service.EnhanceAsync(
-                new EnhancementRequest(
-                    Guid.NewGuid(),
-                    Guid.NewGuid(),
-                    sourcePath,
-                    outputPath,
-                    sourceDimensions,
-                    resolution.Model,
-                    new EnhancementOptions(Scale: 2, Timeout: TimeSpan.FromMinutes(2))),
-                CancellationToken.None);
-
-            Assert.IsTrue(result.IsSuccess, result.Diagnostic.Message);
-            Assert.AreEqual(
-                new PixelDimensions(sourceDimensions.Width * 2, sourceDimensions.Height * 2),
-                inspector.ReadDimensions(outputPath));
-            Console.WriteLine(
-                $"{resolution.Model.ModelId}: status={result.Status}; total_ms={result.Envelope?.TimingMs.Total:F4}; inference_ms={result.Envelope?.TimingMs.Inference:F4}; output_sha256={result.Envelope?.Payload.OutputSha256}");
+            Assert.AreEqual(RealEsrganBackendAvailability.ModelIncompatible, resolution.Availability);
+            Assert.IsFalse(resolution.IsAvailable);
+            Assert.IsNull(resolution.Service);
+            Assert.AreEqual("MODEL_RUNTIME_INCOMPATIBLE", resolution.Diagnostic?.Code);
+            StringAssert.Contains(resolution.Diagnostic?.TechnicalMessage, "scientific-fidelity benchmark");
 
             string secondaryManifest = RepositoryPaths.FromRoot(
                 "models",

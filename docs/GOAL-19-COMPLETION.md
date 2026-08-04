@@ -33,6 +33,13 @@ clean-machine distribution evidence.
 - Added a checksum-bound PDFium dependency review that maps every retained
   target label and system import to an explicit source, license, notice, or
   build-only disposition without promoting the runner.
+- Added internal-only PDFium portable staging that binds the exact runner,
+  deterministic dependency-mapped notice, source evidence, and approval-false
+  metadata while rejecting tampering, ambiguity, traversal, and reparse input.
+- Bound the exact Real-ESRGAN NCNN runtime to an unmodified Visual Studio VC
+  Redist `vcomp140.dll`, private authority attestation, Authenticode identity,
+  reduced inventory, notice hashes, and direct public synthetic smoke. This is
+  redistribution provenance only; every production approval remains false.
 - Added a bounded WPF composition regression that exercises the real manual
   ViewModel commands, canvas edits, save, recovery, reopen, and export without
   selecting recorded fake graph data.
@@ -43,16 +50,18 @@ clean-machine distribution evidence.
 ## Portable preview
 
 The authoritative current preview is the immutable build selected by ignored
-`artifacts/dev-portable/latest.json`. The latest completed clean verification
-before the marker repair-v2 preregistration checkpoint was:
+`artifacts/dev-portable/latest.json`. The last completed clean verification
+before the current source-only model preregistrations was:
 
 - version: `0.0.21`
-- commit: `1314166ba3c484802cab9c908381fac5de851e93`
+- commit: `40bb0ab55dc836e2727a391ff5f3313433ca5faf`
 - dirty development build: no
-- build time: `2026-08-04T21:34:16.652Z`
+- build time: `2026-08-04T21:45:59.327Z`
 - executable:
-  `artifacts/dev-portable/builds/0.0.21-20260804T213416652Z-1314166b/GraphReader.App.exe`
-- running process at verification: `12900`, responsive, window title
+  `artifacts/dev-portable/builds/0.0.21-20260804T214559327Z-40bb0ab5/GraphReader.App.exe`
+- executable SHA-256:
+  `7b12491e3dd788e0b831f795aa46648006bca2b473c510bd5fda1d91d394ed9f`
+- running process at the latest recheck: `57648`, responsive, window title
   `Graph Auto Reader`, exact Chandler path supplied by `--open-image`
 - clean portable full-test rerun: PASS, 668 passed and 5 expected skips
 - production-model IDs reported available: `0`
@@ -64,6 +73,9 @@ before the marker repair-v2 preregistration checkpoint was:
   `055a5d305f57a3c997a801f133baa562c898aecb696831843f29555906d21818`;
   the harness now rejects transparent pixel surfaces as inconclusive instead
   of emitting false evidence
+- the real Chandler window changed after invoking the actual Zoom In control
+  and again after invoking Fit Graph; the final fitted capture SHA-256 is
+  `27902d5aba57304e1eee3011bc977c6c050a6cfdb658dc20db526acb84e26f42`
 
 Start the watcher with
 `powershell.exe -File packaging/Watch-DevPortable.ps1 -BuildOnStart -FastTestsOnly -AllowDirty -LaunchAfterBuild`.
@@ -91,9 +103,9 @@ in Production composition. Automatic stages currently report:
 
 | Stage | State | Exact blocker |
 | --- | --- | --- |
-| Enhancement | Unavailable | No installed approved Real-ESRGAN runtime, payload, and Graph Auto Reader benchmark set. |
+| Enhancement | Unavailable | Exact runtime redistribution provenance is reviewed, but local-adapter, scientific, CPU fallback, clean-machine, production, and release approvals remain false. |
 | Axis | Unavailable | Deterministic adapter exists; OpenCvSharp native redistribution audit is blocked. |
-| OCR | Unavailable | Detection and general recognition remain metadata-only; both V1 CTC runs and both distinct V2 spatial-sequence runs failed quality gates. |
+| OCR | Unavailable | Prior CTC, spatial V2, and canonical-slot experiments are closed. A distinct whole-crop project numeric candidate is preregistered source only and has not trained or produced an approved payload. |
 | Markers | Unavailable | Marker-center acceptance failed and the classifier candidate missed its shape gate. |
 | Legends | Unavailable | Deterministic reasoner requires approved OCR and marker evidence. |
 | Phases | Unavailable | Deterministic reasoner requires approved axis, OCR, and marker evidence. |
@@ -109,19 +121,20 @@ release-eligible model files.
 Bounded ignored development evidence improved the model decisions without
 approving any model:
 
-- A release-minimal Real-ESRGAN anime x2 runtime excluded the nonredistributable
-  debug OpenMP DLL, demos, and unused models. It passed 2/2 real-adapter Vulkan
-  runs at exact 2x dimensions in 2366.1442 ms and 1046.5886 ms, with a
-  73.0172 ms cache hit. Required graph accuracy, memory, CPU fallback,
-  authorized `vcomp140.dll` provenance remain open.
+- A release-minimal Real-ESRGAN anime x2 runtime excludes the nonredistributable
+  debug OpenMP DLL, demos, and unused models. The authorized-vcomp profile uses
+  unmodified Microsoft version `14.44.35211.0`, SHA-256 `55aba23c...164`, and
+  passed a direct exact-2x public synthetic smoke in 2193.913 ms. Redistribution
+  provenance is reviewed only for this profile; local-adapter, scientific,
+  memory, offline CPU, clean-machine, production, and release gates remain false.
 - The official `RealESRGAN_x2plus` hash was reverified, but its PyTorch
   checkpoint is incompatible with the current NCNN adapter and no conversion
   is authorized.
-- The sealed current marker-center ONNX is exact-count clean on only one of
-  three new public fixtures. It produced zero duplicates and zero hits across
-  text, axes, ticks, dividers, brackets, arrowheads, legends, and line
-  intersections. Repair-v2 candidate `P1` is hash-bound and preregistered but
-  has not run.
+- Repair-v2 marker-center `P1` passed procedural selection and CPU ONNX parity
+  `2.86102294921875e-06`, then failed its once-only sealed public gate with 0/3
+  exact scenes, six false positives, and three tick hits. It produced zero
+  duplicates. `P1` is consumed and rejected. `P2` is preregistered source only
+  with one additional procedural tick/joint hard-negative family and has not run.
 - The sealed current packed marker classifier reached shape, fill, artifact,
   and minority-shape F1 `1.0`, but its direct packed ONNX maximum absolute
   error was `2.288818359375e-05`, above the `1e-5` gate. Retraining remains
@@ -140,6 +153,12 @@ approving any model:
   still lack artifact-specific redistribution evidence, immutable artifact
   revisions, and published SHA-256 values. The exact repository dictionary is
   recorded, but it does not approve the uninspected archive.
+- A project-owned numeric OCR candidate now preregisters a distinct whole-crop
+  global-spatial-bottleneck architecture with independent procedural train,
+  validation, and sealed renderer families. Source binding and 139 OCR tests
+  pass. No training, checkpoint, ONNX, manifest, sealed result, private result,
+  or approval exists. Its report cannot claim the separate downstream
+  no-marker-creation gate.
 
 The exact OpenCvSharp slim package remains blocked:
 
@@ -169,8 +188,9 @@ source DLLs, with evidence SHA-256
 `cafb1df2d8b3d959d3de6e7221115634585ed6c7dc9e34994075003f67f85ac7`.
 The complete integration assembly passed 92/92 executed tests with the source
 DLL, and isolated package/source WPF publishes both exited `--portable-smoke`
-with code 0. The source build has not replaced the blocked NuGet runtime because
-clean-machine load and workflow evidence remain mandatory.
+with code 0. The source build now replaces the NuGet DLL only in the
+checksum-bound internal development portable. The production common publish is
+unchanged because clean-machine load and workflow evidence remain mandatory.
 
 The exact minimal PDFium runner is also reproducible: two builds from revision
 `2870fa9244b0f0f69fb743fab1e08deefcb07b2b` produced byte-identical SHA-256
@@ -179,7 +199,10 @@ Independent review confirms all 240 retained target labels map exactly once to
 15 component dispositions, 16 checksum-bound notice sources cover linked code,
 NASM is build-only and unshipped, and the PE imports are exactly four Windows
 system APIs. Runtime packaging, clean-machine execution, and release approval
-remain mandatory and absent.
+remain mandatory and absent. An internal-only staging policy now copies exactly
+the runner, dependency-mapped notice, and approval-false metadata. The staged
+runner SHA-256 is `efd13a38...8ea`, and 55 PDF tests plus eight staging and
+security scenarios pass without promoting the candidate.
 
 ## Files changed
 

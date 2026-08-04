@@ -62,3 +62,25 @@ API imports. Both the policy and notice remain explicitly
 `dependency-mapped-not-approved` until independent review promotes a separate
 reviewed notice and ignored approval. Clean-machine evidence remains a distinct
 mandatory gate.
+
+## Internal development-portable staging
+
+`Stage-InternalPortablePdfium.ps1` provides a separate, fail-closed staging
+seam for manual internal portable testing. It accepts an explicit target under
+the current repository and verifies the tracked dependency-review policy,
+deterministic mapped notice, exact runner, source revision, source lock, build
+manifest, dependency inventory, PE imports, and candidate approval before
+writing anything.
+
+```powershell
+powershell -File packaging/pdfium-source/Stage-InternalPortablePdfium.ps1 `
+  -EvidenceRoot artifacts/pdfium-source/evidence `
+  -TargetRoot artifacts/dev-portable/pdfium-internal
+```
+
+The target contains only the runner, deterministic dependency-mapped notice,
+and deterministic internal metadata. The metadata always records
+`reviewApproved=false`, `cleanMachineEvidence=false`, and
+`releaseApproved=false`. This seam does not create `reviewed-approval.json`,
+does not enable the production PDF stage, and is prohibited for redistribution
+or release packaging.

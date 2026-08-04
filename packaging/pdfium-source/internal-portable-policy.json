@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "policyId": "graphreader-pdfium-internal-dev-portable-v1",
+  "stagingMode": "internal-development-portable-only",
+  "source": {
+    "repository": "https://pdfium.googlesource.com/pdfium",
+    "revision": "2870fa9244b0f0f69fb743fab1e08deefcb07b2b"
+  },
+  "inputs": {
+    "runner": {
+      "relativePath": "bin/graphreader_pdfium_renderer.exe",
+      "sha256": "efd13a38cf3cd8e04d8284a42fff42923267293170424153b1a2a96dbf6fe8ea",
+      "length": 15538176
+    },
+    "sourceLock": {
+      "relativePath": "source-lock.json",
+      "sha256": "026c87468d315f42642e8507b50aaf810dc26461a837454ede20ff9f2335d800",
+      "length": 1722
+    },
+    "buildManifest": {
+      "relativePath": "build-manifest.json",
+      "sha256": "b3744c369982dca6a37377ce1e69daa9d8f269b9052d8a8d5f5a84c1ed120e13",
+      "length": 1309
+    },
+    "dependencyGraph": {
+      "relativePath": "target-dependencies.txt",
+      "sha256": "96b6d3d4b3f0421896cd5d036f52369b58bdf59f003fd03b376af5b40c94cc8b",
+      "length": 11405,
+      "reviewStatus": "inventory-only-unreviewed"
+    },
+    "peImports": {
+      "relativePath": "pe-imports.txt",
+      "sha256": "4cb9c8e65ddfb8ed33bed4940e63705aef71d752b9bd2a629e0a3be6c6033d90",
+      "length": 6939
+    },
+    "dependencyReviewPolicy": {
+      "relativePath": "review/dependency-review-policy.json",
+      "sha256": "aeabf142a3af38922919eef47122211bc07a89668f421510383c4845b448427d",
+      "length": 13255,
+      "reviewStatus": "dependency-mapped-not-approved"
+    },
+    "deterministicNotice": {
+      "relativePath": "review/third-party-notices.dependency-mapped.txt",
+      "sha256": "586d3e93f1eaaa412654e008aa3ca03c003c903270555de761650acb92c457d9",
+      "length": 124144,
+      "firstLine": "REVIEW STATUS: DEPENDENCY-MAPPED"
+    },
+    "candidateApproval": {
+      "relativePath": "reviewed-approval.candidate.json",
+      "sha256": "0060994e2ae1406746e338666ff1fbee663ccd1e85c6e0ed7ddcbbdc87dae2d5",
+      "length": 1001
+    }
+  },
+  "allowedDynamicLibraries": [
+    "ADVAPI32.dll",
+    "GDI32.dll",
+    "USER32.dll",
+    "KERNEL32.dll"
+  ],
+  "stagedFiles": {
+    "runner": "graphreader_pdfium_renderer.exe",
+    "notice": "THIRD-PARTY-NOTICES-PDFIUM.txt",
+    "metadata": "pdfium-internal-metadata.json"
+  },
+  "reviewApproved": false,
+  "cleanMachineEvidence": false,
+  "releaseApproved": false
+}

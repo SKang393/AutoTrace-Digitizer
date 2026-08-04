@@ -1,0 +1,83 @@
+{
+  "configuration": {
+    "alphabet": "0123456789.-%",
+    "architecture": "whole-crop-global-spatial-bottleneck-semantic-slot-v1",
+    "batch_size": 64,
+    "candidate_id": "candidate-1",
+    "candidates": [
+      {
+        "candidate_id": "candidate-1",
+        "configuration_state": "frozen-and-eligible-after-commit",
+        "output_directory": "candidate-1",
+        "permitted_change": "none; exact baseline preregistration"
+      },
+      {
+        "candidate_id": "candidate-2",
+        "configuration_state": "reserved-not-registered",
+        "output_directory": "candidate-2",
+        "permitted_change": "requires a committed validation-only defect report and one frozen change"
+      },
+      {
+        "candidate_id": "candidate-3",
+        "configuration_state": "reserved-not-registered",
+        "output_directory": "candidate-3",
+        "permitted_change": "requires a committed validation-only defect report and one frozen change"
+      }
+    ],
+    "data_scope": "project-owned procedural graph labels and exclusion shapes only; no private images, external datasets, fonts, or pretrained weights",
+    "epochs": 40,
+    "gates": {
+      "cpu_execution_required": true,
+      "marker_exclusion_minimum": 1.0,
+      "onnx_parity_maximum_absolute_difference": 0.0001,
+      "sealed_test_cer_maximum": 0.05,
+      "sealed_test_exact_match_minimum": 0.9,
+      "sealed_test_role_accuracy_minimum": 0.9,
+      "validation_exact_match_minimum": 0.9,
+      "validation_role_accuracy_minimum": 0.9
+    },
+    "input": [1, 32, 128],
+    "learning_rate": 0.001,
+    "maximum_candidates": 3,
+    "maximum_tokens": 8,
+    "objective": "fixed semantic-slot cross entropy plus numeric-role cross entropy",
+    "output": [32, 14],
+    "protocol_id": "graph-numeric-project-v1-20260804",
+    "protocol_state": "frozen-preregistration",
+    "seed": 20260804,
+    "slot_time_indices": [1, 5, 9, 13, 17, 21, 25, 29],
+    "splits": [
+      {
+        "degradation_family": "train-speckle-and-stroke-variation-v1",
+        "negative_count": 512,
+        "positive_count": 4096,
+        "renderer_family": "independent-polyline-stroke-train-v1",
+        "seed_offset": 11000,
+        "split": "train"
+      },
+      {
+        "degradation_family": "validation-fade-and-scanline-v1",
+        "negative_count": 128,
+        "positive_count": 512,
+        "renderer_family": "independent-bitmap-validation-v1",
+        "seed_offset": 22000,
+        "split": "validation"
+      },
+      {
+        "degradation_family": "sealed-contrast-and-dropout-v1",
+        "negative_count": 128,
+        "positive_count": 512,
+        "renderer_family": "independent-seven-segment-sealed-v1",
+        "seed_offset": 33000,
+        "split": "sealed_test"
+      }
+    ],
+    "weight_decay": 0.0001
+  },
+  "frozen_before_training": true,
+  "split_fingerprints": {
+    "sealed_test": "5992d05dd37c84a4816617d3789c85a8e2144f419a87d24432304cc804398827",
+    "train": "3217f58667ca497e8b5de60b4b493c92efd75e7f2e49b71a4f847ff6b7a5c8d2",
+    "validation": "dec5869ac463b24c41616dafda34eb5817b8392a3da88ce09fd60fb47d7520f3"
+  }
+}

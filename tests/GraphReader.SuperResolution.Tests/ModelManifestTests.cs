@@ -261,7 +261,7 @@ public sealed class ModelManifestTests
     }
 
     [TestMethod]
-    public void AnimeVideoV3IsTheExactManifestDrivenDefaultAndRuntimeRemainsBlocked()
+    public void AnimeVideoV3IsTheExactManifestDrivenDefaultAndAllApprovalsRemainBlocked()
     {
         using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(
             Path.Combine(ManifestDirectory, ManifestDrivenRealEsrganBackend.DefaultManifestFileName)));
@@ -269,16 +269,20 @@ public sealed class ModelManifestTests
         Assert.AreEqual(ManifestDrivenRealEsrganBackend.DefaultModelId, GetModelId(manifest));
         JsonElement preprocessing = root.GetProperty("preprocessing");
         Assert.AreEqual("realesr-animevideov3", preprocessing.GetProperty("runtime_model_name").GetString());
-        Assert.IsTrue(preprocessing.GetProperty("local_adapter_approval").GetBoolean());
+        Assert.IsFalse(preprocessing.GetProperty("local_adapter_approval").GetBoolean());
         Assert.AreEqual(2, preprocessing.GetProperty("runtime_scale_argument").GetInt32());
         Assert.AreEqual(
             "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
             preprocessing.GetProperty("runtime_executable_sha256").GetString());
         Assert.AreEqual(
-            "8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b",
+            "55aba23cdcd6484fbb06f4155b8ca75adfce7a881f10afd0c49457165e677164",
             preprocessing.GetProperty("runtime_files_sha256").GetProperty("vcomp140.dll").GetString());
-        Assert.IsFalse(
-            preprocessing.GetProperty("runtime_redistribution").GetProperty("approved").GetBoolean());
+        JsonElement runtimeRedistribution = preprocessing.GetProperty("runtime_redistribution");
+        Assert.IsTrue(runtimeRedistribution.GetProperty("provenance_reviewed").GetBoolean());
+        Assert.AreEqual(
+            "redistribution_provenance_only",
+            runtimeRedistribution.GetProperty("approval_scope").GetString());
+        Assert.IsFalse(runtimeRedistribution.GetProperty("approved").GetBoolean());
         Assert.IsFalse(root.GetProperty("benchmarks")[0].GetProperty("production_approval").GetBoolean());
     }
 

@@ -67,17 +67,21 @@
     "runtime_executable_sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
     "runtime_files_sha256": {
       "realesrgan-ncnn-vulkan.exe": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
-      "vcomp140.dll": "8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b"
+      "vcomp140.dll": "55aba23cdcd6484fbb06f4155b8ca75adfce7a881f10afd0c49457165e677164"
     },
     "runtime_redistribution": {
       "approved": false,
-      "blocker": "The NCNN transitive source and notice inventory is complete, but the exact vcomp140.dll from the official archive lacks an independently authorized Microsoft redistributable source record. Scientific quality, peak memory, clean-machine, and offline CPU gates also remain open.",
+      "provenance_reviewed": true,
+      "approval_scope": "redistribution_provenance_only",
+      "policy_path": "models/manifest/super-resolution/runtime-review/realesrgan-ncnn-vulkan-win-x64-runtime-policy.jsonc",
+      "blocker": "Runtime redistribution provenance is reviewed for the exact authorized-vcomp profile, but packaging remains blocked by failed scientific fidelity and by peak-memory, offline CPU fallback, and clean-machine production gates.",
       "notice_paths": [
         "LICENSES/Real-ESRGAN-NCNN-Vulkan-0.2.0-License.txt",
         "LICENSES/NCNN-6125c9f-License.txt",
         "LICENSES/libwebp-8ea81561-COPYING.txt",
         "LICENSES/dirent-1998-2019-MIT-Notice.txt",
-        "LICENSES/Real-ESRGAN-BSD-3-Clause.txt"
+        "LICENSES/Real-ESRGAN-BSD-3-Clause.txt",
+        "LICENSES/Microsoft-Visual-Cpp-2022-Redistribution-Reference.md"
       ]
     },
     "runtime_components": [
@@ -116,11 +120,18 @@
       {
         "name": "Microsoft Visual C++ OpenMP runtime",
         "file": "vcomp140.dll",
-        "file_version": "14.31.31103.0",
-        "sha256": "8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b",
-        "authenticode_status": "valid Microsoft signature",
+        "file_version": "14.44.35211.0",
+        "sha256": "55aba23cdcd6484fbb06f4155b8ca75adfce7a881f10afd0c49457165e677164",
+        "source": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Redist\\MSVC\\14.44.35112\\x64\\Microsoft.VC143.OpenMP\\vcomp140.dll",
+        "source_profile": "Visual Studio 2022 Build Tools VC Redist MSVC 14.44.35112 x64 Microsoft.VC143.OpenMP",
+        "license": "LicenseRef-Microsoft-VisualStudio-2022-Redistributable",
+        "notice_path": "LICENSES/Microsoft-Visual-Cpp-2022-Redistribution-Reference.md",
+        "authenticode_status": "Valid",
+        "authenticode_signer": "Microsoft Windows Software Compatibility Publisher",
+        "authenticode_thumbprint": "EC5F0D7EE2327688384B4FDF5D7633553A0D055F",
         "linkage": "dynamic import",
-        "review_status": "blocked_pending_independent_redistributable_source"
+        "private_attestation_path": "provenance-private/realesrgan-microsoft-vcomp140-attestation.json",
+        "review_status": "reviewed_redistribution_provenance_only"
       }
     ],
     "default_tile_size": 0,
@@ -158,6 +169,21 @@
         "weights_size_bytes": 8943500,
         "weights_sha256": "fe01c269cfd10cdef8e018ab66ebe750cf79c7af4d1f9c16c737e1295229bacc",
         "audit_date": "2026-08-03"
+      },
+      "authorized_vcomp_runtime_smoke": {
+        "status": "shared_runtime_execution_verified_redistribution_provenance_only",
+        "runtime_profile": "realesrgan-ncnn-vulkan-win-x64-authorized-vcomp-14.44.35211",
+        "policy_path": "models/manifest/super-resolution/runtime-review/realesrgan-ncnn-vulkan-win-x64-runtime-policy.jsonc",
+        "input_privacy": "public synthetic",
+        "input_sha256": "c548bb44965619566fcbfda86f44d092e2c8c71ecebe16b343e79e3b450d6eb4",
+        "output_sha256": "008076b47de90e10ff4b6cbd1efed043125f32b37089ca685055006f5865c4dc",
+        "source_dimensions": "1200x350",
+        "output_dimensions": "2400x700",
+        "elapsed_ms": 2193.913,
+        "exit_code": 0,
+        "provider": "vulkan",
+        "scope_note": "This proves only the shared executable, x2 model, and Microsoft runtime profile. It does not repair this secondary model's failed scientific-fidelity gate.",
+        "quality_claims": "none"
       },
       "fixed_public_synthetic_runtime": {
         "dataset_seed": 393,
@@ -201,8 +227,7 @@
         "Real Chandler scientific-fidelity validation failed because output-scale-2 inference cropped and zoomed the graph, losing content.",
         "Only runtime execution and exact output dimensions were measured; no graph-quality improvement is claimed.",
         "Small-text clarity, open-circle preservation, filled-circle preservation, axis and tick clarity, marker-center F1, numeric OCR, hallucinated-structure rate, and peak memory are not measured.",
-        "The retained release vcomp140.dll still needs an independently authorized Microsoft redistributable source record for the exact shipped hash.",
-        "The exact Real-ESRGAN-ncnn-vulkan, NCNN, libwebp, dirent, and model notices must be staged and checksum-verified with any package candidate.",
+        "Runtime redistribution provenance is reviewed only for the exact authorized-vcomp profile; every package candidate must revalidate the policy, hashes, signature, and checksum-bound notices.",
         "The Vulkan runtime has no CPU or DirectML provider for the required offline CPU fallback gate."
       ],
       "metrics_required": [

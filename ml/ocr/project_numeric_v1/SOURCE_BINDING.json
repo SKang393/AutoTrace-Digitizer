@@ -1,0 +1,67 @@
+{
+  "binding_version": 1,
+  "protocol_id": "graph-numeric-project-v1-20260804",
+  "sources": {
+    "audit_record": {
+      "bytes": 3360,
+      "path": "models/manifest/ocr/PROJECT_NUMERIC_V1_PREREGISTRATION.md",
+      "sha256": "502e111134a8bb664d45b94d4789fa285a03cac0c1392e8521d003c294bf1e1e"
+    },
+    "binding_verifier": {
+      "bytes": 5349,
+      "path": "ml/ocr/project_numeric_v1/verify_preregistration.py",
+      "sha256": "9cb206788f49bfe20e7a6705732275184dcdfc6c9cd3824ef94122ff5be1972e"
+    },
+    "dataset": {
+      "bytes": 17894,
+      "path": "ml/ocr/project_numeric_v1/dataset.py",
+      "sha256": "5d56f4129793d9ac7d2633c78ee064e6a7fd5c56c1d167a1706e89d83ce0716f"
+    },
+    "experiment_plan": {
+      "bytes": 4247,
+      "path": "ml/ocr/project_numeric_v1/EXPERIMENT_PLAN.md",
+      "sha256": "ecbf00398c4c07dc897222c23fad441cc279f6bfaa472a3233faa6a4830f5e7f"
+    },
+    "frozen_protocol": {
+      "bytes": 3104,
+      "path": "ml/ocr/project_numeric_v1/FROZEN_PROTOCOL.json",
+      "sha256": "73b90898d40393bebc3e49d2994b892c1f2460275a7a47424c6f1ac41d23a0e9"
+    },
+    "model": {
+      "bytes": 2676,
+      "path": "ml/ocr/project_numeric_v1/model.py",
+      "sha256": "fce9e7a67b78159f31d0d882eec52487de242b81f82dd85a3ef1bd9a95b1697e"
+    },
+    "package_init": {
+      "bytes": 132,
+      "path": "ml/ocr/project_numeric_v1/__init__.py",
+      "sha256": "c1283a4677171fc9886e39a1e18aa77e842a323a0dd7a487396c821a5f9faedf"
+    },
+    "protocol": {
+      "bytes": 6048,
+      "path": "ml/ocr/project_numeric_v1/protocol.py",
+      "sha256": "4896bc73e62f412fb9ede8ac829348d17acdec28ed462270abb966bb95f2a008"
+    },
+    "readme": {
+      "bytes": 959,
+      "path": "ml/ocr/project_numeric_v1/README.md",
+      "sha256": "8f7d831781b36c6ebda31764a4f17673e34ca0fc1d6b3cfff653914f5368e9c8"
+    },
+    "tests": {
+      "bytes": 6955,
+      "path": "ml/ocr/project_numeric_v1/tests/test_project_numeric_v1.py",
+      "sha256": "d5d19d02a999a3ba9f796d0e173bdf7464c3ff91d72f49d14d30decafc00e694"
+    },
+    "training_entrypoint": {
+      "bytes": 12694,
+      "path": "ml/ocr/project_numeric_v1/train.py",
+      "sha256": "47567e824926873d8779b9261fac476dd7ab56b4315e71f1ae5b019a834d978e"
+    }
+  },
+  "split_fingerprints": {
+    "sealed_test": "5992d05dd37c84a4816617d3789c85a8e2144f419a87d24432304cc804398827",
+    "train": "3217f58667ca497e8b5de60b4b493c92efd75e7f2e49b71a4f847ff6b7a5c8d2",
+    "validation": "dec5869ac463b24c41616dafda34eb5817b8392a3da88ce09fd60fb47d7520f3"
+  },
+  "training_state": "not_started_commit_required"
+}

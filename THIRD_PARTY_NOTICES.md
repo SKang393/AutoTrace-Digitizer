@@ -48,11 +48,15 @@ Current release blockers are:
   `LICENSES/dirent-1998-2019-MIT-Notice.txt`.
 - Runtime executable SHA-256:
   `07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c`.
-- Release status: BLOCKED. `vcomp140.dll` version `14.31.31103.0`, SHA-256
-  `8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b`,
-  is Microsoft-signed but lacks an independently authorized redistributable
-  source record for that exact file. Scientific, CPU fallback, and
-  clean-machine gates are also incomplete.
+- Microsoft OpenMP component: unmodified `vcomp140.dll` version
+  `14.44.35211.0`, SHA-256
+  `55aba23cdcd6484fbb06f4155b8ca75adfce7a881f10afd0c49457165e677164`,
+  from the Visual Studio 2022 VC Redist x64 `Microsoft.VC143.OpenMP` profile.
+- Microsoft provenance reference:
+  `LICENSES/Microsoft-Visual-Cpp-2022-Redistribution-Reference.md`.
+- Release status: BLOCKED. Runtime redistribution provenance is reviewed only
+  for the exact checksum-bound profile. Local adapter, scientific, offline CPU,
+  clean-machine, production, and release approvals remain false.
 
 ## Microsoft .NET Desktop / WPF
 
@@ -259,7 +263,7 @@ Current release blockers are:
 | RealESRGAN_x2plus reference weight | v0.2.1 | Official Real-ESRGAN release | BSD-3-Clause | `49fafd45f8fd7aa8d31ab2a22d14d91b536c34494a5cfe31eb5d89c2fa266abb` | No | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | Metadata yes; release blocked |
 | realesr-general-x4v3 reference weight | v0.2.5.0 | Official Real-ESRGAN release | BSD-3-Clause | `8dc7edb9ac80ccdc30c3a5dca6616509367f05fbc184ad95b731f05bece96292` | No | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | Metadata yes; release blocked |
 | realesr-animevideov3 NCNN x2 model package | v0.2.5.0 | Official Real-ESRGAN Windows NCNN package | BSD-3-Clause | `abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d` | No | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | Metadata yes; release blocked |
-| NCNN runtime | v0.2.0 | Official Real-ESRGAN NCNN Vulkan release | MIT, BSD-3-Clause, zlib, BSD-2-Clause, dirent MIT | `1bbbdb12d470af80b035c773682e144c6c2f6ece9210832a289af0a48ce3fa9a` | No | Exact runtime closure listed above | Source and notice inventory reviewed; exact `vcomp140.dll`, scientific, CPU, and clean-machine gates blocked |
+| NCNN runtime | v0.2.0 plus Microsoft OpenMP 14.44.35211.0 | Official Real-ESRGAN NCNN Vulkan release plus unmodified Visual Studio 2022 VC Redist component | MIT, BSD-3-Clause, zlib, BSD-2-Clause, dirent MIT, Microsoft redistributable terms | Executable: `07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c`; OpenMP: `55aba23cdcd6484fbb06f4155b8ca75adfce7a881f10afd0c49457165e677164` | No | Exact upstream closure and `LICENSES/Microsoft-Visual-Cpp-2022-Redistribution-Reference.md` | Runtime redistribution provenance reviewed only; scientific, CPU, clean-machine, production, and release gates blocked |
 | GraphSR x2 candidate | 0.1.0-local-candidate | Original Graph Auto Reader source | Apache-2.0 | `4b0237683cd61ecd639015380bad9323a5fe79b295ffebf0c93720f51ef0d667` | No | `models/manifest/graphsr/GRAPHSR_X2_CANDIDATE_NOTICE.md` | No, redistribution false and fidelity failed |
 | Marker-center model | 0.1.0 | Original Graph Auto Reader source | Apache-2.0 | `061a496167382d1bd11bb580bed383d2d1725da2001f9c440b7f1acc59ac116a` | No | `models/manifest/markers/MARKER_CENTER_MODEL_NOTICE.md` | No, production held-out acceptance missing |
 | OCR detector / recognizer | Not selected | No approved artifact | Unproven at artifact level | Not available | No | No | No, release blocked |

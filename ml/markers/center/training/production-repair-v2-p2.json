@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "task": "marker-center",
+  "revision": "marker-center-production-repair-v2",
+  "candidate_id": "P2",
+  "status": "preregistered",
+  "experiment_budget": 3,
+  "experiment_ordinal": 2,
+  "seed": 20260815,
+  "epochs": 130,
+  "learning_rate": 0.002,
+  "weight_decay": 0.00001,
+  "robustness_mode": "mixed_photometric",
+  "selection_dataset_manifest_sha256": "afb792b635472bc76d950249dd366f6d9c6f71099a39733d0cd0eb9e6722b59a",
+  "expected_runner_source_bundle_sha256": "272db4f8319bdc5c9ee1329058b130ed1693e86e101d12609b19bfcd85c182f6",
+  "selection_data": "fixed procedural train and validation splits with the P2 tick/joint family",
+  "public_gate_use_for_selection": false,
+  "isolated_change": "add deterministic short perpendicular tick and joint hard-negative families to procedural train and validation selection data",
+  "unchanged_from_p1": {
+    "architecture": true,
+    "seed": true,
+    "epochs": true,
+    "learning_rate": true,
+    "weight_decay": true,
+    "robustness_mode": true,
+    "loss_weights": true,
+    "mask_consensus_threshold": true,
+    "postprocessing": true,
+    "thresholds": [
+      0.28,
+      0.32,
+      0.36,
+      0.4
+    ]
+  },
+  "changes": {
+    "hard_negative_center_suppression_weight": 1.0,
+    "hard_negative_artifact_weight": 0.75,
+    "mask_consensus": "pixelwise maximum of immutable text-mask and artifact-mask input channels",
+    "mask_consensus_threshold": 0.2,
+    "marker_mask_channels_preserved": true,
+    "architecture_change": false,
+    "postprocessing_change": false,
+    "selection_dataset_change": "short perpendicular tick and joint hard negatives only"
+  },
+  "selection_order": [
+    "standard_exact_scene_count",
+    "robust_exact_scene_count",
+    "standard_f1_5px",
+    "robust_f1_5px",
+    "zero_duplicates",
+    "zero_hard_negative_hits"
+  ],
+  "trigger_evidence_path": "ml/markers/center/artifacts/production-public-gate-v2-p1-20260804/public-gate-report.json",
+  "trigger_evidence_sha256": "1a06406f85d54917391fe558dadc8cbe62709bc22244818ebcb07b37cb5129f1",
+  "execution_preconditions": [
+    "this preregistration is reviewed, committed, and clean",
+    "the P2 dataset and runner source bundle is reviewed, committed, and clean",
+    "the canonical training budget ledger is reviewed, committed, and clean",
+    "no P2 output or training seal exists"
+  ],
+  "approval_policy": "training and selection evidence only; no production approval without sealed public and independent confirmation gates"
+}

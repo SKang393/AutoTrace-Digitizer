@@ -34,7 +34,7 @@ explicitly approved conversion and provenance workflow exists.
 |---|---|---|---|---|---|---|---|
 | `RealESRGAN_x2plus` | `v0.2.1` | Official Real-ESRGAN release | BSD-3-Clause | Not bundled; downloaded to ignored audit storage only | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | `49fafd45f8fd7aa8d31ab2a22d14d91b536c34494a5cfe31eb5d89c2fa266abb` | Artifact verified again on 2026-08-03; current NCNN adapter is incompatible; production approval blocked |
 | `realesr-general-x4v3` | `v0.2.5.0` | Official Real-ESRGAN release | BSD-3-Clause | Not bundled; downloaded to temporary audit storage only | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | `8dc7edb9ac80ccdc30c3a5dca6616509367f05fbc184ad95b731f05bece96292` | License and checksum reviewed; benchmark not run; NCNN integration blocked |
-| `realesr-animevideov3` NCNN x2 | `v0.2.5.0-ncnn-x2` | Official Real-ESRGAN Windows NCNN package | BSD-3-Clause model notice; MIT/BSD/zlib runtime closure | Not bundled; downloaded to ignored audit storage only | Exact runtime and model notices listed below | Package: `abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d` | Exact 2x adapter/runtime smoke passed on two public synthetic cases; runtime notice closure recorded, but exact `vcomp140.dll`, accuracy, memory, CPU fallback, and clean-machine gates remain blocked |
+| `realesr-animevideov3` NCNN x2 | `v0.2.5.0-ncnn-x2` | Official Real-ESRGAN Windows NCNN package plus unmodified Visual Studio 2022 VC Redist OpenMP runtime | BSD-3-Clause model notice; MIT/BSD/zlib runtime closure; Microsoft redistributable terms | Not bundled; retained only in ignored audit storage | Exact runtime, model, and Microsoft reference notices listed below | Package: `abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d`; authorized `vcomp140.dll`: `55aba23cdcd6484fbb06f4155b8ca75adfce7a881f10afd0c49457165e677164` | Runtime redistribution provenance reviewed for one checksum-bound profile; local adapter, scientific, memory, CPU fallback, clean-machine, production, and release approvals remain false |
 
 ## Pinned official sources and verified hashes
 
@@ -174,8 +174,8 @@ Radeon RX 6600 XT Vulkan device. The evidence JSON SHA-256 is
 This is a bounded adapter, runtime, dimension, and cache benchmark only. It
 does not measure marker-center F1, shape/fill F1, numeric OCR exact match, axis
 localization error, hallucinated structure rate, or peak memory. The NCNN
-runtime also has no CPU or DirectML execution provider, and its transitive
-redistribution notice inventory remains incomplete. The anime model therefore
+runtime also has no CPU or DirectML execution provider. Its transitive runtime
+provenance is now reviewed only for the exact authorized-vcomp profile. The anime model therefore
 remains experimental and is not approved for production or release bundling.
 
 ## Minimal NCNN runtime boundary
@@ -184,27 +184,39 @@ The official Windows archive also contains `vcomp140d.dll`, a Microsoft debug
 OpenMP runtime that is not redistributable, plus unneeded demo media and model
 families. None may enter a Graph Auto Reader package.
 
-An ignored minimal runtime was assembled from exactly four required files:
+An ignored minimal runtime was assembled from exactly four required files. The
+Microsoft OpenMP file is an unmodified copy from the installed Visual Studio
+2022 VC Redist profile named below, not the copy from the upstream archive:
 
 | File | Bytes | SHA-256 |
 |---|---:|---|
 | `realesrgan-ncnn-vulkan.exe` | 6,161,408 | `07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c` |
-| `vcomp140.dll` | 182,704 | `8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b` |
+| `vcomp140.dll` | 193,152 | `55aba23cdcd6484fbb06f4155b8ca75adfce7a881f10afd0c49457165e677164` |
 | `models/realesr-animevideov3-x2.param` | 3,173 | `b88ff4f00ebf019a7fdac17fdd45a7fd3665d37509efc5baf2e4da2e24420a04` |
 | `models/realesr-animevideov3-x2.bin` | 1,247,368 | `548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d` |
 
-The real adapter again succeeded on both fixed cases and verified its cache
-using this minimal directory. Evidence SHA-256 is
-`c480f97e09cf6117a86d5e8b565afa6e47aa3f85c14d9e46e3ef1932161fa967`.
-This proves that `vcomp140d.dll`, demo media, and unused model families are not
-runtime dependencies. It does not approve redistribution: the release
-`vcomp140.dll` version `14.31.31103.0` has a valid Microsoft Authenticode
-signature, but still needs an independently authorized Microsoft
-redistributable source record for the exact shipped hash.
+The exact profile passed a direct public synthetic x2 process smoke with exit
+code 0 in 2193.913 ms. Input SHA-256
+`c548bb44965619566fcbfda86f44d092e2c8c71ecebe16b343e79e3b450d6eb4`
+at 1200 x 350 produced SHA-256
+`008076b47de90e10ff4b6cbd1efed043125f32b37089ca685055006f5865c4dc`
+at exactly 2400 x 700. This proves only execution, exact 2x dimensions, and the
+reduced inventory. It does not establish scientific fidelity.
+
+The reviewed `vcomp140.dll` is version `14.44.35211.0`, has a valid Microsoft
+Authenticode signature, and is byte-identical to
+`C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Redist\MSVC\14.44.35112\x64\Microsoft.VC143.OpenMP\vcomp140.dll`.
+Its private authority attestation is ignored and Git-ineligible. The tracked
+policy binds that attestation statement, the source `Redist.txt` hash, file
+version, Authenticode signer and thumbprint, every runtime asset, the reduced
+inventory, the direct smoke, and every notice checksum. Runtime redistribution
+provenance is reviewed only for this exact profile.
 
 The executable source closure is recorded in the manifest and exact tracked
 notice files. The Real-ESRGAN BSD notice covers the selected model payloads;
-the four runtime notices cover the executable, NCNN, libwebp, and dirent.
+the four upstream runtime notices cover the executable, NCNN, libwebp, and
+dirent. `LICENSES/Microsoft-Visual-Cpp-2022-Redistribution-Reference.md`
+records the Microsoft source and official terms references.
 
 ## Goal 21 manifest-driven local backend
 
@@ -258,14 +270,14 @@ secondary candidate is rejected for local adapter use and the manifest-driven
 factory fails closed before process invocation. Small-text clarity,
 open-circle preservation, filled-circle preservation, axis and tick clarity,
 detector metrics, hallucinated-structure rate, and peak memory remain
-unmeasured. No quality improvement is claimed. The primary model remains the
-only local default.
+unmeasured. No quality improvement is claimed. The primary manifest remains
+the selected default identity, but its local adapter approval is now also false
+until its fixed scientific-fidelity gate passes.
 
-Neither local result approves release bundling. The runtime notice closure is
-now recorded, but the exact `vcomp140.dll` still needs an independently
-authorized Microsoft redistributable source record. CPU fallback,
-clean-machine execution, peak memory, and production-quality benchmark
-approval also remain mandatory.
+Neither local result approves release bundling. Runtime redistribution
+provenance is reviewed only for the checksum-bound authorized-vcomp profile.
+Scientific fidelity, CPU fallback, clean-machine execution, peak memory, and
+production-quality benchmark approval remain mandatory.
 
 ## Verification method
 

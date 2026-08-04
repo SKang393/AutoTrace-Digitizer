@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "profileId": "realesrgan-ncnn-vulkan-win-x64-authorized-vcomp-14.44.35211",
+  "overallReviewStatus": "reviewed-provenance-only",
+  "defaultRuntimeRoot": "artifacts/goal19-realesrgan/runtime-authorized-vcomp-14.44.35211",
+  "defaultPrivateAttestationPath": "provenance-private/realesrgan-microsoft-vcomp140-attestation.json",
+  "requiredMaintainerStatement": "The release maintainer confirms that Graph Auto Reader is built by a validly licensed Visual Studio user and may redistribute the unmodified vcomp140.dll copied from the Visual Studio 2022 VC Redist directory, subject to the applicable Microsoft license terms.",
+  "runtimeRedistributionProvenanceReviewed": true,
+  "approvals": {
+    "localAdapter": false,
+    "scientificFidelity": false,
+    "offlineCpu": false,
+    "cleanMachine": false,
+    "production": false,
+    "release": false
+  },
+  "officialTerms": [
+    "https://learn.microsoft.com/en-gb/visualstudio/releases/2022/redistribution",
+    "https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170"
+  ],
+  "sourceRedistRecord": {
+    "path": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Licenses\\1033\\Redist.txt",
+    "sha256": "da53b097e02b08e0fc69706102a60bc384fe756426ae4dc4a855e96f95cb2b9c"
+  },
+  "noticeFiles": [
+    {
+      "path": "LICENSES/Real-ESRGAN-NCNN-Vulkan-0.2.0-License.txt",
+      "sha256": "5abb941454de437b0e90d78dcb72e3688f74e14bcd4e24393273cb5cd0e9c937"
+    },
+    {
+      "path": "LICENSES/NCNN-6125c9f-License.txt",
+      "sha256": "6495f972a09ad7f64ccd953e79adba91a93d862edc7135e6d95210bbf4002a01"
+    },
+    {
+      "path": "LICENSES/libwebp-8ea81561-COPYING.txt",
+      "sha256": "e293d1dddc9785200b1f58a4f5293543cf8566d9e0b8a3c02fad955035b19f42"
+    },
+    {
+      "path": "LICENSES/dirent-1998-2019-MIT-Notice.txt",
+      "sha256": "8c8175df0a8879e00fc9ec6adb0b5454ad4010f18f15e18763c6bf0b116387df"
+    },
+    {
+      "path": "LICENSES/Real-ESRGAN-BSD-3-Clause.txt",
+      "sha256": "b76ad0945dd9f55af492cb95b3a50766c4f371557eec02421e7badd2484db85c"
+    },
+    {
+      "path": "LICENSES/Microsoft-Visual-Cpp-2022-Redistribution-Reference.md",
+      "sha256": "0ab4530b4ca4c0bc12fc97b36d8ad1d1383a66aad328b03104215da288e8c24e"
+    }
+  ],
+  "runtimeAssets": [
+    {
+      "path": "realesrgan-ncnn-vulkan.exe",
+      "bytes": 6161408,
+      "sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
+      "source": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-windows.zip",
+      "purpose": "Pinned Vulkan super-resolution process runtime.",
+      "copyright": "Copyright (c) 2021 Xintao Wang; Copyright (c) 2019 nihui; transitive owners retained in notices.",
+      "license": "MIT AND BSD-3-Clause AND Zlib AND BSD-2-Clause",
+      "noticePaths": [
+        "LICENSES/Real-ESRGAN-NCNN-Vulkan-0.2.0-License.txt",
+        "LICENSES/NCNN-6125c9f-License.txt",
+        "LICENSES/libwebp-8ea81561-COPYING.txt",
+        "LICENSES/dirent-1998-2019-MIT-Notice.txt"
+      ],
+      "privacyStatus": "Public official upstream binary.",
+      "gitEligibility": false
+    },
+    {
+      "path": "vcomp140.dll",
+      "bytes": 193152,
+      "sha256": "55aba23cdcd6484fbb06f4155b8ca75adfce7a881f10afd0c49457165e677164",
+      "version": "14.44.35211.0",
+      "source": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Redist\\MSVC\\14.44.35112\\x64\\Microsoft.VC143.OpenMP\\vcomp140.dll",
+      "sourceProfile": "Visual Studio 2022 Build Tools VC Redist MSVC 14.44.35112 x64 Microsoft.VC143.OpenMP",
+      "purpose": "Unmodified Microsoft OpenMP runtime dynamically imported by the NCNN executable.",
+      "copyright": "Microsoft Corporation. All rights reserved.",
+      "license": "LicenseRef-Microsoft-VisualStudio-2022-Redistributable",
+      "noticePaths": [
+        "LICENSES/Microsoft-Visual-Cpp-2022-Redistribution-Reference.md"
+      ],
+      "privacyStatus": "Public installed redistributable binary; maintainer authority attestation is private.",
+      "gitEligibility": false,
+      "unmodifiedSourceCopy": true,
+      "authenticode": {
+        "requiredStatus": "Valid",
+        "signerSubjectContains": "Microsoft",
+        "signerThumbprint": "EC5F0D7EE2327688384B4FDF5D7633553A0D055F"
+      }
+    },
+    {
+      "path": "models/realesr-animevideov3-x2.param",
+      "bytes": 3173,
+      "sha256": "b88ff4f00ebf019a7fdac17fdd45a7fd3665d37509efc5baf2e4da2e24420a04",
+      "source": "Official Real-ESRGAN v0.2.5.0 Windows NCNN package.",
+      "purpose": "Pinned x2 anime model parameter graph.",
+      "copyright": "Copyright (c) 2021 Xintao Wang.",
+      "license": "BSD-3-Clause",
+      "noticePaths": ["LICENSES/Real-ESRGAN-BSD-3-Clause.txt"],
+      "privacyStatus": "Public official upstream model payload.",
+      "gitEligibility": false
+    },
+    {
+      "path": "models/realesr-animevideov3-x2.bin",
+      "bytes": 1247368,
+      "sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
+      "source": "Official Real-ESRGAN v0.2.5.0 Windows NCNN package.",
+      "purpose": "Pinned x2 anime model weights.",
+      "copyright": "Copyright (c) 2021 Xintao Wang.",
+      "license": "BSD-3-Clause",
+      "noticePaths": ["LICENSES/Real-ESRGAN-BSD-3-Clause.txt"],
+      "privacyStatus": "Public official upstream model payload.",
+      "gitEligibility": false
+    }
+  ],
+  "evidenceOnlyFiles": [
+    {
+      "path": "authorized-vcomp-smoke.png",
+      "sha256": "008076b47de90e10ff4b6cbd1efed043125f32b37089ca685055006f5865c4dc",
+      "purpose": "Derived public synthetic direct-smoke output; excluded from every package."
+    }
+  ],
+  "smokeEvidence": {
+    "status": "execution-verified",
+    "exitCode": 0,
+    "elapsedMs": 2193.913,
+    "inputPath": "artifacts/goal19-realesrgan/public-synthetic/seed-393/images/a1b41e74-1808-5dec-99c9-59f4c88f4004.png",
+    "inputSha256": "c548bb44965619566fcbfda86f44d092e2c8c71ecebe16b343e79e3b450d6eb4",
+    "inputWidth": 1200,
+    "inputHeight": 350,
+    "outputSha256": "008076b47de90e10ff4b6cbd1efed043125f32b37089ca685055006f5865c4dc",
+    "outputWidth": 2400,
+    "outputHeight": 700,
+    "provider": "vulkan"
+  }
+}

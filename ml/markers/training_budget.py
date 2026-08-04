@@ -77,13 +77,28 @@ def acquire_training_candidate(
         ),
         None,
     )
-    if entry is None or entry.get("status") != "preregistered" or entry.get("execution_authorized") is not True:
+    if (
+        entry is None
+        or entry.get("execution_authorized") is not True
+        or entry.get("authorized_candidate_id") != candidate_id
+    ):
         raise RuntimeError(f"Training candidate is not authorized by the canonical ledger: {task}/{revision}/{candidate_id}")
-    if entry.get("preregistered_candidate_ids") != [candidate_id] or entry.get("consumed_candidate_ids") != []:
+    candidate_ordinal = candidate_id[1:] if candidate_id.startswith("P") else ""
+    expected_status = f"candidate_{int(candidate_ordinal)}_preregistered" if candidate_ordinal.isdigit() else None
+    if expected_status is None or entry.get("status") != expected_status:
+        raise RuntimeError(
+            f"Training candidate is not in its exact preregistered status: "
+            f"{task}/{revision}/{candidate_id}; expected {expected_status}, found {entry.get('status')}"
+        )
+    if entry.get("preregistered_candidate_ids") != [candidate_id] or candidate_id in entry.get("consumed_candidate_ids", []):
         raise RuntimeError(f"Training candidate budget is not an unused single-candidate authorization: {candidate_id}")
     config_file = repo_root / config_path
     config_sha256 = sha256_file(config_file)
-    if entry.get("candidate_config_path") != config_path.as_posix() or entry.get("candidate_config_sha256") != config_sha256:
+    configured_paths = entry.get("candidate_config_paths")
+    configured_hashes = entry.get("candidate_config_sha256")
+    expected_path = configured_paths.get(candidate_id) if isinstance(configured_paths, dict) else entry.get("candidate_config_path")
+    expected_hash = configured_hashes.get(candidate_id) if isinstance(configured_hashes, dict) else configured_hashes
+    if expected_path != config_path.as_posix() or expected_hash != config_sha256:
         raise RuntimeError("Training candidate configuration does not match the canonical budget ledger")
     config = json.loads(config_file.read_text(encoding="utf-8"))
     if (config.get("task"), config.get("revision"), config.get("candidate_id")) != (task, revision, candidate_id):

@@ -323,7 +323,7 @@ def test_untracked_training_budget_is_never_trusted(tmp_path: Path) -> None:
         )
 
 
-def test_v2_candidate_one_is_hash_bound_and_refuses_before_commit_or_output(tmp_path: Path) -> None:
+def test_v2_candidate_one_is_hash_bound_consumed_and_cannot_rerun(tmp_path: Path) -> None:
     config_path = REPO_ROOT / CONFIG_PATH
     config = json.loads(config_path.read_text(encoding="utf-8"))
     ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
@@ -335,12 +335,22 @@ def test_v2_candidate_one_is_hash_bound_and_refuses_before_commit_or_output(tmp_
     assert config["changes"]["marker_mask_channels_preserved"] is True
     assert config["changes"]["hard_negative_center_suppression_weight"] == 1.0
     assert config["changes"]["hard_negative_artifact_weight"] == 0.75
-    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
-    assert entry["candidate_config_sha256"] == sha256_file(config_path)
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
-    output = tmp_path / "v2-p1-must-not-start-uncommitted"
-    with pytest.raises(RuntimeError, match="committed before use|committed revision"):
+    historical_runner_source_sha256 = "0dc41fbb2b44e67267266b5d5d86c3433f14adfc909027b177bd87de415c6c7c"
+    assert config["expected_runner_source_bundle_sha256"] == historical_runner_source_sha256
+    assert entry["candidate_config_sha256"]["P1"] == sha256_file(config_path)
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["candidate_checkpoint_sha256"]["P1"] == "2292f516ed7263f741549fb6b127a62d1d1cf4368153d23953bca3fa9812deab"
+    assert entry["candidate_onnx_sha256"]["P1"] == "f8f543dee4e80e55f5e7ab316e6ddfd3884219c191b5378a967ed186f4c5b6a6"
+    output = tmp_path / "v2-p1-must-not-rerun"
+    with pytest.raises(RuntimeError, match="committed revision|not authorized|already opened"):
         train_candidate(output)
     assert not output.exists()
-    assert not (REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-production-repair-v2/P1").exists()
+    seal_root = REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-production-repair-v2/P1"
+    opened = json.loads((seal_root / "opened.json").read_text(encoding="utf-8"))
+    assert opened["binding"]["runner_source_bundle_sha256"] == historical_runner_source_sha256
+    assert sha256_file(seal_root / "opened.json") == entry["training_opened_seal_sha256"]
+    assert sha256_file(seal_root / "result.json") == entry["training_result_seal_sha256"]
