@@ -127,7 +127,7 @@
     {
       "task": "marker-classifier",
       "revision": "marker-classifier-production-runtime-repair-v2",
-      "status": "candidate_1_selected_public_gate_authorized",
+      "status": "candidate_1_public_gate_passed_confirmation_authorized",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
         "P1"
@@ -172,10 +172,23 @@
       "p1_probability_packed_onnx_parity_tolerance": 0.00001,
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "public_gate_authorized": true,
+      "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": "P1",
-      "public_gate_evaluations": 0,
-      "confirmation_gate_authorized": false,
+      "public_gate_evaluations": 1,
+      "public_gate_revision": "marker-classifier-public-gate-v3",
+      "public_gate_candidate_key": "a24a8f51db4a96b3e090fc22b07b1d737d3733f04b4b40285a8a1f1d54d75d7c",
+      "public_gate_report_path": "ml/markers/classifier/artifacts/production-runtime-public-v3-p1-20260804/gate-report.json",
+      "public_gate_report_sha256": "32eed939875a3f6a3465fe8cf42a7f9f1ab9c33a4e5b225dfb7c396de2741757",
+      "public_gate_opened_seal_sha256": "40ba09e283b1ece95d6da7946dd201785746c24c39cfa13004931d83f76a08aa",
+      "public_gate_result_seal_sha256": "8cdd59115fd86f5ba3debe887f8394befe2c06259240ec43328e7a1b85f37b6c",
+      "public_gate_sample_count": 140,
+      "public_gate_shape_macro_f1": 0.9907246376811594,
+      "public_gate_fill_macro_f1": 0.9440313111545988,
+      "public_gate_artifact_f1": 1.0,
+      "public_gate_minority_shape_f1": 1.0,
+      "public_gate_probability_packed_onnx_maximum_absolute_error": 0.0000017285346984863281,
+      "confirmation_gate_authorized": true,
+      "confirmation_gate_authorized_candidate_id": "P1",
       "confirmation_gate_evaluations": 0,
       "refusal_required_before_output": true
     }

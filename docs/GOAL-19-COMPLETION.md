@@ -54,14 +54,14 @@ The authoritative current preview is the immutable build selected by ignored
 before the current source-only model preregistrations was:
 
 - version: `0.0.21`
-- commit: `046b284c71c0c0c8286896bac0e04663fee37a26`
+- commit: `e87ea7f6350082825f42c7d331fae2180b58d8c3`
 - dirty development build: no
-- build time: `2026-08-04T23:40:04.367Z`
+- build time: `2026-08-04T23:52:26.599Z`
 - executable:
-  `artifacts/dev-portable/builds/0.0.21-20260804T234004367Z-046b284c/GraphReader.App.exe`
+  `artifacts/dev-portable/builds/0.0.21-20260804T235226599Z-e87ea7f6/GraphReader.App.exe`
 - executable SHA-256:
-  `bfcedd63d33e1eeb64e98ba5c5ae02bab0a6864c1f44f1623ae7a693fa59f131`
-- running process at the latest recheck: `58416`, responsive, window title
+  `0dee91fb99c6e800c327184252ccefec50e38bf4daca2b30ff35f99d2df6cb0e`
+- running process at the latest recheck: `23100`, responsive, window title
   `Graph Auto Reader`, exact Chandler path supplied by `--open-image`
 - clean portable full-test rerun: PASS, 668 passed and 5 expected skips
 - production-model IDs reported available: `0`
@@ -75,8 +75,8 @@ before the current source-only model preregistrations was:
   of emitting false evidence
 - the real Chandler window changed after invoking the actual Zoom In control
   and again after invoking Fit Graph; the zoom and final fitted capture SHA-256
-  values are `205c8c315642e474932cb6c0d2db28099e58aca9c589fce00c14b51677deed26`
-  and `6dc57bb046e6e6aa2fa167ccfb932371ac713842cba3951bb05139001c7726fc`
+  values are `262110e2f6f68a84e275f62b62a21cb8a983b6bd22df796a790752d968cfeaf0`
+  and `b3f85b6ef8e02fd7caef701fa6fe72304fef685c81582f9573c42a7fc46ccf0c`
 
 Start the watcher with
 `powershell.exe -File packaging/Watch-DevPortable.ps1 -BuildOnStart -FastTestsOnly -AllowDirty -LaunchAfterBuild`.
@@ -107,7 +107,7 @@ in Production composition. Automatic stages currently report:
 | Enhancement | Unavailable | Exact runtime redistribution provenance is reviewed, but local-adapter, scientific, CPU fallback, clean-machine, production, and release approvals remain false. |
 | Axis | Unavailable | Deterministic adapter exists; OpenCvSharp native redistribution audit is blocked. |
 | OCR | Unavailable | Prior CTC, spatial V2, and canonical-slot experiments are closed. Whole-crop project numeric Candidate 1 completed evaluation-only recovery without retraining, failed the frozen recognition and role gates, and produced no ONNX. Candidates 2 and 3 are unregistered. |
-| Markers | Unavailable | Marker-center exhausted its budget after one public false positive. The unchanged-weight probability-runtime classifier passed selection, but its one public-v3 gate and disjoint confirmation-v3 gate remain incomplete. |
+| Markers | Unavailable | Marker-center exhausted its budget after one public false positive. The unchanged-weight probability-runtime classifier passed selection and public-v3; its one disjoint confirmation-v3 gate remains incomplete. |
 | Legends | Unavailable | Deterministic reasoner requires approved OCR and marker evidence. |
 | Phases | Unavailable | Deterministic reasoner requires approved axis, OCR, and marker evidence. |
 
@@ -145,8 +145,10 @@ approving any model:
   checkpoint with zero optimizer steps and passed the full fixed 140-case
   selection gate: shape F1 `1.0`, fill F1 `0.9907389542735867`, artifact and
   minority F1 `1.0`, and CPU ONNX parity `2.0265579223632812e-06`. One
-  source-bound public-v3 evaluation is authorized; disjoint confirmation-v3 is
-  not authorized, and no classifier asset is approved.
+  once-only public-v3 gate then passed shape F1 `0.9907246376811594`, fill F1
+  `0.9440313111545988`, artifact and minority F1 `1.0`, and CPU ONNX parity
+  `1.7285346984863281e-06`. One disjoint confirmation-v3 evaluation is
+  authorized, and no classifier asset is approved.
 - The project-trained graph-numeric CTC experiment used only procedural vector
   glyphs. Candidate and single repair held-out exact match were both
   `0.015625`; the repair CER worsened to `0.932710`. Its exact ONNX passed an

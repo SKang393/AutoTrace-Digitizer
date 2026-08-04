@@ -289,6 +289,35 @@
       "confirmation_v3_evaluation_count": 0,
       "release_blocker": "Once-only public-v3 and disjoint confirmation-v3 gates, production model discovery, application integration, packaging, and clean-machine evidence remain mandatory.",
       "promotion_decision": "selection passed; authorize one public-v3 evaluation without approving the model"
+    },
+    {
+      "profile": "production-runtime-repair-v2-p1-public-v3-20260804",
+      "status": "pass",
+      "release_eligible": false,
+      "production_approval": false,
+      "task": "marker-classifier",
+      "revision": "marker-classifier-public-gate-v3",
+      "candidate_id": "P1",
+      "source_checkpoint_sha256": "49a5ce6487b51a7426ebca5081fa3e2a15c9c30bd6302033ad7efa82b3ad8c7a",
+      "probability_packed_onnx_sha256": "26f9304f1689053a0b94aa896a1e239f6ade1e5c1920736a3535c1b32f803b8a",
+      "dataset_manifest_sha256": "475b78354453bf8e50d1f287c79cd855b39f790e27521d57552f2be9c9328a87",
+      "evaluator_source_bundle_sha256": "1acac06a37921eacf298c1105a2080e928d955e7997d197ebb7edb632ec86529",
+      "canonical_seal_key": "a24a8f51db4a96b3e090fc22b07b1d737d3733f04b4b40285a8a1f1d54d75d7c",
+      "evidence_path": "ml/markers/classifier/artifacts/production-runtime-public-v3-p1-20260804/gate-report.json",
+      "evidence_sha256": "32eed939875a3f6a3465fe8cf42a7f9f1ab9c33a4e5b225dfb7c396de2741757",
+      "sample_count": 140,
+      "shape_macro_f1": 0.9907246376811594,
+      "fill_macro_f1": 0.9440313111545988,
+      "artifact_f1": 1.0,
+      "minority_shape_f1": 1.0,
+      "probability_packed_onnx_maximum_absolute_error": 0.0000017285346984863281,
+      "probability_packed_onnx_parity_tolerance": 0.00001,
+      "provider": "CPUExecutionProvider",
+      "evaluation_count": 1,
+      "confirmation_v3_status": "authorized; not evaluated",
+      "confirmation_v3_evaluation_count": 0,
+      "release_blocker": "The disjoint confirmation-v3 gate, production model discovery, application integration, packaging, and clean-machine evidence remain mandatory.",
+      "promotion_decision": "public-v3 passed; authorize one disjoint confirmation-v3 evaluation without approving the model"
     }
   ]
 }

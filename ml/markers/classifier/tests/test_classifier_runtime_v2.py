@@ -138,15 +138,17 @@ def test_runtime_v2_source_bundles_and_budget_binding_match_preregistration() ->
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
     entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
-    assert entry["status"] == "candidate_1_selected_public_gate_authorized"
+    assert entry["status"] == "candidate_1_public_gate_passed_confirmation_authorized"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == [CANDIDATE_ID]
     assert entry["consumed_candidate_ids"] == [CANDIDATE_ID]
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert entry["public_gate_authorized"] is True
-    assert entry["public_gate_evaluations"] == 0
-    assert entry["confirmation_gate_authorized"] is False
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_report_sha256"] == "32eed939875a3f6a3465fe8cf42a7f9f1ab9c33a4e5b225dfb7c396de2741757"
+    assert entry["public_gate_probability_packed_onnx_maximum_absolute_error"] <= PARITY_TOLERANCE
+    assert entry["confirmation_gate_authorized"] is True
     assert entry["confirmation_gate_evaluations"] == 0
     assert entry["p1_optimizer_steps"] == 0
     assert entry["p1_weights_changed"] is False
@@ -169,6 +171,16 @@ def test_runtime_v2_source_bundles_and_budget_binding_match_preregistration() ->
     assert benchmark["production_approval"] is False
     assert benchmark["public_v3_evaluation_count"] == 0
     assert benchmark["confirmation_v3_evaluation_count"] == 0
+    public_benchmark = next(
+        item
+        for item in model_manifest["benchmarks"]
+        if item["profile"] == "production-runtime-repair-v2-p1-public-v3-20260804"
+    )
+    assert public_benchmark["status"] == "pass"
+    assert public_benchmark["release_eligible"] is False
+    assert public_benchmark["production_approval"] is False
+    assert public_benchmark["evaluation_count"] == 1
+    assert public_benchmark["confirmation_v3_evaluation_count"] == 0
 
 
 def test_runtime_v2_gate_boundaries_remain_strict() -> None:
