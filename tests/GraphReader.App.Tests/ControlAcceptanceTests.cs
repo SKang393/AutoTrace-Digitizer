@@ -92,7 +92,7 @@ public sealed class ControlAcceptanceTests
                     CrosshairPosition = new Point(0.25, 0.75),
                 };
 
-                var phasePresenter = (ContentPresenter)canvas.FindName("PhaseOverlayPresenter");
+                var phasePresenter = (ContentControl)canvas.FindName("PhaseOverlayPresenter");
                 var crosshair = (CrosshairOverlay)canvas.FindName("Crosshair");
 
                 Assert.AreEqual(Visibility.Collapsed, phasePresenter.Visibility);
@@ -121,13 +121,19 @@ public sealed class ControlAcceptanceTests
 
                 var image = (Image)canvas.FindName("GraphImage");
                 var coordinateSurface = (FrameworkElement)canvas.FindName("ImageCoordinateSurface");
-                var phasePresenter = (ContentPresenter)canvas.FindName("PhaseOverlayPresenter");
+                var phasePresenter = (ContentControl)canvas.FindName("PhaseOverlayPresenter");
                 var crosshair = (CrosshairOverlay)canvas.FindName("Crosshair");
 
                 Assert.AreEqual(520d, coordinateSurface.ActualWidth, 0.01);
                 Assert.AreEqual(280d, coordinateSurface.ActualHeight, 0.01);
                 Assert.AreEqual(image.ActualWidth, phasePresenter.ActualWidth, 0.01);
                 Assert.AreEqual(image.ActualHeight, phasePresenter.ActualHeight, 0.01);
+                Assert.AreEqual(HorizontalAlignment.Stretch, phasePresenter.HorizontalContentAlignment);
+                Assert.AreEqual(VerticalAlignment.Stretch, phasePresenter.VerticalContentAlignment);
+                var phaseOverlay = FindVisualDescendant<PhaseDividerOverlay>(phasePresenter);
+                Assert.IsNotNull(phaseOverlay);
+                Assert.AreEqual(image.ActualWidth, phaseOverlay.ActualWidth, 0.01);
+                Assert.AreEqual(image.ActualHeight, phaseOverlay.ActualHeight, 0.01);
                 Assert.AreEqual(image.ActualWidth, crosshair.ActualWidth, 0.01);
                 Assert.AreEqual(image.ActualHeight, crosshair.ActualHeight, 0.01);
             });
@@ -348,6 +354,27 @@ public sealed class ControlAcceptanceTests
         }
 
         Assert.IsEmpty(violations, string.Join(Environment.NewLine, violations));
+    }
+
+    private static T? FindVisualDescendant<T>(DependencyObject root)
+        where T : DependencyObject
+    {
+        for (int index = 0; index < VisualTreeHelper.GetChildrenCount(root); index++)
+        {
+            DependencyObject child = VisualTreeHelper.GetChild(root, index);
+            if (child is T match)
+            {
+                return match;
+            }
+
+            T? descendant = FindVisualDescendant<T>(child);
+            if (descendant is not null)
+            {
+                return descendant;
+            }
+        }
+
+        return null;
     }
 
     private sealed class MutableCount(int count) : INotifyPropertyChanged

@@ -2,6 +2,7 @@
 // Copyright 2026 Sungwoo Kang
 
 using System.Runtime.ExceptionServices;
+using System.Windows.Threading;
 
 namespace GraphReader.App.Tests;
 
@@ -28,18 +29,28 @@ internal static class StaTestHost
         var thread = new Thread(
             () =>
             {
-                try
-                {
-                    result = action();
-                }
-                catch (Exception exception)
-                {
-                    failure = ExceptionDispatchInfo.Capture(exception);
-                }
-                finally
-                {
-                    completed.Set();
-                }
+                Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
+                SynchronizationContext.SetSynchronizationContext(
+                    new DispatcherSynchronizationContext(dispatcher));
+                _ = dispatcher.BeginInvoke(
+                    () =>
+                    {
+                        try
+                        {
+                            result = action();
+                        }
+                        catch (Exception exception)
+                        {
+                            failure = ExceptionDispatchInfo.Capture(exception);
+                        }
+                        finally
+                        {
+                            dispatcher.BeginInvokeShutdown(DispatcherPriority.Send);
+                        }
+                    },
+                    DispatcherPriority.Send);
+                Dispatcher.Run();
+                completed.Set();
             });
         thread.SetApartmentState(ApartmentState.STA);
         thread.IsBackground = true;

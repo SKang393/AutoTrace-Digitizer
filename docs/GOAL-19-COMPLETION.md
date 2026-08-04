@@ -54,16 +54,16 @@ was:
   `artifacts/dev-portable/builds/0.0.21-20260804T193412554Z-ad1bb62b/GraphReader.App.exe`
 - running process at verification: `74180`, responsive, window title
   `Graph Auto Reader`, exact Chandler path supplied by `--open-image`
-- full tests: PASS, 668 passed and 5 expected opt-in or provider skips
+- corrected current full-test rerun: PASS, 664 passed and 9 expected or
+  fail-closed skips
 - production-model IDs reported available: `0`
 - automatic stages reported unavailable: `6`
 - mutable root: `artifacts/dev-portable/Data`
 - mutable entries after empty launch: `Autosave`, `Cache`, `Logs`, `Recovery`,
   and `Settings` directories; no graph/project/export file
-- retained empty-state screenshot from the byte-identical prior payload:
-  `artifacts/dev-portable/evidence/manual-preview-empty.png`
-- retained screenshot SHA-256:
-  `56f56e9d2d4cfebea01acb728f051893130c7ea636d707a0093b29861ab82ef4`
+- the previously retained empty-state PNG is fully transparent and is not
+  valid screenshot evidence; the WPF harness now reports that pixel surface as
+  inconclusive instead of emitting a false pass
 
 Start the watcher with
 `powershell.exe -File packaging/Watch-DevPortable.ps1 -BuildOnStart -FastTestsOnly -AllowDirty -LaunchAfterBuild`.
@@ -202,8 +202,10 @@ files are not tracked.
 
 ## Tests and commands
 
-- `dotnet test GraphAutoReader.slnx -c Release --no-restore`: 668 passed and 5
-  expected opt-in or provider-specific tests skipped.
+- `dotnet test GraphAutoReader.slnx -c Release --no-restore`: 664 passed and 9
+  expected or fail-closed tests skipped. Four screenshot tests are
+  inconclusive because the noninteractive test desktop returned a fully
+  transparent WPF pixel surface.
 - focused manual workflow: 8/8 passed.
 - bounded WPF manual composition: 1/1 passed.
 - Goal 19 application/composition focus: 18/18 passed in reviewer verification.
@@ -250,7 +252,7 @@ files are not tracked.
 
 ## Metrics and timing
 
-- full .NET suite: 668 tests passed with 5 expected skips
+- full .NET suite: 664 tests passed with 9 expected or fail-closed skips
 - latest development portable build passed App 34/34, Domain 23/23, focused
   integration 36/36, publish, and process smoke
 - watcher debounce: 2.53 to 2.63 seconds across independent verification
@@ -324,7 +326,8 @@ Microsoft source and license record.
 - `artifacts/dev-portable/latest.json`
 - `artifacts/dev-portable/builds/0.0.21-20260804T193412554Z-ad1bb62b/`
 - `artifacts/dev-portable/Data/`
-- `artifacts/dev-portable/evidence/manual-preview-empty.png`
+- `artifacts/dev-portable/evidence/manual-preview-empty.png` exists but is
+  fully transparent and must not be cited as screenshot evidence
 - `artifacts/evidence/goal19-track-a/manual-preview-track-a.trx`
 - `artifacts/evidence/goal19-wpf-root/manual-preview-wpf-composition-root.trx`
 - `.omo/evidence/goal-19-track-a-code-review.md`

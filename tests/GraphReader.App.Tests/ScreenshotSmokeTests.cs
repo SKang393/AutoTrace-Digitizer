@@ -42,6 +42,15 @@ public sealed class ScreenshotSmokeTests
             520,
             280);
 
+        string evidenceDirectory = Path.Combine(
+            RepositoryTestPaths.Root,
+            "artifacts",
+            "dev-portable",
+            "evidence");
+        Directory.CreateDirectory(evidenceDirectory);
+        File.WriteAllBytes(Path.Combine(evidenceDirectory, "phase-overlay-visible.png"), visible.PngBytes);
+        File.WriteAllBytes(Path.Combine(evidenceDirectory, "phase-overlay-hidden.png"), hidden.PngBytes);
+
         Assert.AreNotEqual(visible.Sha256, hidden.Sha256);
         CollectionAssert.AreNotEqual(visible.PngBytes, hidden.PngBytes);
     }
@@ -138,9 +147,11 @@ public sealed class ScreenshotSmokeTests
         {
             DataContext = viewModel,
         };
-        AddResources(window, themeSource);
-
-        return (FrameworkElement)window.Content;
+        FrameworkElement content = (FrameworkElement)window.Content;
+        window.Content = null;
+        content.DataContext = viewModel;
+        AddResources(content, themeSource);
+        return content;
     }
 
     private static FrameworkElement CreateManualPreviewWorkspace(MainWindowViewModel viewModel)
@@ -149,8 +160,11 @@ public sealed class ScreenshotSmokeTests
         {
             DataContext = viewModel,
         };
-        AddResources(window, LightThemeSource);
-        return (FrameworkElement)window.Content;
+        FrameworkElement content = (FrameworkElement)window.Content;
+        window.Content = null;
+        content.DataContext = viewModel;
+        AddResources(content, LightThemeSource);
+        return content;
     }
 
     private static void AddResources(FrameworkElement element, string themeSource)

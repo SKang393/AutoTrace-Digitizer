@@ -38,20 +38,22 @@
                    SnapsToDevicePixels="True" />
             <ContentPresenter Content="{Binding OverlayContent, ElementName=Root}"
                               IsHitTestVisible="False" />
-            <ContentPresenter x:Name="PhaseOverlayPresenter"
-                              Content="{Binding PhaseOverlayContent, ElementName=Root}"
-                              HorizontalAlignment="Stretch"
-                              VerticalAlignment="Stretch"
-                              IsHitTestVisible="False"
-                              AutomationProperties.Name="{DynamicResource GraphCanvas.PhaseOverlay.AutomationName}">
-              <ContentPresenter.ContentTemplate>
+            <ContentControl x:Name="PhaseOverlayPresenter"
+                            Content="{Binding PhaseOverlayContent, ElementName=Root}"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            IsHitTestVisible="False"
+                            AutomationProperties.Name="{DynamicResource GraphCanvas.PhaseOverlay.AutomationName}">
+              <ContentControl.ContentTemplate>
                 <DataTemplate DataType="{x:Type models:PhaseDivider}">
                   <controls:PhaseDividerOverlay NormalizedX="{Binding NormalizedX}"
                                                 NormalizedTop="{Binding NormalizedTop}"
                                                 NormalizedBottom="{Binding NormalizedBottom}" />
                 </DataTemplate>
-              </ContentPresenter.ContentTemplate>
-            </ContentPresenter>
+              </ContentControl.ContentTemplate>
+            </ContentControl>
             <controls:CrosshairOverlay x:Name="Crosshair"
                                        Position="{Binding CrosshairPosition, ElementName=Root}"
                                        Stroke="{DynamicResource App.Brush.Focus}"
