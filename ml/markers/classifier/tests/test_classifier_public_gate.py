@@ -151,7 +151,15 @@ def test_candidate_budget_and_manifest_remain_fail_closed() -> None:
     assert entry["status"] == "fail"
     assert entry["release_eligible"] is False
     assert entry["generalization_evidence_valid"] is False
-    assert entry["disjoint_confirmation_v2_status"] == "hash-pinned pending commit; never evaluated"
+    assert entry["disjoint_confirmation_v2_status"] == "evaluated exactly once; fail"
+    assert entry["disjoint_confirmation_v2_evidence_sha256"] == "2bb119c5ece6167177e225486c01441e84363c60c5afc4d3e6872aaae99d46b4"
+    assert entry["disjoint_confirmation_v2_manifest_sha256"] == "d90cb4d8777a71cdc8cd103184624961dcc6929faf1619fd0ee864d739a8ff3a"
+    assert entry["disjoint_confirmation_v2_seal_sha256"] == "793eb5fcaf226fceee283476729d5fae6974fb2cc7e9ed7520ed3c18f328e7f8"
+    assert entry["disjoint_confirmation_v2_shape_macro_f1"] == 1.0
+    assert entry["disjoint_confirmation_v2_fill_macro_f1"] >= FILL_MACRO_F1_GATE
+    assert entry["disjoint_confirmation_v2_artifact_f1"] == 1.0
+    assert entry["disjoint_confirmation_v2_minority_shape_f1"] == 1.0
+    assert entry["disjoint_confirmation_v2_packed_onnx_maximum_absolute_error"] > PARITY_TOLERANCE
     assert entry["historical_seed_provenance_status"] == "incomplete"
     assert entry["historical_actual_batch_order_seed"] == 20260803
     assert entry["current_source_reproduces_historical_pipeline"] is False

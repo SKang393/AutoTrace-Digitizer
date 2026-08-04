@@ -65,8 +65,9 @@ The 2026-08-04 three-candidate budget passed validation and all confirmation
 classification metrics, but failed direct packed ONNX parity at the strict
 `1e-5` gate. The candidate remains rejected and the manifest remains
 fail-closed. That historical confirmation was a same-family repeat and is not
-generalization evidence. A disjoint v2 confirmation split is frozen but has not
-been evaluated.
+generalization evidence. The disjoint v2 confirmation was then evaluated once
+and also failed packed ONNX parity at `1.1444091796875e-05` against the
+`1e-05` limit.
 
 The benchmark command is intentionally single-use for one output directory.
 The exact selected weights and evidence remain local until the separately owned
