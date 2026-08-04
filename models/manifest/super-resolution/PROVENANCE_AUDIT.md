@@ -34,7 +34,7 @@ explicitly approved conversion and provenance workflow exists.
 |---|---|---|---|---|---|---|---|
 | `RealESRGAN_x2plus` | `v0.2.1` | Official Real-ESRGAN release | BSD-3-Clause | Not bundled; downloaded to ignored audit storage only | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | `49fafd45f8fd7aa8d31ab2a22d14d91b536c34494a5cfe31eb5d89c2fa266abb` | Artifact verified again on 2026-08-03; current NCNN adapter is incompatible; production approval blocked |
 | `realesr-general-x4v3` | `v0.2.5.0` | Official Real-ESRGAN release | BSD-3-Clause | Not bundled; downloaded to temporary audit storage only | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | `8dc7edb9ac80ccdc30c3a5dca6616509367f05fbc184ad95b731f05bece96292` | License and checksum reviewed; benchmark not run; NCNN integration blocked |
-| `realesr-animevideov3` NCNN x2 | `v0.2.5.0-ncnn-x2` | Official Real-ESRGAN Windows NCNN package | BSD-3-Clause model notice | Not bundled; downloaded to ignored audit storage only | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | Package: `abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d` | Exact 2x adapter/runtime smoke passed on two public synthetic cases; required accuracy, memory, CPU fallback, and runtime notice gates remain blocked |
+| `realesr-animevideov3` NCNN x2 | `v0.2.5.0-ncnn-x2` | Official Real-ESRGAN Windows NCNN package | BSD-3-Clause model notice; MIT/BSD/zlib runtime closure | Not bundled; downloaded to ignored audit storage only | Exact runtime and model notices listed below | Package: `abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d` | Exact 2x adapter/runtime smoke passed on two public synthetic cases; runtime notice closure recorded, but exact `vcomp140.dll`, accuracy, memory, CPU fallback, and clean-machine gates remain blocked |
 
 ## Pinned official sources and verified hashes
 
@@ -90,9 +90,23 @@ larger Real-ESRGAN v0.2.5.0 Windows package contains only these model families:
 - `realesrgan-x4plus-anime`.
 
 It does not contain `RealESRGAN_x2plus` or `realesr-general-x4v3` NCNN files.
-The NCNN runtime package itself also requires its full MIT and transitive
-notices before any release bundling. This model audit does not authorize or
-bundle that runtime.
+The pinned runtime source tree resolves NCNN to
+`6125c9f47cd14b589de0521350668cf9d3d37e3c` and libwebp to
+`8ea81561d2fdd382da60f57958741a7c23a18eb6`. Its embedded dirent header is Git
+blob `f7a46dafcbf143ee8d0ac4b6a7d12b6fe28979e0`. Exact retained notices are:
+
+- `LICENSES/Real-ESRGAN-NCNN-Vulkan-0.2.0-License.txt`, normalized SHA-256
+  `5abb941454de437b0e90d78dcb72e3688f74e14bcd4e24393273cb5cd0e9c937`;
+- `LICENSES/NCNN-6125c9f-License.txt`, normalized SHA-256
+  `6495f972a09ad7f64ccd953e79adba91a93d862edc7135e6d95210bbf4002a01`;
+- `LICENSES/libwebp-8ea81561-COPYING.txt`, normalized SHA-256
+  `5aec868f669e384a22372a4e8a1a6cd7d44c64cd451f960ca69cc170d1e13acf`;
+- `LICENSES/dirent-1998-2019-MIT-Notice.txt` for the embedded header attribution
+  and MIT terms.
+
+This closes the tracked source and notice inventory. It does not authorize or
+bundle the runtime because the exact Microsoft binary and the scientific and
+clean-machine gates remain open.
 
 ## License and redistribution review
 
@@ -107,9 +121,10 @@ conditions, disclaimer, and non-endorsement condition are preserved. The
 manifest flags therefore record `commercial_use: true` and
 `redistribution: true`; release packaging must retain the notice.
 
-The NCNN application source is MIT-licensed, but its executable package has a
-separate runtime/transitive-notice review boundary. Model BSD metadata must not
-be treated as a complete runtime license audit.
+The NCNN application source is MIT-licensed, NCNN carries BSD, zlib, and
+additional embedded notices, libwebp is BSD-3-Clause, and dirent is MIT. Model
+BSD metadata must not be treated as the runtime license audit; the separate
+tracked notice files are required for any future package candidate.
 
 ## Privacy and Git eligibility
 
@@ -183,14 +198,13 @@ using this minimal directory. Evidence SHA-256 is
 `c480f97e09cf6117a86d5e8b565afa6e47aa3f85c14d9e46e3ef1932161fa967`.
 This proves that `vcomp140d.dll`, demo media, and unused model families are not
 runtime dependencies. It does not approve redistribution: the release
-`vcomp140.dll` still needs an authorized Microsoft redistributable source and
-maintainer license attestation.
+`vcomp140.dll` version `14.31.31103.0` has a valid Microsoft Authenticode
+signature, but still needs an independently authorized Microsoft
+redistributable source record for the exact shipped hash.
 
-The executable source closure also requires the complete
-Real-ESRGAN-ncnn-vulkan MIT license, Tencent NCNN `LICENSE.txt`, libwebp
-`COPYING`, and the embedded Toni Ronkko dirent MIT notice. The existing
-Real-ESRGAN BSD notice covers the selected model payloads, not this runtime
-closure.
+The executable source closure is recorded in the manifest and exact tracked
+notice files. The Real-ESRGAN BSD notice covers the selected model payloads;
+the four runtime notices cover the executable, NCNN, libwebp, and dirent.
 
 ## Goal 21 manifest-driven local backend
 
@@ -247,10 +261,11 @@ detector metrics, hallucinated-structure rate, and peak memory remain
 unmeasured. No quality improvement is claimed. The primary model remains the
 only local default.
 
-Neither local result approves release bundling. The runtime still needs an
-authorized source and maintainer attestation for `vcomp140.dll`, the complete
-Real-ESRGAN-ncnn-vulkan, NCNN, libwebp, and dirent notice closure, CPU fallback
-evidence, and production-quality benchmark approval.
+Neither local result approves release bundling. The runtime notice closure is
+now recorded, but the exact `vcomp140.dll` still needs an independently
+authorized Microsoft redistributable source record. CPU fallback,
+clean-machine execution, peak memory, and production-quality benchmark
+approval also remain mandatory.
 
 ## Verification method
 

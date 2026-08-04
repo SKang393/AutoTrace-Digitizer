@@ -2,9 +2,14 @@
 // Copyright 2026 Sungwoo Kang
 
 using System.IO;
+using System.Security;
+using System.Text.Json;
 using GraphReader.App.Integration.Workflow;
 using GraphReader.App.Services;
 using GraphReader.Domain;
+using GraphReader.Export;
+using GraphReader.Imaging;
+using GraphReader.Pdf;
 using GraphReader.SuperResolution;
 
 namespace GraphReader.App.Integration;
@@ -18,6 +23,7 @@ public static class ApplicationComposition
 {
     public const string RealEsrganManifestEnvironmentVariable = "GRAPHREADER_REALESRGAN_MANIFEST_PATH";
     public const string RealEsrganRuntimeRootEnvironmentVariable = "GRAPHREADER_REALESRGAN_RUNTIME_ROOT";
+    public const string PdfiumApprovalEnvironmentVariable = "GRAPHREADER_PDFIUM_APPROVAL_PATH";
 
     public static ApplicationCompositionResult Create(
         WorkflowRuntimeEnvironment environment,
@@ -25,17 +31,20 @@ public static class ApplicationComposition
     {
         Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver =
             CreateLocalEnhancementResolver(applicationPaths);
+        (IPdfImportService? PdfImporter, DomainError? Error) pdf = CreateReviewedPdfImporter();
         IReadOnlyList<AutomaticStageStatus> automaticStages =
-            ProductionStageAvailabilityRegistry.Create(enhancementResolver is not null);
+            ProductionStageAvailabilityRegistry.Create(
+                enhancementResolver is not null,
+                applicationPaths?.ModelRoot,
+                pdf.PdfImporter is not null);
         return environment switch
         {
-            WorkflowRuntimeEnvironment.Production => new ApplicationCompositionResult(
+            WorkflowRuntimeEnvironment.Production => CreateProduction(
                 environment,
-                new ProductionWorkspaceService(
-                    applicationPaths,
-                    automaticStages: automaticStages,
-                    enhancementResolver: enhancementResolver),
-                null),
+                applicationPaths,
+                enhancementResolver,
+                automaticStages,
+                pdf),
             WorkflowRuntimeEnvironment.ManualPreview => new ApplicationCompositionResult(
                 environment,
                 new ManualPreviewWorkspaceService(
@@ -49,6 +58,35 @@ public static class ApplicationComposition
                 null),
             _ => throw new ArgumentOutOfRangeException(nameof(environment)),
         };
+    }
+
+    private static ApplicationCompositionResult CreateProduction(
+        WorkflowRuntimeEnvironment environment,
+        IApplicationPaths? applicationPaths,
+        Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver,
+        IReadOnlyList<AutomaticStageStatus> automaticStages,
+        (IPdfImportService? PdfImporter, DomainError? Error) pdf)
+    {
+        var imageImporter = new ImageImportService();
+        var exportService = new ExportService();
+        var panelStore = new ProductionWorkflowPanelStore();
+        var services = new WorkflowServiceSet(
+            new ProductionWorkflowImportStage(panelStore, imageImporter, pdf.PdfImporter),
+            new ProductionWorkflowPrepareStage(panelStore),
+            new ProductionWorkflowDetectionStage(panelStore),
+            new ProductionWorkflowExportStage(panelStore, exportService));
+        var orchestrator = new WorkflowOrchestrator(services);
+        return new ApplicationCompositionResult(
+            environment,
+            new ProductionWorkspaceService(
+                applicationPaths,
+                imageImporter,
+                exportService: exportService,
+                automaticStages: automaticStages,
+                enhancementResolver: enhancementResolver,
+                workflowOrchestrator: orchestrator,
+                panelStore: panelStore),
+            pdf.Error);
     }
 
     private static Func<CancellationToken, Task<RealEsrganBackendResolution>>? CreateLocalEnhancementResolver(
@@ -70,5 +108,38 @@ public static class ApplicationComposition
             cacheRoot,
             RealEsrganBackendPurpose.LocalEvaluation,
             cancellationToken);
+    }
+
+    private static (IPdfImportService? PdfImporter, DomainError? Error) CreateReviewedPdfImporter()
+    {
+        string? approvalPath = Environment.GetEnvironmentVariable(PdfiumApprovalEnvironmentVariable);
+        if (string.IsNullOrWhiteSpace(approvalPath))
+        {
+            return (null, null);
+        }
+
+        try
+        {
+            ReviewedPdfiumPageRendererBackend backend = ReviewedPdfiumPageRendererBackend.Load(approvalPath);
+            return (
+                new PdfImportService(
+                    new PdfPigDocumentInspector(),
+                    new PanelizationEngine(),
+                    backend.CreateRenderingService()),
+                null);
+        }
+        catch (Exception exception) when (exception is IOException or InvalidDataException or
+            UnauthorizedAccessException or SecurityException or JsonException)
+        {
+            return (
+                null,
+                new DomainError(
+                    "PDFIUM_APPROVAL_REJECTED",
+                    DomainErrorSeverity.Warning,
+                    "Errors.PdfRendererUnavailable",
+                    exception.Message,
+                    Recoverable: true,
+                    "restore_reviewed_pdfium_approval"));
+        }
     }
 }

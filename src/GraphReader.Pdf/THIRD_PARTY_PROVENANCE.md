@@ -24,12 +24,14 @@
 | Field | Value |
 |---|---|
 | dependency/model | PDFium renderer backend |
-| version | Not selected |
-| source | Not selected |
-| license | BSD-style plus build-specific third-party notices required |
-| bundled or downloaded | Not bundled in Session 04 |
-| notice path | `THIRD_PARTY_NOTICES.md`, PDFium section |
-| checksum | Not available because no binary is selected |
-| privacy status | The adapter contract requires local in-process rendering and no network access |
-| Git eligibility | No backend binary is eligible until exact build provenance and the complete notice set are reviewed |
-| review status | BLOCKED for bundling; Session 04 uses the injected adapter boundary and deterministic test backend |
+| version | Pinned source revision `2870fa9244b0f0f69fb743fab1e08deefcb07b2b` |
+| source | https://pdfium.googlesource.com/pdfium |
+| license | BSD-3-Clause plus exact build-specific third-party notices |
+| bundled or downloaded | Source-build profile is tracked; source, dependencies, binary, and review evidence remain ignored under `artifacts/pdfium-source/` |
+| notice path | A reviewed local `third-party-notices.reviewed.txt` is mandatory; the mechanically collected candidate is explicitly incomplete |
+| checksum | No approved binary checksum exists until the source build and independent review complete |
+| candidate build evidence | Two isolated Windows x64 static-ICU builds produced byte-identical runner SHA-256 `efd13a38cf3cd8e04d8284a42fff42923267293170424153b1a2a96dbf6fe8ea`; this is reproducibility evidence, not approval |
+| compatibility patch | Checksum-bound patch `831cdc7351e06115e252a3aa3da9ce61d22b579fe19b1b3598d8b93f526bf5b6` adds the missing explicit Windows type include only while building; the official source checkout must be pristine afterward |
+| privacy status | The reviewed runner reads PDF bytes from standard input and has no network dependency; the adapter writes only a temporary raw rendered page and deletes it after encoding |
+| Git eligibility | The lock, minimal runner source, scripts, adapter, and tests are eligible; source checkout, native binary, approvals, and legal work product are not |
+| review status | BLOCKED for bundling until the exact binary, source lock, build manifest, and complete notice pass independent checksum approval; runtime loading fails closed before that point |

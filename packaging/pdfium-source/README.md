@@ -1,0 +1,50 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Copyright 2026 Sungwoo Kang -->
+
+# Reviewed PDFium source build
+
+This fail-closed Windows x64 build profile pins official PDFium revision
+`2870fa9244b0f0f69fb743fab1e08deefcb07b2b` and depot_tools revision
+`d22ef3bf62a8c3c76d9c7427015bdfec7665587a`. It builds a small local runner
+against PDFium's public embedder API with V8, XFA, Skia, Fontations, and
+PartitionAlloc disabled.
+ICU data is linked statically, so no unchecked `icudtl.dat` sidecar is needed.
+The source lock also bounds Ninja to four concurrent compile jobs so the build
+does not depend on machine-wide processor count or transient memory pressure.
+The tracked `native/pdfium-windows-hdc.patch` supplies the missing explicit
+`fx_system.h` include required by the pinned standalone Windows build. The
+script verifies the pinned header blob, applies the patch only while GN/Ninja
+runs, records its checksum, and restores the official source bytes afterward.
+
+The runner reads PDF bytes from standard input, renders one requested page,
+and writes a bounded BGRA transfer file. `ReviewedPdfiumPageRendererBackend`
+converts that transfer to PNG, validates it through the existing renderer
+adapter, and kills the runner when cancellation is requested. No PDF bytes are
+written to disk by the adapter.
+
+Run from the repository root:
+
+```powershell
+powershell -File packaging/pdfium-source/Initialize-PdfiumSource.ps1
+powershell -File packaging/pdfium-source/Initialize-WindowsSdkDebuggingTools.ps1
+powershell -File packaging/pdfium-source/Build-ReviewedPdfium.ps1 -Phase All
+powershell -File packaging/pdfium-source/Test-PdfiumRunner.ps1 -RunnerPath <runner> -EvidenceRoot <smoke-evidence>
+powershell -File packaging/pdfium-source/Compare-PdfiumBuilds.ps1 -FirstEvidenceRoot <first> -SecondEvidenceRoot <second>
+powershell -File packaging/pdfium-source/Test-ReviewedPdfiumEvidence.ps1
+```
+
+Source, dependencies, build products, license collection, and approvals stay
+under ignored `artifacts/pdfium-source/` paths. Collection deliberately emits
+`REVIEW STATUS: INCOMPLETE` and `reviewed-approval.candidate.json` with all
+approval flags false. It does not approve a binary.
+
+Two isolated `-EvidenceRoot` builds must pass `Compare-PdfiumBuilds.ps1` before
+review. The comparison requires byte-identical runner binaries and identical
+source lock, GN arguments, native overlay, target dependency graph, and PE
+import evidence.
+
+Independent review must reconcile every linked dependency and system import,
+write `third-party-notices.reviewed.txt` with `REVIEW STATUS: COMPLETE` as its
+first line, and create `reviewed-approval.json` with exact binary, source-lock,
+build-manifest, and notice SHA-256 values. Runtime loading and evidence
+validation both fail closed until those inputs exist and match exactly.

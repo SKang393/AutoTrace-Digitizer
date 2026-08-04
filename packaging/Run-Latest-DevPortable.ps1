@@ -6,6 +6,7 @@ param(
     [switch]$Wait,
     [switch]$PortableSmoke,
     [switch]$DisableLocalEnhancement,
+    [string]$ImagePath,
     [string]$RealEsrganRuntimeRoot,
     [string]$RealEsrganManifestPath
 )
@@ -49,9 +50,17 @@ if (-not (Test-Path -LiteralPath (Join-Path $buildDirectory 'portable.mode') -Pa
 
 $sharedDataRoot = [System.IO.Path]::GetFullPath((Join-Path $outputRoot 'Data'))
 New-Item -ItemType Directory -Path $sharedDataRoot -Force | Out-Null
-$arguments = @()
+$arguments = [System.Collections.Generic.List[string]]::new()
 if ($PortableSmoke.IsPresent) {
-    $arguments = @('--portable-smoke')
+    $arguments.Add('--portable-smoke')
+}
+if (-not [string]::IsNullOrWhiteSpace($ImagePath)) {
+    $resolvedImagePath = [System.IO.Path]::GetFullPath($ImagePath)
+    if (-not (Test-Path -LiteralPath $resolvedImagePath -PathType Leaf)) {
+        throw "The requested startup image is missing: $resolvedImagePath"
+    }
+    $arguments.Add('--open-image')
+    $arguments.Add(('"{0}"' -f $resolvedImagePath))
 }
 
 $previousDataRoot = [Environment]::GetEnvironmentVariable(

@@ -68,14 +68,58 @@
     },
     "runtime_redistribution": {
       "approved": false,
-      "blocker": "The execution-verified runtime still lacks an approved Microsoft vcomp140.dll source and a complete NCNN transitive notice set.",
-      "required_notices": [
-        "Real-ESRGAN-ncnn-vulkan MIT license",
-        "Tencent NCNN MIT license",
-        "libwebp COPYING",
-        "Toni Ronkko dirent MIT notice"
+      "blocker": "The NCNN transitive source and notice inventory is complete, but the exact vcomp140.dll from the official archive lacks an independently authorized Microsoft redistributable source record. Scientific quality, peak memory, clean-machine, and offline CPU gates also remain open.",
+      "notice_paths": [
+        "LICENSES/Real-ESRGAN-NCNN-Vulkan-0.2.0-License.txt",
+        "LICENSES/NCNN-6125c9f-License.txt",
+        "LICENSES/libwebp-8ea81561-COPYING.txt",
+        "LICENSES/dirent-1998-2019-MIT-Notice.txt",
+        "LICENSES/Real-ESRGAN-BSD-3-Clause.txt"
       ]
     },
+    "runtime_components": [
+      {
+        "name": "Real-ESRGAN-ncnn-vulkan",
+        "source_revision": "37026f49824c5cf84062e7c6a5dd71445dcf610f",
+        "source_tree_sha": "dc9142026d3632c96eded56f541e35cc73910771",
+        "license_blob_sha": "e8ea6d78d0c63ae4038b7169e5d029e67ce9673b",
+        "license_text_sha256": "5abb941454de437b0e90d78dcb72e3688f74e14bcd4e24393273cb5cd0e9c937",
+        "notice_path": "LICENSES/Real-ESRGAN-NCNN-Vulkan-0.2.0-License.txt",
+        "linkage": "application executable"
+      },
+      {
+        "name": "Tencent ncnn",
+        "source_revision": "6125c9f47cd14b589de0521350668cf9d3d37e3c",
+        "license_blob_sha": "2eb0363c72e0a07c560ae22bc6cda8b9d57d7352",
+        "license_text_sha256": "6495f972a09ad7f64ccd953e79adba91a93d862edc7135e6d95210bbf4002a01",
+        "notice_path": "LICENSES/NCNN-6125c9f-License.txt",
+        "linkage": "statically incorporated"
+      },
+      {
+        "name": "libwebp",
+        "source_revision": "8ea81561d2fdd382da60f57958741a7c23a18eb6",
+        "license_blob_sha": "7a6f99547d4d6b4c5e6d5321acfaeba313e08de3",
+        "license_text_sha256": "5aec868f669e384a22372a4e8a1a6cd7d44c64cd451f960ca69cc170d1e13acf",
+        "notice_path": "LICENSES/libwebp-8ea81561-COPYING.txt",
+        "linkage": "statically incorporated"
+      },
+      {
+        "name": "Toni Ronkko dirent",
+        "source_blob_sha": "f7a46dafcbf143ee8d0ac4b6a7d12b6fe28979e0",
+        "source_header_notice_sha256": "ff797d5f2324db040973ecd452e6ce034c8054c13d5fba6f12317eff311ebb00",
+        "notice_path": "LICENSES/dirent-1998-2019-MIT-Notice.txt",
+        "linkage": "statically incorporated header"
+      },
+      {
+        "name": "Microsoft Visual C++ OpenMP runtime",
+        "file": "vcomp140.dll",
+        "file_version": "14.31.31103.0",
+        "sha256": "8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b",
+        "authenticode_status": "valid Microsoft signature",
+        "linkage": "dynamic import",
+        "review_status": "blocked_pending_independent_redistributable_source"
+      }
+    ],
     "default_tile_size": 0,
     "tile_padding_pixels": 10,
     "model_payload_sha256": {
@@ -157,8 +201,8 @@
       "blockers": [
         "Marker-center, shape/fill, numeric OCR, axis localization, hallucinated-structure, and peak-memory metrics are not measured.",
         "The official archive contains nonredistributable vcomp140d.dll; the execution-verified minimal runtime excludes it, demo media, and unused models.",
-        "The retained release vcomp140.dll still needs an authorized Microsoft redistributable source and maintainer license attestation.",
-        "The runtime notice set must retain Real-ESRGAN-ncnn-vulkan, NCNN, libwebp, and dirent terms.",
+        "The retained release vcomp140.dll still needs an independently authorized Microsoft redistributable source record for the exact shipped hash.",
+        "The exact Real-ESRGAN-ncnn-vulkan, NCNN, libwebp, dirent, and model notices must be staged and checksum-verified with any package candidate.",
         "The Vulkan runtime has no CPU or DirectML provider for the required offline CPU fallback gate."
       ],
       "metrics_required": [

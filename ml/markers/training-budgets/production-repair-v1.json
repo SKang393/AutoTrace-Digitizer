@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "ledger_mode": "canonical_repository",
+  "policy": "A consumed revision and candidate ID cannot be reused with changed code. A future authorized defect class requires a new preregistered revision.",
+  "revisions": [
+    {
+      "task": "marker-center",
+      "revision": "marker-center-production-repair-v1",
+      "status": "exhausted",
+      "experiment_budget": 3,
+      "consumed_candidate_ids": [
+        "P1",
+        "P2",
+        "P3"
+      ],
+      "candidate_checkpoint_sha256": {
+        "P1": "0056677545ee7cad77900b48d2f7d39889545b879f650d1657b6c202e9e04fba",
+        "P2": "3ead272edc598899daa6ddf6e1b00714f8ade1dbfcc5625ea1a55b240fc39dad",
+        "P3": "f3b6aeaa59584a9f36dab0a98e8fe97852c93c77bf5ab0495b6796d2bbc2aeb7"
+      },
+      "training_report_sha256": "b9f01369f6cebb2786769db14f053b50276bb8855ae6e7d77271b6464c1f5dd9",
+      "historical_protocol_status": "invalid_protocol",
+      "current_source_reproduces_historical_pipeline": false,
+      "refusal_required_before_output": true
+    },
+    {
+      "task": "marker-classifier",
+      "revision": "marker-classifier-production-repair-v1",
+      "status": "exhausted",
+      "experiment_budget": 3,
+      "consumed_candidate_ids": [
+        "P1",
+        "P2",
+        "P3"
+      ],
+      "candidate_checkpoint_sha256": {
+        "P1": "c9dfedd098380234b171d26442208c72d49c40ca1887064dfc504d4aa55a7e29",
+        "P2": "49a5ce6487b51a7426ebca5081fa3e2a15c9c30bd6302033ad7efa82b3ad8c7a",
+        "P3": "feb87eac5a39743fe36fda4b7f68e74ffbd408e2b5e712a245a1c8632f2e61ab"
+      },
+      "training_report_sha256": "159c6d11546ae371de9ea003cb589b9299e2ff9511fa5728dd5d720887d5518a",
+      "historical_seed_provenance_status": "incomplete",
+      "historical_global_and_initialization_seeds_reported": [
+        20260804,
+        20260805,
+        20260806
+      ],
+      "historical_actual_batch_order_seed": 20260803,
+      "historical_batch_order_seed_source": "The executed historical _train_one_epoch used the module SEED plus epoch for all three candidates.",
+      "current_source_reproduces_historical_pipeline": false,
+      "refusal_required_before_output": true
+    }
+  ]
+}

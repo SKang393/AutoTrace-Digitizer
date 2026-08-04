@@ -176,6 +176,46 @@
       "maximum_absolute_difference": 0.0000019073486328125,
       "tolerance": 0.0001,
       "directml_assignment_note": "DirectML session execution passed; exclusive GPU node assignment was not asserted"
+    },
+    {
+      "profile": "production-public-and-confirmation-gates-20260804",
+      "status": "fail",
+      "release_eligible": false,
+      "candidate_training_revision": "marker-classifier-production-repair-v1",
+      "historical_seed_provenance_status": "incomplete",
+      "historical_global_and_initialization_seeds_reported": [
+        20260804,
+        20260805,
+        20260806
+      ],
+      "historical_actual_batch_order_seed": 20260803,
+      "historical_batch_order_seed_source": "The executed historical _train_one_epoch used the module SEED plus epoch for all three candidates.",
+      "current_source_reproduces_historical_pipeline": false,
+      "candidate_checkpoint_sha256": "49a5ce6487b51a7426ebca5081fa3e2a15c9c30bd6302033ad7efa82b3ad8c7a",
+      "candidate_packed_onnx_sha256": "e4ee20865d2fcdec7b8acb420b9838255851d39e187cacf609d56a4bfbd83f6a",
+      "experiment_budget": 3,
+      "experiment_count": 3,
+      "selection_shape_macro_f1": 1.0,
+      "selection_fill_macro_f1": 0.9907389542735867,
+      "selection_artifact_f1": 1.0,
+      "selection_minority_shape_f1": 1.0,
+      "failed_public_gate_evidence_path": "ml/markers/classifier/artifacts/production-public-gate-20260804/public-gate-report.json",
+      "failed_public_gate_evidence_sha256": "8ce39a252ac9ce37105625f1833a53485a4ea8738ff06de6267f7ce1d44feb74",
+      "failed_confirmation_evidence_path": "ml/markers/classifier/artifacts/production-confirmation-gate-20260804/public-gate-report.json",
+      "failed_confirmation_evidence_sha256": "59d0f37a95ae089cd8cf7815c7f5f4b526bb0dc6efc787b1eb9074ccaab54bd9",
+      "confirmation_protocol": "historical same-family repeat; not generalization evidence",
+      "generalization_evidence_valid": false,
+      "disjoint_confirmation_v2_status": "hash-pinned pending commit; never evaluated",
+      "confirmation_shape_macro_f1": 1.0,
+      "confirmation_fill_macro_f1": 0.9814671814671815,
+      "confirmation_artifact_f1": 1.0,
+      "confirmation_minority_shape_f1": 1.0,
+      "confirmation_packed_onnx_maximum_absolute_error": 0.0000152587890625,
+      "packed_onnx_parity_tolerance": 0.00001,
+      "failed_criteria": [
+        "direct packed ONNX parity"
+      ],
+      "promotion_decision": "rejected; keep the historical manifest payload fail-closed"
     }
   ]
 }

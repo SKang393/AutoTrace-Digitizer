@@ -1,0 +1,29 @@
+{
+  "case_count": 140,
+  "task": "marker-classifier",
+  "expected_candidate_hash_keys": [
+    "checkpoint_sha256",
+    "packed_onnx_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "d90cb4d8777a71cdc8cd103184624961dcc6929faf1619fd0ee864d739a8ff3a",
+  "expected_evaluator_source_bundle_sha256": "2ea4b6d6eda3e960743aade60ca9cddd538fbc9e962ac1c0fc3ff1dd1f47887a",
+  "expected_gate_config_sha256": "9812a616d8bc46f323e19f0b1095908dcd9c4fce6f794c3cf37050945c49cc20",
+  "families": [
+    "laser_streak",
+    "microfilm_dither"
+  ],
+  "gate": {
+    "artifact_f1": 1.0,
+    "fill_macro_f1": 0.9,
+    "minority_class_f1": 0.9,
+    "packed_onnx_parity": 0.00001,
+    "shape_macro_f1": 0.9
+  },
+  "revision": "marker-classifier-confirmation-gate-v2",
+  "split_status": "hash-pinned pending commit; never evaluated",
+  "templates": [
+    "lower_right_compact",
+    "upper_left_oblong"
+  ],
+  "historical_v1_status": "same-family repeat failed evidence; retired and not a generalization gate"
+}

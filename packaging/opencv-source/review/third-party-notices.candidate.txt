@@ -1,8 +1,8 @@
-REVIEW STATUS: CANDIDATE ONLY
+REVIEW STATUS: COMPLETE
 PROFILE: graphreader-axis-minimal-win-x64
 SOURCE REVISIONS: OpenCvSharp b161e7e012f5101f6d5dc68a835c59db6cc88b18; OpenCV fe38fc608f6acb8b68953438a62305d8318f4fcd.
 
-This bundle covers only dependencies whose source and license terms are determinable from the retained source-build evidence. It is not a release-approved notice file. Microsoft static runtime entries remain subject to maintainer attestation under the applicable Microsoft terms.
+This bundle covers the linked OpenCV, OpenCvSharp, zlib, SoftFloat, and FDLIBM code identified by the retained source-build evidence. The Microsoft static runtime authority confirmation is stored separately in ignored private provenance and is validated before this source build can be accepted. This notice review does not establish scientific parity, clean-machine support, or public release readiness.
 
 ===== BEGIN NOTICE: apache-2.0 =====
 Apache License

@@ -27,6 +27,8 @@ public sealed class ProductionWorkspaceService : ManualPreviewWorkspaceService, 
     ];
 
     private readonly Func<WorkflowReviewState?, CancellationToken, Task<WorkflowRunResult>>? _automaticWorkflow;
+    private readonly WorkflowOrchestrator? _workflowOrchestrator;
+    private readonly ProductionWorkflowPanelStore _panelStore;
 
     public ProductionWorkspaceService(
         IApplicationPaths? applicationPaths = null,
@@ -36,7 +38,9 @@ public sealed class ProductionWorkspaceService : ManualPreviewWorkspaceService, 
         IPhaseManualEditor? phaseEditor = null,
         IReadOnlyList<AutomaticStageStatus>? automaticStages = null,
         Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver = null,
-        Func<WorkflowReviewState?, CancellationToken, Task<WorkflowRunResult>>? automaticWorkflow = null)
+        Func<WorkflowReviewState?, CancellationToken, Task<WorkflowRunResult>>? automaticWorkflow = null,
+        WorkflowOrchestrator? workflowOrchestrator = null,
+        ProductionWorkflowPanelStore? panelStore = null)
         : base(
             applicationPaths,
             imageImportService,
@@ -48,6 +52,8 @@ public sealed class ProductionWorkspaceService : ManualPreviewWorkspaceService, 
             enhancementResolver)
     {
         _automaticWorkflow = automaticWorkflow;
+        _workflowOrchestrator = workflowOrchestrator;
+        _panelStore = panelStore ?? new ProductionWorkflowPanelStore();
     }
 
     public WorkflowRunResult? LastAutomaticRun { get; private set; }
@@ -65,17 +71,51 @@ public sealed class ProductionWorkspaceService : ManualPreviewWorkspaceService, 
             throw new InvalidOperationException(blocked.Explanation);
         }
 
-        if (_automaticWorkflow is null)
+        if (_automaticWorkflow is null && _workflowOrchestrator is null)
         {
             throw new InvalidOperationException(
                 "Automatic detection is not composed with approved production adapters.");
         }
 
-        WorkflowRunResult result = await _automaticWorkflow(
-            LastAutomaticRun?.Review,
-            cancellationToken).ConfigureAwait(false);
-        LastAutomaticRun = result ?? throw new InvalidOperationException(
-            "The production automatic workflow returned no result.");
+        WorkflowRunResult result;
+        if (_automaticWorkflow is not null)
+        {
+            result = await _automaticWorkflow(
+                LastAutomaticRun?.Review,
+                cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            bool enhancementEnabled = AutomaticStages.Any(status =>
+                string.Equals(status.Stage, "enhancement", StringComparison.Ordinal) &&
+                status.State == AutomaticStageState.Approved);
+            var request = new WorkflowRunRequest(
+                Guid.NewGuid(),
+                CreateProductionWorkflowImportRequest(enhancementEnabled));
+            result = await _workflowOrchestrator!.RunThroughReviewAsync(
+                request,
+                LastAutomaticRun?.Review,
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        if (result is null)
+        {
+            throw new InvalidOperationException(
+                "The production automatic workflow returned no result.");
+        }
+        ProductionReviewProjectionResult projection = ProjectProductionReview(result, _panelStore);
+        if (!projection.Succeeded)
+        {
+            throw new ProductionWorkflowStageException(projection.Failure ?? new ProductionWorkflowFailure(
+                ProductionWorkflowFailureCodes.ReviewProjectionRejected,
+                "Errors.ProductionReviewProjectionRejected",
+                "The production review projection failed without structured evidence.",
+                Recoverable: true,
+                "Keep the current manual review and rerun automatic detection."));
+        }
+
+        LastAutomaticRun = projection.ProjectedRun ?? throw new InvalidOperationException(
+            "A successful production review projection returned no corrected workflow run.");
         return LastAutomaticRun;
     }
 

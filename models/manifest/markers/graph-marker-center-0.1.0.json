@@ -231,6 +231,36 @@
       "canonical_source_sha256": "a8cfd538b164d0e7a3c19c262daf55413eaea9a7639f3a1bc87d0c341b9734ac",
       "mask_gate_regression": "Raw text or artifact mask value 0.4 suppresses an otherwise identical candidate at threshold 0.35",
       "generalization_claim": "Only input-family and degradation-family identifiers are disjoint; geometry and layout templates repeat"
+    },
+    {
+      "profile": "production-public-and-confirmation-gates-20260804",
+      "status": "fail",
+      "release_eligible": false,
+      "candidate_training_revision": "marker-center-production-repair-v1",
+      "candidate_checkpoint_sha256": "0056677545ee7cad77900b48d2f7d39889545b879f650d1657b6c202e9e04fba",
+      "candidate_onnx_sha256": "277d01d78034620c7c0767e5d6cc5f8a4e1a2fa69caa93765a3b87e044fe85a8",
+      "candidate_onnx_parity_maximum_absolute_error": 0.0000019073486328125,
+      "candidate_onnx_parity_tolerance": 0.00001,
+      "experiment_budget": 3,
+      "experiment_count": 3,
+      "selection_status": "invalid_protocol",
+      "evidence_validity": "invalid",
+      "protocol_deviation": "Executed P1, P2, and P3 dropped text-mask and artifact-mask channels although the preregistration allowed photometric robustness augmentation only.",
+      "future_training_implementation": "Mask-channel dropout removed; global and model-initialization seeds are explicit. No replacement candidate has been trained.",
+      "selection_exact_scene_count": 3,
+      "selection_scene_count": 3,
+      "failed_public_gate_evidence_path": "ml/markers/center/artifacts/production-public-gate-20260804/public-gate-report.json",
+      "failed_public_gate_evidence_sha256": "a44ad0827f32c67b13ba492a528cec4b622b578bf15f85f64da89b259f9d8733",
+      "failed_confirmation_evidence_path": "ml/markers/center/artifacts/production-confirmation-gate-20260804/public-gate-report.json",
+      "failed_confirmation_evidence_sha256": "faef8737ea574eef42f7b24ef4e71f2aa1a99caff21a5d489627173e1c38b217",
+      "confirmation_exact_scene_count": 1,
+      "confirmation_scene_count": 3,
+      "confirmation_duplicate_count": 0,
+      "confirmation_prohibited_structure_hits": 0,
+      "failed_criteria": [
+        "exact marker count in every confirmation fixture"
+      ],
+      "promotion_decision": "rejected; invalid training protocol and failed confirmation; keep the historical manifest payload fail-closed"
     }
   ]
 }

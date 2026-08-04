@@ -3,16 +3,20 @@
 
 using System.Collections.ObjectModel;
 using System.Security.Cryptography;
+using System.Security;
 using System.Text.Json;
 
 namespace GraphReader.Inference;
 
 /// <summary>
 /// Resolves checksum-bound, benchmark-approved ONNX models from an offline store.
-/// The store layout is <c>{root}/{model-id}/{version}/manifest.json</c>.
+/// The store root is the packaged <c>models</c> directory. A checksum-bound
+/// <c>production-model-index.json</c> maps manifests, runtime payloads, reviewed
+/// notices, and benchmark evidence to distribution-relative paths.
 /// </summary>
 public sealed class ProductionModelStore
 {
+    private const string PackageIndexFileName = "production-model-index.json";
     private static readonly HashSet<string> AllowedRootProperties = new(StringComparer.Ordinal)
     {
         "manifest_version", "model_id", "model_version", "task", "source", "license", "sha256",
@@ -29,6 +33,12 @@ public sealed class ProductionModelStore
     private static readonly HashSet<string> AllowedProviders = new(StringComparer.Ordinal)
     {
         "cpu", "directml", "winml", "cuda", "openvino", "vulkan"
+    };
+
+    private static readonly HashSet<string> ReviewedLicenseAllowlist = new(StringComparer.Ordinal)
+    {
+        "Apache-2.0", "MIT", "BSD-2-Clause", "BSD-3-Clause", "ISC", "Zlib",
+        "BSL-1.0", "Unlicense", "CC0-1.0"
     };
 
     private readonly string _root;
@@ -54,13 +64,69 @@ public sealed class ProductionModelStore
             throw new ArgumentOutOfRangeException(nameof(requiredProvider), "Fake is not a production execution provider.");
         }
 
+        try
+        {
+            return await ResolveCoreAsync(modelId, version, requiredProvider, cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (ProductionModelValidationException)
+        {
+            throw;
+        }
+        catch (UnauthorizedAccessException exception)
+        {
+            throw Failure("MODEL_STORE_ACCESS_DENIED", "Access to the production model store was denied.", exception);
+        }
+        catch (SecurityException exception)
+        {
+            throw Failure("MODEL_STORE_ACCESS_DENIED", "Access to the production model store was denied.", exception);
+        }
+        catch (IOException exception)
+        {
+            throw Failure("MODEL_STORE_IO_ERROR", "The production model store could not be read safely.", exception);
+        }
+    }
+
+    private async ValueTask<ResolvedProductionModel> ResolveCoreAsync(
+        string modelId,
+        string version,
+        InferenceProvider? requiredProvider,
+        CancellationToken cancellationToken)
+    {
         cancellationToken.ThrowIfCancellationRequested();
-        var modelDirectory = ResolveUnderRoot(Path.Combine(modelId, version));
-        var manifestPath = Path.Combine(modelDirectory, "manifest.json");
+        RejectReparseAncestors(_root, "MODEL_STORE_REPARSE_POINT");
+        var packageIndexPath = ResolveUnderRoot(PackageIndexFileName);
+        RejectReparseAncestors(packageIndexPath, "MODEL_STORE_REPARSE_POINT");
+        if (!File.Exists(packageIndexPath))
+        {
+            throw Failure("MODEL_PACKAGE_INDEX_NOT_FOUND", $"Production model package index was not found: {packageIndexPath}");
+        }
+
+        var packageIndex = await ReadPackageIndexAsync(packageIndexPath, cancellationToken).ConfigureAwait(false);
+        ValidateCanonicalPackagePaths(packageIndex);
+        var packageModel = packageIndex.Models.SingleOrDefault(model =>
+            string.Equals(model.ModelId, modelId, StringComparison.Ordinal) &&
+            string.Equals(model.Version, version, StringComparison.Ordinal));
+        if (packageModel is null)
+        {
+            throw Failure("MODEL_MANIFEST_NOT_FOUND", $"The package index does not contain model '{modelId}' version '{version}'.");
+        }
+
+        ValidatePackageTree(packageIndexPath, packageIndex);
+        var manifestPath = ResolveUnderRoot(packageModel.Manifest.Path);
         if (!File.Exists(manifestPath))
         {
             throw Failure("MODEL_MANIFEST_NOT_FOUND", $"Production model manifest was not found: {manifestPath}");
         }
+
+        await VerifyHashAsync(
+            manifestPath,
+            packageModel.Manifest.Sha256,
+            "MODEL_PACKAGE_MANIFEST_CHECKSUM_MISMATCH",
+            cancellationToken).ConfigureAwait(false);
 
         JsonDocument document;
         try
@@ -76,6 +142,7 @@ public sealed class ProductionModelStore
         using (document)
         {
             var root = document.RootElement;
+            RejectDuplicatePropertyNames(root, "MODEL_MANIFEST_INVALID", "Production model manifest");
             ValidateManifestShape(root, modelId, version);
             ValidateSource(root.GetProperty("source"));
             var noticePath = ValidateLicense(root.GetProperty("license"));
@@ -87,54 +154,82 @@ public sealed class ProductionModelStore
 
             var providers = ValidateProviders(root.GetProperty("providers"), requiredProvider);
             var approvalEvidence = ValidateApproval(root.GetProperty("benchmarks"));
-            var payloads = ReadPayloads(root, modelDirectory);
-            if (payloads.Count(path => string.Equals(Path.GetExtension(path), ".onnx", StringComparison.OrdinalIgnoreCase)) != 1)
+            var expectedHashes = ReadDeclaredPayloadHashes(root);
+            if (expectedHashes.Keys.Count(path => string.Equals(Path.GetExtension(path), ".onnx", StringComparison.OrdinalIgnoreCase)) != 1)
             {
                 throw Failure("MODEL_PAYLOAD_INVALID", "A production ONNX manifest must identify exactly one .onnx payload.");
             }
 
-            var expectedHashes = ReadPayloadHashes(root, payloads, modelDirectory);
-            foreach (var payload in payloads)
+            var indexedPayloads = packageModel.Payloads.ToDictionary(
+                payload => payload.DeclaredPath,
+                StringComparer.OrdinalIgnoreCase);
+            if (!expectedHashes.Keys.ToHashSet(StringComparer.OrdinalIgnoreCase)
+                    .SetEquals(indexedPayloads.Keys))
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (!File.Exists(payload))
-                {
-                    throw Failure("MODEL_PAYLOAD_MISSING", $"Manifest payload does not exist: {payload}");
-                }
-
-                RejectReparsePoint(payload, "MODEL_PAYLOAD_INVALID");
-                await VerifyHashAsync(payload, expectedHashes[payload], "MODEL_PAYLOAD_CHECKSUM_MISMATCH", cancellationToken)
-                    .ConfigureAwait(false);
+                throw Failure("MODEL_PACKAGE_INDEX_INVALID", "Package payload mappings must exactly match manifest files.");
             }
 
-            var resolvedNotice = ResolveUnderRoot(noticePath);
+            var resolvedPayloads = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var expected in expectedHashes)
+            {
+                var packaged = indexedPayloads[expected.Key];
+                if (!string.Equals(packaged.Sha256, expected.Value, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw Failure("MODEL_PACKAGE_INDEX_INVALID", $"Package checksum for '{expected.Key}' differs from its manifest checksum.");
+                }
+
+                var payloadPath = ResolveUnderRoot(packaged.Path);
+                if (!File.Exists(payloadPath))
+                {
+                    throw Failure("MODEL_PAYLOAD_MISSING", $"Packaged model payload does not exist: {payloadPath}");
+                }
+
+                await VerifyHashAsync(payloadPath, expected.Value, "MODEL_PAYLOAD_CHECKSUM_MISMATCH", cancellationToken)
+                    .ConfigureAwait(false);
+                resolvedPayloads.Add(expected.Key, payloadPath);
+            }
+
+            if (!string.Equals(packageModel.Notice.DeclaredPath, noticePath, StringComparison.Ordinal))
+            {
+                throw Failure("MODEL_PACKAGE_INDEX_INVALID", "Package notice mapping does not match the manifest notice path.");
+            }
+
+            var resolvedNotice = ResolveUnderRoot(packageModel.Notice.Path);
             if (!File.Exists(resolvedNotice) || new FileInfo(resolvedNotice).Length == 0)
             {
                 throw Failure("MODEL_NOTICE_MISSING", $"Reviewed model notice is missing or empty: {resolvedNotice}");
             }
 
-            RejectReparsePoint(resolvedNotice, "MODEL_NOTICE_INVALID");
-            var evidencePath = ResolveUnderRoot(approvalEvidence.Path);
+            await VerifyHashAsync(
+                resolvedNotice,
+                packageModel.Notice.Sha256,
+                "MODEL_NOTICE_CHECKSUM_MISMATCH",
+                cancellationToken).ConfigureAwait(false);
+            if (!string.Equals(packageModel.BenchmarkEvidence.DeclaredPath, approvalEvidence.Path, StringComparison.Ordinal) ||
+                !string.Equals(packageModel.BenchmarkEvidence.Sha256, approvalEvidence.Sha256, StringComparison.OrdinalIgnoreCase))
+            {
+                throw Failure("MODEL_PACKAGE_INDEX_INVALID", "Package benchmark evidence mapping does not match the approved benchmark.");
+            }
+
+            var evidencePath = ResolveUnderRoot(packageModel.BenchmarkEvidence.Path);
             if (!File.Exists(evidencePath))
             {
                 throw Failure("MODEL_BENCHMARK_EVIDENCE_MISSING", $"Approval evidence does not exist: {evidencePath}");
             }
 
-            RejectReparsePoint(evidencePath, "MODEL_BENCHMARK_INVALID");
             await VerifyHashAsync(
                 evidencePath,
                 approvalEvidence.Sha256,
                 "MODEL_BENCHMARK_CHECKSUM_MISMATCH",
                 cancellationToken).ConfigureAwait(false);
 
-            ValidateNoExtraFiles(modelDirectory, manifestPath, payloads, resolvedNotice, evidencePath);
-
-            var onnxPath = payloads.Single(path =>
+            var onnxDeclaredPath = expectedHashes.Keys.Single(path =>
                 string.Equals(Path.GetExtension(path), ".onnx", StringComparison.OrdinalIgnoreCase));
+            var onnxPath = resolvedPayloads[onnxDeclaredPath];
             var identity = new ModelIdentity(
                 modelId,
                 version,
-                expectedHashes[onnxPath].ToUpperInvariant(),
+                expectedHashes[onnxDeclaredPath].ToUpperInvariant(),
                 onnxPath);
             identity.Validate();
             return new ResolvedProductionModel(
@@ -207,7 +302,7 @@ public sealed class ProductionModelStore
     private static string ValidateLicense(JsonElement license)
     {
         RequireObjectWithExactProperties(license, "license", "spdx", "notice_path", "reviewed");
-        RequireNonEmptyString(license, "spdx");
+        var spdx = RequireNonEmptyString(license, "spdx");
         var notice = RequireNonEmptyString(license, "notice_path");
         RequireBoolean(license, "reviewed");
         if (!license.GetProperty("reviewed").GetBoolean())
@@ -215,7 +310,34 @@ public sealed class ProductionModelStore
             throw Failure("MODEL_LICENSE_NOT_REVIEWED", "The model license and notice must be reviewed before production use.");
         }
 
+        if (IsProhibitedLicense(spdx))
+        {
+            throw Failure("MODEL_LICENSE_PROHIBITED", $"Model license '{spdx}' is prohibited by the Apache distribution policy.");
+        }
+
+        if (!ReviewedLicenseAllowlist.Contains(spdx))
+        {
+            throw Failure("MODEL_LICENSE_UNRECOGNIZED", $"Model license '{spdx}' is not on the reviewed production allowlist.");
+        }
+
         return notice;
+    }
+
+    private static bool IsProhibitedLicense(string spdx)
+    {
+        var normalized = spdx.ToUpperInvariant();
+        return normalized.Contains("GPL", StringComparison.Ordinal) ||
+            normalized.Contains("AGPL", StringComparison.Ordinal) ||
+            normalized.Contains("LGPL", StringComparison.Ordinal) ||
+            normalized.Contains("SSPL", StringComparison.Ordinal) ||
+            normalized.Contains("BUSL", StringComparison.Ordinal) ||
+            normalized.Contains("-NC", StringComparison.Ordinal) ||
+            normalized.Contains("NONCOMMERCIAL", StringComparison.Ordinal) ||
+            normalized.Contains("NOASSERTION", StringComparison.Ordinal) ||
+            normalized.Contains("UNKNOWN", StringComparison.Ordinal) ||
+            normalized.Contains("UNCLEAR", StringComparison.Ordinal) ||
+            normalized.Contains("PROPRIETARY", StringComparison.Ordinal) ||
+            normalized.StartsWith("LICENSEREF-", StringComparison.Ordinal);
     }
 
     private ReadOnlyCollection<InferenceProvider> ValidateProviders(JsonElement element, InferenceProvider? requiredProvider)
@@ -306,12 +428,11 @@ public sealed class ProductionModelStore
             "No benchmark entry has status pass, release_eligible true, production_approval true, and checksum-bound evidence.");
     }
 
-    private static List<string> ReadPayloads(JsonElement root, string modelDirectory)
+    private static Dictionary<string, string> ReadDeclaredPayloadHashes(JsonElement root)
     {
         var files = root.GetProperty("files");
         RequireNonEmptyArray(files, "files");
-        var paths = new List<string>();
-        var unique = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var declared = new List<string>();
         foreach (var item in files.EnumerateArray())
         {
             if (item.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(item.GetString()))
@@ -319,23 +440,15 @@ public sealed class ProductionModelStore
                 throw Failure("MODEL_PAYLOAD_INVALID", "Every manifest file must be a non-empty relative path.");
             }
 
-            var path = ResolveUnder(modelDirectory, item.GetString()!, "MODEL_PAYLOAD_INVALID");
-            if (!unique.Add(path))
+            var path = NormalizeDeclaredPath(item.GetString()!, "MODEL_PAYLOAD_INVALID");
+            if (declared.Contains(path, StringComparer.OrdinalIgnoreCase))
             {
-                throw Failure("MODEL_PAYLOAD_INVALID", $"Duplicate manifest payload: {item.GetString()}");
+                throw Failure("MODEL_PAYLOAD_INVALID", $"Duplicate manifest payload: {path}");
             }
 
-            paths.Add(path);
+            declared.Add(path);
         }
 
-        return paths;
-    }
-
-    private static Dictionary<string, string> ReadPayloadHashes(
-        JsonElement root,
-        List<string> payloads,
-        string modelDirectory)
-    {
         var hashes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         if (root.TryGetProperty("preprocessing", out var preprocessing) &&
             preprocessing.ValueKind == JsonValueKind.Object &&
@@ -348,8 +461,8 @@ public sealed class ProductionModelStore
 
             foreach (var item in map.EnumerateObject())
             {
-                var path = ResolveUnder(modelDirectory, item.Name, "MODEL_PAYLOAD_INVALID");
-                if (!payloads.Contains(path, StringComparer.OrdinalIgnoreCase) || hashes.ContainsKey(path) ||
+                var path = NormalizeDeclaredPath(item.Name, "MODEL_PAYLOAD_INVALID");
+                if (!declared.Contains(path, StringComparer.OrdinalIgnoreCase) || hashes.ContainsKey(path) ||
                     item.Value.ValueKind != JsonValueKind.String || !IsSha256(item.Value.GetString()))
                 {
                     throw Failure("MODEL_PAYLOAD_INVALID", $"Invalid or unlisted payload checksum entry: {item.Name}");
@@ -359,12 +472,12 @@ public sealed class ProductionModelStore
             }
         }
 
-        if (hashes.Count == 0 && payloads.Count == 1)
+        if (hashes.Count == 0 && declared.Count == 1)
         {
-            hashes.Add(payloads[0], root.GetProperty("sha256").GetString()!);
+            hashes.Add(declared[0], root.GetProperty("sha256").GetString()!);
         }
 
-        if (hashes.Count != payloads.Count)
+        if (hashes.Count != declared.Count)
         {
             throw Failure("MODEL_PAYLOAD_INVALID", "Every payload must have exactly one SHA-256 checksum.");
         }
@@ -372,33 +485,166 @@ public sealed class ProductionModelStore
         return hashes;
     }
 
-    private static void ValidateNoExtraFiles(
-        string modelDirectory,
-        string manifestPath,
-        IReadOnlyList<string> payloads,
-        string noticePath,
-        string evidencePath)
+    private static async Task<PackageIndex> ReadPackageIndexAsync(string indexPath, CancellationToken cancellationToken)
     {
-        var allowed = new HashSet<string>(payloads.Select(Path.GetFullPath), StringComparer.OrdinalIgnoreCase)
+        try
         {
-            Path.GetFullPath(manifestPath)
-        };
-        if (IsUnder(modelDirectory, noticePath))
+            return await ReadPackageIndexCoreAsync(indexPath, cancellationToken).ConfigureAwait(false);
+        }
+        catch (ProductionModelValidationException exception) when (exception.Code == "MODEL_MANIFEST_INVALID")
         {
-            allowed.Add(Path.GetFullPath(noticePath));
+            throw Failure("MODEL_PACKAGE_INDEX_INVALID", "Production model package index metadata is invalid.", exception);
+        }
+    }
+
+    private static async Task<PackageIndex> ReadPackageIndexCoreAsync(string indexPath, CancellationToken cancellationToken)
+    {
+        JsonDocument document;
+        try
+        {
+            await using var stream = OpenRead(indexPath);
+            document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+        catch (JsonException exception)
+        {
+            throw Failure("MODEL_PACKAGE_INDEX_INVALID", $"Production model package index is malformed: {exception.Message}", exception);
         }
 
-        if (IsUnder(modelDirectory, evidencePath))
+        using (document)
         {
-            allowed.Add(Path.GetFullPath(evidencePath));
-        }
-
-        foreach (var file in Directory.EnumerateFiles(modelDirectory, "*", SearchOption.AllDirectories))
-        {
-            if (!allowed.Contains(Path.GetFullPath(file)))
+            var root = document.RootElement;
+            RejectDuplicatePropertyNames(root, "MODEL_PACKAGE_INDEX_INVALID", "Production model package index");
+            RequireObjectWithExactProperties(root, "package index", "schema_version", "models");
+            if (!root.GetProperty("schema_version").TryGetInt32(out var version) || version != 1)
             {
-                throw Failure("MODEL_STORE_EXTRA_FILE", $"Unlisted file exists in the production model directory: {file}");
+                throw Failure("MODEL_PACKAGE_INDEX_INVALID", "Only production model package index version 1 is supported.");
             }
+
+            RequireNonEmptyArray(root, "models");
+            var models = new List<PackageModel>();
+            var identities = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var model in root.GetProperty("models").EnumerateArray())
+            {
+                RequireObjectWithExactProperties(
+                    model,
+                    "package model",
+                    "model_id",
+                    "model_version",
+                    "manifest",
+                    "payloads",
+                    "notice",
+                    "benchmark_evidence");
+                var modelId = RequireNonEmptyString(model, "model_id");
+                var modelVersion = RequireNonEmptyString(model, "model_version");
+                if (!identities.Add(modelId + "\0" + modelVersion))
+                {
+                    throw Failure("MODEL_PACKAGE_INDEX_INVALID", $"Duplicate packaged model identity: {modelId} {modelVersion}");
+                }
+
+                var manifest = ReadPackageResource(model.GetProperty("manifest"), "manifest", hasDeclaredPath: false);
+                RequireNonEmptyArray(model, "payloads");
+                var payloads = model.GetProperty("payloads").EnumerateArray()
+                    .Select(payload => ReadPackageResource(payload, "payload", hasDeclaredPath: true))
+                    .ToArray();
+                if (payloads.Select(payload => payload.DeclaredPath).Distinct(StringComparer.OrdinalIgnoreCase).Count() != payloads.Length)
+                {
+                    throw Failure("MODEL_PACKAGE_INDEX_INVALID", $"Duplicate packaged payload declaration for model: {modelId}");
+                }
+
+                models.Add(new PackageModel(
+                    modelId,
+                    modelVersion,
+                    manifest,
+                    Array.AsReadOnly(payloads),
+                    ReadPackageResource(model.GetProperty("notice"), "notice", hasDeclaredPath: true),
+                    ReadPackageResource(model.GetProperty("benchmark_evidence"), "benchmark evidence", hasDeclaredPath: true)));
+            }
+
+            return new PackageIndex(models.AsReadOnly());
+        }
+    }
+
+    private static PackageResource ReadPackageResource(JsonElement element, string name, bool hasDeclaredPath)
+    {
+        RequireObjectWithExactProperties(
+            element,
+            name,
+            hasDeclaredPath ? ["declared_path", "path", "sha256"] : ["path", "sha256"]);
+        var declaredPath = hasDeclaredPath
+            ? NormalizeDeclaredPath(RequireNonEmptyString(element, "declared_path"), "MODEL_PACKAGE_INDEX_INVALID")
+            : string.Empty;
+        var packagePath = NormalizeDeclaredPath(RequireNonEmptyString(element, "path"), "MODEL_PACKAGE_INDEX_INVALID");
+        var sha256 = RequireSha256(element, "sha256");
+        return new PackageResource(declaredPath, packagePath, sha256);
+    }
+
+    private void ValidatePackageTree(string indexPath, PackageIndex index)
+    {
+        var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { Path.GetFullPath(indexPath) };
+        foreach (var model in index.Models)
+        {
+            foreach (var resource in model.Resources)
+            {
+                var path = ResolveUnderRoot(resource.Path);
+                RejectReparseAncestors(path, "MODEL_STORE_REPARSE_POINT");
+                allowed.Add(path);
+            }
+        }
+
+        var pending = new Queue<DirectoryInfo>();
+        pending.Enqueue(new DirectoryInfo(_root));
+        while (pending.TryDequeue(out var directory))
+        {
+            RejectReparseAncestors(directory.FullName, "MODEL_STORE_REPARSE_POINT");
+            foreach (var entry in directory.EnumerateFileSystemInfos())
+            {
+                if ((entry.Attributes & FileAttributes.ReparsePoint) != 0)
+                {
+                    throw Failure("MODEL_STORE_REPARSE_POINT", $"Reparse points are prohibited in the production model store: {entry.FullName}");
+                }
+
+                if (entry is DirectoryInfo child)
+                {
+                    pending.Enqueue(child);
+                }
+                else if (!allowed.Contains(Path.GetFullPath(entry.FullName)))
+                {
+                    throw Failure("MODEL_STORE_EXTRA_FILE", $"Unlisted file exists in the production model directory: {entry.FullName}");
+                }
+            }
+        }
+    }
+
+    private static void ValidateCanonicalPackagePaths(PackageIndex index)
+    {
+        foreach (var model in index.Models)
+        {
+            var manifestPath = $"manifest/{model.ModelId}/{model.Version}/manifest.json";
+            RequireCanonicalPackagePath(model.Manifest.Path, manifestPath, "manifest");
+
+            foreach (var payload in model.Payloads)
+            {
+                var payloadPath = $"runtime/{model.ModelId}/{model.Version}/{payload.DeclaredPath}";
+                RequireCanonicalPackagePath(payload.Path, payloadPath, "payload");
+            }
+
+            var noticeLeaf = model.Notice.DeclaredPath.Split('/')[^1];
+            var noticePath = $"notices/{model.ModelId}/{model.Version}/{noticeLeaf}";
+            RequireCanonicalPackagePath(model.Notice.Path, noticePath, "notice");
+
+            var evidenceLeaf = model.BenchmarkEvidence.DeclaredPath.Split('/')[^1];
+            var evidencePath = $"evidence/{model.ModelId}/{model.Version}/{evidenceLeaf}";
+            RequireCanonicalPackagePath(model.BenchmarkEvidence.Path, evidencePath, "benchmark evidence");
+        }
+    }
+
+    private static void RequireCanonicalPackagePath(string actual, string expected, string resourceKind)
+    {
+        if (!string.Equals(actual, expected, StringComparison.Ordinal))
+        {
+            throw Failure(
+                "MODEL_PACKAGE_INDEX_INVALID",
+                $"Production model {resourceKind} path must be canonical. Expected '{expected}', found '{actual}'.");
         }
     }
 
@@ -450,12 +696,44 @@ public sealed class ProductionModelStore
         64 * 1024,
         FileOptions.Asynchronous | FileOptions.SequentialScan);
 
-    private static void RejectReparsePoint(string path, string code)
+    private static void RejectReparseAncestors(string path, string code)
     {
-        if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+        FileSystemInfo? current = Directory.Exists(path)
+            ? new DirectoryInfo(Path.GetFullPath(path))
+            : new FileInfo(Path.GetFullPath(path));
+        while (current is not null)
         {
-            throw Failure(code, $"Reparse points are prohibited in the production model store: {path}");
+            if (current.Exists && (current.Attributes & FileAttributes.ReparsePoint) != 0)
+            {
+                throw Failure(code, $"Reparse points are prohibited in the production model store: {current.FullName}");
+            }
+
+            current = current switch
+            {
+                FileInfo file => file.Directory,
+                DirectoryInfo directory => directory.Parent,
+                _ => null
+            };
         }
+    }
+
+    private static string NormalizeDeclaredPath(string path, string code)
+    {
+        if (string.IsNullOrWhiteSpace(path) || path != path.Trim() || Path.IsPathRooted(path))
+        {
+            throw Failure(code, $"Model package paths must be non-empty relative paths: {path}");
+        }
+
+        var normalized = path.Replace('\\', '/');
+        var segments = normalized.Split('/');
+        if (segments.Any(segment =>
+                string.IsNullOrWhiteSpace(segment) || segment is "." or ".." ||
+                segment.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0))
+        {
+            throw Failure(code, $"Model package path is not a safe relative path: {path}");
+        }
+
+        return normalized;
     }
 
     private static void ValidatePathComponent(string value, string parameterName)
@@ -475,10 +753,45 @@ public sealed class ProductionModelStore
             throw Failure("MODEL_MANIFEST_INVALID", $"{name} must be an object.");
         }
 
-        var actual = element.EnumerateObject().Select(property => property.Name).ToHashSet(StringComparer.Ordinal);
+        var actual = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var property in element.EnumerateObject())
+        {
+            if (!actual.Add(property.Name))
+            {
+                throw Failure("MODEL_MANIFEST_INVALID", $"{name} contains duplicate JSON property '{property.Name}'.");
+            }
+        }
+
         if (!actual.SetEquals(expected))
         {
             throw Failure("MODEL_MANIFEST_INVALID", $"{name} must contain exactly: {string.Join(", ", expected)}.");
+        }
+    }
+
+    private static void RejectDuplicatePropertyNames(JsonElement element, string code, string description)
+    {
+        if (element.ValueKind == JsonValueKind.Object)
+        {
+            var names = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var property in element.EnumerateObject())
+            {
+                if (!names.Add(property.Name))
+                {
+                    throw Failure(code, $"{description} contains duplicate JSON property '{property.Name}'.");
+                }
+
+                RejectDuplicatePropertyNames(property.Value, code, description);
+            }
+
+            return;
+        }
+
+        if (element.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var item in element.EnumerateArray())
+            {
+                RejectDuplicatePropertyNames(item, code, description);
+            }
         }
     }
 
@@ -547,15 +860,54 @@ public sealed class ProductionModelStore
         new(code, message, inner);
 
     private sealed record ApprovalEvidence(string Profile, string Path, string Sha256);
+
+    private sealed record PackageIndex(ReadOnlyCollection<PackageModel> Models);
+
+    private sealed record PackageModel(
+        string ModelId,
+        string Version,
+        PackageResource Manifest,
+        ReadOnlyCollection<PackageResource> Payloads,
+        PackageResource Notice,
+        PackageResource BenchmarkEvidence)
+    {
+        public IEnumerable<PackageResource> Resources =>
+            new[] { Manifest, Notice, BenchmarkEvidence }.Concat(Payloads);
+    }
+
+    private sealed record PackageResource(string DeclaredPath, string Path, string Sha256);
 }
 
-public sealed record ResolvedProductionModel(
-    ModelIdentity Identity,
-    string Task,
-    IReadOnlyList<InferenceProvider> AvailableProviders,
-    string ManifestPath,
-    string NoticePath,
-    string BenchmarkEvidencePath);
+public sealed class ResolvedProductionModel
+{
+    internal ResolvedProductionModel(
+        ModelIdentity identity,
+        string task,
+        IReadOnlyList<InferenceProvider> availableProviders,
+        string manifestPath,
+        string noticePath,
+        string benchmarkEvidencePath)
+    {
+        Identity = identity;
+        Task = task;
+        AvailableProviders = availableProviders;
+        ManifestPath = manifestPath;
+        NoticePath = noticePath;
+        BenchmarkEvidencePath = benchmarkEvidencePath;
+    }
+
+    public ModelIdentity Identity { get; }
+
+    public string Task { get; }
+
+    public IReadOnlyList<InferenceProvider> AvailableProviders { get; }
+
+    public string ManifestPath { get; }
+
+    public string NoticePath { get; }
+
+    public string BenchmarkEvidencePath { get; }
+}
 
 public sealed class ProductionModelValidationException : Exception
 {

@@ -381,9 +381,11 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
     Copy-Item -LiteralPath $launcherScript -Destination $launcherIsolationRoot
     $captureExecutable = Join-Path $launcherIsolationBuild 'capture.cmd'
     $captureOutput = Join-Path $launcherIsolationBuild 'enhancement-environment.txt'
+    $startupImage = Join-Path $launcherIsolationRoot 'Chandler graph.png'
+    [System.IO.File]::WriteAllBytes($startupImage, [byte[]](1, 2, 3))
     [System.IO.File]::WriteAllText(
         $captureExecutable,
-        "@echo off`r`necho [%GRAPHREADER_REALESRGAN_RUNTIME_ROOT%] > `"%~dp0enhancement-environment.txt`"`r`necho [%GRAPHREADER_REALESRGAN_MANIFEST_PATH%] >> `"%~dp0enhancement-environment.txt`"`r`n")
+        "@echo off`r`necho [%GRAPHREADER_REALESRGAN_RUNTIME_ROOT%] > `"%~dp0enhancement-environment.txt`"`r`necho [%GRAPHREADER_REALESRGAN_MANIFEST_PATH%] >> `"%~dp0enhancement-environment.txt`"`r`necho [%*] >> `"%~dp0enhancement-environment.txt`"`r`n")
     [System.IO.File]::WriteAllText((Join-Path $launcherIsolationBuild 'portable.mode'), '')
     [System.IO.File]::WriteAllText(
         (Join-Path $launcherIsolationRoot 'latest.json'),
@@ -405,7 +407,7 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
             'Process')
         & $hostExecutable -NoProfile -ExecutionPolicy Bypass -File `
             (Join-Path $launcherIsolationRoot 'Run-Latest-DevPortable.ps1') `
-            -Wait -DisableLocalEnhancement | Out-Null
+            -Wait -DisableLocalEnhancement -ImagePath $startupImage | Out-Null
         if ($LASTEXITCODE -ne 0) {
             throw "Disabled-enhancement launcher exited with code $LASTEXITCODE."
         }
@@ -421,12 +423,16 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
             'Process')
     }
     $capturedEnvironment = @(Get-Content -LiteralPath $captureOutput)
-    Assert-True ($capturedEnvironment.Count -eq 2) `
-        'Disabled-enhancement launcher did not capture both child environment values.'
+    Assert-True ($capturedEnvironment.Count -eq 3) `
+        'Launcher did not capture both child environment values and startup arguments.'
     Assert-True ($capturedEnvironment[0].Trim() -eq '[]') `
         'Disabled-enhancement launcher leaked an inherited runtime root to the child.'
     Assert-True ($capturedEnvironment[1].Trim() -eq '[]') `
         'Disabled-enhancement launcher leaked an inherited manifest path to the child.'
+    Assert-True ($capturedEnvironment[2].Contains('--open-image')) `
+        'Launcher did not pass the explicit startup image argument.'
+    Assert-True ($capturedEnvironment[2].Contains($startupImage)) `
+        'Launcher did not preserve the startup image path containing spaces.'
     $passed++
 
     $launcherRoot = Join-Path $testRoot 'launcher traversal'

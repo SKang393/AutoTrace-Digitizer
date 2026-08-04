@@ -55,6 +55,19 @@ python -m ml.markers.classifier.export --checkpoint ml/markers/classifier/artifa
 python -m ml.markers.classifier.benchmark --checkpoint ml/markers/classifier/artifacts/session11-final-e3/marker-classifier.pt --onnx ml/markers/classifier/artifacts/session11-final-e3/marker-classifier.onnx --output ml/markers/classifier/artifacts/session11-final-e3/benchmark.json
 ```
 
+Production repair revision status:
+
+The `marker-classifier-production-repair-v1` budget is exhausted. Its retained
+CLI refuses before creating output. A future authorized repair requires a new
+preregistered revision and cannot reuse `P1`, `P2`, or `P3`.
+
+The 2026-08-04 three-candidate budget passed validation and all confirmation
+classification metrics, but failed direct packed ONNX parity at the strict
+`1e-5` gate. The candidate remains rejected and the manifest remains
+fail-closed. That historical confirmation was a same-family repeat and is not
+generalization evidence. A disjoint v2 confirmation split is frozen but has not
+been evaluated.
+
 The benchmark command is intentionally single-use for one output directory.
 The exact selected weights and evidence remain local until the separately owned
 model manifest, C# runtime, packaging, and maintainer gate are complete.

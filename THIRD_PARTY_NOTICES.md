@@ -12,8 +12,9 @@ blocked below is removed by new, independently verified evidence.
 
 Current release blockers are:
 
-1. `OpenCvSharpExtern.dll` has no complete source-audited inventory and notice
-   set for its statically linked native dependencies.
+1. The reviewed source-built `OpenCvSharpExtern.dll` has not replaced the
+   NuGet native payload and has not passed the mandatory application parity and
+   clean-machine gates.
 2. No marker-center model has passed the production-runtime held-out gate.
 3. No default super-resolution model and runtime pair has passed the required
    benchmark and packaging gates.
@@ -33,10 +34,23 @@ Current release blockers are:
 ## Real-ESRGAN NCNN Vulkan
 
 - Component: command-line inference runtime
-- License: verify exact release and bundled dependency notices before shipment.
-- Expected upstream licensing includes MIT-licensed application code and
-  BSD-licensed NCNN components.
-- Required action: record exact source tag, checksum, and all licenses.
+- Source: Real-ESRGAN-ncnn-vulkan revision
+  `37026f49824c5cf84062e7c6a5dd71445dcf610f`; NCNN submodule
+  `6125c9f47cd14b589de0521350668cf9d3d37e3c`; libwebp submodule
+  `8ea81561d2fdd382da60f57958741a7c23a18eb6`; embedded dirent blob
+  `f7a46dafcbf143ee8d0ac4b6a7d12b6fe28979e0`.
+- Licenses and exact notices:
+  `LICENSES/Real-ESRGAN-NCNN-Vulkan-0.2.0-License.txt`,
+  `LICENSES/NCNN-6125c9f-License.txt`,
+  `LICENSES/libwebp-8ea81561-COPYING.txt`, and
+  `LICENSES/dirent-1998-2019-MIT-Notice.txt`.
+- Runtime executable SHA-256:
+  `07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c`.
+- Release status: BLOCKED. `vcomp140.dll` version `14.31.31103.0`, SHA-256
+  `8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b`,
+  is Microsoft-signed but lacks an independently authorized redistributable
+  source record for that exact file. Scientific, CPU fallback, and
+  clean-machine gates are also incomplete.
 
 ## Microsoft .NET Desktop / WPF
 
@@ -79,8 +93,8 @@ Current release blockers are:
 
 ## OpenCV and OpenCvSharp
 
-- Application dependency, but not approved for installer or portable
-  distribution.
+- Application dependency. The current NuGet native payload remains unapproved
+  for installer or portable distribution.
 - Managed package: `OpenCvSharp4` 4.13.0.20260627, SHA-256
   `8acee778364e5eee6495d923732cacd8d895c7f683d2144f622b54418623d12c`.
 - Native package: `OpenCvSharp4.runtime.win.slim` 4.13.0.20260627, SHA-256
@@ -94,15 +108,27 @@ Current release blockers are:
   source licenses do not constitute a complete license inventory for the
   statically linked native DLL.
 - Extracted native payload: `OpenCvSharpExtern.dll`, 55,547,904 bytes, SHA-256
-  `1fa122bdb8e94175e7719fb8aaf2ab211268a756f5d0c7a13c710ed79ae30cd`.
+  `1fa122bdb8e94175e7719fb8aa8f2ab211268a756f5d0c7a13c710ed79ae30cd`.
 - The published runtime ships no third-party notice bundle, SBOM, link map, or
   object-to-dependency map. Its actual scope also conflicts with the package
   description: the Windows slim workflow disables only contrib, `videoio`,
   `highgui`, and `dnn`; artifact inspection finds additional OpenCV modules and
   embedded build metadata reports non-free algorithms enabled.
-- Release status: BLOCKED. Do not bundle this runtime until a source-audited
-  win-x64 native build, exact dependency lock, binary hash, and complete
-  third-party notice set are produced and verified.
+- A pinned minimal replacement source build now has two byte-identical retained
+  builds. `OpenCvSharpExtern.dll` is 7,965,696 bytes with SHA-256
+  `87c12460daba638b36e916ea2bb832d0759fbf094b8639919a7ce11b0cca5791`.
+  The linker map SHA-256 is
+  `e7f9f768b82172b9f2021b2a469de371962655bd0833c8f214bbefdad05a8a77`.
+  Its 15-entry inventory covers OpenCV core/imgproc/imgcodecs, zlib, SoftFloat,
+  FDLIBM, Microsoft static runtimes, and Windows imports. The private
+  maintainer attestation validates the five Microsoft static-runtime entries.
+- Reviewed build notice:
+  `packaging/opencv-source/review/third-party-notices.candidate.txt`. The
+  historical filename is retained for evidence stability; its header states
+  the reviewed scope.
+- Release status: BLOCKED. Do not substitute the source build into a release
+  until application parity, public axis benchmarks, and clean-machine loading
+  pass with the exact reviewed DLL.
 
 ## ONNX Runtime
 
@@ -217,7 +243,7 @@ Current release blockers are:
 | RealESRGAN_x2plus reference weight | v0.2.1 | Official Real-ESRGAN release | BSD-3-Clause | `49fafd45f8fd7aa8d31ab2a22d14d91b536c34494a5cfe31eb5d89c2fa266abb` | No | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | Metadata yes; release blocked |
 | realesr-general-x4v3 reference weight | v0.2.5.0 | Official Real-ESRGAN release | BSD-3-Clause | `8dc7edb9ac80ccdc30c3a5dca6616509367f05fbc184ad95b731f05bece96292` | No | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | Metadata yes; release blocked |
 | realesr-animevideov3 NCNN x2 model package | v0.2.5.0 | Official Real-ESRGAN Windows NCNN package | BSD-3-Clause | `abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d` | No | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | Metadata yes; release blocked |
-| NCNN runtime | v0.2.0 | Official Real-ESRGAN NCNN Vulkan release | MIT plus transitive notices pending | `1bbbdb12d470af80b035c773682e144c6c2f6ece9210832a289af0a48ce3fa9a` | No | No | No, bundling blocked |
+| NCNN runtime | v0.2.0 | Official Real-ESRGAN NCNN Vulkan release | MIT, BSD-3-Clause, zlib, BSD-2-Clause, dirent MIT | `1bbbdb12d470af80b035c773682e144c6c2f6ece9210832a289af0a48ce3fa9a` | No | Exact runtime closure listed above | Source and notice inventory reviewed; exact `vcomp140.dll`, scientific, CPU, and clean-machine gates blocked |
 | GraphSR x2 candidate | 0.1.0-local-candidate | Original Graph Auto Reader source | Apache-2.0 | `4b0237683cd61ecd639015380bad9323a5fe79b295ffebf0c93720f51ef0d667` | No | `models/manifest/graphsr/GRAPHSR_X2_CANDIDATE_NOTICE.md` | No, redistribution false and fidelity failed |
 | Marker-center model | 0.1.0 | Original Graph Auto Reader source | Apache-2.0 | `061a496167382d1bd11bb580bed383d2d1725da2001f9c440b7f1acc59ac116a` | No | `models/manifest/markers/MARKER_CENTER_MODEL_NOTICE.md` | No, production held-out acceptance missing |
 | OCR detector / recognizer | Not selected | No approved artifact | Unproven at artifact level | Not available | No | No | No, release blocked |
@@ -227,7 +253,8 @@ Current release blockers are:
 | Microsoft DirectML redistributable | 1.15.4 | NuGet / Microsoft.AI.DirectML | Microsoft redistributable + MIT/BSD notices | `4e7cb7ddce8cf837a7a75dc029209b520ca0101470fcdf275c1f49736a3615b9` | Yes | `LICENSES/DirectML-1.15.4-License.txt` and code license | Yes |
 | System.Numerics.Tensors | 9.0.0 | NuGet / dotnet/runtime | MIT + notices | `b750243c36002a62b28b1ac5d3fbc284ad340ba1494cc36aca110611a0b1f959` | Yes | Exact license and third-party notices | Yes |
 | OpenCvSharp managed bindings | 4.13.0.20260627 | NuGet / shimat/opencvsharp `b161e7e012f5101f6d5dc68a835c59db6cc88b18` | Apache-2.0 | `8acee778364e5eee6495d923732cacd8d895c7f683d2144f622b54418623d12c` | Yes | `LICENSES/OpenCvSharp-4.13.0.20260627-License.txt` | Yes, managed package only |
-| OpenCvSharp Windows x64 slim runtime | 4.13.0.20260627 | NuGet / shimat/opencvsharp, OpenCV `fe38fc608f6acb8b68953438a62305d8318f4fcd` | Apache-2.0 plus linked native notices pending | `281551a6c032d1aab316db9c1817bcded5a85188b24b2efd12c02665e7233817` | Yes | OpenCvSharp and OpenCV source licenses only; native inventory pending | No, release blocked |
+| OpenCvSharp Windows x64 slim runtime | 4.13.0.20260627 | NuGet / shimat/opencvsharp, OpenCV `fe38fc608f6acb8b68953438a62305d8318f4fcd` | Apache-2.0 plus unresolved published-binary closure | `281551a6c032d1aab316db9c1817bcded5a85188b24b2efd12c02665e7233817` | Yes | OpenCvSharp and OpenCV source licenses only | No, replace with reviewed source build before release |
+| OpenCvSharp minimal source-build candidate | pinned source profile | OpenCvSharp `b161e7e012f5101f6d5dc68a835c59db6cc88b18`; OpenCV `fe38fc608f6acb8b68953438a62305d8318f4fcd` | Apache-2.0, zlib, BSD-3-Clause, FDLIBM notice, Microsoft attested static runtime | `87c12460daba638b36e916ea2bb832d0759fbf094b8639919a7ce11b0cca5791` | No | Complete pinned-build notice and ignored private attestation | Provenance reviewed; parity and clean-machine release gates blocked |
 | .NET / WPF runtime | 10.0.10 | Microsoft .NET installed by SDK 10.0.302 | `LicenseRef-Microsoft-DotNet-Library` plus third-party notices | Per-file hashes required in release SBOM | Yes | Exact license and third-party notices | Source notice reviewed; artifact gate pending |
 | Imazen.WebP | 11.0.0 | NuGet / imazen/libwebp-net | MIT | `f78a8f874f127bfa4688595950aa6292a8e20ea55fc2b60321523e1d005d5dff` | Yes | `LICENSES/Imazen.WebP-11.0.0-License.txt` | Yes |
 | Imazen WebP native runtime win-x64 | 1.6.1 | NuGet / imazen/libwebp-net | MIT + libwebp BSD-3-Clause | `32df07f31f18b5f4e35409a73621d776d97761f4b601cbbbdc4efbacb6ab62f6` | Yes | Imazen MIT and libwebp BSD-3-Clause texts | Yes |

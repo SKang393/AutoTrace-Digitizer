@@ -55,6 +55,19 @@ python -m ml.markers.center.export --checkpoint ml/markers/center/artifacts/sess
 python -m ml.markers.center.benchmark --checkpoint ml/markers/center/artifacts/session10-final/marker-center.pt --onnx ml/markers/center/artifacts/session10-final/marker-center.onnx --output ml/markers/center/artifacts/session10-final/benchmark.json
 ```
 
+Production repair revision status:
+
+The `marker-center-production-repair-v1` budget is exhausted. Its retained CLI
+refuses before creating output. A future authorized repair requires a new
+preregistered revision and cannot reuse `P1`, `P2`, or `P3`.
+
+The 2026-08-04 three-candidate budget is invalid because executed mask-channel
+dropout was not preregistered. It also failed the independent confirmation
+exact-count gate. The candidates remain rejected and the manifest remains
+fail-closed. The corrected future implementation preserves both mask channels
+and records global and model-initialization seeds, but the exhausted candidates
+are not rerun.
+
 Direct wheel artifacts are hash-locked in `requirements*.txt`. They can be
 verified against the ignored audit cache with `pip install --dry-run --no-deps
 --require-hashes --no-index --find-links ml/markers/center/artifacts/provenance

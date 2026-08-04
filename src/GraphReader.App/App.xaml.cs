@@ -35,7 +35,7 @@ public partial class App : Application, IDisposable
 
     public WorkflowRuntimeEnvironment RuntimeEnvironment { get; private set; }
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
         _themeService = new ThemeService(Resources);
@@ -51,12 +51,20 @@ public partial class App : Application, IDisposable
         WorkflowStartupError = composition.StartupError;
         StartupErrorMessageKey = StartupError?.UserMessageKey ?? WorkflowStartupError?.UserMessageKey;
 
-        bool portableSmoke = e.Args.Contains("--portable-smoke", StringComparer.OrdinalIgnoreCase);
+        StartupArguments startupArguments = StartupArguments.Parse(e.Args);
+        bool portableSmoke = startupArguments.PortableSmoke;
         if (portableSmoke)
         {
             int exitCode = RunPortableSmoke();
             Shutdown(exitCode);
             return;
+        }
+
+        if (startupArguments.OpenImagePath is not null &&
+            WorkspaceService is IManualWorkspaceService manualWorkspace)
+        {
+            await manualWorkspace
+                .ImportImagesAsync([startupArguments.OpenImagePath], CancellationToken.None);
         }
 
         var mainWindow = new MainWindow(_themeService);

@@ -10,4 +10,8 @@
   <ItemGroup>
     <PackageReference Include="PdfPig" VersionOverride="0.1.14" />
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="GraphReader.Pdf.Tests" />
+  </ItemGroup>
 </Project>

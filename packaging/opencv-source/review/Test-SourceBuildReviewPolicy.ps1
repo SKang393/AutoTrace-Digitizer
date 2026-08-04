@@ -5,7 +5,8 @@
 param(
     [string]$EvidenceRoot,
     [string]$PolicyPath,
-    [string]$NoticePath
+    [string]$NoticePath,
+    [string]$AttestationPath
 )
 
 $ErrorActionPreference = 'Stop'
@@ -58,16 +59,25 @@ $binaryPath = Join-Path $EvidenceRoot 'bin\OpenCvSharpExtern.dll'
 if (-not (Test-Path -LiteralPath $binaryPath -PathType Leaf)) { throw "Evidence binary is missing: $binaryPath" }
 
 $policy = Get-Content -LiteralPath $PolicyPath -Raw | ConvertFrom-Json
+$projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\..'))
+if ([string]::IsNullOrWhiteSpace($AttestationPath)) {
+    $AttestationPath = Join-Path $projectRoot ([string]$policy.microsoftStaticRuntimeAttestation.defaultPrivatePath)
+}
+if (-not (Test-Path -LiteralPath $AttestationPath -PathType Leaf)) { throw "Private maintainer attestation is missing: $AttestationPath" }
+$attestation = Get-Content -LiteralPath $AttestationPath -Raw | ConvertFrom-Json
 $inventory = Get-Content -LiteralPath $inventoryPath -Raw | ConvertFrom-Json
 $sourceRevisions = Get-Content -LiteralPath $sourceRevisionsPath -Raw | ConvertFrom-Json
 $noticeText = Get-Content -LiteralPath $NoticePath -Raw
 $errors = New-Object System.Collections.Generic.List[string]
 
-if ([string]$policy.overallReviewStatus -ne 'requires-maintainer-attestation') {
-    $errors.Add('Review policy must remain blocked on maintainer attestation.')
+if ([string]$policy.overallReviewStatus -ne 'reviewed-provenance-only') {
+    $errors.Add('Review policy must remain limited to reviewed provenance.')
 }
-if ([string]$inventory.reviewStatus -ne 'requires-review') {
-    $errors.Add('Mechanical evidence inventory must remain requires-review.')
+if ([string]$policy.noticeBundle.reviewStatus -ne 'complete') {
+    $errors.Add('Notice bundle must be marked complete for the pinned source build.')
+}
+if ([string]$inventory.reviewStatus -ne 'reviewed') {
+    $errors.Add('Promoted evidence inventory must be reviewed.')
 }
 if ([string]$inventory.profileId -ne [string]$policy.profileId) {
     $errors.Add('Evidence inventory profile does not match the review policy.')
@@ -125,21 +135,44 @@ foreach ($entry in @($policy.entries)) {
             }
         }
         { $_ -in @('not-required-not-shipped', 'not-required-not-linked', 'merged-with-zlib-lib') } { }
-        'maintainer-attestation-required' {
-            if ([string]$entry.reviewStatus -ne 'requires-maintainer-attestation') { $errors.Add("Microsoft entry must require maintainer attestation: $key") }
+        'maintainer-attestation-recorded-private' {
+            if ([string]$entry.reviewStatus -ne 'reviewed') { $errors.Add("Microsoft entry must be reviewed after attestation: $key") }
         }
         default { $errors.Add("Unknown notice disposition for $key") }
     }
 }
 
-if ([string]$policy.microsoftStaticRuntimeAttestation.status -ne 'required' -or
+if ([string]$policy.microsoftStaticRuntimeAttestation.status -ne 'recorded-private' -or
     [string]::IsNullOrWhiteSpace([string]$policy.microsoftStaticRuntimeAttestation.requiredMaintainerStatement) -or
     @($policy.microsoftStaticRuntimeAttestation.termReferences).Count -lt 2) {
     $errors.Add('Microsoft static runtime attestation details are incomplete.')
+}
+
+$expectedMicrosoftScope = @(
+    $policy.entries |
+        Where-Object { [string]$_.noticeDisposition -eq 'maintainer-attestation-recorded-private' } |
+        ForEach-Object { [string]$_.name } |
+        Sort-Object
+)
+$actualMicrosoftScope = @($attestation.scope | ForEach-Object { [string]$_ } | Sort-Object)
+if ([int]$attestation.schemaVersion -ne 1 -or -not [bool]$attestation.private -or [bool]$attestation.gitEligibility) {
+    $errors.Add('Private maintainer attestation metadata is invalid.')
+}
+if ([string]$attestation.statement -cne [string]$policy.microsoftStaticRuntimeAttestation.requiredMaintainerStatement) {
+    $errors.Add('Private maintainer attestation statement does not exactly match the required statement.')
+}
+if ([string]$attestation.profileId -ne [string]$policy.profileId -or
+    [string]$attestation.toolchain.visualStudioInstallationVersion -ne [string]$policy.microsoftStaticRuntimeAttestation.visualStudioInstallationVersion -or
+    [string]$attestation.toolchain.vcToolsVersion -ne [string]$policy.microsoftStaticRuntimeAttestation.vcToolsVersion -or
+    [string]$attestation.toolchain.windowsSdkVersion -ne [string]$policy.microsoftStaticRuntimeAttestation.windowsSdkVersion) {
+    $errors.Add('Private maintainer attestation does not match the pinned profile and toolchain.')
+}
+if (($expectedMicrosoftScope -join '|') -cne ($actualMicrosoftScope -join '|') -or $actualMicrosoftScope.Count -ne 5) {
+    $errors.Add('Private maintainer attestation does not cover exactly the five linked Microsoft static-runtime libraries.')
 }
 
 if ($errors.Count -gt 0) {
     throw ("Source-build review policy: BLOCKED`n" + ($errors -join [Environment]::NewLine))
 }
 
-Write-Host 'Source-build review policy: PASS (overall release status remains blocked on maintainer attestation)'
+Write-Host 'Source-build review policy: PASS (provenance only; scientific parity and clean-machine release gates remain external)'

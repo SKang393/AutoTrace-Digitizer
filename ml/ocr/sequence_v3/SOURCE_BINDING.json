@@ -1,0 +1,107 @@
+{
+  "binding_version": 1,
+  "scientific_status": "failed_historical_research_only",
+  "sealed_evidence_valid": false,
+  "family_implementations_independent": false,
+  "protocol": {
+    "protocol_id": "graph-numeric-sequence-v3-20260804",
+    "protocol_state": "exhausted",
+    "seed": 20260804,
+    "epochs": 24,
+    "learning_rate": 0.002,
+    "batch_size": 64,
+    "train_count": 2048,
+    "validation_count": 512,
+    "observed_holdout_count": 512,
+    "candidate_ids": [
+      "candidate-a",
+      "candidate-b",
+      "candidate-c"
+    ]
+  },
+  "sources": {
+    "binding_verifier": {
+      "path": "ml/ocr/sequence_v3/verify_source_binding.py",
+      "bytes": 4327,
+      "sha256": "c12b0408434e80893ec21bfac50fd992d9365f7a9cdb34f29e7fb31f0553b185"
+    },
+    "evaluator": {
+      "path": "ml/ocr/sequence_v3/evaluate_existing.py",
+      "bytes": 5991,
+      "sha256": "1d453b9558c7ab2c2e6fc693cb7891449aa7b860b607dec4d815bb421ef75635"
+    },
+    "generator": {
+      "path": "ml/ocr/synthetic.py",
+      "bytes": 7565,
+      "sha256": "25663ae0935e1400dc29a563ec7824cb269517a0ea98acb136f686125389743e"
+    },
+    "metrics": {
+      "path": "ml/ocr/metrics.py",
+      "bytes": 2025,
+      "sha256": "5f598b2714bd9ade705199a04baaf6da02027b2a2f50271bf31c216750361518"
+    },
+    "model": {
+      "path": "ml/ocr/sequence_v3/model.py",
+      "bytes": 1479,
+      "sha256": "2c0f2e6165dd51e8594e210504372a9a1f517450a466587ac996954c86f70f48"
+    },
+    "plan": {
+      "path": "ml/ocr/sequence_v3/EXPERIMENT_PLAN.md",
+      "bytes": 3393,
+      "sha256": "e4d3a3b12d1bd7334fedf2506e80993546950afc8a45eed1035f14e4cf9ede8f"
+    },
+    "preprocessor": {
+      "path": "ml/ocr/sequence_v3/dataset.py",
+      "bytes": 8559,
+      "sha256": "264a4bc7a33a1e767a9e2a7d62da4c2b705a5329b42c11d69843ed63c51b892d"
+    },
+    "protocol": {
+      "path": "ml/ocr/sequence_v3/protocol.py",
+      "bytes": 2256,
+      "sha256": "7382cee68daea95f8c5e285b5a9a918bf5dc9d2ca74b8d8777a4c383e109b6b1"
+    },
+    "training_entrypoint": {
+      "path": "ml/ocr/sequence_v3/train.py",
+      "bytes": 9063,
+      "sha256": "7ec46c8e6ecc2dfaa9a6410076245647ca1c1f07180cc3569583b883487352b6"
+    }
+  },
+  "historical_artifacts": {
+    "candidate_a_report": {
+      "path": "ml/ocr/sequence_v3/runs/candidate-a/report.json",
+      "bytes": 3093,
+      "sha256": "b968b5e64400c217c1ae1366d18e208823984190bb85706a4329b014d5d45400"
+    },
+    "candidate_b_report": {
+      "path": "ml/ocr/sequence_v3/runs/candidate-b-topology-normalization/report.json",
+      "bytes": 3094,
+      "sha256": "b4f255a0abbd7d4fa1867429280e73ce351a4ed6581e2c083e0d9a9c19ba4fb8"
+    },
+    "candidate_c_report": {
+      "path": "ml/ocr/sequence_v3/runs/candidate-c-topology-columns/report.json",
+      "bytes": 3065,
+      "sha256": "a686f9c322c58d29351a4e58e27fa198265748dd00eeee2e080a564ef93afd52"
+    },
+    "candidate_c_checkpoint": {
+      "path": "ml/ocr/sequence_v3/runs/candidate-c-topology-columns/graph-numeric-sequence-v3.pt",
+      "bytes": 48393,
+      "sha256": "dcd9f00389f9bdaa2513d81fd0adfedc91576873855efb6e2c06f0cb4d82126c"
+    },
+    "candidate_c_onnx": {
+      "path": "ml/ocr/sequence_v3/runs/candidate-c-topology-columns/graph-numeric-sequence-v3.onnx",
+      "bytes": 53096,
+      "sha256": "dfe7a978789d36f71f02b0bbdae07a17d2d6551efa1a0bd7d369fe22184d7e20"
+    },
+    "representative_parity_report": {
+      "path": "ml/ocr/sequence_v3/runs/representative-parity.json",
+      "bytes": 2446,
+      "sha256": "5aeece3990a39a9301e264d7509ee5cc51ee3fad447842d921b561f3e78851ec"
+    }
+  },
+  "limitations": [
+    "Candidate A is the first and only sealed observation and failed.",
+    "Candidate B and C reused the same holdout records and are nonsealed observations.",
+    "Historical Candidate A and B source snapshots were not preserved.",
+    "The preprocessor reverses transformations from the shared procedural generator."
+  ]
+}

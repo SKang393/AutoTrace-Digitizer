@@ -98,6 +98,9 @@ public interface IStageCache
 public sealed class ContentAddressedStageCache : IStageCache
 {
     private readonly string _root;
+    private readonly SemaphoreSlim[] _writeGates = Enumerable.Range(0, 64)
+        .Select(static _ => new SemaphoreSlim(1, 1))
+        .ToArray();
 
     public ContentAddressedStageCache(string root)
     {
@@ -126,31 +129,40 @@ public sealed class ContentAddressedStageCache : IStageCache
     public async ValueTask PutAsync(StageCacheKey key, ReadOnlyMemory<byte> value, CancellationToken cancellationToken)
     {
         var path = GetPath(key);
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        var temporaryPath = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+        var gate = _writeGates[Convert.ToInt32(key.Value[..2], 16) % _writeGates.Length];
+        await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            await using (var stream = new FileStream(
-                temporaryPath,
-                FileMode.CreateNew,
-                FileAccess.Write,
-                FileShare.None,
-                64 * 1024,
-                FileOptions.Asynchronous | FileOptions.WriteThrough))
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            var temporaryPath = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            try
             {
-                await stream.WriteAsync(value, cancellationToken).ConfigureAwait(false);
-                await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
-                stream.Flush(flushToDisk: true);
-            }
+                await using (var stream = new FileStream(
+                    temporaryPath,
+                    FileMode.CreateNew,
+                    FileAccess.Write,
+                    FileShare.None,
+                    64 * 1024,
+                    FileOptions.Asynchronous | FileOptions.WriteThrough))
+                {
+                    await stream.WriteAsync(value, cancellationToken).ConfigureAwait(false);
+                    await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
+                    stream.Flush(flushToDisk: true);
+                }
 
-            File.Move(temporaryPath, path, overwrite: true);
+                File.Move(temporaryPath, path, overwrite: true);
+            }
+            finally
+            {
+                if (File.Exists(temporaryPath))
+                {
+                    File.Delete(temporaryPath);
+                }
+            }
         }
         finally
         {
-            if (File.Exists(temporaryPath))
-            {
-                File.Delete(temporaryPath);
-            }
+            gate.Release();
         }
     }
 

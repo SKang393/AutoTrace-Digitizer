@@ -1,0 +1,39 @@
+{
+  "pairs": [
+    {
+      "candidate_hashes": {
+        "onnx_sha256": "061a496167382d1bd11bb580bed383d2d1725da2001f9c440b7f1acc59ac116a"
+      },
+      "reason": "unsealed failed historical public evaluation",
+      "revision": "marker-center-public-gate-v1",
+      "task": "marker-center"
+    },
+    {
+      "candidate_hashes": {
+        "onnx_sha256": "277d01d78034620c7c0767e5d6cc5f8a4e1a2fa69caa93765a3b87e044fe85a8"
+      },
+      "reason": "unsealed failed historical confirmation evaluation from invalid training protocol",
+      "revision": "marker-center-confirmation-gate-v1",
+      "task": "marker-center"
+    },
+    {
+      "candidate_hashes": {
+        "checkpoint_sha256": "9f15d0d2ef067418b22ca625e405775c771dd63ea798f7c63fbed43d8d50b393",
+        "packed_onnx_sha256": "59b4af98fe40abd436f01a8c14bf0d12a7c82682ec072c65cef92881aa18b0ef"
+      },
+      "reason": "unsealed failed historical public evaluation",
+      "revision": "marker-classifier-public-gate-v1",
+      "task": "marker-classifier"
+    },
+    {
+      "candidate_hashes": {
+        "checkpoint_sha256": "49a5ce6487b51a7426ebca5081fa3e2a15c9c30bd6302033ad7efa82b3ad8c7a",
+        "packed_onnx_sha256": "e4ee20865d2fcdec7b8acb420b9838255851d39e187cacf609d56a4bfbd83f6a"
+      },
+      "reason": "unsealed same-family repeat confirmation failure; not a generalization gate",
+      "revision": "marker-classifier-confirmation-gate-v1",
+      "task": "marker-classifier"
+    }
+  ],
+  "schema_version": 1
+}

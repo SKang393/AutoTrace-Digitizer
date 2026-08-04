@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using GraphReader.App;
+using GraphReader.App.Controls;
 using GraphReader.App.Integration;
 using GraphReader.App.Integration.Workflow;
 using GraphReader.App.Models;
@@ -469,6 +470,7 @@ public sealed class RealGraphManualPortableValidationTests
             {
                 realMainWindowRendered = true,
                 graphTabDisplayed = true,
+                fitVerified = true,
                 zoomInOutVerified = true,
                 horizontalPanVerified = true,
                 fixedRightMagnifierVerified = true,
@@ -568,7 +570,7 @@ public sealed class RealGraphManualPortableValidationTests
         content.Arrange(new Rect(0, 0, width, height));
         content.UpdateLayout();
 
-        FrameworkElement graphCanvas = Assert.IsInstanceOfType<FrameworkElement>(window.FindName("GraphCanvasHost"));
+        GraphCanvasControl graphCanvas = Assert.IsInstanceOfType<GraphCanvasControl>(window.FindName("GraphCanvasHost"));
         FrameworkElement magnifier = Assert.IsInstanceOfType<FrameworkElement>(window.FindName("MagnifierInspector"));
         Point graphOrigin = graphCanvas.TranslatePoint(new Point(0, 0), content);
         Point magnifierOrigin = magnifier.TranslatePoint(new Point(0, 0), content);
@@ -576,16 +578,6 @@ public sealed class RealGraphManualPortableValidationTests
             graphOrigin.X + graphCanvas.ActualWidth,
             magnifierOrigin.X,
             "The fixed magnifier must remain to the right of the editable graph canvas.");
-
-        var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
-        bitmap.Render(content);
-        bitmap.Freeze();
-        var encoder = new PngBitmapEncoder();
-        encoder.Frames.Add(BitmapFrame.Create(bitmap));
-        using (FileStream stream = File.Create(path))
-        {
-            encoder.Save(stream);
-        }
 
         double prePanZoom = viewModel.SelectedTab!.ZoomLevel;
         Execute(viewModel.ZoomInCommand);
@@ -600,6 +592,25 @@ public sealed class RealGraphManualPortableValidationTests
         panHost.ScrollToHorizontalOffset(Math.Min(24, panHost.ScrollableWidth));
         panHost.UpdateLayout();
         Assert.IsGreaterThan(0, panHost.HorizontalOffset, "The real graph canvas must support horizontal panning.");
+
+        Button fitButton = Assert.IsInstanceOfType<Button>(window.FindName("FitGraphButton"));
+        fitButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        content.UpdateLayout();
+        Assert.AreEqual(1, viewModel.SelectedTab.ZoomLevel, 0.000001);
+        Assert.AreEqual(0, panHost.HorizontalOffset, 0.000001);
+        Assert.AreEqual(0, panHost.VerticalOffset, 0.000001);
+        Assert.IsGreaterThan(0, graphCanvas.FitScale);
+        Assert.AreEqual(graphCanvas.FitScale, graphCanvas.EffectiveScale, 0.000001);
+
+        var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+        bitmap.Render(content);
+        bitmap.Freeze();
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+        using (FileStream stream = File.Create(path))
+        {
+            encoder.Save(stream);
+        }
 
         window.DataContext = null;
         return new ScreenshotEvidence(width, height, Sha256(path));

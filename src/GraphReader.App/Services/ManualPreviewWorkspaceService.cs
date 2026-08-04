@@ -37,6 +37,18 @@ namespace GraphReader.App.Services;
 /// </summary>
 public class ManualPreviewWorkspaceService : IManualWorkspaceService
 {
+    private const string ProductionProjectionAuditKind = "production_review_projection";
+    private const string ProductionAddAuditKind = "production_point_added";
+    private const string ProductionMoveAuditKind = "production_point_moved";
+    private const string ProductionDeleteAuditKind = "production_point_deleted";
+    private const string ProductionReassignAuditKind = "production_point_reassigned";
+    private const string ProductionPhaseAuditKind = "production_phase_corrected";
+
+    private sealed record DeletedPointTombstone(
+        string CorrectionId,
+        string PointId,
+        string? DetectionKey);
+
     private readonly IApplicationPaths? _applicationPaths;
     private readonly IImageImportService _imageImportService;
     private readonly ProjectFileStore _projectFileStore;
@@ -49,6 +61,8 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
     private readonly Dictionary<string, PhaseManualOverrides> _phaseOverrides = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ManualPointXState> _pointXStates = new(StringComparer.Ordinal);
     private readonly Dictionary<string, List<PointModification>> _pointModificationHistories = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, Dictionary<string, string?>> _productionDetectionKeysByTab = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, Dictionary<string, DeletedPointTombstone>> _deletedPointTombstonesByTab = new(StringComparer.Ordinal);
     private readonly Dictionary<string, JsonElement> _enhancementByTab = new(StringComparer.Ordinal);
     private readonly Dictionary<string, EnhancementEnvelope> _enhancementEnvelopes = new(StringComparer.Ordinal);
     private IReadOnlyList<ImageImportError> _lastImportErrors = [];
@@ -143,6 +157,8 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
             addedTabs.Add(tab);
             addedSources.Add(source);
             _phaseOverrides[tab.TabId] = new PhaseManualOverrides();
+            _productionDetectionKeysByTab[tab.TabId] = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+            _deletedPointTombstonesByTab[tab.TabId] = new Dictionary<string, DeletedPointTombstone>(StringComparer.OrdinalIgnoreCase);
         }
 
         if (addedTabs.Count > 0)
@@ -206,6 +222,8 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         _phaseOverrides.Clear();
         _pointXStates.Clear();
         _pointModificationHistories.Clear();
+        _productionDetectionKeysByTab.Clear();
+        _deletedPointTombstonesByTab.Clear();
         _enhancementByTab.Clear();
         _enhancementEnvelopes.Clear();
         foreach (PanelRecord panel in project.Panels)
@@ -220,6 +238,8 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
             ReindexAllSeries(tab);
             _tabs.Add(tab);
             _phaseOverrides[tab.TabId] = CreatePhaseOverrides(tab);
+            _productionDetectionKeysByTab[tab.TabId] = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+            _deletedPointTombstonesByTab[tab.TabId] = new Dictionary<string, DeletedPointTombstone>(StringComparer.OrdinalIgnoreCase);
             if (panel.Enhancement is JsonElement enhancement)
             {
                 _enhancementByTab[tab.TabId] = enhancement.Clone();
@@ -238,6 +258,7 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         }
 
         CurrentProject = project;
+        RestoreProductionCorrectionState(project);
         CurrentProjectPath = Path.GetFullPath(path);
         _lastImportErrors = [];
         return CreateWorkspace();
@@ -345,6 +366,8 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
 
         _tabs.Remove(tab);
         _phaseOverrides.Remove(tab.TabId);
+        _productionDetectionKeysByTab.Remove(tab.TabId);
+        _deletedPointTombstonesByTab.Remove(tab.TabId);
         _enhancementByTab.Remove(tab.TabId);
         _enhancementEnvelopes.Remove(tab.TabId);
         foreach (AppGraphPoint point in tab.Points)
@@ -562,7 +585,17 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         tab.Points.Add(point);
         ReindexSeries(tab, seriesId);
         RequireSeries(tab, seriesId).NotifyCountChanged();
-        SynchronizeProject(DomainEventKind.PointEdited, Guid.Parse(tab.PanelId!), point.PointId, "Manual point added");
+        SynchronizeProject(
+            DomainEventKind.PointEdited,
+            Guid.Parse(tab.PanelId!),
+            point.PointId,
+            "Manual point added",
+            JsonSerializer.SerializeToElement(new
+            {
+                kind = ProductionAddAuditKind,
+                correction_id = Guid.NewGuid().ToString("D"),
+                point_id = point.PointId,
+            }));
         return point;
     }
 
@@ -579,20 +612,53 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         MarkPointXAsManualEstimate(tab, point);
         AppendPointModification(point, previousPixel, previousGraph, "Manual point moved");
         ReindexSeries(tab, point.SeriesId);
-        SynchronizeProject(DomainEventKind.PointEdited, Guid.Parse(tab.PanelId!), point.PointId, "Manual point moved");
+        _ = GetProductionDetectionKeys(tab.TabId).TryGetValue(point.PointId, out string? detectionKey);
+        SynchronizeProject(
+            DomainEventKind.PointEdited,
+            Guid.Parse(tab.PanelId!),
+            point.PointId,
+            "Manual point moved",
+            JsonSerializer.SerializeToElement(new
+            {
+                kind = ProductionMoveAuditKind,
+                correction_id = Guid.NewGuid().ToString("D"),
+                target_point_id = point.PointId,
+                target_detection_key = detectionKey,
+                original_pixel_x = point.PixelX,
+                original_pixel_y = point.PixelY,
+            }));
     }
 
     public void DeletePoint(string tabId, string pointId)
     {
         WorkspaceTabViewModel tab = RequireTab(tabId);
         AppGraphPoint point = RequirePoint(tab, pointId);
+        Dictionary<string, string?> identities = GetProductionDetectionKeys(tab.TabId);
+        _ = identities.TryGetValue(point.PointId, out string? detectionKey);
+        var tombstone = new DeletedPointTombstone(
+            Guid.NewGuid().ToString("D"),
+            point.PointId,
+            detectionKey);
+        GetDeletedPointTombstones(tab.TabId)[point.PointId] = tombstone;
         string sourceSeriesId = point.SeriesId;
         tab.Points.Remove(point);
         _pointXStates.Remove(point.PointId);
         _pointModificationHistories.Remove(point.PointId);
+        identities.Remove(point.PointId);
         ReindexSeries(tab, sourceSeriesId);
         RequireSeries(tab, point.SeriesId).NotifyCountChanged();
-        SynchronizeProject(DomainEventKind.PointEdited, Guid.Parse(tab.PanelId!), point.PointId, "Manual point deleted");
+        SynchronizeProject(
+            DomainEventKind.PointEdited,
+            Guid.Parse(tab.PanelId!),
+            point.PointId,
+            "Manual point deleted",
+            JsonSerializer.SerializeToElement(new
+            {
+                kind = ProductionDeleteAuditKind,
+                correction_id = tombstone.CorrectionId,
+                target_point_id = tombstone.PointId,
+                target_detection_key = tombstone.DetectionKey,
+            }));
     }
 
     public void ReassignPoint(string tabId, string pointId, string targetSeriesId)
@@ -619,7 +685,20 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         ReindexSeries(tab, target.SeriesId);
         source.NotifyCountChanged();
         target.NotifyCountChanged();
-        SynchronizeProject(DomainEventKind.PointEdited, Guid.Parse(tab.PanelId!), point.PointId, "Manual point reassigned");
+        _ = GetProductionDetectionKeys(tab.TabId).TryGetValue(point.PointId, out string? detectionKey);
+        SynchronizeProject(
+            DomainEventKind.PointEdited,
+            Guid.Parse(tab.PanelId!),
+            point.PointId,
+            "Manual point reassigned",
+            JsonSerializer.SerializeToElement(new
+            {
+                kind = ProductionReassignAuditKind,
+                correction_id = Guid.NewGuid().ToString("D"),
+                target_point_id = point.PointId,
+                target_detection_key = detectionKey,
+                series_id = target.SeriesId,
+            }));
     }
 
     public EditablePhaseDivider AddPhaseDivider(string tabId, double originalX, string code, string label)
@@ -639,7 +718,12 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         tab.PhaseDividers.Add(divider);
         SortDividers(tab);
         UpdateAllPointPhases(tab);
-        SynchronizeProject(DomainEventKind.PhaseEdited, Guid.Parse(tab.PanelId!), dividerId, "Manual phase divider added");
+        SynchronizeProject(
+            DomainEventKind.PhaseEdited,
+            Guid.Parse(tab.PanelId!),
+            dividerId,
+            "Manual phase divider added",
+            CreatePhaseCorrectionDetails("add", dividerId));
         return divider;
     }
 
@@ -662,7 +746,12 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         divider.OriginalX = originalX;
         SortDividers(tab);
         UpdateAllPointPhases(tab);
-        SynchronizeProject(DomainEventKind.PhaseEdited, Guid.Parse(tab.PanelId!), dividerId, "Manual phase divider moved");
+        SynchronizeProject(
+            DomainEventKind.PhaseEdited,
+            Guid.Parse(tab.PanelId!),
+            dividerId,
+            "Manual phase divider moved",
+            CreatePhaseCorrectionDetails("move", dividerId));
     }
 
     public void DeletePhaseDivider(string tabId, string dividerId)
@@ -678,7 +767,12 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         _phaseOverrides[tab.TabId] = edited.Overrides;
         tab.PhaseDividers.Remove(divider);
         UpdateAllPointPhases(tab);
-        SynchronizeProject(DomainEventKind.PhaseEdited, Guid.Parse(tab.PanelId!), dividerId, "Manual phase divider deleted");
+        SynchronizeProject(
+            DomainEventKind.PhaseEdited,
+            Guid.Parse(tab.PanelId!),
+            dividerId,
+            "Manual phase divider deleted",
+            CreatePhaseCorrectionDetails("delete", dividerId));
     }
 
     public void LabelPhaseDivider(string tabId, string dividerId, string code, string label)
@@ -708,7 +802,12 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         divider.Code = code.Trim();
         divider.Label = label.Trim();
         UpdateAllPointPhases(tab);
-        SynchronizeProject(DomainEventKind.PhaseEdited, Guid.Parse(tab.PanelId!), dividerId, "Manual phase divider labeled");
+        SynchronizeProject(
+            DomainEventKind.PhaseEdited,
+            Guid.Parse(tab.PanelId!),
+            dividerId,
+            "Manual phase divider labeled",
+            CreatePhaseCorrectionDetails("label", dividerId));
     }
 
     public async Task<DomainResult<ProjectSnapshotReceipt>> AutosaveAsync(
@@ -909,6 +1008,1062 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
             : Task.FromException(new InvalidOperationException(unavailable.Explanation));
     }
 
+    protected WorkflowImportRequest CreateProductionWorkflowImportRequest(bool enhancementEnabled)
+    {
+        WorkflowSourceRequest[] sources = CurrentProject.Sources
+            .Where(static source => !string.IsNullOrWhiteSpace(source.LocalPath))
+            .Select(source => new WorkflowSourceRequest(
+                source.SourceId.Value,
+                source.Kind switch
+                {
+                    SourceKind.Image => WorkflowSourceKind.Image,
+                    SourceKind.Pdf => WorkflowSourceKind.Pdf,
+                    _ => throw new InvalidOperationException(
+                        $"Source kind '{source.Kind}' is not supported by the production workflow."),
+                },
+                source.LocalPath!))
+            .ToArray();
+        if (sources.Length == 0)
+        {
+            throw new InvalidOperationException("Import a real image or PDF before running automatic detection.");
+        }
+
+        return new WorkflowImportRequest(CurrentProject.ProjectId.Value, sources, enhancementEnabled);
+    }
+
+    private sealed record ProductionProjectionPlan(
+        WorkflowReviewPanel ReviewPanel,
+        WorkspaceTabViewModel Tab,
+        ProductionPanelProjectionEvidence Projection,
+        ProductionPanelExportEvidence ExportEvidence,
+        ManualCalibrationState Calibration,
+        EditablePhaseDivider[] Dividers,
+        Dictionary<Guid, ProductionPointExportEvidence> PointEvidence,
+        Dictionary<Guid, PhaseRecord> Phases,
+        bool WasBlank,
+        bool PreserveManualPhases,
+        WorkflowCorrection[] Corrections,
+        WorkflowReviewPanel CorrectedReviewPanel);
+
+    private sealed record ProductionCorrectionReplay(
+        WorkflowReviewPanel ReviewPanel,
+        ProductionPanelExportEvidence ExportEvidence,
+        ProductionPanelProjectionEvidence Projection);
+
+    protected ProductionReviewProjectionResult ProjectProductionReview(
+        WorkflowRunResult result,
+        ProductionWorkflowPanelStore panelStore)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+        ArgumentNullException.ThrowIfNull(panelStore);
+        if (result.Review.ProjectId != CurrentProject.ProjectId.Value)
+        {
+            return RejectProductionProjection(
+                $"Automatic review project '{result.Review.ProjectId:D}' does not match the open project '{CurrentProject.ProjectId.Value:D}'.");
+        }
+
+        if (result.Review.Panels.Count == 0)
+        {
+            return RejectProductionProjection("Automatic review returned no panels to project.");
+        }
+
+        var plans = new List<ProductionProjectionPlan>(result.Review.Panels.Count);
+        var plannedTabIds = new HashSet<string>(StringComparer.Ordinal);
+        foreach (WorkflowReviewPanel incomingReviewPanel in result.Review.Panels)
+        {
+            WorkflowReviewPanel reviewPanel = incomingReviewPanel;
+            WorkflowImportedPanel imported = reviewPanel.PreparedPanel.ImportedPanel;
+            WorkspaceTabViewModel[] matchingTabs = _tabs.Where(candidate =>
+                    string.Equals(candidate.SourceId, imported.SourceId.ToString("D"), StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(candidate.SourceSha256, imported.Original.Sha256, StringComparison.OrdinalIgnoreCase) &&
+                    candidate.PixelWidth == imported.Original.Width &&
+                    candidate.PixelHeight == imported.Original.Height)
+                .ToArray();
+            if (matchingTabs.Length != 1)
+            {
+                return RejectProductionProjection(
+                    $"Review panel '{reviewPanel.PanelId:D}' matched {matchingTabs.Length} open workspace tabs by source, checksum, and dimensions.");
+            }
+
+            WorkspaceTabViewModel tab = matchingTabs[0];
+            if (!plannedTabIds.Add(tab.TabId))
+            {
+                return RejectProductionProjection(
+                    $"More than one review panel targets workspace tab '{tab.TabId}'.");
+            }
+
+            if (!panelStore.TryGet(reviewPanel.PanelId, out ProductionPanelEvidence? retained) ||
+                retained?.ExportEvidence is not { ProjectionEvidence: { } retainedProjection } retainedExportEvidence)
+            {
+                return RejectProductionProjection(
+                    $"Review panel '{reviewPanel.PanelId:D}' has no retained exact production projection evidence.");
+            }
+
+            if (result.Review.CorrectionJournal.Count > 0)
+            {
+                WorkflowReviewPanel? exactReview = CreateExactValidationReviewPanel(
+                    tab,
+                    reviewPanel,
+                    retainedProjection);
+                if (exactReview is null)
+                {
+                    return RejectProductionProjection(
+                        $"Review panel '{reviewPanel.PanelId:D}' could not be restored to exact automatic evidence before correction replay.");
+                }
+
+                reviewPanel = exactReview;
+            }
+
+            ProductionCorrectionReplay replay = ApplyDeletedPointTombstones(
+                tab,
+                reviewPanel,
+                retainedExportEvidence,
+                retainedProjection);
+            reviewPanel = replay.ReviewPanel;
+            ProductionPanelExportEvidence exportEvidence = replay.ExportEvidence;
+            ProductionPanelProjectionEvidence projection = replay.Projection;
+
+            if (projection.Calibration.Status != DomainCalibrationStatus.Valid ||
+                projection.Phases.Count == 0 ||
+                projection.Series.Count == 0)
+            {
+                return RejectProductionProjection(
+                    $"Review panel '{reviewPanel.PanelId:D}' has incomplete calibration, phase, or series evidence.");
+            }
+
+            PanelRecord[] projectPanels = CurrentProject.Panels.Where(panel =>
+                    string.Equals(panel.PanelId.Value.ToString("D"), tab.PanelId, StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            if (projectPanels.Length != 1)
+            {
+                return RejectProductionProjection(
+                    $"Workspace tab '{tab.TabId}' matched {projectPanels.Length} project panels.");
+            }
+
+            ManualCalibrationState? calibration = FromDomainCalibration(projection.Calibration);
+            if (calibration is null ||
+                (tab.Calibration is not null && !CalibrationMatches(tab.Calibration, calibration)) ||
+                !TryValidateProjection(reviewPanel, exportEvidence, projection) ||
+                !ExistingSeriesAreCompatible(tab.SeriesCards, projection.Series))
+            {
+                return RejectProductionProjection(
+                    $"Review panel '{reviewPanel.PanelId:D}' failed exact calibration, point, or series validation.");
+            }
+
+            EditablePhaseDivider?[] projectedDividerCandidates = projection.Phases
+                .Where(static phase => phase.Order > 1)
+                .Select(phase => phase.BoundaryLeftId is { } boundary
+                    ? new EditablePhaseDivider(
+                        boundary.Value.ToString("D"),
+                        phase.ScreenXMin,
+                        phase.Code,
+                        phase.LabelText ?? phase.Code)
+                    : null)
+                .ToArray();
+            if (projectedDividerCandidates.Any(static divider => divider is null))
+            {
+                return RejectProductionProjection(
+                    $"Review panel '{reviewPanel.PanelId:D}' has a phase boundary without an exact divider identity.");
+            }
+            EditablePhaseDivider[] projectedDividers = projectedDividerCandidates
+                .Select(static divider => divider!)
+                .ToArray();
+            string? phaseCorrectionId = GetLatestPhaseCorrectionId(tab);
+            bool preserveManualPhases = phaseCorrectionId is not null;
+            if (projectedDividers.Select(static divider => divider.DividerId).Distinct(StringComparer.OrdinalIgnoreCase).Count() !=
+                    projectedDividers.Length ||
+                (!preserveManualPhases &&
+                    tab.PhaseDividers.Count > 0 &&
+                    !PhaseDividersMatch(tab.PhaseDividers, projectedDividers)))
+            {
+                return RejectProductionProjection(
+                    $"Review panel '{reviewPanel.PanelId:D}' failed exact phase-divider validation.");
+            }
+
+            if (tab.Points.Select(static point => point.PointId).Distinct(StringComparer.OrdinalIgnoreCase).Count() != tab.Points.Count)
+            {
+                return RejectProductionProjection(
+                    $"Workspace tab '{tab.TabId}' contains duplicate point identities.");
+            }
+
+            WorkflowCorrection[] corrections = result.Review.CorrectionJournal
+                .Where(correction => correction.PanelId == reviewPanel.PanelId)
+                .Concat(BuildPersistedWorkflowCorrections(tab, reviewPanel, phaseCorrectionId))
+                .GroupBy(static correction => correction.CorrectionId, StringComparer.Ordinal)
+                .Select(static group => group.First())
+                .ToArray();
+            WorkflowReviewPanel correctedReviewPanel = ManualCorrectionOverlay.Reapply(
+                reviewPanel,
+                previousReview: null,
+                corrections);
+            HashSet<string> correctedPointIds = correctedReviewPanel.Points
+                .Select(static point => point.PointId)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            if (tab.Points.Any(point => !correctedPointIds.Contains(point.PointId)))
+            {
+                return RejectProductionProjection(
+                    $"Review panel '{reviewPanel.PanelId:D}' cannot represent every persisted manual point correction.");
+            }
+
+            plans.Add(new ProductionProjectionPlan(
+                reviewPanel,
+                tab,
+                projection,
+                exportEvidence,
+                calibration,
+                projectedDividers,
+                exportEvidence.Points.ToDictionary(static point => point.PointId),
+                projection.Phases.ToDictionary(static phase => phase.PhaseId.Value),
+                projectPanels[0].Series.Count == 0 &&
+                    projectPanels[0].Points.Count == 0 &&
+                    projectPanels[0].Calibration is null,
+                preserveManualPhases,
+                corrections,
+                correctedReviewPanel));
+        }
+
+        if (plans.Count != result.Review.Panels.Count)
+        {
+            return RejectProductionProjection(
+                $"Only {plans.Count} of {result.Review.Panels.Count} review panels passed exact projection validation.");
+        }
+
+        int projected = 0;
+        foreach (ProductionProjectionPlan plan in plans)
+        {
+            WorkflowReviewPanel reviewPanel = plan.ReviewPanel;
+            WorkspaceTabViewModel tab = plan.Tab;
+            ProductionPanelProjectionEvidence projection = plan.Projection;
+
+            tab.Calibration = plan.Calibration;
+            if (!plan.PreserveManualPhases && tab.PhaseDividers.Count == 0)
+            {
+                foreach (EditablePhaseDivider divider in plan.Dividers)
+                {
+                    tab.PhaseDividers.Add(divider);
+                }
+                _phaseOverrides[tab.TabId] = CreatePhaseOverrides(tab);
+            }
+
+            foreach (SeriesRecord series in projection.Series)
+            {
+                if (tab.SeriesCards.Any(candidate => string.Equals(
+                        candidate.SeriesId,
+                        series.SeriesId.Value.ToString("D"),
+                        StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
+
+                tab.SeriesCards.Add(new SeriesCardViewModel(
+                    series.SeriesId.Value.ToString("D"),
+                    series.Symbol,
+                    $"{series.Fill} {series.Shape}",
+                    series.DisplayName,
+                    series.Confidence,
+                    tab.Points,
+                    series.Shape,
+                    series.Fill,
+                    series.SemanticRole));
+            }
+
+            foreach (WorkflowPoint workflowPoint in reviewPanel.Points)
+            {
+                Guid pointId = Guid.Parse(workflowPoint.PointId);
+                Guid seriesId = Guid.Parse(workflowPoint.SeriesId!);
+                Guid phaseId = Guid.Parse(workflowPoint.PhaseId!);
+                ProductionPointExportEvidence metadata = plan.PointEvidence[pointId];
+                PhaseRecord phase = plan.Phases[phaseId];
+
+                AppGraphPoint? existing = tab.Points.SingleOrDefault(point =>
+                    string.Equals(point.PointId, workflowPoint.PointId, StringComparison.OrdinalIgnoreCase));
+                if (existing is not null &&
+                    _pointModificationHistories.TryGetValue(existing.PointId, out List<PointModification>? history) &&
+                    history.Count > 0)
+                {
+                    continue;
+                }
+
+                if (existing is null)
+                {
+                    existing = new AppGraphPoint(
+                        workflowPoint.PointId,
+                        seriesId.ToString("D"),
+                        workflowPoint.OriginalPixelX,
+                        workflowPoint.OriginalPixelY,
+                        workflowPoint.GraphX.GetValueOrDefault(),
+                        workflowPoint.GraphY.GetValueOrDefault(),
+                        phase.Code,
+                        phaseId.ToString("D"),
+                        metadata.ObservationIndex);
+                    tab.Points.Add(existing);
+                    _pointModificationHistories[existing.PointId] = [];
+                }
+                else
+                {
+                    existing.SeriesId = seriesId.ToString("D");
+                    existing.PixelX = workflowPoint.OriginalPixelX;
+                    existing.PixelY = workflowPoint.OriginalPixelY;
+                    existing.GraphX = workflowPoint.GraphX.GetValueOrDefault();
+                    existing.GraphY = workflowPoint.GraphY.GetValueOrDefault();
+                    existing.PhaseCode = phase.Code;
+                    existing.PhaseId = phaseId.ToString("D");
+                    existing.ObservationIndex = metadata.ObservationIndex;
+                }
+
+                _pointXStates[existing.PointId] = new ManualPointXState(
+                    metadata.PrintedXValue,
+                    metadata.EstimatedXValue,
+                    metadata.XSource switch
+                    {
+                        ExportXValueSource.Printed => PointXSource.Printed,
+                        ExportXValueSource.Estimated => PointXSource.Estimated,
+                        ExportXValueSource.ObservationOrder => PointXSource.ObservationOrder,
+                        _ => PointXSource.Unknown,
+                    },
+                    metadata.XConfidence,
+                    workflowPoint.GraphX.HasValue);
+                projected++;
+            }
+
+            foreach (SeriesCardViewModel series in tab.SeriesCards)
+            {
+                series.NotifyCountChanged();
+            }
+
+            Dictionary<string, string?> identities = GetProductionDetectionKeys(tab.TabId);
+            identities.Clear();
+            foreach (WorkflowPoint point in reviewPanel.Points)
+            {
+                identities[point.PointId] = point.DetectionKey;
+            }
+        }
+
+        var exactProjectionByTab = plans.ToDictionary(
+            static plan => plan.Tab.TabId,
+            static plan => (Evidence: plan.Projection, WasBlank: plan.WasBlank),
+            StringComparer.Ordinal);
+        SynchronizeProject(
+            DomainEventKind.DetectionAccepted,
+            panelId: null,
+            entityId: result.RunId.ToString("D"),
+            "Approved production workflow results projected by source and checksum identity",
+            JsonSerializer.SerializeToElement(new
+            {
+                kind = ProductionProjectionAuditKind,
+                point_identities = plans.SelectMany(plan => plan.ReviewPanel.Points.Select(point => new
+                {
+                    panel_id = plan.Tab.PanelId,
+                    point_id = point.PointId,
+                    detection_key = point.DetectionKey,
+                })).ToArray(),
+            }));
+        CurrentProject = CurrentProject with
+        {
+            Panels = CurrentProject.Panels.Select(panel =>
+            {
+                string tabId = panel.PanelId.Value.ToString("D");
+                if (!exactProjectionByTab.TryGetValue(
+                        tabId,
+                        out (ProductionPanelProjectionEvidence Evidence, bool WasBlank) state))
+                {
+                    return panel;
+                }
+
+                ProductionPanelProjectionEvidence exact = state.Evidence;
+                PanelRecord updated = panel with
+                {
+                    Participant = exact.Participant,
+                    Transforms = exact.Transforms,
+                    Calibration = exact.Calibration,
+                    OcrRegions = exact.OcrRegions,
+                    Markers = exact.Markers,
+                    Points = MergeProjectedPoints(panel.Points, exact.Points),
+                };
+                return state.WasBlank
+                    ? updated with { Phases = exact.Phases, Series = exact.Series }
+                    : updated;
+            }).ToArray(),
+        };
+
+        WorkflowCorrection[] allCorrections = plans.SelectMany(static plan => plan.Corrections)
+            .GroupBy(static correction => correction.CorrectionId, StringComparer.Ordinal)
+            .Select(static group => group.First())
+            .ToArray();
+        var correctedPanels = new List<WorkflowReviewPanel>(plans.Count);
+        foreach (ProductionProjectionPlan plan in plans)
+        {
+            PanelRecord currentPanel = CurrentProject.Panels.Single(panel => string.Equals(
+                panel.PanelId.Value.ToString("D"),
+                plan.Tab.PanelId,
+                StringComparison.OrdinalIgnoreCase));
+            WorkflowReviewPanel aligned = AlignReviewPanelToProject(plan.CorrectedReviewPanel, currentPanel);
+            correctedPanels.Add(aligned);
+            panelStore.SetExportEvidence(
+                plan.ReviewPanel.PanelId,
+                AlignExportEvidenceToProject(plan.ExportEvidence, currentPanel));
+        }
+
+        var correctedReview = new WorkflowReviewState(
+            result.Review.ProjectId,
+            correctedPanels,
+            allCorrections,
+            result.Review.Warnings);
+        var correctedRun = new WorkflowRunResult(result.RunId, correctedReview, result.Steps);
+        return ProductionReviewProjectionResult.Success(plans.Count, projected, correctedRun);
+    }
+
+    private WorkflowReviewPanel? CreateExactValidationReviewPanel(
+        WorkspaceTabViewModel tab,
+        WorkflowReviewPanel incoming,
+        ProductionPanelProjectionEvidence projection)
+    {
+        Dictionary<Guid, WorkflowPoint> incomingById = incoming.Points
+            .Where(point => Guid.TryParse(point.PointId, out _))
+            .ToDictionary(point => Guid.Parse(point.PointId));
+        Dictionary<Guid, SeriesRecord> seriesById = projection.Series.ToDictionary(static series => series.SeriesId.Value);
+        Dictionary<string, string?> identities = GetProductionDetectionKeys(tab.TabId);
+        Dictionary<string, DeletedPointTombstone> tombstones = GetDeletedPointTombstones(tab.TabId);
+        var exactPoints = new List<WorkflowPoint>(projection.Points.Count);
+        foreach (PointRecord point in projection.Points)
+        {
+            if (point.SeriesId is not { } seriesId ||
+                point.PhaseId is not { } phaseId ||
+                !seriesById.TryGetValue(seriesId.Value, out SeriesRecord? series))
+            {
+                return null;
+            }
+
+            _ = incomingById.TryGetValue(point.PointId.Value, out WorkflowPoint? template);
+            string pointId = point.PointId.Value.ToString("D");
+            _ = identities.TryGetValue(pointId, out string? detectionKey);
+            if (detectionKey is null && tombstones.TryGetValue(pointId, out DeletedPointTombstone? tombstone))
+            {
+                detectionKey = tombstone.DetectionKey;
+            }
+            detectionKey ??= template?.DetectionKey;
+            if (string.IsNullOrWhiteSpace(detectionKey))
+            {
+                return null;
+            }
+
+            exactPoints.Add(new WorkflowPoint(
+                pointId,
+                detectionKey,
+                point.OriginalPixel.X,
+                point.OriginalPixel.Y,
+                point.PointConfidence,
+                template?.SourceImage ?? WorkflowImageVariant.Original,
+                WorkflowReviewStatus.Accepted,
+                series.Symbol,
+                series.Shape.ToString(),
+                series.Fill.ToString(),
+                seriesId.Value.ToString("D"),
+                phaseId.Value.ToString("D"),
+                point.GraphX,
+                point.GraphY,
+                point.SourceStage,
+                point.ModelVersion,
+                isManual: false));
+        }
+
+        return new WorkflowReviewPanel(incoming.PreparedPanel, exactPoints, incoming.DetectionProvenance);
+    }
+
+    private WorkflowCorrection[] BuildPersistedWorkflowCorrections(
+        WorkspaceTabViewModel tab,
+        WorkflowReviewPanel exactReviewPanel,
+        string? phaseCorrectionId)
+    {
+        Guid workspacePanelId = Guid.Parse(tab.PanelId!);
+        PanelRecord currentPanel = CurrentProject.Panels.Single(panel => panel.PanelId.Value == workspacePanelId);
+        var corrections = new List<WorkflowCorrection>();
+        foreach (AuditEvent auditEvent in CurrentProject.Audit.Events
+                     .Where(auditEvent => auditEvent.PanelId?.Value == workspacePanelId)
+                     .OrderBy(static auditEvent => auditEvent.OccurredUtc))
+        {
+            if (auditEvent.Details is not JsonElement details ||
+                !TryReadString(details, "kind", out string? kind) ||
+                !TryReadString(details, "correction_id", out string? correctionId))
+            {
+                continue;
+            }
+
+            switch (kind)
+            {
+                case ProductionAddAuditKind when TryReadString(details, "point_id", out string? addedPointId):
+                    PointRecord? addedPoint = currentPanel.Points.SingleOrDefault(point => string.Equals(
+                        point.PointId.Value.ToString("D"), addedPointId, StringComparison.OrdinalIgnoreCase));
+                    if (addedPoint is not null && TryCreateManualWorkflowPoint(currentPanel, addedPoint, out WorkflowPoint? workflowPoint))
+                    {
+                        corrections.Add(new AddWorkflowPointCorrection(
+                            correctionId!, exactReviewPanel.PanelId, workflowPoint!));
+                    }
+                    break;
+                case ProductionMoveAuditKind
+                    when TryReadString(details, "target_point_id", out string? movedPointId) &&
+                        TryReadDouble(details, "original_pixel_x", out double movedX) &&
+                        TryReadDouble(details, "original_pixel_y", out double movedY):
+                    corrections.Add(new MoveWorkflowPointCorrection(
+                        correctionId!,
+                        exactReviewPanel.PanelId,
+                        movedPointId!,
+                        TryReadNullableString(details, "target_detection_key"),
+                        movedX,
+                        movedY));
+                    break;
+                case ProductionDeleteAuditKind when TryReadString(details, "target_point_id", out string? deletedPointId):
+                    corrections.Add(new DeleteWorkflowPointCorrection(
+                        correctionId!,
+                        exactReviewPanel.PanelId,
+                        deletedPointId!,
+                        TryReadNullableString(details, "target_detection_key")));
+                    break;
+                case ProductionReassignAuditKind
+                    when TryReadString(details, "target_point_id", out string? reassignedPointId) &&
+                        TryReadString(details, "series_id", out string? seriesId):
+                    corrections.Add(new ReassignWorkflowPointCorrection(
+                        correctionId!,
+                        exactReviewPanel.PanelId,
+                        reassignedPointId!,
+                        TryReadNullableString(details, "target_detection_key"),
+                        seriesId!));
+                    break;
+            }
+        }
+
+        if (phaseCorrectionId is null)
+        {
+            return corrections.ToArray();
+        }
+
+        WorkflowReviewPanel pointCorrected = ManualCorrectionOverlay.Reapply(
+            exactReviewPanel,
+            previousReview: null,
+            corrections);
+        foreach (WorkflowPoint point in pointCorrected.Points)
+        {
+            string? desiredPhaseId = ResolveManualPhaseId(tab, point);
+            if (desiredPhaseId is null || string.Equals(desiredPhaseId, point.PhaseId, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            corrections.Add(new AssignWorkflowPointPhaseCorrection(
+                $"{phaseCorrectionId}:{point.PointId}",
+                exactReviewPanel.PanelId,
+                point.PointId,
+                point.DetectionKey,
+                desiredPhaseId));
+        }
+
+        return corrections.ToArray();
+    }
+
+    private static bool TryCreateManualWorkflowPoint(
+        PanelRecord panel,
+        PointRecord point,
+        out WorkflowPoint? workflowPoint)
+    {
+        workflowPoint = null;
+        if (point.SeriesId is not { } seriesId ||
+            point.PhaseId is not { } phaseId ||
+            panel.Series.SingleOrDefault(series => series.SeriesId == seriesId) is not { } series)
+        {
+            return false;
+        }
+
+        workflowPoint = new WorkflowPoint(
+            point.PointId.Value.ToString("D"),
+            detectionKey: null,
+            point.OriginalPixel.X,
+            point.OriginalPixel.Y,
+            point.PointConfidence,
+            WorkflowImageVariant.Original,
+            WorkflowReviewStatus.Corrected,
+            series.Symbol,
+            series.Shape.ToString(),
+            series.Fill.ToString(),
+            seriesId.Value.ToString("D"),
+            phaseId.Value.ToString("D"),
+            point.GraphX,
+            point.GraphY,
+            point.SourceStage,
+            point.ModelVersion,
+            isManual: true);
+        return true;
+    }
+
+    private static string? ResolveManualPhaseId(WorkspaceTabViewModel tab, WorkflowPoint point)
+    {
+        SeriesCardViewModel? series = tab.SeriesCards.SingleOrDefault(candidate => string.Equals(
+            candidate.SeriesId, point.SeriesId, StringComparison.OrdinalIgnoreCase));
+        if (series is null)
+        {
+            return null;
+        }
+
+        if (series.SemanticRole is SemanticRole.Maintenance or SemanticRole.Generalization)
+        {
+            return series.SeriesId;
+        }
+
+        return tab.PhaseDividers
+            .Where(divider => divider.OriginalX <= point.OriginalPixelX)
+            .OrderByDescending(static divider => divider.OriginalX)
+            .Select(static divider => divider.DividerId)
+            .FirstOrDefault() ?? tab.PanelId;
+    }
+
+    private static WorkflowReviewPanel AlignReviewPanelToProject(
+        WorkflowReviewPanel corrected,
+        PanelRecord panel)
+    {
+        Dictionary<string, WorkflowPoint> correctedById = corrected.Points.ToDictionary(
+            static point => point.PointId,
+            StringComparer.OrdinalIgnoreCase);
+        Dictionary<SeriesId, SeriesRecord> seriesById = panel.Series.ToDictionary(static series => series.SeriesId);
+        var aligned = new List<WorkflowPoint>(panel.Points.Count);
+        foreach (PointRecord point in panel.Points)
+        {
+            string pointId = point.PointId.Value.ToString("D");
+            if (!correctedById.TryGetValue(pointId, out WorkflowPoint? template) ||
+                point.SeriesId is not { } seriesId ||
+                point.PhaseId is not { } phaseId ||
+                !seriesById.TryGetValue(seriesId, out SeriesRecord? series))
+            {
+                throw new InvalidOperationException(
+                    $"Corrected workflow review is missing persisted project point '{pointId}'.");
+            }
+
+            aligned.Add(template with
+            {
+                OriginalPixelX = point.OriginalPixel.X,
+                OriginalPixelY = point.OriginalPixel.Y,
+                GraphX = point.GraphX,
+                GraphY = point.GraphY,
+                SeriesId = seriesId.Value.ToString("D"),
+                PhaseId = phaseId.Value.ToString("D"),
+                Symbol = series.Symbol,
+                Shape = series.Shape.ToString(),
+                Fill = series.Fill.ToString(),
+            });
+        }
+
+        return new WorkflowReviewPanel(corrected.PreparedPanel, aligned, corrected.DetectionProvenance);
+    }
+
+    private static ProductionPanelExportEvidence AlignExportEvidenceToProject(
+        ProductionPanelExportEvidence source,
+        PanelRecord panel)
+    {
+        var projection = new ProductionPanelProjectionEvidence(
+            panel.Calibration ?? throw new InvalidOperationException("Corrected production panel lost calibration."),
+            panel.Phases,
+            panel.Series,
+            panel.Points,
+            panel.Transforms,
+            panel.OcrRegions,
+            panel.Markers,
+            panel.Participant);
+        return new ProductionPanelExportEvidence(
+            source.Calibration,
+            panel.Phases.Select(ToExportPhase),
+            panel.Series.Select(ToExportSeries),
+            panel.Series.Select(series => new ExportSeriesRelation(
+                series.SeriesId.Value,
+                series.SharedBaselineSeriesId?.Value,
+                series.ApplicableProbeSeriesIds.Select(static id => id.Value))),
+            panel.Points.Select(point => new ProductionPointExportEvidence(
+                point.PointId.Value,
+                point.MarkerId?.Value,
+                point.ObservationIndex,
+                point.PrintedXValue,
+                point.EstimatedXValue,
+                point.XSource switch
+                {
+                    PointXSource.Printed => ExportXValueSource.Printed,
+                    PointXSource.Estimated => ExportXValueSource.Estimated,
+                    PointXSource.ObservationOrder => ExportXValueSource.ObservationOrder,
+                    _ => ExportXValueSource.Unknown,
+                },
+                point.XConfidence,
+                point.YConfidence)),
+            source.Provenance,
+            panel.Participant,
+            source.Mode,
+            source.AuditMode,
+            source.SessionOriginPolicy,
+            projection);
+    }
+
+    private ProductionCorrectionReplay ApplyDeletedPointTombstones(
+        WorkspaceTabViewModel tab,
+        WorkflowReviewPanel reviewPanel,
+        ProductionPanelExportEvidence exportEvidence,
+        ProductionPanelProjectionEvidence projection)
+    {
+        DeletedPointTombstone[] tombstones = GetDeletedPointTombstones(tab.TabId).Values
+            .OrderBy(static tombstone => tombstone.CorrectionId, StringComparer.Ordinal)
+            .ToArray();
+        if (tombstones.Length == 0)
+        {
+            return new ProductionCorrectionReplay(reviewPanel, exportEvidence, projection);
+        }
+
+        WorkflowCorrection[] corrections = tombstones.Select(tombstone =>
+            (WorkflowCorrection)new DeleteWorkflowPointCorrection(
+                tombstone.CorrectionId,
+                reviewPanel.PanelId,
+                tombstone.PointId,
+                tombstone.DetectionKey)).ToArray();
+        WorkflowReviewPanel correctedPanel = ManualCorrectionOverlay.Reapply(
+            reviewPanel,
+            previousReview: null,
+            corrections);
+        HashSet<Guid> retainedPointIds = correctedPanel.Points
+            .Select(point => Guid.TryParse(point.PointId, out Guid pointId) ? pointId : Guid.Empty)
+            .Where(static pointId => pointId != Guid.Empty)
+            .ToHashSet();
+        SeriesRecord[] retainedSeries = projection.Series.Select(series => series with
+        {
+            PointIds = series.PointIds.Where(pointId => retainedPointIds.Contains(pointId.Value)).ToArray(),
+        }).ToArray();
+        var correctedProjection = new ProductionPanelProjectionEvidence(
+            projection.Calibration,
+            projection.Phases,
+            retainedSeries,
+            projection.Points.Where(point => retainedPointIds.Contains(point.PointId.Value)),
+            projection.Transforms,
+            projection.OcrRegions,
+            projection.Markers,
+            projection.Participant);
+        var correctedExport = new ProductionPanelExportEvidence(
+            exportEvidence.Calibration,
+            exportEvidence.Phases,
+            exportEvidence.Series.Select(series => new ExportSeries(
+                series.SeriesId,
+                series.Symbol,
+                series.DisplayName,
+                series.SemanticRole,
+                series.PointIds.Where(retainedPointIds.Contains),
+                series.Confidence,
+                series.LegendText)),
+            exportEvidence.Relations,
+            exportEvidence.Points.Where(point => retainedPointIds.Contains(point.PointId)),
+            exportEvidence.Provenance,
+            exportEvidence.Participant,
+            exportEvidence.Mode,
+            exportEvidence.AuditMode,
+            exportEvidence.SessionOriginPolicy,
+            correctedProjection);
+        return new ProductionCorrectionReplay(correctedPanel, correctedExport, correctedProjection);
+    }
+
+    private Dictionary<string, string?> GetProductionDetectionKeys(string tabId)
+    {
+        if (!_productionDetectionKeysByTab.TryGetValue(tabId, out Dictionary<string, string?>? identities))
+        {
+            identities = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+            _productionDetectionKeysByTab[tabId] = identities;
+        }
+
+        return identities;
+    }
+
+    private Dictionary<string, DeletedPointTombstone> GetDeletedPointTombstones(string tabId)
+    {
+        if (!_deletedPointTombstonesByTab.TryGetValue(
+                tabId,
+                out Dictionary<string, DeletedPointTombstone>? tombstones))
+        {
+            tombstones = new Dictionary<string, DeletedPointTombstone>(StringComparer.OrdinalIgnoreCase);
+            _deletedPointTombstonesByTab[tabId] = tombstones;
+        }
+
+        return tombstones;
+    }
+
+    private string? GetLatestPhaseCorrectionId(WorkspaceTabViewModel tab)
+    {
+        Guid panelId = Guid.Parse(tab.PanelId!);
+        return CurrentProject.Audit.Events
+            .Where(auditEvent => auditEvent.PanelId?.Value == panelId)
+            .OrderByDescending(static auditEvent => auditEvent.OccurredUtc)
+            .Select(static auditEvent => auditEvent.Details)
+            .Where(static details => details is not null)
+            .Select(static details => details!.Value)
+            .Where(details => TryReadString(details, "kind", out string? kind) &&
+                string.Equals(kind, ProductionPhaseAuditKind, StringComparison.Ordinal))
+            .Select(details => TryReadString(details, "correction_id", out string? correctionId)
+                ? correctionId
+                : null)
+            .FirstOrDefault(static correctionId => correctionId is not null);
+    }
+
+    private static JsonElement CreatePhaseCorrectionDetails(string action, string dividerId) =>
+        JsonSerializer.SerializeToElement(new
+        {
+            kind = ProductionPhaseAuditKind,
+            correction_id = Guid.NewGuid().ToString("D"),
+            action,
+            divider_id = dividerId,
+        });
+
+    private void RestoreProductionCorrectionState(ProjectDocument project)
+    {
+        foreach (AuditEvent auditEvent in project.Audit.Events.OrderBy(static item => item.OccurredUtc))
+        {
+            if (auditEvent.Details is not JsonElement details ||
+                details.ValueKind != JsonValueKind.Object ||
+                !details.TryGetProperty("kind", out JsonElement kindElement) ||
+                kindElement.ValueKind != JsonValueKind.String)
+            {
+                continue;
+            }
+
+            string? kind = kindElement.GetString();
+            if (string.Equals(kind, ProductionProjectionAuditKind, StringComparison.Ordinal) &&
+                details.TryGetProperty("point_identities", out JsonElement identitiesElement) &&
+                identitiesElement.ValueKind == JsonValueKind.Array)
+            {
+                foreach (JsonElement identity in identitiesElement.EnumerateArray())
+                {
+                    if (!TryReadString(identity, "panel_id", out string? panelId) ||
+                        !TryReadString(identity, "point_id", out string? pointId))
+                    {
+                        continue;
+                    }
+
+                    WorkspaceTabViewModel? tab = _tabs.SingleOrDefault(candidate => string.Equals(
+                        candidate.PanelId,
+                        panelId,
+                        StringComparison.OrdinalIgnoreCase));
+                    if (tab is null)
+                    {
+                        continue;
+                    }
+
+                    string? detectionKey = TryReadNullableString(identity, "detection_key");
+                    GetProductionDetectionKeys(tab.TabId)[pointId!] = detectionKey;
+                }
+            }
+            else if (string.Equals(kind, ProductionDeleteAuditKind, StringComparison.Ordinal) &&
+                auditEvent.PanelId is { } deletedPanelId &&
+                TryReadString(details, "correction_id", out string? correctionId) &&
+                TryReadString(details, "target_point_id", out string? targetPointId))
+            {
+                WorkspaceTabViewModel? tab = _tabs.SingleOrDefault(candidate => string.Equals(
+                    candidate.PanelId,
+                    deletedPanelId.Value.ToString("D"),
+                    StringComparison.OrdinalIgnoreCase));
+                if (tab is null)
+                {
+                    continue;
+                }
+
+                string? detectionKey = TryReadNullableString(details, "target_detection_key");
+                GetDeletedPointTombstones(tab.TabId)[targetPointId!] = new DeletedPointTombstone(
+                    correctionId!,
+                    targetPointId!,
+                    detectionKey);
+                GetProductionDetectionKeys(tab.TabId).Remove(targetPointId!);
+            }
+        }
+    }
+
+    private static bool TryReadString(JsonElement value, string propertyName, out string? result)
+    {
+        result = null;
+        if (value.ValueKind != JsonValueKind.Object ||
+            !value.TryGetProperty(propertyName, out JsonElement property) ||
+            property.ValueKind != JsonValueKind.String ||
+            string.IsNullOrWhiteSpace(property.GetString()))
+        {
+            return false;
+        }
+
+        result = property.GetString();
+        return true;
+    }
+
+    private static string? TryReadNullableString(JsonElement value, string propertyName) =>
+        value.ValueKind == JsonValueKind.Object &&
+        value.TryGetProperty(propertyName, out JsonElement property) &&
+        property.ValueKind == JsonValueKind.String
+            ? property.GetString()
+            : null;
+
+    private static bool TryReadDouble(JsonElement value, string propertyName, out double result)
+    {
+        result = 0;
+        return value.ValueKind == JsonValueKind.Object &&
+            value.TryGetProperty(propertyName, out JsonElement property) &&
+            property.ValueKind == JsonValueKind.Number &&
+            property.TryGetDouble(out result) &&
+            double.IsFinite(result);
+    }
+
+    private static ProductionReviewProjectionResult RejectProductionProjection(string technicalMessage) =>
+        ProductionReviewProjectionResult.Rejected(new ProductionWorkflowFailure(
+            ProductionWorkflowFailureCodes.ReviewProjectionRejected,
+            "Errors.ProductionReviewProjectionRejected",
+            technicalMessage,
+            Recoverable: true,
+            "Keep the current manual review and rerun after every panel has exact approved projection evidence."));
+
+    private static bool TryValidateProjection(
+        WorkflowReviewPanel reviewPanel,
+        ProductionPanelExportEvidence exportEvidence,
+        ProductionPanelProjectionEvidence projection)
+    {
+        ProductionPointExportEvidence[] pointEvidenceItems = exportEvidence.Points.ToArray();
+        SeriesRecord[] seriesItems = projection.Series.ToArray();
+        PointRecord[] projectedPointItems = projection.Points.ToArray();
+        if (pointEvidenceItems.Select(static point => point.PointId).Distinct().Count() != pointEvidenceItems.Length ||
+            seriesItems.Select(static item => item.SeriesId.Value).Distinct().Count() != seriesItems.Length ||
+            projection.Phases.Select(static item => item.PhaseId.Value).Distinct().Count() != projection.Phases.Count ||
+            projectedPointItems.Select(static item => item.PointId.Value).Distinct().Count() != projectedPointItems.Length)
+        {
+            return false;
+        }
+
+        Dictionary<Guid, ProductionPointExportEvidence> pointEvidence = pointEvidenceItems
+            .ToDictionary(static point => point.PointId);
+        Dictionary<Guid, SeriesRecord> series = seriesItems.ToDictionary(static item => item.SeriesId.Value);
+        HashSet<Guid> phases = projection.Phases.Select(static item => item.PhaseId.Value).ToHashSet();
+        Dictionary<Guid, PointRecord> projectedPoints = projectedPointItems.ToDictionary(static item => item.PointId.Value);
+        HashSet<Guid> reviewPointIds = reviewPanel.Points
+            .Select(point => Guid.TryParse(point.PointId, out Guid id) ? id : Guid.Empty)
+            .ToHashSet();
+        (Guid SeriesId, Guid PointId)[] pointMemberships = seriesItems
+            .SelectMany(seriesItem => seriesItem.PointIds.Select(pointId =>
+                (seriesItem.SeriesId.Value, pointId.Value)))
+            .ToArray();
+        if (reviewPointIds.Contains(Guid.Empty) ||
+            reviewPointIds.Count != reviewPanel.Points.Count ||
+            !reviewPointIds.SetEquals(pointEvidence.Keys) ||
+            !reviewPointIds.SetEquals(projectedPoints.Keys) ||
+            pointMemberships.Select(static membership => membership.PointId).Distinct().Count() != pointMemberships.Length ||
+            !reviewPointIds.SetEquals(pointMemberships.Select(static membership => membership.PointId)))
+        {
+            return false;
+        }
+
+        foreach (SeriesRecord retainedSeries in seriesItems)
+        {
+            HashSet<Guid> declaredPointIds = retainedSeries.PointIds.Select(static id => id.Value).ToHashSet();
+            HashSet<Guid> reviewSeriesPointIds = reviewPanel.Points
+                .Where(point => Guid.TryParse(point.SeriesId, out Guid id) && id == retainedSeries.SeriesId.Value)
+                .Select(point => Guid.TryParse(point.PointId, out Guid id) ? id : Guid.Empty)
+                .ToHashSet();
+            HashSet<Guid> exactSeriesPointIds = projectedPointItems
+                .Where(point => point.SeriesId?.Value == retainedSeries.SeriesId.Value)
+                .Select(static point => point.PointId.Value)
+                .ToHashSet();
+            if (!declaredPointIds.SetEquals(reviewSeriesPointIds) ||
+                !declaredPointIds.SetEquals(exactSeriesPointIds))
+            {
+                return false;
+            }
+        }
+
+        foreach (WorkflowPoint point in reviewPanel.Points)
+        {
+            if (!Guid.TryParse(point.PointId, out Guid pointId) ||
+                !Guid.TryParse(point.SeriesId, out Guid seriesId) ||
+                !Guid.TryParse(point.PhaseId, out Guid phaseId) ||
+                point.GraphX is null ||
+                point.GraphY is null ||
+                !pointEvidence.TryGetValue(pointId, out ProductionPointExportEvidence? metadata) ||
+                !projectedPoints.TryGetValue(pointId, out PointRecord? exactPoint) ||
+                metadata.ObservationIndex < 1 ||
+                !series.TryGetValue(seriesId, out SeriesRecord? retainedSeries) ||
+                !phases.Contains(phaseId) ||
+                !Enum.TryParse(point.Shape, ignoreCase: true, out MarkerShape shape) ||
+                !Enum.TryParse(point.Fill, ignoreCase: true, out MarkerFill fill) ||
+                shape != retainedSeries.Shape ||
+                fill != retainedSeries.Fill ||
+                exactPoint.SeriesId?.Value != seriesId ||
+                exactPoint.PhaseId?.Value != phaseId ||
+                exactPoint.OriginalPixel.X != point.OriginalPixelX ||
+                exactPoint.OriginalPixel.Y != point.OriginalPixelY ||
+                exactPoint.GraphX != point.GraphX ||
+                exactPoint.GraphY != point.GraphY ||
+                exactPoint.ObservationIndex != metadata.ObservationIndex)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static List<PointRecord> MergeProjectedPoints(
+        IReadOnlyList<PointRecord> current,
+        IReadOnlyList<PointRecord> exact)
+    {
+        Dictionary<PointId, PointRecord> currentById = current.ToDictionary(static point => point.PointId);
+        var merged = new List<PointRecord>(exact.Count + current.Count);
+        foreach (PointRecord point in exact)
+        {
+            if (currentById.TryGetValue(point.PointId, out PointRecord? existing) &&
+                existing.ModificationHistory.Count > 0)
+            {
+                merged.Add(existing);
+            }
+            else
+            {
+                merged.Add(point);
+            }
+        }
+
+        merged.AddRange(current.Where(point => exact.All(candidate => candidate.PointId != point.PointId)));
+        return merged;
+    }
+
+    private static bool CalibrationMatches(ManualCalibrationState current, ManualCalibrationState exact) =>
+        current.Session1Y0 == exact.Session1Y0 &&
+        current.Session1YMaximum == exact.Session1YMaximum &&
+        current.SessionMaximumY0 == exact.SessionMaximumY0 &&
+        current.YMaximum == exact.YMaximum &&
+        current.XMaximum == exact.XMaximum;
+
+    private static bool PhaseDividersMatch(
+        IEnumerable<EditablePhaseDivider> current,
+        IEnumerable<EditablePhaseDivider> projected) =>
+        current.OrderBy(static divider => divider.OriginalX).Select(static divider =>
+                (divider.DividerId, divider.OriginalX, divider.Code, divider.Label))
+            .SequenceEqual(projected.OrderBy(static divider => divider.OriginalX).Select(static divider =>
+                (divider.DividerId, divider.OriginalX, divider.Code, divider.Label)));
+
+    private static bool ExistingSeriesAreCompatible(
+        IEnumerable<SeriesCardViewModel> current,
+        IEnumerable<SeriesRecord> projected)
+    {
+        Dictionary<string, SeriesRecord> retained = projected.ToDictionary(
+            static series => series.SeriesId.Value.ToString("D"),
+            StringComparer.OrdinalIgnoreCase);
+        foreach (SeriesCardViewModel series in current)
+        {
+            if (!retained.TryGetValue(series.SeriesId, out SeriesRecord? exact))
+            {
+                continue;
+            }
+
+            if (!string.Equals(series.Symbol, exact.Symbol, StringComparison.Ordinal) ||
+                !string.Equals(series.Label, exact.DisplayName, StringComparison.Ordinal) ||
+                series.Shape != exact.Shape ||
+                series.Fill != exact.Fill ||
+                series.SemanticRole != exact.SemanticRole)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private static string GetApplicationVersion()
     {
         Version version = typeof(ManualPreviewWorkspaceService).Assembly.GetName().Version ?? new Version(0, 0, 19);
@@ -1042,7 +2197,8 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         DomainEventKind eventKind,
         Guid? panelId,
         string? entityId,
-        string note)
+        string note,
+        JsonElement? details = null)
     {
         DateTimeOffset now = DateTimeOffset.UtcNow;
         var auditEvent = new AuditEvent(
@@ -1052,7 +2208,7 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
             panelId is null ? null : PanelId.FromGuid(panelId.Value),
             entityId,
             note,
-            Details: null);
+            Details: details);
         CurrentProject = CurrentProject with
         {
             ModifiedUtc = now,

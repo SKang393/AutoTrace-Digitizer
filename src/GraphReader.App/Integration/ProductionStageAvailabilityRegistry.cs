@@ -2,15 +2,32 @@
 // Copyright 2026 Sungwoo Kang
 
 using GraphReader.App.Services;
+using System.IO;
 
 namespace GraphReader.App.Integration;
 
 public static class ProductionStageAvailabilityRegistry
 {
-    public static IReadOnlyList<AutomaticStageStatus> Current { get; } = Create(localEnhancementConfigured: false);
+    public static IReadOnlyList<AutomaticStageStatus> Current { get; } = Create(
+        localEnhancementConfigured: false,
+        modelRoot: null,
+        reviewedPdfiumConfigured: false);
 
-    public static IReadOnlyList<AutomaticStageStatus> Create(bool localEnhancementConfigured) =>
-    [
+    public static IReadOnlyList<AutomaticStageStatus> Create(
+        bool localEnhancementConfigured,
+        string? modelRoot = null,
+        bool reviewedPdfiumConfigured = false)
+    {
+        bool packageIndexPresent = !string.IsNullOrWhiteSpace(modelRoot) &&
+            File.Exists(Path.Combine(modelRoot, "production-model-index.json"));
+        string modelEvidence = packageIndexPresent
+            ? "A package index exists, but no checksum-resolved approved default model set is composed."
+            : "No production-model-index.json is installed in the application model root.";
+        string pdfEvidence = reviewedPdfiumConfigured
+            ? "A checksum-bound reviewed PDFium renderer is configured for PDF import."
+            : "No checksum-bound reviewed PDFium approval is configured; scanned-PDF rendering remains unavailable.";
+        return
+        [
         localEnhancementConfigured
             ? new AutomaticStageStatus(
                 "enhancement",
@@ -27,18 +44,19 @@ public static class ProductionStageAvailabilityRegistry
         new(
             "ocr",
             AutomaticStageState.Unavailable,
-            "OCR detection, text recognition, and graph-numeric recognition do not have checksum-approved redistributable production models."),
+            $"OCR detection, text recognition, and graph-numeric recognition do not have a composed checksum-approved default set. {modelEvidence}"),
         new(
             "markers",
             AutomaticStageState.Unavailable,
-            "The marker-center candidate failed production acceptance and no approved marker shape/fill classifier exists."),
+            $"Marker detection has no composed checksum-approved center and shape/fill model set. {modelEvidence}"),
         new(
             "legends",
             AutomaticStageState.Unavailable,
-            "Legend reasoning is implemented but requires approved OCR and marker evidence."),
+            $"Legend reasoning requires approved OCR and marker evidence. {pdfEvidence}"),
         new(
             "phases",
             AutomaticStageState.Unavailable,
             "Phase reasoning is implemented but requires approved axis, OCR, and marker evidence."),
-    ];
+        ];
+    }
 }

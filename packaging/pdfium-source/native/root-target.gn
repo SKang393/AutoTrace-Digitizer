@@ -1,0 +1,4 @@
+# Graph Auto Reader reproducible overlay target. See packaging/pdfium-source.
+group("graphreader_pdfium_renderer_build") {
+  deps = [ "//graphreader_pdfium_renderer" ]
+}

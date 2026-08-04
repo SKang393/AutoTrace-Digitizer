@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Sungwoo Kang
 
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using GraphReader.Inference;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -12,7 +14,7 @@ namespace GraphReader.Inference.Tests;
 public sealed class ProductionModelStoreTests
 {
     [TestMethod]
-    public async Task ApprovedStoreResolvesAndExecutesRealCpuModel()
+    public async Task PackagedDistributionTreeResolvesAndExecutesRealCpuModel()
     {
         using var store = TestStore.Create();
         var resolver = store.CreateResolver(new FakeExecutionProviderDiscovery("CPUExecutionProvider"));
@@ -24,6 +26,10 @@ public sealed class ProductionModelStoreTests
             CancellationToken.None);
 
         Assert.AreEqual(store.ModelPath, resolved.Identity.FilePath);
+        StringAssert.Contains(resolved.ManifestPath, Path.Combine("manifest", TestStore.ModelId));
+        StringAssert.Contains(resolved.Identity.FilePath, Path.Combine("runtime", TestStore.ModelId, TestStore.Version));
+        StringAssert.Contains(resolved.NoticePath, Path.Combine("notices", TestStore.ModelId, TestStore.Version, "test-model.txt"));
+        StringAssert.Contains(resolved.BenchmarkEvidencePath, Path.Combine("evidence", TestStore.ModelId, TestStore.Version, "test-model-benchmark.json"));
         Assert.AreEqual(store.ModelSha256, resolved.Identity.Sha256, ignoreCase: true);
         CollectionAssert.AreEqual(new[] { InferenceProvider.Cpu }, resolved.AvailableProviders.ToArray());
 
@@ -32,8 +38,8 @@ public sealed class ProductionModelStoreTests
             new WindowsExecutionProviderPolicy(),
             new OnnxInferenceSessionFactory(NoUiThreadGuard.Instance),
             CpuThreadConfiguration.Create(1, new FixedCoreDetector()));
-        var first = await registry.GetOrCreateAsync(resolved.Identity, CancellationToken.None);
-        var second = await registry.GetOrCreateAsync(resolved.Identity, CancellationToken.None);
+        var first = await registry.GetOrCreateAsync(resolved, CancellationToken.None);
+        var second = await registry.GetOrCreateAsync(resolved, CancellationToken.None);
         Assert.AreSame(first.Session, second.Session);
         Assert.AreEqual(1, registry.CreatedSessionCount);
 
@@ -71,10 +77,93 @@ public sealed class ProductionModelStoreTests
     {
         using var store = TestStore.Create();
         File.WriteAllText(store.ManifestPath, "{not-json");
+        store.RebindManifestChecksum();
 
         var error = await ResolveFailureAsync(store);
 
         Assert.AreEqual("MODEL_MANIFEST_INVALID", error.Code);
+    }
+
+    [TestMethod]
+    public async Task MalformedPackageIndexReturnsStablePackageCode()
+    {
+        using var store = TestStore.Create();
+        File.WriteAllText(store.IndexPath, "{not-json");
+
+        var error = await ResolveFailureAsync(store);
+
+        Assert.AreEqual("MODEL_PACKAGE_INDEX_INVALID", error.Code);
+    }
+
+    [TestMethod]
+    [DataRow("identity")]
+    [DataRow("path")]
+    [DataRow("hash")]
+    public async Task DuplicatePackageIndexPropertiesFailBeforeLastValueWinsAccess(string propertyKind)
+    {
+        using var store = TestStore.Create();
+        store.InjectDuplicateIndexProperty(propertyKind);
+
+        var error = await ResolveFailureAsync(store);
+
+        Assert.AreEqual("MODEL_PACKAGE_INDEX_INVALID", error.Code);
+        StringAssert.Contains(error.Message, "duplicate JSON property");
+    }
+
+    [TestMethod]
+    [DataRow("source")]
+    [DataRow("license")]
+    [DataRow("providers")]
+    [DataRow("approval")]
+    [DataRow("payload_hash")]
+    public async Task DuplicateManifestPropertiesAtReviewedDepthsFailBeforeLastValueWinsAccess(string propertyKind)
+    {
+        using var store = TestStore.Create(includeAuxiliaryPayload: propertyKind == "payload_hash");
+        store.InjectDuplicateManifestProperty(propertyKind);
+
+        var error = await ResolveFailureAsync(store);
+
+        Assert.AreEqual("MODEL_MANIFEST_INVALID", error.Code);
+        StringAssert.Contains(error.Message, "duplicate JSON property");
+    }
+
+    [TestMethod]
+    [DataRow("manifest")]
+    [DataRow("payload")]
+    [DataRow("notice")]
+    [DataRow("benchmark_evidence")]
+    public async Task SafeChecksummedInRootResourceRelocationFailsClosed(string resourceKind)
+    {
+        using var store = TestStore.Create();
+        store.RelocateIndexedResource(resourceKind);
+
+        var error = await ResolveFailureAsync(store);
+
+        Assert.AreEqual("MODEL_PACKAGE_INDEX_INVALID", error.Code);
+        StringAssert.Contains(error.Message, "must be canonical");
+    }
+
+    [TestMethod]
+    public async Task CpuOnlyResolvedModelNeverAttemptsDirectMl()
+    {
+        using var store = TestStore.Create(providers: ["cpu"]);
+        var resolver = store.CreateResolver(new FakeExecutionProviderDiscovery("DmlExecutionProvider", "CPUExecutionProvider"));
+        var resolved = await resolver.ResolveAsync(
+            TestStore.ModelId,
+            TestStore.Version,
+            requiredProvider: null,
+            CancellationToken.None);
+        var factory = new RecordingFactory();
+        await using var registry = new OnnxSessionRegistry(
+            new FakeExecutionProviderDiscovery("DmlExecutionProvider", "CPUExecutionProvider"),
+            new WindowsExecutionProviderPolicy(),
+            factory,
+            CpuThreadConfiguration.Create(1, new FixedCoreDetector()));
+
+        var acquisition = await registry.GetOrCreateAsync(resolved, CancellationToken.None);
+
+        Assert.IsTrue(acquisition.Succeeded);
+        CollectionAssert.AreEqual(new[] { InferenceProvider.Cpu }, factory.Attempts.ToArray());
     }
 
     [TestMethod]
@@ -93,6 +182,17 @@ public sealed class ProductionModelStoreTests
     {
         using var store = TestStore.Create();
         File.WriteAllText(Path.Combine(store.ModelDirectory, "unlisted.bin"), "not approved");
+
+        var error = await ResolveFailureAsync(store);
+
+        Assert.AreEqual("MODEL_STORE_EXTRA_FILE", error.Code);
+    }
+
+    [TestMethod]
+    public async Task UnindexedManifestFileFailsClosed()
+    {
+        using var store = TestStore.Create();
+        File.WriteAllText(Path.Combine(Path.GetDirectoryName(store.ManifestPath)!, "unindexed.json"), "{}");
 
         var error = await ResolveFailureAsync(store);
 
@@ -155,6 +255,34 @@ public sealed class ProductionModelStoreTests
     }
 
     [TestMethod]
+    [DataRow("GPL-3.0-only")]
+    [DataRow("AGPL-3.0-only")]
+    [DataRow("LGPL-3.0-only")]
+    [DataRow("SSPL-1.0")]
+    [DataRow("BUSL-1.1")]
+    [DataRow("CC-BY-NC-4.0")]
+    [DataRow("LicenseRef-Unknown")]
+    [DataRow("NOASSERTION")]
+    public async Task ProhibitedOrUnclearLicensesFailClosed(string spdx)
+    {
+        using var store = TestStore.Create(licenseSpdx: spdx);
+
+        var error = await ResolveFailureAsync(store);
+
+        Assert.AreEqual("MODEL_LICENSE_PROHIBITED", error.Code);
+    }
+
+    [TestMethod]
+    public async Task UnrecognizedSpdxExpressionFailsClosed()
+    {
+        using var store = TestStore.Create(licenseSpdx: "Apache-2.0 OR MIT");
+
+        var error = await ResolveFailureAsync(store);
+
+        Assert.AreEqual("MODEL_LICENSE_UNRECOGNIZED", error.Code);
+    }
+
+    [TestMethod]
     public async Task TamperedBenchmarkEvidenceFailsClosed()
     {
         using var store = TestStore.Create();
@@ -173,6 +301,109 @@ public sealed class ProductionModelStoreTests
         var error = await ResolveFailureAsync(store);
 
         Assert.AreEqual("MODEL_CPU_FALLBACK_UNAVAILABLE", error.Code);
+    }
+
+    [TestMethod]
+    public async Task LockedPackageIndexReturnsStableIoFailure()
+    {
+        using var store = TestStore.Create();
+        using var locked = new FileStream(store.IndexPath, FileMode.Open, FileAccess.Read, FileShare.None);
+
+        var error = await ResolveFailureAsync(store);
+
+        Assert.AreEqual("MODEL_STORE_IO_ERROR", error.Code);
+    }
+
+    [TestMethod]
+    public async Task RootSymbolicLinkIsRejectedBeforeIndexOpen()
+    {
+        using var store = TestStore.Create();
+        var link = store.Root + "-link";
+        Directory.CreateSymbolicLink(link, store.Root);
+        try
+        {
+            var resolver = new ProductionModelStore(link, new FakeExecutionProviderDiscovery("CPUExecutionProvider"));
+            var error = await Assert.ThrowsExactlyAsync<ProductionModelValidationException>(async () =>
+                await resolver.ResolveAsync(TestStore.ModelId, TestStore.Version, InferenceProvider.Cpu, CancellationToken.None));
+            Assert.AreEqual("MODEL_STORE_REPARSE_POINT", error.Code);
+        }
+        finally
+        {
+            Directory.Delete(link);
+        }
+    }
+
+    [TestMethod]
+    public async Task ManifestSymbolicLinkIsRejectedBeforeOpen()
+    {
+        using var store = TestStore.Create();
+        var external = store.Root + "-external-manifest.json";
+        File.Move(store.ManifestPath, external);
+        File.CreateSymbolicLink(store.ManifestPath, external);
+        try
+        {
+            var error = await ResolveFailureAsync(store);
+            Assert.AreEqual("MODEL_STORE_REPARSE_POINT", error.Code);
+        }
+        finally
+        {
+            File.Delete(external);
+        }
+    }
+
+    [TestMethod]
+    public async Task NestedPayloadDirectoryJunctionIsRejectedBeforeEnumeration()
+    {
+        using var store = TestStore.Create();
+        var external = store.Root + "-external-runtime";
+        Directory.Move(store.ModelDirectory, external);
+        CreateJunction(store.ModelDirectory, external);
+        try
+        {
+            var error = await ResolveFailureAsync(store);
+            Assert.AreEqual("MODEL_STORE_REPARSE_POINT", error.Code);
+        }
+        finally
+        {
+            Directory.Delete(store.ModelDirectory);
+            Directory.Delete(external, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task NoticeSymbolicLinkIsRejectedBeforeOpen()
+    {
+        using var store = TestStore.Create();
+        var external = store.Root + "-external-notice.txt";
+        File.Move(store.NoticePath, external);
+        File.CreateSymbolicLink(store.NoticePath, external);
+        try
+        {
+            var error = await ResolveFailureAsync(store);
+            Assert.AreEqual("MODEL_STORE_REPARSE_POINT", error.Code);
+        }
+        finally
+        {
+            File.Delete(external);
+        }
+    }
+
+    [TestMethod]
+    public async Task EvidenceSymbolicLinkIsRejectedBeforeOpen()
+    {
+        using var store = TestStore.Create();
+        var external = store.Root + "-external-evidence.json";
+        File.Move(store.BenchmarkPath, external);
+        File.CreateSymbolicLink(store.BenchmarkPath, external);
+        try
+        {
+            var error = await ResolveFailureAsync(store);
+            Assert.AreEqual("MODEL_STORE_REPARSE_POINT", error.Code);
+        }
+        finally
+        {
+            File.Delete(external);
+        }
     }
 
     [TestMethod]
@@ -198,9 +429,39 @@ public sealed class ProductionModelStoreTests
                 InferenceProvider.Cpu,
                 CancellationToken.None));
 
+    private static void CreateJunction(string junctionPath, string targetPath)
+    {
+        using var process = Process.Start(new ProcessStartInfo
+        {
+            FileName = "cmd.exe",
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            ArgumentList = { "/d", "/c", "mklink", "/J", junctionPath, targetPath }
+        })!;
+        process.WaitForExit();
+        Assert.AreEqual(0, process.ExitCode, "Windows mklink /J must create the test junction.");
+    }
+
     private sealed class FixedCoreDetector : IPhysicalCoreDetector
     {
         public int GetPhysicalCoreCount() => 1;
+    }
+
+    private sealed class RecordingFactory : IInferenceSessionFactory
+    {
+        private readonly FakeInferenceSessionFactory _inner = new();
+
+        public List<InferenceProvider> Attempts { get; } = [];
+
+        public ValueTask<IInferenceSession> CreateAsync(
+            ModelIdentity model,
+            InferenceProvider provider,
+            CpuThreadConfiguration cpuConfiguration,
+            CancellationToken cancellationToken)
+        {
+            Attempts.Add(provider);
+            return _inner.CreateAsync(model, provider, cpuConfiguration, cancellationToken);
+        }
     }
 
     private sealed class TestStore : IDisposable
@@ -212,6 +473,7 @@ public sealed class ProductionModelStoreTests
             string root,
             string modelDirectory,
             string manifestPath,
+            string indexPath,
             string modelPath,
             string modelSha256,
             string noticePath,
@@ -221,6 +483,7 @@ public sealed class ProductionModelStoreTests
             Root = root;
             ModelDirectory = modelDirectory;
             ManifestPath = manifestPath;
+            IndexPath = indexPath;
             ModelPath = modelPath;
             ModelSha256 = modelSha256;
             NoticePath = noticePath;
@@ -231,6 +494,7 @@ public sealed class ProductionModelStoreTests
         public string Root { get; }
         public string ModelDirectory { get; }
         public string ManifestPath { get; }
+        public string IndexPath { get; }
         public string ModelPath { get; }
         public string ModelSha256 { get; }
         public string NoticePath { get; }
@@ -242,11 +506,18 @@ public sealed class ProductionModelStoreTests
             bool licenseReviewed = true,
             string[]? providers = null,
             bool includeAuxiliaryPayload = false,
-            bool includeAuxiliaryHash = true)
+            bool includeAuxiliaryHash = true,
+            string licenseSpdx = "Apache-2.0")
         {
             var root = Path.Combine(Path.GetTempPath(), "GraphReaderProductionModelStoreTests", Guid.NewGuid().ToString("N"));
-            var modelDirectory = Path.Combine(root, ModelId, Version);
+            var modelDirectory = Path.Combine(root, "runtime", ModelId, Version);
+            var manifestDirectory = Path.Combine(root, "manifest", ModelId, Version);
+            var noticeDirectory = Path.Combine(root, "notices", ModelId, Version);
+            var evidenceDirectory = Path.Combine(root, "evidence", ModelId, Version);
             Directory.CreateDirectory(modelDirectory);
+            Directory.CreateDirectory(manifestDirectory);
+            Directory.CreateDirectory(noticeDirectory);
+            Directory.CreateDirectory(evidenceDirectory);
 
             using var generated = TestOnnxModel.CreateIdentity();
             var modelPath = Path.Combine(modelDirectory, "identity.onnx");
@@ -254,9 +525,10 @@ public sealed class ProductionModelStoreTests
             var modelBytes = File.ReadAllBytes(modelPath);
             var modelSha = Convert.ToHexString(SHA256.HashData(modelBytes));
 
-            var noticePath = Path.Combine(modelDirectory, "NOTICE.txt");
+            var noticePath = Path.Combine(noticeDirectory, "test-model.txt");
             File.WriteAllText(noticePath, "Apache-2.0 test model notice.");
-            var benchmarkPath = Path.Combine(modelDirectory, "benchmark.json");
+            var noticeSha = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(noticePath)));
+            var benchmarkPath = Path.Combine(evidenceDirectory, "test-model-benchmark.json");
             File.WriteAllText(benchmarkPath, "{\"status\":\"pass\",\"fixture_count\":1}");
             var benchmarkSha = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(benchmarkPath)));
 
@@ -291,8 +563,8 @@ public sealed class ProductionModelStoreTests
                 },
                 ["license"] = new Dictionary<string, object?>
                 {
-                    ["spdx"] = "Apache-2.0",
-                    ["notice_path"] = $"{ModelId}/{Version}/NOTICE.txt",
+                    ["spdx"] = licenseSpdx,
+                    ["notice_path"] = "LICENSES/test-model.txt",
                     ["reviewed"] = licenseReviewed
                 },
                 ["sha256"] = modelSha,
@@ -310,7 +582,7 @@ public sealed class ProductionModelStoreTests
                         ["status"] = "pass",
                         ["release_eligible"] = true,
                         ["production_approval"] = productionApproval,
-                        ["evidence_path"] = $"{ModelId}/{Version}/benchmark.json",
+                        ["evidence_path"] = "artifacts/evidence/test-model-benchmark.json",
                         ["evidence_sha256"] = benchmarkSha
                     }
                 }
@@ -323,12 +595,54 @@ public sealed class ProductionModelStoreTests
                 };
             }
 
-            var manifestPath = Path.Combine(modelDirectory, "manifest.json");
+            var manifestPath = Path.Combine(manifestDirectory, "manifest.json");
             File.WriteAllText(manifestPath, JsonSerializer.Serialize(manifest));
+            var manifestSha = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(manifestPath)));
+            var packagePayloads = files.Select(file => new Dictionary<string, object?>
+            {
+                ["declared_path"] = file,
+                ["path"] = $"runtime/{ModelId}/{Version}/{file}",
+                ["sha256"] = file == "identity.onnx"
+                    ? modelSha
+                    : Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(Path.Combine(modelDirectory, file))))
+            }).ToArray();
+            var packageIndex = new Dictionary<string, object?>
+            {
+                ["schema_version"] = 1,
+                ["models"] = new[]
+                {
+                    new Dictionary<string, object?>
+                    {
+                        ["model_id"] = ModelId,
+                        ["model_version"] = Version,
+                        ["manifest"] = new Dictionary<string, object?>
+                        {
+                            ["path"] = $"manifest/{ModelId}/{Version}/manifest.json",
+                            ["sha256"] = manifestSha
+                        },
+                        ["payloads"] = packagePayloads,
+                        ["notice"] = new Dictionary<string, object?>
+                        {
+                            ["declared_path"] = "LICENSES/test-model.txt",
+                            ["path"] = $"notices/{ModelId}/{Version}/test-model.txt",
+                            ["sha256"] = noticeSha
+                        },
+                        ["benchmark_evidence"] = new Dictionary<string, object?>
+                        {
+                            ["declared_path"] = "artifacts/evidence/test-model-benchmark.json",
+                            ["path"] = $"evidence/{ModelId}/{Version}/test-model-benchmark.json",
+                            ["sha256"] = benchmarkSha
+                        }
+                    }
+                }
+            };
+            var indexPath = Path.Combine(root, "production-model-index.json");
+            File.WriteAllText(indexPath, JsonSerializer.Serialize(packageIndex));
             return new TestStore(
                 root,
                 modelDirectory,
                 manifestPath,
+                indexPath,
                 modelPath,
                 modelSha,
                 noticePath,
@@ -338,6 +652,95 @@ public sealed class ProductionModelStoreTests
 
         public ProductionModelStore CreateResolver(IExecutionProviderDiscovery? discovery = null) =>
             new(Root, discovery ?? new FakeExecutionProviderDiscovery("CPUExecutionProvider"));
+
+        public void RebindManifestChecksum()
+        {
+            var index = JsonNode.Parse(File.ReadAllText(IndexPath))!;
+            index["models"]![0]!["manifest"]!["sha256"] =
+                Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(ManifestPath)));
+            File.WriteAllText(IndexPath, index.ToJsonString());
+        }
+
+        public void RelocateIndexedResource(string resourceKind)
+        {
+            var index = JsonNode.Parse(File.ReadAllText(IndexPath))!;
+            var model = index["models"]![0]!;
+            var resource = resourceKind == "payload"
+                ? model["payloads"]![0]!
+                : model[resourceKind]!;
+            var currentRelativePath = resource["path"]!.GetValue<string>();
+            var currentPath = Path.Combine(Root, currentRelativePath.Replace('/', Path.DirectorySeparatorChar));
+            var relocatedRelativePath = $"relocated/{resourceKind}/{Path.GetFileName(currentRelativePath)}";
+            var relocatedPath = Path.Combine(Root, relocatedRelativePath.Replace('/', Path.DirectorySeparatorChar));
+            Directory.CreateDirectory(Path.GetDirectoryName(relocatedPath)!);
+            File.Move(currentPath, relocatedPath);
+            resource["path"] = relocatedRelativePath;
+            File.WriteAllText(IndexPath, index.ToJsonString());
+        }
+
+        public void InjectDuplicateIndexProperty(string propertyKind)
+        {
+            var json = File.ReadAllText(IndexPath);
+            json = propertyKind switch
+            {
+                "identity" => ReplaceFirst(
+                    json,
+                    $"{{\"model_id\":\"{ModelId}\"",
+                    $"{{\"model_id\":\"duplicate-identity\",\"model_id\":\"{ModelId}\""),
+                "path" => ReplaceFirst(
+                    json,
+                    $"\"manifest\":{{\"path\":\"manifest/{ModelId}/{Version}/manifest.json\"",
+                    $"\"manifest\":{{\"path\":\"relocated/manifest.json\",\"path\":\"manifest/{ModelId}/{Version}/manifest.json\""),
+                "hash" => ReplaceFirst(
+                    json,
+                    $"\"manifest\":{{\"path\":\"manifest/{ModelId}/{Version}/manifest.json\",\"sha256\":",
+                    $"\"manifest\":{{\"path\":\"manifest/{ModelId}/{Version}/manifest.json\",\"sha256\":\"{new string('0', 64)}\",\"sha256\":"),
+                _ => throw new ArgumentOutOfRangeException(nameof(propertyKind), propertyKind, null)
+            };
+            File.WriteAllText(IndexPath, json);
+        }
+
+        public void InjectDuplicateManifestProperty(string propertyKind)
+        {
+            var json = File.ReadAllText(ManifestPath);
+            json = propertyKind switch
+            {
+                "source" => ReplaceFirst(
+                    json,
+                    "\"source\":{\"name\":",
+                    "\"source\":{\"name\":\"duplicate source\",\"name\":"),
+                "license" => ReplaceFirst(
+                    json,
+                    "\"license\":{\"spdx\":",
+                    "\"license\":{\"spdx\":\"GPL-3.0-only\",\"spdx\":"),
+                "providers" => ReplaceFirst(
+                    json,
+                    "\"providers\":",
+                    "\"providers\":[\"directml\"],\"providers\":"),
+                "approval" => ReplaceFirst(
+                    json,
+                    "\"production_approval\":",
+                    "\"production_approval\":false,\"production_approval\":"),
+                "payload_hash" => ReplaceFirst(
+                    json,
+                    "\"model_payload_sha256\":{\"identity.onnx\":",
+                    $"\"model_payload_sha256\":{{\"identity.onnx\":\"{new string('0', 64)}\",\"identity.onnx\":"),
+                _ => throw new ArgumentOutOfRangeException(nameof(propertyKind), propertyKind, null)
+            };
+            File.WriteAllText(ManifestPath, json);
+            RebindManifestChecksum();
+        }
+
+        private static string ReplaceFirst(string value, string oldValue, string newValue)
+        {
+            var index = value.IndexOf(oldValue, StringComparison.Ordinal);
+            if (index < 0)
+            {
+                throw new InvalidOperationException($"Test JSON marker was not found: {oldValue}");
+            }
+
+            return string.Concat(value.AsSpan(0, index), newValue, value.AsSpan(index + oldValue.Length));
+        }
 
         public void Dispose()
         {

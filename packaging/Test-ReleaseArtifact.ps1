@@ -36,6 +36,82 @@ function Assert-Equal {
     }
 }
 
+function Assert-NoDuplicateJsonPropertyNames {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Json,
+
+        [Parameter(Mandatory)]
+        [string]$Description
+    )
+
+    $tokenPattern = '"(?:\\(?:["\\/bfnrt]|u[0-9A-Fa-f]{4})|[^"\\\x00-\x1F])*"|[{}\[\],:]'
+    $contexts = [System.Collections.Generic.List[object]]::new()
+    foreach ($match in [regex]::Matches($Json, $tokenPattern)) {
+        $token = [string]$match.Value
+        $current = if ($contexts.Count -gt 0) { $contexts[$contexts.Count - 1] } else { $null }
+        switch ($token) {
+            '{' {
+                if ($null -ne $current -and $current.Kind -eq 'object' -and $current.State -eq 'value') {
+                    $current.State = 'after-value'
+                }
+                $contexts.Add([pscustomobject]@{
+                        Kind = 'object'
+                        State = 'key'
+                        Names = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+                    })
+                continue
+            }
+            '[' {
+                if ($null -ne $current -and $current.Kind -eq 'object' -and $current.State -eq 'value') {
+                    $current.State = 'after-value'
+                }
+                $contexts.Add([pscustomobject]@{ Kind = 'array'; State = ''; Names = $null })
+                continue
+            }
+            '}' {
+                if ($contexts.Count -gt 0) {
+                    $contexts.RemoveAt($contexts.Count - 1)
+                }
+                continue
+            }
+            ']' {
+                if ($contexts.Count -gt 0) {
+                    $contexts.RemoveAt($contexts.Count - 1)
+                }
+                continue
+            }
+            ':' {
+                if ($null -ne $current -and $current.Kind -eq 'object' -and $current.State -eq 'colon') {
+                    $current.State = 'value'
+                }
+                continue
+            }
+            ',' {
+                if ($null -ne $current -and $current.Kind -eq 'object' -and
+                    $current.State -in @('value', 'after-value')) {
+                    $current.State = 'key'
+                }
+                continue
+            }
+        }
+
+        if ($token.StartsWith('"', [StringComparison]::Ordinal) -and
+            $null -ne $current -and $current.Kind -eq 'object') {
+            if ($current.State -eq 'key') {
+                $propertyName = [string]($token | ConvertFrom-Json)
+                if (-not $current.Names.Add($propertyName)) {
+                    throw "$Description contains duplicate JSON property '$propertyName'."
+                }
+                $current.State = 'colon'
+            }
+            elseif ($current.State -eq 'value') {
+                $current.State = 'after-value'
+            }
+        }
+    }
+}
+
 function Assert-RelativePath {
     param(
         [Parameter(Mandatory)]
@@ -651,135 +727,134 @@ function Assert-ModelManifests {
         [string[]]$EntryNames
     )
 
-    $manifestEntries = @($Archive.Entries | Where-Object {
-            $_.FullName.Replace('\', '/') -like 'models/manifest/*.json' -or
-            $_.FullName.Replace('\', '/') -like 'models/manifest/*/*.json'
-        })
-    if ($manifestEntries.Count -eq 0) {
-        throw 'Portable archive contains no model manifests.'
+    $indexPath = 'models/production-model-index.json'
+    $indexJson = Get-ZipEntryText -Archive $Archive -EntryName $indexPath
+    Assert-NoDuplicateJsonPropertyNames -Json $indexJson -Description 'Production model package index'
+    $index = $indexJson | ConvertFrom-Json
+    if (@($index.PSObject.Properties.Name | Sort-Object) -join '|' -ne 'models|schema_version') {
+        throw 'Production model package index has unsupported or missing root properties.'
+    }
+    Assert-Equal -Actual ([int]$index.schema_version) -Expected 1 -Description 'Production model package index version is invalid'
+    if ($index.models -isnot [System.Array] -or @($index.models).Count -eq 0) {
+        throw 'Production model package index must contain at least one model.'
     }
 
     $modelArtifactPaths = [System.Collections.Generic.List[string]]::new()
-    foreach ($entry in $manifestEntries) {
-        $entryName = $entry.FullName.Replace('\', '/')
-        $manifest = (Get-ZipEntryText -Archive $Archive -EntryName $entryName) | ConvertFrom-Json
-        foreach ($propertyName in @(
-                'manifest_version', 'model_id', 'model_version', 'task', 'source', 'license',
-                'sha256', 'files', 'inputs', 'outputs', 'commercial_use', 'redistribution', 'providers')) {
-            if ($null -eq $manifest.PSObject.Properties[$propertyName]) {
-                throw "Model manifest '$entryName' is missing required property '$propertyName'."
+    $modelArtifactPaths.Add($indexPath)
+    $identities = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($packageModel in @($index.models)) {
+        if (@($packageModel.PSObject.Properties.Name | Sort-Object) -join '|' -ne
+            'benchmark_evidence|manifest|model_id|model_version|notice|payloads') {
+            throw 'Production model package entry has unsupported or missing properties.'
+        }
+        $modelId = [string]$packageModel.model_id
+        $modelVersion = [string]$packageModel.model_version
+        if ([string]::IsNullOrWhiteSpace($modelId) -or [string]::IsNullOrWhiteSpace($modelVersion) -or
+            -not $identities.Add("$modelId`0$modelVersion")) {
+            throw "Production model package contains an invalid or duplicate identity: $modelId $modelVersion"
+        }
+
+        $resources = @($packageModel.manifest, $packageModel.notice, $packageModel.benchmark_evidence) + @($packageModel.payloads)
+        foreach ($resource in $resources) {
+            $resourceNames = @($resource.PSObject.Properties.Name | Sort-Object) -join '|'
+            if ($resourceNames -notin @('path|sha256', 'declared_path|path|sha256') -or
+                [string]$resource.path -match '(^|/)(\.|\.\.)(/|$)' -or
+                [IO.Path]::IsPathRooted([string]$resource.path) -or
+                [string]$resource.sha256 -notmatch '^[a-fA-F0-9]{64}$') {
+                throw "Production model package contains an invalid resource for '$modelId'."
             }
+            $archivePath = "models/$([string]$resource.path)"
+            $matchingEntries = @($Archive.Entries | Where-Object { $_.FullName.Replace('\', '/') -ceq $archivePath })
+            if ($matchingEntries.Count -ne 1) {
+                throw "Production model package resource must exist exactly once: $archivePath"
+            }
+            $stream = $matchingEntries[0].Open()
+            try { $actualHash = Get-StreamSha256 -Stream $stream } finally { $stream.Dispose() }
+            Assert-Equal -Actual $actualHash -Expected ([string]$resource.sha256).ToLowerInvariant() -Description "Production model package checksum differs for '$archivePath'"
+            $modelArtifactPaths.Add($archivePath)
         }
 
-        Assert-Equal -Actual ([int]$manifest.manifest_version) -Expected 1 -Description "Model manifest '$entryName' version is invalid"
-        if ([string]$manifest.sha256 -notmatch '^[a-fA-F0-9]{64}$') {
-            throw "Model manifest '$entryName' has an invalid SHA-256 value."
+        $expectedManifestPath = "manifest/$modelId/$modelVersion/manifest.json"
+        Assert-Equal -Actual ([string]$packageModel.manifest.path) -Expected $expectedManifestPath -Description 'Production model manifest path is not canonical'
+        $manifestArchivePath = "models/$expectedManifestPath"
+        $manifestJson = Get-ZipEntryText -Archive $Archive -EntryName $manifestArchivePath
+        Assert-NoDuplicateJsonPropertyNames -Json $manifestJson -Description "Model manifest '$manifestArchivePath'"
+        $manifest = $manifestJson | ConvertFrom-Json
+        $allowedManifestProperties = @(
+            'manifest_version', 'model_id', 'model_version', 'task', 'source', 'license', 'sha256',
+            'files', 'inputs', 'outputs', 'preprocessing', 'postprocessing', 'commercial_use',
+            'redistribution', 'providers', 'benchmarks')
+        $requiredManifestProperties = @(
+            'manifest_version', 'model_id', 'model_version', 'task', 'source', 'license', 'sha256',
+            'files', 'inputs', 'outputs', 'commercial_use', 'redistribution', 'providers', 'benchmarks')
+        if (@($manifest.PSObject.Properties.Name | Where-Object { $_ -notin $allowedManifestProperties }).Count -gt 0 -or
+            @($requiredManifestProperties | Where-Object { $_ -notin $manifest.PSObject.Properties.Name }).Count -gt 0) {
+            throw "Model manifest '$manifestArchivePath' does not match the production root contract."
         }
-        if (-not [bool]$manifest.license.reviewed -or
-            -not [bool]$manifest.commercial_use -or
-            -not [bool]$manifest.redistribution) {
-            throw "Model manifest '$entryName' is not approved for commercial redistribution."
+        Assert-Equal -Actual ([string]$manifest.model_id) -Expected $modelId -Description 'Packaged model identity differs from index'
+        Assert-Equal -Actual ([string]$manifest.model_version) -Expected $modelVersion -Description 'Packaged model version differs from index'
+        if (-not [bool]$manifest.license.reviewed -or -not [bool]$manifest.commercial_use -or
+            -not [bool]$manifest.redistribution -or @($manifest.providers) -notcontains 'cpu') {
+            throw "Model manifest '$manifestArchivePath' is not approved for commercial redistribution with offline CPU fallback."
         }
-        if ([string]$manifest.license.spdx -match '(?i)(AGPL|GPL|SSPL|BUSL|non[- ]commercial)') {
-            throw "Model manifest '$entryName' uses a prohibited or unclear license."
+        if ([string]$manifest.license.spdx -match '(?i)(AGPL|GPL|SSPL|BUSL|non[- ]commercial|unknown|unclear)') {
+            throw "Model manifest '$manifestArchivePath' uses a prohibited or unclear license."
         }
 
-        $noticePath = ([string]$manifest.license.notice_path).Replace('\', '/')
-        if ([string]::IsNullOrWhiteSpace($noticePath) -or
-            [System.IO.Path]::IsPathRooted($noticePath) -or
-            @($noticePath.Split('/')) -contains '..') {
-            throw "Model manifest '$entryName' uses an unsafe notice path: $noticePath"
+        $declaredNoticePath = (([string]$manifest.license.notice_path).Replace('\', '/'))
+        if ([string]::IsNullOrWhiteSpace($declaredNoticePath) -or [IO.Path]::IsPathRooted($declaredNoticePath) -or
+            @($declaredNoticePath.Split('/')) -contains '..') {
+            throw "Model manifest '$manifestArchivePath' uses an unsafe notice path: $declaredNoticePath"
         }
-        if ($EntryNames -notcontains $noticePath) {
-            throw "Model manifest '$entryName' references a missing notice: $noticePath"
-        }
+        Assert-Equal -Actual ([string]$packageModel.notice.declared_path) -Expected $declaredNoticePath -Description 'Packaged model notice declaration differs from manifest'
+        $expectedNoticePath = "notices/$modelId/$modelVersion/$([IO.Path]::GetFileName($declaredNoticePath))"
+        Assert-Equal -Actual ([string]$packageModel.notice.path) -Expected $expectedNoticePath -Description "Production model notice path is not canonical for '$modelId'"
 
-        $releaseBenchmark = @($manifest.benchmarks | Where-Object {
-                [string]$_.status -eq 'pass' -and
-                $null -ne $_.PSObject.Properties['release_eligible'] -and
-                [bool]$_.release_eligible
+        $approvals = @($manifest.benchmarks | Where-Object {
+                $_.production_approval -is [bool] -and [bool]$_.production_approval -and
+                $_.release_eligible -is [bool] -and [bool]$_.release_eligible -and
+                $_.status -is [string] -and [string]$_.status -ieq 'pass'
             })
-        if ($releaseBenchmark.Count -eq 0) {
-            throw "Model manifest '$entryName' has no passing release-eligible benchmark."
+        if ($approvals.Count -ne 1) {
+            throw "Model manifest '$manifestArchivePath' has no passing release-eligible benchmark with production approval."
         }
+        Assert-Equal -Actual ([string]$packageModel.benchmark_evidence.declared_path) -Expected (([string]$approvals[0].evidence_path).Replace('\', '/')) -Description 'Packaged benchmark declaration differs from manifest'
+        Assert-Equal -Actual ([string]$packageModel.benchmark_evidence.sha256).ToLowerInvariant() -Expected ([string]$approvals[0].evidence_sha256).ToLowerInvariant() -Description 'Packaged benchmark checksum differs from manifest'
+        $declaredEvidencePath = (([string]$approvals[0].evidence_path).Replace('\', '/'))
+        $expectedEvidencePath = "evidence/$modelId/$modelVersion/$([IO.Path]::GetFileName($declaredEvidencePath))"
+        Assert-Equal -Actual ([string]$packageModel.benchmark_evidence.path) -Expected $expectedEvidencePath -Description "Production model benchmark path is not canonical for '$modelId'"
 
         $modelFiles = @($manifest.files | ForEach-Object { ([string]$_).Replace('\', '/') })
-        if ($modelFiles.Count -eq 0 -or
-            @($modelFiles | Where-Object { [string]::IsNullOrWhiteSpace($_) }).Count -gt 0) {
-            throw "Model manifest '$entryName' must identify at least one packaged model artifact."
+        $payloads = @($packageModel.payloads)
+        if ($payloads.Count -ne $modelFiles.Count -or
+            @($modelFiles | Where-Object { [IO.Path]::GetExtension($_) -ieq '.onnx' }).Count -ne 1) {
+            throw "Model manifest '$manifestArchivePath' has invalid production payload coverage."
         }
-        if (@($modelFiles | Sort-Object -Unique).Count -ne $modelFiles.Count) {
-            throw "Model manifest '$entryName' contains duplicate packaged model paths."
-        }
-
-        $artifactHashes = [System.Collections.Generic.Dictionary[string,string]]::new([StringComparer]::Ordinal)
+        $artifactHashes = @{}
         if ($modelFiles.Count -eq 1) {
-            $artifactHashes.Add($modelFiles[0], ([string]$manifest.sha256).ToLowerInvariant())
+            $artifactHashes[$modelFiles[0]] = ([string]$manifest.sha256).ToLowerInvariant()
         }
         else {
-            $payloadHashProperty = $null
-            if ($null -ne $manifest.preprocessing -and
-                $null -ne $manifest.preprocessing.PSObject.Properties['model_payload_sha256']) {
-                $payloadHashProperty = $manifest.preprocessing.PSObject.Properties['model_payload_sha256'].Value
-            }
-            if ($null -eq $payloadHashProperty -or
-                $payloadHashProperty -is [string] -or
-                $payloadHashProperty -is [System.Array]) {
-                throw "Multi-file model manifest '$entryName' requires preprocessing.model_payload_sha256 object entries for every file."
-            }
-            foreach ($hashProperty in @($payloadHashProperty.PSObject.Properties)) {
-                $hashPath = ([string]$hashProperty.Name).Replace('\', '/')
-                $hashValue = [string]$hashProperty.Value
-                if ($hashValue -notmatch '^[a-fA-F0-9]{64}$') {
-                    throw "Multi-file model manifest '$entryName' has an invalid payload SHA-256 for '$hashPath'."
-                }
-                if ($artifactHashes.ContainsKey($hashPath)) {
-                    throw "Multi-file model manifest '$entryName' duplicates payload checksum path '$hashPath'."
-                }
-                $artifactHashes.Add($hashPath, $hashValue.ToLowerInvariant())
-            }
-            foreach ($modelFile in $modelFiles) {
-                if (-not $artifactHashes.ContainsKey($modelFile)) {
-                    throw "Multi-file model manifest '$entryName' has no payload checksum for '$modelFile'."
-                }
-            }
-            foreach ($hashPath in @($artifactHashes.Keys)) {
-                if ($modelFiles -cnotcontains $hashPath) {
-                    throw "Multi-file model manifest '$entryName' has a payload checksum for undeclared file '$hashPath'."
-                }
+            foreach ($property in @($manifest.preprocessing.model_payload_sha256.PSObject.Properties)) {
+                $artifactHashes[([string]$property.Name).Replace('\', '/')] = ([string]$property.Value).ToLowerInvariant()
             }
         }
+        foreach ($payload in $payloads) {
+            $declaredPath = ([string]$payload.declared_path).Replace('\', '/')
+            $expectedPayloadPath = "runtime/$modelId/$modelVersion/$declaredPath"
+            if ($modelFiles -cnotcontains $declaredPath -or
+                -not $artifactHashes.ContainsKey($declaredPath) -or
+                [string]$payload.sha256 -ine [string]$artifactHashes[$declaredPath]) {
+                throw "Production model payload index differs from manifest for '$declaredPath'."
+            }
+            Assert-Equal -Actual ([string]$payload.path) -Expected $expectedPayloadPath -Description "Production model payload path is not canonical for '$modelId'"
+        }
+    }
 
-        foreach ($declaredModelPath in $modelFiles) {
-            if ([IO.Path]::IsPathRooted($declaredModelPath) -or
-                @($declaredModelPath.Split('/')) -contains '..') {
-                throw "Model manifest '$entryName' uses an unsafe packaged model path '$declaredModelPath'."
-            }
-            $archiveModelPath = if ($declaredModelPath.StartsWith('models/', [StringComparison]::OrdinalIgnoreCase)) {
-                $declaredModelPath
-            }
-            else {
-                "models/runtime/$declaredModelPath"
-            }
-            if ($archiveModelPath.StartsWith('models/manifest/', [StringComparison]::OrdinalIgnoreCase)) {
-                throw "Model manifest '$entryName' cannot package model bytes below models/manifest."
-            }
-            $matchingEntries = @($Archive.Entries | Where-Object {
-                    $_.FullName.Replace('\', '/') -ceq $archiveModelPath
-                })
-            if ($matchingEntries.Count -ne 1) {
-                throw "Model manifest '$entryName' must resolve exactly one packaged model artifact '$archiveModelPath'."
-            }
-
-            $stream = $matchingEntries[0].Open()
-            try {
-                $modelHash = Get-StreamSha256 -Stream $stream
-            }
-            finally {
-                $stream.Dispose()
-            }
-            Assert-Equal -Actual $modelHash -Expected $artifactHashes[$declaredModelPath] -Description "Model checksum differs for '$entryName' payload '$declaredModelPath'"
-            $modelArtifactPaths.Add($archiveModelPath)
+    $indexedSet = [System.Collections.Generic.HashSet[string]]::new($modelArtifactPaths, [StringComparer]::Ordinal)
+    foreach ($entryName in @($EntryNames | Where-Object { $_.StartsWith('models/', [StringComparison]::Ordinal) })) {
+        if (-not $indexedSet.Contains($entryName)) {
+            throw "Portable archive contains unlisted production model data: $entryName"
         }
     }
 
@@ -1225,7 +1300,6 @@ Assert-Equal -Actual $portableDefinition.uninstallEntry -Expected $false -Descri
 
 $expectedContentMappings = [ordered]@{
     'contracts' = 'contracts'
-    'models/manifest' = 'models/manifest'
     'LICENSE' = 'LICENSE'
     'NOTICE' = 'NOTICE'
     'THIRD_PARTY_NOTICES.md' = 'THIRD_PARTY_NOTICES.md'

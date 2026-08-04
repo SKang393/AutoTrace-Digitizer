@@ -70,7 +70,7 @@ public sealed class ArchitectureAcceptanceTests
     }
 
     [TestMethod]
-    public void ApplicationAssemblyReferencesOnlyApprovedManualIntegrationModules()
+    public void ApplicationAssemblyReferencesApprovedManualAndProductionIntegrationModules()
     {
         string[] requiredManualAssemblyPrefixes =
         {
@@ -79,14 +79,7 @@ public sealed class ArchitectureAcceptanceTests
             "GraphReader.Phases",
             "GraphReader.Export",
             "GraphReader.SuperResolution",
-        };
-        string[] forbiddenAssemblyPrefixes =
-        {
             "GraphReader.Pdf",
-            "GraphReader.Ocr",
-            "GraphReader.Markers",
-            "GraphReader.Legends",
-            "GraphReader.Inference",
         };
 
         var referencedAssemblies = typeof(MainWindow).Assembly.GetReferencedAssemblies();
@@ -94,14 +87,7 @@ public sealed class ArchitectureAcceptanceTests
         {
             Assert.IsTrue(
                 referencedAssemblies.Any(reference => reference.Name?.StartsWith(prefix, StringComparison.Ordinal) is true),
-                $"The ManualPreview composition must reference real integration module {prefix}.");
-        }
-
-        foreach (var prefix in forbiddenAssemblyPrefixes)
-        {
-            Assert.IsFalse(
-                referencedAssemblies.Any(reference => reference.Name?.StartsWith(prefix, StringComparison.Ordinal) is true),
-                $"The WPF application references prohibited processing module {prefix}.");
+                $"The application composition must reference real integration module {prefix}.");
         }
     }
 }

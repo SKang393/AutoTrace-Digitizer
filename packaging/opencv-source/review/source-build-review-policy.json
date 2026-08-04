@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "profileId": "graphreader-axis-minimal-win-x64",
   "evidenceRootName": "evidence-repro-pass2-final-a",
-  "overallReviewStatus": "requires-maintainer-attestation",
+  "overallReviewStatus": "reviewed-provenance-only",
   "binarySha256": "87c12460daba638b36e916ea2bb832d0759fbf094b8639919a7ce11b0cca5791",
   "sourceRevisions": {
     "openCvSharp": "b161e7e012f5101f6d5dc68a835c59db6cc88b18",
@@ -11,6 +11,7 @@
   },
   "noticeBundle": {
     "path": "third-party-notices.candidate.txt",
+    "reviewStatus": "complete",
     "sections": [
       { "id": "apache-2.0", "sha256": "60057bb16b269b49bdb6a04e0e9ccddc2cd55aef477ff5ef3d9f8eef2b674643" },
       { "id": "zlib", "sha256": "477e8527bfd640e7b9f32bc645ade18a8e7ebc4643cba08336073e644361e226" },
@@ -19,7 +20,8 @@
     ]
   },
   "microsoftStaticRuntimeAttestation": {
-    "status": "required",
+    "status": "recorded-private",
+    "defaultPrivatePath": "provenance-private/opencv-microsoft-static-runtime-attestation.json",
     "visualStudioInstallationVersion": "17.14.37216.2",
     "vcToolsVersion": "14.44.35207",
     "windowsSdkVersion": "10.0.26100.0",
@@ -30,11 +32,11 @@
     "requiredMaintainerStatement": "The release maintainer confirms authority to distribute the statically linked Microsoft runtime code under the applicable Visual Studio and Windows SDK terms."
   },
   "entries": [
-    { "kind": "static-library", "name": "LIBCMT.lib", "classification": "linked-microsoft-static-runtime", "source": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\lib\\x64\\libcmt.lib", "license": "LicenseRef-Microsoft-VisualStudio-2022", "noticeDisposition": "maintainer-attestation-required", "reviewStatus": "requires-maintainer-attestation" },
-    { "kind": "static-library", "name": "libconcrt.lib", "classification": "linked-microsoft-static-runtime", "source": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\lib\\x64\\libconcrt.lib", "license": "LicenseRef-Microsoft-VisualStudio-2022", "noticeDisposition": "maintainer-attestation-required", "reviewStatus": "requires-maintainer-attestation" },
-    { "kind": "static-library", "name": "libcpmt.lib", "classification": "linked-microsoft-static-runtime", "source": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\lib\\x64\\libcpmt.lib", "license": "LicenseRef-Microsoft-VisualStudio-2022", "noticeDisposition": "maintainer-attestation-required", "reviewStatus": "requires-maintainer-attestation" },
-    { "kind": "static-library", "name": "libucrt.lib", "classification": "linked-microsoft-static-runtime", "source": "C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64\\libucrt.lib", "license": "LicenseRef-Microsoft-Windows-SDK-10.0.26100.0", "noticeDisposition": "maintainer-attestation-required", "reviewStatus": "requires-maintainer-attestation" },
-    { "kind": "static-library", "name": "libvcruntime.lib", "classification": "linked-microsoft-static-runtime", "source": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\lib\\x64\\libvcruntime.lib", "license": "LicenseRef-Microsoft-VisualStudio-2022", "noticeDisposition": "maintainer-attestation-required", "reviewStatus": "requires-maintainer-attestation" },
+    { "kind": "static-library", "name": "LIBCMT.lib", "classification": "linked-microsoft-static-runtime", "source": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\lib\\x64\\libcmt.lib", "license": "LicenseRef-Microsoft-VisualStudio-2022", "noticeDisposition": "maintainer-attestation-recorded-private", "reviewStatus": "reviewed" },
+    { "kind": "static-library", "name": "libconcrt.lib", "classification": "linked-microsoft-static-runtime", "source": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\lib\\x64\\libconcrt.lib", "license": "LicenseRef-Microsoft-VisualStudio-2022", "noticeDisposition": "maintainer-attestation-recorded-private", "reviewStatus": "reviewed" },
+    { "kind": "static-library", "name": "libcpmt.lib", "classification": "linked-microsoft-static-runtime", "source": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\lib\\x64\\libcpmt.lib", "license": "LicenseRef-Microsoft-VisualStudio-2022", "noticeDisposition": "maintainer-attestation-recorded-private", "reviewStatus": "reviewed" },
+    { "kind": "static-library", "name": "libucrt.lib", "classification": "linked-microsoft-static-runtime", "source": "C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64\\libucrt.lib", "license": "LicenseRef-Microsoft-Windows-SDK-10.0.26100.0", "noticeDisposition": "maintainer-attestation-recorded-private", "reviewStatus": "reviewed" },
+    { "kind": "static-library", "name": "libvcruntime.lib", "classification": "linked-microsoft-static-runtime", "source": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\lib\\x64\\libvcruntime.lib", "license": "LicenseRef-Microsoft-VisualStudio-2022", "noticeDisposition": "maintainer-attestation-recorded-private", "reviewStatus": "reviewed" },
     { "kind": "static-library", "name": "odbccp32.lib", "classification": "unused-windows-import-library", "source": "Windows SDK 10.0.26100.0 um/x64/odbccp32.lib", "license": "LicenseRef-Microsoft-Windows-SDK-10.0.26100.0", "noticeDisposition": "not-required-not-shipped", "reviewStatus": "reviewed" },
     { "kind": "static-library", "name": "opencv_core4130.lib", "classification": "linked-opencv-static-code", "source": "https://github.com/opencv/opencv/tree/fe38fc608f6acb8b68953438a62305d8318f4fcd", "license": "Apache-2.0 AND BSD-3-Clause AND LicenseRef-FDLIBM-notice", "noticeDisposition": "candidate-included", "noticeIds": ["apache-2.0", "softfloat-bsd-3-clause", "fdlibm"], "reviewStatus": "reviewed" },
     { "kind": "static-library", "name": "opencv_imgcodecs4130.lib", "classification": "linked-opencv-static-code", "source": "https://github.com/opencv/opencv/tree/fe38fc608f6acb8b68953438a62305d8318f4fcd", "license": "Apache-2.0", "noticeDisposition": "candidate-included", "noticeIds": ["apache-2.0"], "reviewStatus": "reviewed" },

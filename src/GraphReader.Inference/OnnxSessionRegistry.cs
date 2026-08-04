@@ -34,8 +34,22 @@ public sealed class OnnxSessionRegistry : IAsyncDisposable
 
     public int CreatedSessionCount => Volatile.Read(ref _createdSessionCount);
 
-    public async ValueTask<SessionAcquisition> GetOrCreateAsync(
+    public ValueTask<SessionAcquisition> GetOrCreateAsync(
         ModelIdentity model,
+        CancellationToken cancellationToken) =>
+        GetOrCreateAsync(model, allowedProviders: null, cancellationToken);
+
+    public ValueTask<SessionAcquisition> GetOrCreateAsync(
+        ResolvedProductionModel model,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        return GetOrCreateAsync(model.Identity, model.AvailableProviders, cancellationToken);
+    }
+
+    private async ValueTask<SessionAcquisition> GetOrCreateAsync(
+        ModelIdentity model,
+        IReadOnlyList<InferenceProvider>? allowedProviders,
         CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
@@ -55,21 +69,35 @@ public sealed class OnnxSessionRegistry : IAsyncDisposable
         }
 
         var attempts = new List<ProviderAttempt>();
-        IReadOnlyList<string> discoveredProviders;
-        try
+        var allowed = allowedProviders?.ToHashSet();
+        if (allowed is not null && (!allowed.Contains(InferenceProvider.Cpu) || allowed.Contains(InferenceProvider.Fake)))
         {
-            discoveredProviders = _discovery.GetAvailableProviders();
-        }
-        catch (Exception exception)
-        {
-            attempts.Add(new ProviderAttempt(
-                InferenceProvider.DirectMl,
-                false,
-                $"Provider discovery failed; continuing with mandatory CPU fallback. {exception.Message}"));
-            discoveredProviders = Array.Empty<string>();
+            throw new ArgumentException("Resolved production models must allow CPU and cannot allow Fake.", nameof(allowedProviders));
         }
 
-        foreach (var provider in _policy.GetOrderedProviders(discoveredProviders))
+        IReadOnlyList<string> discoveredProviders;
+        if (allowed is not null && !allowed.Contains(InferenceProvider.DirectMl))
+        {
+            discoveredProviders = Array.Empty<string>();
+        }
+        else
+        {
+            try
+            {
+                discoveredProviders = _discovery.GetAvailableProviders();
+            }
+            catch (Exception exception)
+            {
+                attempts.Add(new ProviderAttempt(
+                    InferenceProvider.DirectMl,
+                    false,
+                    $"Provider discovery failed; continuing with mandatory CPU fallback. {exception.Message}"));
+                discoveredProviders = Array.Empty<string>();
+            }
+        }
+
+        foreach (var provider in _policy.GetOrderedProviders(discoveredProviders)
+                     .Where(provider => allowed is null || allowed.Contains(provider)))
         {
             var acquisition = await AcquireProviderAsync(model, provider, attempts, cancellationToken).ConfigureAwait(false);
             if (acquisition.Succeeded || acquisition.Error?.Code == "MODEL_CHECKSUM_MISMATCH")

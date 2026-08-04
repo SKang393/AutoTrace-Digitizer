@@ -77,6 +77,82 @@ function Write-JsonFile {
     Write-Utf8NoBom -Path $Path -Content (($Value | ConvertTo-Json -Depth 20) + [Environment]::NewLine)
 }
 
+function Assert-NoDuplicateJsonPropertyNames {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Json,
+
+        [Parameter(Mandatory)]
+        [string]$Description
+    )
+
+    $tokenPattern = '"(?:\\(?:["\\/bfnrt]|u[0-9A-Fa-f]{4})|[^"\\\x00-\x1F])*"|[{}\[\],:]'
+    $contexts = [System.Collections.Generic.List[object]]::new()
+    foreach ($match in [regex]::Matches($Json, $tokenPattern)) {
+        $token = [string]$match.Value
+        $current = if ($contexts.Count -gt 0) { $contexts[$contexts.Count - 1] } else { $null }
+        switch ($token) {
+            '{' {
+                if ($null -ne $current -and $current.Kind -eq 'object' -and $current.State -eq 'value') {
+                    $current.State = 'after-value'
+                }
+                $contexts.Add([pscustomobject]@{
+                        Kind = 'object'
+                        State = 'key'
+                        Names = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+                    })
+                continue
+            }
+            '[' {
+                if ($null -ne $current -and $current.Kind -eq 'object' -and $current.State -eq 'value') {
+                    $current.State = 'after-value'
+                }
+                $contexts.Add([pscustomobject]@{ Kind = 'array'; State = ''; Names = $null })
+                continue
+            }
+            '}' {
+                if ($contexts.Count -gt 0) {
+                    $contexts.RemoveAt($contexts.Count - 1)
+                }
+                continue
+            }
+            ']' {
+                if ($contexts.Count -gt 0) {
+                    $contexts.RemoveAt($contexts.Count - 1)
+                }
+                continue
+            }
+            ':' {
+                if ($null -ne $current -and $current.Kind -eq 'object' -and $current.State -eq 'colon') {
+                    $current.State = 'value'
+                }
+                continue
+            }
+            ',' {
+                if ($null -ne $current -and $current.Kind -eq 'object' -and
+                    $current.State -in @('value', 'after-value')) {
+                    $current.State = 'key'
+                }
+                continue
+            }
+        }
+
+        if ($token.StartsWith('"', [StringComparison]::Ordinal) -and
+            $null -ne $current -and $current.Kind -eq 'object') {
+            if ($current.State -eq 'key') {
+                $propertyName = [string]($token | ConvertFrom-Json)
+                if (-not $current.Names.Add($propertyName)) {
+                    throw "$Description contains duplicate JSON property '$propertyName'."
+                }
+                $current.State = 'colon'
+            }
+            elseif ($current.State -eq 'value') {
+                $current.State = 'after-value'
+            }
+        }
+    }
+}
+
 function Copy-DirectoryContent {
     param(
         [Parameter(Mandatory)]
@@ -182,8 +258,23 @@ function Get-ContractVersion {
 function Resolve-ModelArchiveRelativePath {
     param(
         [Parameter(Mandatory)]
-        [string]$DeclaredPath
+        [string]$DeclaredPath,
+
+        [Parameter(Mandatory)]
+        [string]$ModelId,
+
+        [Parameter(Mandatory)]
+        [string]$ModelVersion
     )
+
+    foreach ($component in @($ModelId, $ModelVersion)) {
+        if ([string]::IsNullOrWhiteSpace($component) -or
+            $component -in @('.', '..') -or
+            $component.IndexOfAny([System.IO.Path]::GetInvalidFileNameChars()) -ge 0 -or
+            $component.Contains('/') -or $component.Contains('\')) {
+            throw "Model identity uses an unsafe path component: $component"
+        }
+    }
 
     if ([System.IO.Path]::IsPathRooted($DeclaredPath)) {
         throw "Model artifact paths must be relative: $DeclaredPath"
@@ -211,18 +302,172 @@ function Resolve-ModelArchiveRelativePath {
         }
     }
 
-    $archivePath = if ($normalized.StartsWith('models/', [System.StringComparison]::OrdinalIgnoreCase)) {
-        $normalized
-    }
-    else {
-        "models/runtime/$normalized"
+    return "models/runtime/$ModelId/$ModelVersion/$normalized"
+}
+
+function Resolve-ModelSupportingFile {
+    param(
+        [Parameter(Mandatory)]
+        [string]$RepositoryRoot,
+
+        [Parameter(Mandatory)]
+        [string]$DeclaredPath,
+
+        [Parameter(Mandatory)]
+        [string]$Description
+    )
+
+    if ([string]::IsNullOrWhiteSpace($DeclaredPath) -or
+        [System.IO.Path]::IsPathRooted($DeclaredPath) -or
+        $DeclaredPath -ne $DeclaredPath.Trim()) {
+        throw "$Description must use a nonempty relative path: $DeclaredPath"
     }
 
-    if ($archivePath.StartsWith('models/manifest/', [System.StringComparison]::OrdinalIgnoreCase)) {
-        throw "Model artifacts cannot be packaged beneath models/manifest: $DeclaredPath"
+    $normalized = $DeclaredPath.Replace('\', '/')
+    if (@($normalized.Split('/')) -contains '..') {
+        throw "$Description leaves the repository: $DeclaredPath"
     }
 
-    return $archivePath
+    $resolved = Resolve-SafeChildPath -Parent $RepositoryRoot -Child $normalized
+    if (-not (Test-Path -LiteralPath $resolved -PathType Leaf)) {
+        throw "$Description is missing: $DeclaredPath"
+    }
+    Assert-NoModelReparsePoint -RepositoryRoot $RepositoryRoot -Path $resolved -Description $Description
+    if ((Get-Item -LiteralPath $resolved).Length -eq 0) {
+        throw "$Description cannot be empty: $DeclaredPath"
+    }
+
+    return $resolved
+}
+
+function Assert-NoModelReparsePoint {
+    param(
+        [Parameter(Mandatory)]
+        [string]$RepositoryRoot,
+
+        [Parameter(Mandatory)]
+        [string]$Path,
+
+        [Parameter(Mandatory)]
+        [string]$Description
+    )
+
+    $repositoryFullPath = [IO.Path]::GetFullPath($RepositoryRoot).TrimEnd('\', '/')
+    $current = Get-Item -LiteralPath ([IO.Path]::GetFullPath($Path)) -Force
+    $reachedRoot = $false
+    while ($null -ne $current) {
+        if (($current.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+            throw "$Description uses a reparse-point path: $($current.FullName)"
+        }
+        if ([string]$current.FullName.TrimEnd('\', '/') -ieq $repositoryFullPath) {
+            $reachedRoot = $true
+            break
+        }
+        $current = if ($current -is [IO.FileInfo]) { $current.Directory } else { $current.Parent }
+    }
+    if (-not $reachedRoot) {
+        throw "$Description could not be proven beneath the repository root: $Path"
+    }
+}
+
+function Get-ProductionApprovalPackageData {
+    param(
+        [Parameter(Mandatory)]
+        [string]$RepositoryRoot,
+
+        [Parameter(Mandatory)]
+        [object]$Manifest,
+
+        [Parameter(Mandatory)]
+        [string]$ManifestName,
+
+        [Parameter(Mandatory)]
+        [object[]]$PackagedArtifacts
+    )
+
+    $allowedRootProperties = @(
+        'manifest_version', 'model_id', 'model_version', 'task', 'source', 'license', 'sha256',
+        'files', 'inputs', 'outputs', 'preprocessing', 'postprocessing', 'commercial_use',
+        'redistribution', 'providers', 'benchmarks')
+    $unknownProperties = @($Manifest.PSObject.Properties.Name | Where-Object { $_ -notin $allowedRootProperties })
+    if ($unknownProperties.Count -gt 0) {
+        throw "Bundled model manifest '$ManifestName' contains unsupported properties: $($unknownProperties -join ', ')."
+    }
+
+    if (@($Manifest.source.PSObject.Properties.Name | Sort-Object) -join '|' -ne 'name|revision|url' -or
+        @($Manifest.license.PSObject.Properties.Name | Sort-Object) -join '|' -ne 'notice_path|reviewed|spdx') {
+        throw "Bundled model manifest '$ManifestName' source or license object does not match the production contract."
+    }
+    $reviewedLicenseAllowlist = @(
+        'Apache-2.0', 'MIT', 'BSD-2-Clause', 'BSD-3-Clause', 'ISC', 'Zlib',
+        'BSL-1.0', 'Unlicense', 'CC0-1.0')
+    if ([string]$Manifest.license.spdx -notin $reviewedLicenseAllowlist) {
+        throw "Bundled model manifest '$ManifestName' license is not on the reviewed production allowlist."
+    }
+    if (@($Manifest.inputs).Count -eq 0 -or @($Manifest.outputs).Count -eq 0) {
+        throw "Bundled model manifest '$ManifestName' requires nonempty input and output contracts."
+    }
+
+    if (@($Manifest.providers) -notcontains 'cpu') {
+        throw "Bundled model manifest '$ManifestName' does not declare mandatory CPU fallback."
+    }
+
+    $onnxArtifacts = @($PackagedArtifacts | Where-Object {
+            [System.IO.Path]::GetExtension([string]$_.declaredPath) -ieq '.onnx'
+        })
+    if ($onnxArtifacts.Count -ne 1) {
+        throw "Bundled production model manifest '$ManifestName' must declare exactly one ONNX payload."
+    }
+
+    $approvals = @($Manifest.benchmarks | Where-Object {
+            $_.production_approval -is [bool] -and [bool]$_.production_approval -and
+            $_.release_eligible -is [bool] -and [bool]$_.release_eligible -and
+            $_.status -is [string] -and [string]$_.status -ieq 'pass'
+        })
+    if ($approvals.Count -ne 1) {
+        throw "Bundled model manifest '$ManifestName' requires exactly one passing release-eligible production approval."
+    }
+
+    $approval = $approvals[0]
+    if ($approval.profile -isnot [string] -or [string]::IsNullOrWhiteSpace([string]$approval.profile)) {
+        throw "Bundled model manifest '$ManifestName' production approval requires a nonempty profile."
+    }
+    if ([string]$approval.evidence_sha256 -notmatch '^[a-fA-F0-9]{64}$') {
+        throw "Bundled model manifest '$ManifestName' production approval requires a valid evidence SHA-256."
+    }
+
+    $evidenceDeclaredPath = [string]$approval.evidence_path
+    $evidenceSourcePath = Resolve-ModelSupportingFile `
+        -RepositoryRoot $RepositoryRoot `
+        -DeclaredPath $evidenceDeclaredPath `
+        -Description "Model benchmark evidence for '$ManifestName'"
+    $evidenceHash = (Get-FileHash -LiteralPath $evidenceSourcePath -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($evidenceHash -ne ([string]$approval.evidence_sha256).ToLowerInvariant()) {
+        throw "Bundled model manifest '$ManifestName' benchmark evidence checksum differs: $evidenceDeclaredPath."
+    }
+
+    $noticeDeclaredPath = [string]$Manifest.license.notice_path
+    $noticeSourcePath = Resolve-ModelSupportingFile `
+        -RepositoryRoot $RepositoryRoot `
+        -DeclaredPath $noticeDeclaredPath `
+        -Description "Model notice for '$ManifestName'"
+    $noticeHash = (Get-FileHash -LiteralPath $noticeSourcePath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $modelId = [string]$Manifest.model_id
+    $modelVersion = [string]$Manifest.model_version
+    $noticeLeaf = [System.IO.Path]::GetFileName($noticeSourcePath)
+    $evidenceLeaf = [System.IO.Path]::GetFileName($evidenceSourcePath)
+
+    return [pscustomobject]@{
+        NoticeDeclaredPath = $noticeDeclaredPath.Replace('\', '/')
+        NoticeSourcePath = $noticeSourcePath
+        NoticeArchivePath = "models/notices/$modelId/$modelVersion/$noticeLeaf"
+        NoticeSha256 = $noticeHash
+        EvidenceDeclaredPath = $evidenceDeclaredPath.Replace('\', '/')
+        EvidenceSourcePath = $evidenceSourcePath
+        EvidenceArchivePath = "models/evidence/$modelId/$modelVersion/$evidenceLeaf"
+        EvidenceSha256 = $evidenceHash
+        Profile = [string]$approval.profile
+    }
 }
 
 function Get-ModelAudit {
@@ -244,7 +489,15 @@ function Get-ModelAudit {
 
     foreach ($manifestFile in $manifestFiles) {
         try {
-            $manifest = Get-Content -LiteralPath $manifestFile.FullName -Raw | ConvertFrom-Json
+            Assert-NoModelReparsePoint `
+                -RepositoryRoot $RepositoryRoot `
+                -Path $manifestFile.FullName `
+                -Description "Model manifest '$($manifestFile.Name)'"
+            $manifestJson = Get-Content -LiteralPath $manifestFile.FullName -Raw
+            Assert-NoDuplicateJsonPropertyNames `
+                -Json $manifestJson `
+                -Description "Model manifest '$($manifestFile.Name)'"
+            $manifest = $manifestJson | ConvertFrom-Json
             $requiredProperties = @(
                 'manifest_version', 'model_id', 'model_version', 'task', 'source', 'license',
                 'sha256', 'files', 'inputs', 'outputs', 'commercial_use', 'redistribution', 'providers')
@@ -392,7 +645,10 @@ function Get-ModelAudit {
                 }
 
                 try {
-                    $archivePath = Resolve-ModelArchiveRelativePath -DeclaredPath ([string]$modelRelativePath)
+                    $archivePath = Resolve-ModelArchiveRelativePath `
+                        -DeclaredPath ([string]$modelRelativePath) `
+                        -ModelId ([string]$manifest.model_id) `
+                        -ModelVersion ([string]$manifest.model_version)
                 }
                 catch {
                     $issues.Add("Model manifest '$($manifestFile.Name)' has an unsafe archive path '$modelRelativePath': $($_.Exception.Message)")
@@ -408,6 +664,10 @@ function Get-ModelAudit {
                 $locatedCandidates = @($candidatePaths | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf })
                 if ($locatedCandidates.Count -eq 1) {
                     $located = $locatedCandidates[0]
+                    Assert-NoModelReparsePoint `
+                        -RepositoryRoot $RepositoryRoot `
+                        -Path $located `
+                        -Description "Model payload '$modelRelativePath' for '$($manifestFile.Name)'"
                     $discoveredModelFileCount++
                     $actualHash = (Get-FileHash -LiteralPath $located -Algorithm SHA256).Hash.ToLowerInvariant()
                     $normalizedModelRelativePath = ([string]$modelRelativePath).Replace('\', '/')
@@ -447,6 +707,7 @@ function Get-ModelAudit {
                 }
             }
 
+            $productionPackageData = $null
             if ($discoveredModelFileCount -gt 0) {
                 if (-not [bool]$manifest.redistribution) {
                     $issues.Add("Bundled model manifest '$($manifestFile.Name)' does not permit redistribution.")
@@ -461,6 +722,17 @@ function Get-ModelAudit {
                 if ($releaseBenchmarks.Count -eq 0) {
                     $issues.Add("Bundled model manifest '$($manifestFile.Name)' has no passing release_eligible benchmark.")
                 }
+
+                try {
+                    $productionPackageData = Get-ProductionApprovalPackageData `
+                        -RepositoryRoot $RepositoryRoot `
+                        -Manifest $manifest `
+                        -ManifestName $manifestFile.Name `
+                        -PackagedArtifacts $packagedArtifacts.ToArray()
+                }
+                catch {
+                    $issues.Add($_.Exception.Message)
+                }
             }
 
             $models.Add([ordered]@{
@@ -471,6 +743,7 @@ function Get-ModelAudit {
                     modelSha256 = ([string]$manifest.sha256).ToLowerInvariant()
                     redistribution = [bool]$manifest.redistribution
                     packagedArtifacts = $packagedArtifacts.ToArray()
+                    productionPackageData = $productionPackageData
                 })
         }
         catch {
@@ -843,7 +1116,6 @@ function Assert-CommonPublishDefinition {
 
     $expected = [ordered]@{
         'contracts' = 'contracts'
-        'models/manifest' = 'models/manifest'
         'LICENSE' = 'LICENSE'
         'NOTICE' = 'NOTICE'
         'THIRD_PARTY_NOTICES.md' = 'THIRD_PARTY_NOTICES.md'
@@ -1214,9 +1486,16 @@ Assert-WindowsX64Executable `
     -Description 'Published GraphReader.App.exe'
 
 $requiredContentPaths = @(Get-RequiredContentArchivePaths -RepositoryRoot $repositoryRoot -Definition $commonDefinition)
-$modelArchivePaths = @($modelAudit.Models | ForEach-Object {
+$modelArchivePaths = @($modelAudit.Models | Where-Object {
+        @($_.packagedArtifacts).Count -gt 0 -and $null -ne $_.productionPackageData
+    } | ForEach-Object {
+        $modelId = [string]$_.modelId
+        $modelVersion = [string]$_.version
+        "models/manifest/$modelId/$modelVersion/manifest.json"
         $_.packagedArtifacts | ForEach-Object { [string]$_.archivePath }
-    })
+        [string]$_.productionPackageData.NoticeArchivePath
+        [string]$_.productionPackageData.EvidenceArchivePath
+    }) + @('models/production-model-index.json')
 $nonApplicationPaths = @($requiredContentPaths) + @($modelArchivePaths) + @('build-metadata.json')
 $publishCollisions = @(Get-FileManifest -Root $commonPublishPath | Where-Object {
         [string]$_.path -in $nonApplicationPaths
@@ -1246,8 +1525,32 @@ foreach ($content in @($commonDefinition.requiredContent)) {
 }
 
 $packagedModelArtifacts = New-Object System.Collections.Generic.List[object]
-foreach ($model in @($modelAudit.Models)) {
+$productionModelIndexEntries = New-Object System.Collections.Generic.List[object]
+foreach ($model in @($modelAudit.Models | Where-Object {
+            @($_.packagedArtifacts).Count -gt 0 -and $null -ne $_.productionPackageData
+        })) {
+    $modelId = [string]$model.modelId
+    $modelVersion = [string]$model.version
+    $manifestArchivePath = "models/manifest/$modelId/$modelVersion/manifest.json"
+    $manifestTargetPath = Resolve-SafeChildPath -Parent $commonPublishPath -Child $manifestArchivePath
+    $manifestSourcePath = Join-Path $repositoryRoot ([string]$model.manifest)
+    Assert-NoModelReparsePoint `
+        -RepositoryRoot $repositoryRoot `
+        -Path $manifestSourcePath `
+        -Description "Model manifest '$($model.manifest)'"
+    New-Item -ItemType Directory -Path (Split-Path -Parent $manifestTargetPath) -Force | Out-Null
+    Copy-Item -LiteralPath $manifestSourcePath -Destination $manifestTargetPath
+    $manifestHash = (Get-FileHash -LiteralPath $manifestTargetPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($manifestHash -ne [string]$model.manifestSha256) {
+        throw "Packaged model manifest checksum changed while staging: $($model.manifest)"
+    }
+
+    $indexedPayloads = New-Object System.Collections.Generic.List[object]
     foreach ($artifact in @($model.packagedArtifacts)) {
+        Assert-NoModelReparsePoint `
+            -RepositoryRoot $repositoryRoot `
+            -Path ([string]$artifact.sourcePath) `
+            -Description "Model payload '$($artifact.declaredPath)' for '$($model.manifest)'"
         $targetPath = Resolve-SafeChildPath -Parent $commonPublishPath -Child ([string]$artifact.archivePath)
         if (Test-Path -LiteralPath $targetPath) {
             throw "Model artifact archive path is already occupied: $($artifact.archivePath)"
@@ -1261,14 +1564,70 @@ foreach ($model in @($modelAudit.Models)) {
         }
 
         $packagedModelArtifacts.Add([ordered]@{
-                modelId = [string]$model.modelId
+                modelId = $modelId
                 manifest = [string]$model.manifest
                 declaredPath = [string]$artifact.declaredPath
                 archivePath = [string]$artifact.archivePath
                 sha256 = $packagedHash
             })
+        $indexedPayloads.Add([ordered]@{
+                declared_path = [string]$artifact.declaredPath
+                path = ([string]$artifact.archivePath).Substring('models/'.Length)
+                sha256 = $packagedHash
+            })
     }
+
+    $noticeTargetPath = Resolve-SafeChildPath `
+        -Parent $commonPublishPath `
+        -Child ([string]$model.productionPackageData.NoticeArchivePath)
+    $evidenceTargetPath = Resolve-SafeChildPath `
+        -Parent $commonPublishPath `
+        -Child ([string]$model.productionPackageData.EvidenceArchivePath)
+    New-Item -ItemType Directory -Path (Split-Path -Parent $noticeTargetPath) -Force | Out-Null
+    New-Item -ItemType Directory -Path (Split-Path -Parent $evidenceTargetPath) -Force | Out-Null
+    Assert-NoModelReparsePoint `
+        -RepositoryRoot $repositoryRoot `
+        -Path ([string]$model.productionPackageData.NoticeSourcePath) `
+        -Description "Model notice for '$($model.manifest)'"
+    Assert-NoModelReparsePoint `
+        -RepositoryRoot $repositoryRoot `
+        -Path ([string]$model.productionPackageData.EvidenceSourcePath) `
+        -Description "Model benchmark evidence for '$($model.manifest)'"
+    Copy-Item -LiteralPath ([string]$model.productionPackageData.NoticeSourcePath) -Destination $noticeTargetPath
+    Copy-Item -LiteralPath ([string]$model.productionPackageData.EvidenceSourcePath) -Destination $evidenceTargetPath
+    $noticeHash = (Get-FileHash -LiteralPath $noticeTargetPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $evidenceHash = (Get-FileHash -LiteralPath $evidenceTargetPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($noticeHash -ne [string]$model.productionPackageData.NoticeSha256 -or
+        $evidenceHash -ne [string]$model.productionPackageData.EvidenceSha256) {
+        throw "Packaged notice or benchmark evidence checksum changed while staging: $($model.manifest)"
+    }
+
+    $productionModelIndexEntries.Add([ordered]@{
+            model_id = $modelId
+            model_version = $modelVersion
+            manifest = [ordered]@{
+                path = $manifestArchivePath.Substring('models/'.Length)
+                sha256 = $manifestHash
+            }
+            payloads = $indexedPayloads.ToArray()
+            notice = [ordered]@{
+                declared_path = [string]$model.productionPackageData.NoticeDeclaredPath
+                path = ([string]$model.productionPackageData.NoticeArchivePath).Substring('models/'.Length)
+                sha256 = $noticeHash
+            }
+            benchmark_evidence = [ordered]@{
+                declared_path = [string]$model.productionPackageData.EvidenceDeclaredPath
+                path = ([string]$model.productionPackageData.EvidenceArchivePath).Substring('models/'.Length)
+                sha256 = $evidenceHash
+            }
+        })
 }
+
+$productionModelIndexPath = Join-Path $commonPublishPath 'models\production-model-index.json'
+Write-JsonFile -Path $productionModelIndexPath -Value ([ordered]@{
+        schema_version = 1
+        models = $productionModelIndexEntries.ToArray()
+    })
 
 $publishBinaryCoverage = @(Assert-PublishBinaryCoverage -PublishRoot $commonPublishPath -ReleaseAudit $releaseAudit)
 $buildUtc = [DateTimeOffset]::UtcNow.ToString('o', [System.Globalization.CultureInfo]::InvariantCulture)
@@ -1284,6 +1643,10 @@ $buildMetadata = [ordered]@{
     applicationPublishFiles = $applicationPublishPaths
     publishBinaryCoverage = $publishBinaryCoverage
     packagedModelArtifacts = $packagedModelArtifacts.ToArray()
+    productionModelIndex = [ordered]@{
+        path = 'models/production-model-index.json'
+        sha256 = (Get-FileHash -LiteralPath $productionModelIndexPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    }
     modelManifests = @($modelAudit.Models | ForEach-Object {
             [ordered]@{
                 modelId = $_.modelId

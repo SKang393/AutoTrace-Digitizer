@@ -1,0 +1,11 @@
+diff --git a/core/fxge/cfx_renderdevice.h b/core/fxge/cfx_renderdevice.h
+--- a/core/fxge/cfx_renderdevice.h
++++ b/core/fxge/cfx_renderdevice.h
+@@ -11,6 +11,7 @@
+ #include <vector>
+ 
+ #include "build/build_config.h"
++#include "core/fxcrt/fx_system.h"
+ #include "core/fxcrt/fx_coordinates.h"
+ #include "core/fxcrt/retain_ptr.h"
+ #include "core/fxcrt/span.h"

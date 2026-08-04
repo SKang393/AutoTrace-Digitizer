@@ -5,6 +5,19 @@ Copyright 2026 Sungwoo Kang
 
 # PaddleOCR model candidate provenance audit
 
+## 2026-08-04 superseding status
+
+The current official-candidate record is
+`PP_OCRV5_OFFICIAL_ARCHIVE_AUDIT.md`. The exact PP-OCRv5 mobile detection and
+English recognition archives were downloaded only into ignored storage for
+hashing, member inventory, and artifact-terms inspection. They were not
+converted or benchmarked. Both remain blocked because the archives contain no
+direct artifact-level redistribution, commercial-use, license, or notice
+evidence.
+
+The Goal 19 PP-OCRv4 metadata-only material below is retained as historical
+evidence and must not be read as the current candidate decision.
+
 Audit date: 2026-08-03
 
 Goal 19 also exercised the project-owned graph-numeric training path. That

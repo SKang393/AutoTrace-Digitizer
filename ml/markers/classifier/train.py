@@ -67,9 +67,11 @@ def _train_one_epoch(
     optimizer: torch.optim.Optimizer,
     tensors: tuple[torch.Tensor, ...],
     epoch: int,
+    *,
+    seed: int = SEED,
 ) -> dict[str, float]:
     inputs, shapes, fills, artifacts = tensors
-    generator = torch.Generator(device="cpu").manual_seed(SEED + epoch)
+    generator = torch.Generator(device="cpu").manual_seed(seed + epoch)
     order = torch.randperm(inputs.shape[0], generator=generator)
     totals = {"total": 0.0, "shape": 0.0, "fill": 0.0, "artifact": 0.0, "embedding": 0.0}
     batches = 0

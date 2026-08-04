@@ -81,7 +81,6 @@ function New-PackagingFixture {
         debugSymbols = $false
         requiredContent = @(
             @{ source = 'contracts'; target = 'contracts' },
-            @{ source = 'models/manifest'; target = 'models/manifest' },
             @{ source = 'LICENSE'; target = 'LICENSE' },
             @{ source = 'NOTICE'; target = 'NOTICE' },
             @{ source = 'THIRD_PARTY_NOTICES.md'; target = 'THIRD_PARTY_NOTICES.md' },
@@ -344,10 +343,143 @@ function Update-TestPortableModelManifest {
     $null = New-Item -ItemType Directory -Path $editRoot -Force
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     [IO.Compression.ZipFile]::ExtractToDirectory($Fixture.PortablePath, $editRoot)
-    $manifestPath = Join-Path $editRoot 'models/manifest/test/test-model.json'
+    $manifestPath = Join-Path $editRoot 'models/manifest/fixture-model/1.0.0/manifest.json'
     $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
     & $Mutation $manifest
     Write-JsonFile -Path $manifestPath -Value $manifest
+    $indexPath = Join-Path $editRoot 'models/production-model-index.json'
+    $index = Get-Content -LiteralPath $indexPath -Raw | ConvertFrom-Json
+    $index.models[0].manifest.sha256 = Get-TestSha256 -Path $manifestPath
+    Write-JsonFile -Path $indexPath -Value $index
+    Remove-Item -LiteralPath $Fixture.PortablePath -Force
+    [IO.Compression.ZipFile]::CreateFromDirectory($editRoot, $Fixture.PortablePath)
+}
+
+function New-TestDirectoryJunction {
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [Parameter(Mandatory)][string]$Target
+    )
+
+    $null = New-Item -ItemType Directory -Path (Split-Path -Parent $Path) -Force
+    $junction = New-Item -ItemType Junction -Path $Path -Target $Target
+    if (($junction.Attributes -band [IO.FileAttributes]::ReparsePoint) -eq 0) {
+        throw "Test junction was not created as a reparse point: $Path"
+    }
+    return $junction.FullName
+}
+
+function Update-TestPortableModelIndex {
+    param(
+        [Parameter(Mandatory)][object]$Fixture,
+        [Parameter(Mandatory)][scriptblock]$Mutation
+    )
+
+    $editRoot = Join-Path $Fixture.BuildRoot ('index-edit-' + [Guid]::NewGuid().ToString('N'))
+    $null = New-Item -ItemType Directory -Path $editRoot -Force
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [IO.Compression.ZipFile]::ExtractToDirectory($Fixture.PortablePath, $editRoot)
+    $indexPath = Join-Path $editRoot 'models/production-model-index.json'
+    $index = Get-Content -LiteralPath $indexPath -Raw | ConvertFrom-Json
+    & $Mutation $index
+    Write-JsonFile -Path $indexPath -Value $index
+    Remove-Item -LiteralPath $Fixture.PortablePath -Force
+    [IO.Compression.ZipFile]::CreateFromDirectory($editRoot, $Fixture.PortablePath)
+}
+
+function Add-TestPortableDuplicateJsonProperty {
+    param(
+        [Parameter(Mandatory)][object]$Fixture,
+        [Parameter(Mandatory)][string]$EntryPath,
+        [Parameter(Mandatory)][string]$MatchPattern,
+        [Parameter(Mandatory)][string]$DuplicateProperty,
+        [switch]$RebindManifestHash
+    )
+
+    $editRoot = Join-Path $Fixture.BuildRoot ('duplicate-json-edit-' + [Guid]::NewGuid().ToString('N'))
+    $null = New-Item -ItemType Directory -Path $editRoot -Force
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [IO.Compression.ZipFile]::ExtractToDirectory($Fixture.PortablePath, $editRoot)
+    $entryFullPath = Join-Path $editRoot $EntryPath
+    $json = Get-Content -LiteralPath $entryFullPath -Raw
+    $match = [regex]::Match($json, $MatchPattern)
+    if (-not $match.Success) {
+        throw "Duplicate JSON test marker was not found in '$EntryPath': $MatchPattern"
+    }
+    $json = $json.Insert($match.Index + $match.Length, ",`r`n$DuplicateProperty")
+    [IO.File]::WriteAllText($entryFullPath, $json, [Text.UTF8Encoding]::new($false))
+
+    if ($RebindManifestHash) {
+        $indexPath = Join-Path $editRoot 'models/production-model-index.json'
+        $index = Get-Content -LiteralPath $indexPath -Raw | ConvertFrom-Json
+        $index.models[0].manifest.sha256 = Get-TestSha256 -Path $entryFullPath
+        Write-JsonFile -Path $indexPath -Value $index
+    }
+
+    Remove-Item -LiteralPath $Fixture.PortablePath -Force
+    [IO.Compression.ZipFile]::CreateFromDirectory($editRoot, $Fixture.PortablePath)
+}
+
+function Add-TestSourceDuplicateJsonProperty {
+    param(
+        [Parameter(Mandatory)][string]$ManifestPath,
+        [Parameter(Mandatory)][string]$MatchPattern,
+        [Parameter(Mandatory)][string]$DuplicateProperty
+    )
+
+    $json = Get-Content -LiteralPath $ManifestPath -Raw
+    $match = [regex]::Match($json, $MatchPattern)
+    if (-not $match.Success) {
+        throw "Source duplicate JSON test marker was not found: $MatchPattern"
+    }
+    $json = $json.Insert($match.Index + $match.Length, ",`r`n$DuplicateProperty")
+    [IO.File]::WriteAllText($ManifestPath, $json, [Text.UTF8Encoding]::new($false))
+}
+
+function Add-TestPortableEntry {
+    param(
+        [Parameter(Mandatory)][object]$Fixture,
+        [Parameter(Mandatory)][string]$RelativePath,
+        [Parameter(Mandatory)][byte[]]$Content
+    )
+
+    $editRoot = Join-Path $Fixture.BuildRoot ('entry-edit-' + [Guid]::NewGuid().ToString('N'))
+    $null = New-Item -ItemType Directory -Path $editRoot -Force
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [IO.Compression.ZipFile]::ExtractToDirectory($Fixture.PortablePath, $editRoot)
+    $targetPath = Join-Path $editRoot $RelativePath
+    $null = New-Item -ItemType Directory -Path (Split-Path -Parent $targetPath) -Force
+    [IO.File]::WriteAllBytes($targetPath, $Content)
+    Remove-Item -LiteralPath $Fixture.PortablePath -Force
+    [IO.Compression.ZipFile]::CreateFromDirectory($editRoot, $Fixture.PortablePath)
+}
+
+function Relocate-TestPortableModelResource {
+    param(
+        [Parameter(Mandatory)][object]$Fixture,
+        [Parameter(Mandatory)][ValidateSet('manifest', 'payload', 'notice', 'benchmark_evidence')][string]$ResourceKind
+    )
+
+    $editRoot = Join-Path $Fixture.BuildRoot ('relocation-edit-' + [Guid]::NewGuid().ToString('N'))
+    $null = New-Item -ItemType Directory -Path $editRoot -Force
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [IO.Compression.ZipFile]::ExtractToDirectory($Fixture.PortablePath, $editRoot)
+    $indexPath = Join-Path $editRoot 'models/production-model-index.json'
+    $index = Get-Content -LiteralPath $indexPath -Raw | ConvertFrom-Json
+    $resource = if ($ResourceKind -eq 'payload') {
+        $index.models[0].payloads[0]
+    }
+    else {
+        $index.models[0].$ResourceKind
+    }
+    $currentRelativePath = [string]$resource.path
+    $currentPath = Join-Path (Join-Path $editRoot 'models') $currentRelativePath
+    $relocatedRelativePath = "relocated/$ResourceKind/$([IO.Path]::GetFileName($currentRelativePath))"
+    $relocatedPath = Join-Path (Join-Path $editRoot 'models') $relocatedRelativePath
+    $null = New-Item -ItemType Directory -Path (Split-Path -Parent $relocatedPath) -Force
+    Move-Item -LiteralPath $currentPath -Destination $relocatedPath
+    $resource.path = $relocatedRelativePath
+    Write-JsonFile -Path $indexPath -Value $index
     Remove-Item -LiteralPath $Fixture.PortablePath -Force
     [IO.Compression.ZipFile]::CreateFromDirectory($editRoot, $Fixture.PortablePath)
 }
@@ -568,20 +700,31 @@ function New-ReleaseFixture {
     'MIT License' | Set-Content -LiteralPath (Join-Path $commonRoot 'LICENSES/MIT.txt') -Encoding utf8
     $null = New-Item -ItemType Directory -Path (Join-Path $commonRoot 'contracts') -Force
     '{}' | Set-Content -LiteralPath (Join-Path $commonRoot 'contracts/model-manifest.schema.json') -Encoding utf8
-    $manifestDirectory = Join-Path $commonRoot 'models/manifest/test'
-    $null = New-Item -ItemType Directory -Path $manifestDirectory -Force
-    $null = New-Item -ItemType Directory -Path (Join-Path $commonRoot 'models/runtime') -Force
-    'Synthetic model notice' | Set-Content -LiteralPath (Join-Path $manifestDirectory 'NOTICE.md') -Encoding utf8
-    $modelPath = Join-Path $commonRoot 'models/runtime/test-model.onnx'
+    $modelId = 'fixture-model'
+    $modelVersion = '1.0.0'
+    $manifestDirectory = Join-Path $commonRoot "models/manifest/$modelId/$modelVersion"
+    $runtimeDirectory = Join-Path $commonRoot "models/runtime/$modelId/$modelVersion"
+    $noticeDirectory = Join-Path $commonRoot "models/notices/$modelId/$modelVersion"
+    $evidenceDirectory = Join-Path $commonRoot "models/evidence/$modelId/$modelVersion"
+    foreach ($directory in @($manifestDirectory, $runtimeDirectory, $noticeDirectory, $evidenceDirectory)) {
+        $null = New-Item -ItemType Directory -Path $directory -Force
+    }
+    $noticePath = Join-Path $noticeDirectory 'LICENSE'
+    'Synthetic model notice' | Set-Content -LiteralPath $noticePath -Encoding utf8
+    $evidencePath = Join-Path $evidenceDirectory 'model-benchmark.json'
+    '{"status":"pass"}' | Set-Content -LiteralPath $evidencePath -Encoding utf8
+    $modelPath = Join-Path $runtimeDirectory 'test-model.onnx'
     [IO.File]::WriteAllBytes($modelPath, [byte[]](1, 2, 3, 4))
     $modelHash = Get-TestSha256 -Path $modelPath
-    Write-JsonFile -Path (Join-Path $manifestDirectory 'test-model.json') -Value ([ordered]@{
+    $evidenceHash = Get-TestSha256 -Path $evidencePath
+    $modelManifestPath = Join-Path $manifestDirectory 'manifest.json'
+    Write-JsonFile -Path $modelManifestPath -Value ([ordered]@{
             manifest_version = 1
-            model_id = 'fixture-model'
-            model_version = '1.0.0'
+            model_id = $modelId
+            model_version = $modelVersion
             task = 'marker_center'
             source = @{ name = 'synthetic fixture'; url = 'local://fixture'; revision = '1' }
-            license = @{ spdx = 'Apache-2.0'; notice_path = 'models/manifest/test/NOTICE.md'; reviewed = $true }
+            license = @{ spdx = 'Apache-2.0'; notice_path = 'LICENSE'; reviewed = $true }
             sha256 = $modelHash
             files = @('test-model.onnx')
             inputs = @(@{ name = 'input' })
@@ -589,11 +732,42 @@ function New-ReleaseFixture {
             commercial_use = $true
             redistribution = $true
             providers = @('cpu')
-            benchmarks = @(@{ profile = 'fixture'; status = 'pass'; release_eligible = $true })
+            benchmarks = @(@{
+                    profile = 'fixture'
+                    status = 'pass'
+                    release_eligible = $true
+                    production_approval = $true
+                    evidence_path = 'packaging/model-benchmark.json'
+                    evidence_sha256 = $evidenceHash
+                })
+        })
+    $manifestHash = Get-TestSha256 -Path $modelManifestPath
+    $noticeHash = Get-TestSha256 -Path $noticePath
+    Write-JsonFile -Path (Join-Path $commonRoot 'models/production-model-index.json') -Value ([ordered]@{
+            schema_version = 1
+            models = @([ordered]@{
+                    model_id = $modelId
+                    model_version = $modelVersion
+                    manifest = @{ path = "manifest/$modelId/$modelVersion/manifest.json"; sha256 = $manifestHash }
+                    payloads = @(@{
+                            declared_path = 'test-model.onnx'
+                            path = "runtime/$modelId/$modelVersion/test-model.onnx"
+                            sha256 = $modelHash
+                        })
+                    notice = @{
+                        declared_path = 'LICENSE'
+                        path = "notices/$modelId/$modelVersion/LICENSE"
+                        sha256 = $noticeHash
+                    }
+                    benchmark_evidence = @{
+                        declared_path = 'packaging/model-benchmark.json'
+                        path = "evidence/$modelId/$modelVersion/model-benchmark.json"
+                        sha256 = $evidenceHash
+                    }
+                })
         })
 
     Copy-TestTree -Source (Join-Path $commonRoot 'contracts') -Destination (Join-Path $fixture.Root 'contracts')
-    Copy-TestTree -Source (Join-Path $commonRoot 'models/manifest') -Destination (Join-Path $fixture.Root 'models/manifest')
     Copy-TestTree -Source (Join-Path $commonRoot 'LICENSES') -Destination (Join-Path $fixture.Root 'LICENSES')
     foreach ($rootFileName in @('LICENSE', 'NOTICE', 'THIRD_PARTY_NOTICES.md')) {
         Copy-Item `
@@ -768,6 +942,9 @@ function New-ModelAuditFixture {
     $validModelPath = Join-Path $fixture.Root 'models/valid-model.onnx'
     [IO.File]::WriteAllBytes($validModelPath, [byte[]](5, 6, 7, 8))
     $validModelHash = Get-TestSha256 -Path $validModelPath
+    $evidencePath = Join-Path $fixture.Root 'packaging/model-benchmark.json'
+    '{"profile":"fixture","status":"pass"}' | Set-Content -LiteralPath $evidencePath -Encoding utf8
+    $evidenceHash = Get-TestSha256 -Path $evidencePath
     $baseManifest = [ordered]@{
         manifest_version = 1
         model_id = 'fixture-valid'
@@ -877,6 +1054,9 @@ function New-ValidModelBuildFixture {
     $validModelPath = Join-Path $fixture.Root 'models/valid-model.onnx'
     [IO.File]::WriteAllBytes($validModelPath, [byte[]](5, 6, 7, 8))
     $validModelHash = Get-TestSha256 -Path $validModelPath
+    $evidencePath = Join-Path $fixture.Root 'packaging/model-benchmark.json'
+    '{"profile":"fixture","status":"pass"}' | Set-Content -LiteralPath $evidencePath -Encoding utf8
+    $evidenceHash = Get-TestSha256 -Path $evidencePath
     Write-JsonFile -Path (Join-Path $fixture.Root 'models/manifest/valid.json') -Value ([ordered]@{
             manifest_version = 1
             model_id = 'fixture-valid'
@@ -891,7 +1071,14 @@ function New-ValidModelBuildFixture {
             commercial_use = $true
             redistribution = $true
             providers = @('cpu')
-            benchmarks = @(@{ status = 'pass'; release_eligible = $true })
+            benchmarks = @(@{
+                    profile = 'fixture'
+                    status = 'pass'
+                    release_eligible = $true
+                    production_approval = $true
+                    evidence_path = 'packaging/model-benchmark.json'
+                    evidence_sha256 = $evidenceHash
+                })
         })
 
     $applicationProjectRoot = Join-Path $fixture.Root 'src/GraphReader.App'
@@ -905,6 +1092,12 @@ function New-ValidModelBuildFixture {
     <AssemblyName>GraphReader.App</AssemblyName>
     <RootNamespace>GraphReader.App</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../GraphReader.Inference/GraphReader.Inference.csproj" />
+  </ItemGroup>
+  <Target Name="RemoveFixtureImportLibrary" AfterTargets="Publish">
+    <Delete Files="$(PublishDir)onnxruntime.lib" />
+  </Target>
 </Project>
 '@ | Set-Content -LiteralPath (Join-Path $applicationProjectRoot 'GraphReader.App.csproj') -Encoding utf8
     @'
@@ -920,6 +1113,39 @@ internal static class Program
     }
 }
 '@ | Set-Content -LiteralPath (Join-Path $applicationProjectRoot 'Program.cs') -Encoding utf8
+
+    $inferenceFixtureRoot = Join-Path $fixture.Root 'src/GraphReader.Inference'
+    $null = New-Item -ItemType Directory -Path $inferenceFixtureRoot -Force
+    Get-ChildItem -LiteralPath ([IO.Path]::GetFullPath(
+            (Join-Path $PSScriptRoot '..\..\src\GraphReader.Inference'))) -File | ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination $inferenceFixtureRoot
+    }
+    $packageVersionsPath = [IO.Path]::GetFullPath(
+        (Join-Path $PSScriptRoot '..\..\Directory.Packages.props'))
+    Copy-Item -LiteralPath $packageVersionsPath -Destination (Join-Path $fixture.Root 'Directory.Packages.props')
+
+    $probeRoot = Join-Path $fixture.Root 'tests/ModelStoreProbe'
+    $null = New-Item -ItemType Directory -Path $probeRoot -Force
+    @'
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/GraphReader.Inference/GraphReader.Inference.csproj" />
+  </ItemGroup>
+</Project>
+'@ | Set-Content -LiteralPath (Join-Path $probeRoot 'ModelStoreProbe.csproj') -Encoding utf8
+    @'
+using GraphReader.Inference;
+
+var store = new ProductionModelStore(args[0]);
+var model = await store.ResolveAsync(args[1], args[2], null, CancellationToken.None);
+Console.WriteLine($"{model.Identity.ModelId}|{model.Identity.Version}|{model.Identity.FilePath}");
+'@ | Set-Content -LiteralPath (Join-Path $probeRoot 'Program.cs') -Encoding utf8
 
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot '..\installer\GraphReader.Installer.csproj') -Destination (Join-Path $fixture.Root 'packaging/installer/GraphReader.Installer.csproj')
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot '..\installer\Program.cs') -Destination (Join-Path $fixture.Root 'packaging/installer/Program.cs')
@@ -940,7 +1166,7 @@ internal static class Program
         Manifest = $fixture.Manifest
         OutputRoot = Join-Path $fixture.Root 'release-output'
         ModelHash = $validModelHash
-        ExpectedArchivePath = 'models/runtime/valid-model.onnx'
+        ExpectedArchivePath = 'models/runtime/fixture-valid/1.0.0/valid-model.onnx'
     }
 }
 
@@ -954,8 +1180,8 @@ function New-MultiFileModelBuildFixture {
     }
     Remove-Item -LiteralPath $singlePayloadPath -Force
 
-    $parameterPath = Join-Path $fixture.Root 'models/multi/model.param'
-    $binaryPath = Join-Path $fixture.Root 'models/multi/model.bin'
+    $parameterPath = Join-Path $fixture.Root 'models/multi/model.onnx'
+    $binaryPath = Join-Path $fixture.Root 'models/multi/labels.txt'
     $null = New-Item -ItemType Directory -Path (Split-Path -Parent $parameterPath) -Force
     [IO.File]::WriteAllBytes($parameterPath, [byte[]](10, 20, 30, 40))
     [IO.File]::WriteAllBytes($binaryPath, [byte[]](50, 60, 70, 80, 90))
@@ -969,19 +1195,26 @@ function New-MultiFileModelBuildFixture {
             source = @{ name = 'fixture package'; url = 'local://fixture-package'; revision = '1' }
             license = @{ spdx = 'Apache-2.0'; notice_path = 'LICENSE'; reviewed = $true }
             sha256 = $parameterHash
-            files = @('multi/model.param', 'multi/model.bin')
+            files = @('multi/model.onnx', 'multi/labels.txt')
             inputs = @(@{ name = 'input' })
             outputs = @(@{ name = 'output' })
             preprocessing = [ordered]@{
                 model_payload_sha256 = [ordered]@{
-                    'multi/model.param' = $parameterHash
-                    'multi/model.bin' = $binaryHash
+                    'multi/model.onnx' = $parameterHash
+                    'multi/labels.txt' = $binaryHash
                 }
             }
             commercial_use = $true
             redistribution = $true
             providers = @('cpu')
-            benchmarks = @(@{ status = 'pass'; release_eligible = $true })
+            benchmarks = @(@{
+                    profile = 'fixture'
+                    status = 'pass'
+                    release_eligible = $true
+                    production_approval = $true
+                    evidence_path = 'packaging/model-benchmark.json'
+                    evidence_sha256 = (Get-TestSha256 -Path (Join-Path $fixture.Root 'packaging/model-benchmark.json'))
+                })
         })
     & git -C $fixture.Root add --all
     if ($LASTEXITCODE -ne 0) { throw 'Could not stage the multi-file model fixture.' }
@@ -993,8 +1226,8 @@ function New-MultiFileModelBuildFixture {
         Manifest = $fixture.Manifest
         OutputRoot = $fixture.OutputRoot
         ExpectedArtifacts = @(
-            [pscustomobject]@{ ArchivePath = 'models/runtime/multi/model.param'; Sha256 = $parameterHash },
-            [pscustomobject]@{ ArchivePath = 'models/runtime/multi/model.bin'; Sha256 = $binaryHash })
+            [pscustomobject]@{ ArchivePath = 'models/runtime/fixture-multi-file/1.0.0/multi/model.onnx'; Sha256 = $parameterHash },
+            [pscustomobject]@{ ArchivePath = 'models/runtime/fixture-multi-file/1.0.0/multi/labels.txt'; Sha256 = $binaryHash })
     }
 }
 
@@ -1409,6 +1642,163 @@ try {
         Assert-ExitCode -Result $result -Expected 1 -Contains 'no passing release-eligible benchmark'
     }
 
+    Assert-Case 'Duplicate package index identity path and hash fields are rejected before conversion' {
+        $mutations = @(
+            @{
+                Name = 'identity'
+                Pattern = '"model_id"\s*:\s*"fixture-model"'
+                Duplicate = '        "model_id": "fixture-model"'
+            },
+            @{
+                Name = 'path'
+                Pattern = '(?s)"manifest"\s*:\s*\{.*?"path"\s*:\s*"manifest/fixture-model/1\.0\.0/manifest\.json"'
+                Duplicate = '          "path": "manifest/fixture-model/1.0.0/manifest.json"'
+            },
+            @{
+                Name = 'hash'
+                Pattern = '(?s)"manifest"\s*:\s*\{.*?"sha256"\s*:\s*"[0-9a-fA-F]{64}"'
+                Duplicate = ('          "sha256": "' + ('0' * 64) + '"')
+            })
+        foreach ($mutation in $mutations) {
+            $fixture = New-ReleaseFixture -Name ("duplicate-index-json-" + $mutation.Name)
+            Add-TestPortableDuplicateJsonProperty `
+                -Fixture $fixture `
+                -EntryPath 'models/production-model-index.json' `
+                -MatchPattern $mutation.Pattern `
+                -DuplicateProperty $mutation.Duplicate
+            $result = Invoke-Gate -Arguments @(
+                '-ManifestPath', $fixture.Manifest,
+                '-ArtifactRoot', $fixture.ReleaseRoot,
+                '-LocalizationReportPath', $fixture.LocalizationReport)
+            Assert-ExitCode -Result $result -Expected 1 -Contains 'duplicate JSON property'
+        }
+    }
+
+    Assert-Case 'Duplicate manifest license provider and approval fields are rejected before conversion' {
+        $mutations = @(
+            @{
+                Name = 'license'
+                Pattern = '"spdx"\s*:\s*"Apache-2\.0"'
+                Duplicate = '        "spdx": "GPL-3.0-only"'
+            },
+            @{
+                Name = 'provider'
+                Pattern = '"providers"\s*:\s*\[\s*"cpu"\s*\]'
+                Duplicate = '    "providers": [ "directml" ]'
+            },
+            @{
+                Name = 'approval'
+                Pattern = '"production_approval"\s*:\s*true'
+                Duplicate = '        "production_approval": false'
+            })
+        foreach ($mutation in $mutations) {
+            $fixture = New-ReleaseFixture -Name ("duplicate-manifest-json-" + $mutation.Name)
+            Add-TestPortableDuplicateJsonProperty `
+                -Fixture $fixture `
+                -EntryPath 'models/manifest/fixture-model/1.0.0/manifest.json' `
+                -MatchPattern $mutation.Pattern `
+                -DuplicateProperty $mutation.Duplicate `
+                -RebindManifestHash
+            $result = Invoke-Gate -Arguments @(
+                '-ManifestPath', $fixture.Manifest,
+                '-ArtifactRoot', $fixture.ReleaseRoot,
+                '-LocalizationReportPath', $fixture.LocalizationReport)
+            Assert-ExitCode -Result $result -Expected 1 -Contains 'duplicate JSON property'
+        }
+    }
+
+    Assert-Case 'Production model index traversal is rejected for every resource kind' {
+        $mutations = @(
+            @{ Name = 'manifest'; Apply = { param($index) $index.models[0].manifest.path = '../manifest.json' } },
+            @{ Name = 'payload'; Apply = { param($index) $index.models[0].payloads[0].path = '../model.onnx' } },
+            @{ Name = 'notice'; Apply = { param($index) $index.models[0].notice.path = '../LICENSE' } },
+            @{ Name = 'benchmark evidence'; Apply = { param($index) $index.models[0].benchmark_evidence.path = '../benchmark.json' } })
+        foreach ($mutation in $mutations) {
+            $fixture = New-ReleaseFixture -Name ("model-index-traversal-" + ([string]$mutation.Name).Replace(' ', '-'))
+            Update-TestPortableModelIndex -Fixture $fixture -Mutation $mutation.Apply
+            $result = Invoke-Gate -Arguments @(
+                '-ManifestPath', $fixture.Manifest,
+                '-ArtifactRoot', $fixture.ReleaseRoot,
+                '-LocalizationReportPath', $fixture.LocalizationReport)
+            Assert-ExitCode `
+                -Result $result `
+                -Expected 1 `
+                -Contains "invalid resource for 'fixture-model'"
+        }
+    }
+
+    Assert-Case 'Safe checksummed in-root model resource relocation is rejected' {
+        foreach ($resourceKind in @('manifest', 'payload', 'notice', 'benchmark_evidence')) {
+            $fixture = New-ReleaseFixture -Name ("model-resource-relocation-" + $resourceKind)
+            Relocate-TestPortableModelResource -Fixture $fixture -ResourceKind $resourceKind
+            $result = Invoke-Gate -Arguments @(
+                '-ManifestPath', $fixture.Manifest,
+                '-ArtifactRoot', $fixture.ReleaseRoot,
+                '-LocalizationReportPath', $fixture.LocalizationReport)
+            Assert-ExitCode -Result $result -Expected 1 -Contains 'path is not canonical'
+        }
+    }
+
+    Assert-Case 'Unlisted production model data is rejected' {
+        $fixture = New-ReleaseFixture -Name 'unlisted-production-model-data'
+        Add-TestPortableEntry `
+            -Fixture $fixture `
+            -RelativePath 'models/runtime/fixture-model/1.0.0/unlisted.bin' `
+            -Content ([byte[]](9, 8, 7))
+        $result = Invoke-Gate -Arguments @(
+            '-ManifestPath', $fixture.Manifest,
+            '-ArtifactRoot', $fixture.ReleaseRoot,
+            '-LocalizationReportPath', $fixture.LocalizationReport)
+        Assert-ExitCode -Result $result -Expected 1 -Contains 'unlisted production model data'
+    }
+
+    Assert-Case 'AuditOnly rejects duplicate source manifest approval license redistribution and nested fields' {
+        $mutations = @(
+            @{
+                Name = 'redistribution'
+                Property = 'redistribution'
+                Pattern = '"redistribution"\s*:\s*true'
+                Duplicate = '    "redistribution": false'
+            },
+            @{
+                Name = 'license'
+                Property = 'spdx'
+                Pattern = '"spdx"\s*:\s*"Apache-2\.0"'
+                Duplicate = '        "spdx": "GPL-3.0-only"'
+            },
+            @{
+                Name = 'approval'
+                Property = 'production_approval'
+                Pattern = '"production_approval"\s*:\s*true'
+                Duplicate = '        "production_approval": false'
+            },
+            @{
+                Name = 'source'
+                Property = 'revision'
+                Pattern = '"revision"\s*:\s*"1"'
+                Duplicate = '        "revision": "attacker-revision"'
+            })
+        $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
+        foreach ($mutation in $mutations) {
+            $fixture = New-ValidModelBuildFixture -Name ("duplicate-source-manifest-" + $mutation.Name)
+            $sourceManifestPath = Join-Path $fixture.Root 'models/manifest/valid.json'
+            Add-TestSourceDuplicateJsonProperty `
+                -ManifestPath $sourceManifestPath `
+                -MatchPattern $mutation.Pattern `
+                -DuplicateProperty $mutation.Duplicate
+            $audit = & $buildScript `
+                -ManifestPath $fixture.Manifest `
+                -OutputRoot $fixture.OutputRoot `
+                -AuditOnly
+            $duplicateBlockers = @($audit.Blockers | Where-Object {
+                    $_ -like "*duplicate JSON property '$($mutation.Property)'*"
+                })
+            if ($audit.ReleaseReady -or $audit.ArtifactsEmitted -or $duplicateBlockers.Count -ne 1) {
+                throw "AuditOnly did not reject duplicate source property '$($mutation.Property)' exactly once. Actual blockers: $(@($audit.Blockers) -join ' | ')"
+            }
+        }
+    }
+
     Assert-Case 'Duplicate release model IDs are rejected' {
         $fixture = New-ValidModelBuildFixture -Name 'duplicate-model-id'
         Copy-Item `
@@ -1419,6 +1809,113 @@ try {
         if ($audit.ReleaseReady -or $audit.ArtifactsEmitted -or
             @($audit.Blockers | Where-Object { $_ -like "Model ID '*' is duplicated by manifests:*" }).Count -ne 1) {
             throw "Duplicate release model ID was not rejected exactly. Actual blockers: $(@($audit.Blockers) -join ' | ')"
+        }
+    }
+
+    Assert-Case 'Production model staging rejects traversal for payload notice and benchmark evidence' {
+        $cases = @(
+            @{
+                Name = 'payload'
+                Expected = 'uses an unsafe model file path'
+                Apply = { param($manifest) $manifest.files = @('../outside.onnx') }
+            },
+            @{
+                Name = 'notice'
+                Expected = 'missing or unsafe notice path'
+                Apply = { param($manifest) $manifest.license.notice_path = '../LICENSE' }
+            },
+            @{
+                Name = 'evidence'
+                Expected = 'leaves the repository'
+                Apply = { param($manifest) $manifest.benchmarks[0].evidence_path = '../benchmark.json' }
+            })
+        foreach ($case in $cases) {
+            $fixture = New-ValidModelBuildFixture -Name ("staging-traversal-" + $case.Name)
+            $manifestPath = Join-Path $fixture.Root 'models/manifest/valid.json'
+            $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+            & $case.Apply $manifest
+            Write-JsonFile -Path $manifestPath -Value $manifest
+            $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
+            $audit = & $buildScript -ManifestPath $fixture.Manifest -OutputRoot $fixture.OutputRoot -AuditOnly
+            if ($audit.ReleaseReady -or $audit.ArtifactsEmitted -or
+                @($audit.Blockers | Where-Object { $_ -like "*$($case.Expected)*" }).Count -eq 0) {
+                throw "Staging did not reject $($case.Name) traversal. Actual blockers: $(@($audit.Blockers) -join ' | ')"
+            }
+            if (Test-Path -LiteralPath $fixture.OutputRoot) {
+                throw "Traversal audit emitted staging for $($case.Name)."
+            }
+        }
+    }
+
+    Assert-Case 'Production model staging rejects reparse-point ancestors for every resource kind' {
+        foreach ($kind in @('manifest', 'payload', 'notice', 'evidence')) {
+            $fixture = New-ValidModelBuildFixture -Name ("staging-reparse-" + $kind)
+            $manifestPath = Join-Path $fixture.Root 'models/manifest/valid.json'
+            $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+            $junctionPath = $null
+            try {
+                switch ($kind) {
+                    'manifest' {
+                        $source = Join-Path $fixture.Root 'manifest-source'
+                        $null = New-Item -ItemType Directory -Path $source -Force
+                        Move-Item -LiteralPath $manifestPath -Destination (Join-Path $source 'valid.json')
+                        [IO.Directory]::Delete((Split-Path -Parent $manifestPath))
+                        $junctionPath = New-TestDirectoryJunction `
+                            -Path (Join-Path $fixture.Root 'models/manifest') `
+                            -Target $source
+                    }
+                    'payload' {
+                        $source = Join-Path $fixture.Root 'payload-source'
+                        $null = New-Item -ItemType Directory -Path $source -Force
+                        Move-Item `
+                            -LiteralPath (Join-Path $fixture.Root 'models/valid-model.onnx') `
+                            -Destination (Join-Path $source 'valid-model.onnx')
+                        $junctionPath = New-TestDirectoryJunction `
+                            -Path (Join-Path $fixture.Root 'models/payload-link') `
+                            -Target $source
+                        $manifest.files = @('payload-link/valid-model.onnx')
+                        Write-JsonFile -Path $manifestPath -Value $manifest
+                    }
+                    'notice' {
+                        $source = Join-Path $fixture.Root 'notice-source'
+                        $null = New-Item -ItemType Directory -Path $source -Force
+                        Copy-Item -LiteralPath (Join-Path $fixture.Root 'LICENSE') -Destination (Join-Path $source 'LICENSE')
+                        $junctionPath = New-TestDirectoryJunction `
+                            -Path (Join-Path $fixture.Root 'support/notice-link') `
+                            -Target $source
+                        $manifest.license.notice_path = 'support/notice-link/LICENSE'
+                        Write-JsonFile -Path $manifestPath -Value $manifest
+                    }
+                    'evidence' {
+                        $source = Join-Path $fixture.Root 'evidence-source'
+                        $null = New-Item -ItemType Directory -Path $source -Force
+                        Move-Item `
+                            -LiteralPath (Join-Path $fixture.Root 'packaging/model-benchmark.json') `
+                            -Destination (Join-Path $source 'model-benchmark.json')
+                        $junctionPath = New-TestDirectoryJunction `
+                            -Path (Join-Path $fixture.Root 'packaging/evidence-link') `
+                            -Target $source
+                        $manifest.benchmarks[0].evidence_path = 'packaging/evidence-link/model-benchmark.json'
+                        Write-JsonFile -Path $manifestPath -Value $manifest
+                    }
+                }
+
+                $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
+                $audit = & $buildScript -ManifestPath $fixture.Manifest -OutputRoot $fixture.OutputRoot -AuditOnly
+                if ($audit.ReleaseReady -or $audit.ArtifactsEmitted -or
+                    @($audit.Blockers | Where-Object { $_ -like '*uses a reparse-point path*' }).Count -eq 0) {
+                    throw "Staging did not reject the $kind reparse-point ancestor. Actual blockers: $(@($audit.Blockers) -join ' | ')"
+                }
+                if (Test-Path -LiteralPath $fixture.OutputRoot) {
+                    throw "Reparse-point audit emitted staging for $kind."
+                }
+            }
+            finally {
+                if (-not [string]::IsNullOrWhiteSpace($junctionPath) -and
+                    (Test-Path -LiteralPath $junctionPath)) {
+                    [IO.Directory]::Delete($junctionPath)
+                }
+            }
         }
     }
 
@@ -1498,6 +1995,32 @@ try {
             [string]$packagedModels[0].sha256 -ne $fixture.ModelHash) {
             throw 'Build metadata does not record the exact packaged model path and checksum.'
         }
+
+        $indexPath = Join-Path $result.CommonPublish 'models/production-model-index.json'
+        $index = Get-Content -LiteralPath $indexPath -Raw | ConvertFrom-Json
+        if ([int]$index.schema_version -ne 1 -or @($index.models).Count -ne 1 -or
+            [string]$index.models[0].manifest.path -cne 'manifest/fixture-valid/1.0.0/manifest.json' -or
+            [string]$index.models[0].payloads[0].path -cne 'runtime/fixture-valid/1.0.0/valid-model.onnx' -or
+            -not ([string]$index.models[0].notice.path).StartsWith('notices/fixture-valid/1.0.0/', [StringComparison]::Ordinal) -or
+            -not ([string]$index.models[0].benchmark_evidence.path).StartsWith('evidence/fixture-valid/1.0.0/', [StringComparison]::Ordinal)) {
+            throw 'Production model index does not use the canonical schema-v1 layout.'
+        }
+
+        $probeProject = Join-Path $fixture.Root 'tests/ModelStoreProbe/ModelStoreProbe.csproj'
+        $probeOutput = & dotnet run `
+            --project $probeProject `
+            --configuration Release `
+            -- `
+            (Join-Path $result.CommonPublish 'models') `
+            'fixture-valid' `
+            '1.0.0'
+        if ($LASTEXITCODE -ne 0) {
+            throw "ProductionModelStore probe failed with exit code $LASTEXITCODE."
+        }
+        $expectedProbe = "fixture-valid|1.0.0|$(Join-Path $result.CommonPublish $fixture.ExpectedArchivePath)"
+        if ([string]($probeOutput | Select-Object -Last 1) -cne $expectedProbe) {
+            throw 'ProductionModelStore did not resolve the exact common-publish model bytes.'
+        }
     }
 
     Assert-Case 'Valid multi-file model payloads are emitted and verified independently' {
@@ -1558,11 +2081,11 @@ try {
         $fixture = New-MultiFileModelBuildFixture -Name 'multi-file-missing-checksum'
         $modelManifestPath = Join-Path $fixture.Root 'models/manifest/valid.json'
         $modelManifest = Get-Content -LiteralPath $modelManifestPath -Raw | ConvertFrom-Json
-        $modelManifest.preprocessing.model_payload_sha256.PSObject.Properties.Remove('multi/model.bin')
+        $modelManifest.preprocessing.model_payload_sha256.PSObject.Properties.Remove('multi/labels.txt')
         Write-JsonFile -Path $modelManifestPath -Value $modelManifest
         $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
         $audit = & $buildScript -ManifestPath $fixture.Manifest -OutputRoot $fixture.OutputRoot -AuditOnly
-        $expected = "Multi-file model manifest 'valid.json' has no payload checksum for 'multi/model.bin'."
+        $expected = "Multi-file model manifest 'valid.json' has no payload checksum for 'multi/labels.txt'."
         if ($audit.ReleaseReady -or $audit.ArtifactsEmitted -or @($audit.Blockers) -notcontains $expected) {
             throw "Missing-checksum multi-file manifest was not rejected exactly. Actual blockers: $(@($audit.Blockers) -join ' | ')"
         }
@@ -1588,11 +2111,11 @@ try {
         $fixture = New-MultiFileModelBuildFixture -Name 'multi-file-hash-mismatch'
         $modelManifestPath = Join-Path $fixture.Root 'models/manifest/valid.json'
         $modelManifest = Get-Content -LiteralPath $modelManifestPath -Raw | ConvertFrom-Json
-        $modelManifest.preprocessing.model_payload_sha256.'multi/model.bin' = ('0' * 64)
+        $modelManifest.preprocessing.model_payload_sha256.'multi/labels.txt' = ('0' * 64)
         Write-JsonFile -Path $modelManifestPath -Value $modelManifest
         $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
         $audit = & $buildScript -ManifestPath $fixture.Manifest -OutputRoot $fixture.OutputRoot -AuditOnly
-        $expected = "Model file checksum does not match manifest 'valid.json': multi/model.bin."
+        $expected = "Model file checksum does not match manifest 'valid.json': multi/labels.txt."
         if ($audit.ReleaseReady -or $audit.ArtifactsEmitted -or @($audit.Blockers) -notcontains $expected) {
             throw "Hash-mismatched multi-file payload was not rejected exactly. Actual blockers: $(@($audit.Blockers) -join ' | ')"
         }

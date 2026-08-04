@@ -3,7 +3,7 @@
 
 # OpenCV source-audit fallback
 
-This directory is a fail-closed source-build scaffold for the Windows x64
+This directory is a fail-closed source-build and provenance scaffold for the Windows x64
 `OpenCvSharpExtern.dll` used by Graph Auto Reader's deterministic axis stage.
 It does not approve a binary for public release and does not modify the public
 release audit.
@@ -35,6 +35,7 @@ powershell -File packaging/opencv-source/Build-SourceAuditedOpenCvSharp.ps1 -Pha
 powershell -File packaging/opencv-source/Build-SourceAuditedOpenCvSharp.ps1 -Phase Collect
 powershell -File packaging/opencv-source/Test-SourceAuditEvidence.ps1
 powershell -File packaging/opencv-source/tests/Test-OpenCvSourceAudit.ps1
+powershell -File packaging/opencv-source/review/Test-SourceBuildReviewPolicy.ps1 -EvidenceRoot <reviewed-evidence>
 powershell -File packaging/opencv-source/Compare-SourceBuilds.ps1 -FirstEvidenceRoot <first> -SecondEvidenceRoot <second>
 ```
 
@@ -53,10 +54,13 @@ The mechanical collection phase deliberately writes:
 - copies of the exact lock, initial cache, and triplet inputs;
 - the built DLL and a SHA-256 manifest.
 
-The evidence validator fails until every linked library and imported DLL has a
-source, license, reviewed status, and notice disposition, and an independently
-reviewed `third-party-notices.reviewed.txt` declares `REVIEW STATUS: COMPLETE`.
-The candidate notice must never be copied into a release as if it were complete.
+The mechanical evidence validator fails until every linked library and imported
+DLL has a source, license, review status, and notice disposition. The tracked
+review validator additionally requires the exact ignored maintainer attestation
+at `provenance-private/opencv-microsoft-static-runtime-attestation.json`. The
+historical `third-party-notices.candidate.txt` filename is retained for stable
+evidence hashing, but its header is authoritative and now records completion
+for this pinned source build only.
 It also requires exact inventory coverage of every linker-map library and PE
 import, and exactly one SHA-256 entry for every retained evidence file.
 
@@ -69,6 +73,7 @@ reproducibility is accepted only when
 `Compare-SourceBuilds.ps1` finds byte-identical DLL and linker-map hashes with
 identical retained inputs.
 
-Replacing the current NuGet runtime additionally requires functional parity,
-axis benchmarks, a second clean-build binary hash comparison, clean-machine
-tests, and maintainer approval outside this scaffold.
+The reviewed provenance status does not approve runtime replacement or a
+public release. Replacing the current NuGet runtime additionally requires
+functional parity, axis benchmarks, the retained second-build comparison,
+clean-machine tests, and the separate release gate.

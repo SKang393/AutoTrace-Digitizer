@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sungwoo Kang
+
+executable("graphreader_pdfium_renderer") {
+  sources = [ "graphreader_pdfium_renderer.cc" ]
+  deps = [ "//:pdfium" ]
+  configs += [ "//:pdfium_common_config" ]
+}

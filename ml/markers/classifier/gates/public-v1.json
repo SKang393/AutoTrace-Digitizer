@@ -1,0 +1,21 @@
+{
+  "case_count": 140,
+  "task": "marker-classifier",
+  "expected_candidate_hash_keys": [
+    "checkpoint_sha256",
+    "packed_onnx_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "cdd0db99a0da47e5d6d56ecf73f37157331d2a41e3817e09728559f7f646db7d",
+  "expected_evaluator_source_bundle_sha256": "a5103cae3203a7af6c6a1acad67a8d651288eed0e1aed37b7664b499f95996e3",
+  "expected_gate_config_sha256": "9812a616d8bc46f323e19f0b1095908dcd9c4fce6f794c3cf37050945c49cc20",
+  "gate": {
+    "artifact_f1": 1.0,
+    "fill_macro_f1": 0.9,
+    "minority_class_f1": 0.9,
+    "packed_onnx_parity": 0.00001,
+    "shape_macro_f1": 0.9
+  },
+  "revision": "marker-classifier-public-gate-v1",
+  "split_status": "hash-pinned; evaluation blocked until committed",
+  "historical_20260804_evaluation_status": "unsealed failed evidence; not eligible for upgrade"
+}

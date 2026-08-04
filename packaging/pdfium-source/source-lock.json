@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "profileId": "graphreader-pdfium-minimal-win-x64",
+  "compatibilityPatchSha256": "831cdc7351e06115e252a3aa3da9ce61d22b579fe19b1b3598d8b93f526bf5b6",
+  "sources": {
+    "pdfium": {
+      "repository": "https://pdfium.googlesource.com/pdfium",
+      "revision": "2870fa9244b0f0f69fb743fab1e08deefcb07b2b",
+      "rootBuildGnBlob": "57a42b0b1b2d8ab4aa74b131c4f92953bed5a45b",
+      "renderDeviceHeaderBlob": "8f427ce01c8dda15f4e0c2e557a60ab35ddb57c8",
+      "license": "BSD-3-Clause"
+    },
+    "depotTools": {
+      "repository": "https://chromium.googlesource.com/chromium/tools/depot_tools.git",
+      "revision": "d22ef3bf62a8c3c76d9c7427015bdfec7665587a",
+      "license": "BSD-3-Clause"
+    }
+  },
+  "target": {
+    "os": "win",
+    "cpu": "x64",
+    "configuration": "Release",
+    "binaryName": "graphreader_pdfium_renderer.exe",
+    "maxParallelCompileJobs": 4,
+    "v8": false,
+    "xfa": false,
+    "skia": false,
+    "fontations": false,
+    "partitionAlloc": false,
+    "icuDataFile": false
+  },
+  "toolchain": {
+    "visualStudioInstallationVersion": "17.14.37216.2",
+    "windowsSdkVersion": "10.0.26100.0",
+    "compilerAndRustRevisions": "resolved-exactly-by-pinned-pdfium-DEPS",
+    "windowsSdkDebuggers": {
+      "installerVersion": "10.1.26100.7705",
+      "featureId": "OptionId.WindowsDesktopDebuggers",
+      "x64MsiSha256": "973c86f9941343ff9ecb4aeed18aa4430d70f991424c94d4ac4e2a085fc67d1c",
+      "dbghelpSha256": "23d33e01020b6d1de7dd29cd737287042476a6e0a8deafdab68f01e61a801fcf",
+      "dbgcoreSha256": "6cc55763c3d6a5318b5115fe5a2014fe5c69fb277f833c27df84dcda950ad2a6",
+      "symsrvSha256": "89efaac07673f87a2862d6b163bc6626b51770ad1bd48c4f277e356df0a08c1d"
+    }
+  }
+}

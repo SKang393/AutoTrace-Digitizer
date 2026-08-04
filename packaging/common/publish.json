@@ -11,10 +11,6 @@
       "target": "contracts"
     },
     {
-      "source": "models/manifest",
-      "target": "models/manifest"
-    },
-    {
       "source": "LICENSE",
       "target": "LICENSE"
     },
