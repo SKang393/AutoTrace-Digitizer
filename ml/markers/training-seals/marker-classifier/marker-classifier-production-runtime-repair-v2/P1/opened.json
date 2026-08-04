@@ -1,0 +1,25 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/markers/classifier/training/production-runtime-repair-v2-p1.json",
+    "candidate_config_sha256": "39d440bf9c5130cd2544bca82a9c1a1d57546d7f0d1dbd02e7aa29fb87c9b679",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "marker-classifier-production-runtime-repair-v2",
+    "runner_source_bundle_sha256": "fee1db2f554e5d2c235a3fea45e0bc96b7958178bf8da12e85a9e08cf3788153",
+    "runner_source_paths": [
+      "ml/markers/classifier/dataset.py",
+      "ml/markers/classifier/manifests/runtime-repair-v2-selection.json",
+      "ml/markers/classifier/metrics.py",
+      "ml/markers/classifier/model.py",
+      "ml/markers/classifier/runtime_repair_v2.py",
+      "ml/markers/classifier/runtime_v2.py",
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py"
+    ],
+    "task": "marker-classifier",
+    "training_budget_ledger_sha256": "35f0465a295d8f630a4fa5ac55cdf37e7d56ca507cd9af05b1dffc2a4baf6e40"
+  },
+  "opened_utc": "2026-08-04T23:44:01.588132+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

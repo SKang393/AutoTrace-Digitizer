@@ -138,16 +138,37 @@ def test_runtime_v2_source_bundles_and_budget_binding_match_preregistration() ->
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
     entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
-    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["status"] == "candidate_1_selected_public_gate_authorized"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == [CANDIDATE_ID]
-    assert entry["consumed_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["public_gate_authorized"] is False
+    assert entry["consumed_candidate_ids"] == [CANDIDATE_ID]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_evaluations"] == 0
     assert entry["confirmation_gate_authorized"] is False
+    assert entry["confirmation_gate_evaluations"] == 0
+    assert entry["p1_optimizer_steps"] == 0
+    assert entry["p1_weights_changed"] is False
+    assert entry["p1_probability_packed_onnx_maximum_absolute_error"] <= PARITY_TOLERANCE
+    assert entry["p1_candidate_report_sha256"] == "3947e5a7f9f35e3684caa49f1fa1cbdc763d632a253ba07ded1720f5a9f6d7d8"
+    assert entry["p1_probability_packed_onnx_sha256"] == "26f9304f1689053a0b94aa896a1e239f6ade1e5c1920736a3535c1b32f803b8a"
     assert entry["candidate_config_sha256"][CANDIDATE_ID] == hashlib.sha256(
         (REPO_ROOT / CONFIG_PATH).read_bytes()
     ).hexdigest()
+    model_manifest = json.loads(
+        (REPO_ROOT / "models/manifest/markers/graph-marker-classifier-0.1.0.json").read_text(encoding="utf-8")
+    )
+    benchmark = next(
+        item
+        for item in model_manifest["benchmarks"]
+        if item["profile"] == "production-runtime-repair-v2-p1-selection-20260804"
+    )
+    assert benchmark["status"] == "pass"
+    assert benchmark["release_eligible"] is False
+    assert benchmark["production_approval"] is False
+    assert benchmark["public_v3_evaluation_count"] == 0
+    assert benchmark["confirmation_v3_evaluation_count"] == 0
 
 
 def test_runtime_v2_gate_boundaries_remain_strict() -> None:

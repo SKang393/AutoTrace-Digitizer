@@ -258,6 +258,37 @@
         "direct packed ONNX parity"
       ],
       "promotion_decision": "rejected; retraining is mandatory because packed ONNX parity exceeded tolerance"
+    },
+    {
+      "profile": "production-runtime-repair-v2-p1-selection-20260804",
+      "status": "pass",
+      "release_eligible": false,
+      "production_approval": false,
+      "task": "marker-classifier",
+      "revision": "marker-classifier-production-runtime-repair-v2",
+      "candidate_id": "P1",
+      "candidate_type": "unchanged-weight calibrated probability runtime",
+      "optimizer_steps": 0,
+      "weights_changed": false,
+      "source_checkpoint_sha256": "49a5ce6487b51a7426ebca5081fa3e2a15c9c30bd6302033ad7efa82b3ad8c7a",
+      "probability_packed_onnx_sha256": "26f9304f1689053a0b94aa896a1e239f6ade1e5c1920736a3535c1b32f803b8a",
+      "selection_dataset_manifest_sha256": "54975fac156228587872652e5fef2df21bbb11aa2095552eb143baf4020776bf",
+      "selection_evidence_path": "ml/markers/classifier/artifacts/production-runtime-repair-v2/P1-run/candidate-report.json",
+      "selection_evidence_sha256": "3947e5a7f9f35e3684caa49f1fa1cbdc763d632a253ba07ded1720f5a9f6d7d8",
+      "selection_sample_count": 140,
+      "selection_shape_macro_f1": 1.0,
+      "selection_fill_macro_f1": 0.9907389542735867,
+      "selection_artifact_f1": 1.0,
+      "selection_minority_shape_f1": 1.0,
+      "probability_packed_onnx_maximum_absolute_error": 0.0000020265579223632812,
+      "probability_packed_onnx_parity_tolerance": 0.00001,
+      "provider": "CPUExecutionProvider",
+      "public_v3_status": "authorized; not evaluated",
+      "public_v3_evaluation_count": 0,
+      "confirmation_v3_status": "not authorized; not evaluated",
+      "confirmation_v3_evaluation_count": 0,
+      "release_blocker": "Once-only public-v3 and disjoint confirmation-v3 gates, production model discovery, application integration, packaging, and clean-machine evidence remain mandatory.",
+      "promotion_decision": "selection passed; authorize one public-v3 evaluation without approving the model"
     }
   ]
 }

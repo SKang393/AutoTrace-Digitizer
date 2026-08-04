@@ -127,12 +127,14 @@
     {
       "task": "marker-classifier",
       "revision": "marker-classifier-production-runtime-repair-v2",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_1_selected_public_gate_authorized",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
+      "consumed_candidate_ids": [
+        "P1"
+      ],
       "remaining_unregistered_candidate_ids": [
         "P2",
         "P3"
@@ -153,11 +155,29 @@
       "confirmation_gate_manifest_path": "ml/markers/classifier/manifests/confirmation-v3.json",
       "confirmation_gate_manifest_sha256": "b32e0b0f4c42ede6913eaa2ac26e7315f4f11f9d7d8c4dd234fe941dd92abb98",
       "source_checkpoint_sha256": "49a5ce6487b51a7426ebca5081fa3e2a15c9c30bd6302033ad7efa82b3ad8c7a",
-      "execution_authorized": true,
-      "authorized_candidate_id": "P1",
-      "public_gate_authorized": false,
+      "p1_candidate_report_path": "ml/markers/classifier/artifacts/production-runtime-repair-v2/P1-run/candidate-report.json",
+      "p1_candidate_report_sha256": "3947e5a7f9f35e3684caa49f1fa1cbdc763d632a253ba07ded1720f5a9f6d7d8",
+      "p1_probability_packed_onnx_sha256": "26f9304f1689053a0b94aa896a1e239f6ade1e5c1920736a3535c1b32f803b8a",
+      "p1_parity_report_sha256": "ca7f62435f0dab55fc52e4cf19eb54aa994c27afd55aafd626e279ae7f43c8e0",
+      "p1_training_opened_seal_sha256": "375508e474602488ea5523eaed91b53db1a5eae79168375a4257fd4f93ea83d1",
+      "p1_training_result_seal_sha256": "5feef30d9bd6efdee70e6b95c7c2abb3eee64476763f006fdb7f9628f8383d0d",
+      "p1_optimizer_steps": 0,
+      "p1_weights_changed": false,
+      "p1_selection_sample_count": 140,
+      "p1_selection_shape_macro_f1": 1.0,
+      "p1_selection_fill_macro_f1": 0.9907389542735867,
+      "p1_selection_artifact_f1": 1.0,
+      "p1_selection_minority_shape_f1": 1.0,
+      "p1_probability_packed_onnx_maximum_absolute_error": 0.0000020265579223632812,
+      "p1_probability_packed_onnx_parity_tolerance": 0.00001,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "public_gate_authorized": true,
+      "public_gate_authorized_candidate_id": "P1",
+      "public_gate_evaluations": 0,
       "confirmation_gate_authorized": false,
-      "refusal_required_before_output": false
+      "confirmation_gate_evaluations": 0,
+      "refusal_required_before_output": true
     }
   ]
 }

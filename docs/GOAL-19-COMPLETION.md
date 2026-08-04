@@ -54,14 +54,14 @@ The authoritative current preview is the immutable build selected by ignored
 before the current source-only model preregistrations was:
 
 - version: `0.0.21`
-- commit: `40bb0ab55dc836e2727a391ff5f3313433ca5faf`
+- commit: `046b284c71c0c0c8286896bac0e04663fee37a26`
 - dirty development build: no
-- build time: `2026-08-04T21:45:59.327Z`
+- build time: `2026-08-04T23:40:04.367Z`
 - executable:
-  `artifacts/dev-portable/builds/0.0.21-20260804T214559327Z-40bb0ab5/GraphReader.App.exe`
+  `artifacts/dev-portable/builds/0.0.21-20260804T234004367Z-046b284c/GraphReader.App.exe`
 - executable SHA-256:
-  `7b12491e3dd788e0b831f795aa46648006bca2b473c510bd5fda1d91d394ed9f`
-- running process at the latest recheck: `57648`, responsive, window title
+  `bfcedd63d33e1eeb64e98ba5c5ae02bab0a6864c1f44f1623ae7a693fa59f131`
+- running process at the latest recheck: `58416`, responsive, window title
   `Graph Auto Reader`, exact Chandler path supplied by `--open-image`
 - clean portable full-test rerun: PASS, 668 passed and 5 expected skips
 - production-model IDs reported available: `0`
@@ -74,8 +74,9 @@ before the current source-only model preregistrations was:
   the harness now rejects transparent pixel surfaces as inconclusive instead
   of emitting false evidence
 - the real Chandler window changed after invoking the actual Zoom In control
-  and again after invoking Fit Graph; the final fitted capture SHA-256 is
-  `27902d5aba57304e1eee3011bc977c6c050a6cfdb658dc20db526acb84e26f42`
+  and again after invoking Fit Graph; the zoom and final fitted capture SHA-256
+  values are `205c8c315642e474932cb6c0d2db28099e58aca9c589fce00c14b51677deed26`
+  and `6dc57bb046e6e6aa2fa167ccfb932371ac713842cba3951bb05139001c7726fc`
 
 Start the watcher with
 `powershell.exe -File packaging/Watch-DevPortable.ps1 -BuildOnStart -FastTestsOnly -AllowDirty -LaunchAfterBuild`.
@@ -106,7 +107,7 @@ in Production composition. Automatic stages currently report:
 | Enhancement | Unavailable | Exact runtime redistribution provenance is reviewed, but local-adapter, scientific, CPU fallback, clean-machine, production, and release approvals remain false. |
 | Axis | Unavailable | Deterministic adapter exists; OpenCvSharp native redistribution audit is blocked. |
 | OCR | Unavailable | Prior CTC, spatial V2, and canonical-slot experiments are closed. Whole-crop project numeric Candidate 1 completed evaluation-only recovery without retraining, failed the frozen recognition and role gates, and produced no ONNX. Candidates 2 and 3 are unregistered. |
-| Markers | Unavailable | Marker-center exhausted its budget after one public false positive. The historical classifier passed classification metrics but failed packed-runtime parity; a new unchanged-weight probability-runtime candidate is preregistered and has not run. |
+| Markers | Unavailable | Marker-center exhausted its budget after one public false positive. The unchanged-weight probability-runtime classifier passed selection, but its one public-v3 gate and disjoint confirmation-v3 gate remain incomplete. |
 | Legends | Unavailable | Deterministic reasoner requires approved OCR and marker evidence. |
 | Phases | Unavailable | Deterministic reasoner requires approved axis, OCR, and marker evidence. |
 
@@ -140,11 +141,12 @@ approving any model:
 - The sealed current packed marker classifier reached shape, fill, artifact,
   and minority-shape F1 `1.0`, but its direct packed ONNX maximum absolute
   error was `2.288818359375e-05`, above the `1e-5` gate. A new
-  `marker-classifier-production-runtime-repair-v2` P1 is preregistered with the
-  exact unchanged checkpoint, calibrated probability outputs, a full fixed
-  validation gate, and new source-bound public-v3 and disjoint confirmation-v3
-  procedural splits. It has not executed, neither external gate is authorized,
-  and no classifier asset is approved.
+  `marker-classifier-production-runtime-repair-v2` P1 retained the exact
+  checkpoint with zero optimizer steps and passed the full fixed 140-case
+  selection gate: shape F1 `1.0`, fill F1 `0.9907389542735867`, artifact and
+  minority F1 `1.0`, and CPU ONNX parity `2.0265579223632812e-06`. One
+  source-bound public-v3 evaluation is authorized; disjoint confirmation-v3 is
+  not authorized, and no classifier asset is approved.
 - The project-trained graph-numeric CTC experiment used only procedural vector
   glyphs. Candidate and single repair held-out exact match were both
   `0.015625`; the repair CER worsened to `0.932710`. Its exact ONNX passed an
