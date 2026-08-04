@@ -6,7 +6,8 @@ param(
     [switch]$AllowDirty,
     [switch]$FastTestsOnly,
     [switch]$SkipRestore,
-    [string]$OutputRoot
+    [string]$OutputRoot,
+    [string]$ReviewedOpenCvEvidenceRoot
 )
 
 Set-StrictMode -Version Latest
@@ -163,6 +164,10 @@ try {
         Invoke-CheckedCommand -Description 'localization audit regression' -Command {
             & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repositoryRoot 'packaging\localization\Test-LocalizationAudit.ps1')
         }
+        $testsRun.Add('Reviewed OpenCV runtime packaging regression')
+        Invoke-CheckedCommand -Description 'reviewed OpenCV runtime packaging regression' -Command {
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repositoryRoot 'packaging\opencv-source\tests\Test-InstallReviewedRuntime.Tests.ps1')
+        }
     }
 
     $buildTimestamp = [DateTimeOffset]::UtcNow
@@ -196,6 +201,34 @@ try {
         throw "Published runtime configuration is missing: $runtimeConfigPath"
     }
 
+    $publishedOpenCvRuntime = @(Get-ChildItem -LiteralPath $stagingDirectory -Recurse -File -Filter 'OpenCvSharpExtern.dll')
+    if ($publishedOpenCvRuntime.Count -ne 1) {
+        throw "Expected exactly one published OpenCvSharpExtern.dll, found $($publishedOpenCvRuntime.Count)."
+    }
+    if (-not [string]::IsNullOrWhiteSpace($ReviewedOpenCvEvidenceRoot)) {
+        $reviewedOpenCvEvidencePath = [IO.Path]::GetFullPath($ReviewedOpenCvEvidenceRoot)
+        Invoke-CheckedCommand -Description 'install reviewed source-built OpenCV runtime' -Command {
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repositoryRoot 'packaging\opencv-source\Install-ReviewedRuntime.ps1') `
+                -EvidenceRoot $reviewedOpenCvEvidencePath `
+                -DestinationRoot $stagingDirectory
+        }
+        $openCvRuntime = Get-Content -LiteralPath (Join-Path $stagingDirectory 'reviewed-opencv-runtime.json') -Raw | ConvertFrom-Json
+        if ([bool]$openCvRuntime.releaseApproved -or
+            [string]$openCvRuntime.binarySha256 -ne '87c12460daba638b36e916ea2bb832d0759fbf094b8639919a7ce11b0cca5791') {
+            throw 'Reviewed OpenCV runtime metadata is invalid or unexpectedly release-approved.'
+        }
+    }
+    else {
+        $openCvRuntime = [pscustomobject][ordered]@{
+            schema = 'graphreader.development-opencv-runtime.v1'
+            runtimeId = 'opencvsharpextern-nuget-development-baseline'
+            binarySha256 = (Get-FileHash -LiteralPath $publishedOpenCvRuntime[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            provenanceValidated = $false
+            cleanMachineEvidence = $false
+            releaseApproved = $false
+        }
+    }
+
     Write-Utf8NoBom -Path (Join-Path $stagingDirectory 'portable.mode') -Content "development portable`r`n"
     Write-Utf8NoBom -Path (Join-Path $stagingDirectory 'DEVELOPMENT_BUILD.txt') -Content @"
 Graph Auto Reader Development Preview
@@ -205,6 +238,8 @@ Commit: $commit
 Dirty: $($isDirty.ToString().ToLowerInvariant())
 Built UTC: $($buildTimestamp.ToString('O'))
 Runtime mode: ManualPreview
+OpenCV runtime: $($openCvRuntime.runtimeId)
+OpenCV SHA-256: $($openCvRuntime.binarySha256)
 "@
 
     $availableModelIds = @(Get-DevPortableApprovedModelIds `
@@ -220,6 +255,7 @@ Runtime mode: ManualPreview
         buildTimeUtc = $buildTimestamp.ToString('O')
         runtimeMode = 'ManualPreview'
         testsRun = @($testsRun)
+        openCvRuntime = $openCvRuntime
         availableModelIds = $availableModelIds
         unavailableStages = $unavailableStages
         localOnlyWarning = 'Development Preview. Local maintainer testing only. Do not redistribute or publish.'
@@ -272,6 +308,13 @@ Runtime mode: ManualPreview
         buildDirectory = $relativeBuildDirectory.Replace('\', '/')
         executable = ($relativeBuildDirectory.Replace('\', '/') + '/GraphReader.App.exe')
         dataRoot = 'Data'
+        openCvRuntime = [ordered]@{
+            runtimeId = [string]$openCvRuntime.runtimeId
+            binarySha256 = [string]$openCvRuntime.binarySha256
+            provenanceValidated = [bool]$openCvRuntime.provenanceValidated
+            cleanMachineEvidence = [bool]$openCvRuntime.cleanMachineEvidence
+            releaseApproved = [bool]$openCvRuntime.releaseApproved
+        }
     }
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Run-Latest-DevPortable.ps1') -Destination $OutputRoot -Force
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Run-Latest-DevPortable.cmd') -Destination $OutputRoot -Force

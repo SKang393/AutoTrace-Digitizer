@@ -38,6 +38,8 @@ powershell -File packaging/opencv-source/tests/Test-OpenCvSourceAudit.ps1
 powershell -File packaging/opencv-source/review/Test-SourceBuildReviewPolicy.ps1 -EvidenceRoot <reviewed-evidence>
 powershell -File packaging/opencv-source/Compare-SourceBuilds.ps1 -FirstEvidenceRoot <first> -SecondEvidenceRoot <second>
 powershell -File packaging/opencv-source/Test-SourceRuntimeParity.ps1 -EvidenceRoot <reviewed-evidence>
+powershell -File packaging/opencv-source/Install-ReviewedRuntime.ps1 -EvidenceRoot <reviewed-evidence> -DestinationRoot <published-app>
+powershell -File packaging/opencv-source/tests/Test-InstallReviewedRuntime.Tests.ps1
 ```
 
 Sources and build evidence are written only under ignored
@@ -78,6 +80,14 @@ The reviewed provenance status does not approve runtime replacement or a
 public release. Replacing the current NuGet runtime additionally requires
 functional parity, public axis benchmarks, the retained second-build
 comparison, clean-machine tests, and the separate release gate.
+
+`Install-ReviewedRuntime.ps1` is the fail-closed internal development-portable
+replacement seam. It runs both evidence validators, requires the exact
+`reviewed-provenance-only` policy and completed notice status, validates the
+source DLL checksum, rejects ambiguous or reparse-point destinations, replaces
+exactly one published DLL, and emits `reviewed-opencv-runtime.json`. That
+metadata deliberately records `cleanMachineEvidence: false` and
+`releaseApproved: false`. It is not used by the production common publish.
 
 `Test-SourceRuntimeParity.ps1` provides the local functional and public-axis
 evidence without changing the release runtime. It validates the retained

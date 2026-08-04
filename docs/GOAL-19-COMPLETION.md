@@ -25,6 +25,10 @@ clean-machine distribution evidence.
   stage-aware registry. Automatic stages remain disabled unless their complete
   production evidence is approved.
 - Added atomic development-portable build, launch, and watcher scripts.
+- Added an opt-in, checksum-bound development-portable replacement for the
+  exact reviewed source-built OpenCV runtime. It validates provenance and the
+  ignored maintainer attestation, rejects tampering and ambiguous destinations,
+  and records that clean-machine and release approval remain false.
 - Added independent packaging and verification for multi-file model payloads.
 - Added a checksum-bound PDFium dependency review that maps every retained
   target label and system import to an explicit source, license, notice, or
@@ -223,6 +227,12 @@ files are not tracked.
 - OpenCV public-axis runtime parity: 4/4 fixed procedural families produced
   exact canonical output; 92/92 executed integration tests and both WPF smoke
   publishes passed with the source DLL.
+- Reviewed OpenCV runtime packaging: 3/3 positive, tamper, and ambiguous-path
+  cases passed in Windows PowerShell 5.1 and PowerShell 7. A self-contained
+  development portable replaced the NuGet DLL with exact SHA-256
+  `87c12460daba638b36e916ea2bb832d0759fbf094b8639919a7ce11b0cca5791`
+  and passed `--portable-smoke`; metadata preserved
+  `cleanMachineEvidence=false` and `releaseApproved=false`.
 - PDFium dependency review policy: 4/4 positive and negative cases passed under
   Windows PowerShell and PowerShell 7. The exact policy validates 240 labels,
   16 notices, and 4 system imports while approval remains false.
@@ -275,8 +285,10 @@ Microsoft source and license record.
 - Multi-file param/bin packaging limitation: resolved and verified.
 - OpenCV source reproducibility and candidate notice classification: resolved.
 - OpenCV local source-runtime parity: PASS.
-- OpenCV release replacement: still blocked on clean-machine load and workflow
-  evidence.
+- OpenCV internal development-portable replacement: PASS with exact
+  checksum-bound provenance metadata.
+- OpenCV production common-publish replacement: still blocked on clean-machine
+  load and workflow evidence.
 - PDFium dependency/license closure: resolved for the exact unbundled runner;
   runtime packaging, clean-machine execution, and release approval remain
   blocked.

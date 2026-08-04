@@ -12,8 +12,9 @@ blocked below is removed by new, independently verified evidence.
 
 Current release blockers are:
 
-1. The reviewed source-built `OpenCvSharpExtern.dll` has not replaced the
-   NuGet native payload and has not passed the mandatory clean-machine gate.
+1. The reviewed source-built `OpenCvSharpExtern.dll` replaces the NuGet native
+   payload only in checksum-bound internal development portable builds. The
+   production common publish and mandatory clean-machine gate remain blocked.
 2. No marker-center model has passed the production-runtime held-out gate.
 3. No default super-resolution model and runtime pair has passed the required
    benchmark and packaging gates.
@@ -127,9 +128,12 @@ Current release blockers are:
   `packaging/opencv-source/review/third-party-notices.candidate.txt`. The
   historical filename is retained for evidence stability; its header states
   the reviewed scope.
-- Release status: BLOCKED. Do not substitute the source build into a release
-  until application parity, public axis benchmarks, and clean-machine loading
-  pass with the exact reviewed DLL.
+- Internal portable status: the checksum-bound packaging seam validates the
+  complete source-build evidence and private attestation, replaces exactly one
+  published native DLL, records the exact runtime hash, and keeps
+  `releaseApproved=false`. Application parity and public axis benchmarks pass.
+- Release status: BLOCKED. The production common publish does not consume this
+  runtime, and clean-machine workflow evidence remains absent.
 
 ## ONNX Runtime
 
