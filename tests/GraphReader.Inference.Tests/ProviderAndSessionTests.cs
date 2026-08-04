@@ -107,6 +107,41 @@ public sealed class ProviderAndSessionTests
     }
 
     [TestMethod]
+    public async Task RealFactoryHonorsPreCanceledCreation()
+    {
+        using var model = TestOnnxModel.CreateIdentity();
+        var factory = new OnnxInferenceSessionFactory(NoUiThreadGuard.Instance);
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
+            await factory.CreateAsync(
+                Model(model),
+                InferenceProvider.Cpu,
+                CpuThreadConfiguration.Create(1, new FixedCoreDetector(2)),
+                cancellation.Token));
+    }
+
+    [TestMethod]
+    public async Task DisposedRealCpuSessionRejectsFurtherRuns()
+    {
+        using var model = TestOnnxModel.CreateIdentity();
+        var factory = new OnnxInferenceSessionFactory(NoUiThreadGuard.Instance);
+        var session = await factory.CreateAsync(
+            Model(model),
+            InferenceProvider.Cpu,
+            CpuThreadConfiguration.Create(1, new FixedCoreDetector(2)),
+            CancellationToken.None);
+
+        await session.DisposeAsync();
+
+        await Assert.ThrowsExactlyAsync<ObjectDisposedException>(async () =>
+            await session.RunAsync(
+                new InferenceInput(new float[] { 1, 2, 3 }, new long[] { 1, 3 }),
+                CancellationToken.None));
+    }
+
+    [TestMethod]
     public async Task CapturedUiThreadIsRejectedBeforeRealInference()
     {
         using var model = TestOnnxModel.CreateIdentity();
