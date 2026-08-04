@@ -46,7 +46,7 @@ public sealed class ApplicationCompositionSmokeTests
             ApplicationComposition.Create(WorkflowRuntimeEnvironment.Production);
 
         Assert.AreEqual(WorkflowRuntimeEnvironment.Production, composition.Environment);
-        var workspace = Assert.IsInstanceOfType<ManualPreviewWorkspaceService>(composition.WorkspaceService);
+        var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
         Assert.IsNull(composition.StartupError);
         Assert.AreEqual(WorkflowRuntimeEnvironment.Production, workspace.RuntimeEnvironment);
         Assert.IsFalse(workspace.UsesFakeGraphData);
@@ -56,6 +56,22 @@ public sealed class ApplicationCompositionSmokeTests
         Assert.AreEqual(
             "enhancement,axis,ocr,markers,legends,phases",
             string.Join(',', workspace.AutomaticStages.Select(static stage => stage.Stage)));
+        Assert.IsInstanceOfType<IAutomaticWorkspaceService>(workspace);
+        Assert.IsNull(workspace.LastAutomaticRun);
+    }
+
+    [TestMethod]
+    public async Task ProductionAutomaticWorkflowRemainsFailClosedWithoutApprovedStages()
+    {
+        ApplicationCompositionResult composition =
+            ApplicationComposition.Create(WorkflowRuntimeEnvironment.Production);
+        var workspace = Assert.IsInstanceOfType<IAutomaticWorkspaceService>(composition.WorkspaceService);
+
+        InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => workspace.RunAutomaticDetectionAsync(CancellationToken.None));
+
+        StringAssert.Contains(exception.Message, "native runtime");
+        Assert.IsNull(workspace.LastAutomaticRun);
     }
 
     [TestMethod]

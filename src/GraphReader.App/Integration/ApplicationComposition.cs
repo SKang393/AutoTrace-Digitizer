@@ -31,9 +31,8 @@ public static class ApplicationComposition
         {
             WorkflowRuntimeEnvironment.Production => new ApplicationCompositionResult(
                 environment,
-                new ManualPreviewWorkspaceService(
+                new ProductionWorkspaceService(
                     applicationPaths,
-                    runtimeEnvironment: WorkflowRuntimeEnvironment.Production,
                     automaticStages: automaticStages,
                     enhancementResolver: enhancementResolver),
                 null),

@@ -147,3 +147,14 @@ public interface IManualWorkspaceService : IRuntimeWorkspaceService
         string outputDirectory,
         CancellationToken cancellationToken);
 }
+
+/// <summary>
+/// Real-data workspace contract for an evidence-backed automatic workflow.
+/// Implementations must never substitute recorded or synthetic detections.
+/// </summary>
+public interface IAutomaticWorkspaceService : IManualWorkspaceService
+{
+    WorkflowRunResult? LastAutomaticRun { get; }
+
+    Task<WorkflowRunResult> RunAutomaticDetectionAsync(CancellationToken cancellationToken);
+}

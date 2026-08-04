@@ -35,7 +35,7 @@ namespace GraphReader.App.Services;
 /// Real-data manual workspace. It intentionally begins empty and never supplies
 /// recorded detections when production models are absent.
 /// </summary>
-public sealed class ManualPreviewWorkspaceService : IManualWorkspaceService
+public class ManualPreviewWorkspaceService : IManualWorkspaceService
 {
     private readonly IApplicationPaths? _applicationPaths;
     private readonly IImageImportService _imageImportService;
@@ -894,7 +894,7 @@ public sealed class ManualPreviewWorkspaceService : IManualWorkspaceService
         return await _exportService.ExportAsync(request, cancellationToken).ConfigureAwait(false);
     }
 
-    public Task RunStageAsync(WorkflowStage stage, CancellationToken cancellationToken)
+    public virtual Task RunStageAsync(WorkflowStage stage, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         AutomaticStageStatus? unavailable = stage switch
