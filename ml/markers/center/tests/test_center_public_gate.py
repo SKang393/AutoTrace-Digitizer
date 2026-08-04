@@ -27,6 +27,7 @@ from ml.markers.center.confirmation_gate import (
 )
 from ml.markers.center.dataset import ARTIFACT_KINDS, build_fixed_dataset
 from ml.markers.center.production_train import CANDIDATE_SEEDS, EXPERIMENTS, _batch, train_candidates
+from ml.markers.center.production_train_v2 import CONFIG_PATH, RUNNER_SOURCE_PATHS, train_candidate
 from ml.markers.center.public_gate import (
     PUBLIC_GATE_CONFIG,
     build_public_gate_split,
@@ -270,7 +271,7 @@ def test_candidate_budget_and_manifest_remain_fail_closed() -> None:
 
 def test_exhausted_center_revision_refuses_before_output(tmp_path: Path) -> None:
     output = tmp_path / "no-fourth-center-candidate"
-    with pytest.raises(RuntimeError, match="committed before use|budget is exhausted"):
+    with pytest.raises(RuntimeError, match="committed before use|committed revision|budget is exhausted"):
         train_candidates(output)
     assert not output.exists()
 
@@ -320,3 +321,26 @@ def test_untracked_training_budget_is_never_trusted(tmp_path: Path) -> None:
             task="marker-center",
             revision="marker-center-production-repair-v1",
         )
+
+
+def test_v2_candidate_one_is_hash_bound_and_refuses_before_commit_or_output(tmp_path: Path) -> None:
+    config_path = REPO_ROOT / CONFIG_PATH
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
+    entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-production-repair-v2")
+    assert config["candidate_id"] == "P1"
+    assert config["experiment_ordinal"] == 1
+    assert config["experiment_budget"] == 3
+    assert config["public_gate_use_for_selection"] is False
+    assert config["changes"]["marker_mask_channels_preserved"] is True
+    assert config["changes"]["hard_negative_center_suppression_weight"] == 1.0
+    assert config["changes"]["hard_negative_artifact_weight"] == 0.75
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
+    assert entry["candidate_config_sha256"] == sha256_file(config_path)
+    assert entry["preregistered_candidate_ids"] == ["P1"]
+    assert entry["consumed_candidate_ids"] == []
+    output = tmp_path / "v2-p1-must-not-start-uncommitted"
+    with pytest.raises(RuntimeError, match="committed before use|committed revision"):
+        train_candidate(output)
+    assert not output.exists()
+    assert not (REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-production-repair-v2/P1").exists()

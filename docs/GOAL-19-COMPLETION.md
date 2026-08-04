@@ -43,27 +43,27 @@ clean-machine distribution evidence.
 ## Portable preview
 
 The authoritative current preview is the immutable build selected by ignored
-`artifacts/dev-portable/latest.json`. Before this OpenCV parity checkpoint it
-was:
+`artifacts/dev-portable/latest.json`. The latest completed clean verification
+before the marker repair-v2 preregistration checkpoint was:
 
 - version: `0.0.21`
-- commit: `ad1bb62bb1e139857ce42715bcff064bc67b4116`
+- commit: `1314166ba3c484802cab9c908381fac5de851e93`
 - dirty development build: no
-- build time: `2026-08-04T19:34:12.554Z`
+- build time: `2026-08-04T21:34:16.652Z`
 - executable:
-  `artifacts/dev-portable/builds/0.0.21-20260804T193412554Z-ad1bb62b/GraphReader.App.exe`
-- running process at verification: `74180`, responsive, window title
+  `artifacts/dev-portable/builds/0.0.21-20260804T213416652Z-1314166b/GraphReader.App.exe`
+- running process at verification: `12900`, responsive, window title
   `Graph Auto Reader`, exact Chandler path supplied by `--open-image`
-- corrected current full-test rerun: PASS, 664 passed and 9 expected or
-  fail-closed skips
+- clean portable full-test rerun: PASS, 668 passed and 5 expected skips
 - production-model IDs reported available: `0`
 - automatic stages reported unavailable: `6`
 - mutable root: `artifacts/dev-portable/Data`
 - mutable entries after empty launch: `Autosave`, `Cache`, `Logs`, `Recovery`,
   and `Settings` directories; no graph/project/export file
-- the previously retained empty-state PNG is fully transparent and is not
-  valid screenshot evidence; the WPF harness now reports that pixel surface as
-  inconclusive instead of emitting a false pass
+- the regenerated empty-state PNG is nontransparent with SHA-256
+  `055a5d305f57a3c997a801f133baa562c898aecb696831843f29555906d21818`;
+  the harness now rejects transparent pixel surfaces as inconclusive instead
+  of emitting false evidence
 
 Start the watcher with
 `powershell.exe -File packaging/Watch-DevPortable.ps1 -BuildOnStart -FastTestsOnly -AllowDirty -LaunchAfterBuild`.
@@ -117,12 +117,15 @@ approving any model:
 - The official `RealESRGAN_x2plus` hash was reverified, but its PyTorch
   checkpoint is incompatible with the current NCNN adapter and no conversion
   is authorized.
-- The marker-center artifact reproduced byte for byte with validation F1@5px
-  `1.0000`, but its historical exact held-out gate remains failed at 5/6
-  fixtures.
-- The new marker-classifier candidate reproduced byte for byte and passed an
-  exact CPU/DirectML probe. Validation shape macro-F1 is `0.871062`, below the
-  local `0.90` gate, and the packed wrapper lacks a direct sealed held-out run.
+- The sealed current marker-center ONNX is exact-count clean on only one of
+  three new public fixtures. It produced zero duplicates and zero hits across
+  text, axes, ticks, dividers, brackets, arrowheads, legends, and line
+  intersections. Repair-v2 candidate `P1` is hash-bound and preregistered but
+  has not run.
+- The sealed current packed marker classifier reached shape, fill, artifact,
+  and minority-shape F1 `1.0`, but its direct packed ONNX maximum absolute
+  error was `2.288818359375e-05`, above the `1e-5` gate. Retraining remains
+  mandatory and no classifier asset is approved.
 - The project-trained graph-numeric CTC experiment used only procedural vector
   glyphs. Candidate and single repair held-out exact match were both
   `0.015625`; the repair CER worsened to `0.932710`. Its exact ONNX passed an
@@ -202,10 +205,10 @@ files are not tracked.
 
 ## Tests and commands
 
-- `dotnet test GraphAutoReader.slnx -c Release --no-restore`: 664 passed and 9
-  expected or fail-closed tests skipped. Four screenshot tests are
-  inconclusive because the noninteractive test desktop returned a fully
-  transparent WPF pixel surface.
+- `dotnet test GraphAutoReader.slnx -c Release --no-restore` in the clean
+  portable build: 668 passed and 5 expected tests skipped. A separate broad
+  parallel invocation had 664 passes and 9 skips because four screenshot tests
+  correctly reported an unavailable transparent surface as inconclusive.
 - focused manual workflow: 8/8 passed.
 - bounded WPF manual composition: 1/1 passed.
 - Goal 19 application/composition focus: 18/18 passed in reviewer verification.
@@ -252,7 +255,7 @@ files are not tracked.
 
 ## Metrics and timing
 
-- full .NET suite: 664 tests passed with 9 expected or fail-closed skips
+- clean portable full .NET suite: 668 tests passed with 5 expected skips
 - latest development portable build passed App 34/34, Domain 23/23, focused
   integration 36/36, publish, and process smoke
 - watcher debounce: 2.53 to 2.63 seconds across independent verification
@@ -326,8 +329,8 @@ Microsoft source and license record.
 - `artifacts/dev-portable/latest.json`
 - `artifacts/dev-portable/builds/0.0.21-20260804T193412554Z-ad1bb62b/`
 - `artifacts/dev-portable/Data/`
-- `artifacts/dev-portable/evidence/manual-preview-empty.png` exists but is
-  fully transparent and must not be cited as screenshot evidence
+- `artifacts/dev-portable/evidence/manual-preview-empty.png`, nontransparent
+  output from the clean portable build
 - `artifacts/evidence/goal19-track-a/manual-preview-track-a.trx`
 - `artifacts/evidence/goal19-wpf-root/manual-preview-wpf-composition-root.trx`
 - `.omo/evidence/goal-19-track-a-code-review.md`

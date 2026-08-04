@@ -49,6 +49,27 @@
       "historical_batch_order_seed_source": "The executed historical _train_one_epoch used the module SEED plus epoch for all three candidates.",
       "current_source_reproduces_historical_pipeline": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "marker-center",
+      "revision": "marker-center-production-repair-v2",
+      "status": "preregistered",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "candidate_config_path": "ml/markers/center/training/production-repair-v2-p1.json",
+      "candidate_config_sha256": "4aefcec6a324e8ee05b90a312777417c7286cb61646816e054581e652093ab2f",
+      "trigger_evidence_path": "ml/markers/center/artifacts/production-public-gate-sealed-20260804/public-gate-report.json",
+      "trigger_evidence_sha256": "a7a796f343fe145453809603d87f1f0e4c5fc9548528ae27f8971c828b9e1646",
+      "execution_authorized": true,
+      "execution_blocker": "Preregistration and runner must be committed and clean before candidate P1 can run.",
+      "refusal_required_before_output": true
     }
   ]
 }

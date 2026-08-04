@@ -261,6 +261,47 @@
         "exact marker count in every confirmation fixture"
       ],
       "promotion_decision": "rejected; invalid training protocol and failed confirmation; keep the historical manifest payload fail-closed"
+    },
+    {
+      "profile": "sealed-current-onnx-public-gate-20260804",
+      "status": "fail",
+      "release_eligible": false,
+      "task": "marker-center",
+      "revision": "marker-center-public-gate-v1",
+      "candidate_onnx_sha256": "277d01d78034620c7c0767e5d6cc5f8a4e1a2fa69caa93765a3b87e044fe85a8",
+      "dataset_manifest_sha256": "048815a821049cdba0ba69a980b8479ac851b2efa9a4a54b307678deaea0e83d",
+      "evaluator_source_bundle_sha256": "d9498c01337b8ef34427c0bbc097b12df081538090fbff6c96469b4c3551a893",
+      "canonical_seal_key": "8660daf89e0a05dc1d97a8725d9bc11a56b2a81f0ea33a159036825f9151f92b",
+      "evidence_path": "ml/markers/center/artifacts/production-public-gate-sealed-20260804/public-gate-report.json",
+      "evidence_sha256": "a7a796f343fe145453809603d87f1f0e4c5fc9548528ae27f8971c828b9e1646",
+      "scene_count": 3,
+      "exact_scene_count": 1,
+      "scene_results": {
+        "public-zigzag": "5 predictions, 6 truth, 1 false negative, 0 false positives",
+        "public-probes": "5 predictions, 6 truth, 2 false negatives, 1 false positive",
+        "public-stair": "6 predictions, 6 truth, exact"
+      },
+      "duplicate_count": 0,
+      "prohibited_structure_hits": {
+        "text": 0,
+        "axis": 0,
+        "tick": 0,
+        "divider": 0,
+        "bracket": 0,
+        "arrowhead": 0,
+        "legend": 0,
+        "line_intersection": 0
+      },
+      "provider": "CPUExecutionProvider",
+      "inference_total_ms": 8.926,
+      "elapsed_ms": 80.256,
+      "retraining_required": true,
+      "next_candidate_training_revision": "marker-center-production-repair-v2",
+      "next_candidate_id": "P1",
+      "next_candidate_config_sha256": "4aefcec6a324e8ee05b90a312777417c7286cb61646816e054581e652093ab2f",
+      "next_candidate_status": "preregistered but not executed",
+      "next_candidate_execution_blocker": "The preregistration, canonical budget, and runner source bundle must be committed and clean before training.",
+      "promotion_decision": "rejected; exact-count gate failed in two of three fixtures"
     }
   ]
 }

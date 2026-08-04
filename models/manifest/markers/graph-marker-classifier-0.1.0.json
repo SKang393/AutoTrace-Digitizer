@@ -225,6 +225,39 @@
         "direct packed ONNX parity"
       ],
       "promotion_decision": "rejected; keep the historical manifest payload fail-closed"
+    },
+    {
+      "profile": "sealed-current-packed-runtime-public-gate-20260804",
+      "status": "fail",
+      "release_eligible": false,
+      "task": "marker-classifier",
+      "revision": "marker-classifier-public-gate-v1",
+      "candidate_checkpoint_sha256": "49a5ce6487b51a7426ebca5081fa3e2a15c9c30bd6302033ad7efa82b3ad8c7a",
+      "candidate_packed_onnx_sha256": "e4ee20865d2fcdec7b8acb420b9838255851d39e187cacf609d56a4bfbd83f6a",
+      "dataset_manifest_sha256": "cdd0db99a0da47e5d6d56ecf73f37157331d2a41e3817e09728559f7f646db7d",
+      "evaluator_source_bundle_sha256": "a5103cae3203a7af6c6a1acad67a8d651288eed0e1aed37b7664b499f95996e3",
+      "canonical_seal_key": "dce4612fff43d70768a3f5022e24f8b5a599c2b367f2d880ce8058fea1860bdb",
+      "evidence_path": "ml/markers/classifier/artifacts/production-public-gate-sealed-20260804/public-gate-report.json",
+      "evidence_sha256": "41e0f6e363efa4bd363e84197a53862ff132e2de741652a56efa92710df5193a",
+      "shape_macro_f1": 1.0,
+      "fill_macro_f1": 1.0,
+      "artifact_f1": 1.0,
+      "minority_shape_f1": {
+        "star": 1.0,
+        "asterisk": 1.0,
+        "cross": 1.0
+      },
+      "packed_onnx_maximum_absolute_error": 0.00002288818359375,
+      "packed_onnx_parity_tolerance": 0.00001,
+      "provider": "CPUExecutionProvider",
+      "sample_count": 140,
+      "inference_total_ms": 6.976,
+      "elapsed_ms": 358.206,
+      "retraining_required": true,
+      "failed_criteria": [
+        "direct packed ONNX parity"
+      ],
+      "promotion_decision": "rejected; retraining is mandatory because packed ONNX parity exceeded tolerance"
     }
   ]
 }

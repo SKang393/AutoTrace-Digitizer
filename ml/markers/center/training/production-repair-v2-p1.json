@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "task": "marker-center",
+  "revision": "marker-center-production-repair-v2",
+  "candidate_id": "P1",
+  "status": "preregistered",
+  "experiment_budget": 3,
+  "experiment_ordinal": 1,
+  "seed": 20260815,
+  "epochs": 130,
+  "learning_rate": 0.002,
+  "weight_decay": 0.00001,
+  "robustness_mode": "mixed_photometric",
+  "selection_dataset_manifest_sha256": "f313278c0fa987ec2b9225b3dbdf3ed218fbe8f5c8d6d32aa339ccad2dc4a6c7",
+  "expected_runner_source_bundle_sha256": "0dc41fbb2b44e67267266b5d5d86c3433f14adfc909027b177bd87de415c6c7c",
+  "selection_data": "existing procedural train and validation splits only",
+  "public_gate_use_for_selection": false,
+  "changes": {
+    "hard_negative_center_suppression_weight": 1.0,
+    "hard_negative_artifact_weight": 0.75,
+    "mask_consensus": "pixelwise maximum of immutable text-mask and artifact-mask input channels",
+    "mask_consensus_threshold": 0.2,
+    "marker_mask_channels_preserved": true,
+    "architecture_change": false,
+    "postprocessing_change": false
+  },
+  "selection_order": [
+    "standard_exact_scene_count",
+    "robust_exact_scene_count",
+    "standard_f1_5px",
+    "robust_f1_5px",
+    "zero_duplicates",
+    "zero_hard_negative_hits"
+  ],
+  "execution_preconditions": [
+    "this preregistration is committed and clean",
+    "the canonical training budget ledger is committed and clean",
+    "the candidate runner source bundle is committed and hash-bound",
+    "no P1 output or training seal exists"
+  ],
+  "approval_policy": "training and selection evidence only; no production approval without sealed public and independent confirmation gates"
+}

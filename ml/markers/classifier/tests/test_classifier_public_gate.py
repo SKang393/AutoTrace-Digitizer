@@ -170,6 +170,6 @@ def test_candidate_budget_and_manifest_remain_fail_closed() -> None:
 
 def test_exhausted_classifier_revision_refuses_before_output(tmp_path: Path) -> None:
     output = tmp_path / "no-fourth-classifier-candidate"
-    with pytest.raises(RuntimeError, match="committed before use|budget is exhausted"):
+    with pytest.raises(RuntimeError, match="committed before use|committed revision|budget is exhausted"):
         train_candidates(output)
     assert not output.exists()
