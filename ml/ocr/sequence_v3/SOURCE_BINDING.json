@@ -42,8 +42,8 @@
     },
     "model": {
       "path": "ml/ocr/sequence_v3/model.py",
-      "bytes": 1479,
-      "sha256": "2c0f2e6165dd51e8594e210504372a9a1f517450a466587ac996954c86f70f48"
+      "bytes": 1478,
+      "sha256": "70d237c5c813987e63e5988cab9f811c3f2bbecd796f88d74128cb7b6ab9e324"
     },
     "plan": {
       "path": "ml/ocr/sequence_v3/EXPERIMENT_PLAN.md",
@@ -57,8 +57,8 @@
     },
     "protocol": {
       "path": "ml/ocr/sequence_v3/protocol.py",
-      "bytes": 2256,
-      "sha256": "7382cee68daea95f8c5e285b5a9a918bf5dc9d2ca74b8d8777a4c383e109b6b1"
+      "bytes": 2255,
+      "sha256": "8cba53d1ac69fca343e8f78592b0c5cd49536347287d534a909692428427dad0"
     },
     "training_entrypoint": {
       "path": "ml/ocr/sequence_v3/train.py",

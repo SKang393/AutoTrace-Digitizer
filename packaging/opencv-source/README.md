@@ -37,6 +37,7 @@ powershell -File packaging/opencv-source/Test-SourceAuditEvidence.ps1
 powershell -File packaging/opencv-source/tests/Test-OpenCvSourceAudit.ps1
 powershell -File packaging/opencv-source/review/Test-SourceBuildReviewPolicy.ps1 -EvidenceRoot <reviewed-evidence>
 powershell -File packaging/opencv-source/Compare-SourceBuilds.ps1 -FirstEvidenceRoot <first> -SecondEvidenceRoot <second>
+powershell -File packaging/opencv-source/Test-SourceRuntimeParity.ps1 -EvidenceRoot <reviewed-evidence>
 ```
 
 Sources and build evidence are written only under ignored
@@ -75,5 +76,15 @@ identical retained inputs.
 
 The reviewed provenance status does not approve runtime replacement or a
 public release. Replacing the current NuGet runtime additionally requires
-functional parity, axis benchmarks, the retained second-build comparison,
-clean-machine tests, and the separate release gate.
+functional parity, public axis benchmarks, the retained second-build
+comparison, clean-machine tests, and the separate release gate.
+
+`Test-SourceRuntimeParity.ps1` provides the local functional and public-axis
+evidence without changing the release runtime. It validates the retained
+source-build and private attestation, runs four committed procedural axis
+families with both native DLLs, requires byte-identical canonical output, runs
+the complete integration assembly with the source DLL, publishes two isolated
+WPF application trees, and requires both `--portable-smoke` runs to exit zero.
+Every temporary test-output substitution is restored and checksum-verified in
+a `finally` block. Its ignored summary deliberately records
+`cleanMachineEvidence: false` and `releaseApproved: false`.

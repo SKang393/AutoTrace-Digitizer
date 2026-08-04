@@ -1630,7 +1630,9 @@ Write-JsonFile -Path $productionModelIndexPath -Value ([ordered]@{
     })
 
 $publishBinaryCoverage = @(Assert-PublishBinaryCoverage -PublishRoot $commonPublishPath -ReleaseAudit $releaseAudit)
-$buildUtc = [DateTimeOffset]::UtcNow.ToString('o', [System.Globalization.CultureInfo]::InvariantCulture)
+$buildUtc = [DateTime]::UtcNow.ToString(
+    "yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'",
+    [System.Globalization.CultureInfo]::InvariantCulture)
 $buildMetadataPath = Join-Path $commonPublishPath 'build-metadata.json'
 $buildMetadata = [ordered]@{
     schemaVersion = 1

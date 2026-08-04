@@ -1550,6 +1550,20 @@ try {
         Assert-ExitCode -Result $result -Expected 1 -Contains 'block unsupported downgrades'
     }
 
+    Assert-Case 'Release metadata requires canonical Z timestamp' {
+        $fixture = New-ReleaseFixture -Name 'noncanonical-build-utc'
+        $metadataPath = Join-Path $fixture.ReleaseRoot 'release-metadata.json'
+        $metadata = Get-Content -LiteralPath $metadataPath -Raw | ConvertFrom-Json
+        $metadata.buildUtc = '2026-08-03T12:00:00+00:00'
+        Write-JsonFile -Path $metadataPath -Value $metadata
+        Update-TestChecksums -ReleaseRoot $fixture.ReleaseRoot
+        $result = Invoke-Gate -Arguments @(
+            '-ManifestPath', $fixture.Manifest,
+            '-ArtifactRoot', $fixture.ReleaseRoot,
+            '-LocalizationReportPath', $fixture.LocalizationReport)
+        Assert-ExitCode -Result $result -Expected 1 -Contains 'canonical UTC timestamp ending in Z'
+    }
+
     Assert-Case 'A four-byte MZ fake installer is rejected' {
         $fixture = New-ReleaseFixture -Name 'fake-installer'
         $installerName = 'GraphAutoReader-0.0.21-win-x64-setup.exe'

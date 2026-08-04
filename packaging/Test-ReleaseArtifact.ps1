@@ -1423,10 +1423,23 @@ if (-not [string]::IsNullOrWhiteSpace($ArtifactRoot)) {
     if ([string]$metadata.gitCommit -notmatch '^[a-fA-F0-9]{40}$') {
         throw 'Release metadata Git commit must be a full 40-character SHA.'
     }
+    $buildUtcValue = $metadata.buildUtc
     $buildTimestamp = [DateTimeOffset]::MinValue
-    if (-not [DateTimeOffset]::TryParse([string]$metadata.buildUtc, [ref]$buildTimestamp) -or
-        $buildTimestamp.Offset -ne [TimeSpan]::Zero) {
-        throw 'Release metadata buildUtc must be a parseable UTC timestamp.'
+    $buildUtcIsValid = if ($buildUtcValue -is [DateTime]) {
+        $buildUtcValue.Kind -eq [DateTimeKind]::Utc
+    }
+    else {
+        $buildUtcText = [string]$buildUtcValue
+        $buildUtcText.EndsWith('Z', [StringComparison]::Ordinal) -and
+            [DateTimeOffset]::TryParse(
+                $buildUtcText,
+                [System.Globalization.CultureInfo]::InvariantCulture,
+                [System.Globalization.DateTimeStyles]::AssumeUniversal,
+                [ref]$buildTimestamp) -and
+            $buildTimestamp.Offset -eq [TimeSpan]::Zero
+    }
+    if (-not $buildUtcIsValid) {
+        throw 'Release metadata buildUtc must be a canonical UTC timestamp ending in Z.'
     }
     Assert-Equal -Actual ([int]$metadata.contractVersion) -Expected 1 -Description 'Release metadata contract version differs'
     Assert-Equal -Actual ([int]$metadata.commonPayload.fileCount) -Expected $commonPayloadRecords.Count -Description 'Release metadata common payload count differs'

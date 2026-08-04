@@ -35,17 +35,19 @@ clean-machine distribution evidence.
 
 ## Portable preview
 
-Goal 19 historical local checkpoint, superseded by the Goal 20 recovery record:
+The authoritative current preview is the immutable build selected by ignored
+`artifacts/dev-portable/latest.json`. Before this OpenCV parity checkpoint it
+was:
 
-- version: `0.0.19`
-- base commit: `616dcf5c792b0f89b9c45311fb03abbed770513e`
-- dirty development build: yes
-- build time: `2026-08-03T22:59:35.3760356+00:00`
+- version: `0.0.21`
+- commit: `ad1bb62bb1e139857ce42715bcff064bc67b4116`
+- dirty development build: no
+- build time: `2026-08-04T19:34:12.554Z`
 - executable:
-  `artifacts/dev-portable/builds/0.0.19-20260803T225935376Z-616dcf5c/GraphReader.App.exe`
-- running process: `66708`, responsive, window title `Graph Auto Reader`
-- fast tests: PASS, App 34/34, Domain 23/23, focused integration 36/36
-- full tests: PASS, 567/567 with exact ignored marker and OCR experiments
+  `artifacts/dev-portable/builds/0.0.21-20260804T193412554Z-ad1bb62b/GraphReader.App.exe`
+- running process at verification: `74180`, responsive, window title
+  `Graph Auto Reader`, exact Chandler path supplied by `--open-image`
+- full tests: PASS, 668 passed and 5 expected opt-in or provider skips
 - production-model IDs reported available: `0`
 - automatic stages reported unavailable: `6`
 - mutable root: `artifacts/dev-portable/Data`
@@ -94,7 +96,7 @@ No automatic stage executes in Production with candidate assets.
 ## Models and provenance
 
 `models/manifest/PRODUCTION_MODEL_MATRIX.md` records exact current candidates.
-There are six manifests and zero installed, checksum-verified,
+There are seven manifests and zero installed, checksum-verified,
 release-eligible model files.
 
 Bounded ignored development evidence improved the model decisions without
@@ -150,9 +152,15 @@ two clean builds byte-identical: the 7,965,696-byte DLL SHA-256 is
 and the 16,390,044-byte linker-map SHA-256 is
 `e7f9f768b82172b9f2021b2a469de371962655bd0833c8f214bbefdad05a8a77`.
 All 15 evidence entries now map to a candidate disposition and four complete
-notice sections validate. Five linked Microsoft static-runtime entries still
-require explicit release-maintainer license attestation, so the source build
-has not replaced the blocked NuGet runtime or changed the public release audit.
+notice sections validate. The ignored scoped maintainer attestation validates
+the five linked Microsoft static-runtime entries. Four committed procedural
+axis families now produce byte-identical canonical results with the package and
+source DLLs, with evidence SHA-256
+`cafb1df2d8b3d959d3de6e7221115634585ed6c7dc9e34994075003f67f85ac7`.
+The complete integration assembly passed 92/92 executed tests with the source
+DLL, and isolated package/source WPF publishes both exited `--portable-smoke`
+with code 0. The source build has not replaced the blocked NuGet runtime because
+clean-machine load and workflow evidence remain mandatory.
 
 ## Files changed
 
@@ -176,44 +184,46 @@ files are not tracked.
 
 ## Tests and commands
 
-- `dotnet test GraphAutoReader.slnx -c Release --no-restore` with the exact
-  ignored marker-classifier, V1 OCR, and V2 OCR experiments enabled: 567/567
-  passed.
+- `dotnet test GraphAutoReader.slnx -c Release --no-restore`: 668 passed and 5
+  expected opt-in or provider-specific tests skipped.
 - focused manual workflow: 8/8 passed.
 - bounded WPF manual composition: 1/1 passed.
 - Goal 19 application/composition focus: 18/18 passed in reviewer verification.
-- `packaging/tests/Test-DevPortable.Tests.ps1`: 6/6 passed, including
+- `packaging/tests/Test-DevPortable.Tests.ps1`: 7/7 passed, including
   fail-closed single-file and multi-file model discovery.
-- `packaging/tests/Test-ReleaseArtifact.Tests.ps1`: 43/43 passed.
+- `packaging/tests/Test-ReleaseArtifact.Tests.ps1`: 52/52 passed under both
+  PowerShell 7 and Windows PowerShell, including canonical UTC metadata.
 - Super-resolution tests: 57/57 passed.
-- Marker Python pipelines: 15/15 passed.
+- Marker Python pipelines: 30/30 passed with four exporter deprecation warnings.
 - Marker .NET assembly with the exact ignored candidate: 83/83 passed.
-- OCR V1 Python scaffold: 17/17 passed.
-- OCR V2 Python tests: 3/3 passed.
+- OCR Python pipelines: 127/127 passed after rebinding the exact committed V3
+  model and protocol source bytes.
 - OCR .NET assembly with both exact ignored failed experiments: 82/82 passed.
 - OpenCV source-audit behavior tests: 6/6 passed in Windows PowerShell and
   PowerShell 7. Retained lock/cache/triplet inputs, preflight metadata, and both
   CMake toolchain caches are bound fail closed to the tracked source lock.
 - Source-built OpenCV focused axis-provider tests: 3/3 passed.
 - OpenCV repeat-build comparison: passed once; DLL and linker-map hashes match.
-- OpenCV candidate review policy and negative-path test: passed in both
-  PowerShell runtimes; overall status remains
-  `requires-maintainer-attestation`.
+- OpenCV candidate review policy and negative-path tests: passed; the ignored
+  scoped maintainer attestation validates.
+- OpenCV public-axis runtime parity: 4/4 fixed procedural families produced
+  exact canonical output; 92/92 executed integration tests and both WPF smoke
+  publishes passed with the source DLL.
 - Portable validation self-tests: 7/7 in Windows PowerShell and PowerShell 7.
 - Live local portable validation after Goal 20 classification repair: 7/7;
   55 allowed portable `Data` events, 12 attributed external warnings, zero
   application-owned or unattributed failures, and zero watcher errors.
-- Public scoreboard: 36/36 synthetic metric-contract gates passed in 196.049 ms.
+- Public scoreboard: 37/37 synthetic metric-contract gates passed in 279.421 ms.
 - `packaging/localization/Test-LocalizationAudit.ps1`: 9/9 passed.
-- repository localization audit: 156 keys, 0 missing, 0 extra, 0 duplicate,
+- repository localization audit: 177 keys, 0 missing, 0 extra, 0 duplicate,
   and 0 unresolved references.
 - `git diff --check`: passed.
-- `Build-Windows.ps1 -AuditOnly`: release not ready, 12 blockers, six
-  manifests, zero redistributable model files, and no emitted artifacts.
+- `Build-Windows.ps1 -AuditOnly`: release not ready, 13 substantive blockers,
+  seven manifests, zero redistributable model files, and no emitted artifacts.
 
 ## Metrics and timing
 
-- full .NET suite: 567 tests passed with no skips
+- full .NET suite: 668 tests passed with 5 expected skips
 - latest development portable build passed App 34/34, Domain 23/23, focused
   integration 36/36, publish, and process smoke
 - watcher debounce: 2.53 to 2.63 seconds across independent verification
@@ -236,10 +246,10 @@ no training, Git, packaging, or redistribution eligibility.
 
 The OpenCV candidate notice bundle covers Apache-2.0, zlib, SoftFloat, and
 FDLIBM obligations for the retained minimal source profile. It is not a public
-notice approval. Five Microsoft static-runtime entries need maintainer
-attestation. The minimal NCNN runtime excludes `vcomp140d.dll`; the remaining
-release `vcomp140.dll` still needs an authorized Microsoft source and license
-record.
+notice approval. The ignored scoped maintainer attestation validates the five
+Microsoft static-runtime entries. The minimal NCNN runtime excludes
+`vcomp140d.dll`; the remaining release `vcomp140.dll` still needs an authorized
+Microsoft source and license record.
 
 ## Readiness changes
 
@@ -247,13 +257,15 @@ record.
 - Stage-aware production composition: implemented, automatic stages fail closed.
 - Multi-file param/bin packaging limitation: resolved and verified.
 - OpenCV source reproducibility and candidate notice classification: resolved.
-- OpenCV release approval: still blocked on Microsoft runtime attestation.
+- OpenCV local source-runtime parity: PASS.
+- OpenCV release replacement: still blocked on clean-machine load and workflow
+  evidence.
 - Local portable path, diagnostic, endpoint, registry-key, and write tracing:
   recorded with one fail-closed isolation gate.
-- Current release audit: 12 legitimate blockers. The false single-file-only
+- Current release audit: 13 legitimate blockers. The false single-file-only
   model restriction is removed; the new classifier manifest adds a truthful
   missing-candidate-payload blocker.
-- Version promotion: intentionally unchanged at `0.0.19`.
+- Version promotion: intentionally unchanged at `0.0.21`.
 - Public release decision: unchanged, `FAIL`.
 
 ## Known limitations
@@ -263,12 +275,9 @@ record.
 - No production model set is approved or installed. Bounded Real-ESRGAN and
   marker evidence remains experimental and ignored. All four bounded numeric
   OCR runs failed; the V1 and V2 experiment budgets are exhausted.
-- OpenCvSharp source inventory and candidate notices are classified, but five
-  Microsoft static-runtime attestations and public release integration remain
-  open.
-- The minimal source-built OpenCvSharp fallback has focused functional parity
-  and repeat-build parity, but full application benchmarks and clean-machine
-  checks remain open.
+- OpenCvSharp source inventory, notices, scoped Microsoft attestation,
+  reproducibility, exact public-axis parity, integration tests, and local WPF
+  smoke pass. Clean-machine load and workflow checks remain open.
 - A purpose-aware local isolated-profile simulation passed, but it is not a
   clean profile or VM. Network remained enabled and polling can miss brief
   connections. FileSystemWatcher cannot directly identify the writer process.
@@ -278,7 +287,7 @@ record.
 ## Artifact paths
 
 - `artifacts/dev-portable/latest.json`
-- `artifacts/dev-portable/builds/0.0.19-20260803T225935376Z-616dcf5c/`
+- `artifacts/dev-portable/builds/0.0.21-20260804T193412554Z-ad1bb62b/`
 - `artifacts/dev-portable/Data/`
 - `artifacts/dev-portable/evidence/manual-preview-empty.png`
 - `artifacts/evidence/goal19-track-a/manual-preview-track-a.trx`
@@ -291,15 +300,16 @@ record.
 - `models/manifest/ocr/GRAPH_NUMERIC_SEQUENCE_V2_EXPERIMENT_AUDIT.md`
 - `artifacts/goal19-opencv-source/evidence-repro-pass2-final-a/`
 - `artifacts/goal19-opencv-source/evidence-repro-pass2-final-b/`
+- `artifacts/goal19-opencv-source/runtime-parity/run-20260804T195149029Z-487978feedc04c248ffab7b315191fc2/runtime-parity-summary.json`
 - `artifacts/portable-validation/20260803T224522086Z-940006c1/portable-clean-profile-report.json`
 
 ## Integration notes
 
-Goal 20 recovered this work, satisfied the mandatory manual real-graph gate,
-and prepared the required `0.0.20` checkpoint for integration into `main`. The
-original workspace's unrelated dirty files remain untouched. No tag,
-installer, portable release ZIP, GitHub release, or `1.0.1` promotion was
-created.
+Goal 20 recovered this work and satisfied the mandatory manual real-graph gate.
+Subsequent production checkpoints are integrated directly on `main` in the
+single primary workspace. The user's unrelated dirty files remain untouched.
+No tag, installer, portable release ZIP, GitHub release, or `1.0.1` promotion
+was created.
 
 ## Acceptance status
 
