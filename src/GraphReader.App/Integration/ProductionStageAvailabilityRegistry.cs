@@ -7,12 +7,19 @@ namespace GraphReader.App.Integration;
 
 public static class ProductionStageAvailabilityRegistry
 {
-    public static IReadOnlyList<AutomaticStageStatus> Current { get; } =
+    public static IReadOnlyList<AutomaticStageStatus> Current { get; } = Create(localEnhancementConfigured: false);
+
+    public static IReadOnlyList<AutomaticStageStatus> Create(bool localEnhancementConfigured) =>
     [
-        new(
-            "enhancement",
-            AutomaticStageState.Unavailable,
-            "No approved Real-ESRGAN runtime, model payload, and Graph Auto Reader benchmark set are installed."),
+        localEnhancementConfigured
+            ? new AutomaticStageStatus(
+                "enhancement",
+                AutomaticStageState.Experimental,
+                "Official realesr-animevideov3 x2 is configured for local evaluation only. Runtime and model checksums are verified before use; public redistribution is not approved.")
+            : new AutomaticStageStatus(
+                "enhancement",
+                AutomaticStageState.Unavailable,
+                "No approved Real-ESRGAN runtime and model payload are installed. The original image remains editable."),
         new(
             "axis",
             AutomaticStageState.Unavailable,

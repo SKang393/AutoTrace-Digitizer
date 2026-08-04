@@ -4,6 +4,7 @@
 using System.Security.Cryptography;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using GraphReader.App.Localization;
 using GraphReader.App.Services;
 using GraphReader.Axis;
 using GraphReader.Domain;
@@ -125,9 +126,19 @@ public sealed class ManualPreviewWorkflowSmokeTests
 
         Assert.HasCount(1, viewModel.Tabs);
         Assert.HasCount(1, workspace.CreateWorkspace());
+        viewModel.CreateSeriesCommand.Execute(null);
+        Assert.IsTrue(viewModel.SelectedTab!.IsDirty);
         viewModel.CloseTabCommand.Execute(null);
-        Assert.HasCount(0, viewModel.Tabs);
-        Assert.HasCount(0, workspace.CreateWorkspace());
+        Assert.HasCount(1, viewModel.Tabs);
+        Assert.HasCount(1, workspace.CreateWorkspace());
+        Assert.AreEqual(LocalizationKeys.ProjectCloseDirtyBlocked, viewModel.StatusMessage);
+
+        var cleanWorkspace = new ManualPreviewWorkspaceService();
+        _ = cleanWorkspace.ImportImagesAsync([imagePath], CancellationToken.None).GetAwaiter().GetResult();
+        using var cleanViewModel = new GraphReader.App.ViewModels.MainWindowViewModel(cleanWorkspace);
+        cleanViewModel.CloseTabCommand.Execute(null);
+        Assert.HasCount(0, cleanViewModel.Tabs);
+        Assert.HasCount(0, cleanWorkspace.CreateWorkspace());
     }
 
     [TestMethod]
@@ -550,6 +561,30 @@ public sealed class ManualPreviewWorkflowSmokeTests
             .Series.Single(series => series.SeriesId.Value.ToString("D") == intervention.SeriesId);
         Assert.IsNull(unchanged.SharedBaselineSeriesId);
         Assert.HasCount(0, unchanged.ApplicableProbeSeriesIds);
+
+        workspace.SetSeriesRelations(
+            tabs[0].TabId,
+            intervention.SeriesId,
+            baseline.SeriesId,
+            [maintenance.SeriesId]);
+        workspace.UpdateSeries(
+            tabs[0].TabId,
+            baseline.SeriesId,
+            new ManualSeriesDefinition("Former baseline", "□", MarkerShape.Square, MarkerFill.Open, SemanticRole.Unknown));
+        SeriesRecord afterBaselineRoleChange = workspace.CurrentProject.Panels
+            .Single(panel => panel.PanelId.Value.ToString("D") == tabs[0].PanelId)
+            .Series.Single(series => series.SeriesId.Value.ToString("D") == intervention.SeriesId);
+        Assert.IsNull(afterBaselineRoleChange.SharedBaselineSeriesId);
+        Assert.HasCount(1, afterBaselineRoleChange.ApplicableProbeSeriesIds);
+
+        workspace.UpdateSeries(
+            tabs[0].TabId,
+            maintenance.SeriesId,
+            new ManualSeriesDefinition("Former maintenance", "△", MarkerShape.TriangleUp, MarkerFill.Open, SemanticRole.Unknown));
+        SeriesRecord afterProbeRoleChange = workspace.CurrentProject.Panels
+            .Single(panel => panel.PanelId.Value.ToString("D") == tabs[0].PanelId)
+            .Series.Single(series => series.SeriesId.Value.ToString("D") == intervention.SeriesId);
+        Assert.HasCount(0, afterProbeRoleChange.ApplicableProbeSeriesIds);
     }
 
     [TestMethod]

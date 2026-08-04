@@ -70,6 +70,8 @@ public sealed class ShellContractTests
             ("R", "Control", "{Binding ReviewCommand}"),
             ("E", "Control+Shift", "{Binding ExportCommand}"),
             ("P", "Control", "{Binding TogglePhaseOverlayCommand}"),
+            ("Tab", "Control", "{Binding NextTabCommand}"),
+            ("Tab", "Control+Shift", "{Binding PreviousTabCommand}"),
             ("Escape", string.Empty, "{Binding CancelCommand}"),
         };
 
@@ -86,26 +88,115 @@ public sealed class ShellContractTests
     }
 
     [TestMethod]
-    public void MagnifierAndSeriesRemainInRightInspector()
+    public void SeriesUsesLeftPaneWhileMagnifierRemainsInRightInspector()
     {
         var document = LoadMainWindow();
         XNamespace automation = AutomationNamespace;
 
+        var seriesPane = FindNamed(document, "SeriesPane");
         var inspector = FindNamed(document, "InspectorPane");
         var magnifier = FindNamed(document, "MagnifierInspector");
         var series = FindNamed(document, "SeriesList");
         var canvas = FindNamed(document, "GraphCanvasHost");
 
         Assert.IsTrue(magnifier.AncestorsAndSelf().Contains(inspector));
-        Assert.IsTrue(series.AncestorsAndSelf().Contains(inspector));
+        Assert.IsTrue(series.AncestorsAndSelf().Contains(seriesPane));
+        Assert.IsFalse(series.AncestorsAndSelf().Contains(inspector));
         Assert.IsFalse(canvas.AncestorsAndSelf().Contains(inspector));
         Assert.AreEqual("Inspector.Magnifier", magnifier.Attribute(automation + "AutomationProperties.AutomationId")?.Value);
-        Assert.AreEqual("Inspector.Series", series.Attribute(automation + "AutomationProperties.AutomationId")?.Value);
+        Assert.AreEqual("Series.List", series.Attribute(automation + "AutomationProperties.AutomationId")?.Value);
         Assert.AreEqual("Canvas.GraphHost", canvas.Attribute(automation + "AutomationProperties.AutomationId")?.Value);
         Assert.AreEqual(
             "{Binding Magnifier.NearestDetectionName}",
             magnifier.Attribute("NearestDetectionName")?.Value,
             "The nearest-detection label must come from fake detection data so the empty placeholder remains reachable.");
+    }
+
+    [TestMethod]
+    public void GraphTabsAndProjectSummaryAreDirectlyAboveCanvas()
+    {
+        var document = LoadMainWindow();
+        XNamespace presentation = PresentationNamespace;
+
+        var workspace = FindNamed(document, "WorkspacePane");
+        var summary = FindNamed(document, "ProjectSummary");
+        var tabs = FindNamed(document, "GraphTabStrip");
+        var canvas = FindNamed(document, "GraphCanvasHost");
+        var dirtyMarker = FindNamed(document, "DirtyMarker");
+
+        Assert.AreEqual(presentation + "TabControl", tabs.Name);
+        Assert.IsTrue(summary.AncestorsAndSelf().Contains(workspace));
+        Assert.IsTrue(tabs.AncestorsAndSelf().Contains(workspace));
+        Assert.IsTrue(canvas.AncestorsAndSelf().Contains(workspace));
+        Assert.AreEqual("1", tabs.Attribute("Grid.Row")?.Value);
+        StringAssert.Contains(dirtyMarker.Attribute("Visibility")?.Value ?? string.Empty, "IsDirty");
+
+        var closeButton = tabs.Descendants(presentation + "Button").Single();
+        Assert.AreEqual(
+            "{Binding DataContext.CloseTabCommand, RelativeSource={RelativeSource AncestorType=Window}}",
+            closeButton.Attribute("Command")?.Value);
+        Assert.AreEqual("{Binding}", closeButton.Attribute("CommandParameter")?.Value);
+        Assert.IsNotNull(closeButton.Attribute("ToolTip"));
+    }
+
+    [TestMethod]
+    public void InspectorIsWiderResizableAndManualCommandsAreVisible()
+    {
+        var document = LoadMainWindow();
+        XNamespace presentation = PresentationNamespace;
+        XNamespace automation = AutomationNamespace;
+        XNamespace xaml = XamlNamespace;
+
+        var inspectorColumn = document.Descendants(presentation + "ColumnDefinition")
+            .Single(element => element.Attribute(xaml + "Name")?.Value == "InspectorColumn");
+        Assert.IsTrue(double.Parse(inspectorColumn.Attribute("Width")!.Value, System.Globalization.CultureInfo.InvariantCulture) >= 390);
+        Assert.IsTrue(double.Parse(inspectorColumn.Attribute("MinWidth")!.Value, System.Globalization.CultureInfo.InvariantCulture) >= 340);
+
+        var resizeGrip = document.Descendants(presentation + "GridSplitter")
+            .Single(element => element.Attribute(automation + "AutomationProperties.AutomationId")?.Value == "Inspector.Resize");
+        Assert.AreEqual("Columns", resizeGrip.Attribute("ResizeDirection")?.Value);
+
+        string[] expectedAutomationIds =
+        [
+            "Manual.Calibrate",
+            "Manual.CreateSeries",
+            "Manual.EditSeries",
+            "Manual.PointFillMode",
+            "Manual.AddFilledPoint",
+            "Manual.AddOpenPoint",
+            "Manual.MovePoint",
+            "Manual.DeletePoint",
+            "Manual.AddPhaseDivider",
+            "Manual.MovePhaseDivider",
+            "Manual.DeletePhaseDivider",
+            "Manual.EditPhaseLabel",
+            "Canvas.Fit",
+            "Canvas.ZoomIn",
+            "Canvas.ZoomOut",
+            "Canvas.ResetView",
+            "Enhancement.ShowOriginal",
+            "Enhancement.ShowEnhanced",
+            "Enhancement.ShowComparison",
+        ];
+
+        var visibleIds = document.Descendants()
+            .Select(element => element.Attribute(automation + "AutomationProperties.AutomationId")?.Value)
+            .Where(static value => value is not null)
+            .ToHashSet(StringComparer.Ordinal);
+        foreach (string id in expectedAutomationIds)
+        {
+            Assert.IsTrue(visibleIds.Contains(id), $"Missing visible manual control '{id}'.");
+        }
+
+        var canvas = FindNamed(document, "GraphCanvasHost");
+        Assert.AreEqual("{Binding SelectedTab.DisplayImageSource}", canvas.Attribute("ImageSource")?.Value);
+        Assert.AreEqual("{Binding SelectedTab.ImageSource}", canvas.Attribute("CoordinateReferenceSource")?.Value);
+        Assert.AreEqual("{Binding SelectedTab.ComparisonImageSource}", canvas.Attribute("ComparisonImageSource")?.Value);
+        Assert.AreEqual("{Binding SelectedTab.IsComparisonPreview}", canvas.Attribute("IsComparisonVisible")?.Value);
+        Assert.AreEqual("{Binding ZoomInCommand}", FindNamed(document, "ZoomInButton").Attribute("Command")?.Value);
+        Assert.AreEqual("{Binding ZoomOutCommand}", FindNamed(document, "ZoomOutButton").Attribute("Command")?.Value);
+        Assert.AreEqual("{Binding FitZoomCommand}", FindNamed(document, "FitGraphButton").Attribute("Command")?.Value);
+        Assert.AreEqual("{Binding ResetViewCommand}", FindNamed(document, "ResetViewButton").Attribute("Command")?.Value);
     }
 
     [TestMethod]

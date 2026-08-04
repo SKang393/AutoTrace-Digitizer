@@ -21,6 +21,8 @@ public sealed class ModelManifestTests
             ["realesr-general-x4v3"] =
                 "8dc7edb9ac80ccdc30c3a5dca6616509367f05fbc184ad95b731f05bece96292",
             ["realesr-animevideov3"] =
+                "abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d",
+            ["RealESRGAN_x4plus_anime_6B"] =
                 "abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d"
         };
 
@@ -41,6 +43,11 @@ public sealed class ModelManifestTests
     [
         "models/realesr-animevideov3-x2.param",
         "models/realesr-animevideov3-x2.bin"
+    ];
+    private static readonly string[] SecondaryNcnnFiles =
+    [
+        "models/realesrgan-x4plus-anime.param",
+        "models/realesrgan-x4plus-anime.bin"
     ];
 
     [TestMethod]
@@ -150,6 +157,20 @@ public sealed class ModelManifestTests
                         Assert.AreEqual("cache_hit", runtime.GetProperty("cache_repeat_status").GetString());
                         Assert.AreEqual("vulkan", runtime.GetProperty("provider").GetString());
                         break;
+                    case "RealESRGAN_x4plus_anime_6B":
+                        Assert.AreEqual("failed_scientific_fidelity", status);
+                        Assert.IsFalse(benchmark.GetProperty("production_approval").GetBoolean());
+                        JsonElement secondaryRuntime = benchmark.GetProperty("fixed_public_synthetic_runtime");
+                        Assert.AreEqual(2, secondaryRuntime.GetProperty("runtime_success_count").GetInt32());
+                        Assert.AreEqual(2, secondaryRuntime.GetProperty("exact_two_x_dimension_count").GetInt32());
+                        Assert.AreEqual("vulkan", secondaryRuntime.GetProperty("provider").GetString());
+                        JsonElement privateFailure = benchmark.GetProperty("private_chandler_scientific_fidelity");
+                        Assert.AreEqual("failed", privateFailure.GetProperty("status").GetString());
+                        Assert.IsTrue(privateFailure.GetProperty("source_unchanged").GetBoolean());
+                        Assert.AreEqual(
+                            "d05e259e69f139d2649aaab8e99f866ccd4092534021612e93650b5048c97e85",
+                            privateFailure.GetProperty("output_sha256").GetString());
+                        break;
                     default:
                         Assert.Fail($"Unexpected benchmark model '{modelId}'.");
                         break;
@@ -213,11 +234,52 @@ public sealed class ModelManifestTests
             CollectionAssert.AreEquivalent(
                 NcnnFiles,
                 files);
+
+            JsonElement secondary = byId["RealESRGAN_x4plus_anime_6B"];
+            CollectionAssert.AreEqual(
+                NcnnProviders,
+                ReadStringArray(secondary.GetProperty("providers")));
+            Assert.AreEqual(
+                "realesrgan-x4plus-anime",
+                secondary.GetProperty("preprocessing").GetProperty("runtime_model_name").GetString());
+            Assert.AreEqual(
+                "RealESRGAN_x4plus_anime_6B",
+                secondary.GetProperty("preprocessing").GetProperty("upstream_model_identity").GetString());
+            Assert.IsFalse(
+                secondary.GetProperty("preprocessing").GetProperty("local_adapter_approval").GetBoolean());
+            StringAssert.Contains(
+                secondary.GetProperty("preprocessing").GetProperty("upstream_identity_mapping_url").GetString(),
+                "685d429c81888252bdb10f56c7754baededc3823/docs/anime_model.md#L20-L35");
+            CollectionAssert.AreEquivalent(
+                SecondaryNcnnFiles,
+                ReadStringArray(secondary.GetProperty("files")));
         }
         finally
         {
             DisposeAll(manifests);
         }
+    }
+
+    [TestMethod]
+    public void AnimeVideoV3IsTheExactManifestDrivenDefaultAndRuntimeRemainsBlocked()
+    {
+        using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(
+            Path.Combine(ManifestDirectory, ManifestDrivenRealEsrganBackend.DefaultManifestFileName)));
+        JsonElement root = manifest.RootElement;
+        Assert.AreEqual(ManifestDrivenRealEsrganBackend.DefaultModelId, GetModelId(manifest));
+        JsonElement preprocessing = root.GetProperty("preprocessing");
+        Assert.AreEqual("realesr-animevideov3", preprocessing.GetProperty("runtime_model_name").GetString());
+        Assert.IsTrue(preprocessing.GetProperty("local_adapter_approval").GetBoolean());
+        Assert.AreEqual(2, preprocessing.GetProperty("runtime_scale_argument").GetInt32());
+        Assert.AreEqual(
+            "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
+            preprocessing.GetProperty("runtime_executable_sha256").GetString());
+        Assert.AreEqual(
+            "8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b",
+            preprocessing.GetProperty("runtime_files_sha256").GetProperty("vcomp140.dll").GetString());
+        Assert.IsFalse(
+            preprocessing.GetProperty("runtime_redistribution").GetProperty("approved").GetBoolean());
+        Assert.IsFalse(root.GetProperty("benchmarks")[0].GetProperty("production_approval").GetBoolean());
     }
 
     [TestMethod]

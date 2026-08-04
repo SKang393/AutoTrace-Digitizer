@@ -13,22 +13,28 @@
           BorderBrush="{DynamicResource App.Brush.Border}"
           BorderThickness="1"
           CornerRadius="8">
-    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+    <ScrollViewer x:Name="ViewportScrollViewer"
+                  HorizontalScrollBarVisibility="Auto"
                   VerticalScrollBarVisibility="Auto"
+                  HorizontalContentAlignment="Center"
+                  VerticalContentAlignment="Center"
                   PanningMode="Both"
                   CanContentScroll="False"
-                  Focusable="False">
-      <Grid x:Name="CanvasSurface" MinWidth="320" MinHeight="240">
-        <Grid.LayoutTransform>
-          <ScaleTransform ScaleX="{Binding ZoomLevel, ElementName=Root}"
-                          ScaleY="{Binding ZoomLevel, ElementName=Root}" />
-        </Grid.LayoutTransform>
-
-        <Viewbox Stretch="Uniform">
-          <Grid x:Name="ImageCoordinateSurface">
+                  Focusable="False"
+                  PreviewMouseWheel="OnViewportMouseWheel"
+                  SizeChanged="OnViewportSizeChanged">
+      <Grid x:Name="CanvasSurface">
+        <StackPanel x:Name="ImageCoordinateSurface"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal">
+          <StackPanel.LayoutTransform>
+            <ScaleTransform x:Name="ViewportScaleTransform" />
+          </StackPanel.LayoutTransform>
+          <Grid x:Name="EditableImageCoordinateSurface">
             <Image x:Name="GraphImage"
                    Source="{Binding ImageSource, ElementName=Root}"
-                   Stretch="None"
+                   Stretch="Fill"
                    SnapsToDevicePixels="True" />
             <ContentPresenter Content="{Binding OverlayContent, ElementName=Root}"
                               IsHitTestVisible="False" />
@@ -51,7 +57,18 @@
                                        Stroke="{DynamicResource App.Brush.Focus}"
                                        AutomationProperties.Name="{DynamicResource GraphCanvas.Crosshair.AutomationName}" />
           </Grid>
-        </Viewbox>
+          <Border x:Name="ComparisonPane"
+                  Margin="8,0,0,0"
+                  BorderBrush="{DynamicResource App.Brush.Border}"
+                  BorderThickness="1,0,0,0"
+                  IsHitTestVisible="False">
+            <Image x:Name="ComparisonImage"
+                   Margin="8,0,0,0"
+                   Source="{Binding ComparisonImageSource, ElementName=Root}"
+                   Stretch="Fill"
+                   SnapsToDevicePixels="True" />
+          </Border>
+        </StackPanel>
         <TextBlock x:Name="EmptyStateText"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"

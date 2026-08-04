@@ -4,9 +4,11 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
+using System.Text.Json;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using GraphReader.App.Integration.Workflow;
+using GraphReader.App.Localization;
 using GraphReader.App.Models;
 using GraphReader.App.ViewModels;
 using GraphReader.Axis;
@@ -14,6 +16,7 @@ using GraphReader.Domain;
 using GraphReader.Export;
 using GraphReader.Imaging;
 using GraphReader.Phases;
+using GraphReader.SuperResolution;
 using AxisPixelPoint = GraphReader.Axis.PixelPoint;
 using AppGraphPoint = GraphReader.App.Models.GraphPoint;
 using DomainCalibrationAnchor = GraphReader.Domain.CalibrationAnchor;
@@ -41,10 +44,13 @@ public sealed class ManualPreviewWorkspaceService : IManualWorkspaceService
     private readonly IPhaseManualEditor _phaseEditor;
     private readonly WorkflowRuntimeEnvironment _runtimeEnvironment;
     private readonly IReadOnlyList<AutomaticStageStatus> _automaticStages;
+    private readonly Func<CancellationToken, Task<RealEsrganBackendResolution>>? _enhancementResolver;
     private readonly List<WorkspaceTabViewModel> _tabs = [];
     private readonly Dictionary<string, PhaseManualOverrides> _phaseOverrides = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ManualPointXState> _pointXStates = new(StringComparer.Ordinal);
     private readonly Dictionary<string, List<PointModification>> _pointModificationHistories = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, JsonElement> _enhancementByTab = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, EnhancementEnvelope> _enhancementEnvelopes = new(StringComparer.Ordinal);
     private IReadOnlyList<ImageImportError> _lastImportErrors = [];
 
     public ManualPreviewWorkspaceService(
@@ -54,7 +60,8 @@ public sealed class ManualPreviewWorkspaceService : IManualWorkspaceService
         IExportService? exportService = null,
         IPhaseManualEditor? phaseEditor = null,
         WorkflowRuntimeEnvironment runtimeEnvironment = WorkflowRuntimeEnvironment.ManualPreview,
-        IReadOnlyList<AutomaticStageStatus>? automaticStages = null)
+        IReadOnlyList<AutomaticStageStatus>? automaticStages = null,
+        Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver = null)
     {
         if (runtimeEnvironment == WorkflowRuntimeEnvironment.RecordedFake)
         {
@@ -70,12 +77,13 @@ public sealed class ManualPreviewWorkspaceService : IManualWorkspaceService
         _phaseEditor = phaseEditor ?? new PhaseManualEditor();
         _runtimeEnvironment = runtimeEnvironment;
         _automaticStages = (automaticStages ?? DefaultAutomaticStages).ToArray();
+        _enhancementResolver = enhancementResolver;
         CurrentProject = ProjectDocument.Create(GetApplicationVersion(), DateTimeOffset.UtcNow);
     }
 
     private static IReadOnlyList<AutomaticStageStatus> DefaultAutomaticStages { get; } =
     [
-        new("enhancement", AutomaticStageState.Unavailable, "Install an approved Real-ESRGAN runtime and model to enable enhancement."),
+        new("enhancement", AutomaticStageState.Unavailable, "Enhancement is unavailable. Install an approved Real-ESRGAN runtime and model to enable it."),
         new("axis", AutomaticStageState.Unavailable, "Automatic axis detection is unavailable. Use manual three-anchor calibration."),
         new("ocr", AutomaticStageState.Unavailable, "Install approved OCR models to enable text recognition."),
         new("markers", AutomaticStageState.Unavailable, "Install approved marker models to enable marker detection."),
@@ -198,6 +206,8 @@ public sealed class ManualPreviewWorkspaceService : IManualWorkspaceService
         _phaseOverrides.Clear();
         _pointXStates.Clear();
         _pointModificationHistories.Clear();
+        _enhancementByTab.Clear();
+        _enhancementEnvelopes.Clear();
         foreach (PanelRecord panel in project.Panels)
         {
             if (!importedBySource.TryGetValue(panel.SourceId, out ImportedImage? image))
@@ -210,6 +220,10 @@ public sealed class ManualPreviewWorkspaceService : IManualWorkspaceService
             ReindexAllSeries(tab);
             _tabs.Add(tab);
             _phaseOverrides[tab.TabId] = CreatePhaseOverrides(tab);
+            if (panel.Enhancement is JsonElement enhancement)
+            {
+                _enhancementByTab[tab.TabId] = enhancement.Clone();
+            }
             foreach (PointRecord point in panel.Points)
             {
                 string pointId = point.PointId.Value.ToString("D");
@@ -229,6 +243,97 @@ public sealed class ManualPreviewWorkspaceService : IManualWorkspaceService
         return CreateWorkspace();
     }
 
+    public async Task<WorkspaceEnhancementResult> EnhanceAsync(
+        string tabId,
+        CancellationToken cancellationToken)
+    {
+        WorkspaceTabViewModel tab = RequireTab(tabId);
+        if (_enhancementResolver is null)
+        {
+            return new WorkspaceEnhancementResult(
+                false,
+                "Official Real-ESRGAN enhancement is not configured. The original image remains unchanged.",
+                UserMessageKey: LocalizationKeys.WorkflowEnhanceUnavailable);
+        }
+
+        if (_applicationPaths is null || string.IsNullOrWhiteSpace(tab.SourcePath) || tab.PanelId is null)
+        {
+            return new WorkspaceEnhancementResult(
+                false,
+                "Enhancement storage or source metadata is unavailable. The original image remains unchanged.",
+                UserMessageKey: LocalizationKeys.EnhancementStorageUnavailable);
+        }
+
+        RealEsrganBackendResolution backend = await _enhancementResolver(cancellationToken).ConfigureAwait(false);
+        if (!backend.IsAvailable || backend.Service is null || backend.Model is null)
+        {
+            string message = backend.Diagnostic?.TechnicalMessage ??
+                "The configured Real-ESRGAN runtime or model is unavailable.";
+            return new WorkspaceEnhancementResult(
+                false,
+                $"{message} The original image remains unchanged.",
+                UserMessageKey: backend.Diagnostic?.UserMessageKey ?? LocalizationKeys.EnhancementRuntimeUnavailable);
+        }
+
+        string derivativeRoot = Path.Combine(_applicationPaths.CacheRoot, "Enhancement", "Derivatives");
+        Directory.CreateDirectory(derivativeRoot);
+        string outputPath = Path.Combine(
+            derivativeRoot,
+            $"{Guid.Parse(tab.PanelId):N}-{Guid.NewGuid():N}-realesrgan-x2.png");
+        var request = new EnhancementRequest(
+            CurrentProject.ProjectId.Value,
+            Guid.Parse(tab.PanelId),
+            tab.SourcePath,
+            outputPath,
+            new PixelDimensions(tab.PixelWidth, tab.PixelHeight),
+            backend.Model,
+            new EnhancementOptions(Scale: 2, ContinueWithoutEnhancement: true));
+        EnhancementResult result = await backend.Service.EnhanceAsync(request, cancellationToken)
+            .ConfigureAwait(false);
+        if (!result.IsSuccess || result.OutputPath is null || result.Envelope is null)
+        {
+            return new WorkspaceEnhancementResult(
+                false,
+                $"{result.Diagnostic.Message} The original image remains unchanged.",
+                RuntimeMilliseconds: result.Envelope?.TimingMs.Total ?? 0,
+                UserMessageKey: LocalizationKeys.EnhancementExecutionFailed);
+        }
+
+        byte[] enhancedBytes = await File.ReadAllBytesAsync(result.OutputPath, cancellationToken)
+            .ConfigureAwait(false);
+        tab.EnhancedImageSource = CreateBitmap(new ImmutableImageBytes(enhancedBytes));
+        tab.EnhancementPreviewMode = EnhancementPreviewMode.Enhanced;
+        _enhancementEnvelopes[tab.TabId] = result.Envelope;
+        UpdateEnhancementProvenance(tab, result.Envelope);
+        SynchronizeProject(
+            DomainEventKind.DetectionAccepted,
+            Guid.Parse(tab.PanelId),
+            backend.Model.ModelId,
+            "Official Real-ESRGAN x2 derivative recorded for local evaluation");
+        return new WorkspaceEnhancementResult(
+            true,
+            $"Enhanced preview ready with {backend.Model.ModelId} at 2x. The original image is unchanged.",
+            result.OutputPath,
+            result.Envelope.TimingMs.Total,
+            LocalizationKeys.StatusEnhancementReadyFormat,
+            [backend.Model.ModelId]);
+    }
+
+    public void SetEnhancementPreviewMode(string tabId, EnhancementPreviewMode mode)
+    {
+        WorkspaceTabViewModel tab = RequireTab(tabId);
+        tab.EnhancementPreviewMode = mode;
+        if (_enhancementEnvelopes.TryGetValue(tab.TabId, out EnhancementEnvelope? envelope))
+        {
+            UpdateEnhancementProvenance(tab, envelope);
+            SynchronizeProject(
+                DomainEventKind.ExportSettingsChanged,
+                Guid.Parse(tab.PanelId!),
+                envelope.Model.ModelId,
+                $"Enhancement preview mode changed to {tab.EnhancementPreviewMode}");
+        }
+    }
+
     public bool CloseTab(string tabId)
     {
         WorkspaceTabViewModel? tab = _tabs.SingleOrDefault(
@@ -240,6 +345,8 @@ public sealed class ManualPreviewWorkspaceService : IManualWorkspaceService
 
         _tabs.Remove(tab);
         _phaseOverrides.Remove(tab.TabId);
+        _enhancementByTab.Remove(tab.TabId);
+        _enhancementEnvelopes.Remove(tab.TabId);
         foreach (AppGraphPoint point in tab.Points)
         {
             _pointXStates.Remove(point.PointId);
@@ -335,6 +442,26 @@ public sealed class ManualPreviewWorkspaceService : IManualWorkspaceService
         tab.SeriesCards.Add(series);
         SynchronizeProject(DomainEventKind.PointEdited, Guid.Parse(tab.PanelId!), series.SeriesId, "Manual series created");
         return series;
+    }
+
+    public void UpdateSeries(string tabId, string seriesId, ManualSeriesDefinition definition)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+        ArgumentException.ThrowIfNullOrWhiteSpace(definition.DisplayName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(definition.Symbol);
+        WorkspaceTabViewModel tab = RequireTab(tabId);
+        SeriesCardViewModel series = RequireSeries(tab, seriesId);
+        series.Label = definition.DisplayName;
+        series.Symbol = definition.Symbol;
+        series.AccessibleName = $"{definition.Fill} {definition.Shape}";
+        series.Shape = definition.Shape;
+        series.Fill = definition.Fill;
+        series.SemanticRole = definition.SemanticRole;
+        SynchronizeProject(
+            DomainEventKind.PointEdited,
+            Guid.Parse(tab.PanelId!),
+            series.SeriesId,
+            "Manual series edited");
     }
 
     public void SetSeriesRelations(
@@ -951,6 +1078,14 @@ public sealed class ManualPreviewWorkspaceService : IManualWorkspaceService
         Dictionary<string, PhaseRecord> pointPhases = tab.Points.ToDictionary(
             static point => point.PointId,
             point => ResolvePointPhase(tab, point, regionPhases, semanticProbePhases));
+        HashSet<SeriesId> validBaselineIds = tab.SeriesCards
+            .Where(static item => item.SemanticRole == SemanticRole.Baseline)
+            .Select(item => SeriesId.FromGuid(Guid.Parse(item.SeriesId)))
+            .ToHashSet();
+        HashSet<SeriesId> validProbeIds = tab.SeriesCards
+            .Where(static item => item.SemanticRole is SemanticRole.Maintenance or SemanticRole.Generalization)
+            .Select(item => SeriesId.FromGuid(Guid.Parse(item.SeriesId)))
+            .ToHashSet();
         SeriesRecord[] series = tab.SeriesCards.Select(item =>
         {
             SeriesId seriesId = SeriesId.FromGuid(Guid.Parse(item.SeriesId));
@@ -967,8 +1102,14 @@ public sealed class ManualPreviewWorkspaceService : IManualWorkspaceService
                     .Select(point => PointId.FromGuid(Guid.Parse(point.PointId)))
                     .ToArray(),
                 item.Confidence,
-                prior?.SharedBaselineSeriesId,
-                prior?.ApplicableProbeSeriesIds ?? [],
+                item.SemanticRole == SemanticRole.Intervention &&
+                    prior?.SharedBaselineSeriesId is { } baselineId &&
+                    validBaselineIds.Contains(baselineId)
+                        ? baselineId
+                        : null,
+                item.SemanticRole == SemanticRole.Intervention
+                    ? prior?.ApplicableProbeSeriesIds.Where(validProbeIds.Contains).ToArray() ?? []
+                    : [],
                 UserConfirmedName: true);
         }).ToArray();
         PointRecord[] points = tab.Points.Select(point =>
@@ -1005,7 +1146,9 @@ public sealed class ManualPreviewWorkspaceService : IManualWorkspaceService
             Participant: null,
             new CropRectangle(0, 0, tab.PixelWidth, tab.PixelHeight),
             Transforms: [],
-            Enhancement: null,
+            Enhancement: _enhancementByTab.TryGetValue(tab.TabId, out JsonElement enhancement)
+                ? enhancement.Clone()
+                : null,
             ToDomainCalibration(tab.Calibration),
             OcrRegions: [],
             Markers: [],
@@ -1061,6 +1204,18 @@ public sealed class ManualPreviewWorkspaceService : IManualWorkspaceService
             UserConfirmed: true,
             calibration.Confidence,
             Reasons: []);
+    }
+
+    private void UpdateEnhancementProvenance(
+        WorkspaceTabViewModel tab,
+        EnhancementEnvelope envelope)
+    {
+        _enhancementByTab[tab.TabId] = JsonSerializer.SerializeToElement(new
+        {
+            selected_preview = tab.EnhancementPreviewMode.ToString().ToLowerInvariant(),
+            original_immutable = true,
+            enhancement = envelope,
+        });
     }
 
     private static PhaseRecord[] BuildRegionPhases(WorkspaceTabViewModel tab)

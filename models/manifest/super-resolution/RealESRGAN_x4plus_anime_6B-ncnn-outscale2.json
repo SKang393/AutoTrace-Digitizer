@@ -1,7 +1,7 @@
 {
   "manifest_version": 1,
-  "model_id": "realesr-animevideov3",
-  "model_version": "v0.2.5.0-ncnn-x2",
+  "model_id": "RealESRGAN_x4plus_anime_6B",
+  "model_version": "v0.2.5.0-ncnn-outscale2",
   "task": "super_resolution",
   "source": {
     "name": "xinntao/Real-ESRGAN official v0.2.5.0 Windows NCNN package",
@@ -15,8 +15,8 @@
   },
   "sha256": "abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d",
   "files": [
-    "models/realesr-animevideov3-x2.param",
-    "models/realesr-animevideov3-x2.bin"
+    "models/realesrgan-x4plus-anime.param",
+    "models/realesrgan-x4plus-anime.bin"
   ],
   "inputs": [
     {
@@ -58,8 +58,11 @@
   ],
   "preprocessing": {
     "runtime": "realesrgan-ncnn-vulkan",
-    "runtime_model_name": "realesr-animevideov3",
-    "local_adapter_approval": true,
+    "runtime_model_name": "realesrgan-x4plus-anime",
+    "upstream_model_identity": "RealESRGAN_x4plus_anime_6B",
+    "upstream_identity_mapping_url": "https://github.com/xinntao/Real-ESRGAN/blob/685d429c81888252bdb10f56c7754baededc3823/docs/anime_model.md#L20-L35",
+    "local_adapter_approval": false,
+    "local_adapter_blocker": "A real Chandler graph run produced exact 2x dimensions but visibly cropped and zoomed the image, losing scientific content.",
     "runtime_scale_argument": 2,
     "runtime_executable_sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
     "runtime_files_sha256": {
@@ -79,15 +82,15 @@
     "default_tile_size": 0,
     "tile_padding_pixels": 10,
     "model_payload_sha256": {
-      "models/realesr-animevideov3-x2.param": "b88ff4f00ebf019a7fdac17fdd45a7fd3665d37509efc5baf2e4da2e24420a04",
-      "models/realesr-animevideov3-x2.bin": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d"
+      "models/realesrgan-x4plus-anime.param": "2b8fb6e0ae4d2d85704ca08c119a2f5ea40add4f2ecd512eb7f4cd44b6127ed4",
+      "models/realesrgan-x4plus-anime.bin": "fe01c269cfd10cdef8e018ab66ebe750cf79c7af4d1f9c16c737e1295229bacc"
     },
     "manifest_sha256_scope": "SHA-256 of the official Windows package containing both listed model files"
   },
   "postprocessing": {
     "configured_output_scale": 2,
     "output_dimension_validation": "Require exact width and height equal to twice the source dimensions",
-    "tiling_note": "The official runtime may tile and stitch, which can differ from PyTorch inference",
+    "tiling_note": "The native x4 model is invoked with the official NCNN output-scale argument set to 2",
     "original_preservation": "Output is a derived image; the source image must not be overwritten"
   },
   "commercial_use": true,
@@ -97,35 +100,20 @@
   ],
   "benchmarks": [
     {
-      "profile": "session-05-super-resolution-x2",
-      "status": "partial_runtime_only",
+      "profile": "goal-21-secondary-comparison-outscale2",
+      "status": "failed_scientific_fidelity",
       "configured_output_scale": 2,
-      "adapter_compatibility": "Official NCNN param/bin payload for Vulkan process inference",
+      "adapter_compatibility": "Official NCNN param/bin payload for Vulkan process inference using runtime model name realesrgan-x4plus-anime",
       "artifact_verification": {
         "status": "verified",
         "package_size_bytes": 45474481,
         "package_sha256": "abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d",
         "runtime_sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
+        "parameter_size_bytes": 30290,
+        "parameter_sha256": "2b8fb6e0ae4d2d85704ca08c119a2f5ea40add4f2ecd512eb7f4cd44b6127ed4",
+        "weights_size_bytes": 8943500,
+        "weights_sha256": "fe01c269cfd10cdef8e018ab66ebe750cf79c7af4d1f9c16c737e1295229bacc",
         "audit_date": "2026-08-03"
-      },
-      "minimal_runtime_verification": {
-        "status": "execution_verified_not_redistribution_approved",
-        "files": [
-          "realesrgan-ncnn-vulkan.exe",
-          "vcomp140.dll",
-          "models/realesr-animevideov3-x2.param",
-          "models/realesr-animevideov3-x2.bin"
-        ],
-        "excluded_from_runtime": [
-          "vcomp140d.dll",
-          "input.jpg",
-          "input2.jpg",
-          "onepiece_demo.mp4",
-          "unused model families"
-        ],
-        "adapter_success_count": 2,
-        "cache_hit_verified": true,
-        "evidence_sha256": "c480f97e09cf6117a86d5e8b565afa6e47aa3f85c14d9e46e3ef1932161fa967"
       },
       "fixed_public_synthetic_runtime": {
         "dataset_seed": 393,
@@ -134,29 +122,41 @@
           "a1b41e74-1808-5dec-99c9-59f4c88f4004",
           "4b57ae01-eed3-55e3-bd47-cbae601ce431"
         ],
-        "adapter_success_count": 2,
+        "runtime_success_count": 2,
         "exact_two_x_dimension_count": 2,
         "source_dimensions": "1200x350",
         "output_dimensions": "2400x700",
-        "adapter_total_ms": [
-          978.6905,
-          916.0614
+        "direct_runtime_wall_clock_ms": [
+          3359.2007,
+          2286.0098
         ],
-        "adapter_inference_ms": [
-          846.537,
-          869.624
-        ],
-        "cache_repeat_status": "cache_hit",
-        "cache_repeat_wall_clock_ms": 72.9273,
+        "manifest_driven_adapter_case": {
+          "case_id": "a1b41e74-1808-5dec-99c9-59f4c88f4004",
+          "status": "Succeeded",
+          "adapter_total_ms": 2220.2884,
+          "adapter_inference_ms": 2162.4602,
+          "output_sha256": "6e6c8b9c022b96cb98f82bddc23e1303a51732ba4d5862dcec044a3cc8efba5d"
+        },
         "provider": "vulkan",
         "gpu": "AMD Radeon RX 6600 XT",
-        "windows_build": "10.0.26200",
-        "evidence_sha256": "26b8b7fa0ce02b3fbbbfc647bcb6993bacc6073a21841c07bbb4c2e46720e98e"
+        "windows_build": "10.0.26200"
+      },
+      "private_chandler_scientific_fidelity": {
+        "status": "failed",
+        "source_sha256": "65bd6e1021bd9a3f2d2564a640ff90060a34e784782f2d847b4b26f9c6c342e1",
+        "source_dimensions": "863x395",
+        "output_dimensions": "1726x790",
+        "output_sha256": "d05e259e69f139d2649aaab8e99f866ccd4092534021612e93650b5048c97e85",
+        "runtime_ms": 2124.1439,
+        "source_unchanged": true,
+        "failure": "The output has exact dimensions but is visibly cropped and zoomed, losing graph content required for scientific review.",
+        "privacy": "Private ignored local evaluation; image and output are not Git-eligible."
       },
       "production_approval": false,
       "blockers": [
-        "Marker-center, shape/fill, numeric OCR, axis localization, hallucinated-structure, and peak-memory metrics are not measured.",
-        "The official archive contains nonredistributable vcomp140d.dll; the execution-verified minimal runtime excludes it, demo media, and unused models.",
+        "Real Chandler scientific-fidelity validation failed because output-scale-2 inference cropped and zoomed the graph, losing content.",
+        "Only runtime execution and exact output dimensions were measured; no graph-quality improvement is claimed.",
+        "Small-text clarity, open-circle preservation, filled-circle preservation, axis and tick clarity, marker-center F1, numeric OCR, hallucinated-structure rate, and peak memory are not measured.",
         "The retained release vcomp140.dll still needs an authorized Microsoft redistributable source and maintainer license attestation.",
         "The runtime notice set must retain Real-ESRGAN-ncnn-vulkan, NCNN, libwebp, and dirent terms.",
         "The Vulkan runtime has no CPU or DirectML provider for the required offline CPU fallback gate."

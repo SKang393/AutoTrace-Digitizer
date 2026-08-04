@@ -54,6 +54,21 @@ public sealed record ManualSeriesDefinition(
     MarkerFill Fill,
     SemanticRole SemanticRole);
 
+public enum EnhancementPreviewMode
+{
+    Original,
+    Enhanced,
+    Comparison,
+}
+
+public sealed record WorkspaceEnhancementResult(
+    bool Succeeded,
+    string Message,
+    string? OutputPath = null,
+    double RuntimeMilliseconds = 0,
+    string? UserMessageKey = null,
+    IReadOnlyList<object>? MessageArguments = null);
+
 public interface IManualWorkspaceService : IRuntimeWorkspaceService
 {
     ProjectDocument CurrentProject { get; }
@@ -70,6 +85,12 @@ public interface IManualWorkspaceService : IRuntimeWorkspaceService
         string path,
         CancellationToken cancellationToken);
 
+    Task<WorkspaceEnhancementResult> EnhanceAsync(
+        string tabId,
+        CancellationToken cancellationToken);
+
+    void SetEnhancementPreviewMode(string tabId, EnhancementPreviewMode mode);
+
     bool CloseTab(string tabId);
 
     Task<DomainResult<ProjectSaveReceipt>> SaveProjectAsync(
@@ -79,6 +100,8 @@ public interface IManualWorkspaceService : IRuntimeWorkspaceService
     ManualCalibrationState Calibrate(string tabId, ManualCalibrationRequest request);
 
     SeriesCardViewModel AddSeries(string tabId, ManualSeriesDefinition definition);
+
+    void UpdateSeries(string tabId, string seriesId, ManualSeriesDefinition definition);
 
     void SetSeriesRelations(
         string tabId,

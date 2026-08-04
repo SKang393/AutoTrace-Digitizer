@@ -199,7 +199,10 @@ public sealed class RealGraphManualPortableValidationTests
         probeChoice.IsSelected = true;
         Execute(viewModel.ApplySeriesRelationsCommand);
 
-        string filledOne = await AddPointAsync(viewModel, filledSeries.SeriesId, ScalePoint(tab, 78, 224));
+        viewModel.SelectedSeriesId = filledSeries.SeriesId;
+        Execute(viewModel.BeginAddFilledPointCommand);
+        await viewModel.HandleCanvasPointAsync(ScalePoint(tab, 78, 224));
+        string filledOne = viewModel.SelectedPointId!;
         string filledToMove = await AddPointAsync(viewModel, filledSeries.SeriesId, ScalePoint(tab, 341, 209));
         string filledThree = await AddPointAsync(viewModel, filledSeries.SeriesId, ScalePoint(tab, 367, 149));
         string filledToDelete = await AddPointAsync(viewModel, filledSeries.SeriesId, ScalePoint(tab, 394, 114));
@@ -214,11 +217,22 @@ public sealed class RealGraphManualPortableValidationTests
         string readdedFilled = await AddPointAsync(viewModel, filledSeries.SeriesId, ScalePoint(tab, 394, 114));
         Assert.AreNotEqual(filledToDelete, readdedFilled);
 
-        string openOne = await AddPointAsync(viewModel, openSeries.SeriesId, ScalePoint(tab, 656, 76));
+        viewModel.SelectedSeriesId = openSeries.SeriesId;
+        Execute(viewModel.BeginAddOpenPointCommand);
+        await viewModel.HandleCanvasPointAsync(ScalePoint(tab, 656, 76));
+        string openOne = viewModel.SelectedPointId!;
         string openTwo = await AddPointAsync(viewModel, openSeries.SeriesId, ScalePoint(tab, 682, 76));
         Assert.HasCount(6, tab.Points);
         Assert.AreEqual(4, filledSeries.Count);
         Assert.AreEqual(2, openSeries.Count);
+
+        viewModel.SelectedSeriesId = filledSeries.SeriesId;
+        viewModel.NewSeriesName = "Filled observations edited";
+        Execute(viewModel.EditSeriesCommand);
+        Assert.AreEqual("Filled observations edited", filledSeries.Label);
+        viewModel.NewSeriesName = "Filled observations";
+        Execute(viewModel.EditSeriesCommand);
+        Assert.AreEqual("Filled observations", filledSeries.Label);
 
         double pitch = (session24Y0.X - session1Y0.X) / 23d;
         double betweenSession9And10 = session1Y0.X + (8.5d * pitch);
@@ -248,6 +262,7 @@ public sealed class RealGraphManualPortableValidationTests
                 !viewModel.IsBusy,
             "Save As");
         Assert.AreEqual(1, dialogs.ProjectSaveSelectionCount);
+        Assert.IsFalse(tab.IsDirty);
         Assert.AreEqual(sourceHashBefore, Sha256(sourcePath));
         Assert.AreEqual(sourceHashBefore, workspace.CurrentProject.Sources.Single().Sha256);
         Assert.IsFalse(
@@ -258,11 +273,13 @@ public sealed class RealGraphManualPortableValidationTests
         Execute(viewModel.BeginMovePointCommand);
         Point secondMove = ScalePoint(tab, 370, 146);
         await viewModel.HandleCanvasPointAsync(secondMove);
+        Assert.IsTrue(tab.IsDirty);
         Execute(viewModel.SaveProjectCommand);
         await WaitForAsync(
             () => !viewModel.IsBusy &&
                 !string.Equals(File.ReadAllText(projectPath), savedBytes, StringComparison.Ordinal),
             "existing-path Save");
+        Assert.IsFalse(tab.IsDirty);
         Assert.AreEqual(1, dialogs.ProjectSaveSelectionCount);
 
         Execute(viewModel.CloseTabCommand);
@@ -329,6 +346,42 @@ public sealed class RealGraphManualPortableValidationTests
         Assert.IsNotNull(recoveredTab.Calibration);
         Assert.AreEqual(sourceHashBefore, recoveredTab.SourceSha256);
 
+        AutomaticStageStatus enhancementStage = workspace.AutomaticStages.Single(status =>
+            string.Equals(status.Stage, "enhancement", StringComparison.Ordinal));
+        bool localEnhancementConfigured = enhancementStage.State == AutomaticStageState.Experimental;
+        string? enhancedOutputPath = null;
+        double enhancementRuntimeMilliseconds = 0;
+        if (localEnhancementConfigured)
+        {
+            Assert.IsTrue(viewModel.EnhanceCommand.CanExecute(null));
+            Execute(viewModel.EnhanceCommand);
+            await WaitForAsync(
+                () => !viewModel.IsBusy && recoveredTab.HasEnhancedPreview,
+                "official Real-ESRGAN x2 enhancement");
+            Assert.IsNotNull(recoveredTab.EnhancedImageSource);
+            BitmapSource enhancedBitmap = Assert.IsInstanceOfType<BitmapSource>(recoveredTab.EnhancedImageSource);
+            Assert.AreEqual(recoveredTab.PixelWidth * 2, enhancedBitmap.PixelWidth);
+            Assert.AreEqual(recoveredTab.PixelHeight * 2, enhancedBitmap.PixelHeight);
+            Execute(viewModel.ShowComparisonPreviewCommand);
+            Assert.AreEqual(EnhancementPreviewMode.Comparison, recoveredTab.EnhancementPreviewMode);
+            Assert.IsTrue(recoveredTab.IsComparisonPreview);
+            Assert.IsTrue(recoveredTab.IsDirty);
+            Assert.AreEqual(sourceHashBefore, Sha256(sourcePath));
+            JsonElement enhancement = workspace.CurrentProject.Panels.Single().Enhancement!.Value;
+            Assert.AreEqual("comparison", enhancement.GetProperty("selected_preview").GetString());
+            Assert.IsTrue(enhancement.GetProperty("original_immutable").GetBoolean());
+            JsonElement envelope = enhancement.GetProperty("enhancement");
+            Assert.AreEqual("realesr-animevideov3", envelope.GetProperty("model").GetProperty("model_id").GetString());
+            Assert.AreEqual(sourceHashBefore, envelope.GetProperty("input_sha256").GetString());
+            enhancementRuntimeMilliseconds = envelope.GetProperty("timing_ms").GetProperty("total").GetDouble();
+            string derivativeRoot = Path.Combine(paths.CacheRoot, "Enhancement", "Derivatives");
+            enhancedOutputPath = Directory.GetFiles(derivativeRoot, "*.png", SearchOption.TopDirectoryOnly).Single();
+            Execute(viewModel.SaveProjectCommand);
+            await WaitForAsync(() => !viewModel.IsBusy, "enhancement provenance save");
+            Assert.IsFalse(recoveredTab.IsDirty);
+            StringAssert.Contains(await File.ReadAllTextAsync(recoveredProjectPath), "realesr-animevideov3");
+        }
+
         ScreenshotEvidence screenshot = RenderMainWindow(viewModel, screenshotPath, 1400, 900);
         Assert.IsTrue(File.Exists(screenshotPath));
         Assert.IsGreaterThan(10_000, new FileInfo(screenshotPath).Length);
@@ -351,6 +404,18 @@ public sealed class RealGraphManualPortableValidationTests
             distributionMode = paths.Mode.ToString(),
             usesFakeGraphData = workspace.UsesFakeGraphData,
             automaticDetectionAccuracyClaimed = false,
+            enhancement = new
+            {
+                configured = localEnhancementConfigured,
+                model = localEnhancementConfigured ? "realesr-animevideov3" : null,
+                scale = localEnhancementConfigured ? 2 : 0,
+                originalImmutable = string.Equals(sourceHashBefore, sourceHashAfter, StringComparison.Ordinal),
+                outputPath = enhancedOutputPath,
+                outputSha256 = enhancedOutputPath is null ? null : Sha256(enhancedOutputPath),
+                runtimeMilliseconds = enhancementRuntimeMilliseconds,
+                previewMode = recoveredTab.EnhancementPreviewMode.ToString(),
+                releaseEligible = false,
+            },
             source = new
             {
                 path = sourcePath,

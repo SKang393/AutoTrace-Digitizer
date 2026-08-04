@@ -257,7 +257,7 @@ public sealed class RealEsrganAdapter : IEnhancementService
                 modelRoot,
                 processInputPath,
                 processOutputPath,
-                request.Model.ModelId,
+                request.Model.RuntimeModelName,
                 options);
 
             ProcessExecutionResult execution = await _processRunner.RunAsync(
@@ -538,6 +538,7 @@ public sealed class RealEsrganAdapter : IEnhancementService
 
         if (request.Model.Provider != EnhancementProvider.Vulkan ||
             !IsSafeModelId(request.Model.ModelId) ||
+            !IsSafeModelId(request.Model.RuntimeModelName) ||
             !HasRuntimeBoundArtifacts(request.Model, options.Scale))
         {
             return Failure(
@@ -585,21 +586,30 @@ public sealed class RealEsrganAdapter : IEnhancementService
             return false;
         }
 
-        string prefix = $"{model.ModelId}-x{scale}";
+        string[] artifactNames = model.Artifacts
+            .Select(static artifact => artifact.RelativePath)
+            .ToArray();
+        if (artifactNames.Any(static path =>
+                string.IsNullOrWhiteSpace(path) ||
+                Path.IsPathRooted(path) ||
+                !string.Equals(Path.GetFileName(path), path, StringComparison.Ordinal)))
+        {
+            return false;
+        }
+
+        string scaledPrefix = $"{model.RuntimeModelName}-x{scale}";
+        return MatchesRuntimePair(artifactNames, scaledPrefix) ||
+               MatchesRuntimePair(artifactNames, model.RuntimeModelName);
+    }
+
+    private static bool MatchesRuntimePair(IEnumerable<string> artifactNames, string prefix)
+    {
         var expected = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             $"{prefix}.param",
             $"{prefix}.bin"
         };
-        return model.Artifacts.All(artifact =>
-                   !string.IsNullOrWhiteSpace(artifact.RelativePath) &&
-                   !Path.IsPathRooted(artifact.RelativePath) &&
-                   string.Equals(
-                       Path.GetFileName(artifact.RelativePath),
-                       artifact.RelativePath,
-                       StringComparison.Ordinal) &&
-                   expected.Remove(artifact.RelativePath)) &&
-               expected.Count == 0;
+        return artifactNames.All(expected.Remove) && expected.Count == 0;
     }
 
     private static async Task<string?> VerifyModelAsync(
@@ -638,6 +648,7 @@ public sealed class RealEsrganAdapter : IEnhancementService
             sourceSha256,
             runtimeSha256,
             request.Model.ModelId,
+            request.Model.RuntimeModelName,
             request.Model.Version,
             EnhancementHashing.NormalizeSha256(request.Model.Sha256),
             EnhancementHashing.ComputeModelSha256(

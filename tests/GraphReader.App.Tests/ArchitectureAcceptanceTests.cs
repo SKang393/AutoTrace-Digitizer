@@ -78,11 +78,11 @@ public sealed class ArchitectureAcceptanceTests
             "GraphReader.Axis",
             "GraphReader.Phases",
             "GraphReader.Export",
+            "GraphReader.SuperResolution",
         };
         string[] forbiddenAssemblyPrefixes =
         {
             "GraphReader.Pdf",
-            "GraphReader.SuperResolution",
             "GraphReader.Ocr",
             "GraphReader.Markers",
             "GraphReader.Legends",

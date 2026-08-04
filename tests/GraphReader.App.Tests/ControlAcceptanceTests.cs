@@ -4,6 +4,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
@@ -31,6 +32,9 @@ public sealed class ControlAcceptanceTests
 
                 Assert.IsTrue(canvas.PhaseOverlayVisible);
                 Assert.IsFalse(canvas.ShowCrosshair);
+                Assert.IsFalse(canvas.IsComparisonVisible);
+                Assert.IsNull(canvas.CoordinateReferenceSource);
+                Assert.IsNull(canvas.ComparisonImageSource);
                 Assert.AreEqual(1d, canvas.ZoomLevel);
                 Assert.AreEqual(new Point(0.5, 0.5), canvas.CrosshairPosition);
                 Assert.IsTrue(((FrameworkPropertyMetadata)GraphCanvasControl.PhaseOverlayVisibleProperty.GetMetadata(typeof(GraphCanvasControl))).BindsTwoWayByDefault);
@@ -116,7 +120,7 @@ public sealed class ControlAcceptanceTests
                 canvas.UpdateLayout();
 
                 var image = (Image)canvas.FindName("GraphImage");
-                var coordinateSurface = (Grid)canvas.FindName("ImageCoordinateSurface");
+                var coordinateSurface = (FrameworkElement)canvas.FindName("ImageCoordinateSurface");
                 var phasePresenter = (ContentPresenter)canvas.FindName("PhaseOverlayPresenter");
                 var crosshair = (CrosshairOverlay)canvas.FindName("Crosshair");
 
@@ -189,6 +193,134 @@ public sealed class ControlAcceptanceTests
     }
 
     [TestMethod]
+    public void ComparisonUsesOriginalCoordinateSizeAndKeepsEditingOnOriginalPane()
+    {
+        StaTestHost.Run(
+            () =>
+            {
+                var original = new WriteableBitmap(400, 200, 192, 192, PixelFormats.Bgra32, null);
+                var enhanced = new WriteableBitmap(800, 400, 192, 192, PixelFormats.Bgra32, null);
+                var canvas = new GraphCanvasControl
+                {
+                    ImageSource = original,
+                    CoordinateReferenceSource = original,
+                    ComparisonImageSource = enhanced,
+                    IsComparisonVisible = true,
+                };
+
+                canvas.Measure(new Size(900, 500));
+                canvas.Arrange(new Rect(0, 0, 900, 500));
+                canvas.UpdateLayout();
+                canvas.RecalculateViewport();
+
+                var editable = (Grid)canvas.FindName("EditableImageCoordinateSurface");
+                var comparison = (Image)canvas.FindName("ComparisonImage");
+                var comparisonPane = (Border)canvas.FindName("ComparisonPane");
+                Assert.AreEqual(400d, editable.Width);
+                Assert.AreEqual(200d, editable.Height);
+                Assert.AreEqual(400d, comparison.Width);
+                Assert.AreEqual(200d, comparison.Height);
+                Assert.AreEqual(Visibility.Visible, comparisonPane.Visibility);
+
+                canvas.IsComparisonVisible = false;
+                Assert.AreEqual(Visibility.Collapsed, comparisonPane.Visibility);
+            });
+    }
+
+    [TestMethod]
+    public void CanvasFitsAfterResizeAndZoomsOnFirstRelativeStep()
+    {
+        StaTestHost.Run(
+            () =>
+            {
+                var canvas = new GraphCanvasControl
+                {
+                    ImageSource = new WriteableBitmap(800, 400, 96, 96, PixelFormats.Bgra32, null),
+                };
+
+                canvas.Measure(new Size(400, 300));
+                canvas.Arrange(new Rect(0, 0, 400, 300));
+                canvas.UpdateLayout();
+                canvas.RecalculateViewport();
+                double initialFit = canvas.FitScale;
+                double initialEffective = canvas.EffectiveScale;
+
+                canvas.ZoomBy(1.25);
+                Assert.AreEqual(1.25, canvas.ZoomLevel, 0.0001);
+                Assert.AreEqual(initialEffective * 1.25, canvas.EffectiveScale, 0.0001);
+
+                canvas.ResetView();
+                canvas.ZoomBy(0.8);
+                canvas.RecalculateViewport();
+                double belowFitScale = canvas.FitScale;
+                double belowFitEffectiveScale = canvas.EffectiveScale;
+                Assert.AreEqual(belowFitScale * 0.8, belowFitEffectiveScale, 0.0001);
+                Assert.IsLessThan(belowFitScale, belowFitEffectiveScale);
+
+                canvas.Measure(new Size(800, 600));
+                canvas.Arrange(new Rect(0, 0, 800, 600));
+                canvas.UpdateLayout();
+                canvas.RecalculateViewport();
+                Assert.IsGreaterThan(initialFit, canvas.FitScale);
+                Assert.AreEqual(canvas.FitScale * canvas.ZoomLevel, canvas.EffectiveScale, 0.0001);
+            });
+    }
+
+    [TestMethod]
+    public void InspectorWidthPersistenceClampsAndFailsSoft()
+    {
+        string root = Path.Combine(Path.GetTempPath(), $"graph-reader-ui-{Guid.NewGuid():N}");
+        string path = Path.Combine(root, "window-layout.txt");
+        MethodInfo read = typeof(MainWindow).GetMethod("ReadInspectorWidth", BindingFlags.NonPublic | BindingFlags.Static)!;
+        MethodInfo write = typeof(MainWindow).GetMethod("WriteInspectorWidth", BindingFlags.NonPublic | BindingFlags.Static)!;
+
+        try
+        {
+            write.Invoke(null, [path, 512d]);
+            Assert.AreEqual(512d, (double)read.Invoke(null, [path, 390d])!);
+
+            File.WriteAllText(path, "99999");
+            Assert.AreEqual(800d, (double)read.Invoke(null, [path, 390d])!);
+
+            File.WriteAllText(path, "not-a-width");
+            Assert.AreEqual(390d, (double)read.Invoke(null, [path, 390d])!);
+            Assert.AreEqual(390d, (double)read.Invoke(null, [null, 390d])!);
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+    }
+
+    [TestMethod]
+    public void RelativeZoomPreservesTwoWayBindingForWheelEquivalentSteps()
+    {
+        StaTestHost.Run(
+            () =>
+            {
+                var source = new MutableZoom(1);
+                var canvas = new GraphCanvasControl();
+                BindingOperations.SetBinding(
+                    canvas,
+                    GraphCanvasControl.ZoomLevelProperty,
+                    new Binding(nameof(MutableZoom.ZoomLevel))
+                    {
+                        Source = source,
+                        Mode = BindingMode.TwoWay,
+                    });
+
+                canvas.ZoomBy(1.25);
+                Assert.AreEqual(1.25, source.ZoomLevel, 0.0001);
+
+                canvas.ZoomBy(0.8);
+                Assert.AreEqual(1, source.ZoomLevel, 0.0001);
+            });
+    }
+
+    [TestMethod]
     public void ControlXamlContainsNoVisibleHardCodedStrings()
     {
         var controlsDirectory = Path.Combine(RepositoryTestPaths.Root, "src", "GraphReader.App", "Controls");
@@ -241,5 +373,27 @@ public sealed class ControlAcceptanceTests
 
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    private sealed class MutableZoom(double zoomLevel) : INotifyPropertyChanged
+    {
+        private double _zoomLevel = zoomLevel;
+
+        public double ZoomLevel
+        {
+            get => _zoomLevel;
+            set
+            {
+                if (Math.Abs(_zoomLevel - value) < 0.0001)
+                {
+                    return;
+                }
+
+                _zoomLevel = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ZoomLevel)));
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }

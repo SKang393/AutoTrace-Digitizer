@@ -137,6 +137,31 @@ public sealed class ConsensusAndBenchmarkTests
     }
 
     [TestMethod]
+    public void Goal21ComparisonPlanContainsOnlyTheApprovedPrimaryAndSecondaryCandidates()
+    {
+        EnhancementBenchmarkCase[] cases =
+        [
+            new("case-a", "input-a.png", "truth-a.json"),
+            new("case-b", "input-b.png", "truth-b.json")
+        ];
+
+        IReadOnlyList<EnhancementBenchmarkWorkItem> plan =
+            EnhancementBenchmarkHarness.CreateGoal21ComparisonPlan(cases);
+
+        Assert.AreEqual(4, plan.Count);
+        Assert.IsTrue(plan.All(static item => item.Model.OutputScale == 2));
+        Assert.IsTrue(plan.All(static item =>
+            item.Model.RuntimeCompatibility == BenchmarkRuntimeCompatibility.NcnnVulkan));
+        Assert.AreEqual(2, plan.Count(static item => item.Model.ModelId == "realesr-animevideov3"));
+        Assert.AreEqual(2, plan.Count(static item =>
+            item.Model.ModelId == "RealESRGAN_x4plus_anime_6B"));
+        Assert.AreEqual(2, EnhancementBenchmarkHarness.Goal21ComparisonModels[0].NativeScale);
+        Assert.AreEqual(4, EnhancementBenchmarkHarness.Goal21ComparisonModels[1].NativeScale);
+        Assert.IsTrue(EnhancementBenchmarkHarness.Goal21ComparisonModels[0].LocalAdapterApproved);
+        Assert.IsFalse(EnhancementBenchmarkHarness.Goal21ComparisonModels[1].LocalAdapterApproved);
+    }
+
+    [TestMethod]
     public async Task BenchmarkHarnessRejectsInvalidMetricsAndMismatchedEvidence()
     {
         EnhancementBenchmarkCase[] cases = [new("fixed-case", "input.png", "truth.json")];

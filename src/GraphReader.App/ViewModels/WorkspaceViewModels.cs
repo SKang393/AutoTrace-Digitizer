@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using GraphReader.App.Models;
+using GraphReader.App.Services;
 using GraphReader.Domain;
 using AppGraphPoint = GraphReader.App.Models.GraphPoint;
 
@@ -92,7 +93,12 @@ public sealed class SeriesCardViewModel : ObservableObject
 {
     private readonly ObservableCollection<AppGraphPoint> _points;
     private bool _isVisible = true;
+    private string _symbol;
+    private string _accessibleName;
     private string _label;
+    private MarkerShape _shape;
+    private MarkerFill _fill;
+    private SemanticRole _semanticRole;
     private Action<string>? _selectAction;
 
     public SeriesCardViewModel(
@@ -116,22 +122,30 @@ public sealed class SeriesCardViewModel : ObservableObject
         }
 
         SeriesId = seriesId;
-        Symbol = symbol;
-        AccessibleName = accessibleName;
+        _symbol = symbol;
+        _accessibleName = accessibleName;
         _label = label;
         Confidence = confidence;
-        Shape = shape;
-        Fill = fill;
-        SemanticRole = semanticRole;
+        _shape = shape;
+        _fill = fill;
+        _semanticRole = semanticRole;
         _points = points ?? throw new ArgumentNullException(nameof(points));
         SelectCommand = new RelayCommand(_ => _selectAction?.Invoke(SeriesId));
     }
 
     public string SeriesId { get; }
 
-    public string Symbol { get; }
+    public string Symbol
+    {
+        get => _symbol;
+        internal set => SetProperty(ref _symbol, value);
+    }
 
-    public string AccessibleName { get; }
+    public string AccessibleName
+    {
+        get => _accessibleName;
+        internal set => SetProperty(ref _accessibleName, value);
+    }
 
     public string Label
     {
@@ -139,11 +153,23 @@ public sealed class SeriesCardViewModel : ObservableObject
         internal set => SetProperty(ref _label, value);
     }
 
-    public MarkerShape Shape { get; }
+    public MarkerShape Shape
+    {
+        get => _shape;
+        internal set => SetProperty(ref _shape, value);
+    }
 
-    public MarkerFill Fill { get; }
+    public MarkerFill Fill
+    {
+        get => _fill;
+        internal set => SetProperty(ref _fill, value);
+    }
 
-    public SemanticRole SemanticRole { get; }
+    public SemanticRole SemanticRole
+    {
+        get => _semanticRole;
+        internal set => SetProperty(ref _semanticRole, value);
+    }
 
     public int Count => _points.Count(point => point.SeriesId == SeriesId);
 
@@ -169,6 +195,9 @@ public sealed class WorkspaceTabViewModel : ObservableObject
 {
     private object? _overlayContent;
     private double _zoomLevel = 1;
+    private bool _isDirty;
+    private ImageSource? _enhancedImageSource;
+    private EnhancementPreviewMode _enhancementPreviewMode;
 
     public WorkspaceTabViewModel(
         string tabId,
@@ -195,7 +224,7 @@ public sealed class WorkspaceTabViewModel : ObservableObject
         Points = points ?? throw new ArgumentNullException(nameof(points));
         SeriesCards = seriesCards ?? throw new ArgumentNullException(nameof(seriesCards));
         ImageSource = imageSource;
-        EnhancedImageSource = enhancedImageSource;
+        _enhancedImageSource = enhancedImageSource;
         _overlayContent = overlayContent;
         PhaseOverlayContent = phaseOverlayContent;
         PanelId = panelId;
@@ -212,13 +241,74 @@ public sealed class WorkspaceTabViewModel : ObservableObject
 
     public string DisplayName { get; }
 
+    public string TabHeader => IsDirty ? $"{DisplayName} *" : DisplayName;
+
+    public bool IsDirty
+    {
+        get => _isDirty;
+        internal set
+        {
+            if (SetProperty(ref _isDirty, value))
+            {
+                OnPropertyChanged(nameof(TabHeader));
+            }
+        }
+    }
+
     public ObservableCollection<AppGraphPoint> Points { get; }
 
     public ObservableCollection<SeriesCardViewModel> SeriesCards { get; }
 
     public ImageSource? ImageSource { get; }
 
-    public ImageSource? EnhancedImageSource { get; }
+    public ImageSource? EnhancedImageSource
+    {
+        get => _enhancedImageSource;
+        internal set
+        {
+            if (SetProperty(ref _enhancedImageSource, value))
+            {
+                OnPropertyChanged(nameof(HasEnhancedPreview));
+                OnPropertyChanged(nameof(DisplayImageSource));
+                OnPropertyChanged(nameof(ComparisonImageSource));
+                if (value is null && EnhancementPreviewMode != EnhancementPreviewMode.Original)
+                {
+                    EnhancementPreviewMode = EnhancementPreviewMode.Original;
+                }
+            }
+        }
+    }
+
+    public bool HasEnhancedPreview => EnhancedImageSource is not null;
+
+    public EnhancementPreviewMode EnhancementPreviewMode
+    {
+        get => _enhancementPreviewMode;
+        internal set
+        {
+            EnhancementPreviewMode normalized = value != EnhancementPreviewMode.Original &&
+                EnhancedImageSource is null
+                    ? EnhancementPreviewMode.Original
+                    : value;
+            if (SetProperty(ref _enhancementPreviewMode, normalized))
+            {
+                OnPropertyChanged(nameof(DisplayImageSource));
+                OnPropertyChanged(nameof(ComparisonImageSource));
+                OnPropertyChanged(nameof(IsComparisonPreview));
+            }
+        }
+    }
+
+    public ImageSource? DisplayImageSource =>
+        EnhancementPreviewMode == EnhancementPreviewMode.Enhanced && EnhancedImageSource is not null
+            ? EnhancedImageSource
+            : ImageSource;
+
+    public ImageSource? ComparisonImageSource =>
+        EnhancementPreviewMode == EnhancementPreviewMode.Comparison ? EnhancedImageSource : null;
+
+    public bool IsComparisonPreview =>
+        EnhancementPreviewMode == EnhancementPreviewMode.Comparison && EnhancedImageSource is not null;
 
     public object? OverlayContent => _overlayContent;
 

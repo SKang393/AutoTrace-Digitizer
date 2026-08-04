@@ -16,5 +16,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\GraphReader.App\GraphReader.App.csproj" />
+    <ProjectReference Include="..\..\src\GraphReader.SuperResolution\GraphReader.SuperResolution.csproj" />
   </ItemGroup>
 </Project>

@@ -82,7 +82,8 @@ public sealed class EnhancementModel
         string licenseSpdx,
         string noticePath,
         IEnumerable<ModelArtifact> artifacts,
-        EnhancementProvider provider = EnhancementProvider.Vulkan)
+        EnhancementProvider provider = EnhancementProvider.Vulkan,
+        string? runtimeModelName = null)
     {
         ModelId = modelId;
         Version = version;
@@ -92,6 +93,7 @@ public sealed class EnhancementModel
         LicenseSpdx = licenseSpdx;
         NoticePath = noticePath;
         Provider = provider;
+        RuntimeModelName = runtimeModelName ?? modelId;
         _artifacts = Array.AsReadOnly(artifacts?.ToArray() ?? throw new ArgumentNullException(nameof(artifacts)));
     }
 
@@ -103,6 +105,7 @@ public sealed class EnhancementModel
     public string LicenseSpdx { get; }
     public string NoticePath { get; }
     public EnhancementProvider Provider { get; }
+    public string RuntimeModelName { get; }
     public IReadOnlyList<ModelArtifact> Artifacts => _artifacts;
 }
 

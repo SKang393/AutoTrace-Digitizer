@@ -127,7 +127,12 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         ImportCommand = new AsyncRelayCommand(
             ImportImagesFromDialogAsync,
             () => !IsBusy && _isWorkflowAvailable);
-        EnhanceCommand = CreateWorkflowCommand(WorkflowStage.Prepare, "Workflow.Enhance");
+        EnhanceCommand = _manualWorkspaceService is null
+            ? CreateWorkflowCommand(WorkflowStage.Prepare, "Workflow.Enhance")
+            : new AsyncRelayCommand(
+                EnhanceSelectedTabAsync,
+                () => !IsBusy && _isWorkflowAvailable && SelectedTab is not null &&
+                    CanRunAutomaticStage(WorkflowStage.Prepare));
         AutoDetectCommand = CreateWorkflowCommand(WorkflowStage.Detect, "Workflow.AutoDetect");
         ReviewCommand = CreateWorkflowCommand(WorkflowStage.Review, "Workflow.Review");
         ExportCommand = new AsyncRelayCommand(
@@ -174,6 +179,18 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         ZoomInCommand = new RelayCommand(_ => ChangeZoom(1.25), _ => SelectedTab is not null);
         ZoomOutCommand = new RelayCommand(_ => ChangeZoom(0.8), _ => SelectedTab is not null);
         FitZoomCommand = new RelayCommand(_ => SetZoom(1), _ => SelectedTab is not null);
+        ResetViewCommand = new RelayCommand(_ => SetZoom(1), _ => SelectedTab is not null);
+        ShowOriginalPreviewCommand = new RelayCommand(
+            _ => SetEnhancementPreviewMode(EnhancementPreviewMode.Original),
+            _ => SelectedTab is not null);
+        ShowEnhancedPreviewCommand = new RelayCommand(
+            _ => SetEnhancementPreviewMode(EnhancementPreviewMode.Enhanced),
+            _ => SelectedTab?.HasEnhancedPreview == true);
+        ShowComparisonPreviewCommand = new RelayCommand(
+            _ => SetEnhancementPreviewMode(EnhancementPreviewMode.Comparison),
+            _ => SelectedTab?.HasEnhancedPreview == true);
+        NextTabCommand = new RelayCommand(_ => SelectRelativeTab(1), _ => Tabs.Count > 1);
+        PreviousTabCommand = new RelayCommand(_ => SelectRelativeTab(-1), _ => Tabs.Count > 1);
         OpenProjectCommand = new AsyncRelayCommand(OpenProjectFromDialogAsync, () => !IsBusy && _manualWorkspaceService is not null);
         SaveProjectCommand = new AsyncRelayCommand(
             cancellationToken => SaveProjectFromDialogAsync(saveAs: false, cancellationToken),
@@ -184,11 +201,20 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         RecoverProjectCommand = new AsyncRelayCommand(
             RecoverProjectFromAutosaveAsync,
             () => !IsBusy && _manualWorkspaceService is not null);
-        CloseTabCommand = new RelayCommand(_ => CloseSelectedTab(), _ => SelectedTab is not null);
+        CloseTabCommand = new RelayCommand(
+            parameter => CloseTab(parameter as WorkspaceTabViewModel ?? SelectedTab),
+            parameter => parameter is WorkspaceTabViewModel || SelectedTab is not null);
         StartCalibrationCommand = new RelayCommand(_ => BeginCalibration(), _ => SelectedTab is not null && _manualWorkspaceService is not null);
         CreateSeriesCommand = new RelayCommand(_ => CreateSeries(), _ => SelectedTab is not null && _manualWorkspaceService is not null);
+        EditSeriesCommand = new RelayCommand(_ => EditSelectedSeries(), _ => CanEditSelectedSeries());
         ApplySeriesRelationsCommand = new RelayCommand(_ => ApplySeriesRelations(), _ => CanApplySeriesRelations());
         BeginAddPointCommand = new RelayCommand(_ => EditorMode = ManualEditorMode.AddPoint, _ => CanEditPoint());
+        BeginAddFilledPointCommand = new RelayCommand(
+            _ => BeginAddPointForFill(MarkerFill.Filled),
+            _ => HasSeriesWithFill(MarkerFill.Filled));
+        BeginAddOpenPointCommand = new RelayCommand(
+            _ => BeginAddPointForFill(MarkerFill.Open),
+            _ => HasSeriesWithFill(MarkerFill.Open));
         BeginMovePointCommand = new RelayCommand(_ => EditorMode = ManualEditorMode.MovePoint, _ => CanMoveSelectedPoint());
         BeginAddPhaseDividerCommand = new RelayCommand(_ => EditorMode = ManualEditorMode.AddPhaseDivider, _ => SelectedTab is not null && _manualWorkspaceService is not null);
         BeginMovePhaseDividerCommand = new RelayCommand(_ => EditorMode = ManualEditorMode.MovePhaseDivider, _ => SelectedDividerId is not null && _manualWorkspaceService is not null);
@@ -202,14 +228,18 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             ? runtime.RuntimeEnvironment.ToString()
             : GetLocalizedString(LocalizationKeys.PreviewUnknown);
         AvailableAutomaticStagesText = workspaceService is IRuntimeWorkspaceService available
-            ? JoinStages(available.AutomaticStages, static state => state is AutomaticStageState.Available or AutomaticStageState.Approved)
+            ? JoinStages(available.AutomaticStages, static state => state is AutomaticStageState.Available or AutomaticStageState.Approved or AutomaticStageState.Experimental)
             : GetLocalizedString(LocalizationKeys.PreviewNone);
         MissingAutomaticStagesText = workspaceService is IRuntimeWorkspaceService missing
             ? JoinStages(missing.AutomaticStages, static state => state == AutomaticStageState.Unavailable)
             : GetLocalizedString(LocalizationKeys.PreviewUnknown);
-        EnhancementAvailabilityText = CanRunAutomaticStage(WorkflowStage.Prepare)
-            ? string.Empty
-            : GetLocalizedString(LocalizationKeys.WorkflowEnhanceUnavailable);
+        AutomaticStageStatus? enhancementStatus = (workspaceService as IRuntimeWorkspaceService)?.AutomaticStages
+            .FirstOrDefault(status => string.Equals(status.Stage, "enhancement", StringComparison.Ordinal));
+        EnhancementAvailabilityText = enhancementStatus?.State == AutomaticStageState.Experimental
+            ? GetLocalizedString(LocalizationKeys.WorkflowEnhanceExperimental)
+            : CanRunAutomaticStage(WorkflowStage.Prepare)
+                ? string.Empty
+                : GetLocalizedString(LocalizationKeys.WorkflowEnhanceUnavailable);
         AutoDetectionAvailabilityText = CanRunAutomaticStage(WorkflowStage.Detect)
             ? string.Empty
             : GetLocalizedString(LocalizationKeys.WorkflowAutoDetectUnavailable);
@@ -225,6 +255,8 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             if (SetProperty(ref _selectedTab, value))
             {
                 OnPropertyChanged(nameof(SeriesCards));
+                OnPropertyChanged(nameof(HasEnhancedPreview));
+                OnPropertyChanged(nameof(CurrentEnhancementPreviewMode));
                 SelectedPointId = value?.Points.FirstOrDefault()?.PointId;
                 SelectedSeriesId = value?.SeriesCards.FirstOrDefault()?.SeriesId;
                 SelectedDividerId = value?.PhaseDividers.FirstOrDefault()?.DividerId;
@@ -293,6 +325,11 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
     public string AutoDetectionAvailabilityText { get; }
 
+    public bool HasEnhancedPreview => SelectedTab?.HasEnhancedPreview == true;
+
+    public EnhancementPreviewMode CurrentEnhancementPreviewMode =>
+        SelectedTab?.EnhancementPreviewMode ?? EnhancementPreviewMode.Original;
+
     public IReadOnlyList<LocalizedChoice<MarkerShape>> MarkerShapeChoices { get; }
 
     public IReadOnlyList<LocalizedChoice<MarkerFill>> MarkerFillChoices { get; }
@@ -330,6 +367,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         {
             if (SetProperty(ref _selectedSeriesId, value))
             {
+                LoadSelectedSeriesEditor();
                 RefreshSeriesRelationChoices();
                 RelayCommand.RaiseCanExecuteChanged();
             }
@@ -462,6 +500,18 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
     public ICommand FitZoomCommand { get; }
 
+    public ICommand ResetViewCommand { get; }
+
+    public ICommand ShowOriginalPreviewCommand { get; }
+
+    public ICommand ShowEnhancedPreviewCommand { get; }
+
+    public ICommand ShowComparisonPreviewCommand { get; }
+
+    public ICommand NextTabCommand { get; }
+
+    public ICommand PreviousTabCommand { get; }
+
     public ICommand OpenProjectCommand { get; }
 
     public ICommand SaveProjectCommand { get; }
@@ -476,9 +526,15 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
     public ICommand CreateSeriesCommand { get; }
 
+    public ICommand EditSeriesCommand { get; }
+
     public ICommand ApplySeriesRelationsCommand { get; }
 
     public ICommand BeginAddPointCommand { get; }
+
+    public ICommand BeginAddFilledPointCommand { get; }
+
+    public ICommand BeginAddOpenPointCommand { get; }
 
     public ICommand BeginMovePointCommand { get; }
 
@@ -805,6 +861,49 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         }, cancellationToken);
     }
 
+    private async Task EnhanceSelectedTabAsync(CancellationToken cancellationToken)
+    {
+        if (_manualWorkspaceService is null || SelectedTab is not { } tab)
+        {
+            return;
+        }
+
+        await RunBusyAsync(async token =>
+        {
+            WorkspaceEnhancementResult result = await _manualWorkspaceService
+                .EnhanceAsync(tab.TabId, token);
+            SetStatus(result.UserMessageKey is null
+                ? result.Message
+                : FormatLocalizedString(
+                    result.UserMessageKey,
+                    result.MessageArguments?.ToArray() ?? []));
+            if (!result.Succeeded)
+            {
+                return;
+            }
+
+            CurrentStage = WorkflowStage.Prepare;
+            Magnifier.IsEnhanced = true;
+            OnPropertyChanged(nameof(HasEnhancedPreview));
+            OnPropertyChanged(nameof(CurrentEnhancementPreviewMode));
+            RelayCommand.RaiseCanExecuteChanged();
+            QueueAutosave(SnapshotTrigger.PointEdited, tab.TabId, "enhancement");
+        }, cancellationToken);
+    }
+
+    private void SetEnhancementPreviewMode(EnhancementPreviewMode mode)
+    {
+        if (_manualWorkspaceService is null || SelectedTab is not { } tab)
+        {
+            return;
+        }
+
+        _manualWorkspaceService.SetEnhancementPreviewMode(tab.TabId, mode);
+        Magnifier.IsEnhanced = mode != EnhancementPreviewMode.Original;
+        OnPropertyChanged(nameof(CurrentEnhancementPreviewMode));
+        QueueAutosave(SnapshotTrigger.ExportSettingsChanged, tab.TabId, "enhancement-preview");
+    }
+
     private async Task OpenProjectFromDialogAsync(CancellationToken cancellationToken)
     {
         if (_manualWorkspaceService is null || _dialogService?.SelectProjectToOpen() is not string path)
@@ -853,6 +952,10 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
                 throw new InvalidOperationException(string.Join(" | ", saved.Errors.Select(error => error.TechnicalMessage)));
             }
 
+            foreach (WorkspaceTabViewModel tab in Tabs)
+            {
+                tab.IsDirty = false;
+            }
             SetStatus(FormatLocalizedString(LocalizationKeys.StatusSavedFormat, Path.GetFileName(saved.Value!.Path)));
         }, cancellationToken);
     }
@@ -996,6 +1099,79 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         }
     }
 
+    private void EditSelectedSeries()
+    {
+        if (SelectedTab is not { } tab ||
+            SelectedSeriesId is not string seriesId ||
+            _manualWorkspaceService is null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(NewSeriesName))
+        {
+            SetStatus(GetLocalizedString(LocalizationKeys.ManualSeriesNameRequired));
+            return;
+        }
+
+        try
+        {
+            _manualWorkspaceService.UpdateSeries(
+                tab.TabId,
+                seriesId,
+                new ManualSeriesDefinition(
+                    NewSeriesName,
+                    SymbolFor(NewSeriesShape, NewSeriesFill),
+                    NewSeriesShape,
+                    NewSeriesFill,
+                    NewSeriesRole));
+            SetStatus(FormatLocalizedString(LocalizationKeys.ManualSeriesSelectedFormat, NewSeriesName));
+            QueueAutosave(SnapshotTrigger.PointEdited, tab.TabId, seriesId);
+            RefreshSeriesRelationChoices();
+        }
+        catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
+        {
+            SetStatus(FormatLocalizedString(LocalizationKeys.StatusManualEditRejectedFormat, exception.Message));
+        }
+    }
+
+    private bool CanEditSelectedSeries() =>
+        _manualWorkspaceService is not null &&
+        SelectedTab is not null &&
+        SelectedSeriesId is not null;
+
+    private void LoadSelectedSeriesEditor()
+    {
+        if (FindSeries(SelectedSeriesId ?? string.Empty) is not { } series)
+        {
+            return;
+        }
+
+        NewSeriesName = series.Label;
+        NewSeriesShape = series.Shape;
+        NewSeriesFill = series.Fill;
+        NewSeriesRole = series.SemanticRole;
+    }
+
+    private bool HasSeriesWithFill(MarkerFill fill) =>
+        _manualWorkspaceService is not null &&
+        SelectedTab?.SeriesCards.Any(series => series.Fill == fill) == true;
+
+    private void BeginAddPointForFill(MarkerFill fill)
+    {
+        SeriesCardViewModel? series = SelectedTab?.SeriesCards.FirstOrDefault(candidate =>
+            candidate.Fill == fill && string.Equals(candidate.SeriesId, SelectedSeriesId, StringComparison.Ordinal))
+            ?? SelectedTab?.SeriesCards.FirstOrDefault(candidate => candidate.Fill == fill);
+        if (series is null)
+        {
+            SetStatus(GetLocalizedString(LocalizationKeys.ManualSelectSeriesFirst));
+            return;
+        }
+
+        SelectedSeriesId = series.SeriesId;
+        EditorMode = ManualEditorMode.AddPoint;
+    }
+
     private void ApplySeriesRelations()
     {
         if (SelectedTab is not { } tab ||
@@ -1078,10 +1254,16 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         }
     }
 
-    private void CloseSelectedTab()
+    private void CloseTab(WorkspaceTabViewModel? tab)
     {
-        if (SelectedTab is not { } tab)
+        if (tab is null || !Tabs.Contains(tab))
         {
+            return;
+        }
+
+        if (tab.IsDirty)
+        {
+            SetStatus(GetLocalizedString(LocalizationKeys.ProjectCloseDirtyBlocked));
             return;
         }
 
@@ -1089,11 +1271,11 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         if (_manualWorkspaceService is not null)
         {
             _manualWorkspaceService.CloseTab(tab.TabId);
-            QueueAutosave(SnapshotTrigger.PointEdited, tabId: null, entityId: tab.TabId);
         }
 
         Tabs.Remove(tab);
         SelectedTab = Tabs.Count == 0 ? null : Tabs[Math.Min(index, Tabs.Count - 1)];
+        RelayCommand.RaiseCanExecuteChanged();
     }
 
     private void DeleteSelectedPhaseDivider()
@@ -1170,6 +1352,14 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         if (_manualWorkspaceService is null)
         {
             return;
+        }
+
+        WorkspaceTabViewModel? editedTab = tabId is null
+            ? null
+            : Tabs.FirstOrDefault(tab => string.Equals(tab.TabId, tabId, StringComparison.Ordinal));
+        if (editedTab is not null)
+        {
+            editedTab.IsDirty = true;
         }
 
         DomainResult<ProjectSnapshotReceipt> result = await _manualWorkspaceService
@@ -1303,6 +1493,23 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         }
     }
 
+    private void SelectRelativeTab(int offset)
+    {
+        if (Tabs.Count < 2)
+        {
+            return;
+        }
+
+        int current = SelectedTab is null ? 0 : Math.Max(0, Tabs.IndexOf(SelectedTab));
+        int next = (current + offset) % Tabs.Count;
+        if (next < 0)
+        {
+            next += Tabs.Count;
+        }
+
+        SelectedTab = Tabs[next];
+    }
+
     private void SetZoom(double value)
     {
         if (SelectedTab is { } tab)
@@ -1340,13 +1547,14 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             return true;
         }
 
-        static bool IsEnabled(AutomaticStageStatus status) =>
-            status.State is AutomaticStageState.Available or AutomaticStageState.Approved;
+        static bool IsEnabled(AutomaticStageStatus status, bool allowExperimental = false) =>
+            status.State is AutomaticStageState.Available or AutomaticStageState.Approved ||
+            (allowExperimental && status.State == AutomaticStageState.Experimental);
 
         return stage switch
         {
             WorkflowStage.Prepare => runtime.AutomaticStages
-                .Any(status => string.Equals(status.Stage, "enhancement", StringComparison.Ordinal) && IsEnabled(status)),
+                .Any(status => string.Equals(status.Stage, "enhancement", StringComparison.Ordinal) && IsEnabled(status, allowExperimental: true)),
             WorkflowStage.Detect => RequiredAutomaticDetectionStages
                 .All(required => runtime.AutomaticStages.Any(status =>
                     string.Equals(status.Stage, required, StringComparison.Ordinal) && IsEnabled(status))),

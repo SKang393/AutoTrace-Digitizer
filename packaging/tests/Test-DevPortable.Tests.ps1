@@ -375,6 +375,60 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
         'last-failure.json did not capture child-process diagnostics.'
     $passed++
 
+    $launcherIsolationRoot = Join-Path $testRoot 'launcher enhancement isolation'
+    $launcherIsolationBuild = Join-Path $launcherIsolationRoot 'builds\isolated'
+    New-Item -ItemType Directory -Path $launcherIsolationBuild -Force | Out-Null
+    Copy-Item -LiteralPath $launcherScript -Destination $launcherIsolationRoot
+    $captureExecutable = Join-Path $launcherIsolationBuild 'capture.cmd'
+    $captureOutput = Join-Path $launcherIsolationBuild 'enhancement-environment.txt'
+    [System.IO.File]::WriteAllText(
+        $captureExecutable,
+        "@echo off`r`necho [%GRAPHREADER_REALESRGAN_RUNTIME_ROOT%] > `"%~dp0enhancement-environment.txt`"`r`necho [%GRAPHREADER_REALESRGAN_MANIFEST_PATH%] >> `"%~dp0enhancement-environment.txt`"`r`n")
+    [System.IO.File]::WriteAllText((Join-Path $launcherIsolationBuild 'portable.mode'), '')
+    [System.IO.File]::WriteAllText(
+        (Join-Path $launcherIsolationRoot 'latest.json'),
+        '{"executable":"builds/isolated/capture.cmd"}')
+    $previousRuntimeRoot = [Environment]::GetEnvironmentVariable(
+        'GRAPHREADER_REALESRGAN_RUNTIME_ROOT',
+        'Process')
+    $previousManifestPath = [Environment]::GetEnvironmentVariable(
+        'GRAPHREADER_REALESRGAN_MANIFEST_PATH',
+        'Process')
+    try {
+        [Environment]::SetEnvironmentVariable(
+            'GRAPHREADER_REALESRGAN_RUNTIME_ROOT',
+            'C:\stale-runtime',
+            'Process')
+        [Environment]::SetEnvironmentVariable(
+            'GRAPHREADER_REALESRGAN_MANIFEST_PATH',
+            'C:\stale-manifest.json',
+            'Process')
+        & $hostExecutable -NoProfile -ExecutionPolicy Bypass -File `
+            (Join-Path $launcherIsolationRoot 'Run-Latest-DevPortable.ps1') `
+            -Wait -DisableLocalEnhancement | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Disabled-enhancement launcher exited with code $LASTEXITCODE."
+        }
+    }
+    finally {
+        [Environment]::SetEnvironmentVariable(
+            'GRAPHREADER_REALESRGAN_RUNTIME_ROOT',
+            $previousRuntimeRoot,
+            'Process')
+        [Environment]::SetEnvironmentVariable(
+            'GRAPHREADER_REALESRGAN_MANIFEST_PATH',
+            $previousManifestPath,
+            'Process')
+    }
+    $capturedEnvironment = @(Get-Content -LiteralPath $captureOutput)
+    Assert-True ($capturedEnvironment.Count -eq 2) `
+        'Disabled-enhancement launcher did not capture both child environment values.'
+    Assert-True ($capturedEnvironment[0].Trim() -eq '[]') `
+        'Disabled-enhancement launcher leaked an inherited runtime root to the child.'
+    Assert-True ($capturedEnvironment[1].Trim() -eq '[]') `
+        'Disabled-enhancement launcher leaked an inherited manifest path to the child.'
+    $passed++
+
     $launcherRoot = Join-Path $testRoot 'launcher traversal'
     New-Item -ItemType Directory -Path $launcherRoot | Out-Null
     Copy-Item -LiteralPath $launcherScript -Destination $launcherRoot
@@ -388,7 +442,7 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
         '-File', (Join-Path $launcherRoot 'Run-Latest-DevPortable.ps1'))
     $passed++
 
-    Write-Host "Development portable packaging tests passed: $passed/6"
+    Write-Host "Development portable packaging tests passed: $passed/7"
 }
 finally {
     if (Test-Path -LiteralPath $dirtyMarker -PathType Leaf) {

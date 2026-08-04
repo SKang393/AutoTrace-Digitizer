@@ -52,17 +52,20 @@ public sealed class ScreenshotSmokeTests
         var workspace = new ManualPreviewWorkspaceService();
         Assert.HasCount(0, workspace.CreateWorkspace());
         Assert.IsFalse(workspace.UsesFakeGraphData);
-        var viewModel = new MainWindowViewModel(
-            workspace,
-            new LocalizationService(new ResourceDictionary()));
+        var localization = new LocalizationService(new ResourceDictionary());
+        var viewModel = new MainWindowViewModel(workspace, localization);
         Assert.IsNull(viewModel.Magnifier.GraphPosition);
         Assert.IsNull(viewModel.Magnifier.NearestDetectionName);
         Assert.IsNull(viewModel.Magnifier.NearestDetectionConfidence);
         Assert.IsFalse(viewModel.Magnifier.IsCrosshairVisible);
         Assert.IsFalse(viewModel.EnhanceCommand.CanExecute(null));
         Assert.IsFalse(viewModel.AutoDetectCommand.CanExecute(null));
-        StringAssert.Contains(viewModel.EnhancementAvailabilityText, "unavailable");
-        StringAssert.Contains(viewModel.AutoDetectionAvailabilityText, "unavailable");
+        Assert.AreEqual(
+            localization.GetString(LocalizationKeys.WorkflowEnhanceUnavailable),
+            viewModel.EnhancementAvailabilityText);
+        Assert.AreEqual(
+            localization.GetString(LocalizationKeys.WorkflowAutoDetectUnavailable),
+            viewModel.AutoDetectionAvailabilityText);
 
         RenderedScreenshot rendered = WpfScreenshotHarness.Render(
             () => CreateManualPreviewWorkspace(viewModel),

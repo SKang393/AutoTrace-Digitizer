@@ -16,7 +16,8 @@ public sealed record EnhancementBenchmarkModel(
     int OutputScale,
     string ArtifactFormat,
     IReadOnlyList<string> Providers,
-    BenchmarkRuntimeCompatibility RuntimeCompatibility);
+    BenchmarkRuntimeCompatibility RuntimeCompatibility,
+    bool LocalAdapterApproved = true);
 
 public sealed record EnhancementBenchmarkCase(
     string CaseId,
@@ -80,29 +81,69 @@ public sealed class EnhancementBenchmarkHarness
                 Vulkan,
                 BenchmarkRuntimeCompatibility.NcnnVulkan)
         });
+    private static readonly IReadOnlyList<EnhancementBenchmarkModel> Goal21Comparison = Array.AsReadOnly(
+        new[]
+        {
+            new EnhancementBenchmarkModel(
+                "realesr-animevideov3",
+                "v0.2.5.0-ncnn-x2",
+                2,
+                2,
+                "ncnn_param_bin",
+                Vulkan,
+                BenchmarkRuntimeCompatibility.NcnnVulkan),
+            new EnhancementBenchmarkModel(
+                "RealESRGAN_x4plus_anime_6B",
+                "v0.2.5.0-ncnn-outscale2",
+                4,
+                2,
+                "ncnn_param_bin",
+                Vulkan,
+                BenchmarkRuntimeCompatibility.NcnnVulkan,
+                LocalAdapterApproved: false)
+        });
 
     public static IReadOnlyList<EnhancementBenchmarkModel> RequiredModels => Required;
+    public static IReadOnlyList<EnhancementBenchmarkModel> Goal21ComparisonModels => Goal21Comparison;
 
     public static IReadOnlyList<EnhancementBenchmarkWorkItem> CreatePlan(
         IEnumerable<EnhancementBenchmarkCase> testCases)
     {
         ArgumentNullException.ThrowIfNull(testCases);
         EnhancementBenchmarkCase[] cases = testCases.ToArray();
+        ValidateCases(cases, nameof(testCases));
+        return CreatePlan(cases, Required);
+    }
+
+    public static IReadOnlyList<EnhancementBenchmarkWorkItem> CreateGoal21ComparisonPlan(
+        IEnumerable<EnhancementBenchmarkCase> testCases)
+    {
+        ArgumentNullException.ThrowIfNull(testCases);
+        EnhancementBenchmarkCase[] cases = testCases.ToArray();
+        ValidateCases(cases, nameof(testCases));
+        return CreatePlan(cases, Goal21Comparison);
+    }
+
+    private static EnhancementBenchmarkWorkItem[] CreatePlan(
+        IEnumerable<EnhancementBenchmarkCase> cases,
+        IEnumerable<EnhancementBenchmarkModel> models) =>
+        models
+            .SelectMany(model => cases.Select(testCase => new EnhancementBenchmarkWorkItem(model, testCase)))
+            .ToArray();
+
+    private static void ValidateCases(EnhancementBenchmarkCase[] cases, string parameterName)
+    {
         if (cases.Length == 0)
         {
-            throw new ArgumentException("A fixed benchmark set is required.", nameof(testCases));
+            throw new ArgumentException("A fixed benchmark set is required.", parameterName);
         }
 
         if (cases.Any(static item => string.IsNullOrWhiteSpace(item.CaseId) ||
                                      string.IsNullOrWhiteSpace(item.InputPath) ||
                                      string.IsNullOrWhiteSpace(item.GroundTruthPath)))
         {
-            throw new ArgumentException("Every benchmark case needs an ID, input, and ground truth path.", nameof(testCases));
+            throw new ArgumentException("Every benchmark case needs an ID, input, and ground truth path.", parameterName);
         }
-
-        return Required
-            .SelectMany(model => cases.Select(testCase => new EnhancementBenchmarkWorkItem(model, testCase)))
-            .ToArray();
     }
 
     public static async Task<IReadOnlyList<EnhancementBenchmarkObservation>> RunAsync(

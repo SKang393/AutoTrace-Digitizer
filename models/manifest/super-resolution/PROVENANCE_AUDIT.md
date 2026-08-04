@@ -192,6 +192,66 @@ Real-ESRGAN-ncnn-vulkan MIT license, Tencent NCNN `LICENSE.txt`, libwebp
 Real-ESRGAN BSD notice covers the selected model payloads, not this runtime
 closure.
 
+## Goal 21 manifest-driven local backend
+
+The Goal 21 adapter probe now reads the exact tracked manifest before creating
+an `IEnhancementService`. It verifies the model notice, executable checksum,
+every parameter and weight checksum, Vulkan provider, runtime model name,
+output scale, model redistribution flag, runtime redistribution status, and
+benchmark approval. Distribution-purpose resolution fails closed. An explicit
+local-evaluation purpose may return a service with a structured warning only
+when the manifest's local scientific-fidelity approval remains true. A failed
+local approval returns `MODEL_RUNTIME_INCOMPATIBLE` without a service.
+
+The primary default remains `realesr-animevideov3` at output scale 2. A
+manifest-driven run on public synthetic case
+`a1b41e74-1808-5dec-99c9-59f4c88f4004` succeeded in 951.9313 ms total and
+880.3792 ms inference time. The output was exactly 2400 x 700 with SHA-256
+`988733f726e21e18cbc6fe17f28ba84ebcc32609a21c61aa237dc32e7b3ef6aa`.
+The source hash was unchanged.
+
+The same official archive contains the secondary
+`RealESRGAN_x4plus_anime_6B` NCNN payload under runtime model name
+`realesrgan-x4plus-anime`. This identity mapping is not inferred from the file
+name. The pinned official Real-ESRGAN anime-model guide names
+`RealESRGAN_x4plus_anime_6B` for PyTorch inference and, in the same usage
+section, directs NCNN users to `-n realesrgan-x4plus-anime`:
+<https://github.com/xinntao/Real-ESRGAN/blob/685d429c81888252bdb10f56c7754baededc3823/docs/anime_model.md#L20-L35>.
+Exact local artifact evidence is:
+
+| File | Bytes | SHA-256 |
+|---|---:|---|
+| `models/realesrgan-x4plus-anime.param` | 30,290 | `2b8fb6e0ae4d2d85704ca08c119a2f5ea40add4f2ecd512eb7f4cd44b6127ed4` |
+| `models/realesrgan-x4plus-anime.bin` | 8,943,500 | `fe01c269cfd10cdef8e018ab66ebe750cf79c7af4d1f9c16c737e1295229bacc` |
+
+Direct output-scale-2 runtime calls succeeded on both fixed seed-393 cases in
+3359.2007 ms and 2286.0098 ms wall time, each producing exact 2400 x 700
+output. The manifest-driven adapter then succeeded on the first case in
+2220.2884 ms total and 2162.4602 ms inference time, with output SHA-256
+`6e6c8b9c022b96cb98f82bddc23e1303a51732ba4d5862dcec044a3cc8efba5d`.
+The source hash was unchanged.
+
+A subsequent private Chandler run invalidated synthetic dimension success as
+compatibility evidence. The 863 x 395 source produced an exact 1726 x 790 PNG
+in 2124.1439 ms, but visual inspection showed that the output was cropped and
+zoomed, losing substantial graph content. The source remained unchanged. The
+failed output SHA-256 is
+`d05e259e69f139d2649aaab8e99f866ccd4092534021612e93650b5048c97e85`.
+The source and output remain private, ignored, and ineligible for Git.
+
+Exact dimensions therefore do not establish scientific fidelity. The
+secondary candidate is rejected for local adapter use and the manifest-driven
+factory fails closed before process invocation. Small-text clarity,
+open-circle preservation, filled-circle preservation, axis and tick clarity,
+detector metrics, hallucinated-structure rate, and peak memory remain
+unmeasured. No quality improvement is claimed. The primary model remains the
+only local default.
+
+Neither local result approves release bundling. The runtime still needs an
+authorized source and maintainer attestation for `vcomp140.dll`, the complete
+Real-ESRGAN-ncnn-vulkan, NCNN, libwebp, and dirent notice closure, CPU fallback
+evidence, and production-quality benchmark approval.
+
 ## Verification method
 
 Artifacts were downloaded from the exact official URLs above into ignored,

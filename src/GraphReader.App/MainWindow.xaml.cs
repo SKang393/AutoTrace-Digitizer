@@ -2,6 +2,9 @@
 // Copyright 2026 Sungwoo Kang
 
 using System.ComponentModel;
+using System.Globalization;
+using System.IO;
+using System.Security;
 using System.Windows;
 using System.Windows.Threading;
 using GraphReader.App.Appearance;
@@ -14,8 +17,13 @@ namespace GraphReader.App;
 
 public partial class MainWindow : Window
 {
+    private const double DefaultInspectorWidth = 390;
+    private const double MaximumInspectorWidth = 800;
+    private const double MinimumInspectorWidth = 340;
+    private const string WindowLayoutFileName = "window-layout.txt";
     private readonly IThemeService? _themeService;
     private readonly DispatcherTimer _autosaveTimer;
+    private readonly string? _windowLayoutPath;
 
     public MainWindow()
         : this((Application.Current as App)?.AvailableThemeService)
@@ -26,6 +34,8 @@ public partial class MainWindow : Window
     {
         _themeService = themeService;
         InitializeComponent();
+        _windowLayoutPath = ResolveWindowLayoutPath();
+        InspectorColumn.Width = new GridLength(ReadInspectorWidth(_windowLayoutPath, DefaultInspectorWidth));
         DataContextChanged += OnDataContextChanged;
         App? application = Application.Current as App;
         DataContext = new MainWindowViewModel(
@@ -70,6 +80,7 @@ public partial class MainWindow : Window
     {
         _ = sender;
         _ = e;
+        WriteInspectorWidth(_windowLayoutPath, InspectorColumn.ActualWidth);
         _autosaveTimer.Stop();
         _autosaveTimer.Tick -= OnAutosaveTimerTick;
         DataContextChanged -= OnDataContextChanged;
@@ -101,5 +112,84 @@ public partial class MainWindow : Window
         {
             await viewModel.HandleCanvasPointAsync(e.ImagePoint);
         }
+    }
+
+    private void OnWindowStateChanged(object? sender, EventArgs e)
+    {
+        _ = sender;
+        _ = e;
+        Dispatcher.BeginInvoke(GraphCanvasHost.RecalculateViewport, DispatcherPriority.Loaded);
+    }
+
+    private void OnFitGraphClick(object sender, RoutedEventArgs e)
+    {
+        _ = sender;
+        _ = e;
+        GraphCanvasHost.ResetView();
+    }
+
+    private void OnResetViewClick(object sender, RoutedEventArgs e)
+    {
+        _ = sender;
+        _ = e;
+        GraphCanvasHost.ResetView();
+    }
+
+    private static double ReadInspectorWidth(string? path, double fallback)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return fallback;
+        }
+
+        try
+        {
+            string value = File.ReadAllText(path).Trim();
+            return double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out double width)
+                && double.IsFinite(width)
+                ? Math.Clamp(width, MinimumInspectorWidth, MaximumInspectorWidth)
+                : fallback;
+        }
+        catch (Exception exception) when (IsExpectedSettingsException(exception))
+        {
+            return fallback;
+        }
+    }
+
+    private static void WriteInspectorWidth(string? path, double width)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !double.IsFinite(width) || width < MinimumInspectorWidth)
+        {
+            return;
+        }
+
+        try
+        {
+            string? directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.WriteAllText(
+                path,
+                Math.Clamp(width, MinimumInspectorWidth, MaximumInspectorWidth)
+                    .ToString("R", CultureInfo.InvariantCulture));
+        }
+        catch (Exception exception) when (IsExpectedSettingsException(exception))
+        {
+            // Layout persistence is intentionally fail-soft and cannot block the workspace.
+        }
+    }
+
+    private static bool IsExpectedSettingsException(Exception exception) =>
+        exception is IOException or UnauthorizedAccessException or SecurityException or ArgumentException or NotSupportedException;
+
+    private static string? ResolveWindowLayoutPath()
+    {
+        string? settingsRoot = (Application.Current as App)?.ApplicationPaths?.SettingsRoot;
+        return string.IsNullOrWhiteSpace(settingsRoot)
+            ? null
+            : Path.Combine(settingsRoot, WindowLayoutFileName);
     }
 }

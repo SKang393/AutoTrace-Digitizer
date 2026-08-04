@@ -17,11 +17,25 @@ public static class LocalizationKeys
     public const string WorkflowReviewToolTip = "Workflow.Review.ToolTip";
     public const string WorkflowExportToolTip = "Workflow.Export.ToolTip";
     public const string WorkflowEnhanceUnavailable = "Workflow.Enhance.Unavailable";
+    public const string WorkflowEnhanceExperimental = "Workflow.Enhance.Experimental";
     public const string WorkflowAutoDetectUnavailable = "Workflow.AutoDetect.Unavailable";
     public const string ApplicationPathsUnavailable = "Errors.ApplicationPathsUnavailable";
     public const string ApplicationDataNotWritable = "Errors.ApplicationDataNotWritable";
     public const string PortableDataNotWritable = "Errors.PortableDataNotWritable";
     public const string ProductionWorkflowUnavailable = "Errors.ProductionWorkflowUnavailable";
+    public const string EnhancementConfigurationInvalid = "Errors.EnhancementConfigurationInvalid";
+    public const string EnhancementModelIncompatible = "Errors.EnhancementModelIncompatible";
+    public const string EnhancementRuntimeUnavailable = "Errors.EnhancementRuntimeUnavailable";
+    public const string EnhancementRuntimeChecksumMismatch = "Errors.EnhancementRuntimeChecksumMismatch";
+    public const string EnhancementRedistributionBlocked = "Errors.EnhancementRedistributionBlocked";
+    public const string EnhancementStorageUnavailable = "Errors.EnhancementStorageUnavailable";
+    public const string EnhancementExecutionFailed = "Errors.EnhancementExecutionFailed";
+    public const string ModelManifestNotFound = "Errors.ModelManifestNotFound";
+    public const string ModelManifestInvalid = "Errors.ModelManifestInvalid";
+    public const string ModelNoticeNotFound = "Errors.ModelNoticeNotFound";
+    public const string ModelNotFound = "Errors.ModelNotFound";
+    public const string ModelChecksumMismatch = "Errors.ModelChecksumMismatch";
+    public const string EnhancementLocalEvaluationOnly = "Warnings.EnhancementLocalEvaluationOnly";
     public const string PreviewDevelopment = "Preview.Development";
     public const string PreviewVersion = "Preview.Version";
     public const string PreviewCommit = "Preview.Commit";
@@ -35,6 +49,7 @@ public static class LocalizationKeys
     public const string ProjectSaveAs = "Project.SaveAs";
     public const string ProjectRecover = "Project.Recover";
     public const string ProjectCloseTab = "Project.CloseTab";
+    public const string ProjectCloseDirtyBlocked = "Project.CloseDirtyBlocked";
     public const string ManualTitle = "Manual.Title";
     public const string ManualInstruction = "Manual.Instruction";
     public const string ManualCalibration = "Manual.Calibration";
@@ -45,7 +60,10 @@ public static class LocalizationKeys
     public const string ManualSeriesFill = "Manual.SeriesFill";
     public const string ManualSeriesRole = "Manual.SeriesRole";
     public const string ManualCreateSeries = "Manual.CreateSeries";
+    public const string ManualEditSeries = "Manual.EditSeries";
     public const string ManualAddPoint = "Manual.AddPoint";
+    public const string ManualAddFilledPoint = "Manual.AddFilledPoint";
+    public const string ManualAddOpenPoint = "Manual.AddOpenPoint";
     public const string ManualMovePoint = "Manual.MovePoint";
     public const string ManualDeletePoint = "Manual.DeletePoint";
     public const string ManualPhaseCode = "Manual.PhaseCode";
@@ -106,6 +124,7 @@ public static class LocalizationKeys
     public const string StatusExportedFormat = "Status.ExportedFormat";
     public const string StatusCancelled = "Status.Cancelled";
     public const string StatusManualEditRejectedFormat = "Status.ManualEditRejectedFormat";
+    public const string StatusEnhancementReadyFormat = "Status.EnhancementReadyFormat";
     public const string DialogGraphImages = "Dialog.GraphImages";
     public const string DialogAllFiles = "Dialog.AllFiles";
     public const string DialogProjectFiles = "Dialog.ProjectFiles";
@@ -119,6 +138,7 @@ public static class LocalizationKeys
     public const string CanvasZoomIn = "Canvas.ZoomIn";
     public const string CanvasZoomOut = "Canvas.ZoomOut";
     public const string CanvasFit = "Canvas.Fit";
+    public const string CanvasResetView = "Canvas.ResetView";
     public const string GraphCanvasAutomationName = "GraphCanvas.AutomationName";
     public const string GraphCanvasEmptyState = "GraphCanvas.EmptyState";
     public const string GraphCanvasPhaseOverlayAutomationName =
@@ -129,6 +149,7 @@ public static class LocalizationKeys
     public const string MagnifierTitle = "Magnifier.Title";
     public const string MagnifierOriginal = "Magnifier.Original";
     public const string MagnifierEnhanced = "Magnifier.Enhanced";
+    public const string EnhancementComparison = "Enhancement.Comparison";
     public const string MagnifierImageModeGroupName = "Magnifier.ImageMode.GroupName";
     public const string MagnifierImageModeOriginal = "Magnifier.ImageMode.Original";
     public const string MagnifierImageModeEnhanced = "Magnifier.ImageMode.Enhanced";
@@ -178,11 +199,25 @@ public static class LocalizationKeys
         WorkflowReviewToolTip,
         WorkflowExportToolTip,
         WorkflowEnhanceUnavailable,
+        WorkflowEnhanceExperimental,
         WorkflowAutoDetectUnavailable,
         ApplicationPathsUnavailable,
         ApplicationDataNotWritable,
         PortableDataNotWritable,
         ProductionWorkflowUnavailable,
+        EnhancementConfigurationInvalid,
+        EnhancementModelIncompatible,
+        EnhancementRuntimeUnavailable,
+        EnhancementRuntimeChecksumMismatch,
+        EnhancementRedistributionBlocked,
+        EnhancementStorageUnavailable,
+        EnhancementExecutionFailed,
+        ModelManifestNotFound,
+        ModelManifestInvalid,
+        ModelNoticeNotFound,
+        ModelNotFound,
+        ModelChecksumMismatch,
+        EnhancementLocalEvaluationOnly,
         PreviewDevelopment,
         PreviewVersion,
         PreviewCommit,
@@ -196,6 +231,7 @@ public static class LocalizationKeys
         ProjectSaveAs,
         ProjectRecover,
         ProjectCloseTab,
+        ProjectCloseDirtyBlocked,
         ManualTitle,
         ManualInstruction,
         ManualCalibration,
@@ -206,7 +242,10 @@ public static class LocalizationKeys
         ManualSeriesFill,
         ManualSeriesRole,
         ManualCreateSeries,
+        ManualEditSeries,
         ManualAddPoint,
+        ManualAddFilledPoint,
+        ManualAddOpenPoint,
         ManualMovePoint,
         ManualDeletePoint,
         ManualPhaseCode,
@@ -267,6 +306,7 @@ public static class LocalizationKeys
         StatusExportedFormat,
         StatusCancelled,
         StatusManualEditRejectedFormat,
+        StatusEnhancementReadyFormat,
         DialogGraphImages,
         DialogAllFiles,
         DialogProjectFiles,
@@ -280,6 +320,7 @@ public static class LocalizationKeys
         CanvasZoomIn,
         CanvasZoomOut,
         CanvasFit,
+        CanvasResetView,
         GraphCanvasAutomationName,
         GraphCanvasEmptyState,
         GraphCanvasPhaseOverlayAutomationName,
@@ -288,6 +329,7 @@ public static class LocalizationKeys
         MagnifierTitle,
         MagnifierOriginal,
         MagnifierEnhanced,
+        EnhancementComparison,
         MagnifierImageModeGroupName,
         MagnifierImageModeOriginal,
         MagnifierImageModeEnhanced,
