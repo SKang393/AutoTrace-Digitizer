@@ -13,9 +13,14 @@
   <ItemGroup>
     <ProjectReference Include="..\GraphReader.Domain\GraphReader.Domain.csproj" />
     <ProjectReference Include="..\GraphReader.Imaging\GraphReader.Imaging.csproj" />
+    <ProjectReference Include="..\GraphReader.Pdf\GraphReader.Pdf.csproj" />
     <ProjectReference Include="..\GraphReader.Axis\GraphReader.Axis.csproj" />
+    <ProjectReference Include="..\GraphReader.Ocr\GraphReader.Ocr.csproj" />
+    <ProjectReference Include="..\GraphReader.Markers\GraphReader.Markers.csproj" />
+    <ProjectReference Include="..\GraphReader.Legends\GraphReader.Legends.csproj" />
     <ProjectReference Include="..\GraphReader.Phases\GraphReader.Phases.csproj" />
     <ProjectReference Include="..\GraphReader.Export\GraphReader.Export.csproj" />
+    <ProjectReference Include="..\GraphReader.Inference\GraphReader.Inference.csproj" />
     <ProjectReference Include="..\GraphReader.SuperResolution\GraphReader.SuperResolution.csproj" />
   </ItemGroup>
 </Project>
