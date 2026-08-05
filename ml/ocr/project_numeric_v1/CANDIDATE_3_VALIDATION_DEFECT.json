@@ -1,0 +1,28 @@
+{
+  "candidate_id": "candidate-2",
+  "checkpoint_sha256": "5ba4da69d0a3b229ef55dae29e1d64d4b61ebfbe361114a027189f50ecbe0b45",
+  "decision": "rejected",
+  "evaluation_scope": "validation-only selection evidence for candidate-3",
+  "marker_exclusion_accuracy": 1.0,
+  "report_sha256": "5a29eb78d29e5ada811da12cd27e6456ccb3bb172766aec8a6a20da3c0b5cfa6",
+  "role_accuracy": 0.821875,
+  "sealed_metrics_opened": false,
+  "selection": {
+    "changed_factor": "recognizer architecture",
+    "reason": "The renderer change improved CER and role accuracy but exact match remained 0.34375. Persistent omissions and substitutions across every label case show that one global bottleneck does not preserve ordered local glyph evidence.",
+    "sealed_results_used": false
+  },
+  "training_time_ms": 114661.40760001144,
+  "validation_case_exact_match": {
+    "decimal": 0.296875,
+    "decimal_percentage": 0.296875,
+    "integer": 0.234375,
+    "l_one_ambiguity": 0.5,
+    "negative": 0.328125,
+    "negative_decimal": 0.25,
+    "o_zero_ambiguity": 0.546875,
+    "percentage": 0.296875
+  },
+  "validation_character_error_rate": 0.37801047120418846,
+  "validation_exact_match": 0.34375
+}
