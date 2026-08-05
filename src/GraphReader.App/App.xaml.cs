@@ -15,6 +15,7 @@ namespace GraphReader.App;
 public partial class App : Application, IDisposable
 {
     private ThemeService? _themeService;
+    private ProductionInferenceRuntimeHost? _inferenceRuntimeHost;
 
     public IThemeService ThemeService =>
         _themeService ?? throw new InvalidOperationException("The application theme service is not initialized.");
@@ -50,6 +51,7 @@ public partial class App : Application, IDisposable
             ApplicationPaths,
             cancellationToken: CancellationToken.None);
         WorkspaceService = composition.WorkspaceService;
+        _inferenceRuntimeHost = composition.InferenceRuntimeHost;
         WorkflowStartupError = composition.StartupError;
         StartupErrorMessageKey = StartupError?.UserMessageKey ?? WorkflowStartupError?.UserMessageKey;
 
@@ -103,6 +105,12 @@ public partial class App : Application, IDisposable
 
     public void Dispose()
     {
+        ProductionInferenceRuntimeHost? inferenceRuntimeHost = _inferenceRuntimeHost;
+        _inferenceRuntimeHost = null;
+        if (inferenceRuntimeHost is not null)
+        {
+            inferenceRuntimeHost.DisposeAsync().AsTask().GetAwaiter().GetResult();
+        }
         _themeService?.Dispose();
         _themeService = null;
         GC.SuppressFinalize(this);

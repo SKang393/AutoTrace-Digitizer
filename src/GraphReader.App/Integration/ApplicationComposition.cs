@@ -9,6 +9,7 @@ using GraphReader.App.Services;
 using GraphReader.Domain;
 using GraphReader.Export;
 using GraphReader.Imaging;
+using GraphReader.Inference;
 using GraphReader.Pdf;
 using GraphReader.SuperResolution;
 
@@ -17,7 +18,8 @@ namespace GraphReader.App.Integration;
 public sealed record ApplicationCompositionResult(
     WorkflowRuntimeEnvironment Environment,
     IWorkspaceService WorkspaceService,
-    DomainError? StartupError);
+    DomainError? StartupError,
+    ProductionInferenceRuntimeHost? InferenceRuntimeHost = null);
 
 public static class ApplicationComposition
 {
@@ -33,6 +35,9 @@ public static class ApplicationComposition
             environment,
             applicationPaths,
             applicationRoot ?? AppContext.BaseDirectory,
+            environment == WorkflowRuntimeEnvironment.Production
+                ? CapturedUiThreadGuard.CaptureCurrentThread()
+                : null,
             modelAvailability: null,
             runtimeAvailability: null);
 
@@ -42,6 +47,9 @@ public static class ApplicationComposition
         string? applicationRoot = null,
         CancellationToken cancellationToken = default)
     {
+        IUiThreadGuard? uiThreadGuard = environment == WorkflowRuntimeEnvironment.Production
+            ? CapturedUiThreadGuard.CaptureCurrentThread()
+            : null;
         ProductionModelAvailabilitySnapshot? modelAvailability = environment == WorkflowRuntimeEnvironment.Production
             ? await ProductionModelAvailabilityProbe.InspectAsync(
                 applicationPaths?.ModelRoot,
@@ -57,6 +65,7 @@ public static class ApplicationComposition
             environment,
             applicationPaths,
             applicationRoot ?? AppContext.BaseDirectory,
+            uiThreadGuard,
             modelAvailability,
             runtimeAvailability);
     }
@@ -65,6 +74,7 @@ public static class ApplicationComposition
         WorkflowRuntimeEnvironment environment,
         IApplicationPaths? applicationPaths,
         string applicationRoot,
+        IUiThreadGuard? uiThreadGuard,
         ProductionModelAvailabilitySnapshot? modelAvailability,
         ProductionRuntimeAvailabilitySnapshot? runtimeAvailability)
     {
@@ -72,12 +82,19 @@ public static class ApplicationComposition
             CreateLocalEnhancementResolver(applicationPaths);
         (IPdfImportService? PdfImporter, DomainError? Error) pdf =
             CreateReviewedPdfImporter(applicationRoot);
+        DomainResult<ProductionInferenceRuntimeHost>? inference =
+            environment == WorkflowRuntimeEnvironment.Production && applicationPaths is not null
+                ? ProductionInferenceRuntimeFactory.Create(
+                    applicationPaths,
+                    uiThreadGuard ?? CapturedUiThreadGuard.CaptureCurrentThread())
+                : null;
         IReadOnlyList<AutomaticStageStatus> automaticStages =
             ProductionStageAvailabilityRegistry.Create(
                 enhancementResolver is not null,
                 modelAvailability,
                 pdf.PdfImporter is not null,
-                runtimeAvailability);
+                runtimeAvailability,
+                inference?.Value is not null);
         return environment switch
         {
             WorkflowRuntimeEnvironment.Production => CreateProduction(
@@ -85,7 +102,8 @@ public static class ApplicationComposition
                 applicationPaths,
                 enhancementResolver,
                 automaticStages,
-                pdf),
+                pdf,
+                inference),
             WorkflowRuntimeEnvironment.ManualPreview => new ApplicationCompositionResult(
                 environment,
                 new ManualPreviewWorkspaceService(
@@ -106,7 +124,8 @@ public static class ApplicationComposition
         IApplicationPaths? applicationPaths,
         Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver,
         IReadOnlyList<AutomaticStageStatus> automaticStages,
-        (IPdfImportService? PdfImporter, DomainError? Error) pdf)
+        (IPdfImportService? PdfImporter, DomainError? Error) pdf,
+        DomainResult<ProductionInferenceRuntimeHost>? inference)
     {
         var imageImporter = new ImageImportService();
         var exportService = new ExportService();
@@ -117,6 +136,9 @@ public static class ApplicationComposition
             new ProductionWorkflowDetectionStage(panelStore),
             new ProductionWorkflowExportStage(panelStore, exportService));
         var orchestrator = new WorkflowOrchestrator(services);
+        DomainError? inferenceError = inference is { Errors.Count: > 0 }
+            ? inference.Errors[0]
+            : null;
         return new ApplicationCompositionResult(
             environment,
             new ProductionWorkspaceService(
@@ -127,7 +149,8 @@ public static class ApplicationComposition
                 enhancementResolver: enhancementResolver,
                 workflowOrchestrator: orchestrator,
                 panelStore: panelStore),
-            pdf.Error);
+            pdf.Error ?? inferenceError,
+            inference?.Value);
     }
 
     private static Func<CancellationToken, Task<RealEsrganBackendResolution>>? CreateLocalEnhancementResolver(

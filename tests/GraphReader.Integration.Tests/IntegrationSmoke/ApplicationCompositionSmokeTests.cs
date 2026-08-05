@@ -4,6 +4,7 @@
 using GraphReader.App.Integration;
 using GraphReader.App.Integration.Workflow;
 using GraphReader.App.Services;
+using GraphReader.Inference;
 using GraphReader.Pdf;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Security.Cryptography;
@@ -127,6 +128,67 @@ public sealed class ApplicationCompositionSmokeTests
         StringAssert.Contains(
             resolved.Single(stage => stage.Stage == "legends").Explanation,
             "no production legend detection adapter");
+
+        IReadOnlyList<AutomaticStageStatus> missingRuntime = ProductionStageAvailabilityRegistry.Create(
+            localEnhancementConfigured: false,
+            complete,
+            reviewedPdfiumConfigured: true,
+            new ProductionRuntimeAvailabilitySnapshot(
+                true,
+                "Checksum-resolved release-approved OpenCV fixture."),
+            inferenceRuntimeConfigured: false);
+        Assert.AreEqual(
+            AutomaticStageState.Unavailable,
+            missingRuntime.Single(stage => stage.Stage == "ocr").State);
+        Assert.AreEqual(
+            AutomaticStageState.Unavailable,
+            missingRuntime.Single(stage => stage.Stage == "markers").State);
+        StringAssert.Contains(
+            missingRuntime.Single(stage => stage.Stage == "ocr").Explanation,
+            "mandatory CPU fallback");
+    }
+
+    [TestMethod]
+    public async Task ProductionComposesLazyBoundedOnnxRuntimeWithCpuFallback()
+    {
+        string root = Path.Combine(
+            Path.GetTempPath(),
+            "GraphReader.ApplicationComposition.Inference",
+            Guid.NewGuid().ToString("N"));
+        string modelRoot = Path.Combine(root, "models");
+        Directory.CreateDirectory(modelRoot);
+        ProductionInferenceRuntimeHost? host = null;
+        try
+        {
+            var paths = new ModelRootApplicationPaths(modelRoot);
+            ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+                WorkflowRuntimeEnvironment.Production,
+                paths,
+                applicationRoot: root,
+                cancellationToken: CancellationToken.None);
+
+            host = composition.InferenceRuntimeHost;
+            Assert.IsNotNull(host);
+            Assert.IsFalse(host.IsInitialized);
+            Assert.AreEqual(ProductionInferenceRuntimeHost.DefaultQueueCapacity, host.QueueCapacity);
+            Assert.AreEqual(ProductionInferenceRuntimeHost.DefaultWorkerCount, host.WorkerCount);
+            Assert.AreEqual(InferenceProvider.Cpu, host.ProviderOrder[^1]);
+            Assert.IsTrue(host.CpuThreadConfiguration.IntraOperationThreads >= 1);
+            Assert.IsTrue(
+                host.CacheRoot.StartsWith(Path.GetFullPath(paths.CacheRoot), StringComparison.OrdinalIgnoreCase));
+
+            _ = host.Runtime;
+            Assert.IsTrue(host.IsInitialized);
+            Assert.IsTrue(Directory.Exists(host.CacheRoot));
+        }
+        finally
+        {
+            if (host is not null)
+            {
+                await host.DisposeAsync();
+            }
+            Directory.Delete(root, recursive: true);
+        }
     }
 
     [TestMethod]

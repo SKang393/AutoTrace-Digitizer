@@ -16,15 +16,18 @@ public static class ProductionStageAvailabilityRegistry
         bool localEnhancementConfigured,
         ProductionModelAvailabilitySnapshot? modelAvailability = null,
         bool reviewedPdfiumConfigured = false,
-        ProductionRuntimeAvailabilitySnapshot? runtimeAvailability = null)
+        ProductionRuntimeAvailabilitySnapshot? runtimeAvailability = null,
+        bool inferenceRuntimeConfigured = true)
     {
         modelAvailability ??= ProductionModelAvailabilitySnapshot.Missing(
             "No production-model-index.json is installed in the application model root.");
         runtimeAvailability ??= ProductionRuntimeAvailabilitySnapshot.Missing(
             "No release-approved OpenCV runtime evidence is installed in the application root.");
         IReadOnlySet<string> approvedTasks = modelAvailability.ApprovedCpuTasks;
-        bool ocrApproved = HasTasks(approvedTasks, "ocr_detection", "ocr_recognition");
-        bool markersApproved = HasTasks(approvedTasks, "marker_center", "marker_classifier");
+        bool ocrModelsApproved = HasTasks(approvedTasks, "ocr_detection", "ocr_recognition");
+        bool markerModelsApproved = HasTasks(approvedTasks, "marker_center", "marker_classifier");
+        bool ocrApproved = inferenceRuntimeConfigured && ocrModelsApproved;
+        bool markersApproved = inferenceRuntimeConfigured && markerModelsApproved;
         string pdfEvidence = reviewedPdfiumConfigured
             ? "A checksum-bound reviewed PDFium renderer is configured for PDF import."
             : "No checksum-bound reviewed PDFium approval is configured; scanned-PDF rendering remains unavailable.";
@@ -56,7 +59,9 @@ public static class ProductionStageAvailabilityRegistry
             : new AutomaticStageStatus(
                 "ocr",
                 AutomaticStageState.Unavailable,
-                $"OCR requires checksum-resolved CPU-approved ocr_detection and ocr_recognition payloads. Missing: {MissingTasks(approvedTasks, "ocr_detection", "ocr_recognition")}. {modelAvailability.Evidence}"),
+                ocrModelsApproved
+                    ? "OCR models are approved, but the bounded local ONNX Runtime with mandatory CPU fallback is unavailable."
+                    : $"OCR requires checksum-resolved CPU-approved ocr_detection and ocr_recognition payloads. Missing: {MissingTasks(approvedTasks, "ocr_detection", "ocr_recognition")}. {modelAvailability.Evidence}"),
         markersApproved
             ? new AutomaticStageStatus(
                 "markers",
@@ -65,7 +70,9 @@ public static class ProductionStageAvailabilityRegistry
             : new AutomaticStageStatus(
                 "markers",
                 AutomaticStageState.Unavailable,
-                $"Markers require checksum-resolved CPU-approved marker_center and marker_classifier payloads. Missing: {MissingTasks(approvedTasks, "marker_center", "marker_classifier")}. {modelAvailability.Evidence}"),
+                markerModelsApproved
+                    ? "Marker models are approved, but the bounded local ONNX Runtime with mandatory CPU fallback is unavailable."
+                    : $"Markers require checksum-resolved CPU-approved marker_center and marker_classifier payloads. Missing: {MissingTasks(approvedTasks, "marker_center", "marker_classifier")}. {modelAvailability.Evidence}"),
         new(
             "legends",
             AutomaticStageState.Unavailable,
