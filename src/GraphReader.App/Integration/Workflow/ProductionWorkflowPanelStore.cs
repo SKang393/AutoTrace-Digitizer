@@ -49,13 +49,18 @@ public sealed record ProductionReviewProjectionResult(
 
 public sealed class ProductionWorkflowStageException : InvalidOperationException
 {
-    public ProductionWorkflowStageException(ProductionWorkflowFailure failure)
+    public ProductionWorkflowStageException(
+        ProductionWorkflowFailure failure,
+        IEnumerable<WorkflowVisionEnvelope>? completedEvidence = null)
         : base((failure ?? throw new ArgumentNullException(nameof(failure))).TechnicalMessage)
     {
         Failure = failure;
+        CompletedEvidence = Array.AsReadOnly((completedEvidence ?? []).ToArray());
     }
 
     public ProductionWorkflowFailure Failure { get; }
+
+    public IReadOnlyList<WorkflowVisionEnvelope> CompletedEvidence { get; }
 }
 
 public sealed class ProductionPanelEvidence

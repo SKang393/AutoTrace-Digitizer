@@ -9,8 +9,10 @@ using GraphReader.App.Integration.Workflow;
 using GraphReader.App.Services;
 using GraphReader.App.ViewModels;
 using Axis = GraphReader.Axis;
+using LegendReasoning = GraphReader.Legends;
 using MarkerClassification = GraphReader.Markers.Classification;
 using MarkerDetection = GraphReader.Markers.Detection;
+using PhaseReasoning = GraphReader.Phases;
 using GraphReader.Domain;
 using GraphReader.Export;
 using GraphReader.Imaging;
@@ -492,6 +494,184 @@ public sealed class ProductionWorkflowStagesTests
             ProductionWorkflowFailureCodes.DetectionEvidenceRejected,
             invalidFrameException.Failure.Code);
         Assert.AreEqual(0, invalidFrameService.CallCount);
+    }
+
+    [TestMethod]
+    public async Task DeterministicSemanticAdaptersRetainIdentityAndRemainDependencyGated()
+    {
+        byte[] encoded = CreateAxisPng();
+        string sha256 = Convert.ToHexStringLower(SHA256.HashData(encoded));
+        Guid projectId = Guid.Parse("10000000-0000-0000-0000-000000000009");
+        Guid sourceId = Guid.Parse("20000000-0000-0000-0000-000000000009");
+        Guid panelId = Guid.Parse("30000000-0000-0000-0000-000000000009");
+        Guid runId = Guid.Parse("40000000-0000-0000-0000-000000000009");
+        var original = new WorkflowImageEvidence(
+            "memory:semantic.png",
+            sha256,
+            width: 96,
+            height: 72,
+            WorkflowImageVariant.Original);
+        var imported = new WorkflowImportedPanel(panelId, sourceId, "semantic.png", original);
+        var request = new ProductionWorkflowDetectionRequest(
+            new WorkflowPreparedPanel(imported, original, enhanced: null),
+            original,
+            WorkflowImageVariant.Original,
+            runId,
+            projectId,
+            encoded);
+
+        var legendRequest = new LegendReasoning.LegendReasoningRequest(
+            projectId.ToString("D"),
+            panelId.ToString("D"),
+            sha256,
+            new LegendReasoning.LegendRectangle(0, 0, 96, 72),
+            new LegendReasoning.LegendRectangle(8, 8, 80, 56),
+            textRegions: [],
+            glyphs: [],
+            series: [],
+            plotMarkers: []);
+        var legendAdapter = new ProductionLegendReasoningAdapter();
+        ProductionLegendReasoningEvidence legendEvidence = await legendAdapter.ResolveAsync(
+            request,
+            legendRequest,
+            CancellationToken.None);
+
+        Assert.AreEqual("legends", legendEvidence.Envelope.Stage);
+        Assert.AreEqual(runId, legendEvidence.Envelope.RunId);
+        Assert.AreEqual(sha256, legendEvidence.Envelope.InputSha256);
+        Assert.AreEqual("original_pixels", legendEvidence.Envelope.CoordinateSpace);
+        Assert.IsNull(legendEvidence.Envelope.Model);
+        Assert.HasCount(0, legendEvidence.Payload.Participants);
+
+        var phaseRequest = new PhaseReasoning.PhaseReasoningRequest(
+            projectId.ToString("D"),
+            panelId.ToString("D"),
+            sha256,
+            new PhaseReasoning.PhaseRectangle(8, 8, 80, 56),
+            segments: [],
+            headings: [],
+            points: [],
+            series: []);
+        var phaseAdapter = new ProductionPhaseReasoningAdapter();
+        ProductionPhaseReasoningEvidence phaseEvidence = await phaseAdapter.ResolveAsync(
+            request,
+            phaseRequest,
+            CancellationToken.None);
+
+        Assert.AreEqual("phases", phaseEvidence.Envelope.Stage);
+        Assert.AreEqual(runId, phaseEvidence.Envelope.RunId);
+        Assert.AreEqual(sha256, phaseEvidence.Envelope.InputSha256);
+        Assert.AreEqual("original_pixels", phaseEvidence.Envelope.CoordinateSpace);
+        Assert.IsNull(phaseEvidence.Envelope.Model);
+        Assert.HasCount(1, phaseEvidence.Payload.Phases);
+        Assert.AreEqual("a", phaseEvidence.Payload.Phases[0].Code);
+
+        var legendStub = new LegendReasoningServiceStub();
+        var unavailableLegend = new ProductionLegendReasoningAdapter(
+            isApproved: false,
+            legendStub);
+        await Assert.ThrowsAsync<ProductionWorkflowStageException>(
+            () => unavailableLegend.ResolveAsync(request, legendRequest, CancellationToken.None));
+        Assert.AreEqual(0, legendStub.CallCount);
+
+        var phaseStub = new PhaseReasoningServiceStub();
+        var unavailablePhase = new ProductionPhaseReasoningAdapter(
+            isApproved: false,
+            phaseStub);
+        await Assert.ThrowsAsync<ProductionWorkflowStageException>(
+            () => unavailablePhase.ResolveAsync(request, phaseRequest, CancellationToken.None));
+        Assert.AreEqual(0, phaseStub.CallCount);
+
+        var unpinnedLegendRequest = new LegendReasoning.LegendReasoningRequest(
+            projectId.ToString("D"),
+            panelId.ToString("D"),
+            sha256,
+            new LegendReasoning.LegendRectangle(0, 0, 96, 72),
+            new LegendReasoning.LegendRectangle(8, 8, 80, 56),
+            textRegions: [],
+            glyphs: [],
+            series: [],
+            plotMarkers: [],
+            options: new LegendReasoning.LegendReasoningOptions { StageVersion = "unreviewed" });
+        await Assert.ThrowsAsync<ProductionWorkflowStageException>(
+            () => legendAdapter.ResolveAsync(request, unpinnedLegendRequest, CancellationToken.None));
+    }
+
+    [TestMethod]
+    public void DetectionEvidenceChainPreservesEarlierStagesWhenLaterStageFails()
+    {
+        byte[] encoded = CreateAxisPng();
+        string sha256 = Convert.ToHexStringLower(SHA256.HashData(encoded));
+        Guid projectId = Guid.Parse("10000000-0000-0000-0000-000000000010");
+        Guid sourceId = Guid.Parse("20000000-0000-0000-0000-000000000010");
+        Guid panelId = Guid.Parse("30000000-0000-0000-0000-000000000010");
+        Guid runId = Guid.Parse("40000000-0000-0000-0000-000000000010");
+        var original = new WorkflowImageEvidence(
+            "memory:evidence-chain.png",
+            sha256,
+            width: 96,
+            height: 72,
+            WorkflowImageVariant.Original);
+        var imported = new WorkflowImportedPanel(panelId, sourceId, "evidence-chain.png", original);
+        var request = new ProductionWorkflowDetectionRequest(
+            new WorkflowPreparedPanel(imported, original, enhanced: null),
+            original,
+            WorkflowImageVariant.Original,
+            runId,
+            projectId,
+            encoded);
+        var axis = new WorkflowVisionEnvelope(
+            1,
+            runId,
+            projectId,
+            panelId,
+            "axis",
+            "1.0.0",
+            sha256,
+            new WorkflowVisionModel("axis-runtime", "1.0.0", new string('d', 64), "cpu"),
+            new WorkflowVisionTiming(1, 0, 1, 2),
+            0.9);
+        var ocr = new WorkflowVisionEnvelope(
+            1,
+            runId,
+            projectId,
+            panelId,
+            "ocr",
+            "1.0.0",
+            sha256,
+            new WorkflowVisionModel("ocr", "1.0.0", new string('e', 64), "cpu"),
+            new WorkflowVisionTiming(1, 2, 1, 4),
+            0.8);
+        var chain = new ProductionDetectionEvidenceChain(request);
+
+        chain.Append(axis);
+        chain.Append(ocr);
+        ProductionWorkflowStageException exception = chain.Reject(new ProductionWorkflowFailure(
+            "MARKERS_FAILED",
+            "Errors.DetectionEvidenceRejected",
+            "Marker stage failed after OCR.",
+            Recoverable: true,
+            "Continue manual review with retained axis and OCR evidence."));
+
+        Assert.HasCount(2, exception.CompletedEvidence);
+        Assert.AreSame(axis, exception.CompletedEvidence[0]);
+        Assert.AreSame(ocr, exception.CompletedEvidence[1]);
+        Assert.AreEqual("MARKERS_FAILED", exception.Failure.Code);
+        Assert.Throws<ArgumentException>(() => chain.Append(axis));
+        Assert.HasCount(2, chain.Snapshot);
+
+        Assert.Throws<ArgumentException>(() => new WorkflowVisionEnvelope(
+            1,
+            runId,
+            projectId,
+            panelId,
+            "markers",
+            "1.0.0",
+            sha256,
+            new WorkflowVisionModel("markers", "1.0.0", new string('f', 64), "fake"),
+            new WorkflowVisionTiming(1, 2, 1, 4),
+            0.8));
+        Assert.HasCount(2, chain.Snapshot);
     }
 
     [TestMethod]
@@ -1545,6 +1725,32 @@ public sealed class ProductionWorkflowStagesTests
                     InferenceProvider.Cpu),
                 null);
             return ValueTask.FromResult(result);
+        }
+    }
+
+    private sealed class LegendReasoningServiceStub : LegendReasoning.ILegendReasoningService
+    {
+        public int CallCount { get; private set; }
+
+        public Task<LegendReasoning.LegendReasoningResult> ResolveAsync(
+            LegendReasoning.LegendReasoningRequest request,
+            CancellationToken cancellationToken)
+        {
+            CallCount++;
+            throw new AssertFailedException("An unapproved legend adapter must not invoke its service.");
+        }
+    }
+
+    private sealed class PhaseReasoningServiceStub : PhaseReasoning.IPhaseReasoningService
+    {
+        public int CallCount { get; private set; }
+
+        public Task<PhaseReasoning.PhaseReasoningResult> ResolveAsync(
+            PhaseReasoning.PhaseReasoningRequest request,
+            CancellationToken cancellationToken)
+        {
+            CallCount++;
+            throw new AssertFailedException("An unapproved phase adapter must not invoke its service.");
         }
     }
 

@@ -67,6 +67,10 @@ public sealed class ApplicationCompositionSmokeTests
             string.Join(',', workspace.AutomaticStages.Select(static stage => stage.Stage)));
         Assert.IsInstanceOfType<IAutomaticWorkspaceService>(workspace);
         Assert.IsNull(workspace.LastAutomaticRun);
+        Assert.IsNotNull(composition.LegendReasoningAdapter);
+        Assert.IsTrue(composition.LegendReasoningAdapter.IsApproved);
+        Assert.IsNotNull(composition.PhaseReasoningAdapter);
+        Assert.IsTrue(composition.PhaseReasoningAdapter.IsApproved);
     }
 
     [TestMethod]

@@ -22,7 +22,9 @@ public sealed record ApplicationCompositionResult(
     ProductionInferenceRuntimeHost? InferenceRuntimeHost = null,
     IProductionAxisGeometryAdapter? AxisGeometryAdapter = null,
     IProductionMarkerCenterAdapter? MarkerCenterAdapter = null,
-    IProductionMarkerClassificationAdapter? MarkerClassificationAdapter = null);
+    IProductionMarkerClassificationAdapter? MarkerClassificationAdapter = null,
+    IProductionLegendReasoningAdapter? LegendReasoningAdapter = null,
+    IProductionPhaseReasoningAdapter? PhaseReasoningAdapter = null);
 
 public static class ApplicationComposition
 {
@@ -96,6 +98,8 @@ public static class ApplicationComposition
             CreateApprovedMarkerCenterAdapter(modelAvailability, inference?.Value);
         (ProductionMarkerClassificationAdapter? Adapter, DomainError? Error) markerClassifier =
             CreateApprovedMarkerClassifierAdapter(modelAvailability, inference?.Value);
+        var legendAdapter = new ProductionLegendReasoningAdapter();
+        var phaseAdapter = new ProductionPhaseReasoningAdapter();
         var approvedAdapterStages = new List<string>();
         var adapterEvidence = new List<string>();
         if (axisAdapter is not null)
@@ -115,6 +119,11 @@ public static class ApplicationComposition
             adapterEvidence.Add(
                 $"Concrete production marker-center component '{markerCenter.Adapter.AdapterId}' is composed; the complete marker workflow adapter remains independently required.");
         }
+
+        approvedAdapterStages.Add("legends");
+        approvedAdapterStages.Add("phases");
+        adapterEvidence.Add(
+            $"Deterministic production semantic adapters '{legendAdapter.AdapterId}' and '{phaseAdapter.AdapterId}' are composed and remain dependency-gated.");
 
         ProductionDetectionAdapterAvailabilitySnapshot? adapterAvailability = adapterEvidence.Count == 0
             ? null
@@ -141,6 +150,8 @@ public static class ApplicationComposition
                 axisAdapter,
                 markerCenter.Adapter,
                 markerClassifier.Adapter,
+                legendAdapter,
+                phaseAdapter,
                 markerCenter.Error ?? markerClassifier.Error),
             WorkflowRuntimeEnvironment.ManualPreview => new ApplicationCompositionResult(
                 environment,
@@ -167,6 +178,8 @@ public static class ApplicationComposition
         IProductionAxisGeometryAdapter? axisAdapter,
         IProductionMarkerCenterAdapter? markerCenterAdapter,
         IProductionMarkerClassificationAdapter? markerClassificationAdapter,
+        IProductionLegendReasoningAdapter? legendReasoningAdapter,
+        IProductionPhaseReasoningAdapter? phaseReasoningAdapter,
         DomainError? markerAdapterError)
     {
         var imageImporter = new ImageImportService();
@@ -195,7 +208,9 @@ public static class ApplicationComposition
             inference?.Value,
             axisAdapter,
             markerCenterAdapter,
-            markerClassificationAdapter);
+            markerClassificationAdapter,
+            legendReasoningAdapter,
+            phaseReasoningAdapter);
     }
 
     private static ProductionAxisGeometryAdapter? CreateApprovedAxisAdapter(
