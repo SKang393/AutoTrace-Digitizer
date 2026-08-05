@@ -142,6 +142,61 @@ public sealed class ProductionWorkflowStagesTests
     }
 
     [TestMethod]
+    public async Task PdfPanelCropProducesImmutableDetectorBytesAndPageProvenance()
+    {
+        using var directory = new TemporaryDirectory();
+        string pdfPath = Path.Combine(directory.Path, "cropped-panel.pdf");
+        byte[] pdfBytes = "%PDF-1.7\n% cropped panel import\n%%EOF"u8.ToArray();
+        await File.WriteAllBytesAsync(pdfPath, pdfBytes);
+        var store = new ProductionWorkflowPanelStore();
+        var stage = new ProductionWorkflowImportStage(
+            store,
+            new ImageImportService(),
+            new PdfWithCroppedDetectorPanel());
+        var request = new WorkflowImportRequest(
+            Guid.Parse("10000000-0000-0000-0000-000000000009"),
+            [new WorkflowSourceRequest(
+                Guid.Parse("20000000-0000-0000-0000-000000000009"),
+                WorkflowSourceKind.Pdf,
+                pdfPath)]);
+        WorkflowImportSnapshot snapshot = await stage.ImportAsync(request, CancellationToken.None);
+        WorkflowImportSnapshot repeated = await stage.ImportAsync(request, CancellationToken.None);
+
+        WorkflowImportedPanel imported = snapshot.Panels.Single();
+        Assert.AreEqual(imported.PanelId, repeated.Panels.Single().PanelId);
+        Assert.HasCount(1, store.PanelIds);
+        ProductionPanelEvidence evidence = store.Get(imported.PanelId);
+        Assert.AreEqual(21, imported.Original.Width);
+        Assert.AreEqual(11, imported.Original.Height);
+        byte[] detectorBytes = evidence.CopyOriginalBytes();
+        Assert.AreEqual(
+            imported.Original.Sha256,
+            Convert.ToHexStringLower(SHA256.HashData(detectorBytes)));
+        using (var stream = new MemoryStream(detectorBytes, writable: false))
+        {
+            BitmapFrame frame = BitmapDecoder.Create(
+                stream,
+                BitmapCreateOptions.PreservePixelFormat,
+                BitmapCacheOption.OnLoad).Frames[0];
+            Assert.AreEqual(21, frame.PixelWidth);
+            Assert.AreEqual(11, frame.PixelHeight);
+        }
+
+        Assert.IsNotNull(evidence.PdfPanelSource);
+        PdfPanelSourceProvenance provenance = evidence.PdfPanelSource;
+        Assert.AreEqual(new PdfRectD(5.2, 4.1, 20.3, 10.2), provenance.RequestedCropInSourcePixels);
+        Assert.AreEqual(new PdfRectD(5, 4, 21, 11), provenance.EncodedCropInSourcePixels);
+        Assert.AreEqual(PdfFigureSourceKind.RenderedPage, provenance.FigureSourceKind);
+        Assert.AreEqual(
+            Convert.ToHexStringLower(SHA256.HashData(pdfBytes)),
+            provenance.DocumentSha256);
+        PdfPointD pagePoint = provenance.MapPanelPixelToPagePoint(new PdfPointD(0, 0));
+        Assert.AreEqual(150d, pagePoint.X, 1e-9);
+        Assert.AreEqual(460d, pagePoint.Y, 1e-9);
+        StringAssert.Contains(imported.Original.Reference, "crop=5,4,21,11");
+    }
+
+    [TestMethod]
     public async Task PrepareUsesOriginalWhenEnhancementAdapterIsNotApproved()
     {
         using var directory = new TemporaryDirectory();
@@ -2404,6 +2459,56 @@ public sealed class ProductionWorkflowStagesTests
                 [],
                 [],
                 new PdfImportTiming(0, 0, 0, 0)));
+        }
+    }
+
+    private sealed class PdfWithCroppedDetectorPanel : IPdfImportService
+    {
+        public Task<PdfImportResult> ImportAsync(PdfImportRequest request, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Guid figureId = Guid.Parse("90000000-0000-0000-0000-000000000011");
+            byte[] encoded = CreateSolidGrayPng(40, 30, 0xd0);
+            var figure = new PdfFigureCandidate(
+                figureId,
+                pageNumber: 1,
+                PdfFigureSourceKind.RenderedPage,
+                embeddedImageId: null,
+                new PdfRectD(0, 0, 40, 30),
+                new PdfRectD(100, 200, 400, 300),
+                sourcePixelWidth: 40,
+                sourcePixelHeight: 30,
+                new ImmutableByteBuffer(encoded),
+                mediaType: "image/png",
+                caption: null,
+                evidence: [],
+                confidence: 1);
+            var panel = new PdfPanelRecord(
+                Guid.Parse("90000000-0000-0000-0000-000000000012"),
+                figureId,
+                pageNumber: 1,
+                order: 0,
+                new PdfRectD(5.2, 4.1, 20.3, 10.2),
+                new PdfRectD(5.2, 4.1, 20.3, 10.2),
+                new PdfRectD(152, 347, 203, 102),
+                participantLabel: null,
+                caption: null,
+                semanticSuggestions: [],
+                evidence: [],
+                confidence: 1);
+            var document = new PdfDocumentSnapshot(
+                new string('b', 64),
+                new PdfDocumentMetadata(null, null, null, null, null, null),
+                []);
+            return Task.FromResult(new PdfImportResult(
+                request.RunId,
+                request.ProjectId,
+                document,
+                [figure],
+                [panel],
+                [],
+                [],
+                new PdfImportTiming(0, 1, 1, 2)));
         }
     }
 

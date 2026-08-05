@@ -28,7 +28,7 @@
       "description": "Born-digital and scanned-PDF panel imports reach the same production detection, review, and export workflow.",
       "status": "blocked",
       "evidence": [],
-      "notes": "The exact reviewed renderer passes local backend execution, but common-publish, clean-machine, and complete production PDF workflow evidence are incomplete."
+      "notes": "The exact reviewed renderer passes local backend execution and a procedural scanned-page import into a real workspace tab, but common-publish, clean-machine, and complete downstream detection, review, and export evidence are incomplete."
     },
     {
       "id": "production-image-batch-cancellation",

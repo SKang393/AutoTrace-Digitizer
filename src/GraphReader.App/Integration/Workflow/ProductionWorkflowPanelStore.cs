@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using GraphReader.Domain;
 using GraphReader.Export;
+using GraphReader.Pdf;
 
 namespace GraphReader.App.Integration.Workflow;
 
@@ -63,6 +64,97 @@ public sealed class ProductionWorkflowStageException : InvalidOperationException
     public IReadOnlyList<WorkflowVisionEnvelope> CompletedEvidence { get; }
 }
 
+public sealed class PdfPanelSourceProvenance : IEquatable<PdfPanelSourceProvenance>
+{
+    public PdfPanelSourceProvenance(
+        string documentSha256,
+        Guid pdfPanelId,
+        Guid figureId,
+        int pageNumber,
+        PdfFigureSourceKind figureSourceKind,
+        PdfRectD requestedCropInSourcePixels,
+        PdfRectD encodedCropInSourcePixels,
+        PdfAffineTransform sourcePixelsToPagePoints)
+    {
+        WorkflowContractGuards.RequireSha256(documentSha256, nameof(documentSha256));
+        if (pdfPanelId == Guid.Empty || figureId == Guid.Empty || pageNumber < 1 ||
+            !requestedCropInSourcePixels.IsValid || !encodedCropInSourcePixels.IsValid ||
+            !ContainsWithinTolerance(encodedCropInSourcePixels, requestedCropInSourcePixels, 0.01d) ||
+            !sourcePixelsToPagePoints.IsInvertible)
+        {
+            throw new ArgumentException("PDF panel source provenance must be finite and complete.");
+        }
+
+        DocumentSha256 = documentSha256.ToLowerInvariant();
+        PdfPanelId = pdfPanelId;
+        FigureId = figureId;
+        PageNumber = pageNumber;
+        FigureSourceKind = figureSourceKind;
+        RequestedCropInSourcePixels = requestedCropInSourcePixels;
+        EncodedCropInSourcePixels = encodedCropInSourcePixels;
+        SourcePixelsToPagePoints = sourcePixelsToPagePoints;
+    }
+
+    public string DocumentSha256 { get; }
+
+    public Guid PdfPanelId { get; }
+
+    public Guid FigureId { get; }
+
+    public int PageNumber { get; }
+
+    public PdfFigureSourceKind FigureSourceKind { get; }
+
+    public PdfRectD RequestedCropInSourcePixels { get; }
+
+    public PdfRectD EncodedCropInSourcePixels { get; }
+
+    public PdfAffineTransform SourcePixelsToPagePoints { get; }
+
+    public PdfPointD MapPanelPixelToPagePoint(PdfPointD panelPixel)
+    {
+        if (!panelPixel.IsFinite || panelPixel.X < 0d || panelPixel.Y < 0d ||
+            panelPixel.X > EncodedCropInSourcePixels.Width ||
+            panelPixel.Y > EncodedCropInSourcePixels.Height)
+        {
+            throw new ArgumentOutOfRangeException(nameof(panelPixel));
+        }
+
+        return SourcePixelsToPagePoints.Transform(new PdfPointD(
+            panelPixel.X + EncodedCropInSourcePixels.X,
+            panelPixel.Y + EncodedCropInSourcePixels.Y));
+    }
+
+    public bool Equals(PdfPanelSourceProvenance? other) =>
+        other is not null &&
+        string.Equals(DocumentSha256, other.DocumentSha256, StringComparison.OrdinalIgnoreCase) &&
+        PdfPanelId == other.PdfPanelId &&
+        FigureId == other.FigureId &&
+        PageNumber == other.PageNumber &&
+        FigureSourceKind == other.FigureSourceKind &&
+        RequestedCropInSourcePixels == other.RequestedCropInSourcePixels &&
+        EncodedCropInSourcePixels == other.EncodedCropInSourcePixels &&
+        SourcePixelsToPagePoints == other.SourcePixelsToPagePoints;
+
+    public override bool Equals(object? obj) => Equals(obj as PdfPanelSourceProvenance);
+
+    public override int GetHashCode() => HashCode.Combine(
+        StringComparer.OrdinalIgnoreCase.GetHashCode(DocumentSha256),
+        PdfPanelId,
+        FigureId,
+        PageNumber,
+        FigureSourceKind,
+        RequestedCropInSourcePixels,
+        EncodedCropInSourcePixels,
+        SourcePixelsToPagePoints);
+
+    private static bool ContainsWithinTolerance(PdfRectD container, PdfRectD value, double tolerance) =>
+        value.X >= container.X - tolerance &&
+        value.Y >= container.Y - tolerance &&
+        value.Right <= container.Right + tolerance &&
+        value.Bottom <= container.Bottom + tolerance;
+}
+
 public sealed class ProductionPanelEvidence
 {
     private readonly byte[] originalBytes;
@@ -77,7 +169,8 @@ public sealed class ProductionPanelEvidence
         byte[]? enhancedBytes = null,
         IEnumerable<WorkflowTransformProvenance>? enhancementTransforms = null,
         IEnumerable<string>? warnings = null,
-        ProductionPanelExportEvidence? exportEvidence = null)
+        ProductionPanelExportEvidence? exportEvidence = null,
+        PdfPanelSourceProvenance? pdfPanelSource = null)
     {
         Panel = panel ?? throw new ArgumentNullException(nameof(panel));
         ArgumentNullException.ThrowIfNull(originalBytes);
@@ -100,6 +193,18 @@ public sealed class ProductionPanelEvidence
         EnhancementTransforms = Freeze(enhancementTransforms ?? []);
         Warnings = Freeze(warnings ?? []);
         ExportEvidence = exportEvidence;
+        if (pdfPanelSource is not null && sourceKind != WorkflowSourceKind.Pdf)
+        {
+            throw new ArgumentException("PDF source provenance is valid only for PDF panels.", nameof(pdfPanelSource));
+        }
+
+        if (pdfPanelSource is not null &&
+            !string.Equals(pdfPanelSource.DocumentSha256, sourceDocumentSha256, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("PDF source provenance must match the retained document checksum.", nameof(pdfPanelSource));
+        }
+
+        PdfPanelSource = pdfPanelSource;
     }
 
     public WorkflowImportedPanel Panel { get; }
@@ -115,6 +220,8 @@ public sealed class ProductionPanelEvidence
     public IReadOnlyList<string> Warnings { get; }
 
     public ProductionPanelExportEvidence? ExportEvidence { get; }
+
+    public PdfPanelSourceProvenance? PdfPanelSource { get; }
 
     public byte[] CopyOriginalBytes() => (byte[])originalBytes.Clone();
 
@@ -134,7 +241,8 @@ public sealed class ProductionPanelEvidence
             preparedEnhancedBytes,
             transforms,
             warnings,
-            ExportEvidence);
+            ExportEvidence,
+            PdfPanelSource);
 
     internal ProductionPanelEvidence WithExportEvidence(ProductionPanelExportEvidence evidence) =>
         new(
@@ -146,7 +254,8 @@ public sealed class ProductionPanelEvidence
             enhancedBytes,
             EnhancementTransforms,
             Warnings,
-            evidence);
+            evidence,
+            PdfPanelSource);
 
     private static void VerifyChecksum(byte[] bytes, string expected, string parameterName)
     {
@@ -340,6 +449,7 @@ public sealed class ProductionWorkflowPanelStore
             left.Panel.Original.Height == right.Panel.Original.Height &&
             string.Equals(left.Panel.Original.Sha256, right.Panel.Original.Sha256, StringComparison.OrdinalIgnoreCase) &&
             string.Equals(left.SourceDocumentSha256, right.SourceDocumentSha256, StringComparison.OrdinalIgnoreCase) &&
+            Equals(left.PdfPanelSource, right.PdfPanelSource) &&
             leftBytes.Length == rightBytes.Length &&
             CryptographicOperations.FixedTimeEquals(leftBytes, rightBytes);
     }

@@ -2,6 +2,7 @@
 // Copyright 2026 Sungwoo Kang
 
 using System.Security.Cryptography;
+using System.Text;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using GraphReader.App.Integration;
@@ -33,9 +34,16 @@ public sealed class PdfWorkspaceImportTests
         var workspace = Assert.IsInstanceOfType<ManualPreviewWorkspaceService>(
             composition.WorkspaceService);
 
-        WorkspaceTabViewModel tab = (await workspace.ImportImagesAsync(
+        IReadOnlyList<WorkspaceTabViewModel> tabs = await workspace.ImportImagesAsync(
             [pdfPath],
-            CancellationToken.None)).Single();
+            CancellationToken.None);
+        Assert.IsTrue(
+            tabs.Count > 0,
+            string.Join(
+                " | ",
+                workspace.LastImportErrors.Select(static error =>
+                    $"{error.Code}:{error.TechnicalMessage}")));
+        WorkspaceTabViewModel tab = tabs.Single();
 
         Assert.IsFalse(workspace.UsesFakeGraphData);
         Assert.IsNotNull(tab.ImageSource);
@@ -105,6 +113,84 @@ public sealed class PdfWorkspaceImportTests
     }
 
     [TestMethod]
+    public async Task ExactReviewedPdfiumRendersScannedPageIntoRealWorkspaceTab()
+    {
+        string? approvalPath = Environment.GetEnvironmentVariable(
+            ApplicationComposition.PdfiumApprovalEnvironmentVariable);
+        if (string.IsNullOrWhiteSpace(approvalPath))
+        {
+            Assert.Inconclusive(
+                $"Set {ApplicationComposition.PdfiumApprovalEnvironmentVariable} to run the exact ignored local scanned-PDF workflow.");
+        }
+
+        using var directory = new TemporaryDirectory();
+        string pdfPath = Path.Combine(directory.Path, "procedural scanned graph.pdf");
+        byte[] pdfBytes = CreateAnnotationScannedPdf();
+        await File.WriteAllBytesAsync(pdfPath, pdfBytes);
+        string sourceSha256 = Convert.ToHexStringLower(SHA256.HashData(pdfBytes));
+        string? previous = Environment.GetEnvironmentVariable(
+            ApplicationComposition.PdfiumApprovalEnvironmentVariable);
+        try
+        {
+            Environment.SetEnvironmentVariable(
+                ApplicationComposition.PdfiumApprovalEnvironmentVariable,
+                approvalPath);
+            ReviewedPdfiumPageRendererBackend backend =
+                ReviewedPdfiumPageRendererBackend.Load(approvalPath);
+            var importer = new PdfImportService(
+                new PdfPigDocumentInspector(),
+                new PanelizationEngine(),
+                backend.CreateRenderingService());
+            PdfImportResult imported = await importer.ImportAsync(
+                new PdfImportRequest(
+                    Guid.Parse("3a08308e-c867-4df7-9184-a6f70a6e7efd"),
+                    Guid.Parse("386d0644-c94a-43ec-b62c-91ebde44014f"),
+                    new ImmutableByteBuffer(pdfBytes),
+                    Path.GetFileName(pdfPath),
+                    Password: null,
+                    new PdfPanelizationOptions()),
+                CancellationToken.None);
+
+            Assert.IsTrue(imported.Succeeded, string.Join(" | ", imported.Failures.Select(static failure => failure.TechnicalMessage)));
+            Assert.IsGreaterThan(0d, imported.Timing.RenderingMilliseconds);
+            Assert.IsNotEmpty(imported.Panels);
+            Assert.IsTrue(imported.Figures.Any(static figure =>
+                figure.SourceKind == PdfFigureSourceKind.RenderedPage));
+
+            ApplicationCompositionResult composition = ApplicationComposition.Create(
+                WorkflowRuntimeEnvironment.ManualPreview,
+                applicationRoot: directory.Path);
+            Assert.IsNull(composition.StartupError);
+            var workspace = Assert.IsInstanceOfType<ManualPreviewWorkspaceService>(
+                composition.WorkspaceService);
+            IReadOnlyList<WorkspaceTabViewModel> tabs = await workspace.ImportImagesAsync(
+                [pdfPath],
+                CancellationToken.None);
+
+            Assert.IsTrue(
+                tabs.Count > 0,
+                string.Join(
+                    " | ",
+                    workspace.LastImportErrors.Select(static error =>
+                        $"{error.Code}:{error.TechnicalMessage}")));
+            Assert.IsTrue(tabs.All(static tab => tab.ImageSource is not null));
+            Assert.IsTrue(tabs.All(static tab => tab.PageNumber == 1));
+            Assert.IsFalse(workspace.UsesFakeGraphData);
+            Assert.IsEmpty(workspace.LastImportErrors);
+            Assert.AreEqual(sourceSha256, workspace.CurrentProject.Sources.Single().Sha256);
+            Assert.AreEqual(
+                sourceSha256,
+                Convert.ToHexStringLower(SHA256.HashData(await File.ReadAllBytesAsync(pdfPath))));
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(
+                ApplicationComposition.PdfiumApprovalEnvironmentVariable,
+                previous);
+        }
+    }
+
+    [TestMethod]
     public async Task PdfWithoutConfiguredImporterFailsWithoutAddingTabsOrSources()
     {
         using var directory = new TemporaryDirectory();
@@ -153,6 +239,67 @@ public sealed class PdfWorkspaceImportTests
         using var stream = new MemoryStream();
         encoder.Save(stream);
         return stream.ToArray();
+    }
+
+    private static byte[] CreateAnnotationScannedPdf()
+    {
+        var appearance = new StringBuilder();
+        appearance.Append("q\n1 1 1 rg\n0 0 540 648 re f\n");
+        appearance.Append("0 0 0 RG\n2 w\n60 60 m 500 60 l S\n60 60 m 60 590 l S\n");
+        appearance.Append("1 w\n250 60 m 250 590 l S\n400 60 m 400 590 l S\n");
+        int[] markerX = [90, 125, 160, 195, 230, 275, 310, 345, 380, 425, 460, 490];
+        int[] markerY = [120, 160, 145, 220, 205, 300, 270, 360, 340, 455, 430, 510];
+        appearance.Append("2 w\n90 120 m\n");
+        for (int index = 1; index < markerX.Length; index++)
+        {
+            appearance.Append(markerX[index]).Append(' ').Append(markerY[index]).Append(" l\n");
+        }
+
+        appearance.Append("S\n0 0 0 rg\n");
+        for (int index = 0; index < markerX.Length; index++)
+        {
+            appearance.Append(markerX[index] - 5).Append(' ')
+                .Append(markerY[index] - 5).Append(" 10 10 re f\n");
+        }
+
+        appearance.Append("Q\n");
+        string appearanceStream = appearance.ToString();
+        int appearanceLength = Encoding.ASCII.GetByteCount(appearanceStream);
+        string[] objects =
+        [
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Count 1 /Kids [3 0 R] >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << >> /Annots [4 0 R] >>",
+            "<< /Type /Annot /Subtype /Stamp /Rect [36 72 576 720] /F 4 /AP << /N 5 0 R >> >>",
+            $"<< /Type /XObject /Subtype /Form /FormType 1 /BBox [0 0 540 648] /Resources << >> /Length {appearanceLength} >>\nstream\n{appearanceStream}endstream",
+        ];
+
+        using var output = new MemoryStream();
+        WriteAscii(output, "%PDF-1.7\n% procedural scanned-page workflow fixture\n");
+        long[] offsets = new long[objects.Length + 1];
+        for (int index = 0; index < objects.Length; index++)
+        {
+            offsets[index + 1] = output.Position;
+            WriteAscii(output, $"{index + 1} 0 obj\n{objects[index]}\nendobj\n");
+        }
+
+        long crossReferenceOffset = output.Position;
+        WriteAscii(output, $"xref\n0 {objects.Length + 1}\n0000000000 65535 f \n");
+        for (int index = 1; index < offsets.Length; index++)
+        {
+            WriteAscii(output, $"{offsets[index]:D10} 00000 n \n");
+        }
+
+        WriteAscii(
+            output,
+            $"trailer\n<< /Size {objects.Length + 1} /Root 1 0 R >>\nstartxref\n{crossReferenceOffset}\n%%EOF\n");
+        return output.ToArray();
+    }
+
+    private static void WriteAscii(Stream stream, string value)
+    {
+        byte[] bytes = Encoding.ASCII.GetBytes(value);
+        stream.Write(bytes, 0, bytes.Length);
     }
 
     private static byte[] CreateBornDigitalPdf()

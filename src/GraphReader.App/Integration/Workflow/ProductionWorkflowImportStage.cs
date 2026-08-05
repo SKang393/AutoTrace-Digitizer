@@ -3,6 +3,8 @@
 
 using System.Security.Cryptography;
 using System.IO;
+using System.Windows;
+using System.Windows.Media.Imaging;
 using GraphReader.Imaging;
 using GraphReader.Pdf;
 
@@ -174,18 +176,33 @@ public sealed class ProductionWorkflowImportStage : IWorkflowImportStage
                      .ThenBy(static panel => panel.PanelId))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (!figures.TryGetValue(pdfPanel.FigureId, out PdfFigureCandidate? figure) ||
-                !IsDetectorReadyFullPanel(pdfPanel, figure))
+            if (!figures.TryGetValue(pdfPanel.FigureId, out PdfFigureCandidate? figure))
             {
                 throw Failure(
                     ProductionWorkflowFailureCodes.PdfPanelBytesUnavailable,
                     "Errors.PdfPanelBytesUnavailable",
-                    $"PDF panel '{pdfPanel.PanelId}' has no encoded detector-ready full-panel bytes.",
+                    $"PDF panel '{pdfPanel.PanelId}' does not reference a retained figure.",
                     recoverable: true,
                     "Render or extract the panel through a reviewed local PDF renderer, or import the panel as an image.");
             }
 
-            byte[] encoded = figure.EncodedSource!.ToArray();
+            EncodedPdfPanel detectorPanel;
+            try
+            {
+                detectorPanel = CreateDetectorReadyPanel(pdfPanel, figure);
+            }
+            catch (Exception exception) when (exception is InvalidDataException or IOException or
+                NotSupportedException or FormatException or ArgumentException or OverflowException)
+            {
+                throw Failure(
+                    ProductionWorkflowFailureCodes.PdfPanelBytesUnavailable,
+                    "Errors.PdfPanelBytesUnavailable",
+                    $"PDF panel '{pdfPanel.PanelId}' could not produce detector-ready bytes: {exception.Message}",
+                    recoverable: true,
+                    "Render or extract the panel through a reviewed local PDF renderer, or import the panel as an image.");
+            }
+
+            byte[] encoded = detectorPanel.Bytes;
             string imageSha256 = Convert.ToHexString(SHA256.HashData(encoded)).ToLowerInvariant();
             Guid panelId = ProductionWorkflowPanelStore.CreateStableId(
                 "pdf-panel-v1",
@@ -195,12 +212,14 @@ public sealed class ProductionWorkflowImportStage : IWorkflowImportStage
                 pdfPanel.PageNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 pdfPanel.Order.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 imageSha256);
-            string reference = $"pdf:{Path.GetFullPath(source.Path)}#page={pdfPanel.PageNumber}&panel={panelId:D}";
+            PdfRectD encodedCrop = detectorPanel.EncodedCropInSourcePixels;
+            string reference = FormattableString.Invariant(
+                $"pdf:{Path.GetFullPath(source.Path)}#page={pdfPanel.PageNumber}&panel={panelId:D}&crop={encodedCrop.X:R},{encodedCrop.Y:R},{encodedCrop.Width:R},{encodedCrop.Height:R}");
             var original = new WorkflowImageEvidence(
                 reference,
                 imageSha256,
-                figure.SourcePixelWidth,
-                figure.SourcePixelHeight,
+                detectorPanel.Width,
+                detectorPanel.Height,
                 WorkflowImageVariant.Original);
             var panel = new WorkflowImportedPanel(
                 panelId,
@@ -213,7 +232,16 @@ public sealed class ProductionWorkflowImportStage : IWorkflowImportStage
                 WorkflowSourceKind.Pdf,
                 encoded,
                 documentSha256,
-                warnings: result.Warnings));
+                warnings: result.Warnings,
+                pdfPanelSource: new PdfPanelSourceProvenance(
+                    documentSha256,
+                    pdfPanel.PanelId,
+                    figure.FigureId,
+                    pdfPanel.PageNumber,
+                    figure.SourceKind,
+                    pdfPanel.CropInSourcePixels,
+                    detectorPanel.EncodedCropInSourcePixels,
+                    figure.SourcePixelsToPagePoints)));
         }
 
         if (imported.Count == 0)
@@ -229,23 +257,104 @@ public sealed class ProductionWorkflowImportStage : IWorkflowImportStage
         return imported;
     }
 
-    private static bool IsDetectorReadyFullPanel(PdfPanelRecord panel, PdfFigureCandidate figure)
+    private static EncodedPdfPanel CreateDetectorReadyPanel(
+        PdfPanelRecord panel,
+        PdfFigureCandidate figure)
     {
         if (figure.EncodedSource is null || figure.EncodedSource.Length == 0 ||
             string.IsNullOrWhiteSpace(figure.MediaType) ||
             !DetectorReadyMediaTypes.Contains(figure.MediaType) ||
             figure.SourcePixelWidth <= 0 || figure.SourcePixelHeight <= 0)
         {
-            return false;
+            throw new InvalidDataException("The referenced figure has no supported encoded source image.");
         }
 
         const double tolerance = 0.01d;
         PdfRectD crop = panel.CropInSourcePixels;
-        return Math.Abs(crop.X) <= tolerance &&
-            Math.Abs(crop.Y) <= tolerance &&
-            Math.Abs(crop.Width - figure.SourcePixelWidth) <= tolerance &&
-            Math.Abs(crop.Height - figure.SourcePixelHeight) <= tolerance;
+        if (!crop.IsValid || crop.X < -tolerance || crop.Y < -tolerance ||
+            crop.Right > figure.SourcePixelWidth + tolerance ||
+            crop.Bottom > figure.SourcePixelHeight + tolerance)
+        {
+            throw new InvalidDataException("The requested panel crop is outside the encoded figure bounds.");
+        }
+
+        double normalizedLeft = Math.Clamp(crop.X, 0d, figure.SourcePixelWidth);
+        double normalizedTop = Math.Clamp(crop.Y, 0d, figure.SourcePixelHeight);
+        double normalizedRight = Math.Clamp(crop.Right, 0d, figure.SourcePixelWidth);
+        double normalizedBottom = Math.Clamp(crop.Bottom, 0d, figure.SourcePixelHeight);
+        var normalizedCrop = new PdfRectD(
+            normalizedLeft,
+            normalizedTop,
+            normalizedRight - normalizedLeft,
+            normalizedBottom - normalizedTop);
+        bool fullPanel = Math.Abs(normalizedCrop.X) <= tolerance &&
+            Math.Abs(normalizedCrop.Y) <= tolerance &&
+            Math.Abs(normalizedCrop.Width - figure.SourcePixelWidth) <= tolerance &&
+            Math.Abs(normalizedCrop.Height - figure.SourcePixelHeight) <= tolerance;
+        if (fullPanel)
+        {
+            return new EncodedPdfPanel(
+                figure.EncodedSource.ToArray(),
+                figure.SourcePixelWidth,
+                figure.SourcePixelHeight,
+                new PdfRectD(0d, 0d, figure.SourcePixelWidth, figure.SourcePixelHeight));
+        }
+
+        if (!IsAxisAlignedCrop(panel.CropInSourcePixelsQuadrilateral, crop, tolerance))
+        {
+            throw new NotSupportedException(
+                "The panel crop requires a non-axis-aligned transform that has not been applied.");
+        }
+
+        int left = checked((int)Math.Floor(normalizedCrop.X));
+        int top = checked((int)Math.Floor(normalizedCrop.Y));
+        int right = checked((int)Math.Ceiling(normalizedCrop.Right));
+        int bottom = checked((int)Math.Ceiling(normalizedCrop.Bottom));
+        int width = checked(right - left);
+        int height = checked(bottom - top);
+        if (width <= 0 || height <= 0)
+        {
+            throw new InvalidDataException("The panel crop rounds to an empty detector image.");
+        }
+
+        byte[] sourceBytes = figure.EncodedSource.ToArray();
+        using var input = new MemoryStream(sourceBytes, writable: false);
+        BitmapDecoder decoder = BitmapDecoder.Create(
+            input,
+            BitmapCreateOptions.PreservePixelFormat,
+            BitmapCacheOption.OnLoad);
+        BitmapFrame source = decoder.Frames[0];
+        if (source.PixelWidth != figure.SourcePixelWidth || source.PixelHeight != figure.SourcePixelHeight)
+        {
+            throw new InvalidDataException(
+                "The encoded figure dimensions do not match the retained PDF figure metadata.");
+        }
+
+        var cropped = new CroppedBitmap(source, new Int32Rect(left, top, width, height));
+        cropped.Freeze();
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(cropped));
+        using var output = new MemoryStream();
+        encoder.Save(output);
+        return new EncodedPdfPanel(
+            output.ToArray(),
+            width,
+            height,
+            new PdfRectD(left, top, width, height));
     }
+
+    private static bool IsAxisAlignedCrop(
+        PdfQuadrilateralD quadrilateral,
+        PdfRectD crop,
+        double tolerance) =>
+        Math.Abs(quadrilateral.TopLeft.X - crop.X) <= tolerance &&
+        Math.Abs(quadrilateral.TopLeft.Y - crop.Y) <= tolerance &&
+        Math.Abs(quadrilateral.TopRight.X - crop.Right) <= tolerance &&
+        Math.Abs(quadrilateral.TopRight.Y - crop.Y) <= tolerance &&
+        Math.Abs(quadrilateral.BottomRight.X - crop.Right) <= tolerance &&
+        Math.Abs(quadrilateral.BottomRight.Y - crop.Bottom) <= tolerance &&
+        Math.Abs(quadrilateral.BottomLeft.X - crop.X) <= tolerance &&
+        Math.Abs(quadrilateral.BottomLeft.Y - crop.Bottom) <= tolerance;
 
     private static ProductionWorkflowStageException Failure(
         string code,
@@ -259,4 +368,10 @@ public sealed class ProductionWorkflowImportStage : IWorkflowImportStage
             technicalMessage,
             recoverable,
             suggestedAction));
+
+    private sealed record EncodedPdfPanel(
+        byte[] Bytes,
+        int Width,
+        int Height,
+        PdfRectD EncodedCropInSourcePixels);
 }
