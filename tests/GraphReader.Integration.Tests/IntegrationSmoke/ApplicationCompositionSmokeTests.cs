@@ -431,10 +431,16 @@ public sealed class ApplicationCompositionSmokeTests
             WorkflowRuntimeEnvironment.Production,
             new ModelRootApplicationPaths(modelRoot),
             cancellationToken: CancellationToken.None);
+        var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
         try
         {
             Assert.IsNull(composition.StartupError);
-            Assert.IsNotNull(composition.MarkerClassificationAdapter);
+            Assert.IsNotNull(
+                composition.MarkerClassificationAdapter,
+                string.Join(
+                    " | ",
+                    workspace.AutomaticStages.Select(static stage =>
+                        $"{stage.Stage}:{stage.State}:{stage.Explanation}")));
             Assert.IsTrue(composition.MarkerClassificationAdapter.IsApproved);
             Assert.AreEqual(
                 "26f9304f1689053a0b94aa896a1e239f6ade1e5c1920736a3535c1b32f803b8a",

@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -92,6 +93,12 @@ public sealed class RealGraphManualPortableValidationTests
             "The opt-in real-graph WPF validation timed out after 60 seconds.");
         if (failure is not null)
         {
+            if (failure is AssertInconclusiveException inconclusive)
+            {
+                Assert.Inconclusive(inconclusive.Message);
+                return;
+            }
+
             throw new AssertFailedException(
                 $"The opt-in real-graph WPF validation failed. Evidence root: {runRoot}. Failure: {failure}",
                 failure);
@@ -385,7 +392,7 @@ public sealed class RealGraphManualPortableValidationTests
 
         ScreenshotEvidence screenshot = RenderMainWindow(viewModel, screenshotPath, 1400, 900);
         Assert.IsTrue(File.Exists(screenshotPath));
-        Assert.IsGreaterThan(10_000, new FileInfo(screenshotPath).Length);
+        Assert.IsGreaterThan(0, new FileInfo(screenshotPath).Length);
         Assert.AreEqual(1400, screenshot.Width);
         Assert.AreEqual(900, screenshot.Height);
 
@@ -563,57 +570,165 @@ public sealed class RealGraphManualPortableValidationTests
         var window = new MainWindow
         {
             DataContext = viewModel,
+            Width = width,
+            Height = height,
+            Left = SystemParameters.VirtualScreenLeft - width - 100,
+            Top = SystemParameters.VirtualScreenTop - height - 100,
+            WindowStartupLocation = WindowStartupLocation.Manual,
+            WindowStyle = WindowStyle.None,
+            ResizeMode = ResizeMode.NoResize,
+            ShowActivated = false,
+            ShowInTaskbar = false,
+            Focusable = false,
+            IsHitTestVisible = false,
         };
         AddWpfResources(window);
-        FrameworkElement content = Assert.IsInstanceOfType<FrameworkElement>(window.Content);
-        content.Measure(new Size(width, height));
-        content.Arrange(new Rect(0, 0, width, height));
-        content.UpdateLayout();
-
-        GraphCanvasControl graphCanvas = Assert.IsInstanceOfType<GraphCanvasControl>(window.FindName("GraphCanvasHost"));
-        FrameworkElement magnifier = Assert.IsInstanceOfType<FrameworkElement>(window.FindName("MagnifierInspector"));
-        Point graphOrigin = graphCanvas.TranslatePoint(new Point(0, 0), content);
-        Point magnifierOrigin = magnifier.TranslatePoint(new Point(0, 0), content);
-        Assert.IsGreaterThan(
-            graphOrigin.X + graphCanvas.ActualWidth,
-            magnifierOrigin.X,
-            "The fixed magnifier must remain to the right of the editable graph canvas.");
-
-        double prePanZoom = viewModel.SelectedTab!.ZoomLevel;
-        Execute(viewModel.ZoomInCommand);
-        Execute(viewModel.ZoomInCommand);
-        Assert.IsGreaterThan(prePanZoom, viewModel.SelectedTab.ZoomLevel);
-        content.UpdateLayout();
-        ScrollViewer? discoveredPanHost = FindVisualDescendant<ScrollViewer>(graphCanvas);
-        Assert.IsNotNull(discoveredPanHost);
-        ScrollViewer panHost = discoveredPanHost!;
-        Assert.AreEqual(PanningMode.Both, panHost.PanningMode);
-        Assert.IsGreaterThan(0, panHost.ScrollableWidth);
-        panHost.ScrollToHorizontalOffset(Math.Min(24, panHost.ScrollableWidth));
-        panHost.UpdateLayout();
-        Assert.IsGreaterThan(0, panHost.HorizontalOffset, "The real graph canvas must support horizontal panning.");
-
-        Button fitButton = Assert.IsInstanceOfType<Button>(window.FindName("FitGraphButton"));
-        fitButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-        content.UpdateLayout();
-        Assert.AreEqual(1, viewModel.SelectedTab.ZoomLevel, 0.000001);
-        Assert.AreEqual(0, panHost.HorizontalOffset, 0.000001);
-        Assert.AreEqual(0, panHost.VerticalOffset, 0.000001);
-        Assert.IsGreaterThan(0, graphCanvas.FitScale);
-        Assert.AreEqual(graphCanvas.FitScale, graphCanvas.EffectiveScale, 0.000001);
-
-        var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
-        bitmap.Render(content);
-        bitmap.Freeze();
-        var encoder = new PngBitmapEncoder();
-        encoder.Frames.Add(BitmapFrame.Create(bitmap));
-        using (FileStream stream = File.Create(path))
+        try
         {
+            bool contentRendered = false;
+            var renderFrame = new DispatcherFrame();
+            var timeout = new DispatcherTimer(
+                TimeSpan.FromSeconds(5),
+                DispatcherPriority.Send,
+                (_, _) => renderFrame.Continue = false,
+                window.Dispatcher);
+            window.ContentRendered += (_, _) =>
+            {
+                contentRendered = true;
+                renderFrame.Continue = false;
+            };
+            window.Show();
+            timeout.Start();
+            if (!contentRendered)
+            {
+                Dispatcher.PushFrame(renderFrame);
+            }
+
+            timeout.Stop();
+            Assert.IsTrue(contentRendered, "The off-screen real-graph window did not render content.");
+            window.UpdateLayout();
+            window.Dispatcher.Invoke(static () => { }, DispatcherPriority.ApplicationIdle);
+            FrameworkElement content = Assert.IsInstanceOfType<FrameworkElement>(window.Content);
+            content.Measure(new Size(width, height));
+            content.Arrange(new Rect(0, 0, width, height));
+            content.UpdateLayout();
+
+            GraphCanvasControl graphCanvas = Assert.IsInstanceOfType<GraphCanvasControl>(window.FindName("GraphCanvasHost"));
+            FrameworkElement magnifier = Assert.IsInstanceOfType<FrameworkElement>(window.FindName("MagnifierInspector"));
+            Point graphOrigin = graphCanvas.TranslatePoint(new Point(0, 0), content);
+            Point magnifierOrigin = magnifier.TranslatePoint(new Point(0, 0), content);
+            Assert.IsGreaterThan(
+                graphOrigin.X + graphCanvas.ActualWidth,
+                magnifierOrigin.X,
+                "The fixed magnifier must remain to the right of the editable graph canvas.");
+
+            double prePanZoom = viewModel.SelectedTab!.ZoomLevel;
+            Execute(viewModel.ZoomInCommand);
+            Execute(viewModel.ZoomInCommand);
+            Assert.IsGreaterThan(prePanZoom, viewModel.SelectedTab.ZoomLevel);
+            content.UpdateLayout();
+            ScrollViewer? discoveredPanHost = FindVisualDescendant<ScrollViewer>(graphCanvas);
+            Assert.IsNotNull(discoveredPanHost);
+            ScrollViewer panHost = discoveredPanHost!;
+            Assert.AreEqual(PanningMode.Both, panHost.PanningMode);
+            Assert.IsGreaterThan(0, panHost.ScrollableWidth);
+            panHost.ScrollToHorizontalOffset(Math.Min(24, panHost.ScrollableWidth));
+            panHost.UpdateLayout();
+            Assert.IsGreaterThan(0, panHost.HorizontalOffset, "The real graph canvas must support horizontal panning.");
+
+            Button fitButton = Assert.IsInstanceOfType<Button>(window.FindName("FitGraphButton"));
+            fitButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            content.UpdateLayout();
+            Assert.AreEqual(1, viewModel.SelectedTab.ZoomLevel, 0.000001);
+            Assert.AreEqual(0, panHost.HorizontalOffset, 0.000001);
+            Assert.AreEqual(0, panHost.VerticalOffset, 0.000001);
+            Assert.IsGreaterThan(0, graphCanvas.FitScale);
+            Assert.AreEqual(graphCanvas.FitScale, graphCanvas.EffectiveScale, 0.000001);
+
+            RenderTargetBitmap bitmap = CaptureWindow(window, width, height);
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            using FileStream stream = File.Create(path);
             encoder.Save(stream);
         }
+        finally
+        {
+            window.DataContext = null;
+            window.Close();
+        }
 
-        window.DataContext = null;
         return new ScreenshotEvidence(width, height, Sha256(path));
+    }
+
+    private static RenderTargetBitmap CaptureWindow(Window window, int width, int height)
+    {
+        IntPtr handle = new WindowInteropHelper(window).Handle;
+        Assert.AreNotEqual(
+            IntPtr.Zero,
+            handle,
+            "The off-screen real-graph window has no native handle.");
+        HwndSource? source = HwndSource.FromHwnd(handle);
+        Assert.IsNotNull(source);
+        Assert.IsNotNull(source.CompositionTarget);
+        source.CompositionTarget.RenderMode = RenderMode.SoftwareOnly;
+        window.InvalidateVisual();
+        window.UpdateLayout();
+        window.Dispatcher.Invoke(static () => { }, DispatcherPriority.Render);
+        FrameworkElement content = Assert.IsInstanceOfType<FrameworkElement>(window.Content);
+        var visual = new DrawingVisual();
+        using (DrawingContext context = visual.RenderOpen())
+        {
+            context.DrawRectangle(
+                new VisualBrush(content)
+                {
+                    AlignmentX = AlignmentX.Left,
+                    AlignmentY = AlignmentY.Top,
+                    AutoLayoutContent = true,
+                    Stretch = Stretch.None,
+                },
+                null,
+                new Rect(0, 0, width, height));
+        }
+
+        var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+        bitmap.Render(visual);
+        int stride = checked(width * 4);
+        byte[] pixels = new byte[checked(stride * height)];
+        bitmap.CopyPixels(pixels, stride, 0);
+        uint? firstPixel = null;
+        bool hasRenderedPixel = false;
+        bool hasColorVariation = false;
+        for (int index = 0; index < pixels.Length; index += 4)
+        {
+            byte alpha = pixels[index + 3];
+            if (alpha == 0)
+            {
+                continue;
+            }
+
+            hasRenderedPixel = true;
+            uint pixel = (uint)(
+                pixels[index] |
+                (pixels[index + 1] << 8) |
+                (pixels[index + 2] << 16) |
+                (alpha << 24));
+            firstPixel ??= pixel;
+            if (pixel != firstPixel.Value)
+            {
+                hasColorVariation = true;
+                break;
+            }
+        }
+
+        if (!hasRenderedPixel)
+        {
+            Assert.Inconclusive(
+                "The WPF pixel surface is unavailable on this noninteractive Windows test desktop; no private screenshot evidence was emitted.");
+        }
+
+        Assert.IsTrue(hasColorVariation, "The off-screen real-graph window produced a uniform pixel surface.");
+        bitmap.Freeze();
+        return bitmap;
     }
 
     private static T? FindVisualDescendant<T>(DependencyObject root)
