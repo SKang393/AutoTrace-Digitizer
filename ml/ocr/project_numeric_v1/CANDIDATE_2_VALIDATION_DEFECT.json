@@ -1,0 +1,26 @@
+{
+  "candidate_id": "candidate-1",
+  "checkpoint_sha256": "6e941b2b3b746e092f01bf04a28faea61d0ba0bf584dc83b0530594ddddd8235",
+  "decision": "rejected",
+  "evaluation_scope": "validation-only selection evidence for candidate-2",
+  "marker_exclusion_accuracy": 1.0,
+  "report_sha256": "889c07252c3b592d039e3a8eee33b394ddf7cf98559d484714e15ac387365fab",
+  "role_accuracy": 0.5828125,
+  "selection": {
+    "changed_factor": "training renderer and degradation family",
+    "reason": "Recognition failed across every validation label case while exclusions remained perfect. Empty numeric predictions and numeric-role false negatives show renderer sensitivity, not an exclusion-boundary defect.",
+    "sealed_results_used": false
+  },
+  "validation_case_exact_match": {
+    "decimal": 0.28125,
+    "decimal_percentage": 0.234375,
+    "integer": 0.3125,
+    "l_one_ambiguity": 0.40625,
+    "negative": 0.390625,
+    "negative_decimal": 0.328125,
+    "o_zero_ambiguity": 0.375,
+    "percentage": 0.359375
+  },
+  "validation_character_error_rate": 0.537696335078534,
+  "validation_exact_match": 0.3359375
+}

@@ -1,0 +1,73 @@
+{
+  "binding_version": 1,
+  "candidate_id": "candidate-2",
+  "protocol_id": "graph-numeric-project-v1-candidate2-20260805",
+  "sources": {
+    "base_dataset": {
+      "bytes": 17894,
+      "path": "ml/ocr/project_numeric_v1/dataset.py",
+      "sha256": "5d56f4129793d9ac7d2633c78ee064e6a7fd5c56c1d167a1706e89d83ce0716f"
+    },
+    "base_model": {
+      "bytes": 2676,
+      "path": "ml/ocr/project_numeric_v1/model.py",
+      "sha256": "fce9e7a67b78159f31d0d882eec52487de242b81f82dd85a3ef1bd9a95b1697e"
+    },
+    "base_protocol": {
+      "bytes": 6048,
+      "path": "ml/ocr/project_numeric_v1/protocol.py",
+      "sha256": "4896bc73e62f412fb9ede8ac829348d17acdec28ed462270abb966bb95f2a008"
+    },
+    "base_training": {
+      "bytes": 19522,
+      "path": "ml/ocr/project_numeric_v1/train.py",
+      "sha256": "46d1513ef646c04f3c1e7ca411685b23e213eb35f71cde533bee54aba7e860a6"
+    },
+    "candidate2_dataset": {
+      "bytes": 9957,
+      "path": "ml/ocr/project_numeric_v1/candidate2_dataset.py",
+      "sha256": "1e4a8259bde9d026734cc5e206c88c4a190771f697b6f16b065c8c71feb8d740"
+    },
+    "candidate2_frozen_protocol": {
+      "bytes": 3569,
+      "path": "ml/ocr/project_numeric_v1/CANDIDATE_2_PROTOCOL.json",
+      "sha256": "42bc321614da5e96a20b5cadf7d52cba2a85114f2466f41e67d247574a275ef3"
+    },
+    "candidate2_protocol": {
+      "bytes": 5386,
+      "path": "ml/ocr/project_numeric_v1/candidate2_protocol.py",
+      "sha256": "1cb290e1ca73312113d0fe11a012e75e8d5a0765f8cf9f6a1496144b75bb1ec0"
+    },
+    "candidate2_training": {
+      "bytes": 6926,
+      "path": "ml/ocr/project_numeric_v1/candidate2_train.py",
+      "sha256": "4c3b3886be211dd2e7b1c23c9ecc84e0ad545f38ef34a0e915683f303e44450e"
+    },
+    "candidate2_verifier": {
+      "bytes": 5400,
+      "path": "ml/ocr/project_numeric_v1/verify_candidate2.py",
+      "sha256": "3ae59e70d681ea9841dc530f0f7aed01a21ae4a164ad803b972c4563a81ef2cb"
+    },
+    "preregistration": {
+      "bytes": 2961,
+      "path": "ml/ocr/project_numeric_v1/CANDIDATE_2_PREREGISTRATION.md",
+      "sha256": "e5df529113614cfece0a7757dd73ddc10309c256a477a4f5417badc0893818dc"
+    },
+    "tests": {
+      "bytes": 4459,
+      "path": "ml/ocr/project_numeric_v1/tests/test_candidate2.py",
+      "sha256": "683ab6492fafaf74a9ca4e27e79f73b0bbcaf09a33575f85a20f0438e3418455"
+    },
+    "validation_defect": {
+      "bytes": 1097,
+      "path": "ml/ocr/project_numeric_v1/CANDIDATE_2_VALIDATION_DEFECT.json",
+      "sha256": "6a363dd3fd0845b8d40aa6af8d3cee643d083d2d5768b30d53391995fbc507b0"
+    }
+  },
+  "split_fingerprints": {
+    "sealed_test": "a4e2e8c0623d77a52d88da9b997deebe9bb57245a65e25c918b6817892b39aee",
+    "train": "2af70dda6d2fadcc4435b0b7bf652e866837442341bd1833ef20e4cc754113c5",
+    "validation": "dec5869ac463b24c41616dafda34eb5817b8392a3da88ce09fd60fb47d7520f3"
+  },
+  "training_state": "candidate_2_frozen_untrained_candidate_3_unregistered"
+}

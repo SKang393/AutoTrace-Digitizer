@@ -1,0 +1,106 @@
+{
+  "configuration": {
+    "alphabet": "0123456789.-%",
+    "architecture": "whole-crop-global-spatial-bottleneck-semantic-slot-v1",
+    "batch_size": 64,
+    "candidate_id": "candidate-2",
+    "candidate_index": 2,
+    "candidate_state": "frozen-and-eligible-after-commit",
+    "candidates": [
+      {
+        "candidate_id": "candidate-1",
+        "configuration_state": "consumed-rejected",
+        "output_directory": "candidate-1"
+      },
+      {
+        "candidate_id": "candidate-2",
+        "configuration_state": "frozen-and-eligible-after-commit",
+        "output_directory": "candidate-2"
+      },
+      {
+        "candidate_id": "candidate-3",
+        "configuration_state": "reserved-not-registered",
+        "output_directory": "candidate-3"
+      }
+    ],
+    "data_scope": "project-owned procedural graph labels and exclusion shapes only; no private images, external datasets, fonts, or pretrained weights",
+    "epochs": 40,
+    "gates": {
+      "cpu_execution_required": true,
+      "marker_exclusion_minimum": 1.0,
+      "onnx_parity_maximum_absolute_difference": 0.0001,
+      "sealed_test_cer_maximum": 0.05,
+      "sealed_test_exact_match_minimum": 0.9,
+      "sealed_test_role_accuracy_minimum": 0.9,
+      "validation_exact_match_minimum": 0.9,
+      "validation_role_accuracy_minimum": 0.9
+    },
+    "input": [
+      1,
+      32,
+      128
+    ],
+    "learning_rate": 0.001,
+    "maximum_candidates": 3,
+    "maximum_tokens": 8,
+    "objective": "fixed semantic-slot cross entropy plus numeric-role cross entropy",
+    "one_factor_change": {
+      "factor": "training renderer and degradation family",
+      "from": "independent-polyline-stroke-train-v1 plus train-speckle-and-stroke-variation-v1",
+      "sealed_results_used": false,
+      "selection_evidence": "CANDIDATE_2_VALIDATION_DEFECT.json",
+      "to": "polyline-domain-randomized-training-v2 plus scale-pixelate-thickness-dropout-scanline-v2"
+    },
+    "output": [
+      32,
+      14
+    ],
+    "protocol_id": "graph-numeric-project-v1-candidate2-20260805",
+    "protocol_state": "frozen-preregistration",
+    "sealed_policy": "score and decode only after validation gates pass; raster construction before training is limited to fingerprint sealing",
+    "seed": 20260804,
+    "slot_time_indices": [
+      1,
+      5,
+      9,
+      13,
+      17,
+      21,
+      25,
+      29
+    ],
+    "splits": [
+      {
+        "degradation_family": "scale-pixelate-thickness-dropout-scanline-v2",
+        "negative_count": 512,
+        "positive_count": 4096,
+        "renderer_family": "polyline-domain-randomized-training-v2",
+        "seed_offset": 11000,
+        "split": "train"
+      },
+      {
+        "degradation_family": "validation-fade-and-scanline-v1",
+        "negative_count": 128,
+        "positive_count": 512,
+        "renderer_family": "independent-bitmap-validation-v1",
+        "seed_offset": 22000,
+        "split": "validation"
+      },
+      {
+        "degradation_family": "contrast-gap-and-offset-sealed-v2",
+        "negative_count": 128,
+        "positive_count": 512,
+        "renderer_family": "independent-outline-stencil-sealed-v2",
+        "seed_offset": 33000,
+        "split": "sealed_test"
+      }
+    ],
+    "weight_decay": 0.0001
+  },
+  "frozen_before_training": true,
+  "split_fingerprints": {
+    "sealed_test": "a4e2e8c0623d77a52d88da9b997deebe9bb57245a65e25c918b6817892b39aee",
+    "train": "2af70dda6d2fadcc4435b0b7bf652e866837442341bd1833ef20e4cc754113c5",
+    "validation": "dec5869ac463b24c41616dafda34eb5817b8392a3da88ce09fd60fb47d7520f3"
+  }
+}
