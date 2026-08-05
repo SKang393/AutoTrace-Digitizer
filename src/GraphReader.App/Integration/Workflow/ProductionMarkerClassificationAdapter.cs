@@ -316,7 +316,8 @@ public sealed class ProductionMarkerClassificationAdapter : IProductionMarkerCla
                 string.IsNullOrWhiteSpace(marker.MarkerId) ||
                 !marker.Center.IsFinite ||
                 !double.IsFinite(marker.Radius) || marker.Radius <= 0 ||
-                marker.SourceImage != expectedSource ||
+                (marker.SourceImage != expectedSource &&
+                    marker.SourceImage != MarkerSourceImage.Consensus) ||
                 !string.Equals(marker.CoordinateSpace, MarkerContract.CoordinateSpace, StringComparison.Ordinal)))
         {
             throw Failure(

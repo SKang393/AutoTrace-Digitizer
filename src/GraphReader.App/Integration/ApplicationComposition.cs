@@ -21,6 +21,7 @@ public sealed record ApplicationCompositionResult(
     DomainError? StartupError,
     ProductionInferenceRuntimeHost? InferenceRuntimeHost = null,
     IProductionAxisGeometryAdapter? AxisGeometryAdapter = null,
+    IProductionMarkerCenterAdapter? MarkerCenterAdapter = null,
     IProductionMarkerClassificationAdapter? MarkerClassificationAdapter = null);
 
 public static class ApplicationComposition
@@ -91,6 +92,8 @@ public static class ApplicationComposition
                     uiThreadGuard ?? CapturedUiThreadGuard.CaptureCurrentThread())
                 : null;
         ProductionAxisGeometryAdapter? axisAdapter = CreateApprovedAxisAdapter(runtimeAvailability);
+        (ProductionMarkerCenterAdapter? Adapter, DomainError? Error) markerCenter =
+            CreateApprovedMarkerCenterAdapter(modelAvailability, inference?.Value);
         (ProductionMarkerClassificationAdapter? Adapter, DomainError? Error) markerClassifier =
             CreateApprovedMarkerClassifierAdapter(modelAvailability, inference?.Value);
         var approvedAdapterStages = new List<string>();
@@ -105,6 +108,12 @@ public static class ApplicationComposition
         {
             adapterEvidence.Add(
                 $"Concrete production marker-classifier component '{markerClassifier.Adapter.AdapterId}' is composed; marker-center remains independently required.");
+        }
+
+        if (markerCenter.Adapter is not null)
+        {
+            adapterEvidence.Add(
+                $"Concrete production marker-center component '{markerCenter.Adapter.AdapterId}' is composed; the complete marker workflow adapter remains independently required.");
         }
 
         ProductionDetectionAdapterAvailabilitySnapshot? adapterAvailability = adapterEvidence.Count == 0
@@ -130,8 +139,9 @@ public static class ApplicationComposition
                 pdf,
                 inference,
                 axisAdapter,
+                markerCenter.Adapter,
                 markerClassifier.Adapter,
-                markerClassifier.Error),
+                markerCenter.Error ?? markerClassifier.Error),
             WorkflowRuntimeEnvironment.ManualPreview => new ApplicationCompositionResult(
                 environment,
                 new ManualPreviewWorkspaceService(
@@ -155,8 +165,9 @@ public static class ApplicationComposition
         (IPdfImportService? PdfImporter, DomainError? Error) pdf,
         DomainResult<ProductionInferenceRuntimeHost>? inference,
         IProductionAxisGeometryAdapter? axisAdapter,
+        IProductionMarkerCenterAdapter? markerCenterAdapter,
         IProductionMarkerClassificationAdapter? markerClassificationAdapter,
-        DomainError? markerClassificationError)
+        DomainError? markerAdapterError)
     {
         var imageImporter = new ImageImportService();
         var exportService = new ExportService();
@@ -180,9 +191,10 @@ public static class ApplicationComposition
                 enhancementResolver: enhancementResolver,
                 workflowOrchestrator: orchestrator,
                 panelStore: panelStore),
-            pdf.Error ?? inferenceError ?? markerClassificationError,
+            pdf.Error ?? inferenceError ?? markerAdapterError,
             inference?.Value,
             axisAdapter,
+            markerCenterAdapter,
             markerClassificationAdapter);
     }
 
@@ -227,6 +239,38 @@ public static class ApplicationComposition
                     DomainErrorSeverity.Warning,
                     "Errors.ProductionWorkflowUnavailable",
                     $"The checksum-resolved marker classifier could not be composed: {exception.Message}",
+                    Recoverable: true,
+                    "continue_manual_or_repair_model_store"));
+        }
+    }
+
+    private static (ProductionMarkerCenterAdapter? Adapter, DomainError? Error)
+        CreateApprovedMarkerCenterAdapter(
+            ProductionModelAvailabilitySnapshot? modelAvailability,
+            ProductionInferenceRuntimeHost? runtimeHost)
+    {
+        if (runtimeHost is null ||
+            modelAvailability is null ||
+            !modelAvailability.ApprovedCpuModels.TryGetValue(
+                "marker_center",
+                out ResolvedProductionModel? model))
+        {
+            return (null, null);
+        }
+
+        try
+        {
+            return (ProductionMarkerCenterAdapter.Create(model, runtimeHost), null);
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            return (
+                null,
+                new DomainError(
+                    "MARKER_CENTER_ADAPTER_UNAVAILABLE",
+                    DomainErrorSeverity.Warning,
+                    "Errors.ProductionWorkflowUnavailable",
+                    $"The checksum-resolved marker-center model could not be composed: {exception.Message}",
                     Recoverable: true,
                     "continue_manual_or_repair_model_store"));
         }

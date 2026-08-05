@@ -371,6 +371,40 @@ public sealed class ApplicationCompositionSmokeTests
     }
 
     [TestMethod]
+    public async Task ApprovedMarkerCenterManifestComposesLazyComponentWithoutApprovingWorkflowStage()
+    {
+        using var package = ApprovedModelPackageFixture.Create("marker_center");
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(package.Root),
+            cancellationToken: CancellationToken.None);
+        try
+        {
+            var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+            Assert.AreEqual(
+                AutomaticStageState.Unavailable,
+                workspace.AutomaticStages.Single(stage => stage.Stage == "markers").State);
+            StringAssert.Contains(
+                workspace.AutomaticStages.Single(stage => stage.Stage == "markers").Explanation,
+                "marker_classifier");
+            Assert.IsNotNull(composition.MarkerCenterAdapter, composition.StartupError?.TechnicalMessage);
+            Assert.IsTrue(composition.MarkerCenterAdapter.IsApproved);
+            Assert.AreEqual("fixture-marker-center", composition.MarkerCenterAdapter.Model.ModelId);
+            Assert.IsNotNull(composition.InferenceRuntimeHost);
+            Assert.IsFalse(composition.InferenceRuntimeHost.IsInitialized);
+            Assert.IsFalse(workspace.UsesFakeGraphData);
+        }
+        finally
+        {
+            if (composition.InferenceRuntimeHost is not null)
+            {
+                await composition.InferenceRuntimeHost.DisposeAsync();
+            }
+        }
+    }
+
+    [TestMethod]
     public async Task ExactLocalClassifierManifestComposesLazyProductionAdapter()
     {
         string? modelRoot = Environment.GetEnvironmentVariable(
@@ -608,18 +642,35 @@ public sealed class ApplicationCompositionSmokeTests
                 },
                 ["sha256"] = payloadSha256,
                 ["files"] = new[] { "model.onnx" },
-                ["inputs"] = task == "marker_classifier"
-                    ? new[]
+                ["inputs"] = task switch
+                {
+                    "marker_classifier" => new[]
                     {
                         new Dictionary<string, object?>
                         {
                             ["name"] = "marker_patch",
                             ["shape"] = new object[] { "N", 1, 32, 32 },
                         },
-                    }
-                    : new[] { new Dictionary<string, object?> { ["name"] = "input" } },
-                ["outputs"] = task == "marker_classifier"
-                    ? new[]
+                    },
+                    "marker_center" => new[]
+                    {
+                        new Dictionary<string, object?>
+                        {
+                            ["name"] = "image_and_masks",
+                            ["element_type"] = "float32",
+                            ["layout"] = "NCHW",
+                            ["shape"] = new object[] { "N", 3, "H", "W" },
+                            ["channels"] = new[]
+                            {
+                                "ink_probability", "text_mask", "artifact_mask",
+                            },
+                        },
+                    },
+                    _ => new[] { new Dictionary<string, object?> { ["name"] = "input" } },
+                },
+                ["outputs"] = task switch
+                {
+                    "marker_classifier" => new[]
                     {
                         new Dictionary<string, object?>
                         {
@@ -633,8 +684,24 @@ public sealed class ApplicationCompositionSmokeTests
                                 "l2_normalized_embedding[12]",
                             },
                         },
-                    }
-                    : new[] { new Dictionary<string, object?> { ["name"] = "output" } },
+                    },
+                    "marker_center" => new[]
+                    {
+                        new Dictionary<string, object?>
+                        {
+                            ["name"] = "marker_heads",
+                            ["element_type"] = "float32",
+                            ["layout"] = "NCHW",
+                            ["shape"] = new object[] { "N", 3, "H", "W" },
+                            ["channels"] = new[]
+                            {
+                                "center_probability", "radius_pixels", "artifact_probability",
+                            },
+                            ["output_stride"] = 1,
+                        },
+                    },
+                    _ => new[] { new Dictionary<string, object?> { ["name"] = "output" } },
+                },
                 ["commercial_use"] = true,
                 ["redistribution"] = true,
                 ["providers"] = new[] { "cpu" },
@@ -667,6 +734,44 @@ public sealed class ApplicationCompositionSmokeTests
                     },
                     ["fill_order"] = new[] { "filled", "open", "unknown" },
                     ["shape_and_fill_separate"] = true,
+                };
+            }
+            else if (task == "marker_center")
+            {
+                manifest["preprocessing"] = new Dictionary<string, object?>
+                {
+                    ["normalization_mean"] = 0f,
+                    ["normalization_scale"] = 1f,
+                };
+                manifest["postprocessing"] = new Dictionary<string, object?>
+                {
+                    ["center_threshold"] = 0.36f,
+                    ["artifact_threshold"] = 0.35f,
+                    ["local_maximum_window"] = 9,
+                    ["minimum_radius_tensor_pixels"] = 2.5,
+                    ["minimum_nms_distance_tensor_pixels"] = 5.0,
+                    ["radius_nms_scale"] = 1.25,
+                    ["consensus"] = "minimum-cost maximum one-to-one matching within 5 original pixels for original and enhanced detections",
+                    ["unmatched_source_confidence_scale"] = 0.75,
+                };
+                manifest["benchmarks"] = new object[]
+                {
+                    new Dictionary<string, object?>
+                    {
+                        ["profile"] = "graphreader-inference-cpu-directml-parity",
+                        ["status"] = "pass",
+                        ["input_shape"] = new[] { 1, 3, 128, 128 },
+                        ["output_shape"] = new[] { 1, 3, 128, 128 },
+                    },
+                    new Dictionary<string, object?>
+                    {
+                        ["profile"] = "application-composition-v1",
+                        ["status"] = "pass",
+                        ["release_eligible"] = true,
+                        ["production_approval"] = true,
+                        ["evidence_path"] = "artifacts/evidence/fixture-benchmark.json",
+                        ["evidence_sha256"] = evidenceSha256,
+                    },
                 };
             }
 

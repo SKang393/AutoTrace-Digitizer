@@ -313,6 +313,18 @@ public sealed class ProductionWorkflowStagesTests
         Assert.AreEqual(MarkerClassification.MarkerShape.Circle, evidence.Markers[0].Shape);
         Assert.AreEqual(MarkerClassification.MarkerFill.Open, evidence.Markers[0].Fill);
 
+        MarkerDetection.MarkerCenter[] consensusMarkers =
+            [markers[0] with { SourceImage = MarkerDetection.MarkerSourceImage.Consensus }];
+        ProductionMarkerClassificationEvidence consensusEvidence = await adapter.ClassifyAsync(
+            request,
+            frame,
+            consensusMarkers,
+            CancellationToken.None);
+        Assert.AreEqual(2, service.CallCount);
+        Assert.AreEqual(
+            MarkerDetection.MarkerSourceImage.Consensus,
+            consensusEvidence.Markers[0].Marker.SourceImage);
+
         var unavailableService = new MarkerClassificationServiceStub();
         var unavailable = new ProductionMarkerClassificationAdapter(
             model,
@@ -348,6 +360,138 @@ public sealed class ProductionWorkflowStagesTests
             ProductionWorkflowFailureCodes.DetectionEvidenceRejected,
             invalidMaskException.Failure.Code);
         Assert.AreEqual(0, invalidMaskService.CallCount);
+    }
+
+    [TestMethod]
+    public async Task ApprovedMarkerCenterAdapterRetainsExactModelProviderAndOriginalCoordinates()
+    {
+        byte[] encoded = CreateAxisPng();
+        string sha256 = Convert.ToHexStringLower(SHA256.HashData(encoded));
+        Guid projectId = Guid.Parse("10000000-0000-0000-0000-000000000008");
+        Guid sourceId = Guid.Parse("20000000-0000-0000-0000-000000000008");
+        Guid panelId = Guid.Parse("30000000-0000-0000-0000-000000000008");
+        Guid runId = Guid.Parse("40000000-0000-0000-0000-000000000008");
+        var original = new WorkflowImageEvidence(
+            "memory:marker-center.png",
+            sha256,
+            width: 96,
+            height: 72,
+            WorkflowImageVariant.Original);
+        var imported = new WorkflowImportedPanel(panelId, sourceId, "marker-center.png", original);
+        var request = new ProductionWorkflowDetectionRequest(
+            new WorkflowPreparedPanel(imported, original, enhanced: null),
+            original,
+            WorkflowImageVariant.Original,
+            runId,
+            projectId,
+            encoded);
+        var frame = new MarkerDetection.MarkerImageFrame(
+            96,
+            72,
+            1,
+            Enumerable.Repeat(0.75f, 96 * 72).ToArray(),
+            MarkerDetection.MarkerSourceImage.Original,
+            MarkerDetection.MarkerAffineTransform.Identity,
+            MarkerDetection.MarkerMask.Empty(96, 72),
+            MarkerDetection.MarkerMask.Empty(96, 72));
+        var plot = MarkerDetection.MarkerPolygon.FromRectangle(
+            new MarkerDetection.MarkerRectangle(8, 8, 80, 56));
+        var model = new ModelIdentity(
+            "graph-marker-center",
+            "0.1.0",
+            new string('c', 64),
+            "marker-center.onnx");
+        var tensor = new MarkerDetection.MarkerModelTensorContract(
+            "image_and_masks",
+            "marker_heads",
+            64,
+            64,
+            3,
+            MarkerDetection.MarkerTensorLayout.ChannelsFirst,
+            64,
+            64,
+            3,
+            MarkerDetection.MarkerTensorLayout.ChannelsFirst,
+            0,
+            1,
+            2,
+            MarkerDetection.MarkerHeadActivation.Identity,
+            MarkerDetection.MarkerHeadActivation.Identity,
+            1,
+            0,
+            1);
+        var options = new MarkerDetection.MarkerDetectionOptions(tensor)
+        {
+            StageVersion = "0.1.0",
+        };
+        var service = new MarkerDetectionServiceStub();
+        var adapter = new ProductionMarkerCenterAdapter(
+            model,
+            options,
+            isApproved: true,
+            service);
+
+        ProductionMarkerCenterEvidence evidence = await adapter.DetectAsync(
+            request,
+            frame,
+            plot,
+            enhancedImage: null,
+            enhancedTransforms: null,
+            CancellationToken.None);
+
+        Assert.AreEqual(1, service.CallCount);
+        Assert.AreEqual("markers", evidence.Envelope.Stage);
+        Assert.AreEqual(model.Sha256.ToLowerInvariant(), evidence.Envelope.Model?.Sha256);
+        Assert.AreEqual("cpu", evidence.Envelope.Model?.Provider);
+        Assert.AreEqual(sha256, evidence.Envelope.InputSha256);
+        Assert.AreEqual("original_pixels", evidence.Envelope.CoordinateSpace);
+        Assert.HasCount(1, evidence.Markers);
+        Assert.AreEqual("center-1", evidence.Markers[0].MarkerId);
+        Assert.AreEqual(MarkerDetection.MarkerSourceImage.Original, evidence.Markers[0].SourceImage);
+
+        var unavailableService = new MarkerDetectionServiceStub();
+        var unavailable = new ProductionMarkerCenterAdapter(
+            model,
+            options,
+            isApproved: false,
+            unavailableService);
+        ProductionWorkflowStageException exception =
+            await Assert.ThrowsAsync<ProductionWorkflowStageException>(
+                () => unavailable.DetectAsync(
+                    request,
+                    frame,
+                    plot,
+                    enhancedImage: null,
+                    enhancedTransforms: null,
+                    CancellationToken.None));
+        Assert.AreEqual(
+            ProductionWorkflowFailureCodes.DetectionModelsUnavailable,
+            exception.Failure.Code);
+        Assert.AreEqual(0, unavailableService.CallCount);
+
+        var invalidFrameService = new MarkerDetectionServiceStub();
+        var invalidFrameAdapter = new ProductionMarkerCenterAdapter(
+            model,
+            options,
+            isApproved: true,
+            invalidFrameService);
+        var invalidFrame = frame with
+        {
+            ArtifactMask = new MarkerDetection.MarkerMask(96, 72, new float[1]),
+        };
+        ProductionWorkflowStageException invalidFrameException =
+            await Assert.ThrowsAsync<ProductionWorkflowStageException>(
+                () => invalidFrameAdapter.DetectAsync(
+                    request,
+                    invalidFrame,
+                    plot,
+                    enhancedImage: null,
+                    enhancedTransforms: null,
+                    CancellationToken.None));
+        Assert.AreEqual(
+            ProductionWorkflowFailureCodes.DetectionEvidenceRejected,
+            invalidFrameException.Failure.Code);
+        Assert.AreEqual(0, invalidFrameService.CallCount);
     }
 
     [TestMethod]
@@ -1343,6 +1487,58 @@ public sealed class ProductionWorkflowStagesTests
                 [],
                 [report],
                 new MarkerClassification.MarkerClassificationModelReport(
+                    request.Model.ModelId,
+                    request.Model.Version,
+                    request.Model.Sha256,
+                    InferenceProvider.Cpu),
+                null);
+            return ValueTask.FromResult(result);
+        }
+    }
+
+    private sealed class MarkerDetectionServiceStub : MarkerDetection.IMarkerDetectionService
+    {
+        public int CallCount { get; private set; }
+
+        public ValueTask<MarkerDetection.MarkerDetectionResult> DetectAsync(
+            MarkerDetection.MarkerDetectionRequest request,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            CallCount++;
+            var marker = new MarkerDetection.MarkerCenter(
+                "center-1",
+                new MarkerDetection.MarkerPoint(32, 28),
+                4,
+                0.01,
+                0.96,
+                MarkerDetection.MarkerSourceImage.Original);
+            var timing = new MarkerDetection.MarkerDetectionTiming(1, 2, 1, 4);
+            var frame = new MarkerDetection.MarkerFrameReport(
+                MarkerDetection.MarkerSourceImage.Original,
+                "cache-key",
+                InferenceProvider.Cpu,
+                [new ProviderAttempt(InferenceProvider.Cpu, true, null)],
+                timing,
+                RawCandidateCount: 1,
+                AcceptedCandidateCount: 1,
+                CacheHit: false,
+                Failure: null);
+            var result = new MarkerDetection.MarkerDetectionResult(
+                MarkerDetection.MarkerContract.Version,
+                Guid.NewGuid().ToString("D"),
+                request.ProjectId,
+                request.PanelId,
+                MarkerDetection.MarkerContract.Stage,
+                request.Options.StageVersion,
+                request.InputSha256,
+                MarkerDetection.MarkerContract.CoordinateSpace,
+                [marker],
+                timing,
+                marker.CenterConfidence,
+                [],
+                [frame],
+                new MarkerDetection.MarkerModelReport(
                     request.Model.ModelId,
                     request.Model.Version,
                     request.Model.Sha256,
