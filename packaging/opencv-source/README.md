@@ -39,6 +39,7 @@ powershell -File packaging/opencv-source/review/Test-SourceBuildReviewPolicy.ps1
 powershell -File packaging/opencv-source/Compare-SourceBuilds.ps1 -FirstEvidenceRoot <first> -SecondEvidenceRoot <second>
 powershell -File packaging/opencv-source/Test-SourceRuntimeParity.ps1 -EvidenceRoot <reviewed-evidence>
 powershell -File packaging/opencv-source/Install-ReviewedRuntime.ps1 -EvidenceRoot <reviewed-evidence> -DestinationRoot <published-app>
+powershell -File packaging/opencv-source/Install-ReleaseRuntime.ps1 -EvidenceRoot <reviewed-evidence> -DestinationRoot <common-publish>
 powershell -File packaging/opencv-source/tests/Test-InstallReviewedRuntime.Tests.ps1
 ```
 
@@ -87,7 +88,14 @@ replacement seam. It runs both evidence validators, requires the exact
 source DLL checksum, rejects ambiguous or reparse-point destinations, replaces
 exactly one published DLL, and emits `reviewed-opencv-runtime.json`. That
 metadata deliberately records `cleanMachineEvidence: false` and
-`releaseApproved: false`. It is not used by the production common publish.
+`releaseApproved: false`.
+
+`Install-ReleaseRuntime.ps1` is the separate production common-publish seam.
+It accepts only the same exact reviewed binary, then independently requires the
+tracked `opencv-clean-machine-load` gate to be passing with repository-local
+checksum-bound evidence before promoting the installed metadata. A missing,
+blocked, unsafe, or tampered gate fails before replacement. `Build-Windows.ps1`
+invokes this seam only after every public release blocker has cleared.
 
 `Test-SourceRuntimeParity.ps1` provides the local functional and public-axis
 evidence without changing the release runtime. It validates the retained

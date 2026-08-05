@@ -15,10 +15,13 @@ public static class ProductionStageAvailabilityRegistry
     public static IReadOnlyList<AutomaticStageStatus> Create(
         bool localEnhancementConfigured,
         ProductionModelAvailabilitySnapshot? modelAvailability = null,
-        bool reviewedPdfiumConfigured = false)
+        bool reviewedPdfiumConfigured = false,
+        ProductionRuntimeAvailabilitySnapshot? runtimeAvailability = null)
     {
         modelAvailability ??= ProductionModelAvailabilitySnapshot.Missing(
             "No production-model-index.json is installed in the application model root.");
+        runtimeAvailability ??= ProductionRuntimeAvailabilitySnapshot.Missing(
+            "No release-approved OpenCV runtime evidence is installed in the application root.");
         IReadOnlySet<string> approvedTasks = modelAvailability.ApprovedCpuTasks;
         bool ocrApproved = HasTasks(approvedTasks, "ocr_detection", "ocr_recognition");
         bool markersApproved = HasTasks(approvedTasks, "marker_center", "marker_classifier");
@@ -36,10 +39,15 @@ public static class ProductionStageAvailabilityRegistry
                 "enhancement",
                 AutomaticStageState.Unavailable,
                 "No approved Real-ESRGAN runtime and model payload are installed. The original image remains editable."),
-        new(
-            "axis",
-            AutomaticStageState.Unavailable,
-            "The deterministic axis adapter and reviewed source-built OpenCV provenance exist, but mandatory clean-machine runtime approval is not installed."),
+        runtimeAvailability.AxisApproved
+            ? new AutomaticStageStatus(
+                "axis",
+                AutomaticStageState.Approved,
+                runtimeAvailability.Evidence)
+            : new AutomaticStageStatus(
+                "axis",
+                AutomaticStageState.Unavailable,
+                $"The deterministic axis adapter requires exact reviewed OpenCV provenance and mandatory clean-machine runtime approval. {runtimeAvailability.Evidence}"),
         ocrApproved
             ? new AutomaticStageStatus(
                 "ocr",

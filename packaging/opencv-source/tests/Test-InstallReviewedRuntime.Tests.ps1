@@ -6,6 +6,7 @@ Set-StrictMode -Version Latest
 
 $profileRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $installerPath = Join-Path $profileRoot 'Install-ReviewedRuntime.ps1'
+$releaseInstallerPath = Join-Path $profileRoot 'Install-ReleaseRuntime.ps1'
 $passed = 0
 $failed = 0
 
@@ -30,7 +31,8 @@ function New-Fixture {
     $profile = Join-Path $repository 'packaging\opencv-source'
     $evidence = Join-Path $root 'evidence'
     $destination = Join-Path $root 'destination'
-    New-Item -ItemType Directory -Path (Join-Path $profile 'review'), (Join-Path $evidence 'bin'), (Join-Path $destination 'runtimes\win-x64\native') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $profile 'review'), (Join-Path $repository 'packaging\common'), (Join-Path $repository 'packaging\evidence'), (Join-Path $evidence 'bin'), (Join-Path $destination 'runtimes\win-x64\native') -Force | Out-Null
+    Copy-Item -LiteralPath $installerPath -Destination (Join-Path $profile 'Install-ReviewedRuntime.ps1')
 
     $reviewedBytes = [Text.Encoding]::UTF8.GetBytes('reviewed deterministic OpenCV runtime')
     $sourcePath = Join-Path $evidence 'bin\OpenCvSharpExtern.dll'
@@ -64,12 +66,36 @@ exit 0
     }
     Write-Utf8NoBom -Path (Join-Path $profile 'review\source-build-review-policy.json') -Content ($policy | ConvertTo-Json -Depth 10)
 
+    $cleanMachineEvidencePath = Join-Path $repository 'packaging\evidence\opencv-clean-machine.json'
+    Write-Utf8NoBom -Path $cleanMachineEvidencePath -Content '{"status":"pass","machine":"fixture"}'
+    $cleanMachineEvidenceHash = (Get-FileHash -LiteralPath $cleanMachineEvidencePath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $releaseAudit = [ordered]@{
+        schemaVersion = 1
+        mandatoryEvidenceGates = @([ordered]@{
+                id = 'opencv-clean-machine-load'
+                description = 'Fixture clean-machine evidence.'
+                status = 'pass'
+                evidence = @([ordered]@{
+                        path = 'packaging/evidence/opencv-clean-machine.json'
+                        sha256 = $cleanMachineEvidenceHash
+                    })
+                notes = 'Fixture only.'
+            })
+        components = @([ordered]@{
+                id = 'opencvsharp-native'
+                checksumPolicy = 'exact-binary'
+                artifactSha256 = $reviewedHash
+            })
+    }
+    Write-Utf8NoBom -Path (Join-Path $repository 'packaging\common\release-audit.json') -Content ($releaseAudit | ConvertTo-Json -Depth 10)
+
     return [pscustomobject]@{
         Root = $root
         Repository = $repository
         Evidence = $evidence
         Destination = $destination
         ReviewedHash = $reviewedHash
+        CleanMachineEvidencePath = $cleanMachineEvidencePath
     }
 }
 
@@ -104,6 +130,28 @@ function Invoke-InstallerFixture {
         }
         else {
             & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $installerPath -EvidenceRoot $Fixture.Evidence -DestinationRoot $Fixture.Destination -RepositoryRoot $Fixture.Repository 2>&1 | Out-Host
+        }
+        return $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorPreference
+    }
+}
+
+function Invoke-ReleaseInstallerFixture {
+    param(
+        [Parameter(Mandatory = $true)] [pscustomobject]$Fixture,
+        [switch]$DiscardOutput
+    )
+
+    $previousErrorPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        if ($DiscardOutput.IsPresent) {
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $releaseInstallerPath -EvidenceRoot $Fixture.Evidence -DestinationRoot $Fixture.Destination -RepositoryRoot $Fixture.Repository 2>&1 | Out-Null
+        }
+        else {
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $releaseInstallerPath -EvidenceRoot $Fixture.Evidence -DestinationRoot $Fixture.Destination -RepositoryRoot $Fixture.Repository 2>&1 | Out-Host
         }
         return $LASTEXITCODE
     }
@@ -150,6 +198,57 @@ Invoke-Case -Name 'Ambiguous published native destinations are rejected' -Action
         [IO.File]::WriteAllText((Join-Path $fixture.Destination 'duplicate\OpenCvSharpExtern.dll'), 'duplicate', [Text.UTF8Encoding]::new($false))
         $exitCode = Invoke-InstallerFixture -Fixture $fixture -DiscardOutput
         if ($exitCode -eq 0) { throw 'Ambiguous destination unexpectedly passed.' }
+    }
+    finally {
+        if (Test-Path -LiteralPath $fixture.Root) { Remove-Item -LiteralPath $fixture.Root -Recurse -Force }
+    }
+}
+
+Invoke-Case -Name 'Direct clean-machine evidence promotes the exact reviewed runtime for release' -Action {
+    $fixture = New-Fixture
+    try {
+        $exitCode = Invoke-ReleaseInstallerFixture -Fixture $fixture
+        if ($exitCode -ne 0) { throw "Release installer exited $exitCode." }
+        $metadata = Get-Content -LiteralPath (Join-Path $fixture.Destination 'reviewed-opencv-runtime.json') -Raw | ConvertFrom-Json
+        if (-not [bool]$metadata.cleanMachineEvidence -or -not [bool]$metadata.releaseApproved) {
+            throw 'Direct passing evidence did not promote the reviewed runtime.'
+        }
+        if ([string]$metadata.binarySha256 -ne $fixture.ReviewedHash) {
+            throw 'Release metadata does not retain the exact reviewed runtime hash.'
+        }
+    }
+    finally {
+        if (Test-Path -LiteralPath $fixture.Root) { Remove-Item -LiteralPath $fixture.Root -Recurse -Force }
+    }
+}
+
+Invoke-Case -Name 'Tampered clean-machine evidence blocks release promotion before replacement' -Action {
+    $fixture = New-Fixture
+    try {
+        Write-Utf8NoBom -Path $fixture.CleanMachineEvidencePath -Content '{"status":"tampered"}'
+        $exitCode = Invoke-ReleaseInstallerFixture -Fixture $fixture -DiscardOutput
+        if ($exitCode -eq 0) { throw 'Tampered clean-machine evidence unexpectedly promoted the runtime.' }
+        if (Test-Path -LiteralPath (Join-Path $fixture.Destination 'reviewed-opencv-runtime.json')) {
+            throw 'Release metadata was written after evidence rejection.'
+        }
+    }
+    finally {
+        if (Test-Path -LiteralPath $fixture.Root) { Remove-Item -LiteralPath $fixture.Root -Recurse -Force }
+    }
+}
+
+Invoke-Case -Name 'Blocked clean-machine gate cannot promote reviewed runtime bytes' -Action {
+    $fixture = New-Fixture
+    try {
+        $auditPath = Join-Path $fixture.Repository 'packaging\common\release-audit.json'
+        $audit = Get-Content -LiteralPath $auditPath -Raw | ConvertFrom-Json
+        $audit.mandatoryEvidenceGates[0].status = 'blocked'
+        Write-Utf8NoBom -Path $auditPath -Content ($audit | ConvertTo-Json -Depth 10)
+        $exitCode = Invoke-ReleaseInstallerFixture -Fixture $fixture -DiscardOutput
+        if ($exitCode -eq 0) { throw 'Blocked clean-machine gate unexpectedly promoted the runtime.' }
+        if (Test-Path -LiteralPath (Join-Path $fixture.Destination 'reviewed-opencv-runtime.json')) {
+            throw 'Release metadata was written for a blocked gate.'
+        }
     }
     finally {
         if (Test-Path -LiteralPath $fixture.Root) { Remove-Item -LiteralPath $fixture.Root -Recurse -Force }

@@ -48,7 +48,7 @@ public partial class App : Application, IDisposable
         ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
             RuntimeEnvironment,
             ApplicationPaths,
-            CancellationToken.None);
+            cancellationToken: CancellationToken.None);
         WorkspaceService = composition.WorkspaceService;
         WorkflowStartupError = composition.StartupError;
         StartupErrorMessageKey = StartupError?.UserMessageKey ?? WorkflowStartupError?.UserMessageKey;

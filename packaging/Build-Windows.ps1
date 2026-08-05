@@ -7,7 +7,8 @@ param(
     [string]$OutputRoot,
     [switch]$SkipPublish,
     [switch]$Force,
-    [switch]$AuditOnly
+    [switch]$AuditOnly,
+    [string]$ReviewedOpenCvEvidenceRoot
 )
 
 Set-StrictMode -Version Latest
@@ -1563,6 +1564,38 @@ foreach ($issue in @($releaseAudit.Issues)) {
 foreach ($issue in @($modelAudit.Issues)) {
     $releaseBlockers.Add([string]$issue)
 }
+$reviewedOpenCvRequired = $null -ne $releaseAudit.Components -and
+    $releaseAudit.Components.ContainsKey('opencvsharp-native')
+$reviewedOpenCvEvidencePath = $null
+$reviewedOpenCvRuntimeSha256 = $null
+if ($reviewedOpenCvRequired) {
+    if ([string]::IsNullOrWhiteSpace($ReviewedOpenCvEvidenceRoot)) {
+        $releaseBlockers.Add('The exact reviewed source-built OpenCV evidence root is required for the common release publish.')
+    }
+    else {
+        try {
+            $reviewedOpenCvEvidencePath = [IO.Path]::GetFullPath($ReviewedOpenCvEvidenceRoot)
+            $reviewedOpenCvRuntimePath = Join-Path $reviewedOpenCvEvidencePath 'bin\OpenCvSharpExtern.dll'
+            if (-not (Test-Path -LiteralPath $reviewedOpenCvEvidencePath -PathType Container) -or
+                -not (Test-Path -LiteralPath $reviewedOpenCvRuntimePath -PathType Leaf)) {
+                $releaseBlockers.Add('The exact reviewed source-built OpenCV evidence root or runtime binary is missing.')
+            }
+            else {
+                $reviewedOpenCvRuntimeSha256 = (Get-FileHash -LiteralPath $reviewedOpenCvRuntimePath -Algorithm SHA256).Hash.ToLowerInvariant()
+                $expectedOpenCvRuntimeSha256 = [string]$releaseAudit.Components['opencvsharp-native'].artifactSha256
+                if (-not [string]::Equals(
+                        $reviewedOpenCvRuntimeSha256,
+                        $expectedOpenCvRuntimeSha256,
+                        [StringComparison]::OrdinalIgnoreCase)) {
+                    $releaseBlockers.Add('The reviewed source-built OpenCV runtime does not match the exact public audit binary.')
+                }
+            }
+        }
+        catch {
+            $releaseBlockers.Add("The reviewed source-built OpenCV evidence root is invalid: $($_.Exception.Message)")
+        }
+    }
+}
 if ($gitWorkingTreeDirty) {
     $releaseBlockers.Add('The Git working tree is dirty. Release artifacts require a clean committed tree.')
 }
@@ -1587,6 +1620,8 @@ $auditResult = [pscustomobject]@{
     PassedMandatoryEvidenceGates = @($releaseAudit.MandatoryEvidenceGates.Values | Where-Object {
             [string]$_.status -eq 'pass'
         } | ForEach-Object { [string]$_.id } | Sort-Object)
+    ReviewedOpenCvRuntimeRequired = $reviewedOpenCvRequired
+    ReviewedOpenCvRuntimeSha256 = $reviewedOpenCvRuntimeSha256
     ArtifactsEmitted = $false
 }
 
@@ -1644,6 +1679,26 @@ if ($LASTEXITCODE -ne 0) {
 Assert-WindowsX64Executable `
     -Path (Join-Path $commonPublishPath 'GraphReader.App.exe') `
     -Description 'Published GraphReader.App.exe'
+
+if ($reviewedOpenCvRequired) {
+    $releaseOpenCvInstallerPath = Join-Path $packagingRoot 'opencv-source\Install-ReleaseRuntime.ps1'
+    if (-not (Test-Path -LiteralPath $releaseOpenCvInstallerPath -PathType Leaf)) {
+        throw "Release OpenCV runtime installer is missing: $releaseOpenCvInstallerPath"
+    }
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $releaseOpenCvInstallerPath `
+        -EvidenceRoot $reviewedOpenCvEvidencePath `
+        -DestinationRoot $commonPublishPath `
+        -RepositoryRoot $repositoryRoot
+    if ($LASTEXITCODE -ne 0) {
+        throw "Release OpenCV runtime installation failed with exit code $LASTEXITCODE."
+    }
+    $releaseOpenCvMetadata = Get-Content -LiteralPath (Join-Path $commonPublishPath 'reviewed-opencv-runtime.json') -Raw | ConvertFrom-Json
+    if (-not [bool]$releaseOpenCvMetadata.cleanMachineEvidence -or
+        -not [bool]$releaseOpenCvMetadata.releaseApproved -or
+        [string]$releaseOpenCvMetadata.binarySha256 -cne $reviewedOpenCvRuntimeSha256) {
+        throw 'Common publish OpenCV runtime metadata did not cross the direct-evidence release boundary.'
+    }
+}
 
 $requiredContentPaths = @(Get-RequiredContentArchivePaths -RepositoryRoot $repositoryRoot -Definition $commonDefinition)
 $modelArchivePaths = @($modelAudit.Models | Where-Object {

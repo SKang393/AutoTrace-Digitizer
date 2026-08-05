@@ -58,7 +58,7 @@ runtime SHA-256 after every stable checkpoint. The current verified behavior is:
 - dirty development build: no
 - running process: responsive visible window titled `Graph Auto Reader`, exact
   Chandler path supplied by `--open-image`
-- clean portable full-test rerun: PASS, 676 passed and 6 expected skips
+- current full Release rerun: PASS, 678 passed and 6 expected skips
 - production-model IDs reported available: `0`
 - automatic stages reported unavailable: `6`
 - mutable root: `artifacts/dev-portable/Data`
@@ -240,13 +240,13 @@ files are not tracked.
 ## Tests and commands
 
 - `dotnet test GraphAutoReader.slnx -c Release --no-restore` in the clean
-  portable build: 676 passed and 6 expected tests skipped.
+  latest Release run: 678 passed and 6 expected tests skipped.
 - focused manual workflow: 8/8 passed.
 - bounded WPF manual composition: 1/1 passed.
 - Goal 19 application/composition focus: 18/18 passed in reviewer verification.
 - `packaging/tests/Test-DevPortable.Tests.ps1`: 7/7 passed, including
   fail-closed single-file and multi-file model discovery.
-- `packaging/tests/Test-ReleaseArtifact.Tests.ps1`: 58/58 passed, including
+- `packaging/tests/Test-ReleaseArtifact.Tests.ps1`: 59/59 passed, including
   canonical UTC metadata, mandatory direct-evidence gates, and exact-binary
   rejection.
 - Super-resolution tests: 57/57 passed.
@@ -265,8 +265,8 @@ files are not tracked.
 - OpenCV public-axis runtime parity: 4/4 fixed procedural families produced
   exact canonical output; 92/92 executed integration tests and both WPF smoke
   publishes passed with the source DLL.
-- Reviewed OpenCV runtime packaging: 3/3 positive, tamper, and ambiguous-path
-  cases passed in Windows PowerShell 5.1 and PowerShell 7. A self-contained
+- Reviewed OpenCV runtime packaging: 6/6 provenance-only, release-promotion,
+  tamper, blocked-gate, and ambiguous-path cases passed. A self-contained
   development portable replaced the NuGet DLL with exact SHA-256
   `87c12460daba638b36e916ea2bb832d0759fbf094b8639919a7ce11b0cca5791`
   and passed `--portable-smoke`; metadata preserved
@@ -280,7 +280,10 @@ files are not tracked.
   application-owned or unattributed failures, and zero watcher errors.
 - Production model resolution focus: 77 inference tests passed with 1 expected
   opt-in skip; 95 integration tests passed with 1 expected private-graph skip.
-- Public scoreboard: 37/37 synthetic metric-contract gates passed in 222.233 ms.
+- Production runtime availability: 12/12 focused composition cases passed;
+  exact OpenCV bytes plus provenance, notice, clean-machine, and release flags
+  are required before the axis stage becomes approved.
+- Public scoreboard: 37/37 synthetic metric-contract gates passed in 218.297 ms.
 - `packaging/localization/Test-LocalizationAudit.ps1`: 9/9 passed.
 - repository localization audit: 177 keys, 0 missing, 0 extra, 0 duplicate,
   and 0 unresolved references.
@@ -291,7 +294,7 @@ files are not tracked.
 
 ## Metrics and timing
 
-- clean portable full .NET suite: 676 tests passed with 6 expected skips
+- current full .NET Release suite: 678 tests passed with 6 expected skips
 - latest development portable build passed App 44/44, Domain 23/23, focused
   integration, publish, reviewed-OpenCV replacement, and process smoke
 - watcher debounce: 2.53 to 2.63 seconds across independent verification
@@ -334,9 +337,10 @@ Microsoft source and license record.
 - OpenCV local source-runtime parity: PASS.
 - OpenCV internal development-portable replacement: PASS with exact
   checksum-bound provenance metadata.
-- OpenCV production common-publish replacement: the audit rejects any binary
-  other than the reviewed source-built hash; replacement, clean-machine load,
-  and workflow evidence remain blocked.
+- OpenCV production common-publish replacement: implemented fail closed. The
+  audit requires the exact retained evidence root, the installer requires a
+  checksum-bound passing clean-machine gate, and production stage availability
+  rehashes the installed DLL. Clean-machine and workflow evidence remain blocked.
 - PDFium dependency/license closure: resolved for the exact unbundled runner;
   runtime packaging, clean-machine execution, and release approval remain
   blocked.
@@ -365,7 +369,7 @@ Microsoft source and license record.
   Microsoft attestation, reproducibility, exact public-axis parity, integration
   tests, and local WPF smoke pass. The public audit accepts only exact binary
   `87c12460daba638b36e916ea2bb832d0759fbf094b8639919a7ce11b0cca5791`;
-  production replacement, clean-machine load, and workflow checks remain open.
+  release promotion cannot occur until clean-machine and workflow checks pass.
 - The PDFium binary and dependency notice closure pass reproducibility and
   independent review, but the runner is not bundled or release approved and
   has no clean-machine execution evidence.

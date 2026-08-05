@@ -28,11 +28,16 @@ public static class ApplicationComposition
     public static ApplicationCompositionResult Create(
         WorkflowRuntimeEnvironment environment,
         IApplicationPaths? applicationPaths = null)
-        => CreateCore(environment, applicationPaths, modelAvailability: null);
+        => CreateCore(
+            environment,
+            applicationPaths,
+            modelAvailability: null,
+            runtimeAvailability: null);
 
     public static async Task<ApplicationCompositionResult> CreateAsync(
         WorkflowRuntimeEnvironment environment,
         IApplicationPaths? applicationPaths = null,
+        string? applicationRoot = null,
         CancellationToken cancellationToken = default)
     {
         ProductionModelAvailabilitySnapshot? modelAvailability = environment == WorkflowRuntimeEnvironment.Production
@@ -41,13 +46,19 @@ public static class ApplicationComposition
                 cancellationToken)
                 .ConfigureAwait(false)
             : null;
-        return CreateCore(environment, applicationPaths, modelAvailability);
+        ProductionRuntimeAvailabilitySnapshot? runtimeAvailability = environment == WorkflowRuntimeEnvironment.Production
+            ? await ProductionRuntimeAvailabilityProbe.InspectAsync(
+                applicationRoot ?? AppContext.BaseDirectory,
+                cancellationToken).ConfigureAwait(false)
+            : null;
+        return CreateCore(environment, applicationPaths, modelAvailability, runtimeAvailability);
     }
 
     private static ApplicationCompositionResult CreateCore(
         WorkflowRuntimeEnvironment environment,
         IApplicationPaths? applicationPaths,
-        ProductionModelAvailabilitySnapshot? modelAvailability)
+        ProductionModelAvailabilitySnapshot? modelAvailability,
+        ProductionRuntimeAvailabilitySnapshot? runtimeAvailability)
     {
         Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver =
             CreateLocalEnhancementResolver(applicationPaths);
@@ -56,7 +67,8 @@ public static class ApplicationComposition
             ProductionStageAvailabilityRegistry.Create(
                 enhancementResolver is not null,
                 modelAvailability,
-                pdf.PdfImporter is not null);
+                pdf.PdfImporter is not null,
+                runtimeAvailability);
         return environment switch
         {
             WorkflowRuntimeEnvironment.Production => CreateProduction(

@@ -107,8 +107,14 @@ public sealed class ApplicationCompositionSmokeTests
         IReadOnlyList<AutomaticStageStatus> resolved = ProductionStageAvailabilityRegistry.Create(
             localEnhancementConfigured: false,
             complete,
-            reviewedPdfiumConfigured: true);
+            reviewedPdfiumConfigured: true,
+            new ProductionRuntimeAvailabilitySnapshot(
+                true,
+                "Checksum-resolved release-approved OpenCV fixture."));
 
+        Assert.AreEqual(
+            AutomaticStageState.Approved,
+            resolved.Single(stage => stage.Stage == "axis").State);
         Assert.AreEqual(
             AutomaticStageState.Approved,
             resolved.Single(stage => stage.Stage == "ocr").State);
@@ -121,6 +127,80 @@ public sealed class ApplicationCompositionSmokeTests
         StringAssert.Contains(
             resolved.Single(stage => stage.Stage == "legends").Explanation,
             "no production legend detection adapter");
+    }
+
+    [TestMethod]
+    public async Task RuntimeAvailabilityRequiresExactBytesAndReleaseApproval()
+    {
+        string root = Path.Combine(
+            Path.GetTempPath(),
+            "GraphReader.ApplicationComposition.Runtime",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        try
+        {
+            string runtimePath = Path.Combine(root, "OpenCvSharpExtern.dll");
+            File.WriteAllBytes(runtimePath, [1, 3, 5, 7, 9]);
+            WriteRuntimeMetadata(root, RuntimeSha256(runtimePath), cleanMachineEvidence: true, releaseApproved: true);
+
+            ProductionRuntimeAvailabilitySnapshot approved =
+                await ProductionRuntimeAvailabilityProbe.InspectAsync(root, CancellationToken.None);
+            Assert.IsTrue(approved.AxisApproved);
+            StringAssert.Contains(approved.Evidence, RuntimeSha256(runtimePath));
+
+            File.AppendAllText(runtimePath, "tampered", Encoding.UTF8);
+            ProductionRuntimeAvailabilitySnapshot tampered =
+                await ProductionRuntimeAvailabilityProbe.InspectAsync(root, CancellationToken.None);
+            Assert.IsFalse(tampered.AxisApproved);
+            StringAssert.Contains(tampered.Evidence, "checksum");
+
+            string currentHash = RuntimeSha256(runtimePath);
+            WriteRuntimeMetadata(root, currentHash, cleanMachineEvidence: false, releaseApproved: false);
+            ProductionRuntimeAvailabilitySnapshot notApproved =
+                await ProductionRuntimeAvailabilityProbe.InspectAsync(root, CancellationToken.None);
+            Assert.IsFalse(notApproved.AxisApproved);
+            StringAssert.Contains(notApproved.Evidence, "lacks mandatory");
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task AsyncProductionCompositionUsesChecksumResolvedRuntimeEvidence()
+    {
+        string root = Path.Combine(
+            Path.GetTempPath(),
+            "GraphReader.ApplicationComposition.Runtime",
+            Guid.NewGuid().ToString("N"));
+        string modelRoot = Path.Combine(root, "models");
+        Directory.CreateDirectory(modelRoot);
+        try
+        {
+            string runtimePath = Path.Combine(root, "OpenCvSharpExtern.dll");
+            File.WriteAllBytes(runtimePath, [2, 4, 6, 8]);
+            WriteRuntimeMetadata(root, RuntimeSha256(runtimePath), cleanMachineEvidence: true, releaseApproved: true);
+
+            ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+                WorkflowRuntimeEnvironment.Production,
+                new ModelRootApplicationPaths(modelRoot),
+                applicationRoot: root,
+                cancellationToken: CancellationToken.None);
+
+            var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+            Assert.AreEqual(
+                AutomaticStageState.Approved,
+                workspace.AutomaticStages.Single(stage => stage.Stage == "axis").State);
+            Assert.AreEqual(
+                AutomaticStageState.Unavailable,
+                workspace.AutomaticStages.Single(stage => stage.Stage == "ocr").State);
+            Assert.IsFalse(workspace.UsesFakeGraphData);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
     }
 
     [TestMethod]
@@ -137,7 +217,7 @@ public sealed class ApplicationCompositionSmokeTests
             ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
                 WorkflowRuntimeEnvironment.Production,
                 new ModelRootApplicationPaths(root),
-                CancellationToken.None);
+                cancellationToken: CancellationToken.None);
 
             var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
             AutomaticStageStatus ocr = workspace.AutomaticStages.Single(stage => stage.Stage == "ocr");
@@ -159,7 +239,7 @@ public sealed class ApplicationCompositionSmokeTests
         ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
             WorkflowRuntimeEnvironment.Production,
             new ModelRootApplicationPaths(package.Root),
-            CancellationToken.None);
+            cancellationToken: CancellationToken.None);
 
         var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
         AutomaticStageStatus markers = workspace.AutomaticStages.Single(stage => stage.Stage == "markers");
@@ -246,6 +326,41 @@ public sealed class ApplicationCompositionSmokeTests
         DuplicateApprovalField,
         UnexpectedApprovalField,
     }
+
+    private static void WriteRuntimeMetadata(
+        string root,
+        string binarySha256,
+        bool cleanMachineEvidence,
+        bool releaseApproved)
+    {
+        var metadata = new Dictionary<string, object?>
+        {
+            ["schema"] = "graphreader.reviewed-opencv-runtime.v1",
+            ["runtimeId"] = "opencvsharpextern-source-audited",
+            ["profileId"] = "graphreader-axis-minimal-win-x64",
+            ["evidenceRootName"] = "integration-fixture",
+            ["binarySha256"] = binarySha256.ToLowerInvariant(),
+            ["replacedBinarySha256"] = new string('a', 64),
+            ["sourceRevisions"] = new Dictionary<string, object?>
+            {
+                ["openCvSharp"] = "fixture-opencvsharp",
+                ["openCv"] = "fixture-opencv",
+                ["vcpkg"] = "fixture-vcpkg",
+            },
+            ["provenanceValidated"] = true,
+            ["noticeReviewStatus"] = "complete",
+            ["maintainerAttestationStatus"] = "recorded-private",
+            ["cleanMachineEvidence"] = cleanMachineEvidence,
+            ["releaseApproved"] = releaseApproved,
+        };
+        File.WriteAllText(
+            Path.Combine(root, "reviewed-opencv-runtime.json"),
+            JsonSerializer.Serialize(metadata),
+            Encoding.UTF8);
+    }
+
+    private static string RuntimeSha256(string path) =>
+        Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(path)));
 
     private sealed class ApprovedModelPackageFixture : IDisposable
     {
