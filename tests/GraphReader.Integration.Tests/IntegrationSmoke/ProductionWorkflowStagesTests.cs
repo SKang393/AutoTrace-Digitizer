@@ -2221,12 +2221,13 @@ public sealed class ProductionWorkflowStagesTests
         public Task<ProductionArtifactMaskEvidence> DetectAsync(
             ProductionWorkflowDetectionRequest request,
             ProductionDecodedRaster raster,
-            ProductionAxisGeometryEvidence axisEvidence,
-            IReadOnlyList<ProductionOcrModelEvidence> ocrModelEvidence,
-            GraphReader.Ocr.OcrResult ocrResult,
+            ProductionDetectionMaskSeed seed,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            Assert.AreEqual(raster.InputSha256, seed.RasterSha256);
+            Assert.IsTrue(seed.CopyOcrMask().Values.Span.Contains(1f));
+            Assert.IsTrue(seed.CopyArtifactMask().Values.Span.Contains(1f));
             var mask = new float[checked(raster.Width * raster.Height)];
             mask[(40 * raster.Width) + 80] = 1;
             var envelope = new WorkflowVisionEnvelope(

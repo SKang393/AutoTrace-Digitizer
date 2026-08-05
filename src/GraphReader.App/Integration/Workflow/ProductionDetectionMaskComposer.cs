@@ -11,6 +11,79 @@ public sealed record ProductionOcrModelEvidence(
     string Task,
     WorkflowVisionEnvelope Envelope);
 
+public sealed class ProductionDetectionMaskSeed
+{
+    private readonly float[] ocrMask;
+    private readonly float[] artifactMask;
+
+    internal ProductionDetectionMaskSeed(
+        int width,
+        int height,
+        string rasterSha256,
+        WorkflowImageVariant rasterVariant,
+        float[] ocrMask,
+        float[] artifactMask)
+    {
+        ArgumentNullException.ThrowIfNull(ocrMask);
+        ArgumentNullException.ThrowIfNull(artifactMask);
+        int expectedLength = checked(width * height);
+        if (width <= 0 || height <= 0 ||
+            ocrMask.Length != expectedLength || artifactMask.Length != expectedLength ||
+            ocrMask.AsSpan().ContainsAnyExceptInRange(0f, 1f) ||
+            artifactMask.AsSpan().ContainsAnyExceptInRange(0f, 1f))
+        {
+            throw new ArgumentException(
+                "Detection seed masks must be normalized exclusive-ownership planes matching positive dimensions.");
+        }
+
+        Width = width;
+        Height = height;
+        RasterSha256 = rasterSha256;
+        RasterVariant = rasterVariant;
+        this.ocrMask = ocrMask;
+        this.artifactMask = artifactMask;
+    }
+
+    public int Width { get; }
+
+    public int Height { get; }
+
+    public string RasterSha256 { get; }
+
+    public WorkflowImageVariant RasterVariant { get; }
+
+    public MarkerMask CopyOcrMask() =>
+        new(Width, Height, (float[])ocrMask.Clone());
+
+    public MarkerMask CopyArtifactMask() =>
+        new(Width, Height, (float[])artifactMask.Clone());
+
+    internal ReadOnlyMemory<float> OcrMaskValues => ocrMask;
+
+    internal ReadOnlyMemory<float> ArtifactMaskValues => artifactMask;
+
+    public MarkerImageFrame CreateMarkerFrame(ProductionDecodedRaster raster)
+    {
+        ArgumentNullException.ThrowIfNull(raster);
+        if (raster.Width != Width || raster.Height != Height ||
+            raster.Variant != RasterVariant ||
+            !string.Equals(raster.InputSha256, RasterSha256, StringComparison.OrdinalIgnoreCase))
+        {
+            throw Failure("Detection seed masks cannot be attached to a different raster identity.");
+        }
+
+        return raster.CreateMarkerFrameBorrowingMasks(OcrMaskValues, ArtifactMaskValues);
+    }
+
+    private static ProductionWorkflowStageException Failure(string technicalMessage) =>
+        new(new ProductionWorkflowFailure(
+            ProductionWorkflowFailureCodes.DetectionEvidenceRejected,
+            "Errors.DetectionEvidenceRejected",
+            technicalMessage,
+            Recoverable: true,
+            "Rebuild the seed masks from the current OCR and axis evidence."));
+}
+
 public interface IProductionArtifactMaskAdapter
 {
     string AdapterId { get; }
@@ -20,9 +93,7 @@ public interface IProductionArtifactMaskAdapter
     Task<ProductionArtifactMaskEvidence> DetectAsync(
         ProductionWorkflowDetectionRequest request,
         ProductionDecodedRaster raster,
-        ProductionAxisGeometryEvidence axisEvidence,
-        IReadOnlyList<ProductionOcrModelEvidence> ocrModelEvidence,
-        OcrResult ocrResult,
+        ProductionDetectionMaskSeed seed,
         CancellationToken cancellationToken);
 }
 
@@ -77,6 +148,8 @@ public sealed class ProductionArtifactMaskEvidence
 
     public MarkerMask CopyMask() =>
         new(Width, Height, (float[])mask.Clone());
+
+    internal ReadOnlyMemory<float> MaskValues => mask;
 }
 
 public interface IProductionDetectionMaskComposer
@@ -116,8 +189,8 @@ public sealed class ProductionDetectionMaskEvidence
         RasterVariant = rasterVariant;
         SourceEnvelopes = Array.AsReadOnly(sourceEnvelopes.ToArray());
         ArtifactEnvelope = artifactEnvelope ?? throw new ArgumentNullException(nameof(artifactEnvelope));
-        this.ocrMask = (float[])ocrMask.Clone();
-        this.artifactMask = (float[])artifactMask.Clone();
+        this.ocrMask = ocrMask;
+        this.artifactMask = artifactMask;
         Warnings = Array.AsReadOnly(warnings.ToArray());
         OcrMaskedPixelCount = this.ocrMask.Count(static value => value >= 1);
         ArtifactMaskedPixelCount = this.artifactMask.Count(static value => value >= 1);
@@ -158,7 +231,7 @@ public sealed class ProductionDetectionMaskEvidence
                 "Detection masks cannot be attached to a different raster identity.");
         }
 
-        return raster.CreateMarkerFrame(CopyOcrMask(), CopyArtifactMask());
+        return raster.CreateMarkerFrameBorrowingMasks(ocrMask, artifactMask);
     }
 
     private static ProductionWorkflowStageException Failure(string technicalMessage) =>
@@ -224,13 +297,15 @@ public sealed class ProductionDetectionMaskComposer : IProductionDetectionMaskCo
                 "Continue in manual mode until checksum-bound artifact-mask evidence passes its fixed public gate."));
         }
 
+        ProductionDetectionMaskSeed seed = await Task.Run(
+            () => BuildSeedMasks(raster, axisEvidence, ocrResult, cancellationToken),
+            cancellationToken).ConfigureAwait(false);
+
         ProductionArtifactMaskEvidence artifactEvidence = await artifactMaskAdapter
             .DetectAsync(
                 request,
                 raster,
-                axisEvidence,
-                ocrModelEvidence,
-                ocrResult,
+                seed,
                 cancellationToken)
             .ConfigureAwait(false);
         ValidateArtifactEvidence(request, raster, artifactEvidence);
@@ -240,7 +315,7 @@ public sealed class ProductionDetectionMaskComposer : IProductionDetectionMaskCo
                 raster,
                 axisEvidence,
                 ocrEnvelopes,
-                ocrResult,
+                seed,
                 artifactEvidence,
                 cancellationToken),
             cancellationToken).ConfigureAwait(false);
@@ -250,13 +325,50 @@ public sealed class ProductionDetectionMaskComposer : IProductionDetectionMaskCo
         ProductionDecodedRaster raster,
         ProductionAxisGeometryEvidence axisEvidence,
         WorkflowVisionEnvelope[] ocrEnvelopes,
-        OcrResult ocrResult,
+        ProductionDetectionMaskSeed seed,
         ProductionArtifactMaskEvidence artifactEvidence,
+        CancellationToken cancellationToken)
+    {
+        float[] ocrMask = seed.OcrMaskValues.ToArray();
+        ReadOnlySpan<float> seededArtifactMask = seed.ArtifactMaskValues.Span;
+        float[] artifactMask = artifactEvidence.MaskValues.ToArray();
+        for (int index = 0; index < artifactMask.Length; index++)
+        {
+            if ((index & 0x3fff) == 0)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
+            artifactMask[index] = Math.Max(artifactMask[index], seededArtifactMask[index]);
+        }
+
+        var sources = new[] { axisEvidence.Envelope }
+            .Concat(ocrEnvelopes)
+            .Append(artifactEvidence.Envelope);
+        return new ProductionDetectionMaskEvidence(
+            raster.Width,
+            raster.Height,
+            raster.InputSha256,
+            raster.Variant,
+            sources,
+            artifactEvidence.Envelope,
+            ocrMask,
+            artifactMask,
+            artifactEvidence.Warnings.Concat(
+            [
+                "artifact_mask_scope:approved_provider_plus_axis_ticks_dividers_ambiguous",
+            ]));
+    }
+
+    private static ProductionDetectionMaskSeed BuildSeedMasks(
+        ProductionDecodedRaster raster,
+        ProductionAxisGeometryEvidence axisEvidence,
+        OcrResult ocrResult,
         CancellationToken cancellationToken)
     {
         int pixelCount = checked(raster.Width * raster.Height);
         var ocrMask = new float[pixelCount];
-        float[] artifactMask = artifactEvidence.CopyMask().Values.ToArray();
+        var artifactMask = new float[pixelCount];
 
         IEnumerable<OcrPolygon> textPolygons = ocrResult.Regions
             .Select(static region => region.Polygon)
@@ -280,22 +392,13 @@ public sealed class ProductionDetectionMaskComposer : IProductionDetectionMaskCo
             RasterizeStructureLine(artifactMask, raster, line, cancellationToken);
         }
 
-        var sources = new[] { axisEvidence.Envelope }
-            .Concat(ocrEnvelopes)
-            .Append(artifactEvidence.Envelope);
-        return new ProductionDetectionMaskEvidence(
+        return new ProductionDetectionMaskSeed(
             raster.Width,
             raster.Height,
             raster.InputSha256,
             raster.Variant,
-            sources,
-            artifactEvidence.Envelope,
             ocrMask,
-            artifactMask,
-            artifactEvidence.Warnings.Concat(
-            [
-                "artifact_mask_scope:approved_provider_plus_axis_ticks_dividers_ambiguous",
-            ]));
+            artifactMask);
     }
 
     private static void ValidateArtifactEvidence(
@@ -304,15 +407,14 @@ public sealed class ProductionDetectionMaskComposer : IProductionDetectionMaskCo
         ProductionArtifactMaskEvidence evidence)
     {
         WorkflowVisionEnvelope envelope = evidence.Envelope;
-        MarkerMask mask = evidence.CopyMask();
+        ReadOnlySpan<float> mask = evidence.MaskValues.Span;
         WorkflowVisionModel? model = envelope.Model;
         int expectedPixelCount = checked(raster.Width * raster.Height);
         if (evidence.Width != raster.Width || evidence.Height != raster.Height ||
             evidence.RasterVariant != raster.Variant ||
             !string.Equals(evidence.RasterSha256, raster.InputSha256, StringComparison.OrdinalIgnoreCase) ||
-            mask.Width != raster.Width || mask.Height != raster.Height ||
-            mask.Values.Length != expectedPixelCount ||
-            mask.Values.Span.ContainsAnyExceptInRange(0f, 1f) ||
+            mask.Length != expectedPixelCount ||
+            mask.ContainsAnyExceptInRange(0f, 1f) ||
             !envelope.Stage.Equals("markers", StringComparison.Ordinal) ||
             envelope.RunId != request.RunId || envelope.ProjectId != request.ProjectId ||
             envelope.PanelId != request.Panel.ImportedPanel.PanelId ||

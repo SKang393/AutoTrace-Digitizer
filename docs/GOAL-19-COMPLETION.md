@@ -28,6 +28,20 @@ clean-machine distribution evidence.
   now requires normalized, checksum-bound, original-pixel evidence for arrows,
   brackets, legends, and connecting-line intersections before the mask composer
   or complete detector can report approved.
+- Added a concrete lazy bridge for the existing frozen marker-center artifact
+  head. It does not add a model task or change a schema. It composes only when
+  the packaged production-approval evidence is a parsed and rehashed direct
+  full-frame artifact-mask report whose embedded dataset manifest, evaluator
+  source, and split seal pass their own hashes. The evaluator source is frozen
+  at SHA-256 `58c3cd9ec6bf2255c4b5d2cc9d865e2d37f58b0688a8bceda78ff523398a9f5f`;
+  the dataset schema, public seed, fixture hashes, inference-locked seal, and
+  exact fixture membership are validated. Manifest and report identities and
+  metrics must match, each fixture must have exact counts, and false
+  positives, false negatives, duplicates, arrow-shaft hits, arrowhead hits, and
+  every other prohibited-structure hit must be zero. A 2048 by 2048 regression
+  also proves repeated marker frames reuse private immutable planes instead of
+  cloning each full-resolution mask. The current rejected marker-center
+  manifest does not satisfy that gate.
 - Added atomic development-portable build, launch, and watcher scripts.
 - Added an opt-in, checksum-bound development-portable replacement for the
   exact reviewed source-built OpenCV runtime. It validates provenance and the
@@ -62,7 +76,7 @@ runtime SHA-256 after every stable checkpoint. The current verified behavior is:
 - dirty development build: no
 - running process: responsive visible window titled `Graph Auto Reader`, exact
   Chandler path supplied by `--open-image`
-- current full Release rerun: PASS, 706 passed and 9 expected skips
+- current full Release rerun: PASS, 722 passed and 9 expected opt-in skips
 - production-model IDs reported available: `0`
 - automatic stages reported unavailable: `6`
 - mutable root: `artifacts/dev-portable/Data`
@@ -106,7 +120,7 @@ in Production composition. Automatic stages currently report:
 | Enhancement | Unavailable | Exact runtime redistribution provenance is reviewed, but local-adapter, scientific, CPU fallback, clean-machine, production, and release approvals remain false. |
 | Axis | Unavailable | Deterministic adapter exists; OpenCvSharp native redistribution audit is blocked. |
 | OCR | Unavailable | Project numeric Candidates 1, 2, and 3 all failed the frozen validation gate and produced no ONNX; the authorized budget is exhausted. Exact official PP-OCRv5 archives are inventoried but lack artifact-scoped redistribution terms, so conversion remains blocked. |
-| Markers | Unavailable | Marker-center exhausted its budget after one public false positive. The unchanged-weight probability-runtime classifier passed selection, public-v3, disjoint confirmation-v3, exact package discovery, and CPU/DirectML runtime validation, but the stage still requires an approved center model and an approved checksum-bound artifact-mask provider. |
+| Markers | Unavailable | Marker-center exhausted its budget after one public false positive. The unchanged-weight probability-runtime classifier passed selection, public-v3, disjoint confirmation-v3, exact package discovery, and CPU/DirectML runtime validation. The concrete artifact-mask runtime bridge exists under the frozen marker-center task, but the current marker-center manifest lacks the separately required direct full-frame artifact-mask approval profile. The stage still requires an approved center model and checksum-bound artifact-mask evidence. |
 | Legends | Unavailable | Deterministic reasoner requires approved OCR and marker evidence. |
 | Phases | Unavailable | Deterministic reasoner requires approved axis, OCR, and marker evidence. |
 
@@ -289,7 +303,7 @@ files are not tracked.
 - Production runtime availability: 12/12 focused composition cases passed;
   exact OpenCV bytes plus provenance, notice, clean-machine, and release flags
   are required before the axis stage becomes approved.
-- Public scoreboard: 37/37 synthetic metric-contract gates passed in 218.297 ms.
+- Public scoreboard: 37/37 synthetic metric-contract gates passed in 195.215 ms.
 - `packaging/localization/Test-LocalizationAudit.ps1`: 9/9 passed.
 - repository localization audit: 177 keys, 0 missing, 0 extra, 0 duplicate,
   and 0 unresolved references.

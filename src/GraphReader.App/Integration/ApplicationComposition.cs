@@ -28,7 +28,8 @@ public sealed record ApplicationCompositionResult(
     IProductionRasterFrameDecoder? RasterFrameDecoder = null,
     IProductionDetectionMaskComposer? DetectionMaskComposer = null,
     IProductionOcrAdapter? OcrAdapter = null,
-    IProductionWorkflowDetectionAdapter? AutomaticDetectionAdapter = null);
+    IProductionWorkflowDetectionAdapter? AutomaticDetectionAdapter = null,
+    IProductionArtifactMaskAdapter? ArtifactMaskAdapter = null);
 
 public static class ApplicationComposition
 {
@@ -98,12 +99,14 @@ public static class ApplicationComposition
                     uiThreadGuard ?? CapturedUiThreadGuard.CaptureCurrentThread())
                 : null;
         var rasterFrameDecoder = new ProductionRasterFrameDecoder();
-        var detectionMaskComposer = new ProductionDetectionMaskComposer();
         ProductionAxisGeometryAdapter? axisAdapter = CreateApprovedAxisAdapter(
             runtimeAvailability,
             rasterFrameDecoder);
         (ProductionMarkerCenterAdapter? Adapter, DomainError? Error) markerCenter =
             CreateApprovedMarkerCenterAdapter(modelAvailability, inference?.Value);
+        (ProductionMarkerArtifactMaskAdapter? Adapter, DomainError? Error) artifactMask =
+            CreateApprovedArtifactMaskAdapter(modelAvailability, inference?.Value);
+        var detectionMaskComposer = new ProductionDetectionMaskComposer(artifactMask.Adapter);
         (ProductionMarkerClassificationAdapter? Adapter, DomainError? Error) markerClassifier =
             CreateApprovedMarkerClassifierAdapter(modelAvailability, inference?.Value);
         IProductionOcrAdapter? ocrAdapter = null;
@@ -133,6 +136,12 @@ public static class ApplicationComposition
         {
             adapterEvidence.Add(
                 $"Concrete production marker-center component '{markerCenter.Adapter.AdapterId}' is composed; the complete marker workflow adapter remains independently required.");
+        }
+
+        if (artifactMask.Adapter is not null)
+        {
+            adapterEvidence.Add(
+                $"Concrete production artifact-mask component '{artifactMask.Adapter.AdapterId}' is composed from the independently gated marker-center artifact head.");
         }
 
         if (ocrAdapter is null)
@@ -188,7 +197,8 @@ public static class ApplicationComposition
                 phaseAdapter,
                 rasterFrameDecoder,
                 detectionMaskComposer,
-                markerCenter.Error ?? markerClassifier.Error),
+                markerCenter.Error ?? markerClassifier.Error ?? artifactMask.Error,
+                artifactMask.Adapter),
             WorkflowRuntimeEnvironment.ManualPreview => new ApplicationCompositionResult(
                 environment,
                 new ManualPreviewWorkspaceService(
@@ -220,7 +230,8 @@ public static class ApplicationComposition
         IProductionPhaseReasoningAdapter? phaseReasoningAdapter,
         IProductionRasterFrameDecoder rasterFrameDecoder,
         ProductionDetectionMaskComposer detectionMaskComposer,
-        DomainError? markerAdapterError)
+        DomainError? markerAdapterError,
+        IProductionArtifactMaskAdapter? artifactMaskAdapter)
     {
         var imageImporter = new ImageImportService();
         var exportService = new ExportService();
@@ -274,7 +285,8 @@ public static class ApplicationComposition
             rasterFrameDecoder,
             detectionMaskComposer,
             ocrAdapter,
-            automaticDetectionAdapter);
+            automaticDetectionAdapter,
+            artifactMaskAdapter);
     }
 
     private static ProductionAxisGeometryAdapter? CreateApprovedAxisAdapter(
@@ -352,6 +364,38 @@ public static class ApplicationComposition
                     DomainErrorSeverity.Warning,
                     "Errors.ProductionWorkflowUnavailable",
                     $"The checksum-resolved marker-center model could not be composed: {exception.Message}",
+                    Recoverable: true,
+                    "continue_manual_or_repair_model_store"));
+        }
+    }
+
+    private static (ProductionMarkerArtifactMaskAdapter? Adapter, DomainError? Error)
+        CreateApprovedArtifactMaskAdapter(
+            ProductionModelAvailabilitySnapshot? modelAvailability,
+            ProductionInferenceRuntimeHost? runtimeHost)
+    {
+        if (runtimeHost is null ||
+            modelAvailability is null ||
+            !modelAvailability.ApprovedCpuModels.TryGetValue(
+                "marker_center",
+                out ResolvedProductionModel? model))
+        {
+            return (null, null);
+        }
+
+        try
+        {
+            return (ProductionMarkerArtifactMaskAdapter.Create(model, runtimeHost), null);
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            return (
+                null,
+                new DomainError(
+                    "ARTIFACT_MASK_ADAPTER_UNAVAILABLE",
+                    DomainErrorSeverity.Warning,
+                    "Errors.ProductionWorkflowUnavailable",
+                    $"The checksum-resolved marker-center artifact head could not be composed as an artifact mask: {exception.Message}",
                     Recoverable: true,
                     "continue_manual_or_repair_model_store"));
         }

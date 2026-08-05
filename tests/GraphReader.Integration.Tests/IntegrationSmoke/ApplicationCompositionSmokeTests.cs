@@ -19,6 +19,8 @@ public sealed class ApplicationCompositionSmokeTests
 {
     private const string ProductionModelStoreEnvironmentVariable =
         "GRAPHREADER_PRODUCTION_MODEL_STORE";
+    private static readonly int[] MarkerProviderInputShape = [1, 3, 128, 128];
+    private static readonly int[] MarkerProviderOutputShape = [1, 3, 128, 128];
 
     [TestMethod]
     public void OrdinaryRuntimeSelectionDefaultsToRealEmptyManualPreview()
@@ -403,8 +405,90 @@ public sealed class ApplicationCompositionSmokeTests
             Assert.IsNotNull(composition.MarkerCenterAdapter, composition.StartupError?.TechnicalMessage);
             Assert.IsTrue(composition.MarkerCenterAdapter.IsApproved);
             Assert.AreEqual("fixture-marker-center", composition.MarkerCenterAdapter.Model.ModelId);
+            Assert.IsNull(composition.ArtifactMaskAdapter);
+            Assert.IsFalse(composition.DetectionMaskComposer?.IsApproved);
+            Assert.AreEqual("ARTIFACT_MASK_ADAPTER_UNAVAILABLE", composition.StartupError?.Code);
             Assert.IsNotNull(composition.InferenceRuntimeHost);
             Assert.IsFalse(composition.InferenceRuntimeHost.IsInitialized);
+            Assert.IsFalse(workspace.UsesFakeGraphData);
+        }
+        finally
+        {
+            if (composition.InferenceRuntimeHost is not null)
+            {
+                await composition.InferenceRuntimeHost.DisposeAsync();
+            }
+        }
+    }
+
+    [TestMethod]
+    public async Task DirectArtifactGateComposesLazyMaskAdapterWithoutApprovingAutomaticWorkflow()
+    {
+        using var package = ApprovedModelPackageFixture.Create(
+            "marker_center",
+            includeArtifactMaskApproval: true);
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(package.Root),
+            cancellationToken: CancellationToken.None);
+        try
+        {
+            var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+            Assert.IsNotNull(composition.MarkerCenterAdapter, composition.StartupError?.TechnicalMessage);
+            Assert.IsNotNull(composition.ArtifactMaskAdapter, composition.StartupError?.TechnicalMessage);
+            Assert.IsTrue(composition.ArtifactMaskAdapter.IsApproved);
+            Assert.IsTrue(composition.DetectionMaskComposer?.IsApproved);
+            Assert.IsNull(composition.AutomaticDetectionAdapter);
+            Assert.AreEqual(
+                AutomaticStageState.Unavailable,
+                workspace.AutomaticStages.Single(stage => stage.Stage == "markers").State);
+            Assert.IsNotNull(composition.InferenceRuntimeHost);
+            Assert.IsFalse(composition.InferenceRuntimeHost.IsInitialized);
+            Assert.IsFalse(workspace.UsesFakeGraphData);
+        }
+        finally
+        {
+            if (composition.InferenceRuntimeHost is not null)
+            {
+                await composition.InferenceRuntimeHost.DisposeAsync();
+            }
+        }
+    }
+
+    [TestMethod]
+    [DataRow(ArtifactEvidenceFault.OpaqueStatusOnly)]
+    [DataRow(ArtifactEvidenceFault.MissingReviewedResources)]
+    [DataRow(ArtifactEvidenceFault.MismatchedModelIdentity)]
+    [DataRow(ArtifactEvidenceFault.ManifestMetricMismatch)]
+    [DataRow(ArtifactEvidenceFault.ArrowShaftHit)]
+    [DataRow(ArtifactEvidenceFault.DatasetSchemaMismatch)]
+    [DataRow(ArtifactEvidenceFault.UnsealedSplit)]
+    [DataRow(ArtifactEvidenceFault.FixtureIdentityMismatch)]
+    [DataRow(ArtifactEvidenceFault.EvaluatorSourceMismatch)]
+    public async Task ArtifactMaskApprovalRejectsManifestOnlyOrMismatchedDirectEvidence(
+        ArtifactEvidenceFault fault)
+    {
+        using var package = ApprovedModelPackageFixture.Create(
+            "marker_center",
+            includeArtifactMaskApproval: true,
+            artifactEvidenceFault: fault);
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(package.Root),
+            cancellationToken: CancellationToken.None);
+        try
+        {
+            var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+            Assert.IsNotNull(composition.MarkerCenterAdapter, composition.StartupError?.TechnicalMessage);
+            Assert.IsNull(composition.ArtifactMaskAdapter);
+            Assert.IsFalse(composition.DetectionMaskComposer?.IsApproved);
+            Assert.IsNull(composition.AutomaticDetectionAdapter);
+            Assert.AreEqual("ARTIFACT_MASK_ADAPTER_UNAVAILABLE", composition.StartupError?.Code);
+            Assert.AreEqual(
+                AutomaticStageState.Unavailable,
+                workspace.AutomaticStages.Single(stage => stage.Stage == "markers").State);
             Assert.IsFalse(workspace.UsesFakeGraphData);
         }
         finally
@@ -569,6 +653,20 @@ public sealed class ApplicationCompositionSmokeTests
         UnexpectedApprovalField,
     }
 
+    public enum ArtifactEvidenceFault
+    {
+        None,
+        OpaqueStatusOnly,
+        MissingReviewedResources,
+        MismatchedModelIdentity,
+        ManifestMetricMismatch,
+        ArrowShaftHit,
+        DatasetSchemaMismatch,
+        UnsealedSplit,
+        FixtureIdentityMismatch,
+        EvaluatorSourceMismatch,
+    }
+
     private static void WriteRuntimeMetadata(
         string root,
         string binarySha256,
@@ -613,7 +711,10 @@ public sealed class ApplicationCompositionSmokeTests
 
         public string Root { get; }
 
-        public static ApprovedModelPackageFixture Create(string task)
+        public static ApprovedModelPackageFixture Create(
+            string task,
+            bool includeArtifactMaskApproval = false,
+            ArtifactEvidenceFault artifactEvidenceFault = ArtifactEvidenceFault.None)
         {
             string root = Path.Combine(
                 Path.GetTempPath(),
@@ -637,7 +738,127 @@ public sealed class ApplicationCompositionSmokeTests
             File.WriteAllText(noticePath, "Apache-2.0 synthetic packaging fixture.", Encoding.UTF8);
             string noticeSha256 = Sha256(noticePath);
             string evidencePath = Path.Combine(evidenceDirectory, "fixture-benchmark.json");
-            File.WriteAllText(evidencePath, "{\"status\":\"pass\"}", Encoding.UTF8);
+            string[] fixtureIds = Enumerable.Range(1, 3)
+                .Select(index => $"public-artifact-{index:D2}")
+                .ToArray();
+            byte[] evaluatorSourceBytes = File.ReadAllBytes(Path.Combine(
+                RepositoryRoot.Find(),
+                "ml",
+                "markers",
+                "center",
+                "artifact_mask_public_gate.py"));
+            if (artifactEvidenceFault == ArtifactEvidenceFault.EvaluatorSourceMismatch)
+            {
+                evaluatorSourceBytes = evaluatorSourceBytes.Append((byte)'#').ToArray();
+            }
+
+            string evaluatorSourceSha256 = Sha256(evaluatorSourceBytes);
+            var datasetManifest = new Dictionary<string, object?>
+            {
+                ["schema"] = artifactEvidenceFault == ArtifactEvidenceFault.DatasetSchemaMismatch
+                    ? "graphreader.marker-artifact-mask-dataset.invalid"
+                    : "graphreader.marker-artifact-mask-dataset.v1",
+                ["scope"] = "public_synthetic",
+                ["private_data"] = false,
+                ["chandler_used"] = false,
+                ["seed"] = 393,
+                ["fixtures"] = fixtureIds.Select((fixtureId, index) => new Dictionary<string, object?>
+                {
+                    ["fixture_id"] = fixtureId,
+                    ["family"] = $"procedural-family-{index + 1}",
+                    ["image_sha256"] = Sha256(Encoding.UTF8.GetBytes($"image:{fixtureId}")),
+                    ["ground_truth_sha256"] = Sha256(Encoding.UTF8.GetBytes($"truth:{fixtureId}")),
+                }).ToArray(),
+            };
+            byte[] datasetManifestBytes = JsonSerializer.SerializeToUtf8Bytes(datasetManifest);
+            string datasetManifestSha256 = Sha256(datasetManifestBytes);
+            var splitSeal = new Dictionary<string, object?>
+            {
+                ["schema"] = "graphreader.marker-artifact-mask-split-seal.v1",
+                ["profile"] = ProductionMarkerArtifactMaskAdapter.ApprovalBenchmarkProfile,
+                ["sealed"] = artifactEvidenceFault != ArtifactEvidenceFault.UnsealedSplit,
+                ["selection_locked_before_inference"] = true,
+                ["private_data"] = false,
+                ["chandler_used"] = false,
+                ["dataset_manifest_sha256"] = datasetManifestSha256,
+                ["evaluator_source_sha256"] = evaluatorSourceSha256,
+                ["fixture_count"] = fixtureIds.Length,
+                ["fixture_ids"] = fixtureIds,
+            };
+            byte[] splitSealBytes = JsonSerializer.SerializeToUtf8Bytes(splitSeal);
+            string splitSealSha256 = Sha256(splitSealBytes);
+            if (includeArtifactMaskApproval &&
+                artifactEvidenceFault != ArtifactEvidenceFault.OpaqueStatusOnly)
+            {
+                var directEvidence = new Dictionary<string, object?>
+                {
+                    ["schema"] = "graphreader.marker-artifact-mask-gate.v1",
+                    ["profile"] = ProductionMarkerArtifactMaskAdapter.ApprovalBenchmarkProfile,
+                    ["status"] = "pass",
+                    ["scope"] = "public_synthetic_sealed",
+                    ["release_eligible"] = true,
+                    ["production_approval"] = true,
+                    ["private_data"] = false,
+                    ["chandler_used"] = false,
+                    ["provider"] = "cpu",
+                    ["seed_mask_scope"] = ProductionMarkerArtifactMaskAdapter.SeedMaskScope,
+                    ["coordinate_space"] = "original_pixels",
+                    ["model_sha256"] = artifactEvidenceFault == ArtifactEvidenceFault.MismatchedModelIdentity
+                        ? new string('f', 64)
+                        : payloadSha256,
+                    ["fixture_count"] = 3,
+                    ["exact_fixture_count"] = 3,
+                    ["downstream_false_positive_count"] = 0,
+                    ["downstream_false_negative_count"] = 0,
+                    ["downstream_duplicate_count"] = 0,
+                    ["prohibited_structure_hits"] = ZeroProhibitedStructureHits(
+                        arrowShaftHits: artifactEvidenceFault == ArtifactEvidenceFault.ArrowShaftHit ? 1 : 0),
+                    ["fixture_results"] = fixtureIds
+                        .Select((fixtureId, index) => new Dictionary<string, object?>
+                        {
+                            ["fixture_id"] = artifactEvidenceFault == ArtifactEvidenceFault.FixtureIdentityMismatch && index == 0
+                                ? "public-artifact-unsealed"
+                                : fixtureId,
+                            ["exact_count"] = true,
+                            ["false_positive_count"] = 0,
+                            ["false_negative_count"] = 0,
+                            ["duplicate_count"] = 0,
+                            ["prohibited_structure_hits"] = ZeroProhibitedStructureHits(
+                                arrowShaftHits: artifactEvidenceFault == ArtifactEvidenceFault.ArrowShaftHit && index == 0
+                                    ? 1
+                                    : 0),
+                        })
+                        .ToArray(),
+                };
+                if (artifactEvidenceFault != ArtifactEvidenceFault.MissingReviewedResources)
+                {
+                    directEvidence["reviewed_resources"] = new Dictionary<string, object?>
+                    {
+                        ["dataset_manifest"] = EmbeddedResource(
+                            "application/json",
+                            datasetManifestBytes,
+                            datasetManifestSha256),
+                        ["evaluator_source"] = EmbeddedResource(
+                            "text/x-python",
+                            evaluatorSourceBytes,
+                            evaluatorSourceSha256),
+                        ["split_seal"] = EmbeddedResource(
+                            "application/json",
+                            splitSealBytes,
+                            splitSealSha256),
+                    };
+                }
+
+                File.WriteAllText(
+                    evidencePath,
+                    JsonSerializer.Serialize(directEvidence),
+                    Encoding.UTF8);
+            }
+            else
+            {
+                File.WriteAllText(evidencePath, "{\"status\":\"pass\"}", Encoding.UTF8);
+            }
+
             string evidenceSha256 = Sha256(evidencePath);
 
             var manifest = new Dictionary<string, object?>
@@ -772,25 +993,67 @@ public sealed class ApplicationCompositionSmokeTests
                     ["consensus"] = "minimum-cost maximum one-to-one matching within 5 original pixels for original and enhanced detections",
                     ["unmatched_source_confidence_scale"] = 0.75,
                 };
-                manifest["benchmarks"] = new object[]
+                var markerBenchmarks = new List<object>
                 {
                     new Dictionary<string, object?>
                     {
                         ["profile"] = "graphreader-inference-cpu-directml-parity",
                         ["status"] = "pass",
-                        ["input_shape"] = new[] { 1, 3, 128, 128 },
-                        ["output_shape"] = new[] { 1, 3, 128, 128 },
+                        ["input_shape"] = MarkerProviderInputShape,
+                        ["output_shape"] = MarkerProviderOutputShape,
                     },
-                    new Dictionary<string, object?>
+                };
+                if (includeArtifactMaskApproval)
+                {
+                    markerBenchmarks.Add(new Dictionary<string, object?>
                     {
-                        ["profile"] = "application-composition-v1",
+                        ["profile"] = ProductionMarkerArtifactMaskAdapter.ApprovalBenchmarkProfile,
                         ["status"] = "pass",
                         ["release_eligible"] = true,
                         ["production_approval"] = true,
                         ["evidence_path"] = "artifacts/evidence/fixture-benchmark.json",
                         ["evidence_sha256"] = evidenceSha256,
-                    },
-                };
+                        ["model_sha256"] = payloadSha256,
+                        ["dataset_manifest_sha256"] = datasetManifestSha256,
+                        ["evaluator_source_sha256"] = evaluatorSourceSha256,
+                        ["split_seal_sha256"] = splitSealSha256,
+                        ["private_data"] = false,
+                        ["chandler_used"] = false,
+                        ["provider"] = "cpu",
+                        ["seed_mask_scope"] = ProductionMarkerArtifactMaskAdapter.SeedMaskScope,
+                        ["coordinate_space"] = "original_pixels",
+                        ["fixture_count"] = artifactEvidenceFault == ArtifactEvidenceFault.ManifestMetricMismatch
+                            ? 4
+                            : 3,
+                        ["exact_fixture_count"] = 3,
+                        ["downstream_false_positive_count"] = 0,
+                        ["downstream_false_negative_count"] = 0,
+                        ["downstream_duplicate_count"] = 0,
+                        ["prohibited_structure_hits"] = new Dictionary<string, object?>
+                        {
+                            ["text"] = 0,
+                            ["axis"] = 0,
+                            ["tick"] = 0,
+                            ["divider"] = 0,
+                            ["bracket"] = 0,
+                            ["arrow_shaft"] = 0,
+                            ["arrowhead"] = 0,
+                            ["legend"] = 0,
+                            ["line_intersection"] = 0,
+                        },
+                    });
+                }
+
+                markerBenchmarks.Add(new Dictionary<string, object?>
+                {
+                    ["profile"] = "application-composition-v1",
+                    ["status"] = "pass",
+                    ["release_eligible"] = true,
+                    ["production_approval"] = true,
+                    ["evidence_path"] = "artifacts/evidence/fixture-benchmark.json",
+                    ["evidence_sha256"] = evidenceSha256,
+                });
+                manifest["benchmarks"] = markerBenchmarks;
             }
 
             string manifestPath = Path.Combine(manifestDirectory, "manifest.json");
@@ -842,6 +1105,32 @@ public sealed class ApplicationCompositionSmokeTests
             return new ApprovedModelPackageFixture(root);
         }
 
+        private static Dictionary<string, object?> EmbeddedResource(
+            string mediaType,
+            byte[] content,
+            string sha256) =>
+            new()
+            {
+                ["media_type"] = mediaType,
+                ["encoding"] = "base64",
+                ["sha256"] = sha256,
+                ["content_base64"] = Convert.ToBase64String(content),
+            };
+
+        private static Dictionary<string, object?> ZeroProhibitedStructureHits(int arrowShaftHits = 0) =>
+            new()
+            {
+                ["text"] = 0,
+                ["axis"] = 0,
+                ["tick"] = 0,
+                ["divider"] = 0,
+                ["bracket"] = 0,
+                ["arrow_shaft"] = arrowShaftHits,
+                ["arrowhead"] = 0,
+                ["legend"] = 0,
+                ["line_intersection"] = 0,
+            };
+
         public void Dispose()
         {
             if (Directory.Exists(Root))
@@ -852,6 +1141,9 @@ public sealed class ApplicationCompositionSmokeTests
 
         private static string Sha256(string path) =>
             Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)));
+
+        private static string Sha256(byte[] bytes) =>
+            Convert.ToHexString(SHA256.HashData(bytes));
     }
 
     private sealed class ModelRootApplicationPaths(string modelRoot) : GraphReader.Domain.IApplicationPaths

@@ -118,6 +118,27 @@ public sealed class ProductionDecodedRaster
             new MarkerMask(Width, Height, artifactMask.Values.ToArray()));
     }
 
+    internal MarkerImageFrame CreateMarkerFrameBorrowingMasks(
+        ReadOnlyMemory<float> ocrMask,
+        ReadOnlyMemory<float> artifactMask)
+    {
+        var validatedOcrMask = new MarkerMask(Width, Height, ocrMask);
+        var validatedArtifactMask = new MarkerMask(Width, Height, artifactMask);
+        ValidateMask(validatedOcrMask, nameof(ocrMask));
+        ValidateMask(validatedArtifactMask, nameof(artifactMask));
+        return new MarkerImageFrame(
+            Width,
+            Height,
+            ChannelCount: 1,
+            normalizedLuminance,
+            Variant == WorkflowImageVariant.Original
+                ? MarkerSourceImage.Original
+                : MarkerSourceImage.Enhanced,
+            OriginalToFrame,
+            validatedOcrMask,
+            validatedArtifactMask);
+    }
+
     private void ValidateMask(MarkerMask mask, string parameterName)
     {
         int pixelCount = checked(Width * Height);
