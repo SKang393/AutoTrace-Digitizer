@@ -32,8 +32,15 @@ if (-not (Test-Path -LiteralPath $latestPath -PathType Leaf)) {
 }
 
 $latest = Get-Content -LiteralPath $latestPath -Raw | ConvertFrom-Json
+if ([int]$latest.schemaVersion -ne 2) {
+    throw "latest.json uses unsupported schema version '$($latest.schemaVersion)': $latestPath"
+}
 if ([string]::IsNullOrWhiteSpace([string]$latest.executable)) {
     throw "latest.json does not identify an executable: $latestPath"
+}
+$expectedExecutableSha256 = [string]$latest.executableSha256
+if ($expectedExecutableSha256 -notmatch '^[0-9a-f]{64}$') {
+    throw "latest.json does not contain a canonical executable SHA-256: $latestPath"
 }
 
 $executablePath = [System.IO.Path]::GetFullPath((Join-Path $outputRoot ([string]$latest.executable)))
@@ -43,6 +50,13 @@ if (-not $executablePath.StartsWith($outputPrefix, [StringComparison]::OrdinalIg
 }
 if (-not (Test-Path -LiteralPath $executablePath -PathType Leaf)) {
     throw "The latest development portable executable is missing: $executablePath"
+}
+$actualExecutableSha256 = (Get-FileHash -LiteralPath $executablePath -Algorithm SHA256).Hash.ToLowerInvariant()
+if (-not [string]::Equals(
+        $actualExecutableSha256,
+        $expectedExecutableSha256,
+        [StringComparison]::Ordinal)) {
+    throw "The latest development portable executable checksum does not match latest.json: $executablePath"
 }
 
 $buildDirectory = Split-Path -Parent $executablePath

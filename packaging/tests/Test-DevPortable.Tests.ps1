@@ -387,9 +387,12 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
         $captureExecutable,
         "@echo off`r`necho [%GRAPHREADER_REALESRGAN_RUNTIME_ROOT%] > `"%~dp0enhancement-environment.txt`"`r`necho [%GRAPHREADER_REALESRGAN_MANIFEST_PATH%] >> `"%~dp0enhancement-environment.txt`"`r`necho [%GRAPHREADER_PDFIUM_APPROVAL_PATH%] >> `"%~dp0enhancement-environment.txt`"`r`necho [%*] >> `"%~dp0enhancement-environment.txt`"`r`n")
     [System.IO.File]::WriteAllText((Join-Path $launcherIsolationBuild 'portable.mode'), '')
-    [System.IO.File]::WriteAllText(
-        (Join-Path $launcherIsolationRoot 'latest.json'),
-        '{"executable":"builds/isolated/capture.cmd"}')
+    $captureHash = (Get-FileHash -LiteralPath $captureExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
+    Write-JsonFile -Path (Join-Path $launcherIsolationRoot 'latest.json') -Value ([ordered]@{
+            schemaVersion = 2
+            executable = 'builds/isolated/capture.cmd'
+            executableSha256 = $captureHash
+        })
     $previousRuntimeRoot = [Environment]::GetEnvironmentVariable(
         'GRAPHREADER_REALESRGAN_RUNTIME_ROOT',
         'Process')
@@ -448,12 +451,22 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
         'Launcher did not preserve the startup image path containing spaces.'
     $passed++
 
+    [System.IO.File]::AppendAllText($captureExecutable, "rem tampered`r`n")
+    Invoke-ExpectedFailure @(
+        '-NoProfile',
+        '-ExecutionPolicy', 'Bypass',
+        '-File', (Join-Path $launcherIsolationRoot 'Run-Latest-DevPortable.ps1'),
+        '-Wait')
+    $passed++
+
     $launcherRoot = Join-Path $testRoot 'launcher traversal'
     New-Item -ItemType Directory -Path $launcherRoot | Out-Null
     Copy-Item -LiteralPath $launcherScript -Destination $launcherRoot
-    [System.IO.File]::WriteAllText(
-        (Join-Path $launcherRoot 'latest.json'),
-        '{"executable":"../outside.exe"}')
+    Write-JsonFile -Path (Join-Path $launcherRoot 'latest.json') -Value ([ordered]@{
+            schemaVersion = 2
+            executable = '../outside.exe'
+            executableSha256 = ('0' * 64)
+        })
 
     Invoke-ExpectedFailure @(
         '-NoProfile',
@@ -461,7 +474,7 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
         '-File', (Join-Path $launcherRoot 'Run-Latest-DevPortable.ps1'))
     $passed++
 
-    Write-Host "Development portable packaging tests passed: $passed/7"
+    Write-Host "Development portable packaging tests passed: $passed/8"
 }
 finally {
     if (Test-Path -LiteralPath $dirtyMarker -PathType Leaf) {

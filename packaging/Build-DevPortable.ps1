@@ -228,6 +228,7 @@ try {
             releaseApproved = $false
         }
     }
+    $executableSha256 = (Get-FileHash -LiteralPath $executablePath -Algorithm SHA256).Hash.ToLowerInvariant()
 
     Write-Utf8NoBom -Path (Join-Path $stagingDirectory 'portable.mode') -Content "development portable`r`n"
     Write-Utf8NoBom -Path (Join-Path $stagingDirectory 'DEVELOPMENT_BUILD.txt') -Content @"
@@ -247,13 +248,14 @@ OpenCV SHA-256: $($openCvRuntime.binarySha256)
             -Diagnostics $diagnostics)
     $unavailableStages = @('enhancement', 'axis', 'ocr', 'markers', 'legends', 'phases')
     $buildInfo = [ordered]@{
-        schemaVersion = 1
+        schemaVersion = 2
         version = $version
         commit = $commit
         shortCommit = $shortCommit
         dirty = $isDirty
         buildTimeUtc = $buildTimestamp.ToString('O')
         runtimeMode = 'ManualPreview'
+        executableSha256 = $executableSha256
         testsRun = @($testsRun)
         openCvRuntime = $openCvRuntime
         availableModelIds = $availableModelIds
@@ -310,7 +312,7 @@ OpenCV SHA-256: $($openCvRuntime.binarySha256)
     }
     $relativeBuildDirectory = $fullBuildDirectory.Substring($outputPrefix.Length)
     $latest = [ordered]@{
-        schemaVersion = 1
+        schemaVersion = 2
         version = $version
         commit = $commit
         shortCommit = $shortCommit
@@ -318,6 +320,7 @@ OpenCV SHA-256: $($openCvRuntime.binarySha256)
         buildTimeUtc = $buildTimestamp.ToString('O')
         buildDirectory = $relativeBuildDirectory.Replace('\', '/')
         executable = ($relativeBuildDirectory.Replace('\', '/') + '/GraphReader.App.exe')
+        executableSha256 = $executableSha256
         dataRoot = 'Data'
         openCvRuntime = [ordered]@{
             runtimeId = [string]$openCvRuntime.runtimeId

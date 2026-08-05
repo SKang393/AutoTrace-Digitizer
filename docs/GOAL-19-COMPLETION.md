@@ -248,8 +248,9 @@ files are not tracked.
 - focused manual workflow: 8/8 passed.
 - bounded WPF manual composition: 1/1 passed.
 - Goal 19 application/composition focus: 18/18 passed in reviewer verification.
-- `packaging/tests/Test-DevPortable.Tests.ps1`: 7/7 passed, including
-  fail-closed single-file and multi-file model discovery.
+- `packaging/tests/Test-DevPortable.Tests.ps1`: 8/8 passed, including
+  fail-closed single-file and multi-file model discovery plus pre-launch
+  executable checksum rejection.
 - `packaging/tests/Test-ReleaseArtifact.Tests.ps1`: 59/59 passed, including
   canonical UTC metadata, mandatory direct-evidence gates, and exact-binary
   rejection.

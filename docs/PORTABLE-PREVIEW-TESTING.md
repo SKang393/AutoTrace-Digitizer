@@ -47,8 +47,10 @@ processes are never modified or overwritten.
 .\packaging\Run-Latest-DevPortable.cmd
 ```
 
-The launcher reads `artifacts\dev-portable\latest.json`, launches its immutable
-build, and sets `GRAPHREADER_DEV_PORTABLE_DATA_ROOT` to the shared local root:
+The launcher reads `artifacts\dev-portable\latest.json`, verifies the required
+SHA-256 of the selected executable, launches its immutable build, and sets
+`GRAPHREADER_DEV_PORTABLE_DATA_ROOT` to the shared local root. Missing,
+malformed, or mismatched executable checksums fail before process start:
 
 ```text
 artifacts\dev-portable\Data
