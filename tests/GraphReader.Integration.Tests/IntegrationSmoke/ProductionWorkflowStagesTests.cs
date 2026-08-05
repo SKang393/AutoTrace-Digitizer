@@ -72,6 +72,51 @@ public sealed class ProductionWorkflowStagesTests
     }
 
     [TestMethod]
+    public async Task ProductionBatchCancellationRetainsCompletedImmutablePanelEvidence()
+    {
+        using var directory = new TemporaryDirectory();
+        byte[] sourceBytes = Convert.FromBase64String(OnePixelPng);
+        string firstPath = Path.Combine(directory.Path, "batch-first.png");
+        string secondPath = Path.Combine(directory.Path, "batch-second.png");
+        await File.WriteAllBytesAsync(firstPath, sourceBytes);
+        await File.WriteAllBytesAsync(secondPath, sourceBytes);
+        string firstHashBefore = Convert.ToHexString(SHA256.HashData(await File.ReadAllBytesAsync(firstPath)))
+            .ToLowerInvariant();
+        string secondHashBefore = Convert.ToHexString(SHA256.HashData(await File.ReadAllBytesAsync(secondPath)))
+            .ToLowerInvariant();
+        using var cancellation = new CancellationTokenSource();
+        var observer = new CancelSecondSourceObserver(secondPath, cancellation);
+        var store = new ProductionWorkflowPanelStore();
+        var stage = new ProductionWorkflowImportStage(store, new ImageImportService(observer));
+        Guid firstSourceId = Guid.Parse("20000000-0000-0000-0000-000000000006");
+
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => stage.ImportAsync(
+            new WorkflowImportRequest(
+                Guid.Parse("10000000-0000-0000-0000-000000000006"),
+                [
+                    new WorkflowSourceRequest(firstSourceId, WorkflowSourceKind.Image, firstPath),
+                    new WorkflowSourceRequest(
+                        Guid.Parse("20000000-0000-0000-0000-000000000007"),
+                        WorkflowSourceKind.Image,
+                        secondPath),
+                ]),
+            cancellation.Token));
+
+        Assert.HasCount(1, store.PanelIds);
+        ProductionPanelEvidence completed = store.Get(store.PanelIds.Single());
+        Assert.AreEqual(firstSourceId, completed.Panel.SourceId);
+        Assert.AreEqual(firstPath, completed.Panel.Original.Reference);
+        Assert.AreEqual(firstHashBefore, completed.Panel.Original.Sha256);
+        CollectionAssert.AreEqual(sourceBytes, completed.CopyOriginalBytes());
+        Assert.AreEqual(
+            firstHashBefore,
+            Convert.ToHexString(SHA256.HashData(await File.ReadAllBytesAsync(firstPath))).ToLowerInvariant());
+        Assert.AreEqual(
+            secondHashBefore,
+            Convert.ToHexString(SHA256.HashData(await File.ReadAllBytesAsync(secondPath))).ToLowerInvariant());
+    }
+
+    [TestMethod]
     public async Task PdfPanelWithoutEncodedDetectorBytesFailsWithStructuredCode()
     {
         using var directory = new TemporaryDirectory();
@@ -2003,6 +2048,27 @@ public sealed class ProductionWorkflowStagesTests
         string path = Path.Combine(directory, "source.png");
         await File.WriteAllBytesAsync(path, Convert.FromBase64String(OnePixelPng));
         return path;
+    }
+
+    private sealed class CancelSecondSourceObserver : IImageImportStageObserver
+    {
+        private readonly string secondSourcePath;
+        private readonly CancellationTokenSource cancellation;
+
+        public CancelSecondSourceObserver(string secondSourcePath, CancellationTokenSource cancellation)
+        {
+            this.secondSourcePath = Path.GetFullPath(secondSourcePath);
+            this.cancellation = cancellation;
+        }
+
+        public void Observe(ImageImportStage stage, string path, CancellationToken cancellationToken)
+        {
+            if (stage == ImageImportStage.BeforeHash &&
+                string.Equals(Path.GetFullPath(path), secondSourcePath, StringComparison.OrdinalIgnoreCase))
+            {
+                cancellation.Cancel();
+            }
+        }
     }
 
     private static string GetEvidenceDirectory(string scenario)

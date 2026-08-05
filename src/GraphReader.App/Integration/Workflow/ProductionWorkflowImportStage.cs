@@ -51,11 +51,10 @@ public sealed class ProductionWorkflowImportStage : IWorkflowImportStage
 
             pending.AddRange(imported);
             warnings.AddRange(imported.SelectMany(static panel => panel.Warnings));
-        }
-
-        foreach (ProductionPanelEvidence evidence in pending)
-        {
-            panelStore.Register(evidence);
+            foreach (ProductionPanelEvidence evidence in imported)
+            {
+                panelStore.Register(evidence);
+            }
         }
 
         return new WorkflowImportSnapshot(
