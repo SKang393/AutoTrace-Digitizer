@@ -1451,16 +1451,7 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
             panelId: null,
             entityId: result.RunId.ToString("D"),
             "Approved production workflow results projected by source and checksum identity",
-            JsonSerializer.SerializeToElement(new
-            {
-                kind = ProductionProjectionAuditKind,
-                point_identities = plans.SelectMany(plan => plan.ReviewPanel.Points.Select(point => new
-                {
-                    panel_id = plan.Tab.PanelId,
-                    point_id = point.PointId,
-                    detection_key = point.DetectionKey,
-                })).ToArray(),
-            }));
+            CreateProductionProjectionAuditDetails(result, plans));
         CurrentProject = CurrentProject with
         {
             Panels = CurrentProject.Panels.Select(panel =>
@@ -1911,6 +1902,71 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
             correction_id = Guid.NewGuid().ToString("D"),
             action,
             divider_id = dividerId,
+        });
+
+    private static JsonElement CreateProductionProjectionAuditDetails(
+        WorkflowRunResult result,
+        IReadOnlyList<ProductionProjectionPlan> plans) =>
+        JsonSerializer.SerializeToElement(new
+        {
+            kind = ProductionProjectionAuditKind,
+            run_id = result.RunId.ToString("D"),
+            point_identities = plans.SelectMany(plan => plan.ReviewPanel.Points.Select(point => new
+            {
+                panel_id = plan.Tab.PanelId,
+                point_id = point.PointId,
+                detection_key = point.DetectionKey,
+            })).ToArray(),
+            vision_provenance = plans
+                .SelectMany(static plan => plan.ReviewPanel.DetectionProvenance)
+                .OrderBy(static envelope => envelope.PanelId)
+                .ThenBy(static envelope => envelope.Stage, StringComparer.Ordinal)
+                .ThenBy(static envelope => envelope.Model?.ModelId, StringComparer.Ordinal)
+                .Select(static envelope => new
+                {
+                    contract_version = envelope.ContractVersion,
+                    run_id = envelope.RunId.ToString("D"),
+                    project_id = envelope.ProjectId.ToString("D"),
+                    panel_id = envelope.PanelId.ToString("D"),
+                    stage = envelope.Stage,
+                    stage_version = envelope.StageVersion,
+                    input_sha256 = envelope.InputSha256,
+                    coordinate_space = envelope.CoordinateSpace,
+                    model = envelope.Model is null
+                        ? null
+                        : new
+                        {
+                            model_id = envelope.Model.ModelId,
+                            version = envelope.Model.Version,
+                            sha256 = envelope.Model.Sha256,
+                            provider = envelope.Model.Provider,
+                        },
+                    timing = new
+                    {
+                        preprocess_milliseconds = envelope.Timing.PreprocessMilliseconds,
+                        inference_milliseconds = envelope.Timing.InferenceMilliseconds,
+                        postprocess_milliseconds = envelope.Timing.PostprocessMilliseconds,
+                        total_milliseconds = envelope.Timing.TotalMilliseconds,
+                    },
+                    confidence = envelope.Confidence,
+                    warnings = envelope.Warnings.ToArray(),
+                    transforms = envelope.Transforms.Select(static transform => new
+                    {
+                        transform_id = transform.TransformId,
+                        input_coordinate_space = transform.InputCoordinateSpace,
+                        output_coordinate_space = transform.OutputCoordinateSpace,
+                        input_to_output_matrix = transform.InputToOutputMatrix.ToArray(),
+                        output_to_input_matrix = transform.OutputToInputMatrix?.ToArray(),
+                        lossy = transform.Lossy,
+                    }).ToArray(),
+                }).ToArray(),
+            workflow_steps = result.Steps.Select(static step => new
+            {
+                step = step.Step.ToString(),
+                elapsed_milliseconds = step.Elapsed.TotalMilliseconds,
+                item_count = step.ItemCount,
+            }).ToArray(),
+            workflow_warnings = result.Review.Warnings.ToArray(),
         });
 
     private void RestoreProductionCorrectionState(ProjectDocument project)
@@ -2476,13 +2532,26 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
     {
         PanelId panelId = PanelId.FromGuid(Guid.Parse(tab.PanelId!));
         SourceId sourceId = SourceId.FromGuid(Guid.Parse(tab.SourceId!));
-        PhaseRecord[] regionPhases = BuildRegionPhases(tab);
-        PhaseRecord[] semanticProbePhases = BuildSemanticProbePhases(tab, regionPhases.Length);
-        PhaseRecord[] phases = [.. regionPhases, .. semanticProbePhases];
-        Dictionary<SeriesId, SeriesRecord> existingSeries = CurrentProject.Panels
-            .FirstOrDefault(panel => panel.PanelId == panelId)?
+        PanelRecord? existingPanel = CurrentProject.Panels
+            .FirstOrDefault(panel => panel.PanelId == panelId);
+        PhaseRecord[] generatedRegionPhases = BuildRegionPhases(tab);
+        PhaseRecord[] generatedSemanticProbePhases = BuildSemanticProbePhases(
+            tab,
+            generatedRegionPhases.Length);
+        PhaseRecord[] generatedPhases = [.. generatedRegionPhases, .. generatedSemanticProbePhases];
+        bool preservePhaseEvidence = existingPanel is not null &&
+            PhaseLayoutMatches(existingPanel.Phases, generatedPhases);
+        PhaseRecord[] phases = preservePhaseEvidence
+            ? existingPanel!.Phases.ToArray()
+            : generatedPhases;
+        PhaseRecord[] regionPhases = phases.Take(generatedRegionPhases.Length).ToArray();
+        PhaseRecord[] semanticProbePhases = phases.Skip(generatedRegionPhases.Length).ToArray();
+        Dictionary<SeriesId, SeriesRecord> existingSeries = existingPanel?
             .Series.ToDictionary(static series => series.SeriesId)
             ?? new Dictionary<SeriesId, SeriesRecord>();
+        Dictionary<PointId, PointRecord> existingPoints = existingPanel?
+            .Points.ToDictionary(static point => point.PointId)
+            ?? new Dictionary<PointId, PointRecord>();
         Dictionary<string, PhaseRecord> pointPhases = tab.Points.ToDictionary(
             static point => point.PointId,
             point => ResolvePointPhase(tab, point, regionPhases, semanticProbePhases));
@@ -2498,6 +2567,12 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         {
             SeriesId seriesId = SeriesId.FromGuid(Guid.Parse(item.SeriesId));
             _ = existingSeries.TryGetValue(seriesId, out SeriesRecord? prior);
+            bool retainedIdentity = prior is not null &&
+                string.Equals(prior.Symbol, item.Symbol, StringComparison.Ordinal) &&
+                prior.Shape == item.Shape &&
+                prior.Fill == item.Fill &&
+                string.Equals(prior.DisplayName, item.Label, StringComparison.Ordinal) &&
+                prior.SemanticRole == item.SemanticRole;
             return new SeriesRecord(
                 seriesId,
                 item.Symbol,
@@ -2518,48 +2593,79 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
                 item.SemanticRole == SemanticRole.Intervention
                     ? prior?.ApplicableProbeSeriesIds.Where(validProbeIds.Contains).ToArray() ?? []
                     : [],
-                UserConfirmedName: true);
+                UserConfirmedName: retainedIdentity
+                    ? prior!.UserConfirmedName
+                    : true);
         }).ToArray();
         PointRecord[] points = tab.Points.Select(point =>
         {
+            PointId pointId = PointId.FromGuid(Guid.Parse(point.PointId));
+            _ = existingPoints.TryGetValue(pointId, out PointRecord? prior);
             PhaseRecord phase = pointPhases[point.PointId];
             point.PhaseId = phase.PhaseId.Value.ToString("D");
             point.PhaseCode = phase.Code;
             ManualPointXState xState = GetPointXState(tab, point);
+            var originalPixel = new DomainPixelPoint(point.PixelX, point.PixelY);
+            SeriesId seriesId = SeriesId.FromGuid(Guid.Parse(point.SeriesId));
+            double? graphX = xState.HasGraphX ? point.GraphX : null;
+            double? graphY = tab.Calibration is null ? null : point.GraphY;
+            PointModification[] modificationHistory = GetPointModificationHistory(point.PointId);
+            bool manuallyCorrected = prior is null ||
+                modificationHistory.Length > 0 ||
+                prior.SeriesId != seriesId ||
+                prior.PhaseId != phase.PhaseId ||
+                prior.OriginalPixel != originalPixel ||
+                prior.GraphX != graphX ||
+                prior.GraphY != graphY ||
+                prior.ObservationIndex != point.ObservationIndex ||
+                prior.PrintedXValue != xState.PrintedXValue ||
+                prior.EstimatedXValue != xState.EstimatedXValue ||
+                prior.XSource != xState.Source;
             return new PointRecord(
-                PointId.FromGuid(Guid.Parse(point.PointId)),
-                MarkerId: null,
-                SeriesId.FromGuid(Guid.Parse(point.SeriesId)),
+                pointId,
+                prior?.MarkerId,
+                seriesId,
                 phase.PhaseId,
-                new DomainPixelPoint(point.PixelX, point.PixelY),
-                xState.HasGraphX ? point.GraphX : null,
-                tab.Calibration is null ? null : point.GraphY,
+                originalPixel,
+                graphX,
+                graphY,
                 point.ObservationIndex,
                 xState.PrintedXValue,
                 xState.EstimatedXValue,
                 xState.Source,
                 xState.Confidence,
-                tab.Calibration?.Confidence ?? 0,
-                1,
-                "manual",
-                ModelVersion: null,
-                ReviewStatus.Corrected,
-                ModificationHistory: GetPointModificationHistory(point.PointId));
+                manuallyCorrected
+                    ? tab.Calibration?.Confidence ?? 0
+                    : prior!.YConfidence,
+                prior?.PointConfidence ?? 1,
+                prior?.SourceStage ?? "manual",
+                prior?.ModelVersion,
+                manuallyCorrected
+                    ? ReviewStatus.Corrected
+                    : prior!.ReviewStatus,
+                modificationHistory);
         }).ToArray();
+        CalibrationRecord? generatedCalibration = ToDomainCalibration(tab.Calibration);
+        CalibrationRecord? calibration = existingPanel?.Calibration is { } retainedCalibration &&
+            tab.Calibration is { } tabCalibration &&
+            FromDomainCalibration(retainedCalibration) is { } retainedTabCalibration &&
+            CalibrationMatches(tabCalibration, retainedTabCalibration)
+                ? retainedCalibration
+                : generatedCalibration;
         return new PanelRecord(
             panelId,
             sourceId,
             tab.PageNumber,
             tab.DisplayName,
-            Participant: null,
-            new CropRectangle(0, 0, tab.PixelWidth, tab.PixelHeight),
-            Transforms: [],
+            existingPanel?.Participant,
+            existingPanel?.Crop ?? new CropRectangle(0, 0, tab.PixelWidth, tab.PixelHeight),
+            existingPanel?.Transforms ?? [],
             Enhancement: _enhancementByTab.TryGetValue(tab.TabId, out JsonElement enhancement)
                 ? enhancement.Clone()
-                : null,
-            ToDomainCalibration(tab.Calibration),
-            OcrRegions: [],
-            Markers: [],
+                : existingPanel?.Enhancement?.Clone(),
+            calibration,
+            existingPanel?.OcrRegions ?? [],
+            existingPanel?.Markers ?? [],
             series,
             points,
             phases,
@@ -2569,7 +2675,36 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
                 series.Where(static item => item.SemanticRole == SemanticRole.Intervention)
                     .Select(static item => item.SeriesId)
                     .ToArray()),
-            Validation: null);
+            existingPanel?.Validation?.Clone());
+    }
+
+    private static bool PhaseLayoutMatches(
+        IReadOnlyList<PhaseRecord> retained,
+        PhaseRecord[] current)
+    {
+        if (retained.Count != current.Length)
+        {
+            return false;
+        }
+
+        for (int index = 0; index < current.Length; index++)
+        {
+            PhaseRecord left = retained[index];
+            PhaseRecord right = current[index];
+            if (left.Order != right.Order ||
+                !string.Equals(left.Code, right.Code, StringComparison.Ordinal) ||
+                left.NormalizedType != right.NormalizedType ||
+                !string.Equals(left.LabelText, right.LabelText, StringComparison.Ordinal) ||
+                left.ScreenXMin != right.ScreenXMin ||
+                left.ScreenXMax != right.ScreenXMax ||
+                left.BoundaryLeftId != right.BoundaryLeftId ||
+                left.BoundaryRightId != right.BoundaryRightId)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static CalibrationRecord? ToDomainCalibration(ManualCalibrationState? calibration)

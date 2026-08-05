@@ -1021,26 +1021,98 @@ public sealed class ProductionWorkflowStagesTests
             pointId.ToString("D"), "key", 0.5, 0.5, 0.95, WorkflowImageVariant.Original,
             WorkflowReviewStatus.Accepted, "●", "circle", "filled", seriesId.Value.ToString("D"),
             phaseId.Value.ToString("D"), 1, 50, "markers", "1", false);
+        MarkerId markerId = MarkerId.New();
+        OcrRegionId ocrRegionId = OcrRegionId.New();
+        var transform = new TransformRecord(
+            TransformId.New(),
+            TransformKind.Affine,
+            CoordinateSpace.OriginalPixels,
+            CoordinateSpace.PanelPixels,
+            [1, 0, 0, 0, 1, 0, 0, 0, 1],
+            [1, 0, 0, 0, 1, 0, 0, 0, 1],
+            JsonSerializer.SerializeToElement(new { source = "approved-production-fixture" }),
+            Lossy: false);
+        var ocrEvidence = new OcrEvidence(
+            ocrRegionId,
+            [
+                new GraphReader.Domain.PixelPoint(0.1, 0.1),
+                new GraphReader.Domain.PixelPoint(0.2, 0.1),
+                new GraphReader.Domain.PixelPoint(0.2, 0.2),
+                new GraphReader.Domain.PixelPoint(0.1, 0.2),
+            ],
+            "50",
+            [new OcrAlternative("50", 0.99)],
+            OcrRole.YTick,
+            0.99,
+            SourceImageKind.Original,
+            ReviewStatus.Accepted);
+        var marker = new MarkerRecord(
+            markerId,
+            new GraphReader.Domain.PixelPoint(0.5, 0.5),
+            0.05,
+            MarkerShape.Circle,
+            MarkerFill.Filled,
+            "●",
+            0,
+            0.95,
+            0.96,
+            0.97,
+            Embedding: null,
+            CandidateSeriesId: seriesId,
+            SourceImageKind.Original,
+            ReviewStatus.Accepted);
         var domainPoint = new PointRecord(
-            PointId.FromGuid(pointId), null, seriesId, phaseId,
+            PointId.FromGuid(pointId), markerId, seriesId, phaseId,
             new GraphReader.Domain.PixelPoint(0.5, 0.5), 1, 50, 1, 1, null,
             PointXSource.Printed, 1, 1, 0.95, "markers", "1", ReviewStatus.Accepted, []);
+        Guid productionRunId = Guid.NewGuid();
+        var identityTransform = new WorkflowTransformProvenance(
+            "marker-original-identity",
+            "original_pixels",
+            "original_pixels",
+            [1, 0, 0, 0, 1, 0, 0, 0, 1],
+            [1, 0, 0, 0, 1, 0, 0, 0, 1],
+            lossy: false);
         var envelope = new WorkflowVisionEnvelope(
-            1, Guid.NewGuid(), workspace.CurrentProject.ProjectId.Value, imported.PanelId, "markers", "1",
-            imported.Original.Sha256, null, new WorkflowVisionTiming(0, 0, 0, 0), 0.95);
+            1,
+            productionRunId,
+            workspace.CurrentProject.ProjectId.Value,
+            imported.PanelId,
+            "markers",
+            "1",
+            imported.Original.Sha256,
+            new WorkflowVisionModel(
+                "project-marker-center",
+                "1.0.0",
+                new string('b', 64),
+                "cpu"),
+            new WorkflowVisionTiming(1, 2, 3, 6),
+            0.95,
+            ["Text and axis masks were applied."],
+            [identityTransform]);
         var exportEvidence = new ProductionPanelExportEvidence(
             new ExportCalibration(ExportCalibrationStatus.Valid, true, true, true, 1, 1),
             [new ExportPhase(phaseId.Value, 1, "a", ExportPhaseType.Baseline, "Baseline", 0, 1, 0.95)],
             [new ExportSeries(seriesId.Value, "●", "Detected", ExportSeriesRole.Intervention, [pointId], 0.95)],
             [new ExportSeriesRelation(seriesId.Value, null)],
-            [new ProductionPointExportEvidence(pointId, null, 1, 1, null, ExportXValueSource.Printed, 1, 1)],
+            [new ProductionPointExportEvidence(pointId, markerId.Value, 1, 1, null, ExportXValueSource.Printed, 1, 1)],
             [envelope],
             projectionEvidence: new ProductionPanelProjectionEvidence(
-                calibration, [phase], [series], [domainPoint]));
+                calibration,
+                [phase],
+                [series],
+                [domainPoint],
+                [transform],
+                [ocrEvidence],
+                [marker],
+                "Participant fixture"));
         store.SetExportEvidence(imported.PanelId, exportEvidence);
         var reviewPanel = new WorkflowReviewPanel(prepared, [point], [envelope]);
-        var result = new WorkflowRunResult(Guid.NewGuid(), new WorkflowReviewState(
-            workspace.CurrentProject.ProjectId.Value, [reviewPanel]), []);
+        var result = new WorkflowRunResult(productionRunId, new WorkflowReviewState(
+            workspace.CurrentProject.ProjectId.Value,
+            [reviewPanel],
+            warnings: ["Production review warning retained."]),
+            [new WorkflowStepRecord(WorkflowStep.Detect, TimeSpan.FromMilliseconds(7), 1)]);
 
         ProductionReviewProjectionResult firstProjection = workspace.ProjectWithEvidence(result, store);
         Assert.IsTrue(firstProjection.Succeeded);
@@ -1060,7 +1132,97 @@ public sealed class ProductionWorkflowStagesTests
         Assert.AreEqual(series.Shape, projectedPanel.Series.Single().Shape);
         Assert.AreEqual(series.Fill, projectedPanel.Series.Single().Fill);
         CollectionAssert.AreEqual(new[] { domainPoint }, projectedPanel.Points.ToArray());
+        Assert.AreEqual("Participant fixture", projectedPanel.Participant);
+        Assert.AreEqual(transform.TransformId, projectedPanel.Transforms.Single().TransformId);
+        Assert.AreEqual(ocrRegionId, projectedPanel.OcrRegions.Single().RegionId);
+        Assert.AreEqual(markerId, projectedPanel.Markers.Single().MarkerId);
         Assert.AreEqual(imported.Original.Sha256, tab.SourceSha256);
+        AuditEvent projectionAudit = workspace.CurrentProject.Audit.Events.Single(auditEvent =>
+            auditEvent.Details is JsonElement details &&
+            details.TryGetProperty("kind", out JsonElement kind) &&
+            kind.GetString() == "production_review_projection");
+        JsonElement projectionDetails = projectionAudit.Details!.Value;
+        Assert.AreEqual(productionRunId.ToString("D"), projectionDetails.GetProperty("run_id").GetString());
+        JsonElement persistedEnvelope = projectionDetails.GetProperty("vision_provenance")
+            .EnumerateArray()
+            .Single();
+        Assert.AreEqual("markers", persistedEnvelope.GetProperty("stage").GetString());
+        Assert.AreEqual(imported.Original.Sha256, persistedEnvelope.GetProperty("input_sha256").GetString());
+        Assert.AreEqual("original_pixels", persistedEnvelope.GetProperty("coordinate_space").GetString());
+        Assert.AreEqual(0.95, persistedEnvelope.GetProperty("confidence").GetDouble(), 0);
+        JsonElement persistedModel = persistedEnvelope.GetProperty("model");
+        Assert.AreEqual("project-marker-center", persistedModel.GetProperty("model_id").GetString());
+        Assert.AreEqual(new string('b', 64), persistedModel.GetProperty("sha256").GetString());
+        Assert.AreEqual("cpu", persistedModel.GetProperty("provider").GetString());
+        Assert.AreEqual(2, persistedEnvelope.GetProperty("timing")
+            .GetProperty("inference_milliseconds").GetDouble(), 0);
+        Assert.AreEqual(
+            "Text and axis masks were applied.",
+            persistedEnvelope.GetProperty("warnings").EnumerateArray().Single().GetString());
+        JsonElement persistedTransform = persistedEnvelope.GetProperty("transforms")
+            .EnumerateArray()
+            .Single();
+        Assert.AreEqual("marker-original-identity", persistedTransform.GetProperty("transform_id").GetString());
+        Assert.IsFalse(persistedTransform.GetProperty("lossy").GetBoolean());
+        Assert.HasCount(9, persistedTransform.GetProperty("output_to_input_matrix").EnumerateArray());
+        JsonElement persistedStep = projectionDetails.GetProperty("workflow_steps").EnumerateArray().Single();
+        Assert.AreEqual(nameof(WorkflowStep.Detect), persistedStep.GetProperty("step").GetString());
+        Assert.AreEqual(7, persistedStep.GetProperty("elapsed_milliseconds").GetDouble(), 0);
+        Assert.AreEqual(
+            "Production review warning retained.",
+            projectionDetails.GetProperty("workflow_warnings").EnumerateArray().Single().GetString());
+        string provenanceProjectPath = Path.Combine(directory.Path, "production-provenance.garproj");
+        DomainResult<ProjectSaveReceipt> provenanceSave = await workspace.SaveProjectAsync(
+            provenanceProjectPath,
+            CancellationToken.None);
+        Assert.IsTrue(
+            provenanceSave.IsSuccess,
+            string.Join(" | ", provenanceSave.Errors.Select(static error => error.TechnicalMessage)));
+        var reopenedProvenanceWorkspace = new ProjectionWorkspace();
+        await reopenedProvenanceWorkspace.OpenProjectAsync(
+            provenanceProjectPath,
+            CancellationToken.None);
+        JsonElement reopenedProjectionDetails = reopenedProvenanceWorkspace.CurrentProject.Audit.Events
+            .Single(auditEvent => auditEvent.Details is JsonElement details &&
+                details.TryGetProperty("kind", out JsonElement kind) &&
+                kind.GetString() == "production_review_projection")
+            .Details!.Value;
+        Assert.IsTrue(JsonElement.DeepEquals(projectionDetails, reopenedProjectionDetails));
+        PanelRecord persistedProjectedPanel = workspace.CurrentProject.Panels.Single();
+        Assert.AreEqual("Participant fixture", persistedProjectedPanel.Participant);
+        Assert.AreEqual(transform.TransformId, persistedProjectedPanel.Transforms.Single().TransformId);
+        Assert.AreEqual(ocrRegionId, persistedProjectedPanel.OcrRegions.Single().RegionId);
+        Assert.AreEqual(markerId, persistedProjectedPanel.Markers.Single().MarkerId);
+        Assert.AreEqual(calibration.CalibrationId, persistedProjectedPanel.Calibration!.CalibrationId);
+        Assert.AreEqual("markers", persistedProjectedPanel.Points.Single().SourceStage);
+        Assert.AreEqual("1", persistedProjectedPanel.Points.Single().ModelVersion);
+        Assert.AreEqual(ReviewStatus.Accepted, persistedProjectedPanel.Points.Single().ReviewStatus);
+        PanelRecord reopenedPersistedPanel = reopenedProvenanceWorkspace.CurrentProject.Panels.Single();
+        Assert.AreEqual(transform.TransformId, reopenedPersistedPanel.Transforms.Single().TransformId);
+        Assert.AreEqual(ocrRegionId, reopenedPersistedPanel.OcrRegions.Single().RegionId);
+        Assert.AreEqual(markerId, reopenedPersistedPanel.Markers.Single().MarkerId);
+        Assert.AreEqual("markers", reopenedPersistedPanel.Points.Single().SourceStage);
+        Assert.AreEqual("1", reopenedPersistedPanel.Points.Single().ModelVersion);
+        string productionExportRoot = Path.Combine(directory.Path, "production-export");
+        ExportResult productionExport = await workspace.ExportAsync(
+            tab.TabId,
+            productionExportRoot,
+            CancellationToken.None);
+        Assert.IsTrue(
+            productionExport.Succeeded,
+            string.Join(" | ", productionExport.Failures.Select(static failure => failure.TechnicalMessage)));
+        ExtendedAuditRow exportedAuditRow = productionExport.AuditArtifacts
+            .SelectMany(static artifact => artifact.Rows)
+            .First();
+        Assert.AreEqual("markers", exportedAuditRow.SourceStage);
+        Assert.AreEqual("1", exportedAuditRow.ModelVersion);
+        Assert.AreEqual(ExportReviewStatus.Accepted, exportedAuditRow.ReviewStatus);
+        persistedProjectedPanel = workspace.CurrentProject.Panels.Single();
+        Assert.AreEqual(transform.TransformId, persistedProjectedPanel.Transforms.Single().TransformId);
+        Assert.AreEqual(ocrRegionId, persistedProjectedPanel.OcrRegions.Single().RegionId);
+        Assert.AreEqual(markerId, persistedProjectedPanel.Markers.Single().MarkerId);
+        Assert.AreEqual("markers", persistedProjectedPanel.Points.Single().SourceStage);
+        Assert.AreEqual("1", persistedProjectedPanel.Points.Single().ModelVersion);
 
         var mismatchedPoint = point with { Shape = "square" };
         var mismatch = new WorkflowRunResult(Guid.NewGuid(), new WorkflowReviewState(
@@ -1072,7 +1234,7 @@ public sealed class ProductionWorkflowStagesTests
         Assert.HasCount(1, tab.SeriesCards);
         Assert.HasCount(1, tab.Points);
         Assert.AreSame(immutableImage, tab.ImageSource);
-        Assert.AreEqual(projectedPanel, workspace.CurrentProject.Panels.Single());
+        Assert.AreSame(persistedProjectedPanel, workspace.CurrentProject.Panels.Single());
 
         Guid secondPointId = Guid.NewGuid();
         SeriesId secondSeriesId = SeriesId.New();
@@ -1118,7 +1280,7 @@ public sealed class ProductionWorkflowStagesTests
             workspace.CurrentProject.ProjectId.Value,
             [new WorkflowReviewPanel(prepared, [point, secondPoint], [envelope])]), []);
         Assert.AreEqual(0, workspace.Project(swappedMembershipResult, store));
-        Assert.AreEqual(projectedPanel, workspace.CurrentProject.Panels.Single(),
+        Assert.AreSame(persistedProjectedPanel, workspace.CurrentProject.Panels.Single(),
             "Swapped per-series membership must fail before any panel mutation.");
         Assert.HasCount(1, tab.SeriesCards);
         Assert.HasCount(1, tab.Points);
@@ -1137,7 +1299,7 @@ public sealed class ProductionWorkflowStagesTests
                 exportEvidence.Provenance,
                 projectionEvidence: exportEvidence.ProjectionEvidence));
         Assert.AreEqual(0, workspace.Project(result, store));
-        Assert.AreEqual(projectedPanel, workspace.CurrentProject.Panels.Single());
+        Assert.AreSame(persistedProjectedPanel, workspace.CurrentProject.Panels.Single());
         store.SetExportEvidence(imported.PanelId, exportEvidence);
 
         workspace.MovePoint(tab.TabId, pointId.ToString("D"), 0.75, 0.75);
