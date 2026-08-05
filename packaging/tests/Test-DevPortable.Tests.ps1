@@ -385,7 +385,7 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
     [System.IO.File]::WriteAllBytes($startupImage, [byte[]](1, 2, 3))
     [System.IO.File]::WriteAllText(
         $captureExecutable,
-        "@echo off`r`necho [%GRAPHREADER_REALESRGAN_RUNTIME_ROOT%] > `"%~dp0enhancement-environment.txt`"`r`necho [%GRAPHREADER_REALESRGAN_MANIFEST_PATH%] >> `"%~dp0enhancement-environment.txt`"`r`necho [%*] >> `"%~dp0enhancement-environment.txt`"`r`n")
+        "@echo off`r`necho [%GRAPHREADER_REALESRGAN_RUNTIME_ROOT%] > `"%~dp0enhancement-environment.txt`"`r`necho [%GRAPHREADER_REALESRGAN_MANIFEST_PATH%] >> `"%~dp0enhancement-environment.txt`"`r`necho [%GRAPHREADER_PDFIUM_APPROVAL_PATH%] >> `"%~dp0enhancement-environment.txt`"`r`necho [%*] >> `"%~dp0enhancement-environment.txt`"`r`n")
     [System.IO.File]::WriteAllText((Join-Path $launcherIsolationBuild 'portable.mode'), '')
     [System.IO.File]::WriteAllText(
         (Join-Path $launcherIsolationRoot 'latest.json'),
@@ -396,6 +396,9 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
     $previousManifestPath = [Environment]::GetEnvironmentVariable(
         'GRAPHREADER_REALESRGAN_MANIFEST_PATH',
         'Process')
+    $previousPdfiumApprovalPath = [Environment]::GetEnvironmentVariable(
+        'GRAPHREADER_PDFIUM_APPROVAL_PATH',
+        'Process')
     try {
         [Environment]::SetEnvironmentVariable(
             'GRAPHREADER_REALESRGAN_RUNTIME_ROOT',
@@ -405,9 +408,13 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
             'GRAPHREADER_REALESRGAN_MANIFEST_PATH',
             'C:\stale-manifest.json',
             'Process')
+        [Environment]::SetEnvironmentVariable(
+            'GRAPHREADER_PDFIUM_APPROVAL_PATH',
+            'C:\stale-pdfium-approval.json',
+            'Process')
         & $hostExecutable -NoProfile -ExecutionPolicy Bypass -File `
             (Join-Path $launcherIsolationRoot 'Run-Latest-DevPortable.ps1') `
-            -Wait -DisableLocalEnhancement -ImagePath $startupImage | Out-Null
+            -Wait -DisableLocalEnhancement -DisableLocalPdfium -ImagePath $startupImage | Out-Null
         if ($LASTEXITCODE -ne 0) {
             throw "Disabled-enhancement launcher exited with code $LASTEXITCODE."
         }
@@ -421,17 +428,23 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
             'GRAPHREADER_REALESRGAN_MANIFEST_PATH',
             $previousManifestPath,
             'Process')
+        [Environment]::SetEnvironmentVariable(
+            'GRAPHREADER_PDFIUM_APPROVAL_PATH',
+            $previousPdfiumApprovalPath,
+            'Process')
     }
     $capturedEnvironment = @(Get-Content -LiteralPath $captureOutput)
-    Assert-True ($capturedEnvironment.Count -eq 3) `
-        'Launcher did not capture both child environment values and startup arguments.'
+    Assert-True ($capturedEnvironment.Count -eq 4) `
+        'Launcher did not capture all child environment values and startup arguments.'
     Assert-True ($capturedEnvironment[0].Trim() -eq '[]') `
         'Disabled-enhancement launcher leaked an inherited runtime root to the child.'
     Assert-True ($capturedEnvironment[1].Trim() -eq '[]') `
         'Disabled-enhancement launcher leaked an inherited manifest path to the child.'
-    Assert-True ($capturedEnvironment[2].Contains('--open-image')) `
+    Assert-True ($capturedEnvironment[2].Trim() -eq '[]') `
+        'Disabled-PDFium launcher leaked an inherited approval path to the child.'
+    Assert-True ($capturedEnvironment[3].Contains('--open-image')) `
         'Launcher did not pass the explicit startup image argument.'
-    Assert-True ($capturedEnvironment[2].Contains($startupImage)) `
+    Assert-True ($capturedEnvironment[3].Contains($startupImage)) `
         'Launcher did not preserve the startup image path containing spaces.'
     $passed++
 

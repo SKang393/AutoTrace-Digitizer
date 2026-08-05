@@ -6,9 +6,11 @@ param(
     [switch]$Wait,
     [switch]$PortableSmoke,
     [switch]$DisableLocalEnhancement,
+    [switch]$DisableLocalPdfium,
     [string]$ImagePath,
     [string]$RealEsrganRuntimeRoot,
-    [string]$RealEsrganManifestPath
+    [string]$RealEsrganManifestPath,
+    [string]$PdfiumApprovalPath
 )
 
 Set-StrictMode -Version Latest
@@ -72,6 +74,9 @@ $previousEnhancementRuntimeRoot = [Environment]::GetEnvironmentVariable(
 $previousEnhancementManifestPath = [Environment]::GetEnvironmentVariable(
     'GRAPHREADER_REALESRGAN_MANIFEST_PATH',
     'Process')
+$previousPdfiumApprovalPath = [Environment]::GetEnvironmentVariable(
+    'GRAPHREADER_PDFIUM_APPROVAL_PATH',
+    'Process')
 try {
     [Environment]::SetEnvironmentVariable(
         'GRAPHREADER_DEV_PORTABLE_DATA_ROOT',
@@ -83,6 +88,10 @@ try {
         'Process')
     [Environment]::SetEnvironmentVariable(
         'GRAPHREADER_REALESRGAN_MANIFEST_PATH',
+        $null,
+        'Process')
+    [Environment]::SetEnvironmentVariable(
+        'GRAPHREADER_PDFIUM_APPROVAL_PATH',
         $null,
         'Process')
     if (-not $DisableLocalEnhancement.IsPresent) {
@@ -101,6 +110,17 @@ try {
             [Environment]::SetEnvironmentVariable(
                 'GRAPHREADER_REALESRGAN_MANIFEST_PATH',
                 [System.IO.Path]::GetFullPath($RealEsrganManifestPath),
+                'Process')
+        }
+    }
+    if (-not $DisableLocalPdfium.IsPresent) {
+        if ([string]::IsNullOrWhiteSpace($PdfiumApprovalPath)) {
+            $PdfiumApprovalPath = Join-Path $repositoryRoot 'artifacts\pdfium-source\evidence\reviewed-approval.json'
+        }
+        if (Test-Path -LiteralPath $PdfiumApprovalPath -PathType Leaf) {
+            [Environment]::SetEnvironmentVariable(
+                'GRAPHREADER_PDFIUM_APPROVAL_PATH',
+                [System.IO.Path]::GetFullPath($PdfiumApprovalPath),
                 'Process')
         }
     }
@@ -128,6 +148,10 @@ finally {
         'GRAPHREADER_REALESRGAN_MANIFEST_PATH',
         $previousEnhancementManifestPath,
         'Process')
+    [Environment]::SetEnvironmentVariable(
+        'GRAPHREADER_PDFIUM_APPROVAL_PATH',
+        $previousPdfiumApprovalPath,
+        'Process')
 }
 
 Write-Host "Launched: $executablePath"
@@ -136,6 +160,11 @@ if (-not $DisableLocalEnhancement.IsPresent -and
     -not [string]::IsNullOrWhiteSpace($RealEsrganRuntimeRoot) -and
     (Test-Path -LiteralPath $RealEsrganRuntimeRoot -PathType Container)) {
     Write-Host "Local enhancement: realesr-animevideov3 x2 evaluation runtime configured outside the portable build"
+}
+if (-not $DisableLocalPdfium.IsPresent -and
+    -not [string]::IsNullOrWhiteSpace($PdfiumApprovalPath) -and
+    (Test-Path -LiteralPath $PdfiumApprovalPath -PathType Leaf)) {
+    Write-Host 'Local PDFium: reviewed renderer approval configured outside the portable build'
 }
 if ($Wait.IsPresent -and $process.ExitCode -ne 0) {
     throw "Development portable exited with code $($process.ExitCode)."

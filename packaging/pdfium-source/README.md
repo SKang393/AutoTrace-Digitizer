@@ -52,6 +52,20 @@ first line, and create `reviewed-approval.json` with exact binary, source-lock,
 build-manifest, and notice SHA-256 values. Runtime loading and evidence
 validation both fail closed until those inputs exist and match exactly.
 
+After that exact review is complete, create the ignored approval without
+changing the tracked fail-closed policy:
+
+```powershell
+powershell -File packaging/pdfium-source/review/New-ReviewedPdfiumApproval.ps1 `
+  -EvidenceRoot artifacts/pdfium-source/evidence `
+  -ConfirmExactDependencyReview
+```
+
+The command revalidates all 240 linked labels, 15 component dispositions, 16
+notice sources, four Windows system imports, retained hashes, and disabled
+feature flags before writing local evidence. It does not supply clean-machine
+evidence or public release authorization.
+
 The tracked `review/dependency-review-policy.json`, exact reviewed target and
 PE-import inventories, and deterministic
 `third-party-notices.dependency-mapped.txt` close the mechanical mapping gap

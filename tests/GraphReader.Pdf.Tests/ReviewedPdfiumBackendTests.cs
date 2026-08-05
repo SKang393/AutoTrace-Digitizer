@@ -257,6 +257,46 @@ public sealed class ReviewedPdfiumBackendTests
     }
 
     [TestMethod]
+    public async Task ExactIgnoredReviewedRunnerRendersControlledPdf()
+    {
+        string? approvalPath = Environment.GetEnvironmentVariable(
+            "GRAPHREADER_PDFIUM_APPROVAL_PATH");
+        string? inputPath = Environment.GetEnvironmentVariable(
+            "GRAPHREADER_PDFIUM_CONTROLLED_INPUT_PATH");
+        if (string.IsNullOrWhiteSpace(approvalPath) ||
+            string.IsNullOrWhiteSpace(inputPath))
+        {
+            Assert.Inconclusive(
+                "Set GRAPHREADER_PDFIUM_APPROVAL_PATH and GRAPHREADER_PDFIUM_CONTROLLED_INPUT_PATH to run the exact ignored local PDFium evidence.");
+        }
+
+        byte[] pdfBytes = await File.ReadAllBytesAsync(inputPath);
+        string pdfSha256 = Convert.ToHexStringLower(SHA256.HashData(pdfBytes));
+        ReviewedPdfiumPageRendererBackend backend =
+            ReviewedPdfiumPageRendererBackend.Load(approvalPath);
+        IPdfPageRenderingService service = backend.CreateRenderingService();
+
+        PdfPageRenderResult result = await service.RenderAsync(
+            new PdfPageRenderRequest(pdfBytes, pageNumber: 1, dpi: 144),
+            CancellationToken.None);
+
+        Assert.IsTrue(result.Succeeded, result.Failure?.TechnicalMessage);
+        Assert.AreEqual(PdfPageRenderStatus.Succeeded, result.Status);
+        Assert.IsGreaterThan(0, result.Page!.Width);
+        Assert.IsGreaterThan(0, result.Page.Height);
+        CollectionAssert.AreEqual(
+            new byte[] { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a },
+            result.Page.PngBytes.ToArray()[..8]);
+        Assert.AreEqual(pdfSha256, result.Metadata!.PdfSha256);
+        Assert.AreEqual(
+            ReviewedPdfiumPageRendererBackend.PinnedSourceRevision,
+            result.Metadata.RendererVersion);
+        Assert.AreEqual(
+            "efd13a38cf3cd8e04d8284a42fff42923267293170424153b1a2a96dbf6fe8ea",
+            result.Metadata.RendererSha256);
+    }
+
+    [TestMethod]
     public async Task TempCleanupRetriesUntilRunnerFileHandleIsReleased()
     {
         if (!OperatingSystem.IsWindows())
