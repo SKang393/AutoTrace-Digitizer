@@ -95,10 +95,64 @@ public sealed class ProductionWorkspaceService : ManualPreviewWorkspaceService, 
             var request = new WorkflowRunRequest(
                 Guid.NewGuid(),
                 CreateProductionWorkflowImportRequest(enhancementEnabled));
+            WorkflowRunResult? accumulated = LastAutomaticRun;
+            var completedPanelIds = new HashSet<Guid>();
             result = await _workflowOrchestrator!.RunThroughReviewAsync(
                 request,
                 LastAutomaticRun?.Review,
+                (checkpoint, _) =>
+                {
+                    ProductionReviewProjectionResult checkpointProjection =
+                        ProjectProductionReview(checkpoint, _panelStore);
+                    if (!checkpointProjection.Succeeded)
+                    {
+                        throw new ProductionWorkflowStageException(
+                            checkpointProjection.Failure ?? new ProductionWorkflowFailure(
+                                ProductionWorkflowFailureCodes.ReviewProjectionRejected,
+                                "Errors.ProductionReviewProjectionRejected",
+                                "A completed production batch panel could not be checkpointed.",
+                                Recoverable: true,
+                                "Keep prior completed panels and rerun automatic detection."));
+                    }
+
+                    WorkflowRunResult projectedCheckpoint = checkpointProjection.ProjectedRun ??
+                        throw new InvalidOperationException(
+                            "A successful production batch checkpoint returned no projected run.");
+                    accumulated = MergeCheckpoint(accumulated, projectedCheckpoint);
+                    LastAutomaticRun = accumulated;
+                    completedPanelIds.Add(projectedCheckpoint.Review.Panels.Single().PanelId);
+                    return Task.CompletedTask;
+                },
                 cancellationToken).ConfigureAwait(false);
+
+            Guid[] resultPanelIds = result.Review.Panels.Select(static panel => panel.PanelId).ToArray();
+            if (resultPanelIds.Length == 0 ||
+                resultPanelIds.Any(panelId => !completedPanelIds.Contains(panelId)) ||
+                accumulated is null)
+            {
+                throw new InvalidOperationException(
+                    "The production batch completed without a checkpoint for every review panel.");
+            }
+
+            Dictionary<Guid, WorkflowReviewPanel> projectedByPanelId = accumulated.Review.Panels
+                .ToDictionary(static panel => panel.PanelId);
+            WorkflowReviewPanel[] projectedPanels = resultPanelIds
+                .Select(panelId => projectedByPanelId[panelId])
+                .ToArray();
+            HashSet<Guid> currentPanelIds = resultPanelIds.ToHashSet();
+            WorkflowCorrection[] corrections = accumulated.Review.CorrectionJournal
+                .Where(correction => currentPanelIds.Contains(correction.PanelId))
+                .ToArray();
+            var completedReview = new WorkflowReviewState(
+                result.Review.ProjectId,
+                projectedPanels,
+                corrections,
+                result.Review.Warnings
+                    .Concat(accumulated.Review.Warnings)
+                    .Distinct(StringComparer.Ordinal));
+            result = new WorkflowRunResult(result.RunId, completedReview, result.Steps);
+            LastAutomaticRun = result;
+            return result;
         }
 
         if (result is null)
@@ -120,6 +174,40 @@ public sealed class ProductionWorkspaceService : ManualPreviewWorkspaceService, 
         LastAutomaticRun = projection.ProjectedRun ?? throw new InvalidOperationException(
             "A successful production review projection returned no corrected workflow run.");
         return LastAutomaticRun;
+    }
+
+    private static WorkflowRunResult MergeCheckpoint(
+        WorkflowRunResult? accumulated,
+        WorkflowRunResult checkpoint)
+    {
+        if (accumulated is null)
+        {
+            return checkpoint;
+        }
+
+        if (accumulated.Review.ProjectId != checkpoint.Review.ProjectId)
+        {
+            throw new InvalidOperationException(
+                "A production batch checkpoint belongs to a different project.");
+        }
+
+        WorkflowReviewPanel checkpointPanel = checkpoint.Review.Panels.Single();
+        var panels = accumulated.Review.Panels
+            .Where(panel => panel.PanelId != checkpointPanel.PanelId)
+            .Append(checkpointPanel)
+            .ToArray();
+        WorkflowCorrection[] corrections = accumulated.Review.CorrectionJournal
+            .Where(correction => correction.PanelId != checkpointPanel.PanelId)
+            .Concat(checkpoint.Review.CorrectionJournal)
+            .ToArray();
+        var review = new WorkflowReviewState(
+            checkpoint.Review.ProjectId,
+            panels,
+            corrections,
+            accumulated.Review.Warnings
+                .Concat(checkpoint.Review.Warnings)
+                .Distinct(StringComparer.Ordinal));
+        return new WorkflowRunResult(checkpoint.RunId, review, checkpoint.Steps);
     }
 
     public override async Task RunStageAsync(WorkflowStage stage, CancellationToken cancellationToken)

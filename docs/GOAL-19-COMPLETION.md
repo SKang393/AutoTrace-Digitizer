@@ -92,7 +92,7 @@ runtime SHA-256 after every stable checkpoint. The current verified behavior is:
 - dirty development build: no
 - running process: responsive visible window titled `Graph Auto Reader`, exact
   Chandler path supplied by `--open-image`
-- current full Release rerun: PASS, 738 passed and 13 skipped; 9 are expected hardware or opt-in probes and 4 WPF screenshot cases were inconclusive on the current noninteractive desktop
+- current full Release rerun: PASS, 744 passed and 9 expected hardware or opt-in skips; all 60 App tests passed on the current interactive desktop
 - production-model IDs reported available: `0`
 - automatic stages reported unavailable: `6`
 - mutable root: `artifacts/dev-portable/Data`
@@ -141,6 +141,14 @@ in Production composition. Automatic stages currently report:
 | Phases | Unavailable | Deterministic reasoner requires approved axis, OCR, and marker evidence. |
 
 No automatic stage executes in Production with candidate assets.
+
+Production batch orchestration now checkpoints only fully reviewed panels. A
+direct two-image composition test completed panel one, cancelled while panel
+two entered detection, retained panel one's projected automatic review and
+both immutable source hashes, then reran to a complete ordered result. This
+closes the executable cancellation and resume behavior in the adapter boundary.
+The mandatory release gate remains blocked until the same scenario runs with
+the approved packaged OCR and marker-center payload set.
 
 ## Models and provenance
 
@@ -274,7 +282,8 @@ files are not tracked.
 ## Tests and commands
 
 - `dotnet test GraphAutoReader.slnx -c Release --no-restore` in the current
-  Release run: 738 passed and 13 skipped; 9 were expected hardware or opt-in probes and 4 WPF screenshot cases were inconclusive on the current noninteractive desktop.
+  Release run: 744 passed and 9 expected hardware or opt-in skips; all 60 App
+  tests passed on the current interactive desktop.
 - focused manual workflow: 8/8 passed.
 - bounded WPF manual composition: 1/1 passed.
 - Goal 19 application/composition focus: 18/18 passed in reviewer verification.
@@ -319,7 +328,7 @@ files are not tracked.
 - Production runtime availability: 12/12 focused composition cases passed;
   exact OpenCV bytes plus provenance, notice, clean-machine, and release flags
   are required before the axis stage becomes approved.
-- Public scoreboard: 37/37 synthetic metric-contract gates passed in 227.264 ms.
+- Public scoreboard: 37/37 synthetic metric-contract gates passed in 241.734 ms with peak managed memory 970768 bytes.
 - `packaging/localization/Test-LocalizationAudit.ps1`: 9/9 passed.
 - repository localization audit: 181 keys, 0 missing, 0 extra, 0 duplicate,
   and 0 unresolved references.
@@ -330,7 +339,7 @@ files are not tracked.
 
 ## Metrics and timing
 
-- current full .NET Release suite: 738 tests passed with 13 skips; 9 expected hardware or opt-in probes and 4 current noninteractive WPF screenshot inconclusives
+- current full .NET Release suite: 744 tests passed with 9 expected hardware or opt-in skips; all 60 App tests passed on the current interactive desktop
 - direct exact Real-ESRGAN Chandler invocation: 1054.545 ms, exit code 0,
   1726 by 790 output, output SHA-256
   `954090b7f3b0783123f51b5a523672fdc889ab5e13b1dc935b5818f05b4729d1`,

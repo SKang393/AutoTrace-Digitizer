@@ -123,6 +123,43 @@ public sealed class OrchestratorCompositionSmokeTests
         Assert.IsTrue(result.Review.Panels.All(static panel => panel.Points.Single().SourceImage == WorkflowImageVariant.Original));
     }
 
+    [TestMethod]
+    public async Task CancellationPublishesOnlyFullyReviewedPanelCheckpoints()
+    {
+        RecordedWorkflowData data = CreateRecordedData();
+        using var cancellation = new CancellationTokenSource();
+        var recorded = new TracingStages(data, PdfPanelId, cancellation);
+        WorkflowOrchestrator orchestrator = WorkflowComposition.Create(
+            WorkflowRuntimeEnvironment.RecordedFake,
+            new ThrowingStages().ServiceSet,
+            recorded.ServiceSet);
+        var checkpoints = new List<WorkflowRunResult>();
+
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(() =>
+            orchestrator.RunThroughReviewAsync(
+                RunRequest(enhancementEnabled: false),
+                previousReview: null,
+                (checkpoint, token) =>
+                {
+                    token.ThrowIfCancellationRequested();
+                    checkpoints.Add(checkpoint);
+                    return Task.CompletedTask;
+                },
+                cancellation.Token));
+
+        Assert.HasCount(1, checkpoints);
+        WorkflowRunResult completed = checkpoints.Single();
+        Assert.AreEqual(RunId, completed.RunId);
+        Assert.HasCount(1, completed.Review.Panels);
+        Assert.AreEqual(ImagePanelId, completed.Review.Panels.Single().PanelId);
+        Assert.HasCount(1, completed.Review.Panels.Single().Points);
+        CollectionAssert.AreEqual(
+            ExpectedReviewSteps,
+            completed.Steps.Select(static step => step.Step).ToArray());
+        Assert.IsTrue(completed.Steps.All(static step => step.Elapsed >= TimeSpan.Zero));
+        Assert.AreEqual(2, recorded.DetectionCalls);
+    }
+
     private static WorkflowRunRequest RunRequest(bool enhancementEnabled) =>
         new(
             RunId,
@@ -237,10 +274,17 @@ public sealed class OrchestratorCompositionSmokeTests
         IWorkflowExportStage
     {
         private readonly RecordedWorkflowStages _inner;
+        private readonly Guid? _cancelBeforePanelId;
+        private readonly CancellationTokenSource? _cancellation;
 
-        public TracingStages(RecordedWorkflowData data)
+        public TracingStages(
+            RecordedWorkflowData data,
+            Guid? cancelBeforePanelId = null,
+            CancellationTokenSource? cancellation = null)
         {
             _inner = new RecordedWorkflowStages(data);
+            _cancelBeforePanelId = cancelBeforePanelId;
+            _cancellation = cancellation;
             ServiceSet = new WorkflowServiceSet(this, this, this, this);
         }
 
@@ -288,6 +332,13 @@ public sealed class OrchestratorCompositionSmokeTests
         {
             DetectionCalls++;
             DetectedVariants.Add(imageVariant);
+            if (_cancelBeforePanelId == panel.ImportedPanel.PanelId &&
+                imageVariant == WorkflowImageVariant.Original)
+            {
+                _cancellation?.Cancel();
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
             return _inner.DetectAsync(panel, imageVariant, runId, projectId, cancellationToken);
         }
 

@@ -35,7 +35,7 @@
       "description": "Image and batch imports use production detection, preserve completed work, and cancel safely.",
       "status": "blocked",
       "evidence": [],
-      "notes": "No end-to-end production automatic batch and cancellation evidence is sealed."
+      "notes": "Production orchestration now checkpoints each fully reviewed panel atomically, retains completed panels when a later panel is cancelled, and resumes to a complete result in direct executable test composition. The gate remains blocked because no approved packaged OCR and marker-center payload set can provide end-to-end production batch evidence."
     },
     {
       "id": "production-accessibility-keyboard",

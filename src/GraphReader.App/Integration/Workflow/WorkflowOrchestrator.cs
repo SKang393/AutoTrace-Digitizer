@@ -14,9 +14,20 @@ public sealed class WorkflowOrchestrator
         this.services = services ?? throw new ArgumentNullException(nameof(services));
     }
 
+    public Task<WorkflowRunResult> RunThroughReviewAsync(
+        WorkflowRunRequest request,
+        WorkflowReviewState? previousReview,
+        CancellationToken cancellationToken) =>
+        RunThroughReviewAsync(
+            request,
+            previousReview,
+            completedPanelCheckpoint: null,
+            cancellationToken);
+
     public async Task<WorkflowRunResult> RunThroughReviewAsync(
         WorkflowRunRequest request,
         WorkflowReviewState? previousReview,
+        Func<WorkflowRunResult, CancellationToken, Task>? completedPanelCheckpoint,
         CancellationToken cancellationToken)
     {
         ValidateRunRequest(request, previousReview);
@@ -47,9 +58,12 @@ public sealed class WorkflowOrchestrator
         steps.Add(new WorkflowStepRecord(WorkflowStep.Prepare, timer.Elapsed, preparedPanels.Count));
 
         timer.Restart();
-        var automationPanels = new List<WorkflowReviewPanel>(preparedPanels.Count);
+        IReadOnlyList<WorkflowCorrection> journal = previousReview?.CorrectionJournal ?? Array.Empty<WorkflowCorrection>();
+        var reviewedPanels = new List<WorkflowReviewPanel>(preparedPanels.Count);
         var detectionWarnings = new List<string>();
         int detectionCount = 0;
+        TimeSpan detectionElapsed = TimeSpan.Zero;
+        TimeSpan reviewElapsed = TimeSpan.Zero;
         foreach (WorkflowPreparedPanel prepared in preparedPanels)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -91,30 +105,67 @@ public sealed class WorkflowOrchestrator
                 original,
                 enhanced,
                 request.ConsensusOptions);
+            timer.Stop();
+            detectionElapsed += timer.Elapsed;
+            var panelReviewTimer = Stopwatch.StartNew();
             WorkflowVisionEnvelope[] provenance = enhanced is null
                 ? [original.Envelope]
                 : [original.Envelope, enhanced.Envelope];
-            automationPanels.Add(new WorkflowReviewPanel(prepared, points, provenance));
+            var automationPanel = new WorkflowReviewPanel(prepared, points, provenance);
+            WorkflowReviewPanel? previousPanel = previousReview?.Panels.SingleOrDefault(
+                candidate => candidate.PanelId == automationPanel.PanelId);
+            WorkflowReviewPanel reviewedPanel = ManualCorrectionOverlay.Reapply(
+                automationPanel,
+                previousPanel,
+                journal);
+            reviewedPanels.Add(reviewedPanel);
             detectionCount += original.Candidates.Count + (enhanced?.Candidates.Count ?? 0);
             detectionWarnings.AddRange(original.Warnings);
             if (enhanced is not null)
             {
                 detectionWarnings.AddRange(enhanced.Warnings);
             }
+            panelReviewTimer.Stop();
+            reviewElapsed += panelReviewTimer.Elapsed;
+
+            if (completedPanelCheckpoint is not null)
+            {
+                WorkflowCorrection[] panelCorrections = journal
+                    .Where(correction => correction.PanelId == reviewedPanel.PanelId)
+                    .ToArray();
+                string[] checkpointWarnings = imported.Warnings
+                    .Concat(prepared.Warnings)
+                    .Concat(detectionWarnings)
+                    .Concat(previousReview?.Warnings ?? Array.Empty<string>())
+                    .Distinct(StringComparer.Ordinal)
+                    .ToArray();
+                var checkpointReview = new WorkflowReviewState(
+                    imported.ProjectId,
+                    [reviewedPanel],
+                    panelCorrections,
+                    checkpointWarnings);
+                var checkpoint = new WorkflowRunResult(
+                    request.RunId,
+                    checkpointReview,
+                    steps
+                        .Append(new WorkflowStepRecord(
+                            WorkflowStep.Detect,
+                            detectionElapsed,
+                            detectionCount))
+                        .Append(new WorkflowStepRecord(
+                            WorkflowStep.Review,
+                            reviewElapsed,
+                            reviewedPanel.Points.Count)));
+                await completedPanelCheckpoint(checkpoint, cancellationToken).ConfigureAwait(false);
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
+            timer.Restart();
         }
 
-        steps.Add(new WorkflowStepRecord(WorkflowStep.Detect, timer.Elapsed, detectionCount));
+        steps.Add(new WorkflowStepRecord(WorkflowStep.Detect, detectionElapsed, detectionCount));
 
         timer.Restart();
-        IReadOnlyList<WorkflowCorrection> journal = previousReview?.CorrectionJournal ?? Array.Empty<WorkflowCorrection>();
-        var reviewedPanels = new List<WorkflowReviewPanel>(automationPanels.Count);
-        foreach (WorkflowReviewPanel automationPanel in automationPanels)
-        {
-            WorkflowReviewPanel? previousPanel = previousReview?.Panels.SingleOrDefault(
-                candidate => candidate.PanelId == automationPanel.PanelId);
-            reviewedPanels.Add(ManualCorrectionOverlay.Reapply(automationPanel, previousPanel, journal));
-        }
-
         IEnumerable<string> warnings = imported.Warnings
             .Concat(preparedPanels.SelectMany(static panel => panel.Warnings))
             .Concat(detectionWarnings)
@@ -123,7 +174,7 @@ public sealed class WorkflowOrchestrator
         var review = new WorkflowReviewState(imported.ProjectId, reviewedPanels, journal, warnings);
         steps.Add(new WorkflowStepRecord(
             WorkflowStep.Review,
-            timer.Elapsed,
+            reviewElapsed + timer.Elapsed,
             review.Panels.Sum(static panel => panel.Points.Count)));
 
         return new WorkflowRunResult(request.RunId, review, steps);

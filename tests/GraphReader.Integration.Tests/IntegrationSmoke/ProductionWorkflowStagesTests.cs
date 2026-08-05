@@ -1512,6 +1512,71 @@ public sealed class ProductionWorkflowStagesTests
     }
 
     [TestMethod]
+    public async Task ApprovedProductionBatchCancellationKeepsCompletedPanelCheckpoint()
+    {
+        using var directory = new TemporaryDirectory();
+        string firstDirectory = Path.Combine(directory.Path, "checkpoint-first");
+        string secondDirectory = Path.Combine(directory.Path, "checkpoint-second");
+        Directory.CreateDirectory(firstDirectory);
+        Directory.CreateDirectory(secondDirectory);
+        string firstPath = await WriteSourceAsync(firstDirectory);
+        string secondPath = await WriteSourceAsync(secondDirectory);
+        string firstHash = Convert.ToHexStringLower(SHA256.HashData(await File.ReadAllBytesAsync(firstPath)));
+        string secondHash = Convert.ToHexStringLower(SHA256.HashData(await File.ReadAllBytesAsync(secondPath)));
+        var store = new ProductionWorkflowPanelStore();
+        var expectedPanels = new Dictionary<Guid, WorkflowReviewPanel>();
+        using var cancellation = new CancellationTokenSource();
+        var detector = new CheckpointDetectionStage(expectedPanels, cancellation);
+        var orchestrator = new WorkflowOrchestrator(new WorkflowServiceSet(
+            new ProductionWorkflowImportStage(store, new ImageImportService()),
+            new ProductionWorkflowPrepareStage(store),
+            detector,
+            new UnusedWorkflowExportStage()));
+        var workspace = new ProductionWorkspaceService(
+            automaticStages: ApprovedAutomaticStages(),
+            workflowOrchestrator: orchestrator,
+            panelStore: store);
+        WorkspaceTabViewModel[] tabs = (await workspace.ImportImagesAsync(
+            [firstPath, secondPath],
+            CancellationToken.None)).ToArray();
+        Assert.HasCount(2, tabs);
+        SeedManualReviewState(workspace, tabs[0]);
+        SeedManualReviewState(workspace, tabs[1]);
+        WorkflowReviewPanel firstPanel = await CreateExactReviewPanelAsync(
+            workspace, tabs[0], firstPath, store, retainProjection: true);
+        WorkflowReviewPanel secondPanel = await CreateExactReviewPanelAsync(
+            workspace, tabs[1], secondPath, store, retainProjection: true);
+        expectedPanels.Add(firstPanel.PanelId, firstPanel);
+        expectedPanels.Add(secondPanel.PanelId, secondPanel);
+        detector.CancelBeforePanelId = secondPanel.PanelId;
+
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(() =>
+            workspace.RunAutomaticDetectionAsync(cancellation.Token));
+
+        Assert.IsNotNull(workspace.LastAutomaticRun);
+        Assert.HasCount(1, workspace.LastAutomaticRun.Review.Panels);
+        Assert.AreEqual(firstPanel.PanelId, workspace.LastAutomaticRun.Review.Panels.Single().PanelId);
+        Assert.AreEqual(2, detector.CallCount);
+        Assert.AreEqual(firstHash, Convert.ToHexStringLower(SHA256.HashData(await File.ReadAllBytesAsync(firstPath))));
+        Assert.AreEqual(secondHash, Convert.ToHexStringLower(SHA256.HashData(await File.ReadAllBytesAsync(secondPath))));
+        Assert.IsTrue(workspace.CurrentProject.Audit.Events.Any(auditEvent =>
+            string.Equals(
+                auditEvent.Note,
+                "Approved production workflow results projected by source and checksum identity",
+                StringComparison.Ordinal)));
+
+        detector.CancelBeforePanelId = Guid.Empty;
+        WorkflowRunResult completed = await workspace.RunAutomaticDetectionAsync(CancellationToken.None);
+        CollectionAssert.AreEquivalent(
+            new[] { firstPanel.PanelId, secondPanel.PanelId },
+            completed.Review.Panels.Select(static panel => panel.PanelId).ToArray());
+        CollectionAssert.AreEqual(
+            new[] { WorkflowStep.Import, WorkflowStep.Prepare, WorkflowStep.Detect, WorkflowStep.Review },
+            completed.Steps.Select(static step => step.Step).ToArray());
+        Assert.AreSame(completed, workspace.LastAutomaticRun);
+    }
+
+    [TestMethod]
     public async Task ApprovedAutomaticRerunPreservesDeleteMoveAddAndReassignAfterReopen()
     {
         using var directory = new TemporaryDirectory();
@@ -2471,6 +2536,78 @@ public sealed class ProductionWorkflowStagesTests
             CallCount++;
             throw new AssertFailedException("The export service must not be called for incomplete evidence.");
         }
+    }
+
+    private sealed class CheckpointDetectionStage(
+        IReadOnlyDictionary<Guid, WorkflowReviewPanel> expectedPanels,
+        CancellationTokenSource cancellation) : IWorkflowDetectionStage
+    {
+        public Guid CancelBeforePanelId { get; set; }
+
+        public int CallCount { get; private set; }
+
+        public Task<WorkflowDetectionBatch> DetectAsync(
+            WorkflowPreparedPanel panel,
+            WorkflowImageVariant imageVariant,
+            Guid runId,
+            Guid projectId,
+            CancellationToken cancellationToken)
+        {
+            CallCount++;
+            if (panel.ImportedPanel.PanelId == CancelBeforePanelId)
+            {
+                cancellation.Cancel();
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
+            WorkflowReviewPanel expected = expectedPanels[panel.ImportedPanel.PanelId];
+            var envelope = new WorkflowVisionEnvelope(
+                contractVersion: 1,
+                runId,
+                projectId,
+                panel.ImportedPanel.PanelId,
+                stage: "markers",
+                stageVersion: "checkpoint-test-v1",
+                panel.Original.Sha256,
+                new WorkflowVisionModel(
+                    "checkpoint-test-model",
+                    "checkpoint-test-v1",
+                    new string('a', 64),
+                    "cpu"),
+                new WorkflowVisionTiming(0, 0, 0, 0),
+                confidence: 1);
+            WorkflowDetectionCandidate[] candidates = expected.Points.Select(point =>
+                new WorkflowDetectionCandidate(
+                    point.PointId,
+                    point.DetectionKey ?? throw new AssertFailedException(
+                        "The checkpoint fixture requires a stable detection key."),
+                    point.OriginalPixelX,
+                    point.OriginalPixelY,
+                    point.Confidence,
+                    WorkflowImageVariant.Original,
+                    point.Symbol,
+                    point.Shape,
+                    point.Fill,
+                    point.SeriesId,
+                    point.PhaseId,
+                    point.GraphX,
+                    point.GraphY,
+                    "markers",
+                    "checkpoint-test-v1")).ToArray();
+            return Task.FromResult(new WorkflowDetectionBatch(
+                envelope,
+                imageVariant,
+                candidates));
+        }
+    }
+
+    private sealed class UnusedWorkflowExportStage : IWorkflowExportStage
+    {
+        public Task<WorkflowExportResult> ExportAsync(
+            WorkflowReviewState review,
+            WorkflowExportRequest request,
+            CancellationToken cancellationToken) =>
+            throw new AssertFailedException("The batch checkpoint test must not invoke export.");
     }
 
     private sealed class PdfWithoutDetectorBytes : IPdfImportService
