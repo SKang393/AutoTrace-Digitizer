@@ -51,6 +51,59 @@ public sealed class ApplicationCompositionSmokeTests
     }
 
     [TestMethod]
+    public async Task AsyncCompositionDoesNotAdvertiseRejectedEnhancementConfiguration()
+    {
+        string? previousManifest = Environment.GetEnvironmentVariable(
+            ApplicationComposition.RealEsrganManifestEnvironmentVariable);
+        string? previousRuntime = Environment.GetEnvironmentVariable(
+            ApplicationComposition.RealEsrganRuntimeRootEnvironmentVariable);
+        string root = Path.Combine(
+            Path.GetTempPath(),
+            "GraphReader.ApplicationComposition.Enhancement",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        try
+        {
+            string manifestPath = Path.Combine(
+                RepositoryRoot.Find(),
+                "models",
+                "manifest",
+                "super-resolution",
+                "realesr-animevideov3-ncnn-x2.json");
+            Environment.SetEnvironmentVariable(
+                ApplicationComposition.RealEsrganManifestEnvironmentVariable,
+                manifestPath);
+            Environment.SetEnvironmentVariable(
+                ApplicationComposition.RealEsrganRuntimeRootEnvironmentVariable,
+                Path.Combine(root, "runtime-not-required-for-manifest-rejection"));
+
+            ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+                WorkflowRuntimeEnvironment.ManualPreview,
+                new ModelRootApplicationPaths(Path.Combine(root, "models")),
+                cancellationToken: CancellationToken.None);
+
+            var workspace = Assert.IsInstanceOfType<ManualPreviewWorkspaceService>(
+                composition.WorkspaceService);
+            AutomaticStageStatus enhancement = workspace.AutomaticStages.Single(stage =>
+                string.Equals(stage.Stage, "enhancement", StringComparison.Ordinal));
+            Assert.AreEqual(AutomaticStageState.Unavailable, enhancement.State);
+            StringAssert.Contains(enhancement.Explanation, "MODEL_RUNTIME_INCOMPATIBLE");
+            StringAssert.Contains(enhancement.Explanation, "scientific-fidelity benchmark");
+            Assert.IsFalse(workspace.UsesFakeGraphData);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(
+                ApplicationComposition.RealEsrganManifestEnvironmentVariable,
+                previousManifest);
+            Environment.SetEnvironmentVariable(
+                ApplicationComposition.RealEsrganRuntimeRootEnvironmentVariable,
+                previousRuntime);
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public void ProductionCompositionKeepsManualWorkflowAvailableAndAutomaticStagesFailClosed()
     {
         ApplicationCompositionResult composition =

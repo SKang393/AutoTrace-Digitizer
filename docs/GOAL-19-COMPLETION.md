@@ -61,6 +61,10 @@ clean-machine distribution evidence.
 - Added a bounded WPF composition regression that exercises the real manual
   ViewModel commands, canvas edits, save, recovery, reopen, and export without
   selecting recorded fake graph data.
+- Changed async enhancement composition to resolve the exact manifest, notice,
+  runtime dependency, and model checksums before advertising a local developer
+  stage. A rejected configured model remains unavailable with its exact
+  diagnostic while the immutable-original manual workflow continues.
 - Added a fail-closed local portable validation harness for Unicode and space
   paths, shared and normal portable data roots, endpoint observation, registry
   observation, read-only diagnostics, and file-system tracing.
@@ -76,7 +80,7 @@ runtime SHA-256 after every stable checkpoint. The current verified behavior is:
 - dirty development build: no
 - running process: responsive visible window titled `Graph Auto Reader`, exact
   Chandler path supplied by `--open-image`
-- current full Release rerun: PASS, 722 passed and 9 expected opt-in skips
+- current full Release rerun: PASS, 723 passed and 9 expected opt-in skips
 - production-model IDs reported available: `0`
 - automatic stages reported unavailable: `6`
 - mutable root: `artifacts/dev-portable/Data`
@@ -257,8 +261,8 @@ files are not tracked.
 
 ## Tests and commands
 
-- `dotnet test GraphAutoReader.slnx -c Release --no-restore` in the clean
-  latest Release run: 678 passed and 6 expected tests skipped.
+- `dotnet test GraphAutoReader.slnx -c Release --no-restore` in the current
+  Release run: 723 passed and 9 expected opt-in tests skipped.
 - focused manual workflow: 8/8 passed.
 - bounded WPF manual composition: 1/1 passed.
 - Goal 19 application/composition focus: 18/18 passed in reviewer verification.
@@ -303,7 +307,7 @@ files are not tracked.
 - Production runtime availability: 12/12 focused composition cases passed;
   exact OpenCV bytes plus provenance, notice, clean-machine, and release flags
   are required before the axis stage becomes approved.
-- Public scoreboard: 37/37 synthetic metric-contract gates passed in 195.215 ms.
+- Public scoreboard: 37/37 synthetic metric-contract gates passed in 195.318 ms.
 - `packaging/localization/Test-LocalizationAudit.ps1`: 9/9 passed.
 - repository localization audit: 177 keys, 0 missing, 0 extra, 0 duplicate,
   and 0 unresolved references.
@@ -314,7 +318,12 @@ files are not tracked.
 
 ## Metrics and timing
 
-- current full .NET Release suite: 678 tests passed with 6 expected skips
+- current full .NET Release suite: 723 tests passed with 9 expected opt-in skips
+- direct exact Real-ESRGAN Chandler invocation: 1054.545 ms, exit code 0,
+  1726 by 790 output, output SHA-256
+  `954090b7f3b0783123f51b5a523672fdc889ab5e13b1dc935b5818f05b4729d1`,
+  and unchanged source SHA-256
+  `65bd6e1021bd9a3f2d2564a640ff90060a34e784782f2d847b4b26f9c6c342e1`
 - latest development portable build passed App 44/44, Domain 23/23, focused
   integration, publish, reviewed-OpenCV replacement, and process smoke
 - watcher debounce: 2.53 to 2.63 seconds across independent verification
@@ -341,8 +350,10 @@ maintainer attestation validates the five Microsoft static-runtime entries and
 is not distributed. This approves the exact source-built component's public
 provenance record, not clean-machine or application release readiness. The
 minimal NCNN runtime excludes
-`vcomp140d.dll`; the remaining release `vcomp140.dll` still needs an authorized
-Microsoft source and license record.
+`vcomp140d.dll`; the retained unmodified `vcomp140.dll` has an authorized
+Visual Studio VC Redist source record and the ignored scoped maintainer
+attestation. This closes provenance only. Scientific, offline CPU,
+clean-machine, production, and release approval remain false.
 
 ## Readiness changes
 

@@ -125,7 +125,7 @@ public sealed class RealGraphManualPortableValidationTests
         StringAssert.StartsWith(paths.AutosaveRoot, portableDataRoot, StringComparison.OrdinalIgnoreCase);
         Assert.IsFalse(Directory.Exists(localApplicationDataDecoy));
 
-        ApplicationCompositionResult composition = ApplicationComposition.Create(
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
             WorkflowRuntimeEnvironment.ManualPreview,
             paths);
         Assert.AreEqual(WorkflowRuntimeEnvironment.ManualPreview, composition.Environment);
@@ -356,10 +356,15 @@ public sealed class RealGraphManualPortableValidationTests
 
         AutomaticStageStatus enhancementStage = workspace.AutomaticStages.Single(status =>
             string.Equals(status.Stage, "enhancement", StringComparison.Ordinal));
-        bool localEnhancementConfigured = enhancementStage.State == AutomaticStageState.Experimental;
+        bool enhancementConfigurationPresent =
+            !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(
+                ApplicationComposition.RealEsrganManifestEnvironmentVariable)) &&
+            !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(
+                ApplicationComposition.RealEsrganRuntimeRootEnvironmentVariable));
+        bool localEnhancementAvailable = enhancementStage.State == AutomaticStageState.Experimental;
         string? enhancedOutputPath = null;
         double enhancementRuntimeMilliseconds = 0;
-        if (localEnhancementConfigured)
+        if (localEnhancementAvailable)
         {
             Assert.IsTrue(viewModel.EnhanceCommand.CanExecute(null));
             Execute(viewModel.EnhanceCommand);
@@ -414,9 +419,11 @@ public sealed class RealGraphManualPortableValidationTests
             automaticDetectionAccuracyClaimed = false,
             enhancement = new
             {
-                configured = localEnhancementConfigured,
-                model = localEnhancementConfigured ? "realesr-animevideov3" : null,
-                scale = localEnhancementConfigured ? 2 : 0,
+                configured = enhancementConfigurationPresent,
+                available = localEnhancementAvailable,
+                availabilityEvidence = enhancementStage.Explanation,
+                model = localEnhancementAvailable ? "realesr-animevideov3" : null,
+                scale = localEnhancementAvailable ? 2 : 0,
                 originalImmutable = string.Equals(sourceHashBefore, sourceHashAfter, StringComparison.Ordinal),
                 outputPath = enhancedOutputPath,
                 outputSha256 = enhancedOutputPath is null ? null : Sha256(enhancedOutputPath),

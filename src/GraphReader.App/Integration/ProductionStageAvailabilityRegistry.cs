@@ -51,7 +51,8 @@ public static class ProductionStageAvailabilityRegistry
         bool reviewedPdfiumConfigured = false,
         ProductionRuntimeAvailabilitySnapshot? runtimeAvailability = null,
         bool inferenceRuntimeConfigured = true,
-        ProductionDetectionAdapterAvailabilitySnapshot? adapterAvailability = null)
+        ProductionDetectionAdapterAvailabilitySnapshot? adapterAvailability = null,
+        string? localEnhancementEvidence = null)
     {
         modelAvailability ??= ProductionModelAvailabilitySnapshot.Missing(
             "No production-model-index.json is installed in the application model root.");
@@ -86,11 +87,13 @@ public static class ProductionStageAvailabilityRegistry
             ? new AutomaticStageStatus(
                 "enhancement",
                 AutomaticStageState.Experimental,
-                "Official realesr-animevideov3 x2 is configured for local evaluation only. Runtime and model checksums are verified before use; public redistribution is not approved.")
+                $"Official realesr-animevideov3 x2 is configured for local evaluation only. Runtime and model checksums are verified before use; public redistribution is not approved. {localEnhancementEvidence}".Trim())
             : new AutomaticStageStatus(
                 "enhancement",
                 AutomaticStageState.Unavailable,
-                "No approved Real-ESRGAN runtime and model payload are installed. The original image remains editable."),
+                localEnhancementEvidence is null
+                    ? "No approved Real-ESRGAN runtime and model payload are installed. The original image remains editable."
+                    : $"The configured Real-ESRGAN runtime or model was rejected. {localEnhancementEvidence} The original image remains editable."),
         axisApproved
             ? new AutomaticStageStatus(
                 "axis",

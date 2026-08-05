@@ -41,7 +41,10 @@ public static class ApplicationComposition
         WorkflowRuntimeEnvironment environment,
         IApplicationPaths? applicationPaths = null,
         string? applicationRoot = null)
-        => CreateCore(
+    {
+        Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver =
+            CreateLocalEnhancementResolver(applicationPaths);
+        return CreateCore(
             environment,
             applicationPaths,
             applicationRoot ?? AppContext.BaseDirectory,
@@ -49,7 +52,10 @@ public static class ApplicationComposition
                 ? CapturedUiThreadGuard.CaptureCurrentThread()
                 : null,
             modelAvailability: null,
-            runtimeAvailability: null);
+            runtimeAvailability: null,
+            enhancementResolver,
+            enhancementResolution: null);
+    }
 
     public static async Task<ApplicationCompositionResult> CreateAsync(
         WorkflowRuntimeEnvironment environment,
@@ -60,6 +66,11 @@ public static class ApplicationComposition
         IUiThreadGuard? uiThreadGuard = environment == WorkflowRuntimeEnvironment.Production
             ? CapturedUiThreadGuard.CaptureCurrentThread()
             : null;
+        Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver =
+            CreateLocalEnhancementResolver(applicationPaths);
+        RealEsrganBackendResolution? enhancementResolution = enhancementResolver is null
+            ? null
+            : await enhancementResolver(cancellationToken).ConfigureAwait(false);
         ProductionModelAvailabilitySnapshot? modelAvailability = environment == WorkflowRuntimeEnvironment.Production
             ? await ProductionModelAvailabilityProbe.InspectAsync(
                 applicationPaths?.ModelRoot,
@@ -77,7 +88,9 @@ public static class ApplicationComposition
             applicationRoot ?? AppContext.BaseDirectory,
             uiThreadGuard,
             modelAvailability,
-            runtimeAvailability);
+            runtimeAvailability,
+            enhancementResolver,
+            enhancementResolution);
     }
 
     private static ApplicationCompositionResult CreateCore(
@@ -86,10 +99,10 @@ public static class ApplicationComposition
         string applicationRoot,
         IUiThreadGuard? uiThreadGuard,
         ProductionModelAvailabilitySnapshot? modelAvailability,
-        ProductionRuntimeAvailabilitySnapshot? runtimeAvailability)
+        ProductionRuntimeAvailabilitySnapshot? runtimeAvailability,
+        Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver,
+        RealEsrganBackendResolution? enhancementResolution)
     {
-        Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver =
-            CreateLocalEnhancementResolver(applicationPaths);
         (IPdfImportService PdfImporter, bool ReviewedRendererConfigured, DomainError? Error) pdf =
             CreateReviewedPdfImporter(applicationRoot);
         DomainResult<ProductionInferenceRuntimeHost>? inference =
@@ -174,12 +187,13 @@ public static class ApplicationComposition
                 string.Join(' ', adapterEvidence));
         IReadOnlyList<AutomaticStageStatus> automaticStages =
             ProductionStageAvailabilityRegistry.Create(
-                enhancementResolver is not null,
+                enhancementResolution?.IsAvailable == true,
                 modelAvailability,
                 pdf.ReviewedRendererConfigured,
                 runtimeAvailability,
                 inference?.Value is not null,
-                adapterAvailability);
+                adapterAvailability,
+                DescribeEnhancementResolution(enhancementResolution));
         return environment switch
         {
             WorkflowRuntimeEnvironment.Production => CreateProduction(
@@ -420,6 +434,24 @@ public static class ApplicationComposition
             cacheRoot,
             RealEsrganBackendPurpose.LocalEvaluation,
             cancellationToken);
+    }
+
+    private static string? DescribeEnhancementResolution(
+        RealEsrganBackendResolution? resolution)
+    {
+        if (resolution is null)
+        {
+            return null;
+        }
+
+        if (resolution.IsAvailable && resolution.Model is not null)
+        {
+            return $"Checksum-verified {resolution.Model.ModelId}@{resolution.Model.Version} resolved as {resolution.Availability}; release eligible: {resolution.ReleaseEligible}.";
+        }
+
+        return resolution.Diagnostic is null
+            ? $"The configured enhancement resolved as {resolution.Availability}."
+            : $"{resolution.Diagnostic.Code}: {resolution.Diagnostic.TechnicalMessage}";
     }
 
     private static (IPdfImportService PdfImporter, bool ReviewedRendererConfigured, DomainError? Error)
