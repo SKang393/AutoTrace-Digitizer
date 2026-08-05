@@ -50,20 +50,15 @@ clean-machine distribution evidence.
 ## Portable preview
 
 The authoritative current preview is the immutable build selected by ignored
-`artifacts/dev-portable/latest.json`. The last completed clean verification
-before the current source-only model preregistrations was:
+`artifacts/dev-portable/latest.json`. That record supplies the exact clean
+commit, build time, executable path, executable SHA-256, and reviewed OpenCV
+runtime SHA-256 after every stable checkpoint. The current verified behavior is:
 
 - version: `0.0.21`
-- commit: `e87ea7f6350082825f42c7d331fae2180b58d8c3`
 - dirty development build: no
-- build time: `2026-08-04T23:52:26.599Z`
-- executable:
-  `artifacts/dev-portable/builds/0.0.21-20260804T235226599Z-e87ea7f6/GraphReader.App.exe`
-- executable SHA-256:
-  `0dee91fb99c6e800c327184252ccefec50e38bf4daca2b30ff35f99d2df6cb0e`
-- running process at the latest recheck: `23100`, responsive, window title
-  `Graph Auto Reader`, exact Chandler path supplied by `--open-image`
-- clean portable full-test rerun: PASS, 668 passed and 5 expected skips
+- running process: responsive visible window titled `Graph Auto Reader`, exact
+  Chandler path supplied by `--open-image`
+- clean portable full-test rerun: PASS, 676 passed and 6 expected skips
 - production-model IDs reported available: `0`
 - automatic stages reported unavailable: `6`
 - mutable root: `artifacts/dev-portable/Data`
@@ -245,16 +240,15 @@ files are not tracked.
 ## Tests and commands
 
 - `dotnet test GraphAutoReader.slnx -c Release --no-restore` in the clean
-  portable build: 668 passed and 5 expected tests skipped. A separate broad
-  parallel invocation had 664 passes and 9 skips because four screenshot tests
-  correctly reported an unavailable transparent surface as inconclusive.
+  portable build: 676 passed and 6 expected tests skipped.
 - focused manual workflow: 8/8 passed.
 - bounded WPF manual composition: 1/1 passed.
 - Goal 19 application/composition focus: 18/18 passed in reviewer verification.
 - `packaging/tests/Test-DevPortable.Tests.ps1`: 7/7 passed, including
   fail-closed single-file and multi-file model discovery.
-- `packaging/tests/Test-ReleaseArtifact.Tests.ps1`: 52/52 passed under both
-  PowerShell 7 and Windows PowerShell, including canonical UTC metadata.
+- `packaging/tests/Test-ReleaseArtifact.Tests.ps1`: 58/58 passed, including
+  canonical UTC metadata, mandatory direct-evidence gates, and exact-binary
+  rejection.
 - Super-resolution tests: 57/57 passed.
 - Marker Python pipelines: 30/30 passed with four exporter deprecation warnings.
 - Marker .NET assembly with the exact ignored candidate: 83/83 passed.
@@ -284,7 +278,9 @@ files are not tracked.
 - Live local portable validation after Goal 20 classification repair: 7/7;
   55 allowed portable `Data` events, 12 attributed external warnings, zero
   application-owned or unattributed failures, and zero watcher errors.
-- Public scoreboard: 37/37 synthetic metric-contract gates passed in 279.421 ms.
+- Production model resolution focus: 77 inference tests passed with 1 expected
+  opt-in skip; 95 integration tests passed with 1 expected private-graph skip.
+- Public scoreboard: 37/37 synthetic metric-contract gates passed in 222.233 ms.
 - `packaging/localization/Test-LocalizationAudit.ps1`: 9/9 passed.
 - repository localization audit: 177 keys, 0 missing, 0 extra, 0 duplicate,
   and 0 unresolved references.
@@ -295,9 +291,9 @@ files are not tracked.
 
 ## Metrics and timing
 
-- clean portable full .NET suite: 668 tests passed with 5 expected skips
-- latest development portable build passed App 34/34, Domain 23/23, focused
-  integration 36/36, publish, and process smoke
+- clean portable full .NET suite: 676 tests passed with 6 expected skips
+- latest development portable build passed App 44/44, Domain 23/23, focused
+  integration, publish, reviewed-OpenCV replacement, and process smoke
 - watcher debounce: 2.53 to 2.63 seconds across independent verification
 - queued watcher behavior: four expected builds
 - manual WPF composition: 1 test in 1 second
@@ -329,6 +325,9 @@ Microsoft source and license record.
 
 - Manual-first development preview: implemented and running.
 - Stage-aware production composition: implemented, automatic stages fail closed.
+- Production stage availability: asynchronously derived from checksum, manifest,
+  notice, benchmark, license, redistribution, and CPU-provider validation for
+  every indexed model; invalid or partial stores remain unavailable.
 - Multi-file param/bin packaging limitation: resolved and verified.
 - OpenCV source reproducibility, linked inventory, and public notice
   classification: resolved for the exact source-built binary.

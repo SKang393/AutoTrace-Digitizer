@@ -75,8 +75,100 @@ public sealed class ApplicationCompositionSmokeTests
         InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(
             () => workspace.RunAutomaticDetectionAsync(CancellationToken.None));
 
-        StringAssert.Contains(exception.Message, "native runtime");
+        StringAssert.Contains(exception.Message, "clean-machine runtime approval");
         Assert.IsNull(workspace.LastAutomaticRun);
+    }
+
+    [TestMethod]
+    public void StageAvailabilityReflectsChecksumResolvedCpuTaskSets()
+    {
+        var classifierOnly = new ProductionModelAvailabilitySnapshot(
+            new HashSet<string>(["marker_classifier"], StringComparer.Ordinal),
+            "Checksum-resolved CPU production models: classifier.");
+
+        IReadOnlyList<AutomaticStageStatus> partial = ProductionStageAvailabilityRegistry.Create(
+            localEnhancementConfigured: false,
+            classifierOnly,
+            reviewedPdfiumConfigured: false);
+
+        AutomaticStageStatus markerPartial = partial.Single(stage => stage.Stage == "markers");
+        Assert.AreEqual(AutomaticStageState.Unavailable, markerPartial.State);
+        StringAssert.Contains(markerPartial.Explanation, "marker_center");
+        Assert.IsFalse(
+            markerPartial.Explanation.Contains(
+                "marker_classifier, marker_center",
+                StringComparison.Ordinal));
+
+        var complete = new ProductionModelAvailabilitySnapshot(
+            new HashSet<string>(
+                ["ocr_detection", "ocr_recognition", "marker_center", "marker_classifier"],
+                StringComparer.Ordinal),
+            "Checksum-resolved CPU production models: complete fixture.");
+        IReadOnlyList<AutomaticStageStatus> resolved = ProductionStageAvailabilityRegistry.Create(
+            localEnhancementConfigured: false,
+            complete,
+            reviewedPdfiumConfigured: true);
+
+        Assert.AreEqual(
+            AutomaticStageState.Approved,
+            resolved.Single(stage => stage.Stage == "ocr").State);
+        Assert.AreEqual(
+            AutomaticStageState.Approved,
+            resolved.Single(stage => stage.Stage == "markers").State);
+        Assert.AreEqual(
+            AutomaticStageState.Unavailable,
+            resolved.Single(stage => stage.Stage == "legends").State);
+        StringAssert.Contains(
+            resolved.Single(stage => stage.Stage == "legends").Explanation,
+            "no production legend detection adapter");
+    }
+
+    [TestMethod]
+    public async Task AsyncProductionCompositionRejectsInvalidInstalledModelEvidence()
+    {
+        string root = Path.Combine(
+            Path.GetTempPath(),
+            "GraphReader.ApplicationComposition",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        try
+        {
+            File.WriteAllText(Path.Combine(root, "production-model-index.json"), "{not-json");
+            ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+                WorkflowRuntimeEnvironment.Production,
+                new ModelRootApplicationPaths(root),
+                CancellationToken.None);
+
+            var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+            AutomaticStageStatus ocr = workspace.AutomaticStages.Single(stage => stage.Stage == "ocr");
+            Assert.AreEqual(AutomaticStageState.Unavailable, ocr.State);
+            StringAssert.Contains(ocr.Explanation, "MODEL_PACKAGE_INDEX_INVALID");
+            Assert.IsFalse(workspace.UsesFakeGraphData);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task AsyncProductionCompositionUsesOnlyChecksumResolvedCpuTasks()
+    {
+        using var package = ApprovedModelPackageFixture.Create("marker_classifier");
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(package.Root),
+            CancellationToken.None);
+
+        var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+        AutomaticStageStatus markers = workspace.AutomaticStages.Single(stage => stage.Stage == "markers");
+        Assert.AreEqual(AutomaticStageState.Unavailable, markers.State);
+        StringAssert.Contains(markers.Explanation, "marker_center");
+        StringAssert.Contains(markers.Explanation, "fixture-marker-classifier@1.0.0");
+        Assert.IsFalse(
+            markers.Explanation.Contains("Missing: marker_classifier", StringComparison.Ordinal));
+        Assert.IsFalse(workspace.UsesFakeGraphData);
     }
 
     [TestMethod]
@@ -153,6 +245,160 @@ public sealed class ApplicationCompositionSmokeTests
         WrongShapedSourceLockSources,
         DuplicateApprovalField,
         UnexpectedApprovalField,
+    }
+
+    private sealed class ApprovedModelPackageFixture : IDisposable
+    {
+        private ApprovedModelPackageFixture(string root)
+        {
+            Root = root;
+        }
+
+        public string Root { get; }
+
+        public static ApprovedModelPackageFixture Create(string task)
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "GraphReader.ApplicationComposition.Models",
+                Guid.NewGuid().ToString("N"));
+            string modelId = $"fixture-{task.Replace('_', '-')}";
+            const string version = "1.0.0";
+            string runtimeDirectory = Path.Combine(root, "runtime", modelId, version);
+            string manifestDirectory = Path.Combine(root, "manifest", modelId, version);
+            string noticeDirectory = Path.Combine(root, "notices", modelId, version);
+            string evidenceDirectory = Path.Combine(root, "evidence", modelId, version);
+            Directory.CreateDirectory(runtimeDirectory);
+            Directory.CreateDirectory(manifestDirectory);
+            Directory.CreateDirectory(noticeDirectory);
+            Directory.CreateDirectory(evidenceDirectory);
+
+            string payloadPath = Path.Combine(runtimeDirectory, "model.onnx");
+            File.WriteAllBytes(payloadPath, [1, 2, 3, 4]);
+            string payloadSha256 = Sha256(payloadPath);
+            string noticePath = Path.Combine(noticeDirectory, "fixture-model.txt");
+            File.WriteAllText(noticePath, "Apache-2.0 synthetic packaging fixture.", Encoding.UTF8);
+            string noticeSha256 = Sha256(noticePath);
+            string evidencePath = Path.Combine(evidenceDirectory, "fixture-benchmark.json");
+            File.WriteAllText(evidencePath, "{\"status\":\"pass\"}", Encoding.UTF8);
+            string evidenceSha256 = Sha256(evidencePath);
+
+            var manifest = new Dictionary<string, object?>
+            {
+                ["manifest_version"] = 1,
+                ["model_id"] = modelId,
+                ["model_version"] = version,
+                ["task"] = task,
+                ["source"] = new Dictionary<string, object?>
+                {
+                    ["name"] = "Application composition synthetic fixture",
+                    ["url"] = "local://application-composition-fixture",
+                    ["revision"] = "1",
+                },
+                ["license"] = new Dictionary<string, object?>
+                {
+                    ["spdx"] = "Apache-2.0",
+                    ["notice_path"] = "LICENSES/fixture-model.txt",
+                    ["reviewed"] = true,
+                },
+                ["sha256"] = payloadSha256,
+                ["files"] = new[] { "model.onnx" },
+                ["inputs"] = new[] { new Dictionary<string, object?> { ["name"] = "input" } },
+                ["outputs"] = new[] { new Dictionary<string, object?> { ["name"] = "output" } },
+                ["commercial_use"] = true,
+                ["redistribution"] = true,
+                ["providers"] = new[] { "cpu" },
+                ["benchmarks"] = new[]
+                {
+                    new Dictionary<string, object?>
+                    {
+                        ["profile"] = "application-composition-v1",
+                        ["status"] = "pass",
+                        ["release_eligible"] = true,
+                        ["production_approval"] = true,
+                        ["evidence_path"] = "artifacts/evidence/fixture-benchmark.json",
+                        ["evidence_sha256"] = evidenceSha256,
+                    },
+                },
+            };
+            string manifestPath = Path.Combine(manifestDirectory, "manifest.json");
+            File.WriteAllText(manifestPath, JsonSerializer.Serialize(manifest), Encoding.UTF8);
+            string manifestSha256 = Sha256(manifestPath);
+
+            var index = new Dictionary<string, object?>
+            {
+                ["schema_version"] = 1,
+                ["models"] = new[]
+                {
+                    new Dictionary<string, object?>
+                    {
+                        ["model_id"] = modelId,
+                        ["model_version"] = version,
+                        ["manifest"] = new Dictionary<string, object?>
+                        {
+                            ["path"] = $"manifest/{modelId}/{version}/manifest.json",
+                            ["sha256"] = manifestSha256,
+                        },
+                        ["payloads"] = new[]
+                        {
+                            new Dictionary<string, object?>
+                            {
+                                ["declared_path"] = "model.onnx",
+                                ["path"] = $"runtime/{modelId}/{version}/model.onnx",
+                                ["sha256"] = payloadSha256,
+                            },
+                        },
+                        ["notice"] = new Dictionary<string, object?>
+                        {
+                            ["declared_path"] = "LICENSES/fixture-model.txt",
+                            ["path"] = $"notices/{modelId}/{version}/fixture-model.txt",
+                            ["sha256"] = noticeSha256,
+                        },
+                        ["benchmark_evidence"] = new Dictionary<string, object?>
+                        {
+                            ["declared_path"] = "artifacts/evidence/fixture-benchmark.json",
+                            ["path"] = $"evidence/{modelId}/{version}/fixture-benchmark.json",
+                            ["sha256"] = evidenceSha256,
+                        },
+                    },
+                },
+            };
+            File.WriteAllText(
+                Path.Combine(root, "production-model-index.json"),
+                JsonSerializer.Serialize(index),
+                Encoding.UTF8);
+            return new ApprovedModelPackageFixture(root);
+        }
+
+        public void Dispose()
+        {
+            if (Directory.Exists(Root))
+            {
+                Directory.Delete(Root, recursive: true);
+            }
+        }
+
+        private static string Sha256(string path) =>
+            Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)));
+    }
+
+    private sealed class ModelRootApplicationPaths(string modelRoot) : GraphReader.Domain.IApplicationPaths
+    {
+        private readonly string _mutableRoot = Path.Combine(modelRoot, "mutable");
+
+        public GraphReader.Domain.DistributionMode Mode => GraphReader.Domain.DistributionMode.Portable;
+
+        public string SettingsRoot => Path.Combine(_mutableRoot, "Settings");
+
+        public string CacheRoot => Path.Combine(_mutableRoot, "Cache");
+
+        public string LogsRoot => Path.Combine(_mutableRoot, "Logs");
+
+        public string AutosaveRoot => Path.Combine(_mutableRoot, "Autosave");
+
+        public string RecoveryRoot => Path.Combine(_mutableRoot, "Recovery");
+
+        public string ModelRoot { get; } = Path.GetFullPath(modelRoot);
     }
 
     private sealed class MalformedPdfiumApprovalFixture : IDisposable

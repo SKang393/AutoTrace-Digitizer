@@ -51,6 +51,24 @@ public sealed class ProductionModelStoreTests
     }
 
     [TestMethod]
+    public async Task ResolveAllReturnsOnlyChecksumValidatedCpuApprovedModels()
+    {
+        using var store = TestStore.Create();
+        var resolver = store.CreateResolver(new FakeExecutionProviderDiscovery("CPUExecutionProvider"));
+
+        IReadOnlyList<ResolvedProductionModel> resolved = await resolver.ResolveAllAsync(
+            InferenceProvider.Cpu,
+            CancellationToken.None);
+
+        Assert.HasCount(1, resolved);
+        Assert.AreEqual(TestStore.ModelId, resolved[0].Identity.ModelId);
+        Assert.AreEqual(TestStore.Version, resolved[0].Identity.Version);
+        Assert.AreEqual("marker_classifier", resolved[0].Task);
+        Assert.AreEqual(store.ModelSha256, resolved[0].Identity.Sha256, ignoreCase: true);
+        CollectionAssert.AreEqual(new[] { InferenceProvider.Cpu }, resolved[0].AvailableProviders.ToArray());
+    }
+
+    [TestMethod]
     public async Task DeclaredDirectMlFallsBackToCpuWhenRuntimeDoesNotProvideIt()
     {
         using var store = TestStore.Create(providers: ["cpu", "directml"]);

@@ -90,6 +90,75 @@ public sealed class ProductionModelStore
         }
     }
 
+    public async ValueTask<IReadOnlyList<ResolvedProductionModel>> ResolveAllAsync(
+        InferenceProvider? requiredProvider,
+        CancellationToken cancellationToken)
+    {
+        if (requiredProvider is InferenceProvider.Fake)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(requiredProvider),
+                "Fake is not a production execution provider.");
+        }
+
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            RejectReparseAncestors(_root, "MODEL_STORE_REPARSE_POINT");
+            string packageIndexPath = ResolveUnderRoot(PackageIndexFileName);
+            RejectReparseAncestors(packageIndexPath, "MODEL_STORE_REPARSE_POINT");
+            if (!File.Exists(packageIndexPath))
+            {
+                throw Failure(
+                    "MODEL_PACKAGE_INDEX_NOT_FOUND",
+                    $"Production model package index was not found: {packageIndexPath}");
+            }
+
+            PackageIndex packageIndex = await ReadPackageIndexAsync(
+                    packageIndexPath,
+                    cancellationToken)
+                .ConfigureAwait(false);
+            ValidateCanonicalPackagePaths(packageIndex);
+            ValidatePackageTree(packageIndexPath, packageIndex);
+
+            var resolved = new List<ResolvedProductionModel>(packageIndex.Models.Count);
+            foreach (PackageModel model in packageIndex.Models.OrderBy(
+                         static item => item.ModelId,
+                         StringComparer.Ordinal))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                resolved.Add(await ResolveCoreAsync(
+                        model.ModelId,
+                        model.Version,
+                        requiredProvider,
+                        cancellationToken)
+                    .ConfigureAwait(false));
+            }
+
+            return new ReadOnlyCollection<ResolvedProductionModel>(resolved);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (ProductionModelValidationException)
+        {
+            throw;
+        }
+        catch (UnauthorizedAccessException exception)
+        {
+            throw Failure("MODEL_STORE_ACCESS_DENIED", "Access to the production model store was denied.", exception);
+        }
+        catch (SecurityException exception)
+        {
+            throw Failure("MODEL_STORE_ACCESS_DENIED", "Access to the production model store was denied.", exception);
+        }
+        catch (IOException exception)
+        {
+            throw Failure("MODEL_STORE_IO_ERROR", "The production model store could not be read safely.", exception);
+        }
+    }
+
     private async ValueTask<ResolvedProductionModel> ResolveCoreAsync(
         string modelId,
         string version,

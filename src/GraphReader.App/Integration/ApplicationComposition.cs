@@ -28,6 +28,26 @@ public static class ApplicationComposition
     public static ApplicationCompositionResult Create(
         WorkflowRuntimeEnvironment environment,
         IApplicationPaths? applicationPaths = null)
+        => CreateCore(environment, applicationPaths, modelAvailability: null);
+
+    public static async Task<ApplicationCompositionResult> CreateAsync(
+        WorkflowRuntimeEnvironment environment,
+        IApplicationPaths? applicationPaths = null,
+        CancellationToken cancellationToken = default)
+    {
+        ProductionModelAvailabilitySnapshot? modelAvailability = environment == WorkflowRuntimeEnvironment.Production
+            ? await ProductionModelAvailabilityProbe.InspectAsync(
+                applicationPaths?.ModelRoot,
+                cancellationToken)
+                .ConfigureAwait(false)
+            : null;
+        return CreateCore(environment, applicationPaths, modelAvailability);
+    }
+
+    private static ApplicationCompositionResult CreateCore(
+        WorkflowRuntimeEnvironment environment,
+        IApplicationPaths? applicationPaths,
+        ProductionModelAvailabilitySnapshot? modelAvailability)
     {
         Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver =
             CreateLocalEnhancementResolver(applicationPaths);
@@ -35,7 +55,7 @@ public static class ApplicationComposition
         IReadOnlyList<AutomaticStageStatus> automaticStages =
             ProductionStageAvailabilityRegistry.Create(
                 enhancementResolver is not null,
-                applicationPaths?.ModelRoot,
+                modelAvailability,
                 pdf.PdfImporter is not null);
         return environment switch
         {

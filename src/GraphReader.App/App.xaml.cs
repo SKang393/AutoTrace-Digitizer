@@ -45,8 +45,10 @@ public partial class App : Application, IDisposable
             RuntimePathBootstrapper.CreateDefault().Initialize();
         ApplicationPaths = runtimePaths.Value;
         StartupError = runtimePaths.Errors.Count > 0 ? runtimePaths.Errors[0] : null;
-        ApplicationCompositionResult composition =
-            ApplicationComposition.Create(RuntimeEnvironment, ApplicationPaths);
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            RuntimeEnvironment,
+            ApplicationPaths,
+            CancellationToken.None);
         WorkspaceService = composition.WorkspaceService;
         WorkflowStartupError = composition.StartupError;
         StartupErrorMessageKey = StartupError?.UserMessageKey ?? WorkflowStartupError?.UserMessageKey;
