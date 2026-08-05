@@ -231,8 +231,8 @@ security scenarios pass without promoting the candidate.
 - Windows build and artifact verifier multi-file model support
 - pinned, fail-closed OpenCV source-build scaffold under
   `packaging/opencv-source/`
-- candidate-only OpenCV source review policy and notice bundle under
-  `packaging/opencv-source/review/`
+- OpenCV source review policy under `packaging/opencv-source/review/` and the
+  public distribution notice under `LICENSES/`
 - fail-closed portable runtime validation under
   `packaging/portable-validation/`
 - Real-ESRGAN partial runtime evidence and marker candidate manifests
@@ -289,8 +289,9 @@ files are not tracked.
 - repository localization audit: 177 keys, 0 missing, 0 extra, 0 duplicate,
   and 0 unresolved references.
 - `git diff --check`: passed.
-- `Build-Windows.ps1 -AuditOnly`: release not ready, 13 substantive blockers,
-  seven manifests, zero redistributable model files, and no emitted artifacts.
+- `Build-Windows.ps1 -AuditOnly`: release not ready, 16 substantive clean-tree
+  blockers, seven manifests, one redistributable approved model file, thirteen
+  blocked mandatory direct-evidence gates, and no emitted artifacts.
 
 ## Metrics and timing
 
@@ -315,10 +316,12 @@ private graph was imported during Goal 19. Goal 20 later imported the explicitly
 user-supplied Chandler image into ignored local evaluation storage only, with
 no training, Git, packaging, or redistribution eligibility.
 
-The OpenCV candidate notice bundle covers Apache-2.0, zlib, SoftFloat, and
-FDLIBM obligations for the retained minimal source profile. It is not a public
-notice approval. The ignored scoped maintainer attestation validates the five
-Microsoft static-runtime entries. The minimal NCNN runtime excludes
+The public OpenCV notice bundle covers Apache-2.0, zlib, SoftFloat, and FDLIBM
+obligations for the retained minimal source profile. The ignored scoped
+maintainer attestation validates the five Microsoft static-runtime entries and
+is not distributed. This approves the exact source-built component's public
+provenance record, not clean-machine or application release readiness. The
+minimal NCNN runtime excludes
 `vcomp140d.dll`; the remaining release `vcomp140.dll` still needs an authorized
 Microsoft source and license record.
 
@@ -327,22 +330,26 @@ Microsoft source and license record.
 - Manual-first development preview: implemented and running.
 - Stage-aware production composition: implemented, automatic stages fail closed.
 - Multi-file param/bin packaging limitation: resolved and verified.
-- OpenCV source reproducibility and candidate notice classification: resolved.
+- OpenCV source reproducibility, linked inventory, and public notice
+  classification: resolved for the exact source-built binary.
 - OpenCV local source-runtime parity: PASS.
 - OpenCV internal development-portable replacement: PASS with exact
   checksum-bound provenance metadata.
-- OpenCV production common-publish replacement: still blocked on clean-machine
-  load and workflow evidence.
+- OpenCV production common-publish replacement: the audit rejects any binary
+  other than the reviewed source-built hash; replacement, clean-machine load,
+  and workflow evidence remain blocked.
 - PDFium dependency/license closure: resolved for the exact unbundled runner;
   runtime packaging, clean-machine execution, and release approval remain
   blocked.
 - Local portable path, diagnostic, endpoint, registry-key, and write tracing:
   recorded with one fail-closed isolation gate.
-- Current release audit: 6 substantive clean-tree blockers. The audit requires
-  exact approved defaults for OCR detection, OCR recognition, marker center,
-  and marker classification; only the classifier currently satisfies its
-  task. Rejected research manifests remain audited without becoming mandatory
-  release payloads.
+- Current release audit: 16 substantive clean-tree blockers. Thirteen explicit
+  workflow, Chandler, PDF, accessibility, native clean-machine, enhancement,
+  Windows VM, and artifact-pair gates require direct checksum-bound evidence.
+  The other three blockers are the missing approved OCR detection, OCR
+  recognition, and marker-center defaults; marker classification is approved.
+  Rejected research manifests remain audited without becoming mandatory release
+  payloads.
 - Version promotion: intentionally unchanged at `0.0.21`.
 - Public release decision: unchanged, `FAIL`.
 
@@ -355,9 +362,11 @@ Microsoft source and license record.
   Real-ESRGAN and marker-center evidence remains experimental and ignored. All
   bounded numeric OCR candidates failed and their authorized budget is
   exhausted.
-- OpenCvSharp source inventory, notices, scoped Microsoft attestation,
-  reproducibility, exact public-axis parity, integration tests, and local WPF
-  smoke pass. Clean-machine load and workflow checks remain open.
+- OpenCvSharp source inventory, public distribution notice, scoped ignored
+  Microsoft attestation, reproducibility, exact public-axis parity, integration
+  tests, and local WPF smoke pass. The public audit accepts only exact binary
+  `87c12460daba638b36e916ea2bb832d0759fbf094b8639919a7ce11b0cca5791`;
+  production replacement, clean-machine load, and workflow checks remain open.
 - The PDFium binary and dependency notice closure pass reproducibility and
   independent review, but the runner is not bundled or release approved and
   has no clean-machine execution evidence.

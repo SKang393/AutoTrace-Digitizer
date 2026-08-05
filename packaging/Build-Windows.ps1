@@ -832,6 +832,7 @@ function Get-ReleaseAudit {
 
     $issues = New-Object System.Collections.Generic.List[string]
     $warnings = New-Object System.Collections.Generic.List[string]
+    $mandatoryEvidenceGates = [System.Collections.Generic.Dictionary[string,object]]::new([System.StringComparer]::Ordinal)
     foreach ($requiredPath in @('LICENSE', 'NOTICE', 'THIRD_PARTY_NOTICES.md', 'LICENSES')) {
         $fullPath = Join-Path $RepositoryRoot $requiredPath
         if (-not (Test-Path -LiteralPath $fullPath)) {
@@ -847,6 +848,7 @@ function Get-ReleaseAudit {
             Warnings = $warnings.ToArray()
             Definition = $null
             Components = $null
+            MandatoryEvidenceGates = $mandatoryEvidenceGates
         }
     }
 
@@ -860,6 +862,7 @@ function Get-ReleaseAudit {
             Warnings = $warnings.ToArray()
             Definition = $null
             Components = $null
+            MandatoryEvidenceGates = $mandatoryEvidenceGates
         }
     }
 
@@ -870,6 +873,81 @@ function Get-ReleaseAudit {
 
     if ($audit.components -isnot [System.Array] -or @($audit.components).Count -eq 0) {
         $issues.Add('The tracked release audit requires a nonempty components array.')
+    }
+
+    if ($audit.mandatoryEvidenceGates -isnot [System.Array] -or
+        @($audit.mandatoryEvidenceGates).Count -eq 0) {
+        $issues.Add('The tracked release audit requires a nonempty mandatoryEvidenceGates array.')
+    }
+    else {
+        $repositoryPrefix = [System.IO.Path]::GetFullPath($RepositoryRoot).TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
+        foreach ($gate in @($audit.mandatoryEvidenceGates)) {
+            foreach ($propertyName in @('id', 'description', 'status', 'evidence', 'notes')) {
+                if ($gate.PSObject.Properties.Name -notcontains $propertyName) {
+                    $issues.Add("Mandatory release evidence gate '$($gate.id)' is missing '$propertyName'.")
+                }
+            }
+
+            $gateId = [string]$gate.id
+            if ([string]::IsNullOrWhiteSpace($gateId)) {
+                $issues.Add('A mandatory release evidence gate has an empty id.')
+                continue
+            }
+            if ($mandatoryEvidenceGates.ContainsKey($gateId)) {
+                $issues.Add("Mandatory release evidence gate id '$gateId' is duplicated.")
+                continue
+            }
+            $mandatoryEvidenceGates.Add($gateId, $gate)
+
+            if ([string]::IsNullOrWhiteSpace([string]$gate.description)) {
+                $issues.Add("Mandatory release evidence gate '$gateId' has no description.")
+            }
+            if ([string]::IsNullOrWhiteSpace([string]$gate.notes)) {
+                $issues.Add("Mandatory release evidence gate '$gateId' has no notes.")
+            }
+
+            $gateStatus = [string]$gate.status
+            if ($gateStatus -notin @('pass', 'blocked')) {
+                $issues.Add("Mandatory release evidence gate '$gateId' has invalid status '$gateStatus'.")
+            }
+            if ($gate.evidence -isnot [System.Array]) {
+                $issues.Add("Mandatory release evidence gate '$gateId' requires an evidence array.")
+                continue
+            }
+
+            $gateEvidence = @($gate.evidence)
+            if ($gateStatus -eq 'pass' -and $gateEvidence.Count -eq 0) {
+                $issues.Add("Mandatory release evidence gate '$gateId' is marked pass without direct evidence.")
+            }
+            foreach ($evidence in $gateEvidence) {
+                $evidencePathValue = [string]$evidence.path
+                $evidenceSha256 = [string]$evidence.sha256
+                if ([string]::IsNullOrWhiteSpace($evidencePathValue) -or
+                    [System.IO.Path]::IsPathRooted($evidencePathValue)) {
+                    $issues.Add("Mandatory release evidence gate '$gateId' has an unsafe evidence path '$evidencePathValue'.")
+                    continue
+                }
+                if ($evidenceSha256 -notmatch '^[a-fA-F0-9]{64}$') {
+                    $issues.Add("Mandatory release evidence gate '$gateId' has no exact evidence SHA-256 for '$evidencePathValue'.")
+                    continue
+                }
+
+                $evidencePath = [System.IO.Path]::GetFullPath((Join-Path $RepositoryRoot $evidencePathValue))
+                if (-not $evidencePath.StartsWith($repositoryPrefix, [System.StringComparison]::OrdinalIgnoreCase) -or
+                    -not (Test-Path -LiteralPath $evidencePath -PathType Leaf)) {
+                    $issues.Add("Mandatory release evidence gate '$gateId' has a missing or unsafe evidence path '$evidencePathValue'.")
+                    continue
+                }
+                $actualEvidenceSha256 = (Get-FileHash -LiteralPath $evidencePath -Algorithm SHA256).Hash
+                if (-not $actualEvidenceSha256.Equals($evidenceSha256, [System.StringComparison]::OrdinalIgnoreCase)) {
+                    $issues.Add("Mandatory release evidence gate '$gateId' evidence checksum differs for '$evidencePathValue'.")
+                }
+            }
+
+            if ($gateStatus -eq 'blocked') {
+                $issues.Add("Mandatory release evidence gate '$gateId' is blocked: $($gate.notes)")
+            }
+        }
     }
 
     $components = [System.Collections.Generic.Dictionary[string,object]]::new([System.StringComparer]::Ordinal)
@@ -941,7 +1019,7 @@ function Get-ReleaseAudit {
             }
 
             $checksumPolicy = [string]$component.checksumPolicy
-            if ($checksumPolicy -eq 'exact-package') {
+            if ($checksumPolicy -in @('exact-package', 'exact-binary')) {
                 if ([string]$component.artifactSha256 -notmatch '^[a-fA-F0-9]{64}$') {
                     $issues.Add("Bundled release component '$componentId' requires an exact artifact SHA-256.")
                 }
@@ -1014,6 +1092,7 @@ function Get-ReleaseAudit {
         Warnings = $warnings.ToArray()
         Definition = $audit
         Components = $components
+        MandatoryEvidenceGates = $mandatoryEvidenceGates
     }
 }
 
@@ -1059,10 +1138,17 @@ function Assert-PublishBinaryCoverage {
             continue
         }
 
+        $binarySha256 = (Get-FileHash -LiteralPath $binary.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+        if ([string]$component.checksumPolicy -eq 'exact-binary' -and
+            -not $binarySha256.Equals([string]$component.artifactSha256, [System.StringComparison]::OrdinalIgnoreCase)) {
+            $failures.Add("Published binary '$relativePath' differs from exact release-audit binary '$($component.id)'.")
+            continue
+        }
+
         $mappings.Add([ordered]@{
                 path = $relativePath
                 componentId = [string]$component.id
-                sha256 = (Get-FileHash -LiteralPath $binary.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+                sha256 = $binarySha256
             })
     }
 
@@ -1497,6 +1583,10 @@ $auditResult = [pscustomobject]@{
     RedistributableModelFileCount = $modelAudit.RedistributableModelFileCount
     RequiredProductionModelTasks = @($modelAudit.RequiredModelTasks)
     ApprovedProductionModelTasks = @($modelAudit.ApprovedModelTasks)
+    MandatoryEvidenceGateCount = $releaseAudit.MandatoryEvidenceGates.Count
+    PassedMandatoryEvidenceGates = @($releaseAudit.MandatoryEvidenceGates.Values | Where-Object {
+            [string]$_.status -eq 'pass'
+        } | ForEach-Object { [string]$_.id } | Sort-Object)
     ArtifactsEmitted = $false
 }
 

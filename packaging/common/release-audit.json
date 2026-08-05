@@ -1,6 +1,99 @@
 {
   "schemaVersion": 1,
-  "description": "Tracked release inputs and publish-binary coverage. A bundled component is releasable only when every required field is exact and reviewStatus is reviewed.",
+  "description": "Tracked release inputs, mandatory direct-evidence gates, and publish-binary coverage. A bundled component is releasable only when every required field is exact and reviewStatus is reviewed.",
+  "mandatoryEvidenceGates": [
+    {
+      "id": "production-offline-cpu-workflow",
+      "description": "Complete Import through Export production workflow succeeds offline with the CPU provider and enhancement disabled.",
+      "status": "blocked",
+      "evidence": [],
+      "notes": "No approved OCR detector, OCR recognizer, or marker-center payload currently completes the production workflow."
+    },
+    {
+      "id": "production-chandler-acceptance",
+      "description": "The ignored Chandler case passes the fixed automatic-detection acceptance contract without training or tuning exposure.",
+      "status": "blocked",
+      "evidence": [],
+      "notes": "Automatic production detection is fail closed until all required model tasks are approved."
+    },
+    {
+      "id": "production-correction-persistence-export",
+      "description": "Correction replay, save, reopen, autosave, recovery, CSV export, and audit export pass with production results.",
+      "status": "blocked",
+      "evidence": [],
+      "notes": "Manual workflow evidence exists, but production automatic-result replay and persistence evidence does not."
+    },
+    {
+      "id": "production-pdf-workflows",
+      "description": "Born-digital and scanned-PDF panel imports reach the same production detection, review, and export workflow.",
+      "status": "blocked",
+      "evidence": [],
+      "notes": "The scanned-PDF production renderer and clean workflow evidence are incomplete."
+    },
+    {
+      "id": "production-image-batch-cancellation",
+      "description": "Image and batch imports use production detection, preserve completed work, and cancel safely.",
+      "status": "blocked",
+      "evidence": [],
+      "notes": "No end-to-end production automatic batch and cancellation evidence is sealed."
+    },
+    {
+      "id": "production-accessibility-keyboard",
+      "description": "Keyboard-only operation and UI Automation names pass across the complete production workflow.",
+      "status": "blocked",
+      "evidence": [],
+      "notes": "Existing control-level tests do not constitute complete production-workflow accessibility evidence."
+    },
+    {
+      "id": "production-public-scoreboard",
+      "description": "The fixed public production scoreboard passes with approved packaged model payloads and real adapters.",
+      "status": "blocked",
+      "evidence": [],
+      "notes": "The current public scoreboard is a synthetic metric-contract smoke and is not production model evidence."
+    },
+    {
+      "id": "opencv-clean-machine-load",
+      "description": "The exact reviewed source-built OpenCvSharpExtern binary loads and passes application smoke on a clean Windows machine.",
+      "status": "blocked",
+      "evidence": [],
+      "notes": "Reproducible source-build, inventory, notice, parity, and local smoke evidence exist; clean-machine load evidence does not."
+    },
+    {
+      "id": "pdfium-clean-machine-load",
+      "description": "The exact minimal PDFium renderer and its complete runtime payload load and render on a clean Windows machine.",
+      "status": "blocked",
+      "evidence": [],
+      "notes": "Pinned renderer provenance exists, but production packaging and clean-machine load evidence are incomplete."
+    },
+    {
+      "id": "optional-enhancement-off-on",
+      "description": "The workflow passes with enhancement disabled and with the exact reviewed optional enhancement runtime enabled.",
+      "status": "blocked",
+      "evidence": [],
+      "notes": "The external development runtime is not an approved packaged production payload."
+    },
+    {
+      "id": "installer-clean-windows-vm",
+      "description": "Installer install, launch, repair, upgrade, uninstall, offline, CPU fallback, path, diagnostics, and mutable-state scenarios pass on clean Windows.",
+      "status": "blocked",
+      "evidence": [],
+      "notes": "No complete clean-Windows installer scenario evidence is sealed."
+    },
+    {
+      "id": "portable-clean-windows-vm",
+      "description": "Portable extraction, launch, offline workflow, CPU fallback, path, read-only diagnostics, registry independence, and mutable-state scenarios pass on clean Windows.",
+      "status": "blocked",
+      "evidence": [],
+      "notes": "Development portable smoke is not complete clean-Windows production portable evidence."
+    },
+    {
+      "id": "release-artifact-pair-parity",
+      "description": "Installer and portable are produced from one clean common publish with identical application, contract, model, manifest, notice, and SBOM bytes.",
+      "status": "blocked",
+      "evidence": [],
+      "notes": "Artifact emission remains disabled while mandatory production, model, provenance, and VM gates are blocked."
+    }
+  ],
   "components": [
     {
       "id": "graph-auto-reader",
@@ -148,21 +241,21 @@
     },
     {
       "id": "opencvsharp-native",
-      "component": "OpenCvSharp Windows x64 slim runtime",
-      "version": "4.13.0.20260627",
+      "component": "OpenCvSharpExtern minimal source-built Windows x64 runtime",
+      "version": "4.13.0.20260627-source",
       "source": "https://github.com/shimat/opencvsharp",
-      "sourceRevision": "b161e7e012f5101f6d5dc68a835c59db6cc88b18; OpenCV fe38fc608f6acb8b68953438a62305d8318f4fcd",
-      "license": "Apache-2.0 AND LicenseRef-Incomplete-Linked-Native-Inventory",
+      "sourceRevision": "OpenCvSharp b161e7e012f5101f6d5dc68a835c59db6cc88b18; OpenCV fe38fc608f6acb8b68953438a62305d8318f4fcd; vcpkg 1e199d36a2b4109fecc04cc7ee67c2dd2e02a234",
+      "license": "Apache-2.0 AND Zlib AND BSD-3-Clause AND LicenseRef-FDLIBM-Notice AND LicenseRef-Microsoft-VisualStudio-2022 AND LicenseRef-Microsoft-Windows-SDK-10.0.26100.0",
       "bundledOrDownloaded": "bundled",
-      "artifactSha256": "281551a6c032d1aab316db9c1817bcded5a85188b24b2efd12c02665e7233817",
-      "checksumPolicy": "exact-package",
-      "noticePaths": ["LICENSES/OpenCvSharp-4.13.0.20260627-License.txt", "LICENSES/OpenCV-4.13.0-License.txt"],
+      "artifactSha256": "87c12460daba638b36e916ea2bb832d0759fbf094b8639919a7ce11b0cca5791",
+      "checksumPolicy": "exact-binary",
+      "noticePaths": ["LICENSES/OpenCvSharpExtern-SourceBuilt-ThirdPartyNotices.txt", "LICENSES/Microsoft-Visual-Cpp-2022-Redistribution-Reference.md"],
       "commercialUse": true,
-      "redistribution": false,
-      "reviewStatus": "blocked",
-      "reviewer": "Session 17",
-      "reviewDate": "2026-08-03",
-      "notes": "Release blocked until a source-audited native dependency inventory and complete notice set exist."
+      "redistribution": true,
+      "reviewStatus": "reviewed",
+      "reviewer": "Goal 19",
+      "reviewDate": "2026-08-04",
+      "notes": "Exact byte-reproducible source build with reviewed 15-entry linked-component inventory and public notice bundle. Maintainer authority for the scoped Microsoft static runtime entries is recorded only in ignored private provenance. The separate mandatory clean-machine gate remains blocked."
     },
     {
       "id": "imazen-webp-managed",

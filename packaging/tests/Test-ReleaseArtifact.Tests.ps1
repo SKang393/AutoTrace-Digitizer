@@ -616,10 +616,23 @@ function New-ReleaseFixture {
         $null = New-Item -ItemType Directory -Path $path -Force
     }
 
+    $releaseGateEvidencePath = Join-Path $fixture.Root 'packaging/release-gate-evidence.json'
+    Write-JsonFile -Path $releaseGateEvidencePath -Value ([ordered]@{ schemaVersion = 1; status = 'pass' })
+    $releaseGateEvidenceHash = Get-TestSha256 -Path $releaseGateEvidencePath
     $releaseAuditSource = Join-Path $fixture.Root 'packaging/common/release-audit.json'
     Write-JsonFile -Path $releaseAuditSource -Value ([ordered]@{
             schemaVersion = 1
             description = 'Synthetic tracked release audit fixture.'
+            mandatoryEvidenceGates = @(@{
+                    id = 'fixture-release-gate'
+                    description = 'Synthetic fixture release gate.'
+                    status = 'pass'
+                    evidence = @(@{
+                            path = 'packaging/release-gate-evidence.json'
+                            sha256 = $releaseGateEvidenceHash
+                        })
+                    notes = 'Synthetic direct evidence for packaging tests.'
+                })
             components = @(
                 @{
                     id = 'fixture-app'
@@ -904,9 +917,22 @@ function New-ModelAuditFixture {
     Write-JsonFile -Path (Join-Path $fixture.Root 'contracts/vision-result.schema.json') -Value (@{
             properties = @{ contract_version = @{ const = 1 } }
         })
+    $releaseGateEvidencePath = Join-Path $fixture.Root 'packaging/release-gate-evidence.json'
+    Write-JsonFile -Path $releaseGateEvidencePath -Value ([ordered]@{ schemaVersion = 1; status = 'pass' })
+    $releaseGateEvidenceHash = Get-TestSha256 -Path $releaseGateEvidencePath
     Write-JsonFile -Path (Join-Path $fixture.Root 'packaging/common/release-audit.json') -Value ([ordered]@{
             schemaVersion = 1
             description = 'Synthetic audit-only fixture.'
+            mandatoryEvidenceGates = @(@{
+                    id = 'fixture-release-gate'
+                    description = 'Synthetic fixture release gate.'
+                    status = 'pass'
+                    evidence = @(@{
+                            path = 'packaging/release-gate-evidence.json'
+                            sha256 = $releaseGateEvidenceHash
+                        })
+                    notes = 'Synthetic direct evidence for packaging tests.'
+                })
             components = @(@{
                     id = 'fixture-app'
                     component = 'Fixture app'
@@ -1003,10 +1029,23 @@ function New-ValidModelBuildFixture {
     Write-JsonFile -Path (Join-Path $fixture.Root 'contracts/vision-result.schema.json') -Value (@{
             properties = @{ contract_version = @{ const = 1 } }
         })
+    $releaseGateEvidencePath = Join-Path $fixture.Root 'packaging/release-gate-evidence.json'
+    Write-JsonFile -Path $releaseGateEvidencePath -Value ([ordered]@{ schemaVersion = 1; status = 'pass' })
+    $releaseGateEvidenceHash = Get-TestSha256 -Path $releaseGateEvidencePath
 
     Write-JsonFile -Path (Join-Path $fixture.Root 'packaging/common/release-audit.json') -Value ([ordered]@{
             schemaVersion = 1
             description = 'Synthetic valid-model build fixture.'
+            mandatoryEvidenceGates = @(@{
+                    id = 'fixture-release-gate'
+                    description = 'Synthetic fixture release gate.'
+                    status = 'pass'
+                    evidence = @(@{
+                            path = 'packaging/release-gate-evidence.json'
+                            sha256 = $releaseGateEvidenceHash
+                        })
+                    notes = 'Synthetic direct evidence for packaging tests.'
+                })
             components = @(
                 @{
                     id = 'fixture-app'
@@ -2227,6 +2266,93 @@ try {
         }
         if (Test-Path -LiteralPath $fixture.OutputRoot) {
             throw 'Build created staging before rejecting the invalid common publish definition.'
+        }
+    }
+
+    Assert-Case 'Blocked mandatory evidence gate keeps release audit closed' {
+        $fixture = New-ValidModelBuildFixture -Name 'blocked-mandatory-evidence-gate'
+        $releaseAuditPath = Join-Path $fixture.Root 'packaging/common/release-audit.json'
+        $releaseAudit = Get-Content -LiteralPath $releaseAuditPath -Raw | ConvertFrom-Json
+        $releaseAudit.mandatoryEvidenceGates[0].status = 'blocked'
+        $releaseAudit.mandatoryEvidenceGates[0].notes = 'Fixture direct evidence remains incomplete.'
+        $releaseAudit.mandatoryEvidenceGates[0].evidence = @()
+        Write-JsonFile -Path $releaseAuditPath -Value $releaseAudit
+        & git -C $fixture.Root add --all
+        & git -C $fixture.Root -c user.name=Fixture -c user.email=fixture@example.invalid commit --quiet -m 'Block mandatory evidence gate'
+        if ($LASTEXITCODE -ne 0) { throw 'Could not commit the blocked-gate fixture.' }
+
+        $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
+        $audit = & $buildScript -ManifestPath $fixture.Manifest -OutputRoot $fixture.OutputRoot -AuditOnly
+        $expected = "Mandatory release evidence gate 'fixture-release-gate' is blocked: Fixture direct evidence remains incomplete."
+        if (@($audit.Blockers) -notcontains $expected -or $audit.ReleaseReady -or $audit.ArtifactsEmitted) {
+            throw "Blocked mandatory evidence gate was not enforced exactly. Actual blockers: $(@($audit.Blockers) -join ' | ')"
+        }
+    }
+
+    Assert-Case 'Mandatory evidence gate cannot pass without direct evidence' {
+        $fixture = New-ValidModelBuildFixture -Name 'empty-mandatory-evidence-gate'
+        $releaseAuditPath = Join-Path $fixture.Root 'packaging/common/release-audit.json'
+        $releaseAudit = Get-Content -LiteralPath $releaseAuditPath -Raw | ConvertFrom-Json
+        $releaseAudit.mandatoryEvidenceGates[0].evidence = @()
+        Write-JsonFile -Path $releaseAuditPath -Value $releaseAudit
+        & git -C $fixture.Root add --all
+        & git -C $fixture.Root -c user.name=Fixture -c user.email=fixture@example.invalid commit --quiet -m 'Remove mandatory evidence'
+        if ($LASTEXITCODE -ne 0) { throw 'Could not commit the empty-evidence fixture.' }
+
+        $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
+        $audit = & $buildScript -ManifestPath $fixture.Manifest -OutputRoot $fixture.OutputRoot -AuditOnly
+        $expected = "Mandatory release evidence gate 'fixture-release-gate' is marked pass without direct evidence."
+        if (@($audit.Blockers) -notcontains $expected -or $audit.ReleaseReady -or $audit.ArtifactsEmitted) {
+            throw "Empty mandatory evidence was not rejected exactly. Actual blockers: $(@($audit.Blockers) -join ' | ')"
+        }
+    }
+
+    Assert-Case 'Mandatory evidence checksum mismatch keeps release audit closed' {
+        $fixture = New-ValidModelBuildFixture -Name 'mandatory-evidence-checksum-mismatch'
+        $releaseAuditPath = Join-Path $fixture.Root 'packaging/common/release-audit.json'
+        $releaseAudit = Get-Content -LiteralPath $releaseAuditPath -Raw | ConvertFrom-Json
+        $releaseAudit.mandatoryEvidenceGates[0].evidence[0].sha256 = ('0' * 64)
+        Write-JsonFile -Path $releaseAuditPath -Value $releaseAudit
+        & git -C $fixture.Root add --all
+        & git -C $fixture.Root -c user.name=Fixture -c user.email=fixture@example.invalid commit --quiet -m 'Tamper mandatory evidence checksum'
+        if ($LASTEXITCODE -ne 0) { throw 'Could not commit the evidence-checksum fixture.' }
+
+        $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
+        $audit = & $buildScript -ManifestPath $fixture.Manifest -OutputRoot $fixture.OutputRoot -AuditOnly
+        $expected = "Mandatory release evidence gate 'fixture-release-gate' evidence checksum differs for 'packaging/release-gate-evidence.json'."
+        if (@($audit.Blockers) -notcontains $expected -or $audit.ReleaseReady -or $audit.ArtifactsEmitted) {
+            throw "Tampered mandatory evidence was not rejected exactly. Actual blockers: $(@($audit.Blockers) -join ' | ')"
+        }
+    }
+
+    Assert-Case 'Exact-binary coverage rejects different published bytes' {
+        $fixture = New-ValidModelBuildFixture -Name 'exact-binary-mismatch'
+        $releaseAuditPath = Join-Path $fixture.Root 'packaging/common/release-audit.json'
+        $releaseAudit = Get-Content -LiteralPath $releaseAuditPath -Raw | ConvertFrom-Json
+        $releaseAudit.components[0].checksumPolicy = 'exact-binary'
+        $releaseAudit.components[0].artifactSha256 = ('0' * 64)
+        Write-JsonFile -Path $releaseAuditPath -Value $releaseAudit
+        & git -C $fixture.Root add --all
+        & git -C $fixture.Root -c user.name=Fixture -c user.email=fixture@example.invalid commit --quiet -m 'Require exact binary'
+        if ($LASTEXITCODE -ne 0) { throw 'Could not commit the exact-binary fixture.' }
+
+        $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
+        $blocked = $false
+        try {
+            & $buildScript -ManifestPath $fixture.Manifest -OutputRoot $fixture.OutputRoot | Out-Null
+        }
+        catch {
+            $blocked = $_.Exception.Message -like "*differs from exact release-audit binary 'fixture-app'*"
+        }
+        if (-not $blocked) {
+            throw 'Different published bytes were not rejected by exact-binary coverage.'
+        }
+        $releaseRoot = Join-Path $fixture.OutputRoot '0.0.21-win-x64/release'
+        if (Test-Path -LiteralPath $releaseRoot -PathType Container) {
+            $emittedArtifacts = @(Get-ChildItem -LiteralPath $releaseRoot -File -ErrorAction SilentlyContinue)
+            if ($emittedArtifacts.Count -gt 0) {
+                throw 'Exact-binary mismatch emitted release artifacts.'
+            }
         }
     }
 

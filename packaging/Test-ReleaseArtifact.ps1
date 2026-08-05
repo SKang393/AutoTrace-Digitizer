@@ -148,6 +148,64 @@ function Assert-RelativePath {
     return $resolvedPath
 }
 
+function Assert-MandatoryReleaseEvidenceGates {
+    param(
+        [Parameter(Mandatory)]
+        [object]$ReleaseAudit,
+
+        [Parameter(Mandatory)]
+        [string]$Description,
+
+        [string]$RepositoryRoot
+    )
+
+    $gatesProperty = $ReleaseAudit.PSObject.Properties['mandatoryEvidenceGates']
+    if ($null -eq $gatesProperty -or
+        $gatesProperty.Value -isnot [System.Array] -or
+        @($gatesProperty.Value).Count -eq 0) {
+        throw "$Description requires a nonempty mandatoryEvidenceGates array."
+    }
+
+    $gateIds = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($gate in @($gatesProperty.Value)) {
+        $gateId = [string]$gate.id
+        if ([string]::IsNullOrWhiteSpace($gateId) -or -not $gateIds.Add($gateId)) {
+            throw "$Description contains an empty or duplicate mandatory evidence gate id '$gateId'."
+        }
+        if ([string]$gate.status -ne 'pass') {
+            throw "$Description mandatory evidence gate '$gateId' is not pass."
+        }
+        if ([string]::IsNullOrWhiteSpace([string]$gate.description) -or
+            [string]::IsNullOrWhiteSpace([string]$gate.notes) -or
+            $gate.evidence -isnot [System.Array] -or
+            @($gate.evidence).Count -eq 0) {
+            throw "$Description mandatory evidence gate '$gateId' lacks its direct evidence contract."
+        }
+
+        foreach ($evidence in @($gate.evidence)) {
+            $evidencePath = [string]$evidence.path
+            $evidenceSha256 = [string]$evidence.sha256
+            if ([string]::IsNullOrWhiteSpace($evidencePath) -or
+                [System.IO.Path]::IsPathRooted($evidencePath) -or
+                $evidenceSha256 -notmatch '^[a-fA-F0-9]{64}$') {
+                throw "$Description mandatory evidence gate '$gateId' has an invalid evidence record."
+            }
+
+            if (-not [string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+                $resolvedEvidencePath = Assert-RelativePath `
+                    -Root $RepositoryRoot `
+                    -RelativePath $evidencePath `
+                    -Description "$Description mandatory evidence gate '$gateId'" `
+                    -RequireFile
+                Assert-Equal `
+                    -Actual (Get-Sha256 -Path $resolvedEvidencePath) `
+                    -Expected $evidenceSha256.ToLowerInvariant() `
+                    -Description "$Description mandatory evidence gate '$gateId' checksum differs"
+            }
+        }
+    }
+}
+
 function Assert-BuildVersion {
     param(
         [Parameter(Mandatory)]
@@ -1056,6 +1114,12 @@ function Assert-Sbom {
             -not [bool]$auditComponent.redistribution) {
             throw "Published binary '$($binaryFile.path)' maps to an unreleasable audit component."
         }
+        if ([string]$auditComponent.checksumPolicy -eq 'exact-binary' -and
+            -not ([string]$binaryFile.sha256).Equals(
+                [string]$auditComponent.artifactSha256,
+                [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw "Published binary '$($binaryFile.path)' differs from its exact release-audit binary."
+        }
 
         $binarySbom = @($components | Where-Object { [string]$_.name -eq [string]$binaryFile.path })
         if ($binarySbom.Count -ne 1 -or @($binarySbom[0].licenses).Count -eq 0) {
@@ -1207,6 +1271,9 @@ function Assert-PortableArchive {
             -ApplicationPublishPaths $applicationPublishPaths
         $releaseAudit = (Get-ZipEntryText -Archive $archive -EntryName 'release-audit.json') | ConvertFrom-Json
         Assert-Equal -Actual ([int]$releaseAudit.schemaVersion) -Expected 1 -Description 'Packaged release audit schema version is invalid'
+        Assert-MandatoryReleaseEvidenceGates `
+            -ReleaseAudit $releaseAudit `
+            -Description 'Packaged release audit'
         if ($releaseAudit.components -isnot [System.Array] -or @($releaseAudit.components).Count -eq 0) {
             throw 'Packaged release audit requires a nonempty components array.'
         }
@@ -1332,6 +1399,7 @@ foreach ($content in $requiredContent) {
         throw "Common publish contains an unapproved source-to-target mapping: '$source' -> '$target'."
     }
 }
+
 $localizationChecked = $false
 if (-not [string]::IsNullOrWhiteSpace($LocalizationReportPath)) {
     Assert-LocalizationReport -Path ([System.IO.Path]::GetFullPath($LocalizationReportPath))
@@ -1361,6 +1429,16 @@ elseif ([System.IO.Path]::GetFullPath($packagingRoot).Equals(
 }
 
 if (-not [string]::IsNullOrWhiteSpace($ArtifactRoot)) {
+    $trackedReleaseAuditPath = Join-Path $repositoryRoot 'packaging\common\release-audit.json'
+    if (-not (Test-Path -LiteralPath $trackedReleaseAuditPath -PathType Leaf)) {
+        throw "Tracked release audit is missing: $trackedReleaseAuditPath"
+    }
+    $trackedReleaseAudit = Get-Content -LiteralPath $trackedReleaseAuditPath -Raw | ConvertFrom-Json
+    Assert-MandatoryReleaseEvidenceGates `
+        -ReleaseAudit $trackedReleaseAudit `
+        -Description 'Tracked release audit' `
+        -RepositoryRoot $repositoryRoot
+
     $artifactRootFullPath = [System.IO.Path]::GetFullPath($ArtifactRoot)
     $requiredContentArchivePaths = @(Get-RequiredContentArchivePaths `
             -RepositoryRoot $repositoryRoot `
@@ -1410,11 +1488,7 @@ if (-not [string]::IsNullOrWhiteSpace($ArtifactRoot)) {
     Assert-PayloadRecordsEqual -Actual $portableStageRecords -Expected $commonPayloadRecords -Description 'Portable stage and common payloads'
     Assert-PayloadRecordsEqual -Actual $portablePayloadRecords -Expected $commonPayloadRecords -Description 'Portable ZIP and common payloads'
 
-    $trackedReleaseAuditPath = Join-Path $repositoryRoot 'packaging\common\release-audit.json'
     $packagedReleaseAuditPath = Join-Path $commonPublishPath 'release-audit.json'
-    if (-not (Test-Path -LiteralPath $trackedReleaseAuditPath -PathType Leaf)) {
-        throw "Tracked release audit is missing: $trackedReleaseAuditPath"
-    }
     Assert-Equal `
         -Actual (Get-Sha256 -Path $packagedReleaseAuditPath) `
         -Expected (Get-Sha256 -Path $trackedReleaseAuditPath) `
