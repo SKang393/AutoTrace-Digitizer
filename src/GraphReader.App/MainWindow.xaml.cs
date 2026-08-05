@@ -114,6 +114,15 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnGraphImagePointNavigated(object sender, GraphImagePointEventArgs e)
+    {
+        _ = sender;
+        if (DataContext is MainWindowViewModel viewModel)
+        {
+            viewModel.HandleCanvasNavigation(e.ImagePoint);
+        }
+    }
+
     private void OnWindowStateChanged(object? sender, EventArgs e)
     {
         _ = sender;

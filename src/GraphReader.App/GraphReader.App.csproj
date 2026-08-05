@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="GraphReader.App.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\GraphReader.Domain\GraphReader.Domain.csproj" />
     <ProjectReference Include="..\GraphReader.Imaging\GraphReader.Imaging.csproj" />
     <ProjectReference Include="..\GraphReader.Pdf\GraphReader.Pdf.csproj" />

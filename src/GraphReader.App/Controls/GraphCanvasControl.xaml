@@ -8,7 +8,8 @@
              x:Name="Root"
              Focusable="True"
              IsTabStop="True"
-             AutomationProperties.Name="{DynamicResource GraphCanvas.AutomationName}">
+             AutomationProperties.Name="{DynamicResource GraphCanvas.AutomationName}"
+             AutomationProperties.HelpText="{DynamicResource GraphCanvas.KeyboardHelp}">
   <Border Background="{DynamicResource App.Brush.Canvas}"
           BorderBrush="{DynamicResource App.Brush.Border}"
           BorderThickness="1"

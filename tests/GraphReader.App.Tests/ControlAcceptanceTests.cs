@@ -53,6 +53,42 @@ public sealed class ControlAcceptanceTests
     }
 
     [TestMethod]
+    public void CanvasKeyboardMovesCursorInPixelStepsAndInvokesCurrentEditAction()
+    {
+        StaTestHost.Run(
+            () =>
+            {
+                var canvas = new GraphCanvasControl
+                {
+                    ImageSource = new WriteableBitmap(100, 50, 96, 96, PixelFormats.Bgra32, null),
+                    CrosshairPosition = new Point(0.5, 0.5),
+                };
+                Point? navigated = null;
+                Point? invoked = null;
+                canvas.ImagePointNavigated += (_, args) => navigated = args.ImagePoint;
+                canvas.ImagePointInvoked += (_, args) => invoked = args.ImagePoint;
+
+                Assert.IsTrue(canvas.TryHandleKeyboardInput(System.Windows.Input.Key.Right, System.Windows.Input.ModifierKeys.None));
+                Assert.AreEqual(new Point(0.51, 0.5), canvas.CrosshairPosition);
+                Assert.AreEqual(new Point(51, 25), navigated);
+                Assert.IsNull(invoked);
+                Assert.IsTrue(canvas.ShowCrosshair);
+
+                Assert.IsTrue(canvas.TryHandleKeyboardInput(System.Windows.Input.Key.Up, System.Windows.Input.ModifierKeys.Shift));
+                Assert.AreEqual(new Point(0.51, 0.3), canvas.CrosshairPosition);
+                Assert.AreEqual(new Point(51, 15), navigated);
+
+                Assert.IsTrue(canvas.TryHandleKeyboardInput(System.Windows.Input.Key.Home, System.Windows.Input.ModifierKeys.None));
+                Assert.AreEqual(new Point(0.5, 0.5), canvas.CrosshairPosition);
+                Assert.AreEqual(new Point(50, 25), navigated);
+
+                Assert.IsTrue(canvas.TryHandleKeyboardInput(System.Windows.Input.Key.Enter, System.Windows.Input.ModifierKeys.None));
+                Assert.AreEqual(new Point(50, 25), invoked);
+                Assert.IsFalse(canvas.TryHandleKeyboardInput(System.Windows.Input.Key.F1, System.Windows.Input.ModifierKeys.None));
+            });
+    }
+
+    [TestMethod]
     public void SeriesCardBindingUpdatesCountAndAccessibleSymbolImmediately()
     {
         StaTestHost.Run(

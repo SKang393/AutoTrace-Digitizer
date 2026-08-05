@@ -728,20 +728,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             return;
         }
 
-        Magnifier.PixelPosition = point;
-        Magnifier.CrosshairPosition = new Point(
-            tab.PixelWidth > 0 ? Math.Clamp(point.X / tab.PixelWidth, 0, 1) : 0,
-            tab.PixelHeight > 0 ? Math.Clamp(point.Y / tab.PixelHeight, 0, 1) : 0);
-        if (tab.Calibration is { } calibration)
-        {
-            Magnifier.GraphPosition = new Point(
-                calibration.XTransform.PixelToGraph(point.X),
-                calibration.YTransform.PixelToGraph(point.Y));
-        }
-        else
-        {
-            Magnifier.GraphPosition = null;
-        }
+        HandleCanvasNavigation(point);
 
         try
         {
@@ -822,6 +809,29 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             OnPropertyChanged(nameof(EditorInstruction));
             EditorMode = ManualEditorMode.Select;
             SetStatus(FormatLocalizedString(LocalizationKeys.StatusManualEditRejectedFormat, exception.Message));
+        }
+    }
+
+    public void HandleCanvasNavigation(Point point)
+    {
+        if (SelectedTab is not { } tab)
+        {
+            return;
+        }
+
+        Magnifier.PixelPosition = point;
+        Magnifier.CrosshairPosition = new Point(
+            tab.PixelWidth > 0 ? Math.Clamp(point.X / tab.PixelWidth, 0, 1) : 0,
+            tab.PixelHeight > 0 ? Math.Clamp(point.Y / tab.PixelHeight, 0, 1) : 0);
+        if (tab.Calibration is { } calibration)
+        {
+            Magnifier.GraphPosition = new Point(
+                calibration.XTransform.PixelToGraph(point.X),
+                calibration.YTransform.PixelToGraph(point.Y));
+        }
+        else
+        {
+            Magnifier.GraphPosition = null;
         }
     }
 

@@ -88,6 +88,50 @@ public sealed class ShellContractTests
     }
 
     [TestMethod]
+    public void GraphCanvasExposesKeyboardNavigationAndActivationToAutomation()
+    {
+        var document = LoadMainWindow();
+        XNamespace automation = AutomationNamespace;
+        var canvas = FindNamed(document, "GraphCanvasHost");
+
+        Assert.AreEqual("True", canvas.Attribute("Focusable")?.Value);
+        Assert.AreEqual("21", canvas.Attribute("TabIndex")?.Value);
+        Assert.AreEqual("OnGraphImagePointInvoked", canvas.Attribute("ImagePointInvoked")?.Value);
+        Assert.AreEqual("OnGraphImagePointNavigated", canvas.Attribute("ImagePointNavigated")?.Value);
+        Assert.AreEqual(
+            "{DynamicResource GraphCanvas.KeyboardHelp}",
+            canvas.Attribute(automation + "AutomationProperties.HelpText")?.Value);
+    }
+
+    [TestMethod]
+    public void EveryShellAutomationIdHasAnExplicitLocalizedOrBoundName()
+    {
+        var document = LoadMainWindow();
+        XNamespace automation = AutomationNamespace;
+        XElement[] identified = document.Descendants()
+            .Where(element => !string.IsNullOrWhiteSpace(
+                element.Attribute(automation + "AutomationProperties.AutomationId")?.Value))
+            .ToArray();
+
+        Assert.HasCount(51, identified);
+        string[] unnamed = identified
+            .Where(element => string.IsNullOrWhiteSpace(
+                element.Attribute(automation + "AutomationProperties.Name")?.Value))
+            .Select(element => element.Attribute(automation + "AutomationProperties.AutomationId")!.Value)
+            .ToArray();
+        Assert.IsEmpty(unnamed, $"Automation IDs without names: {string.Join(", ", unnamed)}");
+
+        XElement status = identified.Single(element =>
+            element.Attribute(automation + "AutomationProperties.AutomationId")?.Value == "Workflow.Status");
+        Assert.AreEqual(
+            "Polite",
+            status.Attribute(automation + "AutomationProperties.LiveSetting")?.Value);
+        Assert.AreEqual(
+            "{Binding StatusMessage}",
+            status.Attribute(automation + "AutomationProperties.Name")?.Value);
+    }
+
+    [TestMethod]
     public void SeriesUsesLeftPaneWhileMagnifierRemainsInRightInspector()
     {
         var document = LoadMainWindow();

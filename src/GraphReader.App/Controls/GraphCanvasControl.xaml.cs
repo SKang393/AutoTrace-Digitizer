@@ -87,10 +87,13 @@ public partial class GraphCanvasControl : UserControl
     {
         InitializeComponent();
         Loaded += OnLoaded;
+        PreviewKeyDown += OnPreviewKeyDown;
         EditableImageCoordinateSurface.MouseLeftButtonDown += OnImageMouseLeftButtonDown;
     }
 
     public event EventHandler<GraphImagePointEventArgs>? ImagePointInvoked;
+
+    public event EventHandler<GraphImagePointEventArgs>? ImagePointNavigated;
 
     public ImageSource? ImageSource
     {
@@ -306,6 +309,64 @@ public partial class GraphCanvasControl : UserControl
         ImagePointInvoked?.Invoke(this, new GraphImagePointEventArgs(point));
         e.Handled = true;
     }
+
+    private void OnPreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        _ = sender;
+        e.Handled = TryHandleKeyboardInput(e.Key, Keyboard.Modifiers);
+    }
+
+    internal bool TryHandleKeyboardInput(Key key, ModifierKeys modifiers)
+    {
+        (double width, double height) = GetCoordinateDimensions(CoordinateReferenceSource ?? ImageSource);
+        if (width <= 0 || height <= 0)
+        {
+            return false;
+        }
+
+        if (key is Key.Enter or Key.Space)
+        {
+            ImagePointInvoked?.Invoke(this, new GraphImagePointEventArgs(ToImagePoint(width, height)));
+            return true;
+        }
+
+        double step = modifiers.HasFlag(ModifierKeys.Shift) ? 10 : 1;
+        double x = CrosshairPosition.X;
+        double y = CrosshairPosition.Y;
+        switch (key)
+        {
+            case Key.Left:
+                x -= step / width;
+                break;
+            case Key.Right:
+                x += step / width;
+                break;
+            case Key.Up:
+                y -= step / height;
+                break;
+            case Key.Down:
+                y += step / height;
+                break;
+            case Key.Home:
+                x = 0.5;
+                y = 0.5;
+                break;
+            default:
+                return false;
+        }
+
+        SetCurrentValue(
+            CrosshairPositionProperty,
+            new Point(Math.Clamp(x, 0, 1), Math.Clamp(y, 0, 1)));
+        SetCurrentValue(ShowCrosshairProperty, true);
+        ImagePointNavigated?.Invoke(this, new GraphImagePointEventArgs(ToImagePoint(width, height)));
+        return true;
+    }
+
+    private Point ToImagePoint(double width, double height) =>
+        new(
+            Math.Clamp(CrosshairPosition.X, 0, 1) * width,
+            Math.Clamp(CrosshairPosition.Y, 0, 1) * height);
 }
 
 public sealed class GraphImagePointEventArgs(Point imagePoint) : EventArgs

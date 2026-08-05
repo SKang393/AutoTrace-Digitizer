@@ -133,6 +133,7 @@ public static class LocalizationKeys
     public const string NavigationGraphs = "Navigation.Graphs";
     public const string NavigationEmpty = "Navigation.Empty";
     public const string NavigationAutomationName = "Navigation.AutomationName";
+    public const string SeriesResizeAutomationName = "Series.Resize.AutomationName";
     public const string CanvasEmpty = "Canvas.Empty";
     public const string CanvasPhaseOverlay = "Canvas.PhaseOverlay";
     public const string CanvasZoomIn = "Canvas.ZoomIn";
@@ -140,12 +141,15 @@ public static class LocalizationKeys
     public const string CanvasFit = "Canvas.Fit";
     public const string CanvasResetView = "Canvas.ResetView";
     public const string GraphCanvasAutomationName = "GraphCanvas.AutomationName";
+    public const string GraphCanvasKeyboardHelp = "GraphCanvas.KeyboardHelp";
     public const string GraphCanvasEmptyState = "GraphCanvas.EmptyState";
     public const string GraphCanvasPhaseOverlayAutomationName =
         "GraphCanvas.PhaseOverlay.AutomationName";
     public const string GraphCanvasCrosshairAutomationName =
         "GraphCanvas.Crosshair.AutomationName";
     public const string InspectorTitle = "Inspector.Title";
+    public const string InspectorResizeAutomationName = "Inspector.Resize.AutomationName";
+    public const string ManualPhaseDividersAutomationName = "Manual.PhaseDividers.AutomationName";
     public const string MagnifierTitle = "Magnifier.Title";
     public const string MagnifierOriginal = "Magnifier.Original";
     public const string MagnifierEnhanced = "Magnifier.Enhanced";
@@ -315,6 +319,7 @@ public static class LocalizationKeys
         NavigationGraphs,
         NavigationEmpty,
         NavigationAutomationName,
+        SeriesResizeAutomationName,
         CanvasEmpty,
         CanvasPhaseOverlay,
         CanvasZoomIn,
@@ -322,10 +327,13 @@ public static class LocalizationKeys
         CanvasFit,
         CanvasResetView,
         GraphCanvasAutomationName,
+        GraphCanvasKeyboardHelp,
         GraphCanvasEmptyState,
         GraphCanvasPhaseOverlayAutomationName,
         GraphCanvasCrosshairAutomationName,
         InspectorTitle,
+        InspectorResizeAutomationName,
+        ManualPhaseDividersAutomationName,
         MagnifierTitle,
         MagnifierOriginal,
         MagnifierEnhanced,

@@ -138,30 +138,35 @@
           <Button Margin="8,0,0,0"
                   Command="{Binding OpenProjectCommand}"
                   Style="{DynamicResource App.Style.Button}"
+                  automation:AutomationProperties.AutomationId="Project.Open"
                   automation:AutomationProperties.Name="{DynamicResource Project.Open}">
             <AccessText Text="{DynamicResource Project.Open}" />
           </Button>
           <Button Margin="8,0,0,0"
                   Command="{Binding CloseTabCommand}"
                   Style="{DynamicResource App.Style.Button}"
+                  automation:AutomationProperties.AutomationId="Project.CloseTab"
                   automation:AutomationProperties.Name="{DynamicResource Project.CloseTab}">
             <AccessText Text="{DynamicResource Project.CloseTab}" />
           </Button>
           <Button Margin="8,0,0,0"
                   Command="{Binding SaveProjectCommand}"
                   Style="{DynamicResource App.Style.Button}"
+                  automation:AutomationProperties.AutomationId="Project.Save"
                   automation:AutomationProperties.Name="{DynamicResource Project.Save}">
             <AccessText Text="{DynamicResource Project.Save}" />
           </Button>
           <Button Margin="8,0,0,0"
                   Command="{Binding SaveProjectAsCommand}"
                   Style="{DynamicResource App.Style.Button}"
+                  automation:AutomationProperties.AutomationId="Project.SaveAs"
                   automation:AutomationProperties.Name="{DynamicResource Project.SaveAs}">
             <AccessText Text="{DynamicResource Project.SaveAs}" />
           </Button>
           <Button Margin="8,0,0,0"
                   Command="{Binding RecoverProjectCommand}"
                   Style="{DynamicResource App.Style.Button}"
+                  automation:AutomationProperties.AutomationId="Project.Recover"
                   automation:AutomationProperties.Name="{DynamicResource Project.Recover}">
             <AccessText Text="{DynamicResource Project.Recover}" />
           </Button>
@@ -202,7 +207,8 @@
                     Grid.Column="0"
                     Padding="16"
                     VerticalScrollBarVisibility="Auto"
-                    automation:AutomationProperties.AutomationId="Series.Panel">
+                    automation:AutomationProperties.AutomationId="Series.Panel"
+                    automation:AutomationProperties.Name="{DynamicResource Series.Title}">
         <StackPanel>
           <TextBlock FontSize="{DynamicResource App.FontSize.Title}"
                      FontWeight="SemiBold"
@@ -245,13 +251,17 @@
           <Separator Margin="0,8" />
           <TextBlock Text="{DynamicResource Manual.SeriesName}" />
           <TextBox Margin="0,0,0,6"
-                   Text="{Binding NewSeriesName, UpdateSourceTrigger=PropertyChanged}" />
+                   Text="{Binding NewSeriesName, UpdateSourceTrigger=PropertyChanged}"
+                   automation:AutomationProperties.AutomationId="Manual.SeriesName"
+                   automation:AutomationProperties.Name="{DynamicResource Manual.SeriesName}" />
           <TextBlock Text="{DynamicResource Manual.SeriesShape}" />
           <ComboBox Margin="0,0,0,6"
                     ItemsSource="{Binding MarkerShapeChoices}"
                     DisplayMemberPath="Label"
                     SelectedValuePath="Value"
-                    SelectedValue="{Binding NewSeriesShape}" />
+                    SelectedValue="{Binding NewSeriesShape}"
+                    automation:AutomationProperties.AutomationId="Manual.SeriesShape"
+                    automation:AutomationProperties.Name="{DynamicResource Manual.SeriesShape}" />
           <TextBlock Text="{DynamicResource Manual.SeriesFill}" />
           <ComboBox x:Name="PointFillModeSelector"
                     Margin="0,0,0,6"
@@ -259,29 +269,37 @@
                     DisplayMemberPath="Label"
                     SelectedValuePath="Value"
                     SelectedValue="{Binding NewSeriesFill}"
-                    automation:AutomationProperties.AutomationId="Manual.PointFillMode" />
+                    automation:AutomationProperties.AutomationId="Manual.PointFillMode"
+                    automation:AutomationProperties.Name="{DynamicResource Manual.SeriesFill}" />
           <TextBlock Text="{DynamicResource Manual.SeriesRole}" />
           <ComboBox Margin="0,0,0,8"
                     ItemsSource="{Binding SeriesRoleChoices}"
                     DisplayMemberPath="Label"
                     SelectedValuePath="Value"
-                    SelectedValue="{Binding NewSeriesRole}" />
+                    SelectedValue="{Binding NewSeriesRole}"
+                    automation:AutomationProperties.AutomationId="Manual.SeriesRole"
+                    automation:AutomationProperties.Name="{DynamicResource Manual.SeriesRole}" />
           <Button x:Name="CreateSeriesButton"
                   Command="{Binding CreateSeriesCommand}"
                   Style="{DynamicResource App.Style.Button}"
                   Content="{DynamicResource Manual.CreateSeries}"
-                  automation:AutomationProperties.AutomationId="Manual.CreateSeries" />
+                  automation:AutomationProperties.AutomationId="Manual.CreateSeries"
+                  automation:AutomationProperties.Name="{DynamicResource Manual.CreateSeries}" />
           <TextBlock Margin="0,12,0,0" Text="{DynamicResource Manual.SharedBaseline}" />
           <ComboBox Margin="0,0,0,6"
                     ItemsSource="{Binding BaselineRelationChoices}"
                     DisplayMemberPath="Label"
                     SelectedValuePath="SeriesId"
-                    SelectedValue="{Binding SelectedSharedBaselineSeriesId, Mode=TwoWay}" />
+                    SelectedValue="{Binding SelectedSharedBaselineSeriesId, Mode=TwoWay}"
+                    automation:AutomationProperties.AutomationId="Manual.SharedBaseline"
+                    automation:AutomationProperties.Name="{DynamicResource Manual.SharedBaseline}" />
           <TextBlock Text="{DynamicResource Manual.ApplicableProbes}" />
           <ItemsControl Margin="0,0,0,6" ItemsSource="{Binding ProbeRelationChoices}">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
-                <CheckBox Content="{Binding Label}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                <CheckBox Content="{Binding Label}"
+                          IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                          automation:AutomationProperties.Name="{Binding Label}" />
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
@@ -289,12 +307,14 @@
                   Command="{Binding EditSeriesCommand}"
                   Style="{DynamicResource App.Style.Button}"
                   Content="{DynamicResource Manual.EditSeries}"
-                  automation:AutomationProperties.AutomationId="Manual.EditSeries" />
+                  automation:AutomationProperties.AutomationId="Manual.EditSeries"
+                  automation:AutomationProperties.Name="{DynamicResource Manual.EditSeries}" />
           <Button Margin="0,6,0,0"
                   Command="{Binding ApplySeriesRelationsCommand}"
                   Style="{DynamicResource App.Style.Button}"
                   Content="{DynamicResource Manual.ApplySeriesRelations}"
-                  automation:AutomationProperties.AutomationId="Manual.ApplySeriesRelations" />
+                  automation:AutomationProperties.AutomationId="Manual.ApplySeriesRelations"
+                  automation:AutomationProperties.Name="{DynamicResource Manual.ApplySeriesRelations}" />
         </StackPanel>
       </ScrollViewer>
 
@@ -303,7 +323,9 @@
                     HorizontalAlignment="Stretch"
                     ResizeDirection="Columns"
                     ResizeBehavior="PreviousAndNext"
-                    Background="{DynamicResource App.Brush.Border}" />
+                    Background="{DynamicResource App.Brush.Border}"
+                    automation:AutomationProperties.AutomationId="Series.Resize"
+                    automation:AutomationProperties.Name="{DynamicResource Series.Resize.AutomationName}" />
 
       <Grid x:Name="WorkspacePane" Grid.Column="2" Margin="16">
         <Grid.RowDefinitions>
@@ -320,7 +342,8 @@
                 BorderBrush="{DynamicResource App.Brush.Border}"
                 BorderThickness="1"
                 CornerRadius="6"
-                automation:AutomationProperties.AutomationId="Project.Summary">
+                automation:AutomationProperties.AutomationId="Project.Summary"
+                automation:AutomationProperties.Name="{DynamicResource Navigation.Title}">
           <StackPanel Orientation="Horizontal">
             <TextBlock Margin="0,0,10,0"
                        FontWeight="SemiBold"
@@ -389,17 +412,20 @@
                     Command="{Binding ShowOriginalPreviewCommand}"
                     Content="{DynamicResource Magnifier.Original}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Enhancement.ShowOriginal" />
+                    automation:AutomationProperties.AutomationId="Enhancement.ShowOriginal"
+                    automation:AutomationProperties.Name="{DynamicResource Magnifier.Original}" />
             <Button Margin="0,0,6,0"
                     Command="{Binding ShowEnhancedPreviewCommand}"
                     Content="{DynamicResource Magnifier.Enhanced}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Enhancement.ShowEnhanced" />
+                    automation:AutomationProperties.AutomationId="Enhancement.ShowEnhanced"
+                    automation:AutomationProperties.Name="{DynamicResource Magnifier.Enhanced}" />
             <Button Margin="0,0,12,0"
                     Command="{Binding ShowComparisonPreviewCommand}"
                     Content="{DynamicResource Enhancement.Comparison}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Enhancement.ShowComparison" />
+                    automation:AutomationProperties.AutomationId="Enhancement.ShowComparison"
+                    automation:AutomationProperties.Name="{DynamicResource Enhancement.Comparison}" />
             <CheckBox x:Name="PhaseOverlayToggle"
                       TabIndex="20"
                       Margin="0,0,8,0"
@@ -415,77 +441,90 @@
                     Command="{Binding StartCalibrationCommand}"
                     Content="{DynamicResource Manual.Calibration}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Manual.Calibrate" />
+                    automation:AutomationProperties.AutomationId="Manual.Calibrate"
+                    automation:AutomationProperties.Name="{DynamicResource Manual.Calibration}" />
             <Button x:Name="AddFilledPointButton"
                     Margin="0,0,6,0"
                     Command="{Binding BeginAddFilledPointCommand}"
                     Content="{DynamicResource Manual.AddFilledPoint}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Manual.AddFilledPoint" />
+                    automation:AutomationProperties.AutomationId="Manual.AddFilledPoint"
+                    automation:AutomationProperties.Name="{DynamicResource Manual.AddFilledPoint}" />
             <Button x:Name="AddOpenPointButton"
                     Margin="0,0,6,0"
                     Command="{Binding BeginAddOpenPointCommand}"
                     Content="{DynamicResource Manual.AddOpenPoint}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Manual.AddOpenPoint" />
+                    automation:AutomationProperties.AutomationId="Manual.AddOpenPoint"
+                    automation:AutomationProperties.Name="{DynamicResource Manual.AddOpenPoint}" />
             <Button x:Name="MovePointButton"
                     Margin="0,0,6,0"
                     Command="{Binding BeginMovePointCommand}"
                     Content="{DynamicResource Manual.MovePoint}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Manual.MovePoint" />
+                    automation:AutomationProperties.AutomationId="Manual.MovePoint"
+                    automation:AutomationProperties.Name="{DynamicResource Manual.MovePoint}" />
             <Button x:Name="DeletePointButton"
                     Margin="0,0,6,0"
                     Command="{Binding DeletePointCommand}"
                     CommandParameter="{Binding SelectedPointId}"
                     Content="{DynamicResource Manual.DeletePoint}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Manual.DeletePoint" />
+                    automation:AutomationProperties.AutomationId="Manual.DeletePoint"
+                    automation:AutomationProperties.Name="{DynamicResource Manual.DeletePoint}" />
             <Button Margin="0,0,6,0"
                     Command="{Binding BeginAddPhaseDividerCommand}"
                     Content="{DynamicResource Manual.AddDivider}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Manual.AddPhaseDivider" />
+                    automation:AutomationProperties.AutomationId="Manual.AddPhaseDivider"
+                    automation:AutomationProperties.Name="{DynamicResource Manual.AddDivider}" />
             <Button Margin="0,0,6,0"
                     Command="{Binding BeginMovePhaseDividerCommand}"
                     Content="{DynamicResource Manual.MoveDivider}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Manual.MovePhaseDivider" />
+                    automation:AutomationProperties.AutomationId="Manual.MovePhaseDivider"
+                    automation:AutomationProperties.Name="{DynamicResource Manual.MoveDivider}" />
             <Button Margin="0,0,6,0"
                     Command="{Binding DeletePhaseDividerCommand}"
                     Content="{DynamicResource Manual.DeleteDivider}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Manual.DeletePhaseDivider" />
+                    automation:AutomationProperties.AutomationId="Manual.DeletePhaseDivider"
+                    automation:AutomationProperties.Name="{DynamicResource Manual.DeleteDivider}" />
             <Button Margin="0,0,12,0"
                     Command="{Binding LabelPhaseDividerCommand}"
                     Content="{DynamicResource Manual.LabelDivider}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Manual.EditPhaseLabel" />
+                    automation:AutomationProperties.AutomationId="Manual.EditPhaseLabel"
+                    automation:AutomationProperties.Name="{DynamicResource Manual.LabelDivider}" />
             <Button x:Name="ZoomOutButton"
                     Margin="0,0,6,0"
                     Command="{Binding ZoomOutCommand}"
                     Content="{DynamicResource Canvas.ZoomOut}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Canvas.ZoomOut" />
+                    automation:AutomationProperties.AutomationId="Canvas.ZoomOut"
+                    automation:AutomationProperties.Name="{DynamicResource Canvas.ZoomOut}" />
             <Button x:Name="ZoomInButton"
                     Margin="0,0,6,0"
                     Command="{Binding ZoomInCommand}"
                     Content="{DynamicResource Canvas.ZoomIn}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Canvas.ZoomIn" />
+                    automation:AutomationProperties.AutomationId="Canvas.ZoomIn"
+                    automation:AutomationProperties.Name="{DynamicResource Canvas.ZoomIn}" />
             <Button x:Name="FitGraphButton"
                     Command="{Binding FitZoomCommand}"
                     Click="OnFitGraphClick"
                     Content="{DynamicResource Canvas.Fit}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Canvas.Fit" />
+                    automation:AutomationProperties.AutomationId="Canvas.Fit"
+                    automation:AutomationProperties.Name="{DynamicResource Canvas.Fit}" />
             <Button x:Name="ResetViewButton"
                     Margin="6,0,0,0"
                     Command="{Binding ResetViewCommand}"
                     Click="OnResetViewClick"
                     Content="{DynamicResource Canvas.ResetView}"
                     Style="{DynamicResource App.Style.Button}"
-                    automation:AutomationProperties.AutomationId="Canvas.ResetView" />
+                    automation:AutomationProperties.AutomationId="Canvas.ResetView"
+                    automation:AutomationProperties.Name="{DynamicResource Canvas.ResetView}" />
         </WrapPanel>
 
         <Border Grid.Row="3"
@@ -524,8 +563,10 @@
                                          CrosshairPosition="{Binding Magnifier.CrosshairPosition}"
                                          ZoomLevel="{Binding SelectedTab.ZoomLevel}"
                                          ImagePointInvoked="OnGraphImagePointInvoked"
+                                         ImagePointNavigated="OnGraphImagePointNavigated"
                                          automation:AutomationProperties.AutomationId="Canvas.GraphHost"
-                                         automation:AutomationProperties.Name="{DynamicResource GraphCanvas.AutomationName}" />
+                                         automation:AutomationProperties.Name="{DynamicResource GraphCanvas.AutomationName}"
+                                         automation:AutomationProperties.HelpText="{DynamicResource GraphCanvas.KeyboardHelp}" />
           </Grid>
         </Border>
       </Grid>
@@ -536,7 +577,8 @@
                     ResizeDirection="Columns"
                     ResizeBehavior="PreviousAndNext"
                     Background="{DynamicResource App.Brush.Border}"
-                    automation:AutomationProperties.AutomationId="Inspector.Resize" />
+                    automation:AutomationProperties.AutomationId="Inspector.Resize"
+                    automation:AutomationProperties.Name="{DynamicResource Inspector.Resize.AutomationName}" />
 
       <Grid x:Name="InspectorPane" Grid.Column="4" Margin="16">
         <Grid.RowDefinitions>
@@ -547,7 +589,8 @@
         <TextBlock FontSize="{DynamicResource App.FontSize.Title}"
                    FontWeight="SemiBold"
                    Text="{DynamicResource Inspector.Title}"
-                   automation:AutomationProperties.AutomationId="Inspector.Panel" />
+                   automation:AutomationProperties.AutomationId="Inspector.Panel"
+                   automation:AutomationProperties.Name="{DynamicResource Inspector.Title}" />
         <controls:MagnifierControl x:Name="MagnifierInspector"
                                    Grid.Row="1"
                                    TabIndex="30"
@@ -580,11 +623,15 @@
               </Grid.ColumnDefinitions>
               <StackPanel Grid.Column="0" Margin="0,0,4,0">
                 <TextBlock Text="{DynamicResource Manual.YMaximum}" />
-                <TextBox Text="{Binding ManualYMaximum, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding ManualYMaximum, UpdateSourceTrigger=PropertyChanged}"
+                         automation:AutomationProperties.AutomationId="Manual.YMaximum"
+                         automation:AutomationProperties.Name="{DynamicResource Manual.YMaximum}" />
               </StackPanel>
               <StackPanel Grid.Column="1" Margin="4,0,0,0">
                 <TextBlock Text="{DynamicResource Manual.XMaximum}" />
-                <TextBox Text="{Binding ManualXMaximum, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding ManualXMaximum, UpdateSourceTrigger=PropertyChanged}"
+                         automation:AutomationProperties.AutomationId="Manual.XMaximum"
+                         automation:AutomationProperties.Name="{DynamicResource Manual.XMaximum}" />
               </StackPanel>
             </Grid>
             <Grid Margin="0,0,0,6">
@@ -594,11 +641,15 @@
               </Grid.ColumnDefinitions>
               <StackPanel Grid.Column="0" Margin="0,0,4,0">
                 <TextBlock Text="{DynamicResource Manual.PhaseCode}" />
-                <TextBox Text="{Binding PhaseCode, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding PhaseCode, UpdateSourceTrigger=PropertyChanged}"
+                         automation:AutomationProperties.AutomationId="Manual.PhaseCode"
+                         automation:AutomationProperties.Name="{DynamicResource Manual.PhaseCode}" />
               </StackPanel>
               <StackPanel Grid.Column="1" Margin="4,0,0,0">
                 <TextBlock Text="{DynamicResource Manual.PhaseLabel}" />
-                <TextBox Text="{Binding PhaseLabel, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding PhaseLabel, UpdateSourceTrigger=PropertyChanged}"
+                         automation:AutomationProperties.AutomationId="Manual.PhaseLabel"
+                         automation:AutomationProperties.Name="{DynamicResource Manual.PhaseLabel}" />
               </StackPanel>
             </Grid>
             <ListBox Margin="0,0,0,6"
@@ -606,7 +657,9 @@
                      ItemsSource="{Binding SelectedTab.PhaseDividers}"
                      DisplayMemberPath="Label"
                      SelectedValuePath="DividerId"
-                     SelectedValue="{Binding SelectedDividerId, Mode=TwoWay}" />
+                     SelectedValue="{Binding SelectedDividerId, Mode=TwoWay}"
+                     automation:AutomationProperties.AutomationId="Manual.PhaseDividers"
+                     automation:AutomationProperties.Name="{DynamicResource Manual.PhaseDividers.AutomationName}" />
           </StackPanel>
         </ScrollViewer>
       </Grid>
@@ -622,7 +675,9 @@
         <TextBlock VerticalAlignment="Center"
                    Foreground="{DynamicResource App.Brush.TextMuted}"
                    Text="{Binding StatusMessage}"
-                   automation:AutomationProperties.AutomationId="Workflow.Status" />
+                   automation:AutomationProperties.AutomationId="Workflow.Status"
+                   automation:AutomationProperties.Name="{Binding StatusMessage}"
+                   automation:AutomationProperties.LiveSetting="Polite" />
         <ProgressBar Width="160"
                      Height="4"
                      HorizontalAlignment="Right"
