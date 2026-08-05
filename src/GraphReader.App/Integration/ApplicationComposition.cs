@@ -87,7 +87,7 @@ public static class ApplicationComposition
     {
         Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver =
             CreateLocalEnhancementResolver(applicationPaths);
-        (IPdfImportService? PdfImporter, DomainError? Error) pdf =
+        (IPdfImportService PdfImporter, bool ReviewedRendererConfigured, DomainError? Error) pdf =
             CreateReviewedPdfImporter(applicationRoot);
         DomainResult<ProductionInferenceRuntimeHost>? inference =
             environment == WorkflowRuntimeEnvironment.Production && applicationPaths is not null
@@ -142,7 +142,7 @@ public static class ApplicationComposition
             ProductionStageAvailabilityRegistry.Create(
                 enhancementResolver is not null,
                 modelAvailability,
-                pdf.PdfImporter is not null,
+                pdf.ReviewedRendererConfigured,
                 runtimeAvailability,
                 inference?.Value is not null,
                 adapterAvailability);
@@ -168,7 +168,8 @@ public static class ApplicationComposition
                 new ManualPreviewWorkspaceService(
                     applicationPaths,
                     automaticStages: automaticStages,
-                    enhancementResolver: enhancementResolver),
+                    enhancementResolver: enhancementResolver,
+                    pdfImportService: pdf.PdfImporter),
                 null),
             WorkflowRuntimeEnvironment.RecordedFake => new ApplicationCompositionResult(
                 environment,
@@ -183,7 +184,7 @@ public static class ApplicationComposition
         IApplicationPaths? applicationPaths,
         Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver,
         IReadOnlyList<AutomaticStageStatus> automaticStages,
-        (IPdfImportService? PdfImporter, DomainError? Error) pdf,
+        (IPdfImportService PdfImporter, bool ReviewedRendererConfigured, DomainError? Error) pdf,
         DomainResult<ProductionInferenceRuntimeHost>? inference,
         IProductionAxisGeometryAdapter? axisAdapter,
         IProductionMarkerCenterAdapter? markerCenterAdapter,
@@ -215,7 +216,8 @@ public static class ApplicationComposition
                 automaticStages: automaticStages,
                 enhancementResolver: enhancementResolver,
                 workflowOrchestrator: orchestrator,
-                panelStore: panelStore),
+                panelStore: panelStore,
+                pdfImportService: pdf.PdfImporter),
             pdf.Error ?? inferenceError ?? markerAdapterError,
             inference?.Value,
             axisAdapter,
@@ -328,9 +330,12 @@ public static class ApplicationComposition
             cancellationToken);
     }
 
-    private static (IPdfImportService? PdfImporter, DomainError? Error) CreateReviewedPdfImporter(
-        string applicationRoot)
+    private static (IPdfImportService PdfImporter, bool ReviewedRendererConfigured, DomainError? Error)
+        CreateReviewedPdfImporter(
+            string applicationRoot)
     {
+        var inspector = new PdfPigDocumentInspector();
+        var panelization = new PanelizationEngine();
         string? approvalPath = Environment.GetEnvironmentVariable(PdfiumApprovalEnvironmentVariable);
         if (string.IsNullOrWhiteSpace(approvalPath))
         {
@@ -340,7 +345,10 @@ public static class ApplicationComposition
                 "reviewed-approval.json");
             if (!File.Exists(packagedApprovalPath))
             {
-                return (null, null);
+                return (
+                    new PdfImportService(inspector, panelization),
+                    ReviewedRendererConfigured: false,
+                    Error: null);
             }
 
             approvalPath = packagedApprovalPath;
@@ -351,17 +359,19 @@ public static class ApplicationComposition
             ReviewedPdfiumPageRendererBackend backend = ReviewedPdfiumPageRendererBackend.Load(approvalPath);
             return (
                 new PdfImportService(
-                    new PdfPigDocumentInspector(),
-                    new PanelizationEngine(),
+                    inspector,
+                    panelization,
                     backend.CreateRenderingService()),
-                null);
+                ReviewedRendererConfigured: true,
+                Error: null);
         }
         catch (Exception exception) when (exception is IOException or InvalidDataException or
             UnauthorizedAccessException or SecurityException or JsonException)
         {
             return (
-                null,
-                new DomainError(
+                new PdfImportService(inspector, panelization),
+                ReviewedRendererConfigured: false,
+                Error: new DomainError(
                     "PDFIUM_APPROVAL_REJECTED",
                     DomainErrorSeverity.Warning,
                     "Errors.PdfRendererUnavailable",

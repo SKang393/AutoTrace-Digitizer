@@ -15,6 +15,7 @@ using GraphReader.Axis;
 using GraphReader.Domain;
 using GraphReader.Export;
 using GraphReader.Imaging;
+using GraphReader.Pdf;
 using GraphReader.Phases;
 using GraphReader.SuperResolution;
 using AxisPixelPoint = GraphReader.Axis.PixelPoint;
@@ -49,8 +50,17 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         string PointId,
         string? DetectionKey);
 
+    private sealed record PdfWorkspacePanel(
+        WorkflowImportedPanel Panel,
+        ImmutableImageBytes OriginalBytes);
+
+    private sealed record PdfWorkspaceImport(
+        string DocumentSha256,
+        IReadOnlyList<PdfWorkspacePanel> Panels);
+
     private readonly IApplicationPaths? _applicationPaths;
     private readonly IImageImportService _imageImportService;
+    private readonly IPdfImportService? _pdfImportService;
     private readonly ProjectFileStore _projectFileStore;
     private readonly IExportService _exportService;
     private readonly IPhaseManualEditor _phaseEditor;
@@ -75,7 +85,8 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         IPhaseManualEditor? phaseEditor = null,
         WorkflowRuntimeEnvironment runtimeEnvironment = WorkflowRuntimeEnvironment.ManualPreview,
         IReadOnlyList<AutomaticStageStatus>? automaticStages = null,
-        Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver = null)
+        Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver = null,
+        IPdfImportService? pdfImportService = null)
     {
         if (runtimeEnvironment == WorkflowRuntimeEnvironment.RecordedFake)
         {
@@ -86,6 +97,7 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
 
         _applicationPaths = applicationPaths;
         _imageImportService = imageImportService ?? new ImageImportService();
+        _pdfImportService = pdfImportService;
         _projectFileStore = projectFileStore ?? new ProjectFileStore();
         _exportService = exportService ?? new ExportService();
         _phaseEditor = phaseEditor ?? new PhaseManualEditor();
@@ -130,37 +142,69 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
             return [];
         }
 
-        BatchImportResult result = await _imageImportService
-            .ImportBatchAsync(requestedPaths, cancellationToken)
-            .ConfigureAwait(false);
-        _lastImportErrors = result.Items
-            .Where(static item => item.Error is not null)
-            .Select(static item => item.Error!)
-            .ToArray();
-
         var addedTabs = new List<WorkspaceTabViewModel>();
         var addedSources = new List<SourceReference>();
-        foreach (ImageImportResult item in result.Items.Where(static item => item.Image is not null))
+        var errors = new List<ImageImportError>();
+        string[] imagePaths = requestedPaths.Where(static path => !IsPdfPath(path)).ToArray();
+        if (imagePaths.Length > 0)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            ImportedImage image = item.Image!;
-            var source = new SourceReference(
-                SourceId.New(),
-                SourceKind.Image,
-                Path.GetFileName(image.SourcePath),
-                image.SourcePath,
-                image.Sha256,
-                ArticleMetadata: null);
-            var panelId = PanelId.New();
-            WorkspaceTabViewModel tab = CreateEmptyImageTab(panelId, source, image);
-            _tabs.Add(tab);
-            addedTabs.Add(tab);
-            addedSources.Add(source);
-            _phaseOverrides[tab.TabId] = new PhaseManualOverrides();
-            _productionDetectionKeysByTab[tab.TabId] = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-            _deletedPointTombstonesByTab[tab.TabId] = new Dictionary<string, DeletedPointTombstone>(StringComparer.OrdinalIgnoreCase);
+            BatchImportResult result = await _imageImportService
+                .ImportBatchAsync(imagePaths, cancellationToken)
+                .ConfigureAwait(false);
+            errors.AddRange(result.Items
+                .Where(static item => item.Error is not null)
+                .Select(static item => item.Error!));
+            foreach (ImageImportResult item in result.Items.Where(static item => item.Image is not null))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                ImportedImage image = item.Image!;
+                var source = new SourceReference(
+                    SourceId.New(),
+                    SourceKind.Image,
+                    Path.GetFileName(image.SourcePath),
+                    image.SourcePath,
+                    image.Sha256,
+                    ArticleMetadata: null);
+                WorkspaceTabViewModel tab = CreateEmptyImageTab(PanelId.New(), source, image);
+                RegisterImportedTab(tab, addedTabs);
+                addedSources.Add(source);
+            }
         }
 
+        foreach (string pdfPath in requestedPaths.Where(IsPdfPath))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var sourceId = SourceId.New();
+            try
+            {
+                PdfWorkspaceImport imported = await LoadPdfPanelsAsync(
+                        CurrentProject.ProjectId.Value,
+                        sourceId,
+                        pdfPath,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+                var source = new SourceReference(
+                    sourceId,
+                    SourceKind.Pdf,
+                    Path.GetFileName(pdfPath),
+                    Path.GetFullPath(pdfPath),
+                    imported.DocumentSha256,
+                    ArticleMetadata: null);
+                foreach (PdfWorkspacePanel panel in imported.Panels)
+                {
+                    WorkspaceTabViewModel tab = CreateEmptyPdfTab(source, panel);
+                    RegisterImportedTab(tab, addedTabs);
+                }
+
+                addedSources.Add(source);
+            }
+            catch (ProductionWorkflowStageException exception)
+            {
+                errors.Add(ToImportError(pdfPath, exception.Failure));
+            }
+        }
+
+        _lastImportErrors = errors.ToArray();
         if (addedTabs.Count > 0)
         {
             CurrentProject = CurrentProject with
@@ -168,7 +212,11 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
                 ModifiedUtc = DateTimeOffset.UtcNow,
                 Sources = CurrentProject.Sources.Concat(addedSources).ToArray(),
             };
-            SynchronizeProject(DomainEventKind.DetectionAccepted, panelId: null, entityId: null, "Real image import");
+            SynchronizeProject(
+                DomainEventKind.DetectionAccepted,
+                panelId: null,
+                entityId: null,
+                "Real image or PDF panel import");
         }
 
         return addedTabs;
@@ -186,30 +234,64 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         }
 
         ProjectDocument project = loaded.Value;
-        var importedBySource = new Dictionary<SourceId, ImportedImage>();
+        var importedImagesBySource = new Dictionary<SourceId, ImportedImage>();
+        var importedPdfPanelsById = new Dictionary<PanelId, PdfWorkspacePanel>();
         var errors = new List<ImageImportError>();
-        foreach (SourceReference source in project.Sources.Where(static source => source.Kind == SourceKind.Image))
+        foreach (SourceReference source in project.Sources)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (string.IsNullOrWhiteSpace(source.LocalPath))
             {
-                throw new InvalidOperationException($"Source '{source.DisplayName}' has no local image path.");
+                throw new InvalidOperationException($"Source '{source.DisplayName}' has no local path.");
             }
 
-            ImageImportResult imported = await _imageImportService.ImportAsync(source.LocalPath, cancellationToken)
-                .ConfigureAwait(false);
-            if (imported.Image is null)
+            if (source.Kind == SourceKind.Image)
             {
-                errors.Add(imported.Error!);
+                ImageImportResult imported = await _imageImportService
+                    .ImportAsync(source.LocalPath, cancellationToken)
+                    .ConfigureAwait(false);
+                if (imported.Image is null)
+                {
+                    errors.Add(imported.Error!);
+                    continue;
+                }
+
+                if (!string.Equals(imported.Image.Sha256, source.Sha256, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException(
+                        $"Source '{source.DisplayName}' no longer matches its saved SHA-256.");
+                }
+
+                importedImagesBySource[source.SourceId] = imported.Image;
                 continue;
             }
 
-            if (!string.Equals(imported.Image.Sha256, source.Sha256, StringComparison.OrdinalIgnoreCase))
+            try
             {
-                throw new InvalidOperationException($"Source '{source.DisplayName}' no longer matches its saved SHA-256.");
-            }
+                PdfWorkspaceImport imported = await LoadPdfPanelsAsync(
+                        project.ProjectId.Value,
+                        source.SourceId,
+                        source.LocalPath,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+                if (!string.Equals(
+                        imported.DocumentSha256,
+                        source.Sha256,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException(
+                        $"Source '{source.DisplayName}' no longer matches its saved SHA-256.");
+                }
 
-            importedBySource[source.SourceId] = imported.Image;
+                foreach (PdfWorkspacePanel panel in imported.Panels)
+                {
+                    importedPdfPanelsById[PanelId.FromGuid(panel.Panel.PanelId)] = panel;
+                }
+            }
+            catch (ProductionWorkflowStageException exception)
+            {
+                errors.Add(ToImportError(source.LocalPath, exception.Failure));
+            }
         }
 
         if (errors.Count > 0)
@@ -228,13 +310,34 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         _enhancementEnvelopes.Clear();
         foreach (PanelRecord panel in project.Panels)
         {
-            if (!importedBySource.TryGetValue(panel.SourceId, out ImportedImage? image))
+            SourceReference source = project.Sources.Single(item => item.SourceId == panel.SourceId);
+            WorkspaceTabViewModel tab;
+            if (source.Kind == SourceKind.Image)
             {
-                continue;
+                if (!importedImagesBySource.TryGetValue(panel.SourceId, out ImportedImage? image))
+                {
+                    continue;
+                }
+
+                tab = CreateTabFromProject(panel, source, image);
+            }
+            else
+            {
+                if (!importedPdfPanelsById.TryGetValue(panel.PanelId, out PdfWorkspacePanel? pdfPanel))
+                {
+                    throw new InvalidOperationException(
+                        $"Saved PDF panel '{panel.PanelId.Value:D}' was not reproduced by the current source bytes.");
+                }
+
+                tab = CreateTabFromProject(
+                    panel,
+                    source,
+                    pdfPanel.OriginalBytes,
+                    pdfPanel.Panel.Original.Width,
+                    pdfPanel.Panel.Original.Height,
+                    pdfPanel.Panel.Original.Sha256);
             }
 
-            SourceReference source = project.Sources.Single(item => item.SourceId == panel.SourceId);
-            WorkspaceTabViewModel tab = CreateTabFromProject(panel, source, image);
             ReindexAllSeries(tab);
             _tabs.Add(tab);
             _phaseOverrides[tab.TabId] = CreatePhaseOverrides(tab);
@@ -2070,6 +2173,113 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         return $"{Math.Max(0, version.Major)}.{Math.Max(0, version.Minor)}.{Math.Max(0, version.Build)}";
     }
 
+    private async Task<PdfWorkspaceImport> LoadPdfPanelsAsync(
+        Guid projectId,
+        SourceId sourceId,
+        string sourcePath,
+        CancellationToken cancellationToken)
+    {
+        var panelStore = new ProductionWorkflowPanelStore();
+        var stage = new ProductionWorkflowImportStage(
+            panelStore,
+            _imageImportService,
+            _pdfImportService);
+        WorkflowImportSnapshot snapshot = await stage.ImportAsync(
+                new WorkflowImportRequest(
+                    projectId,
+                    [new WorkflowSourceRequest(sourceId.Value, WorkflowSourceKind.Pdf, Path.GetFullPath(sourcePath))],
+                    enhancementEnabled: false),
+                cancellationToken)
+            .ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var panels = new List<PdfWorkspacePanel>(snapshot.Panels.Count);
+        var documentChecksums = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (WorkflowImportedPanel panel in snapshot.Panels)
+        {
+            ProductionPanelEvidence evidence = panelStore.Get(panel.PanelId);
+            if (evidence.SourceKind != WorkflowSourceKind.Pdf ||
+                string.IsNullOrWhiteSpace(evidence.SourceDocumentSha256))
+            {
+                throw PdfFailure(
+                    "PDF workspace import did not retain the source-document checksum.");
+            }
+
+            documentChecksums.Add(evidence.SourceDocumentSha256);
+            var originalBytes = new ImmutableImageBytes(evidence.CopyOriginalBytes());
+            BitmapImage decoded;
+            try
+            {
+                decoded = CreateBitmap(originalBytes);
+            }
+            catch (Exception exception) when (exception is not OutOfMemoryException)
+            {
+                throw PdfFailure(
+                    $"PDF panel '{panel.PanelId:D}' encoded bytes could not be decoded: {exception.Message}");
+            }
+
+            if (decoded.PixelWidth != panel.Original.Width ||
+                decoded.PixelHeight != panel.Original.Height)
+            {
+                throw PdfFailure(
+                    $"PDF panel '{panel.PanelId:D}' encoded dimensions do not match its retained evidence.");
+            }
+
+            panels.Add(new PdfWorkspacePanel(
+                panel,
+                originalBytes));
+        }
+
+        if (panels.Count == 0 || documentChecksums.Count != 1)
+        {
+            throw PdfFailure(
+                "PDF workspace import requires at least one panel bound to exactly one source-document checksum.");
+        }
+
+        return new PdfWorkspaceImport(documentChecksums.Single(), panels);
+    }
+
+    private void RegisterImportedTab(
+        WorkspaceTabViewModel tab,
+        List<WorkspaceTabViewModel> addedTabs)
+    {
+        _tabs.Add(tab);
+        addedTabs.Add(tab);
+        _phaseOverrides[tab.TabId] = new PhaseManualOverrides();
+        _productionDetectionKeysByTab[tab.TabId] =
+            new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+        _deletedPointTombstonesByTab[tab.TabId] =
+            new Dictionary<string, DeletedPointTombstone>(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static ImageImportError ToImportError(
+        string sourcePath,
+        ProductionWorkflowFailure failure) =>
+        new(
+            string.Equals(
+                failure.Code,
+                ProductionWorkflowFailureCodes.PdfImportUnavailable,
+                StringComparison.Ordinal)
+                ? ImageImportErrorCode.UnsupportedFormat
+                : ImageImportErrorCode.IoFailure,
+            ImageErrorSeverity.Error,
+            failure.UserMessageKey,
+            failure.TechnicalMessage,
+            failure.Recoverable,
+            ImageSuggestedAction.Retry,
+            sourcePath);
+
+    private static ProductionWorkflowStageException PdfFailure(string technicalMessage) =>
+        new(new ProductionWorkflowFailure(
+            ProductionWorkflowFailureCodes.PdfImportFailed,
+            "Errors.PdfImportFailed",
+            technicalMessage,
+            Recoverable: true,
+            "Retry the PDF import or select a detector-ready graph image."));
+
+    private static bool IsPdfPath(string path) =>
+        string.Equals(Path.GetExtension(path), ".pdf", StringComparison.OrdinalIgnoreCase);
+
     private static WorkspaceTabViewModel CreateEmptyImageTab(
         PanelId panelId,
         SourceReference source,
@@ -2096,10 +2306,51 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
             dividers);
     }
 
+    private static WorkspaceTabViewModel CreateEmptyPdfTab(
+        SourceReference source,
+        PdfWorkspacePanel panel)
+    {
+        var points = new ObservableCollection<AppGraphPoint>();
+        var series = new ObservableCollection<SeriesCardViewModel>();
+        var dividers = new ObservableCollection<EditablePhaseDivider>();
+        return new WorkspaceTabViewModel(
+            panel.Panel.PanelId.ToString("D"),
+            panel.Panel.DisplayName,
+            points,
+            series,
+            CreateBitmap(panel.OriginalBytes),
+            enhancedImageSource: null,
+            phaseOverlayContent: null,
+            panel.Panel.PanelId.ToString("D"),
+            source.SourceId.Value.ToString("D"),
+            source.LocalPath,
+            panel.Panel.Original.Sha256,
+            panel.Panel.Original.Width,
+            panel.Panel.Original.Height,
+            calibration: null,
+            dividers,
+            pageNumber: panel.Panel.PageNumber);
+    }
+
     private static WorkspaceTabViewModel CreateTabFromProject(
         PanelRecord panel,
         SourceReference source,
-        ImportedImage image)
+        ImportedImage image) =>
+        CreateTabFromProject(
+            panel,
+            source,
+            image.OriginalBytes,
+            image.Metadata.Width,
+            image.Metadata.Height,
+            image.Sha256);
+
+    private static WorkspaceTabViewModel CreateTabFromProject(
+        PanelRecord panel,
+        SourceReference source,
+        ImmutableImageBytes originalBytes,
+        int pixelWidth,
+        int pixelHeight,
+        string panelImageSha256)
     {
         var points = new ObservableCollection<AppGraphPoint>(panel.Points.Select(point => new AppGraphPoint(
             point.PointId.Value.ToString("D"),
@@ -2135,17 +2386,18 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
             panel.DisplayName,
             points,
             series,
-            CreateBitmap(image.OriginalBytes),
+            CreateBitmap(originalBytes),
             enhancedImageSource: null,
             phaseOverlayContent: null,
             panel.PanelId.Value.ToString("D"),
             panel.SourceId.Value.ToString("D"),
             source.LocalPath,
-            source.Sha256,
-            image.Metadata.Width,
-            image.Metadata.Height,
+            panelImageSha256,
+            pixelWidth,
+            pixelHeight,
             calibration,
-            dividers);
+            dividers,
+            pageNumber: panel.PageNumber);
     }
 
     private static BitmapImage CreateBitmap(ImmutableImageBytes originalBytes)
@@ -2297,7 +2549,7 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         return new PanelRecord(
             panelId,
             sourceId,
-            PageNumber: null,
+            tab.PageNumber,
             tab.DisplayName,
             Participant: null,
             new CropRectangle(0, 0, tab.PixelWidth, tab.PixelHeight),

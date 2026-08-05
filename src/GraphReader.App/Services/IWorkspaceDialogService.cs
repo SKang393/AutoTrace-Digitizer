@@ -33,7 +33,7 @@ public sealed class WindowsWorkspaceDialogService : IWorkspaceDialogService
         {
             Multiselect = true,
             CheckFileExists = true,
-            Filter = $"{Text(LocalizationKeys.DialogGraphImages, "Graph images")}|*.png;*.jpg;*.jpeg;*.bmp;*.tif;*.tiff;*.webp|{Text(LocalizationKeys.DialogAllFiles, "All files")}|*.*",
+            Filter = $"{Text(LocalizationKeys.DialogGraphImages, "Graph images and PDFs")}|*.png;*.jpg;*.jpeg;*.bmp;*.tif;*.tiff;*.webp;*.pdf|{Text(LocalizationKeys.DialogAllFiles, "All files")}|*.*",
         };
         return dialog.ShowDialog() == true ? dialog.FileNames : [];
     }

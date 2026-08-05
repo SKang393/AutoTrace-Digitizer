@@ -215,10 +215,16 @@ public sealed class WorkspaceTabViewModel : ObservableObject
         int pixelHeight = 0,
         ManualCalibrationState? calibration = null,
         ObservableCollection<EditablePhaseDivider>? phaseDividers = null,
-        object? overlayContent = null)
+        object? overlayContent = null,
+        int? pageNumber = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(tabId);
         ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
+        if (pageNumber is < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(pageNumber));
+        }
+
         TabId = tabId;
         DisplayName = displayName;
         Points = points ?? throw new ArgumentNullException(nameof(points));
@@ -233,6 +239,7 @@ public sealed class WorkspaceTabViewModel : ObservableObject
         SourceSha256 = sourceSha256;
         PixelWidth = pixelWidth;
         PixelHeight = pixelHeight;
+        PageNumber = pageNumber;
         Calibration = calibration;
         PhaseDividers = phaseDividers ?? [];
     }
@@ -334,6 +341,8 @@ public sealed class WorkspaceTabViewModel : ObservableObject
     public int PixelWidth { get; }
 
     public int PixelHeight { get; }
+
+    public int? PageNumber { get; }
 
     public ManualCalibrationState? Calibration { get; internal set; }
 

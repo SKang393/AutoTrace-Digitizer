@@ -6,6 +6,7 @@ using GraphReader.App.ViewModels;
 using GraphReader.Domain;
 using GraphReader.Export;
 using GraphReader.Imaging;
+using GraphReader.Pdf;
 using GraphReader.Phases;
 using GraphReader.SuperResolution;
 
@@ -40,7 +41,8 @@ public sealed class ProductionWorkspaceService : ManualPreviewWorkspaceService, 
         Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver = null,
         Func<WorkflowReviewState?, CancellationToken, Task<WorkflowRunResult>>? automaticWorkflow = null,
         WorkflowOrchestrator? workflowOrchestrator = null,
-        ProductionWorkflowPanelStore? panelStore = null)
+        ProductionWorkflowPanelStore? panelStore = null,
+        IPdfImportService? pdfImportService = null)
         : base(
             applicationPaths,
             imageImportService,
@@ -49,7 +51,8 @@ public sealed class ProductionWorkspaceService : ManualPreviewWorkspaceService, 
             phaseEditor,
             WorkflowRuntimeEnvironment.Production,
             automaticStages,
-            enhancementResolver)
+            enhancementResolver,
+            pdfImportService)
     {
         _automaticWorkflow = automaticWorkflow;
         _workflowOrchestrator = workflowOrchestrator;
