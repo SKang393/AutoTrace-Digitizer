@@ -16,6 +16,27 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+function Get-Sha256 {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path
+    )
+
+    $stream = [System.IO.File]::OpenRead($Path)
+    try {
+        $algorithm = [System.Security.Cryptography.SHA256]::Create()
+        try {
+            return [BitConverter]::ToString($algorithm.ComputeHash($stream)).Replace('-', '').ToLowerInvariant()
+        }
+        finally {
+            $algorithm.Dispose()
+        }
+    }
+    finally {
+        $stream.Dispose()
+    }
+}
+
 $adjacentLatest = Join-Path $PSScriptRoot 'latest.json'
 if (Test-Path -LiteralPath $adjacentLatest -PathType Leaf) {
     $outputRoot = $PSScriptRoot
@@ -51,7 +72,7 @@ if (-not $executablePath.StartsWith($outputPrefix, [StringComparison]::OrdinalIg
 if (-not (Test-Path -LiteralPath $executablePath -PathType Leaf)) {
     throw "The latest development portable executable is missing: $executablePath"
 }
-$actualExecutableSha256 = (Get-FileHash -LiteralPath $executablePath -Algorithm SHA256).Hash.ToLowerInvariant()
+$actualExecutableSha256 = Get-Sha256 -Path $executablePath
 if (-not [string]::Equals(
         $actualExecutableSha256,
         $expectedExecutableSha256,

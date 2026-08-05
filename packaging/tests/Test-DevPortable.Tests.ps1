@@ -12,6 +12,7 @@ $buildScript = Join-Path $repositoryRoot 'packaging\Build-DevPortable.ps1'
 $commonScript = Join-Path $repositoryRoot 'packaging\DevPortable.Common.ps1'
 $watchScript = Join-Path $repositoryRoot 'packaging\Watch-DevPortable.ps1'
 $launcherScript = Join-Path $repositoryRoot 'packaging\Run-Latest-DevPortable.ps1'
+$launcherCommand = Join-Path $repositoryRoot 'packaging\Run-Latest-DevPortable.cmd'
 $hostExecutable = (Get-Process -Id $PID).Path
 $testRoot = Join-Path ([System.IO.Path]::GetTempPath()) (
     'GraphReader-DevPortableTests-' + [Guid]::NewGuid().ToString('N'))
@@ -379,6 +380,7 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
     $launcherIsolationBuild = Join-Path $launcherIsolationRoot 'builds\isolated'
     New-Item -ItemType Directory -Path $launcherIsolationBuild -Force | Out-Null
     Copy-Item -LiteralPath $launcherScript -Destination $launcherIsolationRoot
+    Copy-Item -LiteralPath $launcherCommand -Destination $launcherIsolationRoot
     $captureExecutable = Join-Path $launcherIsolationBuild 'capture.cmd'
     $captureOutput = Join-Path $launcherIsolationBuild 'enhancement-environment.txt'
     $startupImage = Join-Path $launcherIsolationRoot 'Chandler graph.png'
@@ -415,8 +417,7 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
             'GRAPHREADER_PDFIUM_APPROVAL_PATH',
             'C:\stale-pdfium-approval.json',
             'Process')
-        & $hostExecutable -NoProfile -ExecutionPolicy Bypass -File `
-            (Join-Path $launcherIsolationRoot 'Run-Latest-DevPortable.ps1') `
+        & (Join-Path $launcherIsolationRoot 'Run-Latest-DevPortable.cmd') `
             -Wait -DisableLocalEnhancement -DisableLocalPdfium -ImagePath $startupImage | Out-Null
         if ($LASTEXITCODE -ne 0) {
             throw "Disabled-enhancement launcher exited with code $LASTEXITCODE."

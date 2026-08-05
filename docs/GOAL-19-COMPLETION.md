@@ -250,7 +250,8 @@ files are not tracked.
 - Goal 19 application/composition focus: 18/18 passed in reviewer verification.
 - `packaging/tests/Test-DevPortable.Tests.ps1`: 8/8 passed, including
   fail-closed single-file and multi-file model discovery plus pre-launch
-  executable checksum rejection.
+  executable checksum rejection through the durable Windows PowerShell 5.1
+  launcher path.
 - `packaging/tests/Test-ReleaseArtifact.Tests.ps1`: 59/59 passed, including
   canonical UTC metadata, mandatory direct-evidence gates, and exact-binary
   rejection.
