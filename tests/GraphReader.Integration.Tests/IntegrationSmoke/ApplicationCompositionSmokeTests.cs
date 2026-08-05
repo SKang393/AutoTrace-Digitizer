@@ -81,7 +81,7 @@ public sealed class ApplicationCompositionSmokeTests
     }
 
     [TestMethod]
-    public void StageAvailabilityReflectsChecksumResolvedCpuTaskSets()
+    public void StageAvailabilityRequiresChecksumResolvedModelsRuntimeAndComposedAdapters()
     {
         var classifierOnly = new ProductionModelAvailabilitySnapshot(
             new HashSet<string>(["marker_classifier"], StringComparer.Ordinal),
@@ -105,13 +105,49 @@ public sealed class ApplicationCompositionSmokeTests
                 ["ocr_detection", "ocr_recognition", "marker_center", "marker_classifier"],
                 StringComparer.Ordinal),
             "Checksum-resolved CPU production models: complete fixture.");
-        IReadOnlyList<AutomaticStageStatus> resolved = ProductionStageAvailabilityRegistry.Create(
+        IReadOnlyList<AutomaticStageStatus> modelsWithoutAdapters = ProductionStageAvailabilityRegistry.Create(
             localEnhancementConfigured: false,
             complete,
             reviewedPdfiumConfigured: true,
             new ProductionRuntimeAvailabilitySnapshot(
                 true,
                 "Checksum-resolved release-approved OpenCV fixture."));
+
+        Assert.AreEqual(
+            AutomaticStageState.Unavailable,
+            modelsWithoutAdapters.Single(stage => stage.Stage == "axis").State);
+        Assert.AreEqual(
+            AutomaticStageState.Unavailable,
+            modelsWithoutAdapters.Single(stage => stage.Stage == "ocr").State);
+        Assert.AreEqual(
+            AutomaticStageState.Unavailable,
+            modelsWithoutAdapters.Single(stage => stage.Stage == "markers").State);
+        StringAssert.Contains(
+            modelsWithoutAdapters.Single(stage => stage.Stage == "markers").Explanation,
+            "no approved production marker adapter");
+
+        var mutableAdapterStages = new HashSet<string>(
+            ["axis", "ocr", "markers", "legends", "phases"],
+            StringComparer.Ordinal);
+        var completeAdapter = new ProductionDetectionAdapterAvailabilitySnapshot(
+            mutableAdapterStages,
+            "Checksum-resolved approved production adapter fixture.");
+        mutableAdapterStages.Clear();
+        Assert.Throws<ArgumentException>(() => new ProductionDetectionAdapterAvailabilitySnapshot(
+            ["unregistered"],
+            "Invalid fixture."));
+        Assert.Throws<ArgumentException>(() => new ProductionDetectionAdapterAvailabilitySnapshot(
+            [],
+            " "));
+        IReadOnlyList<AutomaticStageStatus> resolved = ProductionStageAvailabilityRegistry.Create(
+            localEnhancementConfigured: false,
+            complete,
+            reviewedPdfiumConfigured: true,
+            new ProductionRuntimeAvailabilitySnapshot(
+                true,
+                "Checksum-resolved release-approved OpenCV fixture."),
+            inferenceRuntimeConfigured: true,
+            completeAdapter);
 
         Assert.AreEqual(
             AutomaticStageState.Approved,
@@ -123,11 +159,14 @@ public sealed class ApplicationCompositionSmokeTests
             AutomaticStageState.Approved,
             resolved.Single(stage => stage.Stage == "markers").State);
         Assert.AreEqual(
-            AutomaticStageState.Unavailable,
+            AutomaticStageState.Approved,
             resolved.Single(stage => stage.Stage == "legends").State);
         StringAssert.Contains(
             resolved.Single(stage => stage.Stage == "legends").Explanation,
-            "no production legend detection adapter");
+            "approved");
+        Assert.AreEqual(
+            AutomaticStageState.Approved,
+            resolved.Single(stage => stage.Stage == "phases").State);
 
         IReadOnlyList<AutomaticStageStatus> missingRuntime = ProductionStageAvailabilityRegistry.Create(
             localEnhancementConfigured: false,
@@ -230,7 +269,7 @@ public sealed class ApplicationCompositionSmokeTests
     }
 
     [TestMethod]
-    public async Task AsyncProductionCompositionUsesChecksumResolvedRuntimeEvidence()
+    public async Task AsyncProductionCompositionDoesNotPromoteRuntimeEvidenceWithoutAxisAdapter()
     {
         string root = Path.Combine(
             Path.GetTempPath(),
@@ -252,8 +291,11 @@ public sealed class ApplicationCompositionSmokeTests
 
             var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
             Assert.AreEqual(
-                AutomaticStageState.Approved,
+                AutomaticStageState.Unavailable,
                 workspace.AutomaticStages.Single(stage => stage.Stage == "axis").State);
+            StringAssert.Contains(
+                workspace.AutomaticStages.Single(stage => stage.Stage == "axis").Explanation,
+                "no approved production axis adapter");
             Assert.AreEqual(
                 AutomaticStageState.Unavailable,
                 workspace.AutomaticStages.Single(stage => stage.Stage == "ocr").State);
