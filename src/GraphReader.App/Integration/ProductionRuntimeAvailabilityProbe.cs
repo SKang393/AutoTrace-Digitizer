@@ -10,7 +10,8 @@ namespace GraphReader.App.Integration;
 
 public sealed record ProductionRuntimeAvailabilitySnapshot(
     bool AxisApproved,
-    string Evidence)
+    string Evidence,
+    string? RuntimeSha256 = null)
 {
     public static ProductionRuntimeAvailabilitySnapshot Missing(string evidence) =>
         new(false, evidence);
@@ -137,7 +138,8 @@ public static class ProductionRuntimeAvailabilityProbe
             return approved
                 ? new ProductionRuntimeAvailabilitySnapshot(
                     true,
-                    $"Exact reviewed OpenCV runtime {actualSha256} has provenance, notice, clean-machine, and release approval evidence.")
+                    $"Exact reviewed OpenCV runtime {actualSha256} has provenance, notice, clean-machine, and release approval evidence.",
+                    actualSha256)
                 : ProductionRuntimeAvailabilitySnapshot.Missing(
                     $"OpenCV runtime {actualSha256} is checksum-valid but lacks mandatory clean-machine or release approval evidence.");
         }

@@ -4,9 +4,11 @@
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using GraphReader.App.Integration.Workflow;
 using GraphReader.App.Services;
 using GraphReader.App.ViewModels;
+using Axis = GraphReader.Axis;
 using GraphReader.Domain;
 using GraphReader.Export;
 using GraphReader.Imaging;
@@ -157,6 +159,70 @@ public sealed class ProductionWorkflowStagesTests
 
         Assert.AreEqual(ProductionWorkflowFailureCodes.DetectionModelsUnavailable, exception.Failure.Code);
         StringAssert.Contains(exception.Failure.SuggestedAction, "manual mode");
+    }
+
+    [TestMethod]
+    public async Task ApprovedAxisAdapterDecodesImmutableOriginalAndReturnsRuntimeProvenance()
+    {
+        byte[] encoded = CreateAxisPng();
+        string sha256 = Convert.ToHexStringLower(SHA256.HashData(encoded));
+        Guid projectId = Guid.Parse("10000000-0000-0000-0000-000000000006");
+        Guid sourceId = Guid.Parse("20000000-0000-0000-0000-000000000006");
+        Guid panelId = Guid.Parse("30000000-0000-0000-0000-000000000006");
+        Guid runId = Guid.Parse("40000000-0000-0000-0000-000000000006");
+        var original = new WorkflowImageEvidence(
+            "memory:axis.png",
+            sha256,
+            width: 96,
+            height: 72,
+            WorkflowImageVariant.Original);
+        var imported = new WorkflowImportedPanel(
+            panelId,
+            sourceId,
+            "axis.png",
+            original);
+        var prepared = new WorkflowPreparedPanel(imported, original, enhanced: null);
+        var request = new ProductionWorkflowDetectionRequest(
+            prepared,
+            original,
+            WorkflowImageVariant.Original,
+            runId,
+            projectId,
+            encoded);
+        encoded[0] ^= 0xff;
+
+        string runtimeSha256 = new('a', 64);
+        var adapter = new ProductionAxisGeometryAdapter(
+            runtimeSha256,
+            isApproved: true);
+
+        ProductionAxisGeometryEvidence evidence = await adapter.DetectAsync(
+            request,
+            CancellationToken.None);
+
+        Assert.AreEqual("axis", evidence.Envelope.Stage);
+        Assert.AreEqual(ProductionAxisGeometryAdapter.StageVersion, evidence.Envelope.StageVersion);
+        Assert.AreEqual(sha256, evidence.Envelope.InputSha256);
+        Assert.AreEqual("original_pixels", evidence.Envelope.CoordinateSpace);
+        Assert.AreEqual(runtimeSha256, evidence.Envelope.Model?.Sha256);
+        Assert.AreEqual("cpu", evidence.Envelope.Model?.Provider);
+        Assert.AreEqual("original_pixels", evidence.Geometry.CoordinateSpace);
+        Assert.IsTrue(evidence.Geometry.Confidence > 0);
+        Assert.IsTrue(evidence.Envelope.Timing.TotalMilliseconds >= 0);
+
+        var provider = new AxisCandidateProviderStub();
+        var unavailable = new ProductionAxisGeometryAdapter(
+            runtimeSha256,
+            isApproved: false,
+            new Axis.AxisGeometryDetector(),
+            provider);
+        ProductionWorkflowStageException exception =
+            await Assert.ThrowsAsync<ProductionWorkflowStageException>(
+                () => unavailable.DetectAsync(request, CancellationToken.None));
+        Assert.AreEqual(
+            ProductionWorkflowFailureCodes.DetectionModelsUnavailable,
+            exception.Failure.Code);
+        Assert.AreEqual(0, provider.CallCount);
     }
 
     [TestMethod]
@@ -1035,6 +1101,75 @@ public sealed class ProductionWorkflowStagesTests
             scenario);
         Directory.CreateDirectory(path);
         return path;
+    }
+
+    private static byte[] CreateAxisPng()
+    {
+        const int width = 96;
+        const int height = 72;
+        var pixels = Enumerable.Repeat((byte)255, width * height).ToArray();
+        for (int x = 10; x <= 86; x++)
+        {
+            pixels[(60 * width) + x] = 0;
+        }
+
+        for (int y = 10; y <= 60; y++)
+        {
+            pixels[(y * width) + 10] = 0;
+        }
+
+        BitmapSource source = BitmapSource.Create(
+            width,
+            height,
+            96,
+            96,
+            PixelFormats.Gray8,
+            palette: null,
+            pixels,
+            stride: width);
+        source.Freeze();
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(source));
+        using var stream = new MemoryStream();
+        encoder.Save(stream);
+        return stream.ToArray();
+    }
+
+    private sealed class AxisCandidateProviderStub : Axis.ILineCandidateProvider
+    {
+        public int CallCount { get; private set; }
+
+        public ValueTask<IReadOnlyList<Axis.GeometryLineCandidate>> DetectLinesAsync(
+            Axis.GrayscaleLineCandidateFrame frame,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Assert.AreEqual(96, frame.Width);
+            Assert.AreEqual(72, frame.Height);
+            Assert.AreEqual(96, frame.Stride);
+            Assert.AreEqual(96 * 72, frame.Pixels.Length);
+            CallCount++;
+            IReadOnlyList<Axis.GeometryLineCandidate> candidates =
+            [
+                new(
+                    "x-axis",
+                    new Axis.GeometryLineSegment(
+                        new GraphReader.Axis.PixelPoint(10, 60),
+                        new GraphReader.Axis.PixelPoint(86, 60)),
+                    Axis.LineCandidateSource.OpenCvLsd,
+                    Strength: 1,
+                    StrokeWidthPixels: 1),
+                new(
+                    "y-axis",
+                    new Axis.GeometryLineSegment(
+                        new GraphReader.Axis.PixelPoint(10, 60),
+                        new GraphReader.Axis.PixelPoint(10, 10)),
+                    Axis.LineCandidateSource.OpenCvLsd,
+                    Strength: 1,
+                    StrokeWidthPixels: 1),
+            ];
+            return ValueTask.FromResult(candidates);
+        }
     }
 
     private sealed class EnhancementAdapter(bool isApproved) : IProductionWorkflowEnhancementAdapter

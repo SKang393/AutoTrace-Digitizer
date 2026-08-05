@@ -19,7 +19,8 @@ public sealed record ApplicationCompositionResult(
     WorkflowRuntimeEnvironment Environment,
     IWorkspaceService WorkspaceService,
     DomainError? StartupError,
-    ProductionInferenceRuntimeHost? InferenceRuntimeHost = null);
+    ProductionInferenceRuntimeHost? InferenceRuntimeHost = null,
+    IProductionAxisGeometryAdapter? AxisGeometryAdapter = null);
 
 public static class ApplicationComposition
 {
@@ -88,13 +89,20 @@ public static class ApplicationComposition
                     applicationPaths,
                     uiThreadGuard ?? CapturedUiThreadGuard.CaptureCurrentThread())
                 : null;
+        ProductionAxisGeometryAdapter? axisAdapter = CreateApprovedAxisAdapter(runtimeAvailability);
+        ProductionDetectionAdapterAvailabilitySnapshot? adapterAvailability = axisAdapter is null
+            ? null
+            : new ProductionDetectionAdapterAvailabilitySnapshot(
+                ["axis"],
+                $"Concrete production axis adapter '{axisAdapter.AdapterId}' is composed.");
         IReadOnlyList<AutomaticStageStatus> automaticStages =
             ProductionStageAvailabilityRegistry.Create(
                 enhancementResolver is not null,
                 modelAvailability,
                 pdf.PdfImporter is not null,
                 runtimeAvailability,
-                inference?.Value is not null);
+                inference?.Value is not null,
+                adapterAvailability);
         return environment switch
         {
             WorkflowRuntimeEnvironment.Production => CreateProduction(
@@ -103,7 +111,8 @@ public static class ApplicationComposition
                 enhancementResolver,
                 automaticStages,
                 pdf,
-                inference),
+                inference,
+                axisAdapter),
             WorkflowRuntimeEnvironment.ManualPreview => new ApplicationCompositionResult(
                 environment,
                 new ManualPreviewWorkspaceService(
@@ -125,7 +134,8 @@ public static class ApplicationComposition
         Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver,
         IReadOnlyList<AutomaticStageStatus> automaticStages,
         (IPdfImportService? PdfImporter, DomainError? Error) pdf,
-        DomainResult<ProductionInferenceRuntimeHost>? inference)
+        DomainResult<ProductionInferenceRuntimeHost>? inference,
+        IProductionAxisGeometryAdapter? axisAdapter)
     {
         var imageImporter = new ImageImportService();
         var exportService = new ExportService();
@@ -150,7 +160,22 @@ public static class ApplicationComposition
                 workflowOrchestrator: orchestrator,
                 panelStore: panelStore),
             pdf.Error ?? inferenceError,
-            inference?.Value);
+            inference?.Value,
+            axisAdapter);
+    }
+
+    private static ProductionAxisGeometryAdapter? CreateApprovedAxisAdapter(
+        ProductionRuntimeAvailabilitySnapshot? runtimeAvailability)
+    {
+        if (runtimeAvailability is not { AxisApproved: true } ||
+            string.IsNullOrWhiteSpace(runtimeAvailability.RuntimeSha256))
+        {
+            return null;
+        }
+
+        return new ProductionAxisGeometryAdapter(
+            runtimeAvailability.RuntimeSha256,
+            isApproved: true);
     }
 
     private static Func<CancellationToken, Task<RealEsrganBackendResolution>>? CreateLocalEnhancementResolver(

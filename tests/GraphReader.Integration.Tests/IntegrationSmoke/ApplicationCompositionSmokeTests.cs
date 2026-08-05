@@ -247,6 +247,7 @@ public sealed class ApplicationCompositionSmokeTests
             ProductionRuntimeAvailabilitySnapshot approved =
                 await ProductionRuntimeAvailabilityProbe.InspectAsync(root, CancellationToken.None);
             Assert.IsTrue(approved.AxisApproved);
+            Assert.AreEqual(RuntimeSha256(runtimePath), approved.RuntimeSha256);
             StringAssert.Contains(approved.Evidence, RuntimeSha256(runtimePath));
 
             File.AppendAllText(runtimePath, "tampered", Encoding.UTF8);
@@ -269,7 +270,7 @@ public sealed class ApplicationCompositionSmokeTests
     }
 
     [TestMethod]
-    public async Task AsyncProductionCompositionDoesNotPromoteRuntimeEvidenceWithoutAxisAdapter()
+    public async Task AsyncProductionCompositionCreatesAxisAdapterFromApprovedExactRuntime()
     {
         string root = Path.Combine(
             Path.GetTempPath(),
@@ -291,11 +292,13 @@ public sealed class ApplicationCompositionSmokeTests
 
             var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
             Assert.AreEqual(
-                AutomaticStageState.Unavailable,
+                AutomaticStageState.Approved,
                 workspace.AutomaticStages.Single(stage => stage.Stage == "axis").State);
+            Assert.IsNotNull(composition.AxisGeometryAdapter);
+            Assert.IsTrue(composition.AxisGeometryAdapter.IsApproved);
             StringAssert.Contains(
                 workspace.AutomaticStages.Single(stage => stage.Stage == "axis").Explanation,
-                "no approved production axis adapter");
+                RuntimeSha256(runtimePath));
             Assert.AreEqual(
                 AutomaticStageState.Unavailable,
                 workspace.AutomaticStages.Single(stage => stage.Stage == "ocr").State);
