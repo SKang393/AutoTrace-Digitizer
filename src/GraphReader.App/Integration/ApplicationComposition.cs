@@ -24,7 +24,8 @@ public sealed record ApplicationCompositionResult(
     IProductionMarkerCenterAdapter? MarkerCenterAdapter = null,
     IProductionMarkerClassificationAdapter? MarkerClassificationAdapter = null,
     IProductionLegendReasoningAdapter? LegendReasoningAdapter = null,
-    IProductionPhaseReasoningAdapter? PhaseReasoningAdapter = null);
+    IProductionPhaseReasoningAdapter? PhaseReasoningAdapter = null,
+    IProductionRasterFrameDecoder? RasterFrameDecoder = null);
 
 public static class ApplicationComposition
 {
@@ -93,7 +94,10 @@ public static class ApplicationComposition
                     applicationPaths,
                     uiThreadGuard ?? CapturedUiThreadGuard.CaptureCurrentThread())
                 : null;
-        ProductionAxisGeometryAdapter? axisAdapter = CreateApprovedAxisAdapter(runtimeAvailability);
+        var rasterFrameDecoder = new ProductionRasterFrameDecoder();
+        ProductionAxisGeometryAdapter? axisAdapter = CreateApprovedAxisAdapter(
+            runtimeAvailability,
+            rasterFrameDecoder);
         (ProductionMarkerCenterAdapter? Adapter, DomainError? Error) markerCenter =
             CreateApprovedMarkerCenterAdapter(modelAvailability, inference?.Value);
         (ProductionMarkerClassificationAdapter? Adapter, DomainError? Error) markerClassifier =
@@ -152,6 +156,7 @@ public static class ApplicationComposition
                 markerClassifier.Adapter,
                 legendAdapter,
                 phaseAdapter,
+                rasterFrameDecoder,
                 markerCenter.Error ?? markerClassifier.Error),
             WorkflowRuntimeEnvironment.ManualPreview => new ApplicationCompositionResult(
                 environment,
@@ -180,6 +185,7 @@ public static class ApplicationComposition
         IProductionMarkerClassificationAdapter? markerClassificationAdapter,
         IProductionLegendReasoningAdapter? legendReasoningAdapter,
         IProductionPhaseReasoningAdapter? phaseReasoningAdapter,
+        IProductionRasterFrameDecoder rasterFrameDecoder,
         DomainError? markerAdapterError)
     {
         var imageImporter = new ImageImportService();
@@ -210,11 +216,13 @@ public static class ApplicationComposition
             markerCenterAdapter,
             markerClassificationAdapter,
             legendReasoningAdapter,
-            phaseReasoningAdapter);
+            phaseReasoningAdapter,
+            rasterFrameDecoder);
     }
 
     private static ProductionAxisGeometryAdapter? CreateApprovedAxisAdapter(
-        ProductionRuntimeAvailabilitySnapshot? runtimeAvailability)
+        ProductionRuntimeAvailabilitySnapshot? runtimeAvailability,
+        IProductionRasterFrameDecoder frameDecoder)
     {
         if (runtimeAvailability is not { AxisApproved: true } ||
             string.IsNullOrWhiteSpace(runtimeAvailability.RuntimeSha256))
@@ -224,7 +232,8 @@ public static class ApplicationComposition
 
         return new ProductionAxisGeometryAdapter(
             runtimeAvailability.RuntimeSha256,
-            isApproved: true);
+            isApproved: true,
+            frameDecoder: frameDecoder);
     }
 
     private static (ProductionMarkerClassificationAdapter? Adapter, DomainError? Error)

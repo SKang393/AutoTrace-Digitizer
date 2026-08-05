@@ -231,6 +231,142 @@ public sealed class ProductionWorkflowStagesTests
     }
 
     [TestMethod]
+    public void RasterDecoderCreatesIsolatedOriginalStageFramesAndRequiresAlignedMasks()
+    {
+        byte[] encoded = CreateAxisPng();
+        string sha256 = Convert.ToHexStringLower(SHA256.HashData(encoded));
+        Guid projectId = Guid.Parse("10000000-0000-0000-0000-000000000011");
+        Guid sourceId = Guid.Parse("20000000-0000-0000-0000-000000000011");
+        Guid panelId = Guid.Parse("30000000-0000-0000-0000-000000000011");
+        var original = new WorkflowImageEvidence(
+            "memory:raster-original.png",
+            sha256,
+            width: 96,
+            height: 72,
+            WorkflowImageVariant.Original);
+        var imported = new WorkflowImportedPanel(panelId, sourceId, "raster-original.png", original);
+        var request = new ProductionWorkflowDetectionRequest(
+            new WorkflowPreparedPanel(imported, original, enhanced: null),
+            original,
+            WorkflowImageVariant.Original,
+            Guid.Parse("40000000-0000-0000-0000-000000000011"),
+            projectId,
+            encoded);
+        encoded[0] ^= 0xff;
+
+        var decoder = new ProductionRasterFrameDecoder();
+        ProductionDecodedRaster raster = decoder.Decode(request, CancellationToken.None);
+        Axis.GrayscaleLineCandidateFrame axis = raster.CreateAxisFrame();
+        GraphReader.Ocr.OcrImage ocr = raster.CreateOcrImage();
+
+        Assert.AreEqual(sha256, raster.InputSha256);
+        Assert.AreEqual(96 * 72, axis.Pixels.Length);
+        Assert.AreEqual(GraphReader.Ocr.OcrSourceImage.Original, ocr.SourceImage);
+        Assert.AreEqual(96, ocr.CanonicalOriginalWidth);
+        Assert.AreEqual(72, ocr.CanonicalOriginalHeight);
+        Assert.AreEqual(0, axis.Pixels.Span[(10 * 96) + 10]);
+
+        byte[] ocrCopy = ocr.Pixels.ToArray();
+        ocrCopy[0] = 0;
+        Assert.AreEqual(255, raster.CreateOcrImage().Pixels.Span[0]);
+
+        var ocrMaskValues = new float[96 * 72];
+        var artifactMaskValues = new float[96 * 72];
+        ocrMaskValues[0] = 0.25f;
+        artifactMaskValues[0] = 0.75f;
+        MarkerDetection.MarkerImageFrame marker = raster.CreateMarkerFrame(
+            new MarkerDetection.MarkerMask(96, 72, ocrMaskValues),
+            new MarkerDetection.MarkerMask(96, 72, artifactMaskValues));
+        ocrMaskValues[0] = 1;
+        artifactMaskValues[0] = 1;
+
+        Assert.AreEqual(MarkerDetection.MarkerSourceImage.Original, marker.SourceImage);
+        Assert.AreEqual(MarkerDetection.MarkerAffineTransform.Identity, marker.OriginalToFrame);
+        Assert.AreEqual(1f, marker.ChannelsFirstPixels.Span[0]);
+        Assert.AreEqual(0.25f, marker.OcrMask.Values.Span[0]);
+        Assert.AreEqual(0.75f, marker.ArtifactMask.Values.Span[0]);
+        Assert.Throws<ProductionWorkflowStageException>(() => raster.CreateMarkerFrame(
+            new MarkerDetection.MarkerMask(1, 1, new float[1]),
+            MarkerDetection.MarkerMask.Empty(96, 72)));
+    }
+
+    [TestMethod]
+    public void RasterDecoderMapsExactReversibleEnhancedScaleToOriginalPixels()
+    {
+        byte[] originalBytes = CreateSolidGrayPng(96, 72, 255);
+        byte[] enhancedBytes = CreateSolidGrayPng(192, 144, 128);
+        string originalSha256 = Convert.ToHexStringLower(SHA256.HashData(originalBytes));
+        string enhancedSha256 = Convert.ToHexStringLower(SHA256.HashData(enhancedBytes));
+        Guid projectId = Guid.Parse("10000000-0000-0000-0000-000000000012");
+        Guid sourceId = Guid.Parse("20000000-0000-0000-0000-000000000012");
+        Guid panelId = Guid.Parse("30000000-0000-0000-0000-000000000012");
+        var original = new WorkflowImageEvidence(
+            "memory:raster-original.png",
+            originalSha256,
+            96,
+            72,
+            WorkflowImageVariant.Original);
+        var enhanced = new WorkflowImageEvidence(
+            "memory:raster-enhanced.png",
+            enhancedSha256,
+            192,
+            144,
+            WorkflowImageVariant.Enhanced);
+        var imported = new WorkflowImportedPanel(panelId, sourceId, "raster-original.png", original);
+        var prepared = new WorkflowPreparedPanel(imported, original, enhanced);
+        var transform = new WorkflowTransformProvenance(
+            "scale-2x",
+            "original_pixels",
+            "enhanced_pixels",
+            [2, 0, 0, 0, 2, 0, 0, 0, 1],
+            [0.5, 0, 0, 0, 0.5, 0, 0, 0, 1],
+            lossy: false);
+        var request = new ProductionWorkflowDetectionRequest(
+            prepared,
+            enhanced,
+            WorkflowImageVariant.Enhanced,
+            Guid.Parse("40000000-0000-0000-0000-000000000012"),
+            projectId,
+            enhancedBytes,
+            [transform]);
+
+        ProductionDecodedRaster raster = new ProductionRasterFrameDecoder().Decode(
+            request,
+            CancellationToken.None);
+        MarkerDetection.MarkerPoint originalPoint = raster.OriginalToFrame.MapToOriginal(
+            new MarkerDetection.MarkerPoint(40, 60));
+        GraphReader.Ocr.OcrPoint ocrPoint = raster.OriginalToImage.MapToOriginal(
+            new GraphReader.Ocr.OcrPoint(40, 60));
+
+        Assert.AreEqual(20, originalPoint.X);
+        Assert.AreEqual(30, originalPoint.Y);
+        Assert.AreEqual(20, ocrPoint.X);
+        Assert.AreEqual(30, ocrPoint.Y);
+        Assert.AreEqual(MarkerDetection.MarkerSourceImage.Enhanced, raster.CreateMarkerFrame(
+            MarkerDetection.MarkerMask.Empty(192, 144),
+            MarkerDetection.MarkerMask.Empty(192, 144)).SourceImage);
+        Assert.Throws<ProductionWorkflowStageException>(() => raster.CreateAxisFrame());
+
+        var invalidTransform = new WorkflowTransformProvenance(
+            "invalid-inverse",
+            "original_pixels",
+            "enhanced_pixels",
+            [2, 0, 0, 0, 2, 0, 0, 0, 1],
+            [1, 0, 0, 0, 1, 0, 0, 0, 1],
+            lossy: false);
+        var invalidRequest = new ProductionWorkflowDetectionRequest(
+            prepared,
+            enhanced,
+            WorkflowImageVariant.Enhanced,
+            request.RunId,
+            projectId,
+            enhancedBytes,
+            [invalidTransform]);
+        Assert.Throws<ProductionWorkflowStageException>(() =>
+            new ProductionRasterFrameDecoder().Decode(invalidRequest, CancellationToken.None));
+    }
+
+    [TestMethod]
     public async Task ApprovedMarkerClassifierAdapterRetainsExactModelProviderAndCoordinates()
     {
         byte[] encoded = CreateAxisPng();
@@ -1567,6 +1703,26 @@ public sealed class ProductionWorkflowStagesTests
             pixels[(y * width) + 10] = 0;
         }
 
+        BitmapSource source = BitmapSource.Create(
+            width,
+            height,
+            96,
+            96,
+            PixelFormats.Gray8,
+            palette: null,
+            pixels,
+            stride: width);
+        source.Freeze();
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(source));
+        using var stream = new MemoryStream();
+        encoder.Save(stream);
+        return stream.ToArray();
+    }
+
+    private static byte[] CreateSolidGrayPng(int width, int height, byte value)
+    {
+        var pixels = Enumerable.Repeat(value, checked(width * height)).ToArray();
         BitmapSource source = BitmapSource.Create(
             width,
             height,

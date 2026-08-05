@@ -71,6 +71,7 @@ public sealed class ApplicationCompositionSmokeTests
         Assert.IsTrue(composition.LegendReasoningAdapter.IsApproved);
         Assert.IsNotNull(composition.PhaseReasoningAdapter);
         Assert.IsTrue(composition.PhaseReasoningAdapter.IsApproved);
+        Assert.IsNotNull(composition.RasterFrameDecoder);
     }
 
     [TestMethod]
