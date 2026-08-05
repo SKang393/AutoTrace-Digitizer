@@ -30,14 +30,15 @@ internal static class WpfScreenshotHarness
                 {
                     Width = width,
                     Height = height,
-                    Left = 0,
-                    Top = 0,
+                    Left = SystemParameters.VirtualScreenLeft - width - 100,
+                    Top = SystemParameters.VirtualScreenTop - height - 100,
                     WindowStartupLocation = WindowStartupLocation.Manual,
                     WindowStyle = WindowStyle.None,
                     ResizeMode = ResizeMode.NoResize,
                     ShowActivated = false,
                     ShowInTaskbar = false,
-                    Topmost = true,
+                    Focusable = false,
+                    IsHitTestVisible = false,
                     Content = element,
                 };
                 try
