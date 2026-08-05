@@ -841,24 +841,51 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
         await RunBusyAsync(async token =>
         {
-            IReadOnlyList<WorkspaceTabViewModel> imported =
-                await _manualWorkspaceService.ImportImagesAsync(paths, token);
-            foreach (WorkspaceTabViewModel tab in imported)
+            try
             {
-                EnsureManualOverlay(tab);
-                ConfigureSeriesSelection(tab);
-                Tabs.Add(tab);
+                IReadOnlyList<WorkspaceTabViewModel> imported =
+                    await _manualWorkspaceService.ImportImagesAsync(paths, token);
+                AddImportedTabs(imported);
+
+                SelectedTab = imported.Count > 0 ? imported[^1] : SelectedTab;
+                CurrentStage = WorkflowStage.Import;
+                SetStatus(_manualWorkspaceService.LastImportErrors.Count == 0
+                    ? FormatLocalizedString(LocalizationKeys.StatusImportedFormat, imported.Count)
+                    : FormatLocalizedString(
+                        LocalizationKeys.StatusImportFailuresFormat,
+                        imported.Count,
+                        _manualWorkspaceService.LastImportErrors.Count));
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            {
+                AddImportedTabs(_manualWorkspaceService.CreateWorkspace());
+                CurrentStage = WorkflowStage.Import;
+                throw;
+            }
+        }, cancellationToken);
+    }
+
+    private void AddImportedTabs(IEnumerable<WorkspaceTabViewModel> imported)
+    {
+        var existingTabIds = Tabs.Select(static tab => tab.TabId).ToHashSet(StringComparer.Ordinal);
+        WorkspaceTabViewModel? lastAdded = null;
+        foreach (WorkspaceTabViewModel tab in imported)
+        {
+            if (!existingTabIds.Add(tab.TabId))
+            {
+                continue;
             }
 
-            SelectedTab = imported.Count > 0 ? imported[^1] : SelectedTab;
-            CurrentStage = WorkflowStage.Import;
-            SetStatus(_manualWorkspaceService.LastImportErrors.Count == 0
-                ? FormatLocalizedString(LocalizationKeys.StatusImportedFormat, imported.Count)
-                : FormatLocalizedString(
-                    LocalizationKeys.StatusImportFailuresFormat,
-                    imported.Count,
-                    _manualWorkspaceService.LastImportErrors.Count));
-        }, cancellationToken);
+            EnsureManualOverlay(tab);
+            ConfigureSeriesSelection(tab);
+            Tabs.Add(tab);
+            lastAdded = tab;
+        }
+
+        if (lastAdded is not null)
+        {
+            SelectedTab = lastAdded;
+        }
     }
 
     private async Task EnhanceSelectedTabAsync(CancellationToken cancellationToken)

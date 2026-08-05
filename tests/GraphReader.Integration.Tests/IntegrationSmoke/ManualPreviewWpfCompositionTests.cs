@@ -15,6 +15,7 @@ using GraphReader.App.Services;
 using GraphReader.App.ViewModels;
 using GraphReader.Domain;
 using GraphReader.Export;
+using GraphReader.Imaging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GraphReader.Integration.Tests.IntegrationSmoke;
@@ -397,6 +398,39 @@ public sealed class ManualPreviewWpfCompositionTests
         Assert.IsTrue(audit.Any(static entry => entry.Note == "Manual intervention series relations changed"));
         Assert.IsTrue(audit.Any(static entry => entry.Note == "Manual CSV export"));
         Assert.IsFalse(workspace.UsesFakeGraphData);
+
+        using var cancellationObserver = new BlockingSecondImageObserver(secondImage);
+        var cancellationWorkspace = new ManualPreviewWorkspaceService(
+            imageImportService: new ImageImportService(cancellationObserver));
+        var cancellationDialogs = new DeterministicWorkspaceDialogService
+        {
+            Images = [firstImage, secondImage],
+        };
+        using var cancellationViewModel = new MainWindowViewModel(
+            cancellationWorkspace,
+            localization,
+            dialogService: cancellationDialogs);
+
+        Execute(cancellationViewModel.ImportCommand);
+        await WaitForAsync(
+            () => cancellationObserver.SecondImageStarted.IsSet,
+            "second image import to start");
+        Execute(cancellationViewModel.CancelCommand);
+        cancellationObserver.ReleaseSecondImage.Set();
+        await WaitForAsync(
+            () => !cancellationViewModel.IsBusy && cancellationViewModel.Tabs.Count == 1,
+            "completed image to remain visible after batch cancellation");
+
+        Assert.AreEqual(LocalizationKeys.StatusCancelled, cancellationViewModel.StatusMessage);
+        Assert.AreEqual(firstImage, cancellationViewModel.Tabs.Single().SourcePath);
+        Assert.AreEqual(firstHash, cancellationViewModel.Tabs.Single().SourceSha256);
+        Assert.HasCount(1, cancellationWorkspace.CreateWorkspace());
+        Assert.HasCount(1, cancellationWorkspace.CurrentProject.Sources);
+        Assert.HasCount(1, cancellationWorkspace.CurrentProject.Panels);
+        Assert.AreEqual(firstHash, cancellationWorkspace.CurrentProject.Sources.Single().Sha256);
+        Assert.AreEqual(firstHash, Sha256(firstImage));
+        Assert.AreEqual(secondHash, Sha256(secondImage));
+        Assert.IsFalse(cancellationWorkspace.UsesFakeGraphData);
     }
 
     private static SeriesCardViewModel CreateSeries(
@@ -481,6 +515,41 @@ public sealed class ManualPreviewWpfCompositionTests
 
     private static string Sha256(string path) =>
         Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(path)));
+
+    private sealed class BlockingSecondImageObserver : IImageImportStageObserver, IDisposable
+    {
+        private readonly string secondImagePath;
+
+        public BlockingSecondImageObserver(string secondImagePath)
+        {
+            this.secondImagePath = Path.GetFullPath(secondImagePath);
+        }
+
+        public ManualResetEventSlim SecondImageStarted { get; } = new(initialState: false);
+
+        public ManualResetEventSlim ReleaseSecondImage { get; } = new(initialState: false);
+
+        public void Observe(ImageImportStage stage, string path, CancellationToken cancellationToken)
+        {
+            if (stage != ImageImportStage.BeforeHash ||
+                !string.Equals(Path.GetFullPath(path), secondImagePath, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            SecondImageStarted.Set();
+            if (!ReleaseSecondImage.Wait(TimeSpan.FromSeconds(5), cancellationToken))
+            {
+                throw new TimeoutException("Timed out waiting to release the second image import.");
+            }
+        }
+
+        public void Dispose()
+        {
+            SecondImageStarted.Dispose();
+            ReleaseSecondImage.Dispose();
+        }
+    }
 
     private sealed class DeterministicWorkspaceDialogService : IWorkspaceDialogService
     {

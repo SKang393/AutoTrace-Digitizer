@@ -143,32 +143,44 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
         }
 
         var addedTabs = new List<WorkspaceTabViewModel>();
-        var addedSources = new List<SourceReference>();
         var errors = new List<ImageImportError>();
+        _lastImportErrors = [];
         string[] imagePaths = requestedPaths.Where(static path => !IsPdfPath(path)).ToArray();
-        if (imagePaths.Length > 0)
+        var firstImageIndexByHash = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        for (int imageIndex = 0; imageIndex < imagePaths.Length; imageIndex++)
         {
-            BatchImportResult result = await _imageImportService
-                .ImportBatchAsync(imagePaths, cancellationToken)
+            cancellationToken.ThrowIfCancellationRequested();
+            ImageImportResult item = await _imageImportService
+                .ImportAsync(imagePaths[imageIndex], cancellationToken)
                 .ConfigureAwait(false);
-            errors.AddRange(result.Items
-                .Where(static item => item.Error is not null)
-                .Select(static item => item.Error!));
-            foreach (ImageImportResult item in result.Items.Where(static item => item.Image is not null))
+            if (item.Error is not null)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                ImportedImage image = item.Image!;
-                var source = new SourceReference(
-                    SourceId.New(),
-                    SourceKind.Image,
-                    Path.GetFileName(image.SourcePath),
-                    image.SourcePath,
-                    image.Sha256,
-                    ArticleMetadata: null);
-                WorkspaceTabViewModel tab = CreateEmptyImageTab(PanelId.New(), source, image);
-                RegisterImportedTab(tab, addedTabs);
-                addedSources.Add(source);
+                errors.Add(item.Error);
+                _lastImportErrors = errors.ToArray();
+                continue;
             }
+
+            ImportedImage image = item.Image! with { InputIndex = imageIndex };
+            if (firstImageIndexByHash.TryGetValue(image.Sha256, out int duplicateIndex))
+            {
+                image = image with { DuplicateOfInputIndex = duplicateIndex };
+            }
+            else
+            {
+                firstImageIndexByHash.Add(image.Sha256, imageIndex);
+            }
+
+            var source = new SourceReference(
+                SourceId.New(),
+                SourceKind.Image,
+                Path.GetFileName(image.SourcePath),
+                image.SourcePath,
+                image.Sha256,
+                ArticleMetadata: null);
+            WorkspaceTabViewModel tab = CreateEmptyImageTab(PanelId.New(), source, image);
+            RegisterImportedTab(tab, addedTabs);
+            CommitImportedSource(source);
+            _lastImportErrors = errors.ToArray();
         }
 
         foreach (string pdfPath in requestedPaths.Where(IsPdfPath))
@@ -196,30 +208,32 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
                     RegisterImportedTab(tab, addedTabs);
                 }
 
-                addedSources.Add(source);
+                CommitImportedSource(source);
+                _lastImportErrors = errors.ToArray();
             }
             catch (ProductionWorkflowStageException exception)
             {
                 errors.Add(ToImportError(pdfPath, exception.Failure));
+                _lastImportErrors = errors.ToArray();
             }
         }
 
         _lastImportErrors = errors.ToArray();
-        if (addedTabs.Count > 0)
-        {
-            CurrentProject = CurrentProject with
-            {
-                ModifiedUtc = DateTimeOffset.UtcNow,
-                Sources = CurrentProject.Sources.Concat(addedSources).ToArray(),
-            };
-            SynchronizeProject(
-                DomainEventKind.DetectionAccepted,
-                panelId: null,
-                entityId: null,
-                "Real image or PDF panel import");
-        }
-
         return addedTabs;
+    }
+
+    private void CommitImportedSource(SourceReference source)
+    {
+        CurrentProject = CurrentProject with
+        {
+            ModifiedUtc = DateTimeOffset.UtcNow,
+            Sources = CurrentProject.Sources.Append(source).ToArray(),
+        };
+        SynchronizeProject(
+            DomainEventKind.DetectionAccepted,
+            panelId: null,
+            entityId: null,
+            "Real image or PDF panel import");
     }
 
     public async Task<IReadOnlyList<WorkspaceTabViewModel>> OpenProjectAsync(
