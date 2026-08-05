@@ -13,7 +13,10 @@ import pytest
 from ml.ocr.official_bakeoff.audit_archives import (
     Candidate,
     OfficialDocument,
+    OfficialModelFile,
+    OfficialModelRepository,
     audit_archive,
+    audit_official_model_repositories,
     audit_official_source,
     build_decision,
 )
@@ -879,3 +882,196 @@ def test_official_source_rejects_nested_duplicate_commit_response_key(
 
     assert result["valid"] is False
     assert any("duplicate JSON object key: sha" in blocker for blocker in result["blockers"])
+
+
+def _write_model_repository_fixture(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    api_license: str = "apache-2.0",
+    readme_license: str = "apache-2.0",
+    payload_override: tuple[str, bytes] | None = None,
+    duplicate_api_license: bool = False,
+    api_blob_mismatch: bool = False,
+    api_lfs_mismatch: bool = False,
+    malformed_sibling: bool = False,
+) -> tuple[Candidate, dict[str, object]]:
+    model_id = "test-model"
+    repository_id = "PaddlePaddle/test-model"
+    revision = "c" * 40
+    repository_root = tmp_path / "model"
+    repository_root.mkdir()
+    readme = (
+        f"---\nlicense: {readme_license}\n---\n\n# {model_id}\n"
+    ).encode("utf-8")
+    payloads = {
+        ".gitattributes": b"*.pdiparams filter=lfs diff=lfs merge=lfs -text\n",
+        "README.md": readme,
+        "config.json": b"{}\n",
+        "inference.json": b"graph",
+        "inference.pdiparams": b"weights",
+        "inference.yml": b"Global:\n  model_name: test-model\n",
+    }
+    file_specs = []
+    for name, payload in payloads.items():
+        if name == "inference.pdiparams":
+            content_hash = sha256(payload).hexdigest()
+            pointer = (
+                "version https://git-lfs.github.com/spec/v1\n"
+                f"oid sha256:{content_hash}\n"
+                f"size {len(payload)}\n"
+            ).encode("ascii")
+            blob_hash = sha1(f"blob {len(pointer)}\0".encode("ascii") + pointer).hexdigest()
+            file_specs.append(
+                OfficialModelFile(
+                    name,
+                    blob_hash,
+                    len(payload),
+                    content_hash,
+                    len(pointer),
+                )
+            )
+        else:
+            blob_hash = sha1(
+                f"blob {len(payload)}\0".encode("ascii") + payload
+            ).hexdigest()
+            file_specs.append(OfficialModelFile(name, blob_hash, len(payload)))
+    candidate = Candidate(
+        model_id=model_id,
+        archive_name="test-model.tar",
+        url="https://official.invalid/test-model.tar",
+        archive_sha256="1" * 64,
+        member_sha256={
+            f"test-model/{name}": sha256(payload).hexdigest()
+            for name, payload in payloads.items()
+            if name.startswith("inference.")
+        },
+    )
+    for name, payload in payloads.items():
+        (repository_root / name).write_bytes(payload)
+    if payload_override is not None:
+        (repository_root / payload_override[0]).write_bytes(payload_override[1])
+
+    api = {
+        "id": repository_id,
+        "author": "PaddlePaddle",
+        "sha": revision,
+        "private": False,
+        "gated": False,
+        "cardData": {"license": api_license},
+        "siblings": [],
+    }
+    for file_spec in sorted(file_specs, key=lambda item: item.name):
+        sibling: dict[str, object] = {
+            "rfilename": file_spec.name,
+            "blobId": file_spec.blob_sha1,
+            "size": file_spec.size,
+        }
+        if file_spec.lfs_sha256 is not None:
+            sibling["lfs"] = {
+                "sha256": file_spec.lfs_sha256,
+                "size": file_spec.size,
+                "pointerSize": file_spec.lfs_pointer_size,
+            }
+        api["siblings"].append(sibling)
+    if api_blob_mismatch:
+        api["siblings"][0]["blobId"] = "0" * 40
+    if api_lfs_mismatch:
+        for sibling in api["siblings"]:
+            if sibling["rfilename"] == "inference.pdiparams":
+                sibling["lfs"]["sha256"] = "0" * 64
+    if malformed_sibling:
+        api["siblings"][0]["unexpected"] = True
+    api_text = json.dumps(api)
+    if duplicate_api_license:
+        api_text = api_text.replace(
+            f'"license": "{api_license}"',
+            f'"license": "proprietary", "license": "{api_license}"',
+        )
+    (repository_root / "model-api.json").write_text(api_text, encoding="utf-8")
+
+    monkeypatch.setattr(audit_module, "CANDIDATES", (candidate,))
+    monkeypatch.setattr(
+        audit_module,
+        "OFFICIAL_MODEL_REPOSITORIES",
+        (
+            OfficialModelRepository(
+                model_id=model_id,
+                repository_id=repository_id,
+                revision=revision,
+                local_name="model",
+                readme_sha256=sha256(readme).hexdigest(),
+                files=tuple(file_specs),
+            ),
+        ),
+    )
+    repository_audit = audit_official_model_repositories(tmp_path)
+    archive_audit = {
+        "candidate": asdict(candidate),
+        "archive_hash_matches": True,
+        "member_inventory_matches": True,
+        "artifact_terms_review": {
+            "valid": False,
+            "blockers": ["Expected exactly one artifact-terms.json; found 0."],
+        },
+        "artifact_level_redistribution_proven": False,
+    }
+    return candidate, {"repository": repository_audit, "archive": archive_audit}
+
+
+def test_exact_official_model_repository_license_and_bytes_permit_conversion(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, evidence = _write_model_repository_fixture(tmp_path, monkeypatch)
+
+    decision = build_decision(
+        [evidence["archive"]],
+        {"valid": True, "blockers": []},
+        evidence["repository"],
+    )
+
+    assert evidence["repository"]["valid"] is True
+    assert decision["conversion_permitted"] is True
+    assert decision["official_model_repository_terms_proven"] is True
+    assert decision["embedded_archive_terms_proven"] is False
+    assert decision["blockers"] == []
+
+
+@pytest.mark.parametrize(
+    ("fixture_arguments", "blocker"),
+    [
+        ({"api_license": "proprietary"}, "API metadata"),
+        ({"readme_license": "non-commercial"}, "model card"),
+        (
+            {"payload_override": ("inference.pdiparams", b"different weights")},
+            "does not match the BOS archive",
+        ),
+        ({"duplicate_api_license": True}, "duplicate JSON object key"),
+        ({"api_blob_mismatch": True}, "file identity"),
+        ({"api_lfs_mismatch": True}, "file identity"),
+        ({"malformed_sibling": True}, "file identity"),
+    ],
+)
+def test_model_repository_license_or_byte_tampering_fails_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    fixture_arguments: dict[str, object],
+    blocker: str,
+) -> None:
+    _, evidence = _write_model_repository_fixture(
+        tmp_path,
+        monkeypatch,
+        **fixture_arguments,
+    )
+
+    decision = build_decision(
+        [evidence["archive"]],
+        {"valid": True, "blockers": []},
+        evidence["repository"],
+    )
+
+    assert evidence["repository"]["valid"] is False
+    assert decision["conversion_permitted"] is False
+    assert decision["official_model_repository_terms_proven"] is False
+    assert any(blocker in item for item in decision["blockers"])

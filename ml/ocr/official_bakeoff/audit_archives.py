@@ -68,6 +68,25 @@ class OfficialDocument:
     required_url: str
 
 
+@dataclass(frozen=True)
+class OfficialModelFile:
+    name: str
+    blob_sha1: str
+    size: int
+    lfs_sha256: str | None = None
+    lfs_pointer_size: int | None = None
+
+
+@dataclass(frozen=True)
+class OfficialModelRepository:
+    model_id: str
+    repository_id: str
+    revision: str
+    local_name: str
+    readme_sha256: str
+    files: tuple[OfficialModelFile, ...]
+
+
 CANDIDATES = (
     Candidate(
         model_id="PP-OCRv5_mobile_det",
@@ -120,6 +139,64 @@ OFFICIAL_DOCUMENTS = (
     ),
 )
 
+OFFICIAL_MODEL_REPOSITORIES = (
+    OfficialModelRepository(
+        model_id="PP-OCRv5_mobile_det",
+        repository_id="PaddlePaddle/PP-OCRv5_mobile_det",
+        revision="0d63e78e2b680928f6b1747d76a08db6e645efb7",
+        local_name="det",
+        readme_sha256="4cc20ad6d41af86b3ce9885ffb0956e152574a2eb14179aeb07fd2d3956161ca",
+        files=(
+            OfficialModelFile(".gitattributes", "c48a31d8dce80bfbfe392212dc49792e212a6436", 1575),
+            OfficialModelFile("README.md", "6ed97ac58de2375d7010fa6b7562b762d5e804f9", 16243),
+            OfficialModelFile("config.json", "4fc190d78e4425094b31a2d3a4744a3623d00b50", 2871),
+            OfficialModelFile("inference.json", "6cd678f39460a27372f8fe570e4e12e7a383418f", 229777),
+            OfficialModelFile(
+                "inference.pdiparams",
+                "5e6d602681aa10f3660406dd7ec0ba48268d56e4",
+                4692937,
+                "afa1820cb16c1fd0dad589d0f8b389139061c1ef6d68019685fd07be997dda5b",
+                132,
+            ),
+            OfficialModelFile("inference.yml", "579d10695d2dd6e85c5ecba02d151ae5c077aa49", 903),
+        ),
+    ),
+    OfficialModelRepository(
+        model_id="en_PP-OCRv5_mobile_rec",
+        repository_id="PaddlePaddle/en_PP-OCRv5_mobile_rec",
+        revision="267c36e24c331595590fe7bd72bde2436fd286f2",
+        local_name="rec",
+        readme_sha256="4c1cfd6e103b0966fe97505b5254cfa35a931d47d7effca97a9db47fb57dd699",
+        files=(
+            OfficialModelFile(".gitattributes", "c48a31d8dce80bfbfe392212dc49792e212a6436", 1575),
+            OfficialModelFile("README.md", "c7789c66447d3fbc3a4740b3d2b40e23b1ec6895", 6908),
+            OfficialModelFile("config.json", "ee30b810753068b251de393eee66dff31f6d279c", 10455),
+            OfficialModelFile("inference.json", "fc20fb935854373220fbeff985cbd310f0450608", 217712),
+            OfficialModelFile(
+                "inference.pdiparams",
+                "81545b8e5cd2f173ddfaeeb9be76ab1574974fca",
+                7772315,
+                "3ec8a97ed6cefe8568d3e2ee90bb193299b566a7661aa4fd52d224b96b59f66b",
+                132,
+            ),
+            OfficialModelFile("inference.yml", "91a401a7220881921c249b92852a96f9dbf2132a", 3964),
+        ),
+    ),
+)
+
+MODEL_CARD_LICENSE = "apache-2.0"
+MODEL_LICENSE_SPDX = "Apache-2.0"
+MODEL_CARD_CONTRADICTIONS = (
+    re.compile(r"\bnon[- ]?commercial\b", re.IGNORECASE),
+    re.compile(r"\bresearch[- ]?only\b", re.IGNORECASE),
+    re.compile(r"\bproprietary\b", re.IGNORECASE),
+    re.compile(r"\b(?:redistribution|commercial use)\s+(?:is\s+)?forbidden\b", re.IGNORECASE),
+    re.compile(r"\bGPL(?:-[0-9.]+)?\b", re.IGNORECASE),
+    re.compile(r"\bAGPL(?:-[0-9.]+)?\b", re.IGNORECASE),
+    re.compile(r"\bSSPL(?:-[0-9.]+)?\b", re.IGNORECASE),
+    re.compile(r"\bBUSL(?:-[0-9.]+)?\b", re.IGNORECASE),
+)
+
 
 def _hash_bytes(payload: bytes) -> str:
     return sha256(payload).hexdigest()
@@ -136,6 +213,14 @@ def _hash_file(path: Path) -> str:
 def _git_blob_hash(payload: bytes) -> str:
     header = f"blob {len(payload)}\0".encode("ascii")
     return sha1(header + payload).hexdigest()
+
+
+def _git_lfs_pointer(sha256_digest: str, size: int) -> bytes:
+    return (
+        "version https://git-lfs.github.com/spec/v1\n"
+        f"oid sha256:{sha256_digest}\n"
+        f"size {size}\n"
+    ).encode("ascii")
 
 
 class DuplicateJsonKeyError(ValueError):
@@ -410,9 +495,259 @@ def audit_official_source(source: Path) -> dict[str, object]:
     }
 
 
+def audit_official_model_repositories(evidence: Path) -> dict[str, object]:
+    """Bind exact official model-card terms to the archived inference bytes."""
+
+    blockers: list[str] = []
+    repositories: list[dict[str, object]] = []
+    candidates_by_id = {candidate.model_id: candidate for candidate in CANDIDATES}
+
+    if set(candidates_by_id) != {
+        repository.model_id for repository in OFFICIAL_MODEL_REPOSITORIES
+    }:
+        blockers.append(
+            "Official model repository definitions do not exactly cover the pinned candidates."
+        )
+
+    for repository in OFFICIAL_MODEL_REPOSITORIES:
+        repository_blockers: list[str] = []
+        repository_root = evidence / repository.local_name
+        api_path = repository_root / "model-api.json"
+        try:
+            api: Any = _load_reviewed_json(api_path.read_bytes())
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, DuplicateJsonKeyError) as error:
+            repository_blockers.append(f"Official model API evidence is unreadable: {error}")
+            api = {}
+
+        if not isinstance(api, dict):
+            repository_blockers.append("Official model API evidence is not a JSON object.")
+            api = {}
+        if api.get("id") != repository.repository_id:
+            repository_blockers.append(
+                "Official model API evidence identifies the wrong repository."
+            )
+        if api.get("author") != "PaddlePaddle":
+            repository_blockers.append("Official model repository is not owned by PaddlePaddle.")
+        if api.get("sha") != repository.revision:
+            repository_blockers.append("Official model API evidence identifies the wrong revision.")
+        if api.get("private") is not False or api.get("gated") is not False:
+            repository_blockers.append("Official model repository is private or access-gated.")
+        card_data = api.get("cardData")
+        if not isinstance(card_data, dict) or card_data.get("license") != MODEL_CARD_LICENSE:
+            repository_blockers.append(
+                "Official model API metadata does not scope Apache-2.0 to the model repository."
+            )
+        siblings = api.get("siblings")
+        expected_files = {item.name: item for item in repository.files}
+        sibling_names: list[str] = []
+        if not isinstance(siblings, list):
+            repository_blockers.append("Official model API file inventory is not a list.")
+            siblings = []
+        for index, sibling in enumerate(siblings):
+            if not isinstance(sibling, dict):
+                repository_blockers.append(
+                    f"Official model API file inventory entry {index} is malformed."
+                )
+                continue
+            filename = sibling.get("rfilename")
+            if not isinstance(filename, str):
+                repository_blockers.append(
+                    f"Official model API file inventory entry {index} has no filename."
+                )
+                continue
+            sibling_names.append(filename)
+            expected_file = expected_files.get(filename)
+            if expected_file is None:
+                repository_blockers.append(
+                    f"Official model API file inventory contains an unexpected file: {filename}."
+                )
+                continue
+            expected_sibling: dict[str, object] = {
+                "rfilename": expected_file.name,
+                "blobId": expected_file.blob_sha1,
+                "size": expected_file.size,
+            }
+            if expected_file.lfs_sha256 is not None:
+                expected_sibling["lfs"] = {
+                    "sha256": expected_file.lfs_sha256,
+                    "size": expected_file.size,
+                    "pointerSize": expected_file.lfs_pointer_size,
+                }
+            if sibling != expected_sibling:
+                repository_blockers.append(
+                    "Official model API file identity does not match the reviewed revision "
+                    f"({filename})."
+                )
+        if len(sibling_names) != len(set(sibling_names)):
+            repository_blockers.append("Official model API evidence repeats a repository file.")
+        if set(sibling_names) != set(expected_files):
+            repository_blockers.append(
+                "Official model repository file inventory does not match the reviewed revision."
+            )
+
+        expected_local_files = set(expected_files) | {"model-api.json"}
+        try:
+            actual_local_files = {
+                path.name for path in repository_root.iterdir() if path.is_file()
+            }
+        except OSError as error:
+            repository_blockers.append(
+                f"Official model evidence directory is unreadable: {error}"
+            )
+            actual_local_files = set()
+        if actual_local_files != expected_local_files:
+            repository_blockers.append(
+                "Official model evidence directory contains missing or unexpected files."
+            )
+
+        local_payloads: dict[str, bytes] = {}
+        measured_file_identities: dict[str, dict[str, object]] = {}
+        for expected_file in repository.files:
+            payload_path = repository_root / expected_file.name
+            try:
+                payload = payload_path.read_bytes()
+            except OSError as error:
+                repository_blockers.append(
+                    "Official model repository file is unreadable "
+                    f"({expected_file.name}): {error}"
+                )
+                continue
+            local_payloads[expected_file.name] = payload
+            if len(payload) != expected_file.size:
+                repository_blockers.append(
+                    "Official model repository file size does not match the reviewed revision "
+                    f"({expected_file.name})."
+                )
+            if expected_file.lfs_sha256 is None:
+                measured_blob_sha1 = _git_blob_hash(payload)
+                measured_content_sha256 = _hash_bytes(payload)
+            else:
+                measured_content_sha256 = _hash_bytes(payload)
+                pointer = _git_lfs_pointer(expected_file.lfs_sha256, expected_file.size)
+                measured_blob_sha1 = _git_blob_hash(pointer)
+                if len(pointer) != expected_file.lfs_pointer_size:
+                    repository_blockers.append(
+                        "Official model LFS pointer size does not match the reviewed revision "
+                        f"({expected_file.name})."
+                    )
+                if measured_content_sha256 != expected_file.lfs_sha256:
+                    repository_blockers.append(
+                        "Official model LFS content SHA-256 does not match the reviewed revision "
+                        f"({expected_file.name})."
+                    )
+            if measured_blob_sha1 != expected_file.blob_sha1:
+                repository_blockers.append(
+                    "Official model Git blob identity does not match the reviewed revision "
+                    f"({expected_file.name})."
+                )
+            measured_file_identities[expected_file.name] = {
+                "bytes": len(payload),
+                "git_blob_sha1": measured_blob_sha1,
+                "content_sha256": measured_content_sha256,
+                "evidence_path": str(payload_path.resolve()),
+                "revision_url": (
+                    f"https://huggingface.co/{repository.repository_id}/resolve/"
+                    f"{repository.revision}/{expected_file.name}"
+                ),
+            }
+
+        readme_payload = local_payloads.get("README.md", b"")
+        readme_hash = _hash_bytes(readme_payload)
+        if readme_hash != repository.readme_sha256:
+            repository_blockers.append(
+                "Official model card SHA-256 does not match the reviewed revision."
+            )
+        try:
+            readme_text = readme_payload.decode("utf-8")
+        except UnicodeDecodeError:
+            repository_blockers.append("Official model card is not valid UTF-8.")
+            readme_text = ""
+        license_lines = [
+            line.strip()
+            for line in readme_text.splitlines()
+            if line.strip().lower().startswith("license:")
+        ]
+        if license_lines != [f"license: {MODEL_CARD_LICENSE}"]:
+            repository_blockers.append(
+                "Official model card does not contain exactly one Apache-2.0 license field."
+            )
+        if f"# {repository.model_id}" not in readme_text:
+            repository_blockers.append("Official model card does not identify the exact model ID.")
+        if any(pattern.search(readme_text) for pattern in MODEL_CARD_CONTRADICTIONS):
+            repository_blockers.append("Official model card contains contradictory license terms.")
+
+        candidate = candidates_by_id.get(repository.model_id)
+        expected_payloads = (
+            {PurePosixPath(path).name: digest for path, digest in candidate.member_sha256.items()}
+            if candidate is not None
+            else {}
+        )
+        measured_payloads: dict[str, str] = {}
+        if set(expected_payloads) != {"inference.json", "inference.pdiparams", "inference.yml"}:
+            repository_blockers.append(
+                "Pinned archive inventory does not expose the exact three inference payloads."
+            )
+        for filename, expected_hash in expected_payloads.items():
+            payload = local_payloads.get(filename)
+            if payload is None:
+                continue
+            measured_hash = _hash_bytes(payload)
+            measured_payloads[filename] = measured_hash
+            if measured_hash != expected_hash:
+                repository_blockers.append(
+                    "Official model repository payload does not match the BOS archive "
+                    f"({filename})."
+                )
+
+        repository_valid = not repository_blockers
+        blockers.extend(
+            f"{repository.model_id}: {blocker}" for blocker in repository_blockers
+        )
+        repositories.append(
+            {
+                "model_id": repository.model_id,
+                "repository_id": repository.repository_id,
+                "revision": repository.revision,
+                "repository_url": f"https://huggingface.co/{repository.repository_id}",
+                "revision_url": (
+                    f"https://huggingface.co/{repository.repository_id}/tree/"
+                    f"{repository.revision}"
+                ),
+                "revision_api_url": (
+                    f"https://huggingface.co/api/models/{repository.repository_id}/"
+                    f"revision/{repository.revision}?blobs=true"
+                ),
+                "api_evidence_path": str(api_path.resolve()),
+                "model_card_sha256": readme_hash,
+                "license_spdx": MODEL_LICENSE_SPDX if repository_valid else None,
+                "redistribution": repository_valid,
+                "commercial_use": repository_valid,
+                "repository_file_identities": measured_file_identities,
+                "archive_payload_sha256": measured_payloads,
+                "valid": repository_valid,
+                "blockers": repository_blockers,
+            }
+        )
+
+    covered_model_ids = [
+        repository["model_id"] for repository in repositories if repository["valid"] is True
+    ]
+    expected_model_ids = [candidate.model_id for candidate in CANDIDATES]
+    valid = not blockers and sorted(covered_model_ids) == sorted(expected_model_ids)
+    return {
+        "valid": valid,
+        "license_spdx": MODEL_LICENSE_SPDX if valid else None,
+        "scope": "exact-model-repository-revision-and-byte-identical-bos-payloads",
+        "covered_model_ids": covered_model_ids,
+        "repositories": repositories,
+        "blockers": blockers,
+    }
+
+
 def build_decision(
     audits: list[dict[str, object]],
     source_audit: dict[str, object],
+    model_repository_license_audit: dict[str, object] | None = None,
 ) -> dict[str, object]:
     blockers = list(source_audit["blockers"])
     if not audits:
@@ -448,22 +783,54 @@ def build_decision(
             blockers.append(f"{model_id}: archive SHA-256 mismatch.")
         if audit.get("member_inventory_matches") is not True:
             blockers.append(f"{model_id}: extracted member inventory or SHA-256 mismatch.")
-        terms_review = audit.get("artifact_terms_review")
-        terms_blockers = (
-            terms_review.get("blockers", []) if isinstance(terms_review, dict) else []
-        )
-        if not isinstance(terms_blockers, list):
-            terms_blockers = ["Artifact terms review blockers are malformed."]
-        for blocker in terms_blockers:
-            blockers.append(f"{model_id}: {blocker}")
     hashes_valid = candidate_audits_valid and all(
         audit.get("archive_hash_matches") is True
         and audit.get("member_inventory_matches") is True
         for audit in audits
     )
-    redistribution_proven = candidate_audits_valid and all(
+    embedded_redistribution_proven = candidate_audits_valid and all(
         audit.get("artifact_level_redistribution_proven") is True for audit in audits
     )
+    expected_model_ids = sorted(candidate.model_id for candidate in CANDIDATES)
+    repository_covered_model_ids = (
+        model_repository_license_audit.get("covered_model_ids", [])
+        if isinstance(model_repository_license_audit, dict)
+        else []
+    )
+    repository_redistribution_proven = (
+        isinstance(model_repository_license_audit, dict)
+        and model_repository_license_audit.get("valid") is True
+        and isinstance(repository_covered_model_ids, list)
+        and sorted(repository_covered_model_ids) == expected_model_ids
+    )
+    redistribution_proven = (
+        embedded_redistribution_proven or repository_redistribution_proven
+    )
+    if not redistribution_proven:
+        for audit in audits:
+            candidate_metadata = audit.get("candidate")
+            model_id = (
+                candidate_metadata.get("model_id", "<invalid-candidate>")
+                if isinstance(candidate_metadata, dict)
+                else "<invalid-candidate>"
+            )
+            terms_review = audit.get("artifact_terms_review")
+            terms_blockers = (
+                terms_review.get("blockers", []) if isinstance(terms_review, dict) else []
+            )
+            if not isinstance(terms_blockers, list):
+                terms_blockers = ["Artifact terms review blockers are malformed."]
+            for blocker in terms_blockers:
+                blockers.append(f"{model_id}: {blocker}")
+        if isinstance(model_repository_license_audit, dict):
+            repository_blockers = model_repository_license_audit.get("blockers", [])
+            if isinstance(repository_blockers, list):
+                blockers.extend(
+                    f"Official model repository evidence: {blocker}"
+                    for blocker in repository_blockers
+                )
+            else:
+                blockers.append("Official model repository evidence blockers are malformed.")
     conversion_permitted = (
         source_valid and hashes_valid and redistribution_proven and not blockers
     )
@@ -471,25 +838,38 @@ def build_decision(
         "source_provenance_valid": source_valid,
         "hashes_valid": hashes_valid,
         "artifact_level_redistribution_proven": redistribution_proven,
+        "embedded_archive_terms_proven": embedded_redistribution_proven,
+        "official_model_repository_terms_proven": repository_redistribution_proven,
         "conversion_permitted": conversion_permitted,
         "status": "eligible_for_conversion" if conversion_permitted else "blocked",
         "blockers": blockers,
     }
 
 
-def run(archives: Path, source: Path, output: Path) -> dict[str, object]:
+def run(
+    archives: Path,
+    source: Path,
+    output: Path,
+    model_license_evidence: Path | None = None,
+) -> dict[str, object]:
     audits = [
         audit_archive(candidate, archives / candidate.archive_name)
         for candidate in CANDIDATES
     ]
     source_audit = audit_official_source(source)
+    model_repository_license_audit = (
+        audit_official_model_repositories(model_license_evidence)
+        if model_license_evidence is not None
+        else None
+    )
     report = {
         "pinned_tag": PINNED_TAG,
         "pinned_commit": PINNED_COMMIT,
         "official_archives_only": True,
         "source_audit": source_audit,
+        "model_repository_license_audit": model_repository_license_audit,
         "audits": audits,
-        **build_decision(audits, source_audit),
+        **build_decision(audits, source_audit, model_repository_license_audit),
     }
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -500,9 +880,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--archives", type=Path, required=True)
     parser.add_argument("--source", type=Path, required=True)
+    parser.add_argument("--model-license-evidence", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     arguments = parser.parse_args()
-    report = run(arguments.archives, arguments.source, arguments.output)
+    report = run(
+        arguments.archives,
+        arguments.source,
+        arguments.output,
+        arguments.model_license_evidence,
+    )
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0 if report["conversion_permitted"] else 2
 

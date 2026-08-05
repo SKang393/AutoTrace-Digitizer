@@ -135,7 +135,7 @@ in Production composition. Automatic stages currently report:
 | --- | --- | --- |
 | Enhancement | Unavailable | Exact runtime redistribution provenance is reviewed, but local-adapter, scientific, CPU fallback, clean-machine, production, and release approvals remain false. |
 | Axis | Unavailable | Deterministic adapter exists; OpenCvSharp native redistribution audit is blocked. |
-| OCR | Unavailable | The executable detector, recognizer, strict two-manifest factory, CPU provider binding, and fail-closed composition boundary are implemented. No approved OCR payload pair exists. Project numeric Candidates 1, 2, and 3 failed the frozen validation gate and produced no ONNX; the authorized budget is exhausted. Exact official PP-OCRv5 archives are inventoried but lack artifact-scoped redistribution terms, so conversion remains blocked. |
+| OCR | Unavailable | The executable detector, recognizer, strict two-manifest factory, CPU provider binding, and fail-closed composition boundary are implemented. No approved OCR payload pair exists. Project numeric Candidates 1, 2, and 3 failed the frozen validation gate and produced no ONNX; the authorized budget is exhausted. Exact official PP-OCRv5 BOS payloads are now bound byte for byte to immutable official PaddlePaddle model repositories whose exact model cards declare Apache-2.0. Controlled conversion is permitted, but no converted ONNX, parity, CPU, benchmark, notice, manifest, or package evidence exists. |
 | Markers | Unavailable | Marker-center exhausted its budget after one public false positive. The unchanged-weight probability-runtime classifier passed selection, public-v3, disjoint confirmation-v3, exact package discovery, and CPU/DirectML runtime validation. The concrete artifact-mask runtime bridge exists under the frozen marker-center task, but the current marker-center manifest lacks the separately required direct full-frame artifact-mask approval profile. The stage still requires an approved center model and checksum-bound artifact-mask evidence. |
 | Legends | Unavailable | Deterministic reasoner requires approved OCR and marker evidence. |
 | Phases | Unavailable | Deterministic reasoner requires approved axis, OCR, and marker evidence. |
@@ -203,9 +203,11 @@ marker classifier reached approval:
   recognition archives were downloaded, hashed, and inventoried at
   `50446e5d01ac2a73d5319c89513281f6578414c888c602f9af13f93feefffc58`
   and `e595b4cf2ffad19fbb5a61ba345d63939577a3ab8717b6e5995642590c9101b4`.
-  Their six extracted files contain no
-  artifact-scoped license, commercial-use grant, redistribution grant, or
-  notice, so conversion and approval remain blocked.
+  All six payloads match immutable official PaddlePaddle model repositories at
+  `0d63e78e2b680928f6b1747d76a08db6e645efb7` and
+  `267c36e24c331595590fe7bd72bde2436fd286f2`. Their exact model cards declare
+  Apache-2.0, clearing only the controlled conversion step. No ONNX, parity,
+  benchmark, reviewed notice, manifest, package discovery, or approval exists.
 - Project numeric OCR Candidate 1 completed its recovery with zero optimizer
   steps and unchanged checkpoint SHA-256 `6e941b2b...8235`. It failed with
   validation exact `0.3359375`, sealed exact `0.119140625`, sealed CER
@@ -328,7 +330,7 @@ files are not tracked.
 - Production runtime availability: 12/12 focused composition cases passed;
   exact OpenCV bytes plus provenance, notice, clean-machine, and release flags
   are required before the axis stage becomes approved.
-- Public scoreboard: 37/37 synthetic metric-contract gates passed in 241.734 ms with peak managed memory 970768 bytes.
+- Public scoreboard: 37/37 synthetic metric-contract gates passed in 214.322 ms with peak managed memory 987216 bytes.
 - `packaging/localization/Test-LocalizationAudit.ps1`: 9/9 passed.
 - repository localization audit: 181 keys, 0 missing, 0 extra, 0 duplicate,
   and 0 unresolved references.

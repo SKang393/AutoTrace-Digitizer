@@ -5,19 +5,22 @@ Copyright 2026 Sungwoo Kang
 
 # PP-OCRv5 official archive bake-off audit
 
-Audit date: 2026-08-04
+Audit date: 2026-08-05
 
 ## Decision
 
-The official-candidate bake-off is **blocked before conversion**. The exact
-official archives are available and checksum reproducible, but neither archive
-contains a license, notice, copyright statement, commercial-use statement, or
-redistribution grant. The repository Apache-2.0 license is not treated as
-artifact-level evidence for separately hosted model weights.
+The exact source bytes are **eligible for conversion only**. Each BOS inference
+archive is byte-identical to the corresponding immutable official PaddlePaddle
+model repository, and each exact model card scopes Apache-2.0 to that repository.
+The executable audit independently binds owner, model ID, revision, public and
+ungated state, complete file inventory, model-card SHA-256, license metadata,
+revision-specific Git blob and LFS identities, and all six inference payload
+hashes.
 
-No ONNX was converted, no CPU inference or parity claim was made, no role or
-text-mask benchmark was run, and no manifest was created. This is the required
-fail-closed result, not a skipped or passing gate.
+No ONNX has yet been converted, no CPU inference or parity claim is made, no
+role or text-mask benchmark has run, and no manifest or production approval
+exists. License clearance permits the controlled conversion experiment. It does
+not pass the model, notice, packaging, or release gates.
 
 ## Pinned official source
 
@@ -83,6 +86,26 @@ The YAML binds `en_PP-OCRv5_mobile_rec` to its embedded character dictionary,
 CTC decoding, and `[3,48,320]` recognition preprocessing. It contains no
 license metadata.
 
+## Exact official model repositories
+
+The official PaddlePaddle Hugging Face repositories provide artifact-scoped
+model-card terms for the exact bytes present in the BOS archives:
+
+| Model | Immutable official repository revision | Model-card SHA-256 | License | Byte identity |
+|---|---|---|---|---|
+| `PP-OCRv5_mobile_det` | `PaddlePaddle/PP-OCRv5_mobile_det@0d63e78e2b680928f6b1747d76a08db6e645efb7` | `4cc20ad6d41af86b3ce9885ffb0956e152574a2eb14179aeb07fd2d3956161ca` | Apache-2.0 | All three inference files match the BOS member SHA-256 values above |
+| `en_PP-OCRv5_mobile_rec` | `PaddlePaddle/en_PP-OCRv5_mobile_rec@267c36e24c331595590fe7bd72bde2436fd286f2` | `4c1cfd6e103b0966fe97505b5254cfa35a931d47d7effca97a9db47fb57dd699` | Apache-2.0 | All three inference files match the BOS member SHA-256 values above |
+
+The audit requires author `PaddlePaddle`, exact repository ID and revision,
+`private=false`, `gated=false`, the reviewed six-file repository inventory,
+exactly one `license: apache-2.0` model-card field, exact model identity, no
+contradictory license term, and all three byte hashes for both models. Every
+non-LFS file must reproduce its revision-bound Git blob SHA-1. Each weights file
+must reproduce the reviewed Git LFS pointer blob, pointer size, content size,
+and content SHA-256. The report emits every consumed local evidence path plus
+its revision-specific API and file URL. Malformed or extra sibling fields and
+any missing, changed, duplicated, gated, or mismatched input fail closed.
+
 ## Artifact-level terms result
 
 The complete six-file extracted inventory contains no `artifact-terms.json`,
@@ -118,34 +141,38 @@ The metadata pass also rejects every nonempty `TarInfo.sparse` map regardless of
 the member type byte, including PAX GNU sparse metadata attached to a nominal
 regular `b'0'` member.
 
-The pinned root repository license is Apache-2.0, but it does not directly say
-that these separately hosted inference archives and weight bytes are covered.
-Commercial use and redistribution of the exact archives therefore remain
-`unclear`, which is a mandatory stop condition.
+The BOS tar members contain no embedded terms or notice. That route remains
+invalid. The independent official model-repository route supplies the missing
+scope: both exact model cards declare Apache-2.0 and their inference files are
+byte-identical to all six BOS payload members. Current executable result:
+`source_provenance_valid=true`, `hashes_valid=true`,
+`official_model_repository_terms_proven=true`,
+`artifact_level_redistribution_proven=true`, and
+`conversion_permitted=true`.
 
 ## Blocked downstream gates
 
 | Gate | Status | Direct reason |
 |---|---|---|
-| Artifact redistribution | BLOCKED | Exact archives carry no applicable terms or notice |
+| Artifact redistribution | PASS for conversion source | Exact official model-repository revisions scope Apache-2.0 to byte-identical BOS payloads |
 | Notices | BLOCKED | No artifact notice exists to package |
-| Paddle-to-ONNX conversion provenance | BLOCKED | Conversion is prohibited until source weights are license-cleared |
-| ONNX parity | BLOCKED | No permitted converted ONNX exists |
-| CPU execution | BLOCKED | No permitted converted ONNX exists |
-| Frozen public/sealed OCR accuracy | BLOCKED | Inference is blocked upstream |
-| Role accuracy | BLOCKED | Inference is blocked upstream |
-| Text masks and no marker creation | BLOCKED | Detection inference is blocked upstream |
-| Model manifest | BLOCKED | License, redistribution, checksum-of-converted-file, providers, and benchmarks are unresolved |
+| Paddle-to-ONNX conversion provenance | READY | Source revision, archive, repository revision, license scope, and six payload hashes are bound |
+| ONNX parity | BLOCKED | Controlled conversion and source-runtime comparison have not run |
+| CPU execution | BLOCKED | No converted ONNX exists |
+| Frozen public/sealed OCR accuracy | BLOCKED | No converted candidate has run the fixed public gates |
+| Role accuracy | BLOCKED | No converted candidate has run the role gate |
+| Text masks and no marker creation | BLOCKED | No converted detector has run the exclusion gate |
+| Model manifest | BLOCKED | Converted checksums, parity, providers, benchmarks, notice, and packaging discovery are unresolved |
 
 No private graph or Chandler data was read, tuned, or evaluated. Downloaded
 archives, extracted payloads, and audit JSON remain ignored under
 `ml/ocr/official_bakeoff/runs/`.
 
-## Required unblock evidence
+## Required next evidence
 
-Obtain a direct official artifact statement that identifies these exact model
-IDs, covers every archive member, gives an allowlisted compatible license,
-affirmatively grants commercial redistribution, and supplies the required
-notice. The archive inventory and reviewed constants must then be updated and
-re-audited. Only afterward may conversion, ONNX parity, CPU provider, frozen
-public splits, role accuracy, and marker-suppression tests proceed.
+Run a checksum-bound conversion from these exact source bytes, retain tool and
+runtime provenance, compare source and ONNX outputs, and execute CPU inference
+against the frozen public and sealed gates. Create and review the Apache-2.0
+license and attribution notice bundle before any manifest becomes approved or
+any payload enters packaging. Production composition must remain unavailable
+until both OCR tasks pass every model-store and packaging requirement together.

@@ -1,18 +1,23 @@
 # Official PP-OCRv5 archive audit
 
 This tool verifies the pinned tag, commit tree, official documentation blobs,
-documented archive URLs, exact archives, and extracted member hashes. Conversion
-requires a structured `artifact-terms.json` that identifies the exact model,
-uses an allowlisted SPDX license, affirmatively grants redistribution and
-commercial use with boolean `true`, covers every archive file, and names a
-reviewed `NOTICE` member with an exact SHA-256. That notice must identify the
-same model, license, and grants and contain no proprietary, copyleft,
-noncommercial, research-only, or forbidden-use contradiction. Legal keyword
-presence alone never grants permission. After UTF-8 decoding, the complete set
-of nonempty notice lines must exactly equal the four required scoped lines.
-Additional prose, changed spelling, conditions, homoglyphs, and duplicate lines
-fail closed. Conversion also requires exactly one audit with complete matching
-metadata for every pinned candidate, with no missing, extra, or duplicate audit.
+documented archive URLs, exact archives, and extracted member hashes. It accepts
+artifact terms through either of two fully bound routes: exact structured terms
+inside each archive, or the immutable official PaddlePaddle model repository
+whose model card scopes Apache-2.0 to byte-identical inference files. The
+repository route validates the exact owner, repository, revision, public and
+ungated state, complete file inventory, model-card SHA-256, model identity,
+license field, contradiction scan, revision-bound Git blob IDs, LFS pointer and
+content identities, and all three BOS payload hashes for each model. The saved
+API must include `?blobs=true`; malformed sibling records and any missing,
+altered, extra, duplicated, gated, or mismatched evidence fail closed.
+
+The archive-embedded route requires a structured `artifact-terms.json` that
+identifies the exact model, uses an allowlisted SPDX license, affirmatively
+grants redistribution and commercial use with boolean `true`, covers every
+archive file, and names a reviewed `NOTICE` member with an exact SHA-256. Legal
+keyword presence alone never grants permission. Conversion also requires
+exactly one complete audit for every pinned candidate.
 Every reviewed JSON input rejects duplicate object keys at any depth, including
 artifact terms and saved tag and commit responses. Archive auditing also rejects
 duplicate normalized file paths before reading payload bytes or constructing the
@@ -37,7 +42,11 @@ ignored `runs/`.
 python -m ml.ocr.official_bakeoff.audit_archives `
   --archives ml/ocr/official_bakeoff/runs/archives `
   --source ml/ocr/official_bakeoff/runs/source `
+  --model-license-evidence ml/ocr/official_bakeoff/runs/huggingface `
   --output ml/ocr/official_bakeoff/runs/archive-audit.json
 ```
 
-Exit code `2` means provenance is blocked and conversion must not proceed.
+Exit code `0` means these source bytes are license-cleared for conversion only.
+It does not approve an ONNX conversion, benchmark, manifest, runtime provider,
+notice bundle, packaging discovery, or production composition. Exit code `2`
+means provenance is blocked and conversion must not proceed.
