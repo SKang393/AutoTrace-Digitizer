@@ -1719,6 +1719,7 @@ $publishArguments = @(
     '--runtime', [string]$manifest.rid,
     '--self-contained', ([string]$commonDefinition.selfContained).ToLowerInvariant(),
     ('-p:PublishSingleFile=' + ([string]$commonDefinition.publishSingleFile).ToLowerInvariant()),
+    '-p:GraphReaderRuntimeMode=Production',
     '-p:DebugSymbols=false',
     '-p:DebugType=None',
     '--output', $commonPublishPath)
@@ -1730,6 +1731,16 @@ if ($LASTEXITCODE -ne 0) {
 Assert-WindowsX64Executable `
     -Path (Join-Path $commonPublishPath 'GraphReader.App.exe') `
     -Description 'Published GraphReader.App.exe'
+$productionRuntimeSmoke = Start-Process `
+    -FilePath (Join-Path $commonPublishPath 'GraphReader.App.exe') `
+    -ArgumentList '--production-runtime-smoke' `
+    -WorkingDirectory $commonPublishPath `
+    -WindowStyle Hidden `
+    -PassThru `
+    -Wait
+if ($productionRuntimeSmoke.ExitCode -ne 0) {
+    throw "Published GraphReader.App.exe did not report its compiled Production runtime mode (exit $($productionRuntimeSmoke.ExitCode))."
+}
 
 if ($reviewedOpenCvRequired) {
     $releaseOpenCvInstallerPath = Join-Path $packagingRoot 'opencv-source\Install-ReleaseRuntime.ps1'
@@ -1926,6 +1937,8 @@ $buildMetadata = [ordered]@{
     product = 'Graph Auto Reader'
     version = $version.Value
     rid = [string]$manifest.rid
+    runtimeMode = 'Production'
+    productionRuntimeSmokeExitCode = [int]$productionRuntimeSmoke.ExitCode
     gitCommit = $gitCommit
     buildUtc = $buildUtc
     contractVersion = $contractVersion

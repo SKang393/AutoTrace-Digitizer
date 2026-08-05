@@ -5,13 +5,17 @@ using System.IO;
 
 namespace GraphReader.App;
 
-public sealed record StartupArguments(bool PortableSmoke, string? OpenImagePath)
+public sealed record StartupArguments(
+    bool PortableSmoke,
+    bool ProductionRuntimeSmoke,
+    string? OpenImagePath)
 {
     public static StartupArguments Parse(IReadOnlyList<string> arguments)
     {
         ArgumentNullException.ThrowIfNull(arguments);
 
         bool portableSmoke = false;
+        bool productionRuntimeSmoke = false;
         string? openImagePath = null;
         for (int index = 0; index < arguments.Count; index++)
         {
@@ -19,6 +23,12 @@ public sealed record StartupArguments(bool PortableSmoke, string? OpenImagePath)
             if (string.Equals(argument, "--portable-smoke", StringComparison.OrdinalIgnoreCase))
             {
                 portableSmoke = true;
+                continue;
+            }
+
+            if (string.Equals(argument, "--production-runtime-smoke", StringComparison.OrdinalIgnoreCase))
+            {
+                productionRuntimeSmoke = true;
                 continue;
             }
 
@@ -46,6 +56,6 @@ public sealed record StartupArguments(bool PortableSmoke, string? OpenImagePath)
             openImagePath = Path.GetFullPath(requestedPath);
         }
 
-        return new StartupArguments(portableSmoke, openImagePath);
+        return new StartupArguments(portableSmoke, productionRuntimeSmoke, openImagePath);
     }
 }

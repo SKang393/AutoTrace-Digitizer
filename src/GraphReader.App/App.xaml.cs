@@ -41,7 +41,14 @@ public partial class App : Application, IDisposable
         base.OnStartup(e);
         _themeService = new ThemeService(Resources);
         LocalizationService = new LocalizationService(Resources);
+        StartupArguments startupArguments = StartupArguments.Parse(e.Args);
         RuntimeEnvironment = RuntimeModeSelector.Select();
+        if (startupArguments.ProductionRuntimeSmoke)
+        {
+            Shutdown(RuntimeModeSelector.SelectBuildDefault() == WorkflowRuntimeEnvironment.Production ? 0 : 2);
+            return;
+        }
+
         DomainResult<IApplicationPaths> runtimePaths =
             RuntimePathBootstrapper.CreateDefault().Initialize();
         ApplicationPaths = runtimePaths.Value;
@@ -55,7 +62,6 @@ public partial class App : Application, IDisposable
         WorkflowStartupError = composition.StartupError;
         StartupErrorMessageKey = StartupError?.UserMessageKey ?? WorkflowStartupError?.UserMessageKey;
 
-        StartupArguments startupArguments = StartupArguments.Parse(e.Args);
         bool portableSmoke = startupArguments.PortableSmoke;
         if (portableSmoke)
         {

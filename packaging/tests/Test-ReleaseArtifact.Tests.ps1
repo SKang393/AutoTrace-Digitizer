@@ -705,6 +705,8 @@ function New-ReleaseFixture {
     }
     Write-JsonFile -Path (Join-Path $commonRoot 'build-metadata.json') -Value ([ordered]@{
             schemaVersion = 1
+            runtimeMode = 'Production'
+            productionRuntimeSmokeExitCode = 0
             applicationPublishFiles = $applicationPublishFiles
         })
     'Apache-2.0' | Set-Content -LiteralPath (Join-Path $commonRoot 'LICENSE') -Encoding utf8

@@ -465,6 +465,11 @@ function Get-ApplicationPublishArchivePaths {
     )
 
     $buildMetadata = (Get-ZipEntryText -Archive $Archive -EntryName 'build-metadata.json') | ConvertFrom-Json
+    if ([string]$buildMetadata.runtimeMode -cne 'Production' -or
+        [int]$buildMetadata.productionRuntimeSmokeExitCode -ne 0) {
+        throw 'Build metadata does not contain a passing direct compiled Production runtime probe.'
+    }
+
     $paths = @($buildMetadata.applicationPublishFiles | ForEach-Object { ([string]$_).Replace('\', '/') })
     if ($paths.Count -eq 0 -or $paths -notcontains 'GraphReader.App.exe') {
         throw 'Build metadata requires a nonempty application publish allowlist containing GraphReader.App.exe.'

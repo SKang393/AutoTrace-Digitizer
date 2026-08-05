@@ -279,6 +279,17 @@ OpenCV SHA-256: $($openCvRuntime.binarySha256)
         if ($smokeProcess.ExitCode -ne 0) {
             throw "Portable smoke exited with code $($smokeProcess.ExitCode)."
         }
+
+        $productionRuntimeSmokeProcess = Start-Process `
+            -FilePath $executablePath `
+            -ArgumentList '--production-runtime-smoke' `
+            -WorkingDirectory $stagingDirectory `
+            -WindowStyle Hidden `
+            -PassThru `
+            -Wait
+        if ($productionRuntimeSmokeProcess.ExitCode -ne 2) {
+            throw "Development portable unexpectedly reported compiled Production runtime mode (exit $($productionRuntimeSmokeProcess.ExitCode))."
+        }
     }
     finally {
         [Environment]::SetEnvironmentVariable(

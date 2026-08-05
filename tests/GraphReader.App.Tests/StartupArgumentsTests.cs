@@ -14,9 +14,10 @@ public sealed class StartupArgumentsTests
         string imagePath = Path.GetFullPath(Path.Combine("images", "Chandler graph.png"));
 
         StartupArguments result = StartupArguments.Parse(
-            ["--portable-smoke", "--open-image", imagePath]);
+            ["--portable-smoke", "--production-runtime-smoke", "--open-image", imagePath]);
 
         Assert.IsTrue(result.PortableSmoke);
+        Assert.IsTrue(result.ProductionRuntimeSmoke);
         Assert.AreEqual(imagePath, result.OpenImagePath);
     }
 
