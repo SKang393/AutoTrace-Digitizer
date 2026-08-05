@@ -25,7 +25,8 @@ public sealed record ApplicationCompositionResult(
     IProductionMarkerClassificationAdapter? MarkerClassificationAdapter = null,
     IProductionLegendReasoningAdapter? LegendReasoningAdapter = null,
     IProductionPhaseReasoningAdapter? PhaseReasoningAdapter = null,
-    IProductionRasterFrameDecoder? RasterFrameDecoder = null);
+    IProductionRasterFrameDecoder? RasterFrameDecoder = null,
+    IProductionDetectionMaskComposer? DetectionMaskComposer = null);
 
 public static class ApplicationComposition
 {
@@ -95,6 +96,7 @@ public static class ApplicationComposition
                     uiThreadGuard ?? CapturedUiThreadGuard.CaptureCurrentThread())
                 : null;
         var rasterFrameDecoder = new ProductionRasterFrameDecoder();
+        var detectionMaskComposer = new ProductionDetectionMaskComposer();
         ProductionAxisGeometryAdapter? axisAdapter = CreateApprovedAxisAdapter(
             runtimeAvailability,
             rasterFrameDecoder);
@@ -128,6 +130,8 @@ public static class ApplicationComposition
         approvedAdapterStages.Add("phases");
         adapterEvidence.Add(
             $"Deterministic production semantic adapters '{legendAdapter.AdapterId}' and '{phaseAdapter.AdapterId}' are composed and remain dependency-gated.");
+        adapterEvidence.Add(
+            $"Deterministic production mask composer '{detectionMaskComposer.AdapterId}' is composed and requires exact axis plus two-model OCR evidence.");
 
         ProductionDetectionAdapterAvailabilitySnapshot? adapterAvailability = adapterEvidence.Count == 0
             ? null
@@ -157,6 +161,7 @@ public static class ApplicationComposition
                 legendAdapter,
                 phaseAdapter,
                 rasterFrameDecoder,
+                detectionMaskComposer,
                 markerCenter.Error ?? markerClassifier.Error),
             WorkflowRuntimeEnvironment.ManualPreview => new ApplicationCompositionResult(
                 environment,
@@ -186,6 +191,7 @@ public static class ApplicationComposition
         IProductionLegendReasoningAdapter? legendReasoningAdapter,
         IProductionPhaseReasoningAdapter? phaseReasoningAdapter,
         IProductionRasterFrameDecoder rasterFrameDecoder,
+        IProductionDetectionMaskComposer detectionMaskComposer,
         DomainError? markerAdapterError)
     {
         var imageImporter = new ImageImportService();
@@ -217,7 +223,8 @@ public static class ApplicationComposition
             markerClassificationAdapter,
             legendReasoningAdapter,
             phaseReasoningAdapter,
-            rasterFrameDecoder);
+            rasterFrameDecoder,
+            detectionMaskComposer);
     }
 
     private static ProductionAxisGeometryAdapter? CreateApprovedAxisAdapter(

@@ -367,6 +367,180 @@ public sealed class ProductionWorkflowStagesTests
     }
 
     [TestMethod]
+    public async Task DetectionMaskComposerRequiresTwoModelOcrAndRasterizesOnlyBoundEvidence()
+    {
+        byte[] encoded = CreateSolidGrayPng(96, 72, 255);
+        string sha256 = Convert.ToHexStringLower(SHA256.HashData(encoded));
+        Guid projectId = Guid.Parse("10000000-0000-0000-0000-000000000013");
+        Guid sourceId = Guid.Parse("20000000-0000-0000-0000-000000000013");
+        Guid panelId = Guid.Parse("30000000-0000-0000-0000-000000000013");
+        Guid runId = Guid.Parse("40000000-0000-0000-0000-000000000013");
+        var original = new WorkflowImageEvidence(
+            "memory:mask-source.png",
+            sha256,
+            96,
+            72,
+            WorkflowImageVariant.Original);
+        var imported = new WorkflowImportedPanel(panelId, sourceId, "mask-source.png", original);
+        var request = new ProductionWorkflowDetectionRequest(
+            new WorkflowPreparedPanel(imported, original, enhanced: null),
+            original,
+            WorkflowImageVariant.Original,
+            runId,
+            projectId,
+            encoded);
+        ProductionDecodedRaster raster = new ProductionRasterFrameDecoder().Decode(
+            request,
+            CancellationToken.None);
+
+        var xAxis = new Axis.AxisLineFit(
+            new Axis.GeometryLineSegment(new Axis.PixelPoint(10, 60), new Axis.PixelPoint(86, 60)),
+            0.98,
+            0,
+            1,
+            ["x-axis"]);
+        var yAxis = new Axis.AxisLineFit(
+            new Axis.GeometryLineSegment(new Axis.PixelPoint(10, 60), new Axis.PixelPoint(10, 10)),
+            0.98,
+            0,
+            1,
+            ["y-axis"]);
+        var geometry = new Axis.AxisGeometryResult(
+            "original_pixels",
+            new Axis.PlotPolygon(
+                new Axis.PixelPoint(10, 60),
+                new Axis.PixelPoint(86, 60),
+                new Axis.PixelPoint(86, 10),
+                new Axis.PixelPoint(10, 10)),
+            xAxis,
+            yAxis,
+            [
+                new Axis.AxisTickGeometry(
+                    "tick-1",
+                    Axis.TickAxis.XAxis,
+                    new Axis.PixelPoint(30, 60),
+                    new Axis.GeometryLineSegment(new Axis.PixelPoint(30, 58), new Axis.PixelPoint(30, 62)),
+                    0.9,
+                    ["tick"]),
+            ],
+            [
+                new Axis.PhaseDividerGeometry(
+                    "divider-1",
+                    new Axis.GeometryLineSegment(new Axis.PixelPoint(50, 10), new Axis.PixelPoint(50, 60)),
+                    Axis.DividerStyle.Solid,
+                    0.9,
+                    1,
+                    1,
+                    ["divider"]),
+            ],
+            [
+                new Axis.AmbiguousGridOrDividerGeometry(
+                    "ambiguous-1",
+                    new Axis.GeometryLineSegment(new Axis.PixelPoint(70, 10), new Axis.PixelPoint(70, 60)),
+                    0.8,
+                    1,
+                    1,
+                    ["ambiguous"]),
+            ],
+            0.95,
+            new Axis.AxisGeometryUncertainty(0, 0, 1, false, []),
+            new Axis.AxisGeometryDiagnostics(5, 5, 0, 1, 4, 1, 1, 0, TimeSpan.Zero, []));
+        var axisEnvelope = new WorkflowVisionEnvelope(
+            1,
+            runId,
+            projectId,
+            panelId,
+            "axis",
+            ProductionAxisGeometryAdapter.StageVersion,
+            sha256,
+            new WorkflowVisionModel("axis", "1", new string('c', 64), "cpu"),
+            new WorkflowVisionTiming(1, 0, 1, 2),
+            0.95);
+        var axisEvidence = new ProductionAxisGeometryEvidence(axisEnvelope, geometry);
+
+        GraphReader.Ocr.OcrPolygon textPolygon = GraphReader.Ocr.OcrPolygon.FromRectangle(
+            new GraphReader.Ocr.OcrRectangle(30, 20, 10, 5));
+        var ocrResult = new GraphReader.Ocr.OcrResult(
+            GraphReader.Ocr.OcrContract.Version,
+            Guid.Parse("50000000-0000-0000-0000-000000000013").ToString("D"),
+            projectId.ToString("D"),
+            panelId.ToString("D"),
+            GraphReader.Ocr.OcrContract.Stage,
+            "0.3.0",
+            sha256,
+            GraphReader.Ocr.OcrContract.CoordinateSpace,
+            [
+                new GraphReader.Ocr.OcrRegion(
+                    "text-1",
+                    textPolygon,
+                    "100",
+                    [new GraphReader.Ocr.OcrRecognitionAlternative("100", 0.95, GraphReader.Ocr.OcrSourceImage.Original)],
+                    GraphReader.Ocr.OcrTextRole.YTick,
+                    0.95,
+                    GraphReader.Ocr.OcrSourceImage.Original,
+                    GraphReader.Ocr.OcrReviewStatus.Unreviewed),
+            ],
+            [new GraphReader.Ocr.OcrMask("text-1", textPolygon, 0.95)],
+            new GraphReader.Ocr.OcrTiming(1, 2, 1, 4),
+            0.95,
+            [],
+            new GraphReader.Ocr.OcrCacheDiagnostics(false, "cache", 1, 1),
+            null,
+            []);
+        var detectionEnvelope = new WorkflowVisionEnvelope(
+            1,
+            runId,
+            projectId,
+            panelId,
+            "ocr",
+            "0.3.0",
+            sha256,
+            new WorkflowVisionModel("ocr-detector", "1", new string('a', 64), "cpu"),
+            new WorkflowVisionTiming(1, 1, 1, 3),
+            0.9);
+        var recognitionEnvelope = new WorkflowVisionEnvelope(
+            1,
+            runId,
+            projectId,
+            panelId,
+            "ocr",
+            "0.3.0",
+            sha256,
+            new WorkflowVisionModel("ocr-recognizer", "1", new string('b', 64), "cpu"),
+            new WorkflowVisionTiming(1, 1, 1, 3),
+            0.9);
+        ProductionOcrModelEvidence[] ocrEvidence =
+        [
+            new("ocr_detection", detectionEnvelope),
+            new("ocr_recognition", recognitionEnvelope),
+        ];
+
+        var composer = new ProductionDetectionMaskComposer();
+        ProductionDetectionMaskEvidence masks = await composer.ComposeAsync(
+            request,
+            raster,
+            axisEvidence,
+            ocrEvidence,
+            ocrResult,
+            CancellationToken.None);
+        MarkerDetection.MarkerImageFrame markerFrame = masks.CreateMarkerFrame(raster);
+
+        Assert.HasCount(3, masks.SourceEnvelopes);
+        Assert.IsTrue(masks.OcrMaskedPixelCount > 0);
+        Assert.IsTrue(masks.ArtifactMaskedPixelCount > 0);
+        Assert.AreEqual(1f, markerFrame.OcrMask.Values.Span[(22 * 96) + 35]);
+        Assert.AreEqual(1f, markerFrame.ArtifactMask.Values.Span[(60 * 96) + 30]);
+        Assert.AreEqual(0f, markerFrame.OcrMask.Values.Span[(40 * 96) + 80]);
+        await Assert.ThrowsAsync<ProductionWorkflowStageException>(() => composer.ComposeAsync(
+            request,
+            raster,
+            axisEvidence,
+            [ocrEvidence[0]],
+            ocrResult,
+            CancellationToken.None));
+    }
+
+    [TestMethod]
     public async Task ApprovedMarkerClassifierAdapterRetainsExactModelProviderAndCoordinates()
     {
         byte[] encoded = CreateAxisPng();
