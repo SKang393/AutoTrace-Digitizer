@@ -59,6 +59,7 @@ public sealed class MarkerClassificationContractTests
         Assert.AreEqual(1, contract.InputChannelCount);
         Assert.AreEqual(0f, contract.NormalizeMean);
         Assert.AreEqual(1f, contract.NormalizeScale);
+        Assert.AreEqual(MarkerClassifierOutputEncoding.Logits, contract.OutputEncoding);
         StringAssert.StartsWith(MarkerClassificationContract.ShapeOutputOrder, "circle,square,");
         CollectionAssert.AreEqual(
             ExpectedFillOutputOrder,

@@ -1,0 +1,37 @@
+{
+  "binding": {
+    "candidate_hash_key_schema": [
+      "checkpoint_sha256",
+      "probability_packed_onnx_sha256"
+    ],
+    "candidate_hashes": {
+      "checkpoint_sha256": "49a5ce6487b51a7426ebca5081fa3e2a15c9c30bd6302033ad7efa82b3ad8c7a",
+      "probability_packed_onnx_sha256": "26f9304f1689053a0b94aa896a1e239f6ade1e5c1920736a3535c1b32f803b8a"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "b32e0b0f4c42ede6913eaa2ac26e7315f4f11f9d7d8c4dd234fe941dd92abb98",
+    "evaluator_source_bundle_sha256": "02cbdaff33b47eda340b643e2c07be13de8eac6b193ebb4b7ebda2a9d935f2d7",
+    "evaluator_source_paths": [
+      "ml/markers/classifier/dataset.py",
+      "ml/markers/classifier/manifests/confirmation-v3.json",
+      "ml/markers/classifier/metrics.py",
+      "ml/markers/classifier/model.py",
+      "ml/markers/classifier/runtime_gate_v2.py",
+      "ml/markers/classifier/runtime_v2.py",
+      "ml/markers/gate_seal.py"
+    ],
+    "gate_config_sha256": "c51bcbec0737057c76c12b8797af2231f08bb8841e1c10817ee3988f53af96b9",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "marker-classifier-confirmation-gate-v3",
+    "split_config_path": "ml/markers/classifier/gates/confirmation-v3.json",
+    "split_config_sha256": "2ba717f72633e1a68abf0802b9fe29b881f97dd7a3b4c82f5b5920fe71a32ef0",
+    "task": "marker-classifier"
+  },
+  "evaluation_count": 1,
+  "key": "d0731e45e11f4238de8fc3adce2534c2cd7b922f7f6c944998aa7f5bd62bc48b",
+  "opened_utc": "2026-08-05T00:03:03.946608+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

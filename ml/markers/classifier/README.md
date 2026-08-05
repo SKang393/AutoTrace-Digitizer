@@ -79,9 +79,21 @@ confirmation-v3 procedural families, manifests, evaluator source hashes, and
 the same strict gates were frozen before execution. The once-only public-v3
 gate passed 140 cases with shape F1 `0.9907246376811594`, fill F1
 `0.9440313111545988`, artifact and minority F1 `1.0`, and CPU ONNX parity
-`1.7285346984863281e-06`. One disjoint confirmation-v3 evaluation is now
-authorized. The model is not approved.
+`1.7285346984863281e-06`. The once-only disjoint confirmation-v3 gate also
+passed 140 cases with shape F1 `0.9813519813519813`, fill F1
+`0.9440559440559441`, artifact and minority F1 `1.0`, and CPU ONNX parity
+`1.0728836059570312e-06`. No gate replay is authorized. Production probability
+decoding, exact provider execution, model-store discovery, and packaging
+discovery were then evaluated together. The exact payload passed
+the C# probability decoder on CPU and DirectML with maximum provider difference
+`3.5762786865234375e-07`; its checksum-bound notice and benchmark evidence
+resolved from the strict production store; and the packaging audit discovered
+one eligible exact model file without a classifier blocker. The classifier is
+approved for production discovery and packaging. Marker-center, OCR,
+end-to-end workflow, distribution, and clean-machine release gates remain
+mandatory.
 
 The benchmark command is intentionally single-use for one output directory.
-The exact selected weights and evidence remain local until the separately owned
-model manifest, C# runtime, packaging, and maintainer gate are complete.
+The checksum-bound selected weights and direct reports remain ignored local
+artifacts. The canonical manifest, notice, gate seals, runtime contract, and
+tests are tracked.

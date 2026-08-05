@@ -140,7 +140,7 @@ def test_classifier_gate_exact_boundaries_pass_and_just_below_fail() -> None:
     )["packed_onnx_parity"]
 
 
-def test_candidate_budget_and_manifest_remain_fail_closed() -> None:
+def test_exhausted_historical_revision_remains_fail_closed_after_runtime_approval() -> None:
     assert len(EXPERIMENTS) == 3
     assert len({item["id"] for item in EXPERIMENTS}) == 3
     assert len(CANDIDATE_SEEDS) == len(EXPERIMENTS)
@@ -165,7 +165,11 @@ def test_candidate_budget_and_manifest_remain_fail_closed() -> None:
     assert entry["current_source_reproduces_historical_pipeline"] is False
     assert entry["failed_public_gate_evidence_sha256"] == "8ce39a252ac9ce37105625f1833a53485a4ea8738ff06de6267f7ce1d44feb74"
     assert entry["failed_confirmation_evidence_sha256"] == "59d0f37a95ae089cd8cf7815c7f5f4b526bb0dc6efc787b1eb9074ccaab54bd9"
-    assert not _contains_approval(manifest)
+    assert not _contains_approval(entry)
+    approvals = [item for item in manifest["benchmarks"] if item.get("production_approval") is True]
+    assert [item["profile"] for item in approvals] == [
+        "production-runtime-repair-v2-p1-integrated-candidate-20260805"
+    ]
 
 
 def test_exhausted_classifier_revision_refuses_before_output(tmp_path: Path) -> None:

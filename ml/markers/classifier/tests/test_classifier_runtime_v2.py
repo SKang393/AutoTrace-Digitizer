@@ -138,7 +138,7 @@ def test_runtime_v2_source_bundles_and_budget_binding_match_preregistration() ->
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
     entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
-    assert entry["status"] == "candidate_1_public_gate_passed_confirmation_authorized"
+    assert entry["status"] == "candidate_1_production_approved"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == [CANDIDATE_ID]
     assert entry["consumed_candidate_ids"] == [CANDIDATE_ID]
@@ -148,8 +148,19 @@ def test_runtime_v2_source_bundles_and_budget_binding_match_preregistration() ->
     assert entry["public_gate_evaluations"] == 1
     assert entry["public_gate_report_sha256"] == "32eed939875a3f6a3465fe8cf42a7f9f1ab9c33a4e5b225dfb7c396de2741757"
     assert entry["public_gate_probability_packed_onnx_maximum_absolute_error"] <= PARITY_TOLERANCE
-    assert entry["confirmation_gate_authorized"] is True
-    assert entry["confirmation_gate_evaluations"] == 0
+    assert entry["confirmation_gate_authorized"] is False
+    assert entry["confirmation_gate_evaluations"] == 1
+    assert entry["confirmation_gate_report_sha256"] == (
+        "991e3ec0c41508833791b0b57d1633f9cf6230114dcaa22a4e2eb84feb6c86d1"
+    )
+    assert entry["confirmation_gate_probability_packed_onnx_maximum_absolute_error"] <= PARITY_TOLERANCE
+    assert entry["production_approval"] is True
+    assert entry["production_payload_sha256"] == (
+        "26f9304f1689053a0b94aa896a1e239f6ade1e5c1920736a3535c1b32f803b8a"
+    )
+    assert entry["production_evidence_sha256"] == (
+        "c4fb25e45e9c6d77100de8230a30443231445fa71751d685ba66c65da370e7a3"
+    )
     assert entry["p1_optimizer_steps"] == 0
     assert entry["p1_weights_changed"] is False
     assert entry["p1_probability_packed_onnx_maximum_absolute_error"] <= PARITY_TOLERANCE
@@ -181,6 +192,24 @@ def test_runtime_v2_source_bundles_and_budget_binding_match_preregistration() ->
     assert public_benchmark["production_approval"] is False
     assert public_benchmark["evaluation_count"] == 1
     assert public_benchmark["confirmation_v3_evaluation_count"] == 0
+    confirmation_benchmark = next(
+        item
+        for item in model_manifest["benchmarks"]
+        if item["profile"] == "production-runtime-repair-v2-p1-confirmation-v3-20260805"
+    )
+    assert confirmation_benchmark["status"] == "pass"
+    assert confirmation_benchmark["release_eligible"] is False
+    assert confirmation_benchmark["production_approval"] is False
+    assert confirmation_benchmark["evaluation_count"] == 1
+    assert confirmation_benchmark["probability_packed_onnx_maximum_absolute_error"] <= PARITY_TOLERANCE
+    integrated_benchmark = next(
+        item
+        for item in model_manifest["benchmarks"]
+        if item["profile"] == "production-runtime-repair-v2-p1-integrated-candidate-20260805"
+    )
+    assert integrated_benchmark["status"] == "pass"
+    assert integrated_benchmark["release_eligible"] is True
+    assert integrated_benchmark["production_approval"] is True
 
 
 def test_runtime_v2_gate_boundaries_remain_strict() -> None:

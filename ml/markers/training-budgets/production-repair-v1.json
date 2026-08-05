@@ -127,7 +127,7 @@
     {
       "task": "marker-classifier",
       "revision": "marker-classifier-production-runtime-repair-v2",
-      "status": "candidate_1_public_gate_passed_confirmation_authorized",
+      "status": "candidate_1_production_approved",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
         "P1"
@@ -187,9 +187,29 @@
       "public_gate_artifact_f1": 1.0,
       "public_gate_minority_shape_f1": 1.0,
       "public_gate_probability_packed_onnx_maximum_absolute_error": 0.0000017285346984863281,
-      "confirmation_gate_authorized": true,
+      "confirmation_gate_authorized": false,
       "confirmation_gate_authorized_candidate_id": "P1",
-      "confirmation_gate_evaluations": 0,
+      "confirmation_gate_evaluations": 1,
+      "confirmation_gate_revision": "marker-classifier-confirmation-gate-v3",
+      "confirmation_gate_candidate_key": "d0731e45e11f4238de8fc3adce2534c2cd7b922f7f6c944998aa7f5bd62bc48b",
+      "confirmation_gate_report_path": "ml/markers/classifier/artifacts/production-runtime-confirmation-v3-p1-20260805/gate-report.json",
+      "confirmation_gate_report_sha256": "991e3ec0c41508833791b0b57d1633f9cf6230114dcaa22a4e2eb84feb6c86d1",
+      "confirmation_gate_opened_seal_sha256": "aba3fe2252f87d41021cbfd2480e33715e46afbad1d8e3b70b14c3083c5cb884",
+      "confirmation_gate_result_seal_sha256": "7e47a61e38812b26cf465d3b46c9a12fc32fb4acc4bd09cdd6af60639eb89570",
+      "confirmation_gate_sample_count": 140,
+      "confirmation_gate_shape_macro_f1": 0.9813519813519813,
+      "confirmation_gate_fill_macro_f1": 0.9440559440559441,
+      "confirmation_gate_artifact_f1": 1.0,
+      "confirmation_gate_minority_shape_f1": 1.0,
+      "confirmation_gate_probability_packed_onnx_maximum_absolute_error": 0.0000010728836059570312,
+      "production_approval": true,
+      "production_payload_sha256": "26f9304f1689053a0b94aa896a1e239f6ade1e5c1920736a3535c1b32f803b8a",
+      "production_evidence_sha256": "c4fb25e45e9c6d77100de8230a30443231445fa71751d685ba66c65da370e7a3",
+      "provider_integration_trx_sha256": "24d9ebf38853174ec3ddadba42015b84f4c7ea4aa507b69ec70a42419ea5d247",
+      "model_store_canonical_trx_sha256": "2b52ba36a0322a8f0e21df81bd4da307bb3659078cc693a15346300bfde84243",
+      "production_model_store_index_sha256": "2cbd8adb51f80307b1ca4f011d54f108a78c3299c901e680ed92696ec46750a8",
+      "cpu_directml_maximum_absolute_difference": 0.00000035762786865234375,
+      "integration_blocker": "The classifier is approved for production discovery and packaging. Marker-center, OCR, workflow, distribution, and clean-machine release gates remain mandatory.",
       "refusal_required_before_output": true
     }
   ]

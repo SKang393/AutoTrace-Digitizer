@@ -266,6 +266,60 @@ public sealed class MarkerClassificationFakeInferenceTests
     }
 
     [TestMethod]
+    public async Task ProbabilityPackedOutputIsConsumedWithoutSecondSoftmax()
+    {
+        MarkerClassifierTensorContract contract = ClassificationTestSupport.TensorContract() with
+        {
+            OutputEncoding = MarkerClassifierOutputEncoding.Probabilities,
+        };
+        var runner = new ClassificationInferenceRunnerStub(
+            ClassificationInferenceResponses.ProbabilitySuccess(
+                shapeProbabilities: [0.51f, 0.49f, 0, 0, 0, 0, 0, 0, 0],
+                fillProbabilities: [0.51f, 0.49f, 0],
+                artifactProbability: 0.75f));
+        var service = new MarkerClassificationService(runner);
+
+        MarkerClassificationResult result = await service.ClassifyAsync(
+            ClassificationTestSupport.Request(
+                options: ClassificationTestSupport.Options() with { TensorContract = contract }),
+            CancellationToken.None);
+
+        Assert.IsTrue(result.Succeeded, result.Failure?.TechnicalMessage);
+        Assert.AreEqual(MarkerShape.Circle, result.Markers[0].Shape);
+        Assert.AreEqual(MarkerFill.Filled, result.Markers[0].Fill);
+        Assert.AreEqual(0.51, result.Markers[0].ShapeConfidence, 1e-6);
+        Assert.AreEqual(0.51, result.Markers[0].FillConfidence, 1e-6);
+        Assert.AreEqual(0.75, result.Markers[0].ArtifactProbability, 1e-6);
+        Assert.AreEqual(
+            nameof(MarkerClassifierOutputEncoding.Probabilities),
+            runner.Requests.Single().CacheMaterial.Parameters["output_encoding"]);
+    }
+
+    [TestMethod]
+    public async Task InvalidProbabilityPackedOutputFailsClosed()
+    {
+        MarkerClassifierTensorContract contract = ClassificationTestSupport.TensorContract() with
+        {
+            OutputEncoding = MarkerClassifierOutputEncoding.Probabilities,
+        };
+        var runner = new ClassificationInferenceRunnerStub(
+            ClassificationInferenceResponses.ProbabilitySuccess(
+                shapeProbabilities: [0.6f, 0.6f, 0, 0, 0, 0, 0, 0, 0],
+                fillProbabilities: [1f, 0, 0],
+                artifactProbability: 1.01f));
+        var service = new MarkerClassificationService(runner);
+
+        MarkerClassificationResult result = await service.ClassifyAsync(
+            ClassificationTestSupport.Request(
+                options: ClassificationTestSupport.Options() with { TensorContract = contract }),
+            CancellationToken.None);
+
+        Assert.IsFalse(result.Succeeded);
+        Assert.AreEqual("MARKER_CLASSIFICATION_INVALID_MODEL_OUTPUT", result.Failure?.Code);
+        Assert.IsEmpty(result.Markers);
+    }
+
+    [TestMethod]
     public async Task CancellationFromInferencePropagatesWithoutFailureSubstitution()
     {
         using var cancellation = new CancellationTokenSource();
@@ -331,6 +385,36 @@ internal static class ClassificationInferenceResponses
         }
 
         mutate?.Invoke(output);
+        return new InferenceResponse(
+            true,
+            new InferenceExecution(
+                output,
+                InferenceProvider.Fake,
+                new StageTiming(0.1, 0.2, 0.1, 0.4, 0, false, false),
+                new MemoryDiagnostics(0, 0, 0, 0, 0)),
+            null,
+            [new ProviderAttempt(InferenceProvider.Fake, true, null)]);
+    }
+
+    internal static InferenceResponse ProbabilitySuccess(
+        IReadOnlyList<float> shapeProbabilities,
+        IReadOnlyList<float> fillProbabilities,
+        float artifactProbability)
+    {
+        MarkerClassifierTensorContract contract = ClassificationTestSupport.TensorContract();
+        var output = new float[contract.ValuesPerMarker];
+        for (var index = 0; index < shapeProbabilities.Count; index++)
+        {
+            output[MarkerClassifierTensorContract.ShapeOffset + index] = shapeProbabilities[index];
+        }
+
+        for (var index = 0; index < fillProbabilities.Count; index++)
+        {
+            output[MarkerClassifierTensorContract.FillOffset + index] = fillProbabilities[index];
+        }
+
+        output[MarkerClassifierTensorContract.ArtifactOffset] = artifactProbability;
+        output[MarkerClassifierTensorContract.EmbeddingOffset] = 1;
         return new InferenceResponse(
             true,
             new InferenceExecution(

@@ -318,6 +318,7 @@ public sealed class MarkerClassificationService : IMarkerClassificationService
             ["patch_height"] = contract.PatchHeight,
             ["patch_radius_scale"] = request.Options.PatchRadiusScale,
             ["patch_width"] = contract.PatchWidth,
+            ["output_encoding"] = contract.OutputEncoding.ToString(),
             ["shape_order"] = MarkerClassificationContract.ShapeOutputOrder,
         };
         var markerMaterial = new object?[batchCount];
@@ -388,14 +389,18 @@ public sealed class MarkerClassificationService : IMarkerClassificationService
                 values[valueIndex] = value;
             }
 
-            var shapeProbabilities = Softmax(
-                values.AsSpan(
-                    MarkerClassifierTensorContract.ShapeOffset,
-                    MarkerClassificationContract.ShapeClassCount));
-            var fillProbabilities = Softmax(
-                values.AsSpan(
-                    MarkerClassifierTensorContract.FillOffset,
-                    MarkerClassificationContract.FillClassCount));
+            var shapeValues = values.AsSpan(
+                MarkerClassifierTensorContract.ShapeOffset,
+                MarkerClassificationContract.ShapeClassCount);
+            var fillValues = values.AsSpan(
+                MarkerClassifierTensorContract.FillOffset,
+                MarkerClassificationContract.FillClassCount);
+            var shapeProbabilities = contract.OutputEncoding == MarkerClassifierOutputEncoding.Probabilities
+                ? ValidateProbabilities(shapeValues, "shape")
+                : Softmax(shapeValues);
+            var fillProbabilities = contract.OutputEncoding == MarkerClassifierOutputEncoding.Probabilities
+                ? ValidateProbabilities(fillValues, "fill")
+                : Softmax(fillValues);
             var shapeIndex = MaximumIndex(shapeProbabilities);
             var fillIndex = MaximumIndex(fillProbabilities);
             var shape = (MarkerShape)shapeIndex;
@@ -409,7 +414,9 @@ public sealed class MarkerClassificationService : IMarkerClassificationService
                 fill,
                 descriptor.Symbol,
                 descriptor.AccessibleName,
-                Sigmoid(values[MarkerClassifierTensorContract.ArtifactOffset]),
+                DecodeArtifactProbability(
+                    values[MarkerClassifierTensorContract.ArtifactOffset],
+                    contract.OutputEncoding),
                 shapeProbabilities[shapeIndex],
                 fillProbabilities[fillIndex],
                 embedding);
@@ -445,6 +452,52 @@ public sealed class MarkerClassificationService : IMarkerClassificationService
         }
 
         return probabilities;
+    }
+
+    private static float[] ValidateProbabilities(ReadOnlySpan<float> values, string headName)
+    {
+        const double sumTolerance = 1e-4;
+        var probabilities = values.ToArray();
+        var total = 0d;
+        foreach (var probability in probabilities)
+        {
+            if (probability < 0 || probability > 1)
+            {
+                throw new ArgumentException(
+                    $"Classifier {headName} probability values must be in [0,1].",
+                    nameof(values));
+            }
+
+            total += probability;
+        }
+
+        if (!double.IsFinite(total) || Math.Abs(total - 1) > sumTolerance)
+        {
+            throw new ArgumentException(
+                $"Classifier {headName} probabilities must sum to 1 within {sumTolerance:R}.",
+                nameof(values));
+        }
+
+        return probabilities;
+    }
+
+    private static double DecodeArtifactProbability(
+        float value,
+        MarkerClassifierOutputEncoding outputEncoding)
+    {
+        if (outputEncoding != MarkerClassifierOutputEncoding.Probabilities)
+        {
+            return Sigmoid(value);
+        }
+
+        if (value < 0 || value > 1)
+        {
+            throw new ArgumentException(
+                "Classifier artifact probability must be in [0,1].",
+                nameof(value));
+        }
+
+        return value;
     }
 
     private static float[] NormalizeEmbedding(ReadOnlySpan<float> values)
@@ -575,6 +628,7 @@ public sealed class MarkerClassificationService : IMarkerClassificationService
             contract.PatchWidth <= 0 || contract.PatchHeight <= 0 ||
             contract.InputChannelCount != 1 ||
             contract.EmbeddingLength <= 0 || contract.EmbeddingLength > 256 ||
+            !Enum.IsDefined(contract.OutputEncoding) ||
             !float.IsFinite(contract.NormalizeMean) ||
             !float.IsFinite(contract.NormalizeScale) || contract.NormalizeScale == 0)
         {

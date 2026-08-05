@@ -658,7 +658,9 @@ function Get-ModelAudit {
                 $candidatePaths = @(
                     (Join-Path $RepositoryRoot ([string]$modelRelativePath)),
                     (Join-Path (Join-Path $RepositoryRoot 'models') ([string]$modelRelativePath)),
-                    (Join-Path $manifestFile.DirectoryName ([string]$modelRelativePath))) | ForEach-Object {
+                    (Join-Path $manifestFile.DirectoryName ([string]$modelRelativePath)),
+                    (Join-Path $RepositoryRoot (
+                        "artifacts\production-model-store\source\$([string]$manifest.model_id)\$([string]$manifest.model_version)\$([string]$modelRelativePath)"))) | ForEach-Object {
                     [System.IO.Path]::GetFullPath($_)
                 } | Sort-Object -Unique
                 $locatedCandidates = @($candidatePaths | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf })

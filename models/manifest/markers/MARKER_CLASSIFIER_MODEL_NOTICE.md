@@ -9,10 +9,10 @@ Model ID: `graph-marker-classifier`
 
 Model version: `0.1.0`
 
-Artifact: `marker-classifier-packed.onnx`
+Artifact: `marker-classifier-probability-packed.onnx`
 
 SHA-256:
-`59b4af98fe40abd436f01a8c14bf0d12a7c82682ec072c65cef92881aa18b0ef`
+`26f9304f1689053a0b94aa896a1e239f6ade1e5c1920736a3535c1b32f803b8a`
 
 Copyright 2026 Sungwoo Kang.
 
@@ -27,12 +27,16 @@ downloaded model weight. Training dependencies are unbundled permissive tools
 recorded in `ml/markers/classifier/DEPENDENCY_PROVENANCE.csv` and the adjacent
 training-tool notices.
 
-The exact checkpoint and packed ONNX were reproduced byte for byte in Goal 19
-with seed `20260803`. Generated weights remain ignored and are not committed.
+Runtime-repair P1 preserves the exact selected checkpoint with zero optimizer
+steps and exposes calibrated probabilities instead of high-magnitude logits.
+Generated weights remain ignored and are not committed.
 
-This model is an unapproved candidate. The selected checkpoint passed the
-historical single sealed procedural held-out gate, but validation shape
-macro-F1 was below the session-local threshold. The packed runtime wrapper has
-validation parity and exact CPU and DirectML provider evidence, but it has not
-received a direct held-out runtime benchmark, a maintainer-approved numeric
-gate, private-graph validation, or packaged model-discovery validation.
+The once-only public-v3 and disjoint confirmation-v3 procedural gates passed
+the fixed shape, fill, artifact, minority-shape, and `1e-5` CPU ONNX parity
+thresholds. The exact payload executes through the production C# probability
+decoder on CPU and DirectML with maximum provider difference
+`3.5762786865234375e-07`. This notice does not waive production model-store,
+end-to-end workflow, private-graph, or clean-machine gates. The exact payload,
+notice, benchmark evidence, package index, CPU and DirectML providers, and
+production resolver now pass together, so this classifier payload is approved
+for production discovery and packaging. It is not application release approval.

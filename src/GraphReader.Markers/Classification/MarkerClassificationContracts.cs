@@ -39,6 +39,12 @@ public enum MarkerFill
     Unknown,
 }
 
+public enum MarkerClassifierOutputEncoding
+{
+    Logits,
+    Probabilities,
+}
+
 public sealed record MarkerClassifierTensorContract
 {
     public MarkerClassifierTensorContract(
@@ -72,6 +78,9 @@ public sealed record MarkerClassifierTensorContract
     public float NormalizeMean { get; init; }
 
     public float NormalizeScale { get; init; } = 1f;
+
+    public MarkerClassifierOutputEncoding OutputEncoding { get; init; } =
+        MarkerClassifierOutputEncoding.Logits;
 
     public static int ShapeOffset => 0;
 

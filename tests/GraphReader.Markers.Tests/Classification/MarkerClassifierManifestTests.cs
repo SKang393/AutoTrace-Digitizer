@@ -11,7 +11,7 @@ namespace GraphReader.Markers.Tests.Classification;
 public sealed class MarkerClassifierManifestTests
 {
     private const string ExpectedModelSha256 =
-        "59b4af98fe40abd436f01a8c14bf0d12a7c82682ec072c65cef92881aa18b0ef";
+        "26f9304f1689053a0b94aa896a1e239f6ade1e5c1920736a3535c1b32f803b8a";
     private static readonly string[] ExpectedInputShape = ["N", "1", "32", "32"];
     private static readonly string[] ExpectedOutputShape = ["N", "25"];
 
@@ -42,7 +42,7 @@ public sealed class MarkerClassifierManifestTests
             ExpectedInputShape,
             input.GetProperty("shape").EnumerateArray().Select(JsonValue).ToArray());
         JsonElement output = root.GetProperty("outputs")[0];
-        Assert.AreEqual("classification_heads", output.GetProperty("name").GetString());
+        Assert.AreEqual("classification_probabilities", output.GetProperty("name").GetString());
         CollectionAssert.AreEqual(
             ExpectedOutputShape,
             output.GetProperty("shape").EnumerateArray().Select(JsonValue).ToArray());
@@ -55,6 +55,9 @@ public sealed class MarkerClassifierManifestTests
             MarkerClassificationContract.FillOutputOrder,
             string.Join(',', postprocessing.GetProperty("fill_order").EnumerateArray().Select(Value)));
         Assert.IsTrue(postprocessing.GetProperty("shape_and_fill_separate").GetBoolean());
+        StringAssert.StartsWith(
+            postprocessing.GetProperty("shape_rule").GetString(),
+            "validate columns 0 through 8");
 
         JsonElement[] benchmarks = root.GetProperty("benchmarks").EnumerateArray().ToArray();
         JsonElement validation = benchmarks.Single(item =>
@@ -64,7 +67,17 @@ public sealed class MarkerClassifierManifestTests
         Assert.IsLessThan(
             validation.GetProperty("local_shape_gate").GetDouble(),
             validation.GetProperty("shape_macro_f1").GetDouble());
-        Assert.IsTrue(benchmarks.All(item => !item.GetProperty("release_eligible").GetBoolean()));
+        Assert.AreEqual(1, benchmarks.Count(item => item.GetProperty("release_eligible").GetBoolean()));
+        Assert.AreEqual(
+            1,
+            benchmarks.Count(item =>
+                item.TryGetProperty("production_approval", out JsonElement approval) &&
+                approval.GetBoolean()));
+        JsonElement integrated = benchmarks.Single(item =>
+            item.GetProperty("profile").GetString() ==
+                "production-runtime-repair-v2-p1-integrated-candidate-20260805");
+        Assert.IsTrue(integrated.GetProperty("release_eligible").GetBoolean());
+        Assert.IsTrue(integrated.GetProperty("production_approval").GetBoolean());
 
         string noticePath = Path.Combine(
             repositoryRoot,
