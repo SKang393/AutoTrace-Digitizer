@@ -26,7 +26,9 @@ public sealed record ApplicationCompositionResult(
     IProductionLegendReasoningAdapter? LegendReasoningAdapter = null,
     IProductionPhaseReasoningAdapter? PhaseReasoningAdapter = null,
     IProductionRasterFrameDecoder? RasterFrameDecoder = null,
-    IProductionDetectionMaskComposer? DetectionMaskComposer = null);
+    IProductionDetectionMaskComposer? DetectionMaskComposer = null,
+    IProductionOcrAdapter? OcrAdapter = null,
+    IProductionWorkflowDetectionAdapter? AutomaticDetectionAdapter = null);
 
 public static class ApplicationComposition
 {
@@ -104,8 +106,14 @@ public static class ApplicationComposition
             CreateApprovedMarkerCenterAdapter(modelAvailability, inference?.Value);
         (ProductionMarkerClassificationAdapter? Adapter, DomainError? Error) markerClassifier =
             CreateApprovedMarkerClassifierAdapter(modelAvailability, inference?.Value);
+        IProductionOcrAdapter? ocrAdapter = null;
         var legendAdapter = new ProductionLegendReasoningAdapter();
         var phaseAdapter = new ProductionPhaseReasoningAdapter();
+        bool completeDetectionAdapterAvailable =
+            axisAdapter is not null &&
+            ocrAdapter is not null &&
+            markerCenter.Adapter is not null &&
+            markerClassifier.Adapter is not null;
         var approvedAdapterStages = new List<string>();
         var adapterEvidence = new List<string>();
         if (axisAdapter is not null)
@@ -124,6 +132,20 @@ public static class ApplicationComposition
         {
             adapterEvidence.Add(
                 $"Concrete production marker-center component '{markerCenter.Adapter.AdapterId}' is composed; the complete marker workflow adapter remains independently required.");
+        }
+
+        if (ocrAdapter is null)
+        {
+            adapterEvidence.Add(
+                "No production OCR pipeline is composed because no checksum-bound detector and recognizer pair currently has an executable approved adapter factory.");
+        }
+
+        if (completeDetectionAdapterAvailable)
+        {
+            approvedAdapterStages.Add("ocr");
+            approvedAdapterStages.Add("markers");
+            adapterEvidence.Add(
+                "The complete production detection, projection, and export-evidence adapter can be composed from approved components.");
         }
 
         approvedAdapterStages.Add("legends");
@@ -156,6 +178,7 @@ public static class ApplicationComposition
                 pdf,
                 inference,
                 axisAdapter,
+                ocrAdapter,
                 markerCenter.Adapter,
                 markerClassifier.Adapter,
                 legendAdapter,
@@ -187,6 +210,7 @@ public static class ApplicationComposition
         (IPdfImportService PdfImporter, bool ReviewedRendererConfigured, DomainError? Error) pdf,
         DomainResult<ProductionInferenceRuntimeHost>? inference,
         IProductionAxisGeometryAdapter? axisAdapter,
+        IProductionOcrAdapter? ocrAdapter,
         IProductionMarkerCenterAdapter? markerCenterAdapter,
         IProductionMarkerClassificationAdapter? markerClassificationAdapter,
         IProductionLegendReasoningAdapter? legendReasoningAdapter,
@@ -198,10 +222,28 @@ public static class ApplicationComposition
         var imageImporter = new ImageImportService();
         var exportService = new ExportService();
         var panelStore = new ProductionWorkflowPanelStore();
+        IProductionWorkflowDetectionAdapter? automaticDetectionAdapter =
+            axisAdapter is not null &&
+            ocrAdapter is not null &&
+            markerCenterAdapter is not null &&
+            markerClassificationAdapter is not null &&
+            legendReasoningAdapter is not null &&
+            phaseReasoningAdapter is not null
+                ? new ProductionAutomaticDetectionAdapter(
+                    panelStore,
+                    rasterFrameDecoder,
+                    axisAdapter,
+                    ocrAdapter,
+                    detectionMaskComposer,
+                    markerCenterAdapter,
+                    markerClassificationAdapter,
+                    legendReasoningAdapter,
+                    phaseReasoningAdapter)
+                : null;
         var services = new WorkflowServiceSet(
             new ProductionWorkflowImportStage(panelStore, imageImporter, pdf.PdfImporter),
             new ProductionWorkflowPrepareStage(panelStore),
-            new ProductionWorkflowDetectionStage(panelStore),
+            new ProductionWorkflowDetectionStage(panelStore, automaticDetectionAdapter),
             new ProductionWorkflowExportStage(panelStore, exportService));
         var orchestrator = new WorkflowOrchestrator(services);
         DomainError? inferenceError = inference is { Errors.Count: > 0 }
@@ -226,7 +268,9 @@ public static class ApplicationComposition
             legendReasoningAdapter,
             phaseReasoningAdapter,
             rasterFrameDecoder,
-            detectionMaskComposer);
+            detectionMaskComposer,
+            ocrAdapter,
+            automaticDetectionAdapter);
     }
 
     private static ProductionAxisGeometryAdapter? CreateApprovedAxisAdapter(
