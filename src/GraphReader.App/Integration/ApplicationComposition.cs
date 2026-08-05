@@ -113,7 +113,8 @@ public static class ApplicationComposition
             axisAdapter is not null &&
             ocrAdapter is not null &&
             markerCenter.Adapter is not null &&
-            markerClassifier.Adapter is not null;
+            markerClassifier.Adapter is not null &&
+            detectionMaskComposer.IsApproved;
         var approvedAdapterStages = new List<string>();
         var adapterEvidence = new List<string>();
         if (axisAdapter is not null)
@@ -153,7 +154,9 @@ public static class ApplicationComposition
         adapterEvidence.Add(
             $"Deterministic production semantic adapters '{legendAdapter.AdapterId}' and '{phaseAdapter.AdapterId}' are composed and remain dependency-gated.");
         adapterEvidence.Add(
-            $"Deterministic production mask composer '{detectionMaskComposer.AdapterId}' is composed and requires exact axis plus two-model OCR evidence.");
+            detectionMaskComposer.IsApproved
+                ? $"Production mask composer '{detectionMaskComposer.AdapterId}' is composed with approved artifact-mask evidence."
+                : $"Production mask composer '{detectionMaskComposer.AdapterId}' is fail closed because no approved arrow, bracket, legend, and connecting-line-intersection mask provider is composed.");
 
         ProductionDetectionAdapterAvailabilitySnapshot? adapterAvailability = adapterEvidence.Count == 0
             ? null
@@ -216,7 +219,7 @@ public static class ApplicationComposition
         IProductionLegendReasoningAdapter? legendReasoningAdapter,
         IProductionPhaseReasoningAdapter? phaseReasoningAdapter,
         IProductionRasterFrameDecoder rasterFrameDecoder,
-        IProductionDetectionMaskComposer detectionMaskComposer,
+        ProductionDetectionMaskComposer detectionMaskComposer,
         DomainError? markerAdapterError)
     {
         var imageImporter = new ImageImportService();
@@ -228,7 +231,8 @@ public static class ApplicationComposition
             markerCenterAdapter is not null &&
             markerClassificationAdapter is not null &&
             legendReasoningAdapter is not null &&
-            phaseReasoningAdapter is not null
+            phaseReasoningAdapter is not null &&
+            detectionMaskComposer.IsApproved
                 ? new ProductionAutomaticDetectionAdapter(
                     panelStore,
                     rasterFrameDecoder,

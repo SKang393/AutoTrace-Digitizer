@@ -146,6 +146,7 @@ public sealed class ProductionAutomaticDetectionAdapter : IProductionWorkflowDet
                     ocr.Result,
                     cancellationToken)
                 .ConfigureAwait(false);
+            chain.Append(masks.ArtifactEnvelope);
             MarkerImageFrame markerFrame = masks.CreateMarkerFrame(raster);
             MarkerPolygon markerPlot = ToMarkerPolygon(axis.Geometry.PlotPolygon);
             ProductionMarkerCenterEvidence centers = await markerCenterAdapter

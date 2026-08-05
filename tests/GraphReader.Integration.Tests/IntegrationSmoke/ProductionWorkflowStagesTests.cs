@@ -615,7 +615,7 @@ public sealed class ProductionWorkflowStagesTests
             new("ocr_recognition", recognitionEnvelope),
         ];
 
-        var composer = new ProductionDetectionMaskComposer();
+        var composer = new ProductionDetectionMaskComposer(new ArtifactMaskAdapter());
         ProductionDetectionMaskEvidence masks = await composer.ComposeAsync(
             request,
             raster,
@@ -625,11 +625,12 @@ public sealed class ProductionWorkflowStagesTests
             CancellationToken.None);
         MarkerDetection.MarkerImageFrame markerFrame = masks.CreateMarkerFrame(raster);
 
-        Assert.HasCount(3, masks.SourceEnvelopes);
+        Assert.HasCount(4, masks.SourceEnvelopes);
         Assert.IsTrue(masks.OcrMaskedPixelCount > 0);
         Assert.IsTrue(masks.ArtifactMaskedPixelCount > 0);
         Assert.AreEqual(1f, markerFrame.OcrMask.Values.Span[(22 * 96) + 35]);
         Assert.AreEqual(1f, markerFrame.ArtifactMask.Values.Span[(60 * 96) + 30]);
+        Assert.AreEqual(1f, markerFrame.ArtifactMask.Values.Span[(40 * 96) + 80]);
         Assert.AreEqual(0f, markerFrame.OcrMask.Values.Span[(40 * 96) + 80]);
         await Assert.ThrowsAsync<ProductionWorkflowStageException>(() => composer.ComposeAsync(
             request,
@@ -638,6 +639,20 @@ public sealed class ProductionWorkflowStagesTests
             [ocrEvidence[0]],
             ocrResult,
             CancellationToken.None));
+
+        var unavailable = new ProductionDetectionMaskComposer();
+        Assert.IsFalse(unavailable.IsApproved);
+        ProductionWorkflowStageException unavailableException =
+            await Assert.ThrowsAsync<ProductionWorkflowStageException>(() => unavailable.ComposeAsync(
+                request,
+                raster,
+                axisEvidence,
+                ocrEvidence,
+                ocrResult,
+                CancellationToken.None));
+        Assert.AreEqual(
+            ProductionWorkflowFailureCodes.DetectionModelsUnavailable,
+            unavailableException.Failure.Code);
     }
 
     [TestMethod]
@@ -2195,6 +2210,50 @@ public sealed class ProductionWorkflowStagesTests
         using var stream = new MemoryStream();
         encoder.Save(stream);
         return stream.ToArray();
+    }
+
+    private sealed class ArtifactMaskAdapter : IProductionArtifactMaskAdapter
+    {
+        public string AdapterId => "test-artifact-mask";
+
+        public bool IsApproved => true;
+
+        public Task<ProductionArtifactMaskEvidence> DetectAsync(
+            ProductionWorkflowDetectionRequest request,
+            ProductionDecodedRaster raster,
+            ProductionAxisGeometryEvidence axisEvidence,
+            IReadOnlyList<ProductionOcrModelEvidence> ocrModelEvidence,
+            GraphReader.Ocr.OcrResult ocrResult,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var mask = new float[checked(raster.Width * raster.Height)];
+            mask[(40 * raster.Width) + 80] = 1;
+            var envelope = new WorkflowVisionEnvelope(
+                1,
+                request.RunId,
+                request.ProjectId,
+                request.Panel.ImportedPanel.PanelId,
+                "markers",
+                "artifact-mask-test-v1",
+                request.Image.Sha256,
+                new WorkflowVisionModel(
+                    "test-artifact-mask",
+                    "1",
+                    new string('e', 64),
+                    "cpu"),
+                new WorkflowVisionTiming(1, 1, 1, 3),
+                1,
+                ["test_fixture_artifact_evidence"]);
+            return Task.FromResult(new ProductionArtifactMaskEvidence(
+                raster.Width,
+                raster.Height,
+                raster.InputSha256,
+                raster.Variant,
+                envelope,
+                mask,
+                ["artifact_mask_scope:test_fixture_arrow_bracket_legend_intersection"]));
+        }
     }
 
     private sealed class AxisCandidateProviderStub : Axis.ILineCandidateProvider

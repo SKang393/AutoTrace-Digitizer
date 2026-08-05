@@ -11,6 +11,74 @@ public sealed record ProductionOcrModelEvidence(
     string Task,
     WorkflowVisionEnvelope Envelope);
 
+public interface IProductionArtifactMaskAdapter
+{
+    string AdapterId { get; }
+
+    bool IsApproved { get; }
+
+    Task<ProductionArtifactMaskEvidence> DetectAsync(
+        ProductionWorkflowDetectionRequest request,
+        ProductionDecodedRaster raster,
+        ProductionAxisGeometryEvidence axisEvidence,
+        IReadOnlyList<ProductionOcrModelEvidence> ocrModelEvidence,
+        OcrResult ocrResult,
+        CancellationToken cancellationToken);
+}
+
+public sealed class ProductionArtifactMaskEvidence
+{
+    private readonly float[] mask;
+
+    public ProductionArtifactMaskEvidence(
+        int width,
+        int height,
+        string rasterSha256,
+        WorkflowImageVariant rasterVariant,
+        WorkflowVisionEnvelope envelope,
+        float[] mask,
+        IEnumerable<string>? warnings = null)
+    {
+        if (width <= 0 || height <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width), "Positive mask dimensions are required.");
+        }
+
+        WorkflowContractGuards.RequireSha256(rasterSha256, nameof(rasterSha256));
+        ArgumentNullException.ThrowIfNull(mask);
+        if (mask.Length != checked(width * height) ||
+            mask.AsSpan().ContainsAnyExceptInRange(0f, 1f))
+        {
+            throw new ArgumentException(
+                "Artifact mask values must match the dimensions and remain within [0,1].",
+                nameof(mask));
+        }
+
+        Width = width;
+        Height = height;
+        RasterSha256 = rasterSha256.ToLowerInvariant();
+        RasterVariant = rasterVariant;
+        Envelope = envelope ?? throw new ArgumentNullException(nameof(envelope));
+        this.mask = (float[])mask.Clone();
+        Warnings = Array.AsReadOnly((warnings ?? Array.Empty<string>()).ToArray());
+    }
+
+    public int Width { get; }
+
+    public int Height { get; }
+
+    public string RasterSha256 { get; }
+
+    public WorkflowImageVariant RasterVariant { get; }
+
+    public WorkflowVisionEnvelope Envelope { get; }
+
+    public IReadOnlyList<string> Warnings { get; }
+
+    public MarkerMask CopyMask() =>
+        new(Width, Height, (float[])mask.Clone());
+}
+
 public interface IProductionDetectionMaskComposer
 {
     string AdapterId { get; }
@@ -37,6 +105,7 @@ public sealed class ProductionDetectionMaskEvidence
         string rasterSha256,
         WorkflowImageVariant rasterVariant,
         IEnumerable<WorkflowVisionEnvelope> sourceEnvelopes,
+        WorkflowVisionEnvelope artifactEnvelope,
         float[] ocrMask,
         float[] artifactMask,
         IEnumerable<string> warnings)
@@ -46,6 +115,7 @@ public sealed class ProductionDetectionMaskEvidence
         RasterSha256 = rasterSha256;
         RasterVariant = rasterVariant;
         SourceEnvelopes = Array.AsReadOnly(sourceEnvelopes.ToArray());
+        ArtifactEnvelope = artifactEnvelope ?? throw new ArgumentNullException(nameof(artifactEnvelope));
         this.ocrMask = (float[])ocrMask.Clone();
         this.artifactMask = (float[])artifactMask.Clone();
         Warnings = Array.AsReadOnly(warnings.ToArray());
@@ -62,6 +132,8 @@ public sealed class ProductionDetectionMaskEvidence
     public WorkflowImageVariant RasterVariant { get; }
 
     public IReadOnlyList<WorkflowVisionEnvelope> SourceEnvelopes { get; }
+
+    public WorkflowVisionEnvelope ArtifactEnvelope { get; }
 
     public IReadOnlyList<string> Warnings { get; }
 
@@ -99,9 +171,8 @@ public sealed class ProductionDetectionMaskEvidence
 }
 
 /// <summary>
-/// Converts validated original-coordinate OCR and axis evidence into dense
-/// marker exclusion masks. It deliberately does not infer text, axes, arrows,
-/// brackets, legends, or connecting-line intersections on its own.
+/// Converts validated original-coordinate OCR, axis, and separately approved
+/// artifact evidence into dense marker exclusion masks.
 /// </summary>
 public sealed class ProductionDetectionMaskComposer : IProductionDetectionMaskComposer
 {
@@ -109,12 +180,20 @@ public sealed class ProductionDetectionMaskComposer : IProductionDetectionMaskCo
     private const double StructureHalfWidthOriginalPixels = 2;
     private static readonly string[] RequiredOcrTasks =
         ["ocr_detection", "ocr_recognition"];
+    private readonly IProductionArtifactMaskAdapter? artifactMaskAdapter;
 
-    public string AdapterId => "graphreader-detection-masks:1";
+    public ProductionDetectionMaskComposer(
+        IProductionArtifactMaskAdapter? artifactMaskAdapter = null) =>
+        this.artifactMaskAdapter = artifactMaskAdapter;
 
-    public bool IsApproved => true;
+    public string AdapterId => string.Join(
+        ':',
+        "graphreader-detection-masks-v2",
+        artifactMaskAdapter?.AdapterId ?? "artifact-provider-unavailable");
 
-    public Task<ProductionDetectionMaskEvidence> ComposeAsync(
+    public bool IsApproved => artifactMaskAdapter?.IsApproved == true;
+
+    public async Task<ProductionDetectionMaskEvidence> ComposeAsync(
         ProductionWorkflowDetectionRequest request,
         ProductionDecodedRaster raster,
         ProductionAxisGeometryEvidence axisEvidence,
@@ -135,14 +214,36 @@ public sealed class ProductionDetectionMaskComposer : IProductionDetectionMaskCo
             ocrModelEvidence,
             ocrResult);
 
-        return Task.Run(
+        if (artifactMaskAdapter?.IsApproved != true)
+        {
+            throw new ProductionWorkflowStageException(new ProductionWorkflowFailure(
+                ProductionWorkflowFailureCodes.DetectionModelsUnavailable,
+                "Errors.ModelNotFound",
+                "No approved artifact-mask adapter is available for arrows, brackets, legends, and connecting-line intersections.",
+                Recoverable: true,
+                "Continue in manual mode until checksum-bound artifact-mask evidence passes its fixed public gate."));
+        }
+
+        ProductionArtifactMaskEvidence artifactEvidence = await artifactMaskAdapter
+            .DetectAsync(
+                request,
+                raster,
+                axisEvidence,
+                ocrModelEvidence,
+                ocrResult,
+                cancellationToken)
+            .ConfigureAwait(false);
+        ValidateArtifactEvidence(request, raster, artifactEvidence);
+
+        return await Task.Run(
             () => ComposeCore(
                 raster,
                 axisEvidence,
                 ocrEnvelopes,
                 ocrResult,
+                artifactEvidence,
                 cancellationToken),
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
     }
 
     private static ProductionDetectionMaskEvidence ComposeCore(
@@ -150,11 +251,12 @@ public sealed class ProductionDetectionMaskComposer : IProductionDetectionMaskCo
         ProductionAxisGeometryEvidence axisEvidence,
         WorkflowVisionEnvelope[] ocrEnvelopes,
         OcrResult ocrResult,
+        ProductionArtifactMaskEvidence artifactEvidence,
         CancellationToken cancellationToken)
     {
         int pixelCount = checked(raster.Width * raster.Height);
         var ocrMask = new float[pixelCount];
-        var artifactMask = new float[pixelCount];
+        float[] artifactMask = artifactEvidence.CopyMask().Values.ToArray();
 
         IEnumerable<OcrPolygon> textPolygons = ocrResult.Regions
             .Select(static region => region.Polygon)
@@ -178,19 +280,52 @@ public sealed class ProductionDetectionMaskComposer : IProductionDetectionMaskCo
             RasterizeStructureLine(artifactMask, raster, line, cancellationToken);
         }
 
-        var sources = new[] { axisEvidence.Envelope }.Concat(ocrEnvelopes);
+        var sources = new[] { axisEvidence.Envelope }
+            .Concat(ocrEnvelopes)
+            .Append(artifactEvidence.Envelope);
         return new ProductionDetectionMaskEvidence(
             raster.Width,
             raster.Height,
             raster.InputSha256,
             raster.Variant,
             sources,
+            artifactEvidence.Envelope,
             ocrMask,
             artifactMask,
+            artifactEvidence.Warnings.Concat(
             [
-                "artifact_mask_scope:axis_ticks_dividers_ambiguous_only",
-                "arrow_bracket_legend_intersection_masks_require_separate_verified_evidence",
-            ]);
+                "artifact_mask_scope:approved_provider_plus_axis_ticks_dividers_ambiguous",
+            ]));
+    }
+
+    private static void ValidateArtifactEvidence(
+        ProductionWorkflowDetectionRequest request,
+        ProductionDecodedRaster raster,
+        ProductionArtifactMaskEvidence evidence)
+    {
+        WorkflowVisionEnvelope envelope = evidence.Envelope;
+        MarkerMask mask = evidence.CopyMask();
+        WorkflowVisionModel? model = envelope.Model;
+        int expectedPixelCount = checked(raster.Width * raster.Height);
+        if (evidence.Width != raster.Width || evidence.Height != raster.Height ||
+            evidence.RasterVariant != raster.Variant ||
+            !string.Equals(evidence.RasterSha256, raster.InputSha256, StringComparison.OrdinalIgnoreCase) ||
+            mask.Width != raster.Width || mask.Height != raster.Height ||
+            mask.Values.Length != expectedPixelCount ||
+            mask.Values.Span.ContainsAnyExceptInRange(0f, 1f) ||
+            !envelope.Stage.Equals("markers", StringComparison.Ordinal) ||
+            envelope.RunId != request.RunId || envelope.ProjectId != request.ProjectId ||
+            envelope.PanelId != request.Panel.ImportedPanel.PanelId ||
+            !string.Equals(envelope.InputSha256, request.Image.Sha256, StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(envelope.CoordinateSpace, "original_pixels", StringComparison.Ordinal) ||
+            string.IsNullOrWhiteSpace(model?.ModelId) ||
+            string.IsNullOrWhiteSpace(model.Version) ||
+            string.IsNullOrWhiteSpace(model.Sha256) ||
+            model.Provider is not ("cpu" or "directml"))
+        {
+            throw Failure(
+                "Artifact-mask evidence must be normalized, checksum-bound, CPU-compatible original-pixel evidence for the current raster.");
+        }
     }
 
     private static void ValidateRaster(

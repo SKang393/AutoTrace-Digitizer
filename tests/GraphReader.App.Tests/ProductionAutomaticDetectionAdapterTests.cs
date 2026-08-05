@@ -19,7 +19,7 @@ namespace GraphReader.App.Tests;
 public sealed class ProductionAutomaticDetectionAdapterTests
 {
     private static readonly string[] ExpectedStages =
-        ["axis", "ocr", "ocr", "markers", "markers", "legends", "phases"];
+        ["axis", "ocr", "ocr", "markers", "markers", "markers", "legends", "phases"];
 
     [TestMethod]
     public async Task ApprovedCompositePersistsExactProjectionAndReturnsRealCandidates()
@@ -86,7 +86,7 @@ public sealed class ProductionAutomaticDetectionAdapterTests
         Assert.HasCount(2, evidence.ProjectionEvidence.Points);
         Assert.HasCount(2, evidence.ProjectionEvidence.Markers);
         Assert.AreEqual("Chandler", evidence.Participant);
-        Assert.AreEqual(7, evidence.Provenance.Count);
+        Assert.AreEqual(8, evidence.Provenance.Count);
         CollectionAssert.AreEqual(
             ExpectedStages,
             evidence.Provenance.Select(static item => item.Stage).ToArray());
@@ -353,6 +353,7 @@ public sealed class ProductionAutomaticDetectionAdapterTests
                 request.Image.Sha256,
                 request.ImageVariant,
                 new[] { axisEvidence.Envelope }.Concat(ocrModelEvidence.Select(static item => item.Envelope)),
+                Envelope(request, "markers", "artifact-mask-v1", "test-artifact-mask", 'f'),
                 new float[10_000],
                 new float[10_000],
                 []));

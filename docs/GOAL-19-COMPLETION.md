@@ -24,6 +24,10 @@ clean-machine distribution evidence.
 - Replaced all-or-nothing production composition with a manual-capable,
   stage-aware registry. Automatic stages remain disabled unless their complete
   production evidence is approved.
+- Added a fail-closed artifact-mask adapter boundary. Production Auto Detect
+  now requires normalized, checksum-bound, original-pixel evidence for arrows,
+  brackets, legends, and connecting-line intersections before the mask composer
+  or complete detector can report approved.
 - Added atomic development-portable build, launch, and watcher scripts.
 - Added an opt-in, checksum-bound development-portable replacement for the
   exact reviewed source-built OpenCV runtime. It validates provenance and the
@@ -58,7 +62,7 @@ runtime SHA-256 after every stable checkpoint. The current verified behavior is:
 - dirty development build: no
 - running process: responsive visible window titled `Graph Auto Reader`, exact
   Chandler path supplied by `--open-image`
-- current full Release rerun: PASS, 678 passed and 6 expected skips
+- current full Release rerun: PASS, 706 passed and 9 expected skips
 - production-model IDs reported available: `0`
 - automatic stages reported unavailable: `6`
 - mutable root: `artifacts/dev-portable/Data`
@@ -102,7 +106,7 @@ in Production composition. Automatic stages currently report:
 | Enhancement | Unavailable | Exact runtime redistribution provenance is reviewed, but local-adapter, scientific, CPU fallback, clean-machine, production, and release approvals remain false. |
 | Axis | Unavailable | Deterministic adapter exists; OpenCvSharp native redistribution audit is blocked. |
 | OCR | Unavailable | Project numeric Candidates 1, 2, and 3 all failed the frozen validation gate and produced no ONNX; the authorized budget is exhausted. Exact official PP-OCRv5 archives are inventoried but lack artifact-scoped redistribution terms, so conversion remains blocked. |
-| Markers | Unavailable | Marker-center exhausted its budget after one public false positive. The unchanged-weight probability-runtime classifier passed selection, public-v3, disjoint confirmation-v3, exact package discovery, and CPU/DirectML runtime validation, but the stage still requires an approved center model. |
+| Markers | Unavailable | Marker-center exhausted its budget after one public false positive. The unchanged-weight probability-runtime classifier passed selection, public-v3, disjoint confirmation-v3, exact package discovery, and CPU/DirectML runtime validation, but the stage still requires an approved center model and an approved checksum-bound artifact-mask provider. |
 | Legends | Unavailable | Deterministic reasoner requires approved OCR and marker evidence. |
 | Phases | Unavailable | Deterministic reasoner requires approved axis, OCR, and marker evidence. |
 

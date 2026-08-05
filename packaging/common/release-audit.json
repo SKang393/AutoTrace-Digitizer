@@ -7,14 +7,14 @@
       "description": "Complete Import through Export production workflow succeeds offline with the CPU provider and enhancement disabled.",
       "status": "blocked",
       "evidence": [],
-      "notes": "No approved OCR detector, OCR recognizer, or marker-center payload currently completes the production workflow."
+      "notes": "No approved OCR detector, OCR recognizer, marker-center payload, or arrow/bracket/legend/intersection mask provider currently completes the production workflow."
     },
     {
       "id": "production-chandler-acceptance",
       "description": "The ignored Chandler case passes the fixed automatic-detection acceptance contract without training or tuning exposure.",
       "status": "blocked",
       "evidence": [],
-      "notes": "Automatic production detection is fail closed until all required model tasks are approved."
+      "notes": "Automatic production detection is fail closed until all required model tasks and the checksum-bound artifact-mask provider are approved."
     },
     {
       "id": "production-correction-persistence-export",

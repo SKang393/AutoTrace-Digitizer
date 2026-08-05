@@ -73,7 +73,10 @@ public sealed class ApplicationCompositionSmokeTests
         Assert.IsTrue(composition.PhaseReasoningAdapter.IsApproved);
         Assert.IsNotNull(composition.RasterFrameDecoder);
         Assert.IsNotNull(composition.DetectionMaskComposer);
-        Assert.IsTrue(composition.DetectionMaskComposer.IsApproved);
+        Assert.IsFalse(composition.DetectionMaskComposer.IsApproved);
+        StringAssert.Contains(
+            composition.DetectionMaskComposer.AdapterId,
+            "artifact-provider-unavailable");
         Assert.IsNull(composition.OcrAdapter);
         Assert.IsNull(composition.AutomaticDetectionAdapter);
     }
