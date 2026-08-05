@@ -2382,6 +2382,32 @@ try {
         }
     }
 
+    Assert-Case 'Common publish requires exact reviewed PDFium evidence when the release audit selects it' {
+        $fixture = New-ValidModelBuildFixture -Name 'reviewed-pdfium-release-input'
+        $releaseAuditPath = Join-Path $fixture.Root 'packaging/common/release-audit.json'
+        $releaseAudit = Get-Content -LiteralPath $releaseAuditPath -Raw | ConvertFrom-Json
+        $component = $releaseAudit.components[0] | ConvertTo-Json -Depth 10 | ConvertFrom-Json
+        $component.id = 'pdfium-native'
+        $component.checksumPolicy = 'exact-binary'
+        $component | Add-Member -NotePropertyName artifactSha256 -NotePropertyValue ('2' * 64) -Force
+        $releaseAudit.components = @($releaseAudit.components) + @($component)
+        Write-JsonFile -Path $releaseAuditPath -Value $releaseAudit
+        & git -C $fixture.Root add --all
+        & git -C $fixture.Root -c user.name=Fixture -c user.email=fixture@example.invalid commit --quiet -m 'Select reviewed PDFium runtime'
+        if ($LASTEXITCODE -ne 0) { throw 'Could not commit the reviewed PDFium fixture.' }
+
+        $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
+        $audit = & $buildScript -ManifestPath $fixture.Manifest -OutputRoot $fixture.OutputRoot -AuditOnly
+        $expected = 'The exact reviewed PDFium evidence root is required for the common release publish.'
+        if ($audit.ReleaseReady -or $audit.ArtifactsEmitted -or @($audit.Blockers) -notcontains $expected) {
+            throw "Missing reviewed PDFium release input was not rejected exactly. Actual blockers: $(@($audit.Blockers) -join ' | ')"
+        }
+        if (-not [bool]$audit.ReviewedPdfiumRuntimeRequired -or
+            -not [string]::IsNullOrWhiteSpace([string]$audit.ReviewedPdfiumRuntimeSha256)) {
+            throw 'Reviewed PDFium audit metadata did not remain fail closed without exact runtime bytes.'
+        }
+    }
+
     Assert-Case 'Rejected research manifest does not become a missing release payload' {
         $fixture = New-ModelAuditFixture -Name 'rejected-research-model-audit'
         $missingPath = Join-Path $fixture.Root 'models/manifest/missing.json'

@@ -84,3 +84,19 @@ and deterministic internal metadata. The metadata always records
 `releaseApproved=false`. This seam does not create `reviewed-approval.json`,
 does not enable the production PDF stage, and is prohibited for redistribution
 or release packaging.
+
+## Release common-publish staging
+
+`Install-ReleaseRenderer.ps1` is the separate release-only boundary. It refuses
+to stage anything unless `reviewed-approval.json` validates, the exact runner
+matches a reviewed `pdfium-native` public-audit component, and the
+`pdfium-clean-machine-load` mandatory gate is directly passing with
+checksum-bound repository evidence. It copies only the approval and its four
+checksum-bound resources into `pdfium/` under the common publish. It never
+overwrites an existing target.
+
+`Build-Windows.ps1 -ReviewedPdfiumEvidenceRoot <path>` invokes this boundary
+only when the public release audit contains the reviewed component. Production
+composition automatically discovers `pdfium/reviewed-approval.json` beside the
+application. The current candidate does not satisfy this release boundary, so
+the public audit remains blocked and no release payload is emitted.

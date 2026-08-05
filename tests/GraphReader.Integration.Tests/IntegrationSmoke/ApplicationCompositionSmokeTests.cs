@@ -277,6 +277,42 @@ public sealed class ApplicationCompositionSmokeTests
     }
 
     [TestMethod]
+    public void ProductionDiscoversPackagedPdfiumApprovalAndRejectsInvalidBytes()
+    {
+        string root = Path.Combine(
+            Path.GetTempPath(),
+            "GraphReader.ApplicationComposition.PackagedPdfium",
+            Guid.NewGuid().ToString("N"));
+        string pdfiumRoot = Path.Combine(root, "pdfium");
+        string? previous = Environment.GetEnvironmentVariable(ApplicationComposition.PdfiumApprovalEnvironmentVariable);
+        Directory.CreateDirectory(pdfiumRoot);
+        try
+        {
+            Environment.SetEnvironmentVariable(ApplicationComposition.PdfiumApprovalEnvironmentVariable, null);
+            File.WriteAllText(
+                Path.Combine(pdfiumRoot, "reviewed-approval.json"),
+                "{not-json",
+                Encoding.UTF8);
+
+            ApplicationCompositionResult composition = ApplicationComposition.Create(
+                WorkflowRuntimeEnvironment.Production,
+                applicationRoot: root);
+
+            Assert.IsNotNull(composition.StartupError);
+            Assert.AreEqual("PDFIUM_APPROVAL_REJECTED", composition.StartupError.Code);
+            StringAssert.Contains(composition.StartupError.TechnicalMessage, "invalid start");
+            var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+            Assert.IsTrue(workspace.AutomaticStages.All(static stage =>
+                stage.State == AutomaticStageState.Unavailable));
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(ApplicationComposition.PdfiumApprovalEnvironmentVariable, previous);
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public void ProductionRejectsMalformedNestedAndAmbiguousPdfiumEvidenceWithoutCrashing()
     {
         string? previous = Environment.GetEnvironmentVariable(ApplicationComposition.PdfiumApprovalEnvironmentVariable);

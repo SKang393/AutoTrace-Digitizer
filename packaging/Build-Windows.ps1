@@ -8,7 +8,8 @@ param(
     [switch]$SkipPublish,
     [switch]$Force,
     [switch]$AuditOnly,
-    [string]$ReviewedOpenCvEvidenceRoot
+    [string]$ReviewedOpenCvEvidenceRoot,
+    [string]$ReviewedPdfiumEvidenceRoot
 )
 
 Set-StrictMode -Version Latest
@@ -1596,6 +1597,54 @@ if ($reviewedOpenCvRequired) {
         }
     }
 }
+$reviewedPdfiumRequired = $null -ne $releaseAudit.Components -and
+    $releaseAudit.Components.ContainsKey('pdfium-native')
+$reviewedPdfiumEvidencePath = $null
+$reviewedPdfiumRuntimeSha256 = $null
+if ($reviewedPdfiumRequired) {
+    if ([string]::IsNullOrWhiteSpace($ReviewedPdfiumEvidenceRoot)) {
+        $releaseBlockers.Add('The exact reviewed PDFium evidence root is required for the common release publish.')
+    }
+    else {
+        try {
+            $reviewedPdfiumEvidencePath = [IO.Path]::GetFullPath($ReviewedPdfiumEvidenceRoot)
+            $reviewedPdfiumApprovalPath = Join-Path $reviewedPdfiumEvidencePath 'reviewed-approval.json'
+            if (-not (Test-Path -LiteralPath $reviewedPdfiumEvidencePath -PathType Container) -or
+                -not (Test-Path -LiteralPath $reviewedPdfiumApprovalPath -PathType Leaf)) {
+                $releaseBlockers.Add('The exact reviewed PDFium evidence root or approval is missing.')
+            }
+            else {
+                $reviewedPdfiumApproval = Get-Content -LiteralPath $reviewedPdfiumApprovalPath -Raw | ConvertFrom-Json
+                $reviewedPdfiumBinaryValue = [string]$reviewedPdfiumApproval.binaryPath
+                if ([IO.Path]::IsPathRooted($reviewedPdfiumBinaryValue) -or
+                    $reviewedPdfiumBinaryValue -match '(^|[\\/])\.\.([\\/]|$)') {
+                    $releaseBlockers.Add('The reviewed PDFium approval uses an unsafe binary path.')
+                }
+                else {
+                    $reviewedPdfiumRuntimePath = [IO.Path]::GetFullPath((Join-Path $reviewedPdfiumEvidencePath $reviewedPdfiumBinaryValue))
+                    $reviewedPdfiumPrefix = $reviewedPdfiumEvidencePath.TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+                    if (-not $reviewedPdfiumRuntimePath.StartsWith($reviewedPdfiumPrefix, [StringComparison]::OrdinalIgnoreCase) -or
+                        -not (Test-Path -LiteralPath $reviewedPdfiumRuntimePath -PathType Leaf)) {
+                        $releaseBlockers.Add('The exact reviewed PDFium runner is missing or outside its evidence root.')
+                    }
+                    else {
+                        $reviewedPdfiumRuntimeSha256 = (Get-FileHash -LiteralPath $reviewedPdfiumRuntimePath -Algorithm SHA256).Hash.ToLowerInvariant()
+                        $expectedPdfiumRuntimeSha256 = [string]$releaseAudit.Components['pdfium-native'].artifactSha256
+                        if (-not [string]::Equals(
+                                $reviewedPdfiumRuntimeSha256,
+                                $expectedPdfiumRuntimeSha256,
+                                [StringComparison]::OrdinalIgnoreCase)) {
+                            $releaseBlockers.Add('The reviewed PDFium runner does not match the exact public audit binary.')
+                        }
+                    }
+                }
+            }
+        }
+        catch {
+            $releaseBlockers.Add("The reviewed PDFium evidence root is invalid: $($_.Exception.Message)")
+        }
+    }
+}
 if ($gitWorkingTreeDirty) {
     $releaseBlockers.Add('The Git working tree is dirty. Release artifacts require a clean committed tree.')
 }
@@ -1622,6 +1671,8 @@ $auditResult = [pscustomobject]@{
         } | ForEach-Object { [string]$_.id } | Sort-Object)
     ReviewedOpenCvRuntimeRequired = $reviewedOpenCvRequired
     ReviewedOpenCvRuntimeSha256 = $reviewedOpenCvRuntimeSha256
+    ReviewedPdfiumRuntimeRequired = $reviewedPdfiumRequired
+    ReviewedPdfiumRuntimeSha256 = $reviewedPdfiumRuntimeSha256
     ArtifactsEmitted = $false
 }
 
@@ -1697,6 +1748,27 @@ if ($reviewedOpenCvRequired) {
         -not [bool]$releaseOpenCvMetadata.releaseApproved -or
         [string]$releaseOpenCvMetadata.binarySha256 -cne $reviewedOpenCvRuntimeSha256) {
         throw 'Common publish OpenCV runtime metadata did not cross the direct-evidence release boundary.'
+    }
+}
+
+if ($reviewedPdfiumRequired) {
+    $releasePdfiumInstallerPath = Join-Path $packagingRoot 'pdfium-source\Install-ReleaseRenderer.ps1'
+    if (-not (Test-Path -LiteralPath $releasePdfiumInstallerPath -PathType Leaf)) {
+        throw "Release PDFium renderer installer is missing: $releasePdfiumInstallerPath"
+    }
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $releasePdfiumInstallerPath `
+        -EvidenceRoot $reviewedPdfiumEvidencePath `
+        -DestinationRoot $commonPublishPath `
+        -RepositoryRoot $repositoryRoot
+    if ($LASTEXITCODE -ne 0) {
+        throw "Release PDFium renderer installation failed with exit code $LASTEXITCODE."
+    }
+    $releasePdfiumApproval = Get-Content -LiteralPath (Join-Path $commonPublishPath 'pdfium\reviewed-approval.json') -Raw | ConvertFrom-Json
+    if (-not [bool]$releasePdfiumApproval.reviewApproved -or
+        -not [bool]$releasePdfiumApproval.redistributionApproved -or
+        -not [bool]$releasePdfiumApproval.bundlingApproved -or
+        [string]$releasePdfiumApproval.binarySha256 -cne $reviewedPdfiumRuntimeSha256) {
+        throw 'Common publish PDFium renderer did not cross the direct-evidence release boundary.'
     }
 }
 

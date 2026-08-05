@@ -27,10 +27,12 @@ public static class ApplicationComposition
 
     public static ApplicationCompositionResult Create(
         WorkflowRuntimeEnvironment environment,
-        IApplicationPaths? applicationPaths = null)
+        IApplicationPaths? applicationPaths = null,
+        string? applicationRoot = null)
         => CreateCore(
             environment,
             applicationPaths,
+            applicationRoot ?? AppContext.BaseDirectory,
             modelAvailability: null,
             runtimeAvailability: null);
 
@@ -51,18 +53,25 @@ public static class ApplicationComposition
                 applicationRoot ?? AppContext.BaseDirectory,
                 cancellationToken).ConfigureAwait(false)
             : null;
-        return CreateCore(environment, applicationPaths, modelAvailability, runtimeAvailability);
+        return CreateCore(
+            environment,
+            applicationPaths,
+            applicationRoot ?? AppContext.BaseDirectory,
+            modelAvailability,
+            runtimeAvailability);
     }
 
     private static ApplicationCompositionResult CreateCore(
         WorkflowRuntimeEnvironment environment,
         IApplicationPaths? applicationPaths,
+        string applicationRoot,
         ProductionModelAvailabilitySnapshot? modelAvailability,
         ProductionRuntimeAvailabilitySnapshot? runtimeAvailability)
     {
         Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver =
             CreateLocalEnhancementResolver(applicationPaths);
-        (IPdfImportService? PdfImporter, DomainError? Error) pdf = CreateReviewedPdfImporter();
+        (IPdfImportService? PdfImporter, DomainError? Error) pdf =
+            CreateReviewedPdfImporter(applicationRoot);
         IReadOnlyList<AutomaticStageStatus> automaticStages =
             ProductionStageAvailabilityRegistry.Create(
                 enhancementResolver is not null,
@@ -142,12 +151,22 @@ public static class ApplicationComposition
             cancellationToken);
     }
 
-    private static (IPdfImportService? PdfImporter, DomainError? Error) CreateReviewedPdfImporter()
+    private static (IPdfImportService? PdfImporter, DomainError? Error) CreateReviewedPdfImporter(
+        string applicationRoot)
     {
         string? approvalPath = Environment.GetEnvironmentVariable(PdfiumApprovalEnvironmentVariable);
         if (string.IsNullOrWhiteSpace(approvalPath))
         {
-            return (null, null);
+            string packagedApprovalPath = Path.Combine(
+                Path.GetFullPath(applicationRoot),
+                "pdfium",
+                "reviewed-approval.json");
+            if (!File.Exists(packagedApprovalPath))
+            {
+                return (null, null);
+            }
+
+            approvalPath = packagedApprovalPath;
         }
 
         try
