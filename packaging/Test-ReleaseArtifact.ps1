@@ -1274,6 +1274,18 @@ Assert-Equal -Actual ([string]$commonDefinition.project) -Expected 'src/GraphRea
 Assert-Equal -Actual ([string]$commonDefinition.configuration) -Expected 'Release' -Description 'Common publish configuration is invalid'
 Assert-Equal -Actual $commonDefinition.selfContained -Expected $true -Description 'Common publish must be self-contained'
 Assert-Equal -Actual $commonDefinition.debugSymbols -Expected $false -Description 'Release publish must exclude debug symbols'
+$allowedModelTasks = @(
+    'ocr_detection', 'ocr_recognition', 'marker_center', 'marker_classifier', 'panelization')
+$requiredModelTasks = @($commonDefinition.requiredModelTasks)
+if ($requiredModelTasks.Count -eq 0 -or
+    @($requiredModelTasks | Where-Object {
+            $_ -isnot [string] -or
+            [string]::IsNullOrWhiteSpace([string]$_) -or
+            $allowedModelTasks -cnotcontains [string]$_
+        }).Count -gt 0 -or
+    @($requiredModelTasks | Select-Object -Unique).Count -ne $requiredModelTasks.Count) {
+    throw 'Common publish requiredModelTasks must be a nonempty unique array of supported offline production tasks.'
+}
 Assert-Equal -Actual $installerDefinition.schemaVersion -Expected 2 -Description 'Installer definition schema version is invalid'
 Assert-Equal -Actual ([string]$installerDefinition.kind) -Expected 'installer' -Description 'Installer definition kind is invalid'
 Assert-Equal -Actual ([string]$installerDefinition.format) -Expected 'setup-exe' -Description 'Installer format is invalid'

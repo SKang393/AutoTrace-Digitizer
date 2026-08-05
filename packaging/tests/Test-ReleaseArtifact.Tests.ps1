@@ -79,6 +79,7 @@ function New-PackagingFixture {
         selfContained = $true
         publishSingleFile = $false
         debugSymbols = $false
+        requiredModelTasks = @('marker_center')
         requiredContent = @(
             @{ source = 'contracts'; target = 'contracts' },
             @{ source = 'LICENSE'; target = 'LICENSE' },
@@ -959,7 +960,14 @@ function New-ModelAuditFixture {
         commercial_use = $true
         redistribution = $true
         providers = @('cpu')
-        benchmarks = @(@{ status = 'pass'; release_eligible = $true })
+        benchmarks = @(@{
+                profile = 'fixture'
+                status = 'pass'
+                release_eligible = $true
+                production_approval = $true
+                evidence_path = 'packaging/model-benchmark.json'
+                evidence_sha256 = $evidenceHash
+            })
     }
     Write-JsonFile -Path (Join-Path $fixture.Root 'models/manifest/valid.json') -Value $baseManifest
     $missingManifest = [ordered]@{}
@@ -1191,7 +1199,7 @@ function New-MultiFileModelBuildFixture {
             manifest_version = 1
             model_id = 'fixture-multi-file'
             model_version = '1.0.0'
-            task = 'super_resolution'
+            task = 'marker_center'
             source = @{ name = 'fixture package'; url = 'local://fixture-package'; revision = '1' }
             license = @{ spdx = 'Apache-2.0'; notice_path = 'LICENSE'; reviewed = $true }
             sha256 = $parameterHash
@@ -2219,6 +2227,52 @@ try {
         }
         if (Test-Path -LiteralPath $fixture.OutputRoot) {
             throw 'Build created staging before rejecting the invalid common publish definition.'
+        }
+    }
+
+    Assert-Case 'Rejected research manifest does not become a missing release payload' {
+        $fixture = New-ModelAuditFixture -Name 'rejected-research-model-audit'
+        $missingPath = Join-Path $fixture.Root 'models/manifest/missing.json'
+        $missing = Get-Content -LiteralPath $missingPath -Raw | ConvertFrom-Json
+        $missing.benchmarks = @([pscustomobject]@{
+                status = 'fail'
+                release_eligible = $false
+                production_approval = $false
+            })
+        Write-JsonFile -Path $missingPath -Value $missing
+        & git -C $fixture.Root add --all
+        & git -C $fixture.Root -c user.name=Fixture -c user.email=fixture@example.invalid commit --quiet -m 'Reject research model'
+        if ($LASTEXITCODE -ne 0) { throw 'Could not commit the rejected research-model fixture.' }
+
+        $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
+        $audit = & $buildScript -ManifestPath $fixture.Manifest -AuditOnly
+        $obsoleteBlocker = "Model manifest 'missing.json' references missing model file 'missing-model.onnx'."
+        if (@($audit.Blockers) -contains $obsoleteBlocker) {
+            throw 'A rejected research manifest was incorrectly treated as a required release payload.'
+        }
+        if (@($audit.ApprovedProductionModelTasks) -notcontains 'marker_center') {
+            throw 'The checksum-approved marker-center fixture did not satisfy its explicit required task.'
+        }
+    }
+
+    Assert-Case 'Explicit required production task blocks an otherwise valid model set' {
+        $fixture = New-ValidModelBuildFixture -Name 'required-model-task-audit'
+        $definitionPath = Join-Path $fixture.Root 'packaging/common/publish.json'
+        $definition = Get-Content -LiteralPath $definitionPath -Raw | ConvertFrom-Json
+        $definition.requiredModelTasks = @('marker_center', 'ocr_detection')
+        Write-JsonFile -Path $definitionPath -Value $definition
+        & git -C $fixture.Root add --all
+        & git -C $fixture.Root -c user.name=Fixture -c user.email=fixture@example.invalid commit --quiet -m 'Require OCR detector'
+        if ($LASTEXITCODE -ne 0) { throw 'Could not commit the required-model-task fixture.' }
+
+        $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
+        $audit = & $buildScript -ManifestPath $fixture.Manifest -OutputRoot $fixture.OutputRoot -AuditOnly
+        $expected = "Required production model task 'ocr_detection' has no checksum-verified, release-eligible, production-approved payload."
+        if (@($audit.Blockers) -notcontains $expected) {
+            throw "Missing explicit required-task blocker. Actual blockers: $(@($audit.Blockers) -join ' | ')"
+        }
+        if ($audit.ReleaseReady -or $audit.ArtifactsEmitted) {
+            throw 'The missing required OCR detector did not keep the release audit closed.'
         }
     }
 

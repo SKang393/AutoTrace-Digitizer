@@ -106,8 +106,8 @@ in Production composition. Automatic stages currently report:
 | --- | --- | --- |
 | Enhancement | Unavailable | Exact runtime redistribution provenance is reviewed, but local-adapter, scientific, CPU fallback, clean-machine, production, and release approvals remain false. |
 | Axis | Unavailable | Deterministic adapter exists; OpenCvSharp native redistribution audit is blocked. |
-| OCR | Unavailable | Prior CTC, spatial V2, and canonical-slot experiments are closed. Whole-crop project numeric Candidate 1 completed evaluation-only recovery without retraining, failed the frozen recognition and role gates, and produced no ONNX. Candidates 2 and 3 are unregistered. |
-| Markers | Unavailable | Marker-center exhausted its budget after one public false positive. The unchanged-weight probability-runtime classifier passed selection and public-v3; its one disjoint confirmation-v3 gate remains incomplete. |
+| OCR | Unavailable | Project numeric Candidates 1, 2, and 3 all failed the frozen validation gate and produced no ONNX; the authorized budget is exhausted. Exact official PP-OCRv5 archives are inventoried but lack artifact-scoped redistribution terms, so conversion remains blocked. |
+| Markers | Unavailable | Marker-center exhausted its budget after one public false positive. The unchanged-weight probability-runtime classifier passed selection, public-v3, disjoint confirmation-v3, exact package discovery, and CPU/DirectML runtime validation, but the stage still requires an approved center model. |
 | Legends | Unavailable | Deterministic reasoner requires approved OCR and marker evidence. |
 | Phases | Unavailable | Deterministic reasoner requires approved axis, OCR, and marker evidence. |
 
@@ -116,11 +116,11 @@ No automatic stage executes in Production with candidate assets.
 ## Models and provenance
 
 `models/manifest/PRODUCTION_MODEL_MATRIX.md` records exact current candidates.
-There are seven manifests and zero installed, checksum-verified,
-release-eligible model files.
+There are seven manifests and one installed, checksum-verified,
+release-eligible model file in the ignored production model store.
 
-Bounded ignored development evidence improved the model decisions without
-approving any model:
+Bounded ignored development evidence resolved the model decisions. Only the
+marker classifier reached approval:
 
 - A release-minimal Real-ESRGAN anime x2 runtime excludes the nonredistributable
   debug OpenMP DLL, demos, and unused models. The authorized-vcomp profile uses
@@ -147,8 +147,11 @@ approving any model:
   minority F1 `1.0`, and CPU ONNX parity `2.0265579223632812e-06`. One
   once-only public-v3 gate then passed shape F1 `0.9907246376811594`, fill F1
   `0.9440313111545988`, artifact and minority F1 `1.0`, and CPU ONNX parity
-  `1.7285346984863281e-06`. One disjoint confirmation-v3 evaluation is
-  authorized, and no classifier asset is approved.
+  `1.7285346984863281e-06`. The disjoint confirmation-v3 gate also passed, the
+  C# packed-runtime decoder passed on CPU and DirectML with maximum provider
+  difference `3.5762786865234375e-07`, and the exact payload
+  `26f9304f1689053a0b94aa896a1e239f6ade1e5c1920736a3535c1b32f803b8a`
+  is approved for checksum-bound production discovery and packaging.
 - The project-trained graph-numeric CTC experiment used only procedural vector
   glyphs. Candidate and single repair held-out exact match were both
   `0.015625`; the repair CER worsened to `0.932710`. Its exact ONNX passed an
@@ -159,10 +162,13 @@ approving any model:
   CER remained `1.201399`. The exact repair ONNX passed CPU and DirectML tensor
   execution, but no manifest or approval was created.
 - Official PaddleOCR metadata is pinned to source revision
-  `33cbdd9deb2e00f61e7966db70669b249c005a37`. The separately hosted archives
-  still lack artifact-specific redistribution evidence, immutable artifact
-  revisions, and published SHA-256 values. The exact repository dictionary is
-  recorded, but it does not approve the uninspected archive.
+  `33cbdd9deb2e00f61e7966db70669b249c005a37`. The exact detection and English
+  recognition archives were downloaded, hashed, and inventoried at
+  `50446e5d01ac2a73d5319c89513281f6578414c888c602f9af13f93feefffc58`
+  and `e595b4cf2ffad19fbb5a61ba345d63939577a3ab8717b6e5995642590c9101b4`.
+  Their six extracted files contain no
+  artifact-scoped license, commercial-use grant, redistribution grant, or
+  notice, so conversion and approval remain blocked.
 - Project numeric OCR Candidate 1 completed its recovery with zero optimizer
   steps and unchanged checkpoint SHA-256 `6e941b2b...8235`. It failed with
   validation exact `0.3359375`, sealed exact `0.119140625`, sealed CER
@@ -332,9 +338,11 @@ Microsoft source and license record.
   blocked.
 - Local portable path, diagnostic, endpoint, registry-key, and write tracing:
   recorded with one fail-closed isolation gate.
-- Current release audit: 13 legitimate blockers. The false single-file-only
-  model restriction is removed; the new classifier manifest adds a truthful
-  missing-candidate-payload blocker.
+- Current release audit: 6 substantive clean-tree blockers. The audit requires
+  exact approved defaults for OCR detection, OCR recognition, marker center,
+  and marker classification; only the classifier currently satisfies its
+  task. Rejected research manifests remain audited without becoming mandatory
+  release payloads.
 - Version promotion: intentionally unchanged at `0.0.21`.
 - Public release decision: unchanged, `FAIL`.
 
@@ -342,9 +350,11 @@ Microsoft source and license record.
 
 - The user-authorized private Chandler graph now has complete manual-only Goal
   20 evidence. It does not provide automatic detector accuracy evidence.
-- No production model set is approved or installed. Bounded Real-ESRGAN and
-  marker evidence remains experimental and ignored. All four bounded numeric
-  OCR runs failed; the V1 and V2 experiment budgets are exhausted.
+- The production model set is incomplete. Only the marker classifier is
+  approved and installed in ignored checksum-bound storage. Bounded
+  Real-ESRGAN and marker-center evidence remains experimental and ignored. All
+  bounded numeric OCR candidates failed and their authorized budget is
+  exhausted.
 - OpenCvSharp source inventory, notices, scoped Microsoft attestation,
   reproducibility, exact public-axis parity, integration tests, and local WPF
   smoke pass. Clean-machine load and workflow checks remain open.

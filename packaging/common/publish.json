@@ -5,6 +5,12 @@
   "selfContained": true,
   "publishSingleFile": false,
   "debugSymbols": false,
+  "requiredModelTasks": [
+    "ocr_detection",
+    "ocr_recognition",
+    "marker_center",
+    "marker_classifier"
+  ],
   "requiredContent": [
     {
       "source": "contracts",

@@ -476,7 +476,10 @@ function Get-ProductionApprovalPackageData {
 function Get-ModelAudit {
     param(
         [Parameter(Mandatory)]
-        [string]$RepositoryRoot
+        [string]$RepositoryRoot,
+
+        [Parameter(Mandatory)]
+        [string[]]$RequiredModelTasks
     )
 
     $manifestRoot = Join-Path $RepositoryRoot 'models\manifest'
@@ -503,7 +506,8 @@ function Get-ModelAudit {
             $manifest = $manifestJson | ConvertFrom-Json
             $requiredProperties = @(
                 'manifest_version', 'model_id', 'model_version', 'task', 'source', 'license',
-                'sha256', 'files', 'inputs', 'outputs', 'commercial_use', 'redistribution', 'providers')
+                'sha256', 'files', 'inputs', 'outputs', 'commercial_use', 'redistribution', 'providers',
+                'benchmarks')
             foreach ($requiredProperty in $requiredProperties) {
                 if ($manifest.PSObject.Properties.Name -notcontains $requiredProperty) {
                     $issues.Add("Model manifest '$($manifestFile.Name)' is missing '$requiredProperty'.")
@@ -548,7 +552,7 @@ function Get-ModelAudit {
                 $issues.Add("Model manifest '$($manifestFile.Name)' uses a prohibited or unclear license.")
             }
 
-            foreach ($arrayProperty in @('files', 'inputs', 'outputs', 'providers')) {
+            foreach ($arrayProperty in @('files', 'inputs', 'outputs', 'providers', 'benchmarks')) {
                 if ($manifest.$arrayProperty -isnot [System.Array]) {
                     $issues.Add("Model manifest '$($manifestFile.Name)' '$arrayProperty' must be an array.")
                 }
@@ -568,6 +572,25 @@ function Get-ModelAudit {
 
             if ([string]$manifest.sha256 -notmatch '^[a-fA-F0-9]{64}$') {
                 $issues.Add("Model manifest '$($manifestFile.Name)' has an invalid SHA-256 value.")
+            }
+
+            $benchmarkEntries = if ($manifest.benchmarks -is [System.Array]) {
+                @($manifest.benchmarks)
+            }
+            else {
+                @()
+            }
+            $productionApprovals = @($benchmarkEntries | Where-Object {
+                    $null -ne $_.PSObject.Properties['production_approval'] -and
+                    $_.production_approval -is [bool] -and [bool]$_.production_approval -and
+                    $null -ne $_.PSObject.Properties['release_eligible'] -and
+                    $_.release_eligible -is [bool] -and [bool]$_.release_eligible -and
+                    $null -ne $_.PSObject.Properties['status'] -and
+                    $_.status -is [string] -and [string]$_.status -ieq 'pass'
+                })
+            $isProductionApproved = $productionApprovals.Count -eq 1
+            if ($productionApprovals.Count -gt 1) {
+                $issues.Add("Model manifest '$($manifestFile.Name)' has multiple passing release-eligible production approvals.")
             }
 
             $artifactHashes = [System.Collections.Generic.Dictionary[string,string]]::new([System.StringComparer]::Ordinal)
@@ -688,7 +711,7 @@ function Get-ModelAudit {
                     elseif ($actualHash -ne $expectedArtifactHash) {
                         $issues.Add("Model file checksum does not match manifest '$($manifestFile.Name)': $modelRelativePath.")
                     }
-                    elseif ([bool]$manifest.redistribution) {
+                    elseif ([bool]$manifest.redistribution -and $isProductionApproved) {
                         if ($archivePaths.ContainsKey($archivePath)) {
                             $issues.Add("Model manifests '$($archivePaths[$archivePath])' and '$($manifestFile.Name)' resolve to the same archive path '$archivePath'.")
                         }
@@ -707,7 +730,7 @@ function Get-ModelAudit {
                 elseif ($locatedCandidates.Count -gt 1) {
                     $issues.Add("Model manifest '$($manifestFile.Name)' resolves model file '$modelRelativePath' to multiple source files.")
                 }
-                else {
+                elseif ($isProductionApproved) {
                     $issues.Add("Model manifest '$($manifestFile.Name)' references missing model file '$modelRelativePath'.")
                 }
             }
@@ -743,6 +766,8 @@ function Get-ModelAudit {
             $models.Add([ordered]@{
                     modelId = [string]$manifest.model_id
                     version = [string]$manifest.model_version
+                    task = [string]$manifest.task
+                    productionApproved = $isProductionApproved
                     manifest = $manifestFile.FullName.Substring($RepositoryRoot.Length).TrimStart('\', '/').Replace('\', '/')
                     manifestSha256 = (Get-FileHash -LiteralPath $manifestFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
                     modelSha256 = ([string]$manifest.sha256).ToLowerInvariant()
@@ -764,6 +789,28 @@ function Get-ModelAudit {
         }
     }
 
+    $approvedTasks = New-Object System.Collections.Generic.List[string]
+    foreach ($requiredTask in $RequiredModelTasks) {
+        $approvedForTask = @($models | Where-Object {
+                [string]$_.task -ceq $requiredTask -and
+                [bool]$_.productionApproved -and
+                @($_.packagedArtifacts).Count -gt 0 -and
+                $null -ne $_.productionPackageData
+            })
+        if ($approvedForTask.Count -eq 0) {
+            $issues.Add("Required production model task '$requiredTask' has no checksum-verified, release-eligible, production-approved payload.")
+        }
+        elseif ($approvedForTask.Count -gt 1) {
+            $identities = @($approvedForTask | ForEach-Object {
+                    "$($_.modelId)@$($_.version)"
+                } | Sort-Object) -join ', '
+            $issues.Add("Required production model task '$requiredTask' has multiple approved defaults: $identities.")
+        }
+        else {
+            $approvedTasks.Add($requiredTask)
+        }
+    }
+
     if ($redistributableModelFileCount -eq 0) {
         $issues.Add('No checksum-verified redistributable model binary is available for the offline default workflow.')
     }
@@ -772,6 +819,8 @@ function Get-ModelAudit {
         Issues = $issues.ToArray()
         Models = $models.ToArray()
         RedistributableModelFileCount = $redistributableModelFileCount
+        RequiredModelTasks = $RequiredModelTasks
+        ApprovedModelTasks = $approvedTasks.ToArray()
     }
 }
 
@@ -1111,6 +1160,18 @@ function Assert-CommonPublishDefinition {
     if ([int]$Definition.schemaVersion -ne 2) {
         throw "Unsupported common publish definition schema '$($Definition.schemaVersion)'."
     }
+    $allowedModelTasks = @(
+        'ocr_detection', 'ocr_recognition', 'marker_center', 'marker_classifier', 'panelization')
+    $requiredModelTasks = @($Definition.requiredModelTasks)
+    if ($requiredModelTasks.Count -eq 0 -or
+        @($requiredModelTasks | Where-Object {
+                $_ -isnot [string] -or
+                [string]::IsNullOrWhiteSpace([string]$_) -or
+                $allowedModelTasks -cnotcontains [string]$_
+            }).Count -gt 0 -or
+        @($requiredModelTasks | Select-Object -Unique).Count -ne $requiredModelTasks.Count) {
+        throw 'Common publish requiredModelTasks must be a nonempty unique array of supported offline production tasks.'
+    }
     if ([string]$Definition.project -ne 'src/GraphReader.App/GraphReader.App.csproj' -or
         [string]$Definition.configuration -ne 'Release' -or
         $Definition.selfContained -isnot [bool] -or -not [bool]$Definition.selfContained -or
@@ -1405,7 +1466,9 @@ $portableFileName = Resolve-ArtifactLeafName `
 $gitCommit = Get-GitCommit -RepositoryRoot $repositoryRoot
 $gitWorkingTreeDirty = Get-GitWorkingTreeDirty -RepositoryRoot $repositoryRoot
 $contractVersion = Get-ContractVersion -RepositoryRoot $repositoryRoot
-$modelAudit = Get-ModelAudit -RepositoryRoot $repositoryRoot
+$modelAudit = Get-ModelAudit `
+    -RepositoryRoot $repositoryRoot `
+    -RequiredModelTasks @($commonDefinition.requiredModelTasks)
 $releaseAudit = Get-ReleaseAudit -RepositoryRoot $repositoryRoot
 $releaseBlockers = New-Object System.Collections.Generic.List[string]
 foreach ($issue in @($releaseAudit.Issues)) {
@@ -1432,6 +1495,8 @@ $auditResult = [pscustomobject]@{
     Warnings = @($releaseAudit.Warnings)
     ModelManifestCount = @($modelAudit.Models).Count
     RedistributableModelFileCount = $modelAudit.RedistributableModelFileCount
+    RequiredProductionModelTasks = @($modelAudit.RequiredModelTasks)
+    ApprovedProductionModelTasks = @($modelAudit.ApprovedModelTasks)
     ArtifactsEmitted = $false
 }
 
