@@ -17,6 +17,9 @@ namespace GraphReader.Integration.Tests.IntegrationSmoke;
 [TestClass]
 public sealed class ApplicationCompositionSmokeTests
 {
+    private const string ProductionModelStoreEnvironmentVariable =
+        "GRAPHREADER_PRODUCTION_MODEL_STORE";
+
     [TestMethod]
     public void OrdinaryRuntimeSelectionDefaultsToRealEmptyManualPreview()
     {
@@ -355,7 +358,51 @@ public sealed class ApplicationCompositionSmokeTests
         StringAssert.Contains(markers.Explanation, "fixture-marker-classifier@1.0.0");
         Assert.IsFalse(
             markers.Explanation.Contains("Missing: marker_classifier", StringComparison.Ordinal));
+        Assert.IsNotNull(
+            composition.MarkerClassificationAdapter,
+            composition.StartupError?.TechnicalMessage);
+        Assert.IsTrue(composition.MarkerClassificationAdapter.IsApproved);
+        Assert.AreEqual(
+            "fixture-marker-classifier",
+            composition.MarkerClassificationAdapter.Model.ModelId);
+        Assert.IsNotNull(composition.InferenceRuntimeHost);
+        Assert.IsFalse(composition.InferenceRuntimeHost.IsInitialized);
         Assert.IsFalse(workspace.UsesFakeGraphData);
+    }
+
+    [TestMethod]
+    public async Task ExactLocalClassifierManifestComposesLazyProductionAdapter()
+    {
+        string? modelRoot = Environment.GetEnvironmentVariable(
+            ProductionModelStoreEnvironmentVariable);
+        if (string.IsNullOrWhiteSpace(modelRoot))
+        {
+            Assert.Inconclusive(
+                $"Set {ProductionModelStoreEnvironmentVariable} to the ignored production model package to run this probe.");
+        }
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(modelRoot),
+            cancellationToken: CancellationToken.None);
+        try
+        {
+            Assert.IsNull(composition.StartupError);
+            Assert.IsNotNull(composition.MarkerClassificationAdapter);
+            Assert.IsTrue(composition.MarkerClassificationAdapter.IsApproved);
+            Assert.AreEqual(
+                "26f9304f1689053a0b94aa896a1e239f6ade1e5c1920736a3535c1b32f803b8a",
+                composition.MarkerClassificationAdapter.Model.Sha256.ToLowerInvariant());
+            Assert.IsNotNull(composition.InferenceRuntimeHost);
+            Assert.IsFalse(composition.InferenceRuntimeHost.IsInitialized);
+        }
+        finally
+        {
+            if (composition.InferenceRuntimeHost is not null)
+            {
+                await composition.InferenceRuntimeHost.DisposeAsync();
+            }
+        }
     }
 
     [TestMethod]
@@ -561,8 +608,33 @@ public sealed class ApplicationCompositionSmokeTests
                 },
                 ["sha256"] = payloadSha256,
                 ["files"] = new[] { "model.onnx" },
-                ["inputs"] = new[] { new Dictionary<string, object?> { ["name"] = "input" } },
-                ["outputs"] = new[] { new Dictionary<string, object?> { ["name"] = "output" } },
+                ["inputs"] = task == "marker_classifier"
+                    ? new[]
+                    {
+                        new Dictionary<string, object?>
+                        {
+                            ["name"] = "marker_patch",
+                            ["shape"] = new object[] { "N", 1, 32, 32 },
+                        },
+                    }
+                    : new[] { new Dictionary<string, object?> { ["name"] = "input" } },
+                ["outputs"] = task == "marker_classifier"
+                    ? new[]
+                    {
+                        new Dictionary<string, object?>
+                        {
+                            ["name"] = "classification_probabilities",
+                            ["shape"] = new object[] { "N", 25 },
+                            ["order"] = new[]
+                            {
+                                "shape_probabilities[9]",
+                                "fill_probabilities[3]",
+                                "artifact_probability[1]",
+                                "l2_normalized_embedding[12]",
+                            },
+                        },
+                    }
+                    : new[] { new Dictionary<string, object?> { ["name"] = "output" } },
                 ["commercial_use"] = true,
                 ["redistribution"] = true,
                 ["providers"] = new[] { "cpu" },
@@ -579,6 +651,25 @@ public sealed class ApplicationCompositionSmokeTests
                     },
                 },
             };
+            if (task == "marker_classifier")
+            {
+                manifest["preprocessing"] = new Dictionary<string, object?>
+                {
+                    ["normalization_mean"] = 0f,
+                    ["normalization_scale"] = 1f,
+                };
+                manifest["postprocessing"] = new Dictionary<string, object?>
+                {
+                    ["shape_order"] = new[]
+                    {
+                        "circle", "square", "triangle_up", "triangle_down", "diamond",
+                        "star", "asterisk", "cross", "other",
+                    },
+                    ["fill_order"] = new[] { "filled", "open", "unknown" },
+                    ["shape_and_fill_separate"] = true,
+                };
+            }
+
             string manifestPath = Path.Combine(manifestDirectory, "manifest.json");
             File.WriteAllText(manifestPath, JsonSerializer.Serialize(manifest), Encoding.UTF8);
             string manifestSha256 = Sha256(manifestPath);

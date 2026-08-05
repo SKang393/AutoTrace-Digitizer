@@ -31,6 +31,18 @@ public sealed class ProductionModelStoreTests
         StringAssert.Contains(resolved.NoticePath, Path.Combine("notices", TestStore.ModelId, TestStore.Version, "test-model.txt"));
         StringAssert.Contains(resolved.BenchmarkEvidencePath, Path.Combine("evidence", TestStore.ModelId, TestStore.Version, "test-model-benchmark.json"));
         Assert.AreEqual(store.ModelSha256, resolved.Identity.Sha256, ignoreCase: true);
+        Assert.AreEqual(
+            Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(store.ManifestPath))),
+            resolved.ManifestSha256,
+            ignoreCase: true);
+        Assert.AreEqual(
+            Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(store.NoticePath))),
+            resolved.NoticeSha256,
+            ignoreCase: true);
+        Assert.AreEqual(
+            Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(store.BenchmarkPath))),
+            resolved.BenchmarkEvidenceSha256,
+            ignoreCase: true);
         CollectionAssert.AreEqual(new[] { InferenceProvider.Cpu }, resolved.AvailableProviders.ToArray());
 
         await using var registry = new OnnxSessionRegistry(

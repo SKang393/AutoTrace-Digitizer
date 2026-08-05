@@ -20,7 +20,8 @@ public sealed record ApplicationCompositionResult(
     IWorkspaceService WorkspaceService,
     DomainError? StartupError,
     ProductionInferenceRuntimeHost? InferenceRuntimeHost = null,
-    IProductionAxisGeometryAdapter? AxisGeometryAdapter = null);
+    IProductionAxisGeometryAdapter? AxisGeometryAdapter = null,
+    IProductionMarkerClassificationAdapter? MarkerClassificationAdapter = null);
 
 public static class ApplicationComposition
 {
@@ -90,11 +91,27 @@ public static class ApplicationComposition
                     uiThreadGuard ?? CapturedUiThreadGuard.CaptureCurrentThread())
                 : null;
         ProductionAxisGeometryAdapter? axisAdapter = CreateApprovedAxisAdapter(runtimeAvailability);
-        ProductionDetectionAdapterAvailabilitySnapshot? adapterAvailability = axisAdapter is null
+        (ProductionMarkerClassificationAdapter? Adapter, DomainError? Error) markerClassifier =
+            CreateApprovedMarkerClassifierAdapter(modelAvailability, inference?.Value);
+        var approvedAdapterStages = new List<string>();
+        var adapterEvidence = new List<string>();
+        if (axisAdapter is not null)
+        {
+            approvedAdapterStages.Add("axis");
+            adapterEvidence.Add($"Concrete production axis adapter '{axisAdapter.AdapterId}' is composed.");
+        }
+
+        if (markerClassifier.Adapter is not null)
+        {
+            adapterEvidence.Add(
+                $"Concrete production marker-classifier component '{markerClassifier.Adapter.AdapterId}' is composed; marker-center remains independently required.");
+        }
+
+        ProductionDetectionAdapterAvailabilitySnapshot? adapterAvailability = adapterEvidence.Count == 0
             ? null
             : new ProductionDetectionAdapterAvailabilitySnapshot(
-                ["axis"],
-                $"Concrete production axis adapter '{axisAdapter.AdapterId}' is composed.");
+                approvedAdapterStages,
+                string.Join(' ', adapterEvidence));
         IReadOnlyList<AutomaticStageStatus> automaticStages =
             ProductionStageAvailabilityRegistry.Create(
                 enhancementResolver is not null,
@@ -112,7 +129,9 @@ public static class ApplicationComposition
                 automaticStages,
                 pdf,
                 inference,
-                axisAdapter),
+                axisAdapter,
+                markerClassifier.Adapter,
+                markerClassifier.Error),
             WorkflowRuntimeEnvironment.ManualPreview => new ApplicationCompositionResult(
                 environment,
                 new ManualPreviewWorkspaceService(
@@ -135,7 +154,9 @@ public static class ApplicationComposition
         IReadOnlyList<AutomaticStageStatus> automaticStages,
         (IPdfImportService? PdfImporter, DomainError? Error) pdf,
         DomainResult<ProductionInferenceRuntimeHost>? inference,
-        IProductionAxisGeometryAdapter? axisAdapter)
+        IProductionAxisGeometryAdapter? axisAdapter,
+        IProductionMarkerClassificationAdapter? markerClassificationAdapter,
+        DomainError? markerClassificationError)
     {
         var imageImporter = new ImageImportService();
         var exportService = new ExportService();
@@ -159,9 +180,10 @@ public static class ApplicationComposition
                 enhancementResolver: enhancementResolver,
                 workflowOrchestrator: orchestrator,
                 panelStore: panelStore),
-            pdf.Error ?? inferenceError,
+            pdf.Error ?? inferenceError ?? markerClassificationError,
             inference?.Value,
-            axisAdapter);
+            axisAdapter,
+            markerClassificationAdapter);
     }
 
     private static ProductionAxisGeometryAdapter? CreateApprovedAxisAdapter(
@@ -176,6 +198,38 @@ public static class ApplicationComposition
         return new ProductionAxisGeometryAdapter(
             runtimeAvailability.RuntimeSha256,
             isApproved: true);
+    }
+
+    private static (ProductionMarkerClassificationAdapter? Adapter, DomainError? Error)
+        CreateApprovedMarkerClassifierAdapter(
+            ProductionModelAvailabilitySnapshot? modelAvailability,
+            ProductionInferenceRuntimeHost? runtimeHost)
+    {
+        if (runtimeHost is null ||
+            modelAvailability is null ||
+            !modelAvailability.ApprovedCpuModels.TryGetValue(
+                "marker_classifier",
+                out ResolvedProductionModel? model))
+        {
+            return (null, null);
+        }
+
+        try
+        {
+            return (ProductionMarkerClassificationAdapter.Create(model, runtimeHost), null);
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            return (
+                null,
+                new DomainError(
+                    "MARKER_CLASSIFIER_ADAPTER_UNAVAILABLE",
+                    DomainErrorSeverity.Warning,
+                    "Errors.ProductionWorkflowUnavailable",
+                    $"The checksum-resolved marker classifier could not be composed: {exception.Message}",
+                    Recoverable: true,
+                    "continue_manual_or_repair_model_store"));
+        }
     }
 
     private static Func<CancellationToken, Task<RealEsrganBackendResolution>>? CreateLocalEnhancementResolver(

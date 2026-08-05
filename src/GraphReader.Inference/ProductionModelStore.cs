@@ -306,8 +306,11 @@ public sealed class ProductionModelStore
                 root.GetProperty("task").GetString()!,
                 new ReadOnlyCollection<InferenceProvider>(providers.ToArray()),
                 manifestPath,
+                packageModel.Manifest.Sha256,
                 resolvedNotice,
-                evidencePath);
+                packageModel.Notice.Sha256,
+                evidencePath,
+                packageModel.BenchmarkEvidence.Sha256);
         }
     }
 
@@ -954,15 +957,21 @@ public sealed class ResolvedProductionModel
         string task,
         IReadOnlyList<InferenceProvider> availableProviders,
         string manifestPath,
+        string manifestSha256,
         string noticePath,
-        string benchmarkEvidencePath)
+        string noticeSha256,
+        string benchmarkEvidencePath,
+        string benchmarkEvidenceSha256)
     {
         Identity = identity;
         Task = task;
         AvailableProviders = availableProviders;
         ManifestPath = manifestPath;
+        ManifestSha256 = manifestSha256;
         NoticePath = noticePath;
+        NoticeSha256 = noticeSha256;
         BenchmarkEvidencePath = benchmarkEvidencePath;
+        BenchmarkEvidenceSha256 = benchmarkEvidenceSha256;
     }
 
     public ModelIdentity Identity { get; }
@@ -973,9 +982,15 @@ public sealed class ResolvedProductionModel
 
     public string ManifestPath { get; }
 
+    public string ManifestSha256 { get; }
+
     public string NoticePath { get; }
 
+    public string NoticeSha256 { get; }
+
     public string BenchmarkEvidencePath { get; }
+
+    public string BenchmarkEvidenceSha256 { get; }
 }
 
 public sealed class ProductionModelValidationException : Exception

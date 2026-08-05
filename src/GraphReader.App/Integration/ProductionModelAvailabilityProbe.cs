@@ -7,14 +7,32 @@ using GraphReader.Inference;
 
 namespace GraphReader.App.Integration;
 
-public sealed record ProductionModelAvailabilitySnapshot(
-    IReadOnlySet<string> ApprovedCpuTasks,
-    string Evidence)
+public sealed record ProductionModelAvailabilitySnapshot
 {
+    public ProductionModelAvailabilitySnapshot(
+        IEnumerable<string> approvedCpuTasks,
+        string evidence,
+        IReadOnlyDictionary<string, ResolvedProductionModel>? approvedCpuModels = null)
+    {
+        ArgumentNullException.ThrowIfNull(approvedCpuTasks);
+        ArgumentException.ThrowIfNullOrWhiteSpace(evidence);
+        ApprovedCpuTasks = new ReadOnlySet<string>(
+            new HashSet<string>(approvedCpuTasks, StringComparer.Ordinal));
+        ApprovedCpuModels = new ReadOnlyDictionary<string, ResolvedProductionModel>(
+            new Dictionary<string, ResolvedProductionModel>(
+                approvedCpuModels ?? new Dictionary<string, ResolvedProductionModel>(),
+                StringComparer.Ordinal));
+        Evidence = evidence;
+    }
+
+    public IReadOnlySet<string> ApprovedCpuTasks { get; }
+
+    public IReadOnlyDictionary<string, ResolvedProductionModel> ApprovedCpuModels { get; }
+
+    public string Evidence { get; }
+
     public static ProductionModelAvailabilitySnapshot Missing(string evidence) =>
-        new(
-            new ReadOnlySet<string>(new HashSet<string>(StringComparer.Ordinal)),
-            evidence);
+        new([], evidence);
 }
 
 public static class ProductionModelAvailabilityProbe
@@ -45,8 +63,22 @@ public static class ProductionModelAvailabilityProbe
                     InferenceProvider.Cpu,
                     cancellationToken)
                 .ConfigureAwait(false);
+            string[] ambiguousTasks = models
+                .GroupBy(static model => model.Task, StringComparer.Ordinal)
+                .Where(static group => group.Count() != 1)
+                .Select(static group => group.Key)
+                .Order(StringComparer.Ordinal)
+                .ToArray();
+            if (ambiguousTasks.Length > 0)
+            {
+                return ProductionModelAvailabilitySnapshot.Missing(
+                    $"Production model store validation failed closed because tasks resolve ambiguously: {string.Join(", ", ambiguousTasks)}.");
+            }
+
+            var modelsByTask = new ReadOnlyDictionary<string, ResolvedProductionModel>(
+                models.ToDictionary(static model => model.Task, StringComparer.Ordinal));
             var tasks = new HashSet<string>(
-                models.Select(static model => model.Task),
+                modelsByTask.Keys,
                 StringComparer.Ordinal);
             string identities = models.Count == 0
                 ? "none"
@@ -55,8 +87,9 @@ public static class ProductionModelAvailabilityProbe
                     models.Select(static model =>
                         $"{model.Identity.ModelId}@{model.Identity.Version}:{model.Identity.Sha256[..12].ToLowerInvariant()}"));
             return new ProductionModelAvailabilitySnapshot(
-                new ReadOnlySet<string>(tasks),
-                $"Checksum-resolved CPU production models: {identities}.");
+                tasks,
+                $"Checksum-resolved CPU production models: {identities}.",
+                modelsByTask);
         }
         catch (ProductionModelValidationException exception)
         {
