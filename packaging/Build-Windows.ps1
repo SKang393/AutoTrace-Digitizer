@@ -420,8 +420,11 @@ function Get-ProductionApprovalPackageData {
     }
 
     $approvals = @($Manifest.benchmarks | Where-Object {
+            $null -ne $_.PSObject.Properties['production_approval'] -and
             $_.production_approval -is [bool] -and [bool]$_.production_approval -and
+            $null -ne $_.PSObject.Properties['release_eligible'] -and
             $_.release_eligible -is [bool] -and [bool]$_.release_eligible -and
+            $null -ne $_.PSObject.Properties['status'] -and
             $_.status -is [string] -and [string]$_.status -ieq 'pass'
         })
     if ($approvals.Count -ne 1) {
