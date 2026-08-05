@@ -50,6 +50,14 @@ public sealed record LocalOnnxTextRecognizerOptions(
     public float NormalizeMean { get; init; } = 0.5f;
 
     public float NormalizeScale { get; init; } = 2f;
+
+    public IReadOnlyList<float>? ChannelMeans { get; init; }
+
+    public IReadOnlyList<float>? ChannelScales { get; init; }
+
+    public IReadOnlyList<InferenceProvider>? AllowedProviders { get; init; }
+
+    public bool BypassCache { get; init; }
 }
 
 public sealed record CtcDecodedAlternative(string Text, double Confidence);
@@ -183,20 +191,20 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
         LocalOnnxTextRecognizerOptions options)
     {
         _runtime = runtime ?? throw new ArgumentNullException(nameof(runtime));
-        _options = options ?? throw new ArgumentNullException(nameof(options));
-        _options.Model.Validate();
-        if (string.IsNullOrEmpty(_options.Alphabet) ||
-            _options.Alphabet.Distinct().Count() != _options.Alphabet.Length ||
-            _options.InputWidth <= 0 || _options.InputHeight <= 0 || _options.InputChannels <= 0 ||
-            !Enum.IsDefined(_options.InputLayout) || !Enum.IsDefined(_options.OutputLayout) ||
-            _options.ExpectedTimeSteps is <= 0 ||
-            _options.BlankClassIndex < 0 || _options.BlankClassIndex > _options.Alphabet.Length ||
-            _options.MaximumAlternatives <= 0 || _options.Timeout <= TimeSpan.Zero ||
-            !float.IsFinite(_options.NormalizeMean) || !float.IsFinite(_options.NormalizeScale) ||
-            _options.NormalizeScale == 0)
+        ArgumentNullException.ThrowIfNull(options);
+        _options = options with
         {
-            throw new ArgumentException("Local ONNX OCR recognizer options are invalid.", nameof(options));
-        }
+            ChannelMeans = options.ChannelMeans is null
+                ? null
+                : Array.AsReadOnly(options.ChannelMeans.ToArray()),
+            ChannelScales = options.ChannelScales is null
+                ? null
+                : Array.AsReadOnly(options.ChannelScales.ToArray()),
+            AllowedProviders = options.AllowedProviders is null
+                ? null
+                : Array.AsReadOnly(options.AllowedProviders.ToArray()),
+        };
+        ValidateOptions(_options);
 
         _configurationFingerprint = CreateConfigurationFingerprint(_options);
     }
@@ -236,9 +244,11 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
             var source = crops[cropIndex].Pixels.Span;
             for (var valueIndex = 0; valueIndex < source.Length; valueIndex++)
             {
-                var normalized = (source[valueIndex] - _options.NormalizeMean) * _options.NormalizeScale;
                 for (var channel = 0; channel < _options.InputChannels; channel++)
                 {
+                    float mean = _options.ChannelMeans?[channel] ?? _options.NormalizeMean;
+                    float scale = _options.ChannelScales?[channel] ?? _options.NormalizeScale;
+                    var normalized = (source[valueIndex] - mean) * scale;
                     var destinationIndex = _options.InputLayout == OcrTensorLayout.ChannelsFirst
                         ? (cropIndex * valuesPerCrop) + (channel * pixelsPerCrop) + valueIndex
                         : (cropIndex * valuesPerCrop) + (valueIndex * _options.InputChannels) + channel;
@@ -277,9 +287,14 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
                     ["expected_time_steps"] = _options.ExpectedTimeSteps,
                     ["normalization_mean"] = _options.NormalizeMean,
                     ["normalization_scale"] = _options.NormalizeScale,
+                    ["channel_means"] = _options.ChannelMeans?.ToArray(),
+                    ["channel_scales"] = _options.ChannelScales?.ToArray(),
+                    ["allowed_providers"] = ProviderFingerprint(_options.AllowedProviders),
                 },
                 OcrContract.Version),
-            _options.Timeout);
+            _options.Timeout,
+            _options.AllowedProviders,
+            _options.BypassCache);
 
         var response = await _runtime.RunAsync(request, cancellationToken).ConfigureAwait(false);
         if (!response.Succeeded || response.Execution is null)
@@ -290,6 +305,24 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
                 crop.SourceImage,
                 Array.Empty<OcrRecognitionAlternative>(),
                 0,
+                failure)));
+        }
+
+        if (_options.AllowedProviders is not null &&
+            !_options.AllowedProviders.Contains(response.Execution.Provider))
+        {
+            var failure = new OcrFailure(
+                "OCR_PROVIDER_EVIDENCE_MISMATCH",
+                "error",
+                "Errors.OCR_PROVIDER_EVIDENCE_MISMATCH",
+                $"OCR recognition executed with undeclared provider '{response.Execution.Provider}'.",
+                false,
+                "repair_inference_provider_policy");
+            return OcrCollections.Freeze(crops.Select(crop => new OcrRecognition(
+                crop.RegionId,
+                crop.SourceImage,
+                Array.Empty<OcrRecognitionAlternative>(),
+                response.Execution.Timing.InferenceMilliseconds / crops.Count,
                 failure)));
         }
 
@@ -377,7 +410,68 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
             options.StageVersion,
             options.NormalizeMean.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
             options.NormalizeScale.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
+            options.ChannelMeans is null
+                ? "scalar-means"
+                : string.Join(',', options.ChannelMeans.Select(static value =>
+                    value.ToString("R", System.Globalization.CultureInfo.InvariantCulture))),
+            options.ChannelScales is null
+                ? "scalar-scales"
+                : string.Join(',', options.ChannelScales.Select(static value =>
+                    value.ToString("R", System.Globalization.CultureInfo.InvariantCulture))),
+            ProviderFingerprint(options.AllowedProviders),
         ]);
+
+    private static bool ValidChannelStatistics(LocalOnnxTextRecognizerOptions options)
+    {
+        if ((options.ChannelMeans is null) != (options.ChannelScales is null))
+        {
+            return false;
+        }
+
+        return options.ChannelMeans is null ||
+            (options.ChannelMeans.Count == options.InputChannels &&
+             options.ChannelScales!.Count == options.InputChannels &&
+             options.ChannelMeans.All(static value => float.IsFinite(value)) &&
+             options.ChannelScales.All(static value => float.IsFinite(value) && value != 0));
+    }
+
+    private static bool ValidProviderPolicy(IReadOnlyList<InferenceProvider>? providers) =>
+        providers is null ||
+        (providers.Count > 0 &&
+         providers.Contains(InferenceProvider.Cpu) &&
+         providers.All(static provider =>
+             provider is InferenceProvider.Cpu or InferenceProvider.DirectMl) &&
+         providers.Distinct().Count() == providers.Count);
+
+    public static void ValidateOptions(LocalOnnxTextRecognizerOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        options.Model.Validate();
+        if (string.IsNullOrEmpty(options.Alphabet) ||
+            options.Alphabet.Distinct().Count() != options.Alphabet.Length ||
+            options.InputWidth is < 1 or > 4096 || options.InputHeight is < 1 or > 4096 ||
+            options.InputChannels is < 1 or > 4 ||
+            !Enum.IsDefined(options.InputLayout) || !Enum.IsDefined(options.OutputLayout) ||
+            options.ExpectedTimeSteps is <= 0 or > 16_384 ||
+            options.BlankClassIndex < 0 || options.BlankClassIndex > options.Alphabet.Length ||
+            options.MaximumAlternatives is < 1 or > 16 ||
+            options.Timeout <= TimeSpan.Zero || options.Timeout > TimeSpan.FromMinutes(5) ||
+            !float.IsFinite(options.NormalizeMean) || !float.IsFinite(options.NormalizeScale) ||
+            options.NormalizeScale == 0 ||
+            !ValidChannelStatistics(options) ||
+            !ValidProviderPolicy(options.AllowedProviders))
+        {
+            throw new ArgumentException("Local ONNX OCR recognizer options are invalid.", nameof(options));
+        }
+    }
+
+    private static string ProviderFingerprint(IReadOnlyList<InferenceProvider>? providers) =>
+        providers is null
+            ? "policy-default"
+            : string.Join(',', providers
+                .Distinct()
+                .OrderBy(static provider => provider)
+                .Select(static provider => provider.ToString()));
 
     private static ReadOnlySpan<float> GetCropOutput(
         float[] output,

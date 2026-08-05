@@ -10,6 +10,8 @@ namespace GraphReader.Ocr.Tests;
 [TestClass]
 public sealed class LocalOnnxTextRecognizerTests
 {
+    private static readonly float[] ExpectedChannelTensor = [1f, 1f, 0f];
+
     [TestMethod]
     public async Task LocalAdapterBatchesThroughInferenceRuntimeAndDecodesCtcOutput()
     {
@@ -200,6 +202,12 @@ public sealed class LocalOnnxTextRecognizerTests
                 {
                     OutputLayout = (OcrOutputLayout)999,
                 }));
+            Assert.Throws<ArgumentException>(() => new LocalOnnxTextRecognizer(
+                runtime,
+                new LocalOnnxTextRecognizerOptions(identity, "01")
+                {
+                    AllowedProviders = [InferenceProvider.Cpu, (InferenceProvider)999],
+                }));
         }
         finally
         {
@@ -243,6 +251,56 @@ public sealed class LocalOnnxTextRecognizerTests
             Assert.HasCount(2, results);
             Assert.AreEqual("0", results[0].Alternatives[0].Text);
             Assert.AreEqual("1", results[1].Alternatives[0].Text);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task ChannelStatisticsAndCpuPolicyBindExactRecognitionTensorProvenance()
+    {
+        string directory = CreateDirectory();
+        string modelPath = Path.Combine(directory, "channel-policy.onnx");
+        await File.WriteAllBytesAsync(modelPath, [5, 4, 3, 2]);
+        try
+        {
+            var identity = new ModelIdentity(
+                "channel-policy-ocr",
+                "1",
+                Convert.ToHexStringLower(SHA256.HashData(await File.ReadAllBytesAsync(modelPath))),
+                modelPath);
+            var factory = new FakeInferenceSessionFactory(scale: 1);
+            var registry = new OnnxSessionRegistry(
+                new FakeExecutionProviderDiscovery("DmlExecutionProvider", "CPUExecutionProvider"),
+                new WindowsExecutionProviderPolicy(),
+                factory,
+                CpuThreadConfiguration.Create(1));
+            await using var runtime = new InferenceRuntime(
+                registry,
+                new BoundedInferenceScheduler(capacity: 2, workerCount: 1),
+                new ContentAddressedStageCache(Path.Combine(directory, "cache")));
+            var recognizer = new LocalOnnxTextRecognizer(
+                runtime,
+                new LocalOnnxTextRecognizerOptions(identity, "01")
+                {
+                    InputWidth = 1,
+                    InputHeight = 1,
+                    InputChannels = 3,
+                    ChannelMeans = [0f, 0.5f, 1f],
+                    ChannelScales = [1f, 2f, 3f],
+                    AllowedProviders = [InferenceProvider.Cpu],
+                });
+
+            IReadOnlyList<OcrRecognition> results = await recognizer.RecognizeBatchAsync(
+                [Crop("channels", [1f], width: 1)],
+                CancellationToken.None);
+
+            Assert.HasCount(1, results);
+            FakeInferenceSession session = factory.Sessions.Single();
+            Assert.AreEqual(InferenceProvider.Cpu, session.Provider);
+            CollectionAssert.AreEqual(ExpectedChannelTensor, session.LastInputValues.ToArray());
         }
         finally
         {

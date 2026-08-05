@@ -89,6 +89,8 @@ public sealed class ProductionInferenceRuntimeHost : IAsyncDisposable
 
     public bool IsInitialized => _runtime.IsValueCreated;
 
+    public bool IsDisposed => Volatile.Read(ref _disposed) != 0;
+
     public async ValueTask DisposeAsync()
     {
         InferenceRuntime? runtime;

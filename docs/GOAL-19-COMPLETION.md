@@ -42,6 +42,18 @@ clean-machine distribution evidence.
   also proves repeated marker frames reuse private immutable planes instead of
   cloning each full-resolution mask. The current rejected marker-center
   manifest does not satisfy that gate.
+- Added the missing local ONNX OCR detector and production factory without
+  changing a frozen schema. Detection consumes a checksum-bound dense
+  probability map, maps deterministic regions to original pixels, and rejects
+  invalid output, provider drift, and cancellation. Recognition now supports
+  exact per-channel preprocessing. The shared inference request can bind a
+  CPU-only policy with a provider-specific cache identity. Production
+  composition rehashes and strictly parses both approved OCR manifests and the
+  same embedded evaluator, sealed split, predictions, and runtime results.
+  It independently derives all fixed metrics and executes both exact payloads
+  through a two-item CPU preflight before exposing the adapter. Tampered
+  resources and non-ONNX payloads fail closed. The current store contains
+  neither approved OCR task, so normal production remains unavailable.
 - Added atomic development-portable build, launch, and watcher scripts.
 - Added an opt-in, checksum-bound development-portable replacement for the
   exact reviewed source-built OpenCV runtime. It validates provenance and the
@@ -80,7 +92,7 @@ runtime SHA-256 after every stable checkpoint. The current verified behavior is:
 - dirty development build: no
 - running process: responsive visible window titled `Graph Auto Reader`, exact
   Chandler path supplied by `--open-image`
-- current full Release rerun: PASS, 723 passed and 9 expected opt-in skips
+- current full Release rerun: PASS, 738 passed and 13 skipped; 9 are expected hardware or opt-in probes and 4 WPF screenshot cases were inconclusive on the current noninteractive desktop
 - production-model IDs reported available: `0`
 - automatic stages reported unavailable: `6`
 - mutable root: `artifacts/dev-portable/Data`
@@ -123,7 +135,7 @@ in Production composition. Automatic stages currently report:
 | --- | --- | --- |
 | Enhancement | Unavailable | Exact runtime redistribution provenance is reviewed, but local-adapter, scientific, CPU fallback, clean-machine, production, and release approvals remain false. |
 | Axis | Unavailable | Deterministic adapter exists; OpenCvSharp native redistribution audit is blocked. |
-| OCR | Unavailable | Project numeric Candidates 1, 2, and 3 all failed the frozen validation gate and produced no ONNX; the authorized budget is exhausted. Exact official PP-OCRv5 archives are inventoried but lack artifact-scoped redistribution terms, so conversion remains blocked. |
+| OCR | Unavailable | The executable detector, recognizer, strict two-manifest factory, CPU provider binding, and fail-closed composition boundary are implemented. No approved OCR payload pair exists. Project numeric Candidates 1, 2, and 3 failed the frozen validation gate and produced no ONNX; the authorized budget is exhausted. Exact official PP-OCRv5 archives are inventoried but lack artifact-scoped redistribution terms, so conversion remains blocked. |
 | Markers | Unavailable | Marker-center exhausted its budget after one public false positive. The unchanged-weight probability-runtime classifier passed selection, public-v3, disjoint confirmation-v3, exact package discovery, and CPU/DirectML runtime validation. The concrete artifact-mask runtime bridge exists under the frozen marker-center task, but the current marker-center manifest lacks the separately required direct full-frame artifact-mask approval profile. The stage still requires an approved center model and checksum-bound artifact-mask evidence. |
 | Legends | Unavailable | Deterministic reasoner requires approved OCR and marker evidence. |
 | Phases | Unavailable | Deterministic reasoner requires approved axis, OCR, and marker evidence. |
@@ -262,7 +274,7 @@ files are not tracked.
 ## Tests and commands
 
 - `dotnet test GraphAutoReader.slnx -c Release --no-restore` in the current
-  Release run: 723 passed and 9 expected opt-in tests skipped.
+  Release run: 738 passed and 13 skipped; 9 were expected hardware or opt-in probes and 4 WPF screenshot cases were inconclusive on the current noninteractive desktop.
 - focused manual workflow: 8/8 passed.
 - bounded WPF manual composition: 1/1 passed.
 - Goal 19 application/composition focus: 18/18 passed in reviewer verification.
@@ -270,7 +282,7 @@ files are not tracked.
   fail-closed single-file and multi-file model discovery plus pre-launch
   executable checksum rejection through the durable Windows PowerShell 5.1
   launcher path.
-- `packaging/tests/Test-ReleaseArtifact.Tests.ps1`: 59/59 passed, including
+- `packaging/tests/Test-ReleaseArtifact.Tests.ps1`: 60/60 passed, including
   canonical UTC metadata, mandatory direct-evidence gates, and exact-binary
   rejection.
 - Super-resolution tests: 57/57 passed.
@@ -307,9 +319,9 @@ files are not tracked.
 - Production runtime availability: 12/12 focused composition cases passed;
   exact OpenCV bytes plus provenance, notice, clean-machine, and release flags
   are required before the axis stage becomes approved.
-- Public scoreboard: 37/37 synthetic metric-contract gates passed in 195.318 ms.
+- Public scoreboard: 37/37 synthetic metric-contract gates passed in 227.264 ms.
 - `packaging/localization/Test-LocalizationAudit.ps1`: 9/9 passed.
-- repository localization audit: 177 keys, 0 missing, 0 extra, 0 duplicate,
+- repository localization audit: 181 keys, 0 missing, 0 extra, 0 duplicate,
   and 0 unresolved references.
 - `git diff --check`: passed.
 - `Build-Windows.ps1 -AuditOnly`: release not ready, 16 substantive clean-tree
@@ -318,7 +330,7 @@ files are not tracked.
 
 ## Metrics and timing
 
-- current full .NET Release suite: 723 tests passed with 9 expected opt-in skips
+- current full .NET Release suite: 738 tests passed with 13 skips; 9 expected hardware or opt-in probes and 4 current noninteractive WPF screenshot inconclusives
 - direct exact Real-ESRGAN Chandler invocation: 1054.545 ms, exit code 0,
   1726 by 790 output, output SHA-256
   `954090b7f3b0783123f51b5a523672fdc889ab5e13b1dc935b5818f05b4729d1`,
@@ -359,6 +371,10 @@ clean-machine, production, and release approval remain false.
 
 - Manual-first development preview: implemented and running.
 - Stage-aware production composition: implemented, automatic stages fail closed.
+- Production OCR adapter boundary: implemented and directly tested with
+  checksum-resolved public-synthetic resources and executable generated ONNX
+  composition fixtures. The factory remains null for the real model store
+  because both approved payloads are absent.
 - Production stage availability: asynchronously derived from checksum, manifest,
   notice, benchmark, license, redistribution, and CPU-provider validation for
   every indexed model; invalid or partial stores remain unavailable.

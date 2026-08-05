@@ -125,6 +125,112 @@ public sealed class InferenceRuntimeTests
     }
 
     [TestMethod]
+    public async Task CacheBypassForcesCurrentSessionExecutionAfterAValidEntryExists()
+    {
+        using var model = TestOnnxModel.CreateIdentity();
+        var cacheRoot = TempDirectory();
+        try
+        {
+            var factory = new FakeInferenceSessionFactory(scale: 3);
+            await using var runtime = CreateRuntime(model, cacheRoot, factory);
+            InferenceRequest request = Request(model, TimeSpan.FromSeconds(2));
+
+            InferenceResponse cold = await runtime.RunAsync(request, CancellationToken.None);
+            InferenceResponse cached = await runtime.RunAsync(request, CancellationToken.None);
+            InferenceResponse forced = await runtime.RunAsync(
+                request with { BypassCache = true },
+                CancellationToken.None);
+
+            Assert.IsTrue(cold.Succeeded);
+            Assert.IsTrue(cached.Execution?.Timing.CacheHit);
+            Assert.IsTrue(forced.Succeeded);
+            Assert.IsFalse(forced.Execution?.Timing.CacheHit);
+            Assert.AreEqual(2, factory.Sessions.Single().RunCount);
+        }
+        finally
+        {
+            Directory.Delete(cacheRoot, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task ExplicitCpuPolicySkipsDirectMlAndUsesASeparateCacheIdentity()
+    {
+        using var model = TestOnnxModel.CreateIdentity();
+        var cacheRoot = TempDirectory();
+        try
+        {
+            var factory = new FakeInferenceSessionFactory(scale: 4);
+            var registry = new OnnxSessionRegistry(
+                new FakeExecutionProviderDiscovery("DmlExecutionProvider", "CPUExecutionProvider"),
+                new WindowsExecutionProviderPolicy(),
+                factory,
+                CpuThreadConfiguration.Create(1, new FixedCoreDetector()));
+            await using var runtime = new InferenceRuntime(
+                registry,
+                new BoundedInferenceScheduler(2, 1),
+                new ContentAddressedStageCache(cacheRoot));
+            InferenceRequest defaultPolicy = Request(model, TimeSpan.FromSeconds(2));
+            InferenceRequest cpuPolicy = defaultPolicy with
+            {
+                AllowedProviders = [InferenceProvider.Cpu],
+            };
+
+            InferenceResponse directMl = await runtime.RunAsync(defaultPolicy, CancellationToken.None);
+            InferenceResponse cpu = await runtime.RunAsync(cpuPolicy, CancellationToken.None);
+            InferenceResponse cpuCached = await runtime.RunAsync(cpuPolicy, CancellationToken.None);
+
+            Assert.AreEqual(InferenceProvider.DirectMl, directMl.Execution?.Provider);
+            Assert.AreEqual(InferenceProvider.Cpu, cpu.Execution?.Provider);
+            Assert.IsFalse(cpu.Execution?.Timing.CacheHit);
+            Assert.IsTrue(cpuCached.Execution?.Timing.CacheHit);
+            CollectionAssert.AreEquivalent(
+                new[] { InferenceProvider.DirectMl, InferenceProvider.Cpu },
+                factory.Sessions.Select(static session => session.Provider).ToArray());
+        }
+        finally
+        {
+            Directory.Delete(cacheRoot, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task ExplicitProviderPolicyRejectsMissingCpuFakeAndDuplicates()
+    {
+        using var model = TestOnnxModel.CreateIdentity();
+        var cacheRoot = TempDirectory();
+        try
+        {
+            await using var runtime = CreateRuntime(
+                model,
+                cacheRoot,
+                new FakeInferenceSessionFactory());
+            InferenceRequest request = Request(model, TimeSpan.FromSeconds(2));
+
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() =>
+                runtime.RunAsync(
+                    request with { AllowedProviders = [InferenceProvider.DirectMl] },
+                    CancellationToken.None).AsTask());
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() =>
+                runtime.RunAsync(
+                    request with { AllowedProviders = [InferenceProvider.Cpu, InferenceProvider.Fake] },
+                    CancellationToken.None).AsTask());
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() =>
+                runtime.RunAsync(
+                    request with { AllowedProviders = [InferenceProvider.Cpu, InferenceProvider.Cpu] },
+                    CancellationToken.None).AsTask());
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() =>
+                runtime.RunAsync(
+                    request with { AllowedProviders = [InferenceProvider.Cpu, (InferenceProvider)99] },
+                    CancellationToken.None).AsTask());
+        }
+        finally
+        {
+            Directory.Delete(cacheRoot, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public void DerivedCacheKeyIsolatedByActualTensorAndModelIdentity()
     {
         using var model = TestOnnxModel.CreateIdentity();

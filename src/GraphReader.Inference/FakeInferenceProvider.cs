@@ -73,6 +73,7 @@ public sealed class FakeInferenceSession : IInferenceSession
     private int _runCount;
     private int _running;
     private int _maximumConcurrentRuns;
+    private float[] _lastInputValues = [];
 
     internal FakeInferenceSession(InferenceProvider provider, TimeSpan delay, float scale, bool failRuns)
     {
@@ -90,6 +91,8 @@ public sealed class FakeInferenceSession : IInferenceSession
 
     public int MaximumConcurrentRuns => Volatile.Read(ref _maximumConcurrentRuns);
 
+    public IReadOnlyList<float> LastInputValues => Array.AsReadOnly((float[])_lastInputValues.Clone());
+
     public async ValueTask<InferenceExecution> RunAsync(InferenceInput input, CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
@@ -104,6 +107,7 @@ public sealed class FakeInferenceSession : IInferenceSession
             }
 
             cancellationToken.ThrowIfCancellationRequested();
+            _lastInputValues = input.Values.ToArray();
             if (_failRuns)
             {
                 throw new InvalidOperationException($"Simulated {Provider} inference run failure.");

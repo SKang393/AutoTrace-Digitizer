@@ -38,24 +38,43 @@ public sealed class InferenceRuntime : IAsyncDisposable
         ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
         ArgumentNullException.ThrowIfNull(request);
         cancellationToken.ThrowIfCancellationRequested();
+        request = request.AllowedProviders is null
+            ? request
+            : request with
+            {
+                AllowedProviders = Array.AsReadOnly(request.AllowedProviders.ToArray()),
+            };
+        ValidateAllowedProviders(request.AllowedProviders);
 
         var cacheKey = InferenceCacheKeyDeriver.Derive(request);
-        var cacheStopwatch = Stopwatch.StartNew();
-        var cached = await _cache.TryGetAsync(cacheKey, cancellationToken).ConfigureAwait(false);
-        if (cached is not null)
+        if (!request.BypassCache)
         {
-            try
+            var cacheStopwatch = Stopwatch.StartNew();
+            var cached = await _cache.TryGetAsync(cacheKey, cancellationToken).ConfigureAwait(false);
+            if (cached is not null)
             {
-                var cacheResult = CacheCodec.Decode(cached, cacheStopwatch.Elapsed.TotalMilliseconds);
-                return new InferenceResponse(true, cacheResult, null, Array.Empty<ProviderAttempt>());
-            }
-            catch (InvalidDataException)
-            {
-                // A corrupt entry is treated as a miss and overwritten by a successful run.
+                try
+                {
+                    var cacheResult = CacheCodec.Decode(cached, cacheStopwatch.Elapsed.TotalMilliseconds);
+                    if (request.AllowedProviders is null ||
+                        request.AllowedProviders.Contains(cacheResult.Provider))
+                    {
+                        return new InferenceResponse(true, cacheResult, null, Array.Empty<ProviderAttempt>());
+                    }
+                }
+                catch (InvalidDataException)
+                {
+                    // A corrupt entry is treated as a miss and overwritten by a successful run.
+                }
             }
         }
 
-        var acquisition = await _registry.GetOrCreateAsync(request.Model, cancellationToken).ConfigureAwait(false);
+        var acquisition = request.AllowedProviders is null
+            ? await _registry.GetOrCreateAsync(request.Model, cancellationToken).ConfigureAwait(false)
+            : await _registry.GetOrCreateAsync(
+                request.Model,
+                request.AllowedProviders,
+                cancellationToken).ConfigureAwait(false);
         if (!acquisition.Succeeded)
         {
             return InferenceResponse.Failure(acquisition.Error!, acquisition.Attempts);
@@ -210,6 +229,25 @@ public sealed class InferenceRuntime : IAsyncDisposable
 
     private static InferenceError Error(string code, string technicalMessage, string action) =>
         new(code, "error", "Errors." + code, technicalMessage, true, action);
+
+    private static void ValidateAllowedProviders(IReadOnlyList<InferenceProvider>? providers)
+    {
+        if (providers is null)
+        {
+            return;
+        }
+
+        if (providers.Count == 0 ||
+            providers.Any(static provider =>
+                provider is not (InferenceProvider.Cpu or InferenceProvider.DirectMl)) ||
+            !providers.Contains(InferenceProvider.Cpu) ||
+            providers.Distinct().Count() != providers.Count)
+        {
+            throw new ArgumentException(
+                "An explicit inference provider policy must be unique, production-only, and retain CPU fallback.",
+                nameof(providers));
+        }
+    }
 
     private static class CacheCodec
     {

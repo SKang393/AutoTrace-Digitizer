@@ -123,6 +123,55 @@ public sealed class ProductionOcrAdapterTests
         Assert.AreEqual(0, recognizer.CallCount);
     }
 
+    [TestMethod]
+    public async Task DetectionFailureDoesNotClaimEitherModelCompleted()
+    {
+        Fixture fixture = CreateFixture();
+        var detector = new TextDetectorStub(throwOnCall: true);
+        var recognizer = new TextRecognizerStub();
+        var pipeline = new OcrPipeline(detector, recognizer, new MemoryOcrResultCache());
+        var adapter = CreateAdapter(pipeline, isApproved: true);
+
+        ProductionWorkflowStageException exception =
+            await Assert.ThrowsAsync<ProductionWorkflowStageException>(() => adapter.RecognizeAsync(
+                fixture.Request,
+                fixture.Raster,
+                new OcrRectangle(4, 4, 24, 20),
+                CancellationToken.None));
+
+        Assert.AreEqual(
+            ProductionWorkflowFailureCodes.DetectionEvidenceRejected,
+            exception.Failure.Code);
+        Assert.IsEmpty(exception.CompletedEvidence);
+        Assert.AreEqual(1, detector.CallCount);
+        Assert.AreEqual(0, recognizer.CallCount);
+    }
+
+    [TestMethod]
+    public async Task RecognitionFailurePreservesOnlyCompletedDetectionEvidence()
+    {
+        Fixture fixture = CreateFixture();
+        var detector = new TextDetectorStub();
+        var recognizer = new TextRecognizerStub(throwOnCall: true);
+        var pipeline = new OcrPipeline(detector, recognizer, new MemoryOcrResultCache());
+        var adapter = CreateAdapter(pipeline, isApproved: true);
+
+        ProductionWorkflowStageException exception =
+            await Assert.ThrowsAsync<ProductionWorkflowStageException>(() => adapter.RecognizeAsync(
+                fixture.Request,
+                fixture.Raster,
+                new OcrRectangle(4, 4, 24, 20),
+                CancellationToken.None));
+
+        Assert.AreEqual(
+            ProductionWorkflowFailureCodes.DetectionEvidenceRejected,
+            exception.Failure.Code);
+        Assert.HasCount(1, exception.CompletedEvidence);
+        Assert.AreEqual(new string('a', 64), exception.CompletedEvidence[0].Model?.Sha256);
+        Assert.AreEqual(1, detector.CallCount);
+        Assert.AreEqual(1, recognizer.CallCount);
+    }
+
     private static ProductionOcrAdapter CreateAdapter(OcrPipeline pipeline, bool isApproved) =>
         new(
             pipeline,
@@ -201,7 +250,7 @@ public sealed class ProductionOcrAdapterTests
         ProductionWorkflowDetectionRequest Request,
         ProductionDecodedRaster Raster);
 
-    private sealed class TextDetectorStub : ITextRegionDetector
+    private sealed class TextDetectorStub(bool throwOnCall = false) : ITextRegionDetector
     {
         public int CallCount { get; private set; }
 
@@ -211,6 +260,11 @@ public sealed class ProductionOcrAdapterTests
         {
             cancellationToken.ThrowIfCancellationRequested();
             CallCount++;
+            if (throwOnCall)
+            {
+                throw new InvalidOperationException("Controlled detector failure.");
+            }
+
             IReadOnlyList<OcrDetectedRegion> regions =
             [
                 new(
@@ -224,7 +278,7 @@ public sealed class ProductionOcrAdapterTests
         }
     }
 
-    private sealed class TextRecognizerStub : ITextRecognizer
+    private sealed class TextRecognizerStub(bool throwOnCall = false) : ITextRecognizer
     {
         public string ModelId => "graph-ocr-recognizer";
 
@@ -240,6 +294,11 @@ public sealed class ProductionOcrAdapterTests
         {
             cancellationToken.ThrowIfCancellationRequested();
             CallCount++;
+            if (throwOnCall)
+            {
+                throw new InvalidOperationException("Controlled recognizer failure.");
+            }
+
             IReadOnlyList<OcrRecognition> recognitions = crops
                 .Select(crop => new OcrRecognition(
                     crop.RegionId,

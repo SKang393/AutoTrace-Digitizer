@@ -475,6 +475,198 @@ public sealed class ApplicationCompositionSmokeTests
     }
 
     [TestMethod]
+    public async Task ApprovedOcrPairExecutesCpuPreflightWithoutApprovingCompleteWorkflow()
+    {
+        using var package = ApprovedOcrPairPackageFixture.Create();
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(package.Root),
+            cancellationToken: CancellationToken.None);
+        try
+        {
+            var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+            Assert.IsNotNull(composition.OcrAdapter, composition.StartupError?.TechnicalMessage);
+            Assert.IsTrue(composition.OcrAdapter.IsApproved);
+            StringAssert.Contains(composition.OcrAdapter.AdapterId, "graphreader-ocr:");
+            Assert.AreEqual(
+                AutomaticStageState.Approved,
+                workspace.AutomaticStages.Single(stage => stage.Stage == "ocr").State);
+            Assert.AreEqual(
+                AutomaticStageState.Unavailable,
+                workspace.AutomaticStages.Single(stage => stage.Stage == "markers").State);
+            Assert.IsNull(composition.AutomaticDetectionAdapter);
+            Assert.IsNotNull(composition.InferenceRuntimeHost);
+            Assert.IsTrue(composition.InferenceRuntimeHost.IsInitialized);
+            Assert.IsFalse(workspace.UsesFakeGraphData);
+        }
+        finally
+        {
+            if (composition.InferenceRuntimeHost is not null)
+            {
+                await composition.InferenceRuntimeHost.DisposeAsync();
+            }
+        }
+    }
+
+    [TestMethod]
+    public async Task OcrPairWithMismatchedTensorContractFailsClosedBeforeRuntimeInitialization()
+    {
+        using var package = ApprovedOcrPairPackageFixture.Create(invalidDetectionShape: true);
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(package.Root),
+            cancellationToken: CancellationToken.None);
+        try
+        {
+            var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+            Assert.IsNull(composition.OcrAdapter);
+            Assert.AreEqual("OCR_ADAPTER_UNAVAILABLE", composition.StartupError?.Code);
+            StringAssert.Contains(composition.StartupError?.TechnicalMessage, "[1,3,H,W]");
+            Assert.AreEqual(
+                AutomaticStageState.Unavailable,
+                workspace.AutomaticStages.Single(stage => stage.Stage == "ocr").State);
+            Assert.IsNull(composition.AutomaticDetectionAdapter);
+            Assert.IsNotNull(composition.InferenceRuntimeHost);
+            Assert.IsFalse(composition.InferenceRuntimeHost.IsInitialized);
+            Assert.IsFalse(workspace.UsesFakeGraphData);
+        }
+        finally
+        {
+            if (composition.InferenceRuntimeHost is not null)
+            {
+                await composition.InferenceRuntimeHost.DisposeAsync();
+            }
+        }
+    }
+
+    [TestMethod]
+    public async Task OcrPairWithoutPassingDirectPublicGateEvidenceFailsClosed()
+    {
+        using var package = ApprovedOcrPairPackageFixture.Create(failingCer: true);
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(package.Root),
+            cancellationToken: CancellationToken.None);
+        try
+        {
+            var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+            Assert.IsNull(composition.OcrAdapter);
+            Assert.AreEqual("OCR_ADAPTER_UNAVAILABLE", composition.StartupError?.Code);
+            StringAssert.Contains(composition.StartupError?.TechnicalMessage, "sealed_test_cer");
+            Assert.AreEqual(
+                AutomaticStageState.Unavailable,
+                workspace.AutomaticStages.Single(stage => stage.Stage == "ocr").State);
+            Assert.IsNull(composition.AutomaticDetectionAdapter);
+            Assert.IsNotNull(composition.InferenceRuntimeHost);
+            Assert.IsFalse(composition.InferenceRuntimeHost.IsInitialized);
+            Assert.IsFalse(workspace.UsesFakeGraphData);
+        }
+        finally
+        {
+            if (composition.InferenceRuntimeHost is not null)
+            {
+                await composition.InferenceRuntimeHost.DisposeAsync();
+            }
+        }
+    }
+
+    [TestMethod]
+    public async Task OcrPairRejectsPhysicallyInvalidNegativeParityMetric()
+    {
+        using var package = ApprovedOcrPairPackageFixture.Create(negativeParity: true);
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(package.Root),
+            cancellationToken: CancellationToken.None);
+        try
+        {
+            var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+            Assert.IsNull(composition.OcrAdapter);
+            Assert.AreEqual("OCR_ADAPTER_UNAVAILABLE", composition.StartupError?.Code);
+            StringAssert.Contains(composition.StartupError?.TechnicalMessage, "onnx_max_abs_error");
+            Assert.AreEqual(
+                AutomaticStageState.Unavailable,
+                workspace.AutomaticStages.Single(stage => stage.Stage == "ocr").State);
+            Assert.IsNull(composition.AutomaticDetectionAdapter);
+            Assert.IsFalse(workspace.UsesFakeGraphData);
+        }
+        finally
+        {
+            if (composition.InferenceRuntimeHost is not null)
+            {
+                await composition.InferenceRuntimeHost.DisposeAsync();
+            }
+        }
+    }
+
+    [TestMethod]
+    public async Task OcrPairRejectsChecksumBoundNonOnnxPayloadDuringCpuPreflight()
+    {
+        using var package = ApprovedOcrPairPackageFixture.Create(invalidOnnxPayload: true);
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(package.Root),
+            cancellationToken: CancellationToken.None);
+        try
+        {
+            var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+            Assert.IsNull(composition.OcrAdapter);
+            Assert.AreEqual("OCR_ADAPTER_UNAVAILABLE", composition.StartupError?.Code);
+            StringAssert.Contains(composition.StartupError?.TechnicalMessage, "InvalidProtobuf");
+            Assert.AreEqual(
+                AutomaticStageState.Unavailable,
+                workspace.AutomaticStages.Single(stage => stage.Stage == "ocr").State);
+            Assert.IsNull(composition.AutomaticDetectionAdapter);
+            Assert.IsNotNull(composition.InferenceRuntimeHost);
+            Assert.IsTrue(composition.InferenceRuntimeHost.IsInitialized);
+            Assert.IsFalse(workspace.UsesFakeGraphData);
+        }
+        finally
+        {
+            if (composition.InferenceRuntimeHost is not null)
+            {
+                await composition.InferenceRuntimeHost.DisposeAsync();
+            }
+        }
+    }
+
+    [TestMethod]
+    public async Task OcrPairRejectsTamperedStructuredPredictionResource()
+    {
+        using var package = ApprovedOcrPairPackageFixture.Create(tamperPredictions: true);
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(package.Root),
+            cancellationToken: CancellationToken.None);
+        try
+        {
+            var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+            Assert.IsNull(composition.OcrAdapter);
+            Assert.AreEqual("OCR_ADAPTER_UNAVAILABLE", composition.StartupError?.Code);
+            StringAssert.Contains(composition.StartupError?.TechnicalMessage, "failed checksum validation");
+            Assert.AreEqual(
+                AutomaticStageState.Unavailable,
+                workspace.AutomaticStages.Single(stage => stage.Stage == "ocr").State);
+            Assert.IsNotNull(composition.InferenceRuntimeHost);
+            Assert.IsFalse(composition.InferenceRuntimeHost.IsInitialized);
+            Assert.IsFalse(workspace.UsesFakeGraphData);
+        }
+        finally
+        {
+            if (composition.InferenceRuntimeHost is not null)
+            {
+                await composition.InferenceRuntimeHost.DisposeAsync();
+            }
+        }
+    }
+
+    [TestMethod]
     public async Task DirectArtifactGateComposesLazyMaskAdapterWithoutApprovingAutomaticWorkflow()
     {
         using var package = ApprovedModelPackageFixture.Create(
@@ -1197,6 +1389,485 @@ public sealed class ApplicationCompositionSmokeTests
 
         private static string Sha256(byte[] bytes) =>
             Convert.ToHexString(SHA256.HashData(bytes));
+    }
+
+    private sealed class ApprovedOcrPairPackageFixture : IDisposable
+    {
+        private ApprovedOcrPairPackageFixture(string root)
+        {
+            Root = root;
+        }
+
+        public string Root { get; }
+
+        public static ApprovedOcrPairPackageFixture Create(
+            bool invalidDetectionShape = false,
+            bool failingCer = false,
+            bool negativeParity = false,
+            bool invalidOnnxPayload = false,
+            bool tamperPredictions = false)
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "GraphReader.ApplicationComposition.OcrModels",
+                Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+            const string alphabet = "0123456789.-%OolI";
+            byte[] detectionPayload = invalidOnnxPayload
+                ? [1, 9, 3, 7]
+                : GeneratedOcrContractOnnx.BuildDetectionModel();
+            byte[] recognitionPayload = GeneratedOcrContractOnnx.BuildRecognitionModel(
+                timeSteps: 16,
+                classCount: alphabet.Length + 1);
+            string detectionSha256 = Sha256(detectionPayload);
+            string recognitionSha256 = Sha256(recognitionPayload);
+            OcrEvidenceFixture evidence = CreateEvidence(
+                detectionSha256,
+                recognitionSha256,
+                failingCer,
+                negativeParity,
+                tamperPredictions);
+            Dictionary<string, object?> detection = WriteModel(
+                root,
+                "fixture-ocr-detection",
+                "ocr_detection",
+                detectionPayload,
+                detectionSha256,
+                recognitionSha256,
+                invalidDetectionShape,
+                alphabet,
+                evidence);
+            Dictionary<string, object?> recognition = WriteModel(
+                root,
+                "fixture-ocr-recognition",
+                "ocr_recognition",
+                recognitionPayload,
+                detectionSha256,
+                recognitionSha256,
+                invalidDetectionShape: false,
+                alphabet,
+                evidence);
+            var index = new Dictionary<string, object?>
+            {
+                ["schema_version"] = 1,
+                ["models"] = new[] { detection, recognition },
+            };
+            File.WriteAllText(
+                Path.Combine(root, "production-model-index.json"),
+                JsonSerializer.Serialize(index),
+                Encoding.UTF8);
+            return new ApprovedOcrPairPackageFixture(root);
+        }
+
+        private static Dictionary<string, object?> WriteModel(
+            string root,
+            string modelId,
+            string task,
+            byte[] payload,
+            string detectionSha256,
+            string recognitionSha256,
+            bool invalidDetectionShape,
+            string alphabet,
+            OcrEvidenceFixture evidence)
+        {
+            const string version = "1.0.0";
+            string runtimeDirectory = Path.Combine(root, "runtime", modelId, version);
+            string manifestDirectory = Path.Combine(root, "manifest", modelId, version);
+            string noticeDirectory = Path.Combine(root, "notices", modelId, version);
+            string evidenceDirectory = Path.Combine(root, "evidence", modelId, version);
+            Directory.CreateDirectory(runtimeDirectory);
+            Directory.CreateDirectory(manifestDirectory);
+            Directory.CreateDirectory(noticeDirectory);
+            Directory.CreateDirectory(evidenceDirectory);
+
+            string payloadPath = Path.Combine(runtimeDirectory, "model.onnx");
+            File.WriteAllBytes(payloadPath, payload);
+            string payloadSha256 = Sha256(payloadPath);
+            string noticePath = Path.Combine(noticeDirectory, "fixture-model.txt");
+            File.WriteAllText(
+                noticePath,
+                "Apache-2.0 synthetic OCR composition fixture.",
+                Encoding.UTF8);
+            string noticeSha256 = Sha256(noticePath);
+            string evidencePath = Path.Combine(evidenceDirectory, "fixture-benchmark.json");
+            File.WriteAllBytes(evidencePath, evidence.ReportBytes);
+            string evidenceSha256 = Sha256(evidencePath);
+            object[] channels = ["grayscale", "grayscale", "grayscale"];
+            object[] inputs;
+            object[] outputs;
+            Dictionary<string, object?> preprocessing;
+            Dictionary<string, object?> postprocessing;
+            if (task == "ocr_detection")
+            {
+                inputs =
+                [
+                    new Dictionary<string, object?>
+                    {
+                        ["name"] = "image",
+                        ["element_type"] = "float32",
+                        ["layout"] = "NCHW",
+                        ["shape"] = invalidDetectionShape
+                            ? new object[] { 1, 1, "H", "W" }
+                            : new object[] { 1, 3, "H", "W" },
+                        ["channels"] = channels,
+                    },
+                ];
+                outputs =
+                [
+                    new Dictionary<string, object?>
+                    {
+                        ["name"] = "text_probability",
+                        ["element_type"] = "float32",
+                        ["layout"] = "NCHW",
+                        ["shape"] = new object[] { 1, 1, "H", "W" },
+                        ["channels"] = new[] { "text_probability" },
+                        ["activation"] = "probability",
+                    },
+                ];
+                preprocessing = new Dictionary<string, object?>
+                {
+                    ["maximum_side_length"] = 960,
+                    ["dimension_multiple"] = 32,
+                    ["channel_means"] = new[] { 0.485f, 0.456f, 0.406f },
+                    ["channel_scales"] = new[] { 1f / 0.229f, 1f / 0.224f, 1f / 0.225f },
+                };
+                postprocessing = new Dictionary<string, object?>
+                {
+                    ["algorithm"] = "dense_probability_components_v1",
+                    ["probability_threshold"] = 0.3f,
+                    ["box_confidence_threshold"] = 0.55f,
+                    ["unclip_ratio"] = 1.5,
+                    ["minimum_component_area"] = 3,
+                    ["minimum_side_length"] = 2,
+                    ["maximum_regions"] = 1000,
+                };
+            }
+            else
+            {
+                inputs =
+                [
+                    new Dictionary<string, object?>
+                    {
+                        ["name"] = "image",
+                        ["element_type"] = "float32",
+                        ["layout"] = "NCHW",
+                        ["shape"] = new object[] { "N", 3, 48, 320 },
+                        ["channels"] = channels,
+                    },
+                ];
+                outputs =
+                [
+                    new Dictionary<string, object?>
+                    {
+                        ["name"] = "ctc_logits",
+                        ["element_type"] = "float32",
+                        ["layout"] = "NTC",
+                        ["shape"] = new object[] { "N", "T", "C" },
+                        ["alphabet"] = alphabet,
+                        ["time_steps"] = 16,
+                        ["blank_class_index"] = 0,
+                    },
+                ];
+                preprocessing = new Dictionary<string, object?>
+                {
+                    ["channel_means"] = new[] { 0.5f, 0.5f, 0.5f },
+                    ["channel_scales"] = new[] { 2f, 2f, 2f },
+                };
+                postprocessing = new Dictionary<string, object?>
+                {
+                    ["algorithm"] = "ctc_greedy_alternatives_v1",
+                    ["maximum_alternatives"] = 3,
+                };
+            }
+
+            var manifest = new Dictionary<string, object?>
+            {
+                ["manifest_version"] = 1,
+                ["model_id"] = modelId,
+                ["model_version"] = version,
+                ["task"] = task,
+                ["source"] = new Dictionary<string, object?>
+                {
+                    ["name"] = "Application composition synthetic fixture",
+                    ["url"] = "local://application-composition-ocr-fixture",
+                    ["revision"] = "1",
+                },
+                ["license"] = new Dictionary<string, object?>
+                {
+                    ["spdx"] = "Apache-2.0",
+                    ["notice_path"] = "LICENSES/fixture-model.txt",
+                    ["reviewed"] = true,
+                },
+                ["sha256"] = payloadSha256,
+                ["files"] = new[] { "model.onnx" },
+                ["inputs"] = inputs,
+                ["outputs"] = outputs,
+                ["preprocessing"] = preprocessing,
+                ["postprocessing"] = postprocessing,
+                ["commercial_use"] = true,
+                ["redistribution"] = true,
+                ["providers"] = new[] { "cpu" },
+                ["benchmarks"] = new[]
+                {
+                    new Dictionary<string, object?>
+                    {
+                        ["profile"] = ProductionOcrAdapter.ApprovalBenchmarkProfile,
+                        ["status"] = "pass",
+                        ["release_eligible"] = true,
+                        ["production_approval"] = true,
+                        ["evidence_path"] = "artifacts/evidence/fixture-benchmark.json",
+                        ["evidence_sha256"] = evidenceSha256,
+                        ["evaluator_source_sha256"] = evidence.EvaluatorSourceSha256,
+                        ["sealed_split_sha256"] = evidence.SealedSplitSha256,
+                        ["predictions_sha256"] = evidence.PredictionsSha256,
+                        ["runtime_results_sha256"] = evidence.RuntimeResultsSha256,
+                        ["sealed_test_exact_match"] = 1.0,
+                        ["sealed_test_cer"] = 0.0,
+                        ["onnx_max_abs_error"] = 0.00005,
+                    },
+                },
+            };
+            string manifestPath = Path.Combine(manifestDirectory, "manifest.json");
+            File.WriteAllText(manifestPath, JsonSerializer.Serialize(manifest), Encoding.UTF8);
+            string manifestSha256 = Sha256(manifestPath);
+            return new Dictionary<string, object?>
+            {
+                ["model_id"] = modelId,
+                ["model_version"] = version,
+                ["manifest"] = new Dictionary<string, object?>
+                {
+                    ["path"] = $"manifest/{modelId}/{version}/manifest.json",
+                    ["sha256"] = manifestSha256,
+                },
+                ["payloads"] = new[]
+                {
+                    new Dictionary<string, object?>
+                    {
+                        ["declared_path"] = "model.onnx",
+                        ["path"] = $"runtime/{modelId}/{version}/model.onnx",
+                        ["sha256"] = payloadSha256,
+                    },
+                },
+                ["notice"] = new Dictionary<string, object?>
+                {
+                    ["declared_path"] = "LICENSES/fixture-model.txt",
+                    ["path"] = $"notices/{modelId}/{version}/fixture-model.txt",
+                    ["sha256"] = noticeSha256,
+                },
+                ["benchmark_evidence"] = new Dictionary<string, object?>
+                {
+                    ["declared_path"] = "artifacts/evidence/fixture-benchmark.json",
+                    ["path"] = $"evidence/{modelId}/{version}/fixture-benchmark.json",
+                    ["sha256"] = evidenceSha256,
+                },
+            };
+        }
+
+        private static OcrEvidenceFixture CreateEvidence(
+            string detectionSha256,
+            string recognitionSha256,
+            bool failingCer,
+            bool negativeParity,
+            bool tamperPredictions)
+        {
+            byte[] evaluatorSource = File.ReadAllBytes(Path.Combine(
+                RepositoryRoot.Find(),
+                "ml",
+                "ocr",
+                "production_gate.py"));
+            string evaluatorSourceSha256 = Sha256(evaluatorSource);
+            string[] families = ["integer", "decimal", "negative", "percentage", "ambiguity"];
+            string[] roles = ["x_tick", "y_tick", "annotation", "participant", "phase_header"];
+            var cases = new List<Dictionary<string, object?>>();
+            var predictions = new List<Dictionary<string, object?>>();
+            for (int index = 0; index < 200; index++)
+            {
+                string partition = index < 100 ? "validation" : "sealed_test";
+                string family = families[index % families.Length];
+                string truth = family switch
+                {
+                    "integer" => (index % 101).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    "decimal" => $"{index % 10}.{(index + 3) % 10}",
+                    "negative" => $"-{(index % 99) + 1}",
+                    "percentage" => $"{index % 101}%",
+                    _ => $"O{index % 10}l",
+                };
+                string role = roles[index % roles.Length];
+                string caseId = $"{partition}-text-{index:D3}";
+                cases.Add(new Dictionary<string, object?>
+                {
+                    ["case_id"] = caseId,
+                    ["partition"] = partition,
+                    ["kind"] = "text",
+                    ["family"] = family,
+                    ["truth_text"] = truth,
+                    ["truth_role"] = role,
+                    ["expected_region_count"] = 1,
+                    ["source_sha256"] = Sha256(Encoding.UTF8.GetBytes($"source:{caseId}")),
+                });
+                predictions.Add(new Dictionary<string, object?>
+                {
+                    ["case_id"] = caseId,
+                    ["predicted_text"] = truth,
+                    ["predicted_role"] = role,
+                    ["detected_region_count"] = 1,
+                    ["false_region_count"] = 0,
+                    ["marker_creation_count"] = 0,
+                });
+            }
+
+            for (int index = 0; index < 20; index++)
+            {
+                string partition = index < 10 ? "validation" : "sealed_test";
+                string caseId = $"{partition}-exclusion-{index:D2}";
+                cases.Add(new Dictionary<string, object?>
+                {
+                    ["case_id"] = caseId,
+                    ["partition"] = partition,
+                    ["kind"] = "exclusion",
+                    ["family"] = "exclusion",
+                    ["truth_text"] = string.Empty,
+                    ["truth_role"] = "other",
+                    ["expected_region_count"] = 0,
+                    ["source_sha256"] = Sha256(Encoding.UTF8.GetBytes($"source:{caseId}")),
+                });
+                predictions.Add(new Dictionary<string, object?>
+                {
+                    ["case_id"] = caseId,
+                    ["predicted_text"] = string.Empty,
+                    ["predicted_role"] = "other",
+                    ["detected_region_count"] = 0,
+                    ["false_region_count"] = 0,
+                    ["marker_creation_count"] = 0,
+                });
+            }
+
+            byte[] splitBytes = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object?>
+            {
+                ["schema"] = "graphreader.ocr-sealed-split.v1",
+                ["profile"] = ProductionOcrAdapter.ApprovalBenchmarkProfile,
+                ["scope"] = "public_synthetic",
+                ["sealed"] = true,
+                ["selection_locked_before_inference"] = true,
+                ["private_data"] = false,
+                ["chandler_used"] = false,
+                ["evaluator_source_sha256"] = evaluatorSourceSha256,
+                ["cases"] = cases,
+            });
+            string splitSha256 = Sha256(splitBytes);
+            byte[] predictionBytes = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object?>
+            {
+                ["schema"] = "graphreader.ocr-predictions.v1",
+                ["profile"] = ProductionOcrAdapter.ApprovalBenchmarkProfile,
+                ["provider"] = "cpu",
+                ["sealed_split_sha256"] = splitSha256,
+                ["detection_model_sha256"] = detectionSha256,
+                ["recognition_model_sha256"] = recognitionSha256,
+                ["records"] = predictions,
+            });
+            string predictionsSha256 = Sha256(predictionBytes);
+            Dictionary<string, object?>[] parity = Enumerable.Range(0, 16)
+                .Select(index => new Dictionary<string, object?>
+                {
+                    ["reference"] = index / 16d,
+                    ["onnx"] = (index / 16d) + 0.00005,
+                })
+                .ToArray();
+            byte[] runtimeBytes = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object?>
+            {
+                ["schema"] = "graphreader.ocr-runtime-results.v1",
+                ["profile"] = ProductionOcrAdapter.ApprovalBenchmarkProfile,
+                ["provider"] = "cpu",
+                ["detection_executed"] = true,
+                ["recognition_executed"] = true,
+                ["evaluator_source_sha256"] = evaluatorSourceSha256,
+                ["sealed_split_sha256"] = splitSha256,
+                ["predictions_sha256"] = predictionsSha256,
+                ["detection_model_sha256"] = detectionSha256,
+                ["recognition_model_sha256"] = recognitionSha256,
+                ["detection_parity"] = parity,
+                ["recognition_parity"] = parity,
+            });
+            string runtimeSha256 = Sha256(runtimeBytes);
+            byte[] reportBytes = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object?>
+            {
+                ["schema"] = "graphreader.ocr-production-gate.v1",
+                ["profile"] = ProductionOcrAdapter.ApprovalBenchmarkProfile,
+                ["status"] = "pass",
+                ["scope"] = "public_synthetic_sealed",
+                ["release_eligible"] = true,
+                ["production_approval"] = true,
+                ["private_data"] = false,
+                ["chandler_used"] = false,
+                ["provider"] = "cpu",
+                ["coordinate_space"] = "original_pixels",
+                ["detection_model_sha256"] = detectionSha256,
+                ["recognition_model_sha256"] = recognitionSha256,
+                ["evaluator_source_sha256"] = evaluatorSourceSha256,
+                ["sealed_split_sha256"] = splitSha256,
+                ["predictions_sha256"] = predictionsSha256,
+                ["runtime_results_sha256"] = runtimeSha256,
+                ["validation_exact_match"] = 1.0,
+                ["validation_cer"] = 0.0,
+                ["validation_role_accuracy"] = 1.0,
+                ["sealed_test_exact_match"] = 1.0,
+                ["sealed_test_cer"] = failingCer ? 0.051 : 0.0,
+                ["sealed_test_role_accuracy"] = 1.0,
+                ["onnx_max_abs_error"] = negativeParity ? -0.00001 : 0.00005,
+                ["detection_exact_rate"] = 1.0,
+                ["marker_creation_evaluated"] = true,
+                ["marker_creation_count"] = 0,
+                ["reviewed_resources"] = new Dictionary<string, object?>
+                {
+                    ["evaluator_source"] = Embedded("text/x-python", evaluatorSource, evaluatorSourceSha256),
+                    ["sealed_split"] = Embedded("application/json", splitBytes, splitSha256),
+                    ["predictions"] = Embedded(
+                        "application/json",
+                        tamperPredictions ? predictionBytes.Append((byte)0).ToArray() : predictionBytes,
+                        predictionsSha256),
+                    ["runtime_results"] = Embedded("application/json", runtimeBytes, runtimeSha256),
+                },
+            });
+            return new OcrEvidenceFixture(
+                reportBytes,
+                evaluatorSourceSha256,
+                splitSha256,
+                predictionsSha256,
+                runtimeSha256);
+        }
+
+        private static Dictionary<string, object?> Embedded(
+            string mediaType,
+            byte[] bytes,
+            string sha256) =>
+            new()
+            {
+                ["media_type"] = mediaType,
+                ["encoding"] = "base64",
+                ["sha256"] = sha256,
+                ["content_base64"] = Convert.ToBase64String(bytes),
+            };
+
+        private static string Sha256(string path) =>
+            Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)));
+
+        private static string Sha256(byte[] bytes) =>
+            Convert.ToHexString(SHA256.HashData(bytes));
+
+        private sealed record OcrEvidenceFixture(
+            byte[] ReportBytes,
+            string EvaluatorSourceSha256,
+            string SealedSplitSha256,
+            string PredictionsSha256,
+            string RuntimeResultsSha256);
+
+        public void Dispose()
+        {
+            if (Directory.Exists(Root))
+            {
+                Directory.Delete(Root, recursive: true);
+            }
+        }
     }
 
     private sealed class ModelRootApplicationPaths(string modelRoot) : GraphReader.Domain.IApplicationPaths

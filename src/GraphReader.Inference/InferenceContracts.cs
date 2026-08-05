@@ -84,7 +84,9 @@ public sealed record InferenceRequest(
     ModelIdentity Model,
     InferenceInput Input,
     StageCacheMaterial CacheMaterial,
-    TimeSpan Timeout);
+    TimeSpan Timeout,
+    IReadOnlyList<InferenceProvider>? AllowedProviders = null,
+    bool BypassCache = false);
 
 public sealed record StageCacheMaterial(
     string InputSha256,

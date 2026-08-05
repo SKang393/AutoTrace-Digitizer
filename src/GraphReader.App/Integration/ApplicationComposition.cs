@@ -49,12 +49,14 @@ public static class ApplicationComposition
             applicationPaths,
             applicationRoot ?? AppContext.BaseDirectory,
             environment == WorkflowRuntimeEnvironment.Production
-                ? CapturedUiThreadGuard.CaptureCurrentThread()
+                ? CreateProductionUiThreadGuard()
                 : null,
             modelAvailability: null,
             runtimeAvailability: null,
             enhancementResolver,
-            enhancementResolution: null);
+            enhancementResolution: null,
+            precreatedInference: null,
+            precreatedOcr: null);
     }
 
     public static async Task<ApplicationCompositionResult> CreateAsync(
@@ -64,7 +66,7 @@ public static class ApplicationComposition
         CancellationToken cancellationToken = default)
     {
         IUiThreadGuard? uiThreadGuard = environment == WorkflowRuntimeEnvironment.Production
-            ? CapturedUiThreadGuard.CaptureCurrentThread()
+            ? CreateProductionUiThreadGuard()
             : null;
         Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver =
             CreateLocalEnhancementResolver(applicationPaths);
@@ -82,15 +84,55 @@ public static class ApplicationComposition
                 applicationRoot ?? AppContext.BaseDirectory,
                 cancellationToken).ConfigureAwait(false)
             : null;
-        return CreateCore(
-            environment,
-            applicationPaths,
-            applicationRoot ?? AppContext.BaseDirectory,
-            uiThreadGuard,
-            modelAvailability,
-            runtimeAvailability,
-            enhancementResolver,
-            enhancementResolution);
+        DomainResult<ProductionInferenceRuntimeHost>? inference =
+            environment == WorkflowRuntimeEnvironment.Production && applicationPaths is not null
+                ? ProductionInferenceRuntimeFactory.Create(
+                    applicationPaths,
+                    uiThreadGuard ?? NoUiThreadGuard.Instance)
+                : null;
+        return await CompleteWithOwnedInferenceAsync(
+                inference?.Value,
+                async () =>
+                {
+                    (ProductionOcrAdapter? Adapter, DomainError? Error) ocr =
+                        await CreateApprovedOcrAdapterAsync(
+                                modelAvailability,
+                                inference?.Value,
+                                cancellationToken)
+                            .ConfigureAwait(false);
+                    return CreateCore(
+                        environment,
+                        applicationPaths,
+                        applicationRoot ?? AppContext.BaseDirectory,
+                        uiThreadGuard,
+                        modelAvailability,
+                        runtimeAvailability,
+                        enhancementResolver,
+                        enhancementResolution,
+                        inference,
+                        ocr);
+                })
+            .ConfigureAwait(false);
+    }
+
+    internal static async Task<ApplicationCompositionResult> CompleteWithOwnedInferenceAsync(
+        ProductionInferenceRuntimeHost? runtimeHost,
+        Func<Task<ApplicationCompositionResult>> continuation)
+    {
+        ArgumentNullException.ThrowIfNull(continuation);
+        try
+        {
+            return await continuation().ConfigureAwait(false);
+        }
+        catch
+        {
+            if (runtimeHost is not null)
+            {
+                await runtimeHost.DisposeAsync().ConfigureAwait(false);
+            }
+
+            throw;
+        }
     }
 
     private static ApplicationCompositionResult CreateCore(
@@ -101,16 +143,18 @@ public static class ApplicationComposition
         ProductionModelAvailabilitySnapshot? modelAvailability,
         ProductionRuntimeAvailabilitySnapshot? runtimeAvailability,
         Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver,
-        RealEsrganBackendResolution? enhancementResolution)
+        RealEsrganBackendResolution? enhancementResolution,
+        DomainResult<ProductionInferenceRuntimeHost>? precreatedInference,
+        (ProductionOcrAdapter? Adapter, DomainError? Error)? precreatedOcr)
     {
         (IPdfImportService PdfImporter, bool ReviewedRendererConfigured, DomainError? Error) pdf =
             CreateReviewedPdfImporter(applicationRoot);
-        DomainResult<ProductionInferenceRuntimeHost>? inference =
-            environment == WorkflowRuntimeEnvironment.Production && applicationPaths is not null
+        DomainResult<ProductionInferenceRuntimeHost>? inference = precreatedInference ??
+            (environment == WorkflowRuntimeEnvironment.Production && applicationPaths is not null
                 ? ProductionInferenceRuntimeFactory.Create(
                     applicationPaths,
-                    uiThreadGuard ?? CapturedUiThreadGuard.CaptureCurrentThread())
-                : null;
+                    uiThreadGuard ?? NoUiThreadGuard.Instance)
+                : null);
         var rasterFrameDecoder = new ProductionRasterFrameDecoder();
         ProductionAxisGeometryAdapter? axisAdapter = CreateApprovedAxisAdapter(
             runtimeAvailability,
@@ -122,7 +166,9 @@ public static class ApplicationComposition
         var detectionMaskComposer = new ProductionDetectionMaskComposer(artifactMask.Adapter);
         (ProductionMarkerClassificationAdapter? Adapter, DomainError? Error) markerClassifier =
             CreateApprovedMarkerClassifierAdapter(modelAvailability, inference?.Value);
-        IProductionOcrAdapter? ocrAdapter = null;
+        (ProductionOcrAdapter? Adapter, DomainError? Error) ocr =
+            precreatedOcr ?? (null, null);
+        ProductionOcrAdapter? ocrAdapter = ocr.Adapter;
         var legendAdapter = new ProductionLegendReasoningAdapter();
         var phaseAdapter = new ProductionPhaseReasoningAdapter();
         bool completeDetectionAdapterAvailable =
@@ -162,10 +208,15 @@ public static class ApplicationComposition
             adapterEvidence.Add(
                 "No production OCR pipeline is composed because no checksum-bound detector and recognizer pair currently has an executable approved adapter factory.");
         }
+        else
+        {
+            approvedAdapterStages.Add("ocr");
+            adapterEvidence.Add(
+                $"Concrete production OCR component '{ocrAdapter.AdapterId}' is composed from two independently approved CPU-bound payloads.");
+        }
 
         if (completeDetectionAdapterAvailable)
         {
-            approvedAdapterStages.Add("ocr");
             approvedAdapterStages.Add("markers");
             adapterEvidence.Add(
                 "The complete production detection, projection, and export-evidence adapter can be composed from approved components.");
@@ -211,7 +262,7 @@ public static class ApplicationComposition
                 phaseAdapter,
                 rasterFrameDecoder,
                 detectionMaskComposer,
-                markerCenter.Error ?? markerClassifier.Error ?? artifactMask.Error,
+                ocr.Error ?? markerCenter.Error ?? markerClassifier.Error ?? artifactMask.Error,
                 artifactMask.Adapter),
             WorkflowRuntimeEnvironment.ManualPreview => new ApplicationCompositionResult(
                 environment,
@@ -227,6 +278,15 @@ public static class ApplicationComposition
                 null),
             _ => throw new ArgumentOutOfRangeException(nameof(environment)),
         };
+    }
+
+    private static IUiThreadGuard CreateProductionUiThreadGuard()
+    {
+        System.Windows.Threading.Dispatcher? dispatcher =
+            System.Windows.Application.Current?.Dispatcher;
+        return dispatcher is null
+            ? NoUiThreadGuard.Instance
+            : new DispatcherUiThreadGuard(dispatcher);
     }
 
     private static ApplicationCompositionResult CreateProduction(
@@ -346,6 +406,51 @@ public static class ApplicationComposition
                     DomainErrorSeverity.Warning,
                     "Errors.ProductionWorkflowUnavailable",
                     $"The checksum-resolved marker classifier could not be composed: {exception.Message}",
+                    Recoverable: true,
+                    "continue_manual_or_repair_model_store"));
+        }
+    }
+
+    private static async Task<(ProductionOcrAdapter? Adapter, DomainError? Error)>
+        CreateApprovedOcrAdapterAsync(
+            ProductionModelAvailabilitySnapshot? modelAvailability,
+            ProductionInferenceRuntimeHost? runtimeHost,
+            CancellationToken cancellationToken)
+    {
+        if (runtimeHost is null || modelAvailability is null ||
+            !modelAvailability.ApprovedCpuModels.TryGetValue(
+                "ocr_detection",
+                out ResolvedProductionModel? detectionModel) ||
+            !modelAvailability.ApprovedCpuModels.TryGetValue(
+                "ocr_recognition",
+                out ResolvedProductionModel? recognitionModel))
+        {
+            return (null, null);
+        }
+
+        try
+        {
+            ProductionOcrAdapter adapter = await ProductionOcrAdapter.CreateAsync(
+                    detectionModel,
+                    recognitionModel,
+                    runtimeHost,
+                    cancellationToken)
+                .ConfigureAwait(false);
+            return (adapter, null);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            return (
+                null,
+                new DomainError(
+                    "OCR_ADAPTER_UNAVAILABLE",
+                    DomainErrorSeverity.Warning,
+                    "Errors.ProductionWorkflowUnavailable",
+                    $"The checksum-resolved OCR detector and recognizer could not be composed: {exception.Message}",
                     Recoverable: true,
                     "continue_manual_or_repair_model_store"));
         }

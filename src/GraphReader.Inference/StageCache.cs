@@ -45,13 +45,19 @@ public static class InferenceCacheKeyDeriver
         ArgumentNullException.ThrowIfNull(request.Input);
         ArgumentNullException.ThrowIfNull(request.CacheMaterial);
         var tensorHash = HashTensorInput(request.Input);
+        var providerPolicy = request.AllowedProviders is null
+            ? "policy-default"
+            : string.Join(',', request.AllowedProviders
+                .Distinct()
+                .OrderBy(static provider => provider)
+                .Select(static provider => provider.ToString()));
         return StageCacheKey.Create(
             request.CacheMaterial.InputSha256 + ":" + tensorHash,
             request.CacheMaterial.PanelCrop,
             request.CacheMaterial.TransformChain,
             request.CacheMaterial.StageName,
             request.CacheMaterial.StageVersion,
-            request.Model.Sha256,
+            request.Model.Sha256 + ":" + providerPolicy,
             request.CacheMaterial.Parameters,
             request.CacheMaterial.ContractVersion);
     }

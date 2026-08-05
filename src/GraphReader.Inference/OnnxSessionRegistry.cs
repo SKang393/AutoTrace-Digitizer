@@ -37,17 +37,29 @@ public sealed class OnnxSessionRegistry : IAsyncDisposable
     public ValueTask<SessionAcquisition> GetOrCreateAsync(
         ModelIdentity model,
         CancellationToken cancellationToken) =>
-        GetOrCreateAsync(model, allowedProviders: null, cancellationToken);
+        GetOrCreateCoreAsync(model, allowedProviders: null, cancellationToken);
+
+    public ValueTask<SessionAcquisition> GetOrCreateAsync(
+        ModelIdentity model,
+        IReadOnlyList<InferenceProvider> allowedProviders,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(allowedProviders);
+        return GetOrCreateCoreAsync(
+            model,
+            Array.AsReadOnly(allowedProviders.ToArray()),
+            cancellationToken);
+    }
 
     public ValueTask<SessionAcquisition> GetOrCreateAsync(
         ResolvedProductionModel model,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(model);
-        return GetOrCreateAsync(model.Identity, model.AvailableProviders, cancellationToken);
+        return GetOrCreateCoreAsync(model.Identity, model.AvailableProviders, cancellationToken);
     }
 
-    private async ValueTask<SessionAcquisition> GetOrCreateAsync(
+    private async ValueTask<SessionAcquisition> GetOrCreateCoreAsync(
         ModelIdentity model,
         IReadOnlyList<InferenceProvider>? allowedProviders,
         CancellationToken cancellationToken)
@@ -70,7 +82,10 @@ public sealed class OnnxSessionRegistry : IAsyncDisposable
 
         var attempts = new List<ProviderAttempt>();
         var allowed = allowedProviders?.ToHashSet();
-        if (allowed is not null && (!allowed.Contains(InferenceProvider.Cpu) || allowed.Contains(InferenceProvider.Fake)))
+        if (allowed is not null &&
+            (!allowed.Contains(InferenceProvider.Cpu) ||
+             allowed.Any(static provider =>
+                 provider is not (InferenceProvider.Cpu or InferenceProvider.DirectMl))))
         {
             throw new ArgumentException("Resolved production models must allow CPU and cannot allow Fake.", nameof(allowedProviders));
         }
