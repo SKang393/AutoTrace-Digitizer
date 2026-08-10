@@ -82,6 +82,10 @@ try {
             [ref]$errors) | Out-Null
         Assert-True ($errors.Count -eq 0) "PowerShell parser errors in ${script}: $($errors -join ' | ')"
     }
+    Assert-True (
+        (Get-Content -LiteralPath $launcherScript -Raw).Contains(
+            'artifacts\goal19-realesrgan\runtime-authorized-vcomp-14.44.35211')) `
+        'Launcher default must select the exact manifest-authorized vcomp runtime profile.'
 
     $atomicOutputRoot = Join-Path $testRoot 'atomic metadata'
     New-Item -ItemType Directory -Path $atomicOutputRoot | Out-Null

@@ -34,7 +34,7 @@ explicitly approved conversion and provenance workflow exists.
 |---|---|---|---|---|---|---|---|
 | `RealESRGAN_x2plus` | `v0.2.1` | Official Real-ESRGAN release | BSD-3-Clause | Not bundled; downloaded to ignored audit storage only | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | `49fafd45f8fd7aa8d31ab2a22d14d91b536c34494a5cfe31eb5d89c2fa266abb` | Artifact verified again on 2026-08-03; current NCNN adapter is incompatible; production approval blocked |
 | `realesr-general-x4v3` | `v0.2.5.0` | Official Real-ESRGAN release | BSD-3-Clause | Not bundled; downloaded to temporary audit storage only | `LICENSES/Real-ESRGAN-BSD-3-Clause.txt` | `8dc7edb9ac80ccdc30c3a5dca6616509367f05fbc184ad95b731f05bece96292` | License and checksum reviewed; benchmark not run; NCNN integration blocked |
-| `realesr-animevideov3` NCNN x2 | `v0.2.5.0-ncnn-x2` | Official Real-ESRGAN Windows NCNN package plus unmodified Visual Studio 2022 VC Redist OpenMP runtime | BSD-3-Clause model notice; MIT/BSD/zlib runtime closure; Microsoft redistributable terms | Not bundled; retained only in ignored audit storage | Exact runtime, model, and Microsoft reference notices listed below | Package: `abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d`; authorized `vcomp140.dll`: `55aba23cdcd6484fbb06f4155b8ca75adfce7a881f10afd0c49457165e677164` | Runtime redistribution provenance reviewed for one checksum-bound profile; local adapter, scientific, memory, CPU fallback, clean-machine, production, and release approvals remain false |
+| `realesr-animevideov3` NCNN x2 | `v0.2.5.0-ncnn-x2` | Official Real-ESRGAN Windows NCNN package plus unmodified Visual Studio 2022 VC Redist OpenMP runtime | BSD-3-Clause model notice; MIT/BSD/zlib runtime closure; Microsoft redistributable terms | Not bundled; retained only in ignored audit storage | Exact runtime, model, and Microsoft reference notices listed below | Package: `abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d`; authorized `vcomp140.dll`: `55aba23cdcd6484fbb06f4155b8ca75adfce7a881f10afd0c49457165e677164` | Developer-only local adapter approved from checksum-bound execution and source-preservation evidence; scientific, memory, clean-machine, production, bundling, and release approvals remain false |
 
 ## Pinned official sources and verified hashes
 
@@ -104,9 +104,10 @@ blob `f7a46dafcbf143ee8d0ac4b6a7d12b6fe28979e0`. Exact retained notices are:
 - `LICENSES/dirent-1998-2019-MIT-Notice.txt` for the embedded header attribution
   and MIT terms.
 
-This closes the tracked source and notice inventory. It does not authorize or
-bundle the runtime because the exact Microsoft binary and the scientific and
-clean-machine gates remain open.
+This closes the tracked source and notice inventory. It does not authorize
+bundling because scientific, clean-machine, and production gates remain open.
+The exact Microsoft binary has reviewed redistribution provenance only for the
+checksum-bound authorized-vcomp profile.
 
 ## License and redistribution review
 
@@ -171,8 +172,9 @@ The local environment was Windows `10.0.26200`, .NET SDK `10.0.302`, and an AMD
 Radeon RX 6600 XT Vulkan device. The evidence JSON SHA-256 is
 `26b8b7fa0ce02b3fbbbfc647bcb6993bacc6073a21841c07bbb4c2e46720e98e`.
 
-This is a bounded adapter, runtime, dimension, and cache benchmark only. It
-does not measure marker-center F1, shape/fill F1, numeric OCR exact match, axis
+This bounded adapter, runtime, dimension, and cache benchmark approves only
+visibly labeled developer local evaluation of the exact manifest and runtime.
+It does not measure marker-center F1, shape/fill F1, numeric OCR exact match, axis
 localization error, hallucinated structure rate, or peak memory. The NCNN
 runtime also has no CPU or DirectML execution provider. Its transitive runtime
 provenance is now reviewed only for the exact authorized-vcomp profile. The anime model therefore
@@ -226,8 +228,12 @@ every parameter and weight checksum, Vulkan provider, runtime model name,
 output scale, model redistribution flag, runtime redistribution status, and
 benchmark approval. Distribution-purpose resolution fails closed. An explicit
 local-evaluation purpose may return a service with a structured warning only
-when the manifest's local scientific-fidelity approval remains true. A failed
-local approval returns `MODEL_RUNTIME_INCOMPATIBLE` without a service.
+when the manifest's developer-only local-adapter approval is true. That
+approval proves exact runtime compatibility, source preservation, and 2x output
+dimensions, not scientific quality. A failed local approval returns
+`MODEL_RUNTIME_INCOMPATIBLE` without a service. Distribution purpose remains
+blocked while runtime redistribution and production benchmark approvals are
+false.
 
 The primary default remains `realesr-animevideov3` at output scale 2. A
 manifest-driven run on public synthetic case
@@ -271,13 +277,16 @@ factory fails closed before process invocation. Small-text clarity,
 open-circle preservation, filled-circle preservation, axis and tick clarity,
 detector metrics, hallucinated-structure rate, and peak memory remain
 unmeasured. No quality improvement is claimed. The primary manifest remains
-the selected default identity, but its local adapter approval is now also false
-until its fixed scientific-fidelity gate passes.
+the selected default identity and is approved only for visibly labeled
+developer local evaluation. Its scientific and production approvals remain
+false until the fixed quality gates pass.
 
 Neither local result approves release bundling. Runtime redistribution
 provenance is reviewed only for the checksum-bound authorized-vcomp profile.
-Scientific fidelity, CPU fallback, clean-machine execution, peak memory, and
-production-quality benchmark approval remain mandatory.
+Scientific fidelity, clean-machine execution, peak memory, and
+production-quality benchmark approval remain mandatory. Enhancement is
+optional, so the required offline CPU workflow continues with enhancement
+disabled rather than claiming NCNN Vulkan has a CPU provider.
 
 ## Verification method
 

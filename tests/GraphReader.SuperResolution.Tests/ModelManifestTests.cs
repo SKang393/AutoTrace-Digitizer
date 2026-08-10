@@ -261,7 +261,7 @@ public sealed class ModelManifestTests
     }
 
     [TestMethod]
-    public void AnimeVideoV3IsTheExactManifestDrivenDefaultAndAllApprovalsRemainBlocked()
+    public void AnimeVideoV3IsTheDeveloperDefaultWhileProductionApprovalsRemainBlocked()
     {
         using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(
             Path.Combine(ManifestDirectory, ManifestDrivenRealEsrganBackend.DefaultManifestFileName)));
@@ -269,7 +269,14 @@ public sealed class ModelManifestTests
         Assert.AreEqual(ManifestDrivenRealEsrganBackend.DefaultModelId, GetModelId(manifest));
         JsonElement preprocessing = root.GetProperty("preprocessing");
         Assert.AreEqual("realesr-animevideov3", preprocessing.GetProperty("runtime_model_name").GetString());
-        Assert.IsFalse(preprocessing.GetProperty("local_adapter_approval").GetBoolean());
+        Assert.IsTrue(preprocessing.GetProperty("local_adapter_approval").GetBoolean());
+        Assert.AreEqual(
+            "developer_local_evaluation_only",
+            preprocessing.GetProperty("local_adapter_approval_scope").GetString());
+        JsonElement localEvidence = preprocessing.GetProperty("local_adapter_evidence");
+        Assert.IsTrue(localEvidence.GetProperty("source_preservation_verified").GetBoolean());
+        Assert.IsTrue(localEvidence.GetProperty("exact_two_x_dimensions_verified").GetBoolean());
+        Assert.AreEqual("none", localEvidence.GetProperty("production_quality_claims").GetString());
         Assert.AreEqual(2, preprocessing.GetProperty("runtime_scale_argument").GetInt32());
         Assert.AreEqual(
             "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",

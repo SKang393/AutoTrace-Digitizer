@@ -131,7 +131,7 @@ try {
         'Process')
     if (-not $DisableLocalEnhancement.IsPresent) {
         if ([string]::IsNullOrWhiteSpace($RealEsrganRuntimeRoot)) {
-            $RealEsrganRuntimeRoot = Join-Path $repositoryRoot 'artifacts\goal19-realesrgan\runtime-minimal-audit'
+            $RealEsrganRuntimeRoot = Join-Path $repositoryRoot 'artifacts\goal19-realesrgan\runtime-authorized-vcomp-14.44.35211'
         }
         if ([string]::IsNullOrWhiteSpace($RealEsrganManifestPath)) {
             $RealEsrganManifestPath = Join-Path $repositoryRoot 'models\manifest\super-resolution\realesr-animevideov3-ncnn-x2.json'

@@ -224,7 +224,7 @@ public sealed class ManifestDrivenRealEsrganBackendTests
     }
 
     [TestMethod]
-    public async Task AuthorizedOfficialRuntimeFailsClosedUntilScientificApproval()
+    public async Task AuthorizedOfficialRuntimeRunsOnlyAsDeveloperLocalEvaluation()
     {
         string? runtimeRoot = Environment.GetEnvironmentVariable("GRAPHREADER_REALESRGAN_RUNTIME_ROOT");
         string? datasetRoot = Environment.GetEnvironmentVariable("GRAPHREADER_REALESRGAN_DATASET_ROOT");
@@ -255,11 +255,30 @@ public sealed class ManifestDrivenRealEsrganBackendTests
                 Path.Combine(modelRoot, "cache"),
                 RealEsrganBackendPurpose.LocalEvaluation,
                 CancellationToken.None);
-            Assert.AreEqual(RealEsrganBackendAvailability.ModelIncompatible, resolution.Availability);
-            Assert.IsFalse(resolution.IsAvailable);
-            Assert.IsNull(resolution.Service);
-            Assert.AreEqual("MODEL_RUNTIME_INCOMPATIBLE", resolution.Diagnostic?.Code);
-            StringAssert.Contains(resolution.Diagnostic?.TechnicalMessage, "scientific-fidelity benchmark");
+            Assert.AreEqual(
+                RealEsrganBackendAvailability.AvailableForLocalEvaluationOnly,
+                resolution.Availability);
+            Assert.IsTrue(resolution.IsAvailable);
+            Assert.IsFalse(resolution.ReleaseEligible);
+            Assert.IsNotNull(resolution.Service);
+            Assert.IsNotNull(resolution.Model);
+            Assert.AreEqual("ENHANCEMENT_LOCAL_EVALUATION_ONLY", resolution.Diagnostic?.Code);
+
+            string outputPath = Path.Combine(testRoot, "primary", "enhanced.png");
+            EnhancementResult result = await resolution.Service.EnhanceAsync(
+                new EnhancementRequest(
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    sourcePath,
+                    outputPath,
+                    new PixelDimensions(1200, 350),
+                    resolution.Model,
+                    new EnhancementOptions(Scale: 2)),
+                CancellationToken.None);
+            Assert.IsTrue(result.IsSuccess, result.Diagnostic.Message);
+            Assert.AreEqual(
+                new PixelDimensions(2400, 700),
+                new PngOutputImageInspector().ReadDimensions(outputPath));
 
             string secondaryManifest = RepositoryPaths.FromRoot(
                 "models",

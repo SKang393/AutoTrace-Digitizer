@@ -59,8 +59,15 @@
   "preprocessing": {
     "runtime": "realesrgan-ncnn-vulkan",
     "runtime_model_name": "realesr-animevideov3",
-    "local_adapter_approval": false,
-    "local_adapter_blocker": "The reviewed runtime has direct Vulkan execution evidence, but its fixed scientific-fidelity benchmark, offline CPU fallback, and clean-machine production gates are not approved.",
+    "local_adapter_approval": true,
+    "local_adapter_approval_scope": "developer_local_evaluation_only",
+    "local_adapter_evidence": {
+      "adapter_benchmark_sha256": "26b8b7fa0ce02b3fbbbfc647bcb6993bacc6073a21841c07bbb4c2e46720e98e",
+      "minimal_runtime_evidence_sha256": "c480f97e09cf6117a86d5e8b565afa6e47aa3f85c14d9e46e3ef1932161fa967",
+      "source_preservation_verified": true,
+      "exact_two_x_dimensions_verified": true,
+      "production_quality_claims": "none"
+    },
     "runtime_scale_argument": 2,
     "runtime_executable_sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
     "runtime_files_sha256": {
