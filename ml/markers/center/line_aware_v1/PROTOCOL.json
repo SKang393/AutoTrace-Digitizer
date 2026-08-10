@@ -1,0 +1,40 @@
+{
+  "schema": "graphreader.marker-center-line-aware-protocol.v1",
+  "task": "marker-center",
+  "revision": "marker-center-line-aware-v1",
+  "defect_class": "proposal-and-predicted-center mask consensus with radial marker geometry",
+  "prior_revision": "marker-center-candidate-level-v1",
+  "prior_candidate_bytes_reused": false,
+  "experiment_budget": 3,
+  "currently_preregistered_candidate": "P1",
+  "architecture": "line-aware-dual-branch-patch-cnn-v1",
+  "isolated_change": "train new weights from a new seed with separate ink and exclusion-mask branches; reject masked proposal origins, masked regressed centers, and line-only radial geometry",
+  "input_contract": {
+    "name": "candidate_patches",
+    "shape": ["candidate_count", 3, 33, 33],
+    "channels": ["ink_probability", "text_mask", "artifact_mask"]
+  },
+  "output_contract": {
+    "name": "candidate_predictions",
+    "shape": ["candidate_count", 4],
+    "columns": ["marker_probability", "offset_x_grid", "offset_y_grid", "radius_pixels"]
+  },
+  "selection_thresholds": [0.25, 0.4, 0.55],
+  "sealed_gate_requirements": {
+    "exact_count_every_scene": true,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "duplicates": 0,
+    "prohibited_structure_hits": 0,
+    "onnx_parity_maximum_absolute_error": 0.00001,
+    "provider": "CPUExecutionProvider"
+  },
+  "prohibited_structures": [
+    "text", "axis", "tick", "divider", "bracket", "arrow_shaft", "arrowhead", "legend", "line_intersection"
+  ],
+  "public_gate_budget": 1,
+  "private_or_article_images": false,
+  "chandler_included": false,
+  "production_approval": false,
+  "release_eligible": false
+}

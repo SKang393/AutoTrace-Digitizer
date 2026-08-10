@@ -244,6 +244,47 @@
       "refusal_required_before_output": true
     },
     {
+      "task": "marker-center",
+      "revision": "marker-center-line-aware-v1",
+      "status": "candidate_1_preregistered",
+      "defect_class": "proposal-and-predicted-center mask consensus with radial marker geometry",
+      "prior_revision": "marker-center-candidate-level-v1",
+      "prior_candidate_bytes_reused": false,
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "candidate_config_paths": {
+        "P1": "ml/markers/center/line_aware_v1/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "8b252b458131c5c9b66b47ef8450d16cf5829903f2546e125b4f915a90512e76"
+      },
+      "trigger_evidence_path": "ml/markers/center/artifacts/candidate-level-v1/P3-sealed-public/gate-report.json",
+      "trigger_evidence_sha256": "02490587ef0bffccd5ca636fcd9e2d69f8ee55f9943fd22100065499755f321f",
+      "trigger_evidence": "The exhausted candidate-level P3 public gate produced one false positive, two false negatives, and two divider hits.",
+      "isolated_change": "new weights and seed with separate ink and mask branches plus proposal-center mask consensus and radial line rejection",
+      "selection_manifest_path": "ml/markers/center/line_aware_v1/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "e2a1446a1a33045fe711552b724c8f5b7bb7b33e516a2e75e7e66504308adfb5",
+      "sealed_public_test_seal_path": "ml/markers/center/line_aware_v1/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "b6f4f65e9bb868fe1beab77e6d3ad70b72a87f785ff0ea76b3598be4572a8eb0",
+      "sealed_public_fixture_archive_sha256": "69e905d2ae2a07544e2426446f1fc7e0008d7701d7831103c74a1cf7ed9795b6",
+      "sealed_public_private_manifest_sha256": "3226eafe50bd5c46908de0954109a561da5be27a54b457f62badd160947ed9d8",
+      "expected_runner_source_bundle_sha256": "eb6d6c5c7b9a960ff86ab9c010c6bc32a1fd856df327699aa21733537e72c26a",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "public_gate_authorized": false,
+      "public_gate_evaluations": 0,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
+    },
+    {
       "task": "marker-classifier",
       "revision": "marker-classifier-production-runtime-repair-v2",
       "status": "candidate_1_production_approved",

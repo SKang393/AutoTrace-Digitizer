@@ -1,0 +1,35 @@
+{
+  "chandler_included": false,
+  "dataset_revision": "marker-center-line-aware-procedural-v1",
+  "degradation_ids": [
+    "anisotropic_public",
+    "dark_scan_public"
+  ],
+  "family_ids": [
+    "compressed_withdrawal_public",
+    "asymmetric_stair_public",
+    "three_phase_shift_public",
+    "isolated_tail_public"
+  ],
+  "fixture_archive_path": "ml/markers/center/artifacts/line-aware-v1/split-freeze/sealed-public-fixtures.npz",
+  "fixture_archive_sha256": "69e905d2ae2a07544e2426446f1fc7e0008d7701d7831103c74a1cf7ed9795b6",
+  "frozen_utc": "2026-08-10T17:47:01.122256+00:00",
+  "private_manifest_path": "ml/markers/center/artifacts/line-aware-v1/split-freeze/sealed-public-private-manifest.json",
+  "private_manifest_sha256": "3226eafe50bd5c46908de0954109a561da5be27a54b457f62badd160947ed9d8",
+  "private_or_article_images": false,
+  "private_seed_sha256": "53879bae847c16213e214d7ebf092b784ba2d4c724ca2d158595f48524ac4a63",
+  "public_release_eligible": false,
+  "revision": "marker-center-line-aware-v1",
+  "scene_count": 16,
+  "schema": "graphreader.marker-center-line-aware-sealed-test-seal.v1",
+  "selection_manifest_path": "ml/markers/center/line_aware_v1/SELECTION_MANIFEST.json",
+  "selection_manifest_sha256": "e2a1446a1a33045fe711552b724c8f5b7bb7b33e516a2e75e7e66504308adfb5",
+  "split_generator_source_bundle_sha256": "95f7b18871e2d09c0c6527dda3e6488b85252b65065b1bd5c3347b9f7bb06a49",
+  "split_generator_source_paths": [
+    "ml/markers/center/line_aware_v1/dataset.py",
+    "ml/markers/center/line_aware_v1/prepare_split.py"
+  ],
+  "synthetic_only": true,
+  "task": "marker-center",
+  "truth_hidden_from_training_runner": true
+}

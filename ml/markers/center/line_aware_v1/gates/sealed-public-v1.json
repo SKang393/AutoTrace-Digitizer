@@ -1,0 +1,19 @@
+{
+  "schema": "graphreader.marker-center-line-aware-public-config.v1",
+  "task": "marker-center",
+  "revision": "marker-center-line-aware-public-v1",
+  "sealed_public_test_seal_path": "ml/markers/center/line_aware_v1/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "b6f4f65e9bb868fe1beab77e6d3ad70b72a87f785ff0ea76b3598be4572a8eb0",
+  "evaluator_source_bundle_sha256": "d513ecb16335d5f693083d3a7723df92870247ba0be29989214c0c2c216b52bf",
+  "evaluation_budget": 1,
+  "required_provider": "CPUExecutionProvider",
+  "required_exact_scene_fraction": 1.0,
+  "required_false_positives": 0,
+  "required_false_negatives": 0,
+  "required_duplicates": 0,
+  "required_prohibited_structure_hits": 0,
+  "private_or_article_images": false,
+  "chandler_included": false,
+  "production_approval": false,
+  "release_eligible": false
+}
