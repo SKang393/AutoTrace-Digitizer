@@ -1,0 +1,83 @@
+{
+    "schema":  "graphreader.opencv-clean-machine-load.v1",
+    "status":  "pass",
+    "observedAtUtc":  "2026-08-10T15:57:00.0868213+00:00",
+    "harnessSha256":  "7e919bda543cd83258975e12317e50c79bcbfc55ca41e09ac188e70ab23b9744",
+    "vmProvenance":  {
+                         "path":  "D:\\vm-provenance.json",
+                         "sha256":  "1352c262c06e4df2ec936cc612c62cf55a945f8a701117ce87bd852ead0a8575",
+                         "schema":  "graphreader.clean-windows-vm-provenance.v1",
+                         "isoSha256":  "a61adeab895ef5a4db436e0a7011c92a2ff17bb0357f58b13bbc4062e535e7b9",
+                         "officialIsoSha256":  "a61adeab895ef5a4db436e0a7011c92a2ff17bb0357f58b13bbc4062e535e7b9",
+                         "isoSha256Verified":  true,
+                         "environmentKind":  "fresh-windows-evaluation-vm",
+                         "networkMode":  "none",
+                         "freshInstall":  true,
+                         "vmId":  "8edb9b52-d3a1-4cda-96b0-54cc5696630a",
+                         "vmConfigurationSha256":  "6a3f51d26eec2277564b6606f0f3e67ca100a19c932c82db04e4261ad8ca3250",
+                         "qemuInstallerSha256":  "a8b29572afb4c6ad024b7de129c81033e9fd191b9e054e3a52ea0bed24ac19ef",
+                         "qemuVersion":  "QEMU emulator version 11.0.50 (v11.0.0-12631-g54e84cdc7a)",
+                         "expectedOsBuild":  "26200",
+                         "expectedOsUbr":  6584,
+                         "expectedCommit":  "cfa874bb5962cc8988e885fa4791ce685492eca7",
+                         "expectedVersion":  "0.0.21",
+                         "expectedExecutableSha256":  "a20008a857abddc975e722805f3d027ac16dfdbb824d7beb80655049d1a68786",
+                         "expectedOpenCvSha256":  "87c12460daba638b36e916ea2bb832d0759fbf094b8639919a7ce11b0cca5791",
+                         "expectedHarnessSha256":  "7e919bda543cd83258975e12317e50c79bcbfc55ca41e09ac188e70ab23b9744"
+                     },
+    "machine":  {
+                    "productName":  "Microsoft Windows 11 Enterprise Evaluation",
+                    "version":  "10.0.26200",
+                    "buildNumber":  "26200",
+                    "architecture":  "64-bit",
+                    "installTimeUtc":  "2026-08-10T13:21:23.0000000Z",
+                    "installAgeHours":  2.602,
+                    "powerShellVersion":  "5.1.26100.6584",
+                    "is64BitOperatingSystem":  true,
+                    "is64BitProcess":  true,
+                    "manufacturer":  "QEMU",
+                    "model":  "Standard PC (Q35 + ICH9, 2009)",
+                    "biosManufacturer":  "EDK II",
+                    "machineUuid":  "8edb9b52-d3a1-4cda-96b0-54cc5696630a",
+                    "updateBuildRevision":  6584,
+                    "developerToolsOnPath":  [
+
+                                             ],
+                    "networkQuerySucceeded":  true,
+                    "networkAdapters":  [
+
+                                        ],
+                    "networkAdaptersUp":  0
+                },
+    "payload":  {
+                    "root":  "E:\\PayloadOpenCv",
+                    "version":  "0.0.21",
+                    "commit":  "cfa874bb5962cc8988e885fa4791ce685492eca7",
+                    "dirty":  false,
+                    "executablePath":  "E:\\PayloadOpenCv\\GraphReader.App.exe",
+                    "executableSha256":  "a20008a857abddc975e722805f3d027ac16dfdbb824d7beb80655049d1a68786",
+                    "portableModePresent":  true,
+                    "openCvPath":  "E:\\PayloadOpenCv\\OpenCvSharpExtern.dll",
+                    "openCvSha256":  "87c12460daba638b36e916ea2bb832d0759fbf094b8639919a7ce11b0cca5791",
+                    "modelPayloadFileCount":  0,
+                    "reparsePointCount":  0
+                },
+    "nativeLoad":  {
+                       "attempted":  true,
+                       "succeeded":  true,
+                       "win32Error":  null,
+                       "flags":  "LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_DEFAULT_DIRS"
+                   },
+    "applicationSmoke":  {
+                             "argument":  "--portable-smoke",
+                             "startedUtc":  "2026-08-10T15:58:57.8011780+00:00",
+                             "finishedUtc":  "2026-08-10T16:00:58.9288828+00:00",
+                             "timeoutSeconds":  300,
+                             "timedOut":  false,
+                             "exitCode":  0,
+                             "passed":  true
+                         },
+    "failures":  [
+
+                 ]
+}

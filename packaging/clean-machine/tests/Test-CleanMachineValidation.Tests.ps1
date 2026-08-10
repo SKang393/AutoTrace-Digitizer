@@ -53,6 +53,22 @@ Invoke-Case -Name 'Validator parses in Windows PowerShell' -Action {
     }
 }
 
+Invoke-Case -Name 'OpenCV application smoke timeout supports slow software-emulated VMs without removing its ceiling' -Action {
+    $command = Get-Command -Name $validatorPath
+    $timeoutParameter = $command.Parameters['ApplicationSmokeTimeoutSeconds']
+    if ($null -eq $timeoutParameter) {
+        throw 'OpenCV validator is missing ApplicationSmokeTimeoutSeconds.'
+    }
+
+    $range = @($timeoutParameter.Attributes |
+        Where-Object { $_ -is [Management.Automation.ValidateRangeAttribute] })
+    if ($range.Count -ne 1 -or
+        [int]$range[0].MinRange -ne 15 -or
+        [int]$range[0].MaxRange -ne 300) {
+        throw 'OpenCV smoke timeout must remain bounded to 15 through 300 seconds.'
+    }
+}
+
 Invoke-Case -Name 'PDFium validator parses in Windows PowerShell' -Action {
     $tokens = $null
     $errors = $null

@@ -24,7 +24,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$ExpectedOpenCvSha256,
 
-    [ValidateRange(15, 120)]
+    [ValidateRange(15, 300)]
     [int]$ApplicationSmokeTimeoutSeconds = 60
 )
 

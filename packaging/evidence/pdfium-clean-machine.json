@@ -1,0 +1,144 @@
+{
+    "schema":  "graphreader.pdfium-clean-machine-load.v1",
+    "status":  "pass",
+    "observedAtUtc":  "2026-08-10T16:02:02.0436705+00:00",
+    "harnessSha256":  "2444f0f5402dc4ec8faedc078a1be06503dad7d83ec832113c7bc2940682f7a3",
+    "requested":  {
+                      "commit":  "cfa874bb5962cc8988e885fa4791ce685492eca7",
+                      "version":  "0.0.21",
+                      "executableSha256":  "a20008a857abddc975e722805f3d027ac16dfdbb824d7beb80655049d1a68786",
+                      "applicationDllSha256":  "f8e6611fe93b3bdacf50b2fc1dc7ec0f6568a1f2ff4adb10febff496e3851dcc",
+                      "rendererSha256":  "efd13a38cf3cd8e04d8284a42fff42923267293170424153b1a2a96dbf6fe8ea"
+                  },
+    "vmProvenance":  {
+                         "path":  "D:\\vm-provenance.json",
+                         "sha256":  "1352c262c06e4df2ec936cc612c62cf55a945f8a701117ce87bd852ead0a8575",
+                         "schema":  "graphreader.clean-windows-vm-provenance.v1",
+                         "isoSha256":  "a61adeab895ef5a4db436e0a7011c92a2ff17bb0357f58b13bbc4062e535e7b9",
+                         "officialIsoSha256":  "a61adeab895ef5a4db436e0a7011c92a2ff17bb0357f58b13bbc4062e535e7b9",
+                         "isoSha256Verified":  true,
+                         "environmentKind":  "fresh-windows-evaluation-vm",
+                         "networkMode":  "none",
+                         "freshInstall":  true,
+                         "vmId":  "8edb9b52-d3a1-4cda-96b0-54cc5696630a",
+                         "vmConfigurationSha256":  "6a3f51d26eec2277564b6606f0f3e67ca100a19c932c82db04e4261ad8ca3250",
+                         "qemuInstallerSha256":  "a8b29572afb4c6ad024b7de129c81033e9fd191b9e054e3a52ea0bed24ac19ef",
+                         "qemuVersion":  "QEMU emulator version 11.0.50 (v11.0.0-12631-g54e84cdc7a)",
+                         "expectedOsBuild":  "26200",
+                         "expectedOsUbr":  6584,
+                         "expectedCommit":  "cfa874bb5962cc8988e885fa4791ce685492eca7",
+                         "expectedVersion":  "0.0.21",
+                         "expectedExecutableSha256":  "a20008a857abddc975e722805f3d027ac16dfdbb824d7beb80655049d1a68786",
+                         "expectedApplicationDllSha256":  "f8e6611fe93b3bdacf50b2fc1dc7ec0f6568a1f2ff4adb10febff496e3851dcc",
+                         "expectedPdfiumRendererSha256":  "efd13a38cf3cd8e04d8284a42fff42923267293170424153b1a2a96dbf6fe8ea",
+                         "expectedPdfiumHarnessSha256":  "2444f0f5402dc4ec8faedc078a1be06503dad7d83ec832113c7bc2940682f7a3",
+                         "expectedRendererSmokeScriptSha256":  "f2baea36999352da1a8487fc42da835c3983afcab4068887e74e2e500487cb1a"
+                     },
+    "machine":  {
+                    "productName":  "Microsoft Windows 11 Enterprise Evaluation",
+                    "version":  "10.0.26200",
+                    "buildNumber":  "26200",
+                    "architecture":  "64-bit",
+                    "installTimeUtc":  "2026-08-10T13:21:23.0000000Z",
+                    "installAgeHours":  2.681,
+                    "powerShellVersion":  "5.1.26100.6584",
+                    "is64BitOperatingSystem":  true,
+                    "is64BitProcess":  true,
+                    "manufacturer":  "QEMU",
+                    "model":  "Standard PC (Q35 + ICH9, 2009)",
+                    "biosManufacturer":  "EDK II",
+                    "machineUuid":  "8edb9b52-d3a1-4cda-96b0-54cc5696630a",
+                    "updateBuildRevision":  6584,
+                    "developerToolsOnPath":  [
+
+                                             ],
+                    "networkQuerySucceeded":  true,
+                    "networkAdapters":  [
+
+                                        ],
+                    "networkAdaptersUp":  0
+                },
+    "payload":  {
+                    "root":  "E:\\PayloadPdfium",
+                    "commit":  "cfa874bb5962cc8988e885fa4791ce685492eca7",
+                    "version":  "0.0.21",
+                    "executablePath":  "E:\\PayloadPdfium\\GraphReader.App.exe",
+                    "executableSha256":  "a20008a857abddc975e722805f3d027ac16dfdbb824d7beb80655049d1a68786",
+                    "applicationDllPath":  "E:\\PayloadPdfium\\GraphReader.App.dll",
+                    "applicationDllSha256":  "f8e6611fe93b3bdacf50b2fc1dc7ec0f6568a1f2ff4adb10febff496e3851dcc",
+                    "pdfiumRoot":  "E:\\PayloadPdfium\\pdfium",
+                    "approvalPath":  "E:\\PayloadPdfium\\pdfium\\reviewed-approval.json",
+                    "approvalSha256":  "cd070063a237f1a984bb44230da13be45dda501c7cd0ab08dba493f358cc961d",
+                    "rendererPath":  "E:\\PayloadPdfium\\pdfium\\bin\\graphreader_pdfium_renderer.exe",
+                    "rendererSha256":  "efd13a38cf3cd8e04d8284a42fff42923267293170424153b1a2a96dbf6fe8ea",
+                    "resources":  [
+                                      {
+                                          "label":  "renderer",
+                                          "relativePath":  "bin/graphreader_pdfium_renderer.exe",
+                                          "sha256":  "efd13a38cf3cd8e04d8284a42fff42923267293170424153b1a2a96dbf6fe8ea"
+                                      },
+                                      {
+                                          "label":  "source lock",
+                                          "relativePath":  "source-lock.json",
+                                          "sha256":  "026c87468d315f42642e8507b50aaf810dc26461a837454ede20ff9f2335d800"
+                                      },
+                                      {
+                                          "label":  "build manifest",
+                                          "relativePath":  "build-manifest.json",
+                                          "sha256":  "b3744c369982dca6a37377ce1e69daa9d8f269b9052d8a8d5f5a84c1ed120e13"
+                                      },
+                                      {
+                                          "label":  "notice",
+                                          "relativePath":  "third-party-notices.reviewed.txt",
+                                          "sha256":  "2a7df15b077286bac7b7abdb74b48bd1c2f3f351016bbcc02c399e3840c55736"
+                                      }
+                                  ],
+                    "pdfiumFileCount":  5,
+                    "reparsePointCount":  0
+                },
+    "rendererSmoke":  {
+                          "scriptPath":  "D:\\Test-PdfiumRunner.ps1",
+                          "scriptSha256":  "f2baea36999352da1a8487fc42da835c3983afcab4068887e74e2e500487cb1a",
+                          "startedUtc":  "2026-08-10T16:03:17.1392810+00:00",
+                          "finishedUtc":  "2026-08-10T16:05:16.8606168+00:00",
+                          "timeoutSeconds":  300,
+                          "timedOut":  false,
+                          "exitCode":  0,
+                          "reportPath":  "C:\\Users\\Validator\\AppData\\Local\\Temp\\GraphReaderValidation-cfa874b\\pdfium-render-smoke\\native-render-smoke.json",
+                          "reportSha256":  "9b88ded4251208aef28e2f9d5eba88a3e796ec22b3cb941228f18ddb80d6e58d",
+                          "contractPassed":  true,
+                          "result":  {
+                                         "schemaVersion":  1,
+                                         "runnerSha256":  "efd13a38cf3cd8e04d8284a42fff42923267293170424153b1a2a96dbf6fe8ea",
+                                         "inputKind":  "controlled-synthetic-fixture",
+                                         "inputPath":  "C:\\Users\\Validator\\AppData\\Local\\Temp\\GraphReaderValidation-cfa874b\\pdfium-render-smoke\\controlled-input.pdf",
+                                         "inputSha256":  "2ebb9f3a7cdec5c76773fc7796f3056a80cc0bdaa1935b1b27e10bb9d581cf8b",
+                                         "inputUnchanged":  true,
+                                         "rawSha256":  "b549878f8641965a3c78a659177f4b4e027fa250d161d33b9a3df551e8f72158",
+                                         "width":  72,
+                                         "height":  72,
+                                         "stride":  288,
+                                         "payloadLength":  20736,
+                                         "stdout":  "OK 72 72 288",
+                                         "stderr":  "",
+                                         "verifiedUtc":  "2026-08-10T16:05:05.4639401Z"
+                                     }
+                      },
+    "applicationPackagedFallback":  {
+                                        "arguments":  [
+                                                          "--production-runtime-smoke",
+                                                          "--require-packaged-pdfium"
+                                                      ],
+                                        "environmentApprovalUnset":  true,
+                                        "expectedPackagedApprovalPath":  "E:\\PayloadPdfium\\pdfium\\reviewed-approval.json",
+                                        "startedUtc":  "2026-08-10T16:05:19.9098757+00:00",
+                                        "finishedUtc":  "2026-08-10T16:06:41.9590709+00:00",
+                                        "timeoutSeconds":  300,
+                                        "timedOut":  false,
+                                        "exitCode":  0,
+                                        "passed":  true
+                                    },
+    "failures":  [
+
+                 ]
+}
