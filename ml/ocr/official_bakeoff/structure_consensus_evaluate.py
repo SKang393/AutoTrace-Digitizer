@@ -16,7 +16,6 @@ import random
 import sys
 from time import perf_counter
 from typing import Any, Callable, Iterable, Sequence
-import uuid
 
 from ml.ocr.official_bakeoff import production_evaluate as locked
 from ml.ocr.production_gate import evaluate_partition
@@ -28,9 +27,7 @@ CORE_SCHEMA = "graphreader.ocr-structure-consensus-core-predictions.v1"
 PREDICTIONS_SCHEMA = "graphreader.ocr-structure-consensus-predictions.v1"
 RUNTIME_SCHEMA = "graphreader.ocr-structure-consensus-runtime-results.v1"
 REPORT_SCHEMA = "graphreader.ocr-structure-consensus-production-gate.v1"
-MARKER_SCHEMA = "graphreader.ocr-structure-consensus-marker-results.v1"
 COMPOSITION_ID = "graph-structure-consensus-v1"
-MARKER_COMPOSITION_ID = "production-ocr-to-marker-composed-v1"
 DETECTION_MODEL_ID = locked.DETECTION_MODEL_ID
 RECOGNITION_MODEL_ID = locked.RECOGNITION_MODEL_ID
 TEXT_FAMILIES = ("integer", "decimal", "negative", "percentage", "ambiguity")
@@ -758,6 +755,49 @@ def connected_component_candidates(masked_bgr: bytes, width: int, height: int) -
                     }
                     changed = True
         lines.append(line)
+
+    remaining = sorted(lines, key=lambda item: (item["left"], item["top"]))
+    vertical_lines: list[dict[str, Any]] = []
+
+    def is_rotated_glyph_candidate(item: dict[str, Any]) -> bool:
+        item_width = item["right"] - item["left"] + 1
+        item_height = item["bottom"] - item["top"] + 1
+        return item["count"] == 1 and item_width >= item_height * 1.2 and item["marker_count"] == 0
+
+    while remaining:
+        line = remaining.pop(0)
+        if not is_rotated_glyph_candidate(line):
+            vertical_lines.append(line)
+            continue
+        changed = True
+        while changed:
+            changed = False
+            for index in range(len(remaining) - 1, -1, -1):
+                candidate = remaining[index]
+                if not is_rotated_glyph_candidate(candidate):
+                    continue
+                overlap = max(0, min(line["right"], candidate["right"]) - max(line["left"], candidate["left"]) + 1)
+                line_width = line["right"] - line["left"] + 1
+                candidate_width = candidate["right"] - candidate["left"] + 1
+                fraction = overlap / max(1, min(line_width, candidate_width))
+                gap = max(0, candidate["top"] - line["bottom"] - 1, line["top"] - candidate["bottom"] - 1)
+                maximum_gap = max(line_width, candidate_width) * 2.5
+                if fraction >= 0.35 and gap <= maximum_gap:
+                    other = remaining.pop(index)
+                    line = {
+                        "left": min(line["left"], other["left"]),
+                        "top": min(line["top"], other["top"]),
+                        "right": max(line["right"], other["right"]),
+                        "bottom": max(line["bottom"], other["bottom"]),
+                        "area": line["area"] + other["area"],
+                        "count": line["count"] + other["count"],
+                        "maximum_row": max(line["maximum_row"], other["maximum_row"]),
+                        "maximum_column": max(line["maximum_column"], other["maximum_column"]),
+                        "marker_count": line["marker_count"] + other["marker_count"],
+                    }
+                    changed = True
+        vertical_lines.append(line)
+    lines = vertical_lines
     result: list[StructureCandidate] = []
     for line in lines:
         component_width = line["right"] - line["left"] + 1
@@ -877,58 +917,17 @@ def _duplicate_count(regions: Sequence[ModelRegion]) -> int:
     return duplicates
 
 
-def _marker_evidence(
-    path: Path | None,
+def _missing_marker_evidence(
     cases: Sequence[dict[str, Any]],
-    split_sha256: str,
-    detection_sha256: str,
-    recognition_sha256: str,
-    core_predictions_sha256: str,
-) -> tuple[bool, dict[str, int], bytes | None, list[str]]:
-    case_map = {str(case["case_id"]): case for case in cases}
-    if path is None:
-        return False, {case_id: 0 for case_id in case_map}, None, [
-            "No checksum-bound independent marker-stage run was supplied."
-        ]
-    evidence = load_strict_json(path)
-    _require(evidence.get("schema") == MARKER_SCHEMA, "Marker evidence schema is invalid.")
-    _require(evidence.get("profile") == PROFILE, "Marker evidence profile changed.")
-    _require(evidence.get("provider") == "cpu", "Marker evidence must use CPU.")
-    _require(evidence.get("stage") == "markers", "Marker evidence stage changed.")
-    _require(evidence.get("composition_id") == MARKER_COMPOSITION_ID, "Marker composition changed.")
-    run_id = evidence.get("run_id")
-    try:
-        parsed = uuid.UUID(str(run_id))
-    except (ValueError, TypeError, AttributeError) as error:
-        raise ProductionGateError("Marker run_id is invalid.") from error
-    _require(str(parsed) == run_id, "Marker run_id is not canonical.")
-    _sha256_hex(str(evidence.get("marker_model_sha256")), "Marker model")
-    _require(isinstance(evidence.get("marker_model_id"), str) and evidence["marker_model_id"], "Marker model ID is missing.")
-    _require(evidence.get("sealed_split_sha256") == split_sha256, "Marker split hash changed.")
-    _require(evidence.get("detection_model_sha256") == detection_sha256, "Marker detector hash changed.")
-    _require(evidence.get("recognition_model_sha256") == recognition_sha256, "Marker recognizer hash changed.")
-    _require(evidence.get("ocr_core_predictions_sha256") == core_predictions_sha256, "Marker OCR binding changed.")
-    counts: dict[str, int] = {}
-    records = evidence.get("records")
-    _require(isinstance(records, list), "Marker records are missing.")
-    for record in records:
-        _require(isinstance(record, dict), "Marker record is invalid.")
-        case_id = record.get("case_id")
-        case = case_map.get(str(case_id))
-        count = record.get("marker_creation_count")
-        _require(
-            case is not None
-            and case_id not in counts
-            and record.get("source_sha256") == case["source_sha256"]
-            and record.get("detector_image_bgr_sha256") == case["detector_image_bgr_sha256"]
-            and isinstance(count, int)
-            and not isinstance(count, bool)
-            and count >= 0,
-            "Marker evidence record changed or is incomplete.",
-        )
-        counts[str(case_id)] = count
-    _require(set(counts) == set(case_map), "Marker evidence does not cover the frozen split.")
-    return True, counts, path.read_bytes(), []
+) -> tuple[bool, dict[str, int], None, list[str]]:
+    return False, {str(case["case_id"]): 0 for case in cases}, None, [
+        "No checksum-bound independent marker-stage run was available; external precomputed marker-result injection is prohibited."
+    ]
+
+
+def _embedded_resource(media_type: str, content: bytes, label: str) -> dict[str, Any]:
+    _require(len(content) <= MAXIMUM_RESOURCE_BYTES, f"{label} exceeds the gate resource limit.")
+    return locked._embedded(media_type, content)
 
 
 def _threshold_blockers(metrics: dict[str, Any]) -> list[str]:
@@ -964,7 +963,6 @@ def evaluate_official_candidate(
     conversion_report_path: Path,
     source_root: Path,
     output_root: Path,
-    marker_evidence_path: Path | None = None,
     *,
     session_factory: Callable[[Path], Any] = locked._cpu_session,
     parity_runner: Callable[[dict[str, Any], Path], list[dict[str, Any]]] = locked._direct_parity_pairs,
@@ -1055,14 +1053,7 @@ def evaluate_official_candidate(
     }
     core_bytes = canonical_json_bytes(core)
     core_sha = hash_bytes(core_bytes)
-    marker_evaluated, marker_counts, marker_bytes, marker_blockers = _marker_evidence(
-        marker_evidence_path,
-        split["cases"],
-        split_sha,
-        detection_sha,
-        recognition_sha,
-        core_sha,
-    )
+    marker_evaluated, marker_counts, marker_bytes, marker_blockers = _missing_marker_evidence(split["cases"])
     final_records = [
         {**record, "marker_creation_count": marker_counts[str(record["case_id"])]}
         for record in records
@@ -1171,17 +1162,19 @@ def evaluate_official_candidate(
     evaluator_bytes = metrics_evaluator_path.read_bytes()
     workflow_bytes = Path(__file__).read_bytes()
     resources: dict[str, Any] = {
-        "gate_protocol": locked._embedded("application/json", protocol_path.read_bytes()),
-        "evaluator_source": locked._embedded("text/x-python", evaluator_bytes),
-        "workflow_source": locked._embedded("text/x-python", workflow_bytes),
-        "sealed_split": locked._embedded("application/json", split_bytes),
-        "fixture_archive": locked._embedded("application/zip", verification["fixture_archive_bytes"]),
-        "core_predictions": locked._embedded("application/json", core_bytes),
-        "predictions": locked._embedded("application/json", prediction_bytes),
-        "runtime_results": locked._embedded("application/json", runtime_bytes),
+        "gate_protocol": _embedded_resource("application/json", protocol_path.read_bytes(), "Gate protocol"),
+        "evaluator_source": _embedded_resource("text/x-python", evaluator_bytes, "Metrics evaluator"),
+        "workflow_source": _embedded_resource("text/x-python", workflow_bytes, "Execution workflow"),
+        "sealed_split": _embedded_resource("application/json", split_bytes, "Sealed split"),
+        "fixture_archive": _embedded_resource("application/zip", verification["fixture_archive_bytes"], "Fixture archive"),
+        "core_predictions": _embedded_resource("application/json", core_bytes, "Core predictions"),
+        "predictions": _embedded_resource("application/json", prediction_bytes, "Predictions"),
+        "runtime_results": _embedded_resource("application/json", runtime_bytes, "Runtime results"),
     }
     if marker_bytes is not None:
-        resources["marker_creation_results"] = locked._embedded("application/json", marker_bytes)
+        resources["marker_creation_results"] = _embedded_resource(
+            "application/json", marker_bytes, "Marker creation results"
+        )
     report = {
         "schema": REPORT_SCHEMA,
         "profile": PROFILE,
@@ -1236,7 +1229,6 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     evaluate.add_argument("--conversion-report", required=True, type=Path)
     evaluate.add_argument("--source-root", required=True, type=Path)
     evaluate.add_argument("--output-root", required=True, type=Path)
-    evaluate.add_argument("--marker-evidence", type=Path)
     verify = subparsers.add_parser("verify-freeze")
     verify.add_argument("--frozen-root", required=True, type=Path)
     verify.add_argument("--protocol", type=Path, default=_default_protocol())
@@ -1261,7 +1253,6 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.conversion_report,
                 args.source_root,
                 args.output_root,
-                args.marker_evidence,
             )
             print(json.dumps({"status": report["status"], "production_approval": report["production_approval"]}, sort_keys=True))
             return 0 if report["production_approval"] else 2

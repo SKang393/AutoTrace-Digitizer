@@ -16,6 +16,14 @@ package. The reviewed Apache-2.0 license and ONNX change-notice bundle exists,
 but it has not been bound through a model-store index or package. This is an
 intentional fail-closed state.
 
+The preregistered structure-consensus workflow now matches the production
+vertical-glyph grouping, enforces the C# gate's 8 MiB limit for every embedded
+resource, and does not accept an external precomputed marker-result file. The
+marker-center P1 through P3 budget is exhausted and P3 remains rejected after
+one false positive in its once-only public gate. The official OCR evaluation
+must therefore report `marker_creation_evaluated=false` and cannot approve,
+even if all OCR-only metrics pass.
+
 | Task | Model | Converted ONNX SHA-256 | Current status |
 | --- | --- | --- | --- |
 | OCR detection | `PP-OCRv5_mobile_det` | `d4aa24d408cd70b8b9f66cc758e20f397fc31a9c69d8477cf8887fc53bd5fceb` | Conversion parity passed; public evaluation failed |

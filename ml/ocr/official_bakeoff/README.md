@@ -175,8 +175,13 @@ and permits exactly one evaluation. The evaluator and C# approval gate are now
 frozen and checksum-bound before any model execution. They rederive the
 one-to-one structure consensus, truth matching, duplicate counts, source BGR
 pixels, and axis/tick/divider-masked detector BGR pixels from embedded fixture
-bytes and frozen mask geometry. No fixtures have been generated and no official
-composition has been executed at this checkpoint. Once the split is frozen,
-the official composition must not be rerun or tuned. Production approval,
-manifests, model-store promotion, package discovery, and release authorization
-therefore remain false.
+bytes and frozen mask geometry. The workflow now matches the production
+vertical-glyph grouping and rejects every embedded resource above the C# gate's
+8 MiB limit before report creation. It no longer accepts a precomputed marker
+result file. Because the three-candidate marker-center budget is exhausted and
+the selected P3 candidate remains rejected, the official OCR run must record
+`marker_creation_evaluated=false` and cannot approve even if its OCR metrics
+pass. No fixtures have been generated and no official composition has been
+executed at this checkpoint. Once the split is frozen, the official composition
+must not be rerun or tuned. Production approval, manifests, model-store
+promotion, package discovery, and release authorization therefore remain false.

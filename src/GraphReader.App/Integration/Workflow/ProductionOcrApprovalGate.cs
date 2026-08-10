@@ -34,7 +34,7 @@ internal static class ProductionOcrApprovalGate
     internal const string FrozenEvaluatorSourceSha256 =
         "cc354ec53e4d0ecc5eab7dcf6243e5538e39f043057a949fd3d6ce84a83d50ee";
     internal const string FrozenWorkflowSourceSha256 =
-        "56890be869a3a58cfacc2687ac92c81644835030ef45b2e73375e854dad1fb7d";
+        "65de1c76288c2cd9646386afb941bf641a1a87c5abfec5d76b6cb0f7a818c992";
     private const string CompositionId = "graph-structure-consensus-v1";
     private const int MaximumResourceBytes = 8 * 1024 * 1024;
     private static readonly HashSet<string> AllowedRoles = new(StringComparer.Ordinal)

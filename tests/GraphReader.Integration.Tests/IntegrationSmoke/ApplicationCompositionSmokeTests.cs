@@ -1593,7 +1593,7 @@ public sealed class ApplicationCompositionSmokeTests
         private const string FixtureDetectorBgrSha256 =
             "5ae7e6a42304dc6e4176210b83c43024f99a0bce9a870c3b6d2c95fc8ebfb74c";
         private const string FixtureWorkflowSourceSha256 =
-            "56890be869a3a58cfacc2687ac92c81644835030ef45b2e73375e854dad1fb7d";
+            "65de1c76288c2cd9646386afb941bf641a1a87c5abfec5d76b6cb0f7a818c992";
         private static readonly double[] FixtureUnitBounds = [0d, 0d, 1d, 1d];
 
         private ApprovedOcrPairPackageFixture(string root, string applicationRoot)

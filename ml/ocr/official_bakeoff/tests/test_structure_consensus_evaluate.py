@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import numpy as np
@@ -102,6 +101,18 @@ def test_consensus_is_one_to_one_filters_structure_and_never_substitutes_candida
     assert gate.compose_consensus((), candidates) == ((), ())
 
 
+def test_connected_component_candidate_matches_production_vertical_glyph_grouping() -> None:
+    pixels = np.full((40, 40, 3), 255, dtype=np.uint8)
+    pixels[5:7, 10:16, :] = 0
+    pixels[10:12, 10:16, :] = 0
+
+    candidates = gate.connected_component_candidates(pixels.tobytes(order="C"), 40, 40)
+
+    assert len(candidates) == 1
+    assert candidates[0].component_count == 2
+    assert candidates[0].bounds == gate.Box(10.0, 5.0, 16.0, 12.0)
+
+
 def test_thresholds_fail_closed_on_duplicate_exclusion_and_marker_counts() -> None:
     passing = {
         "validation_exact_match": 0.90,
@@ -127,43 +138,32 @@ def test_thresholds_fail_closed_on_duplicate_exclusion_and_marker_counts() -> No
         assert gate._threshold_blockers(failed), field
 
 
-def test_marker_evidence_binds_exact_masked_detector_pixels(tmp_path: Path) -> None:
-    case = {
-        "case_id": "case-a",
-        "source_sha256": "a" * 64,
-        "detector_image_bgr_sha256": "b" * 64,
-    }
-    evidence = {
-        "schema": gate.MARKER_SCHEMA,
-        "profile": gate.PROFILE,
-        "provider": "cpu",
-        "run_id": "12345678-1234-4234-8234-123456789abc",
-        "stage": "markers",
-        "composition_id": gate.MARKER_COMPOSITION_ID,
-        "marker_model_id": "marker-fixture",
-        "marker_model_sha256": "c" * 64,
-        "sealed_split_sha256": "d" * 64,
-        "detection_model_sha256": "e" * 64,
-        "recognition_model_sha256": "f" * 64,
-        "ocr_core_predictions_sha256": "1" * 64,
-        "records": [
-            {
-                "case_id": "case-a",
-                "source_sha256": "a" * 64,
-                "detector_image_bgr_sha256": "0" * 64,
-                "marker_creation_count": 0,
-            }
-        ],
-    }
-    path = tmp_path / "marker.json"
-    path.write_text(json.dumps(evidence), encoding="utf-8")
+def test_official_evaluation_prohibits_external_marker_result_injection() -> None:
+    evaluated, counts, content, blockers = gate._missing_marker_evidence(
+        [{"case_id": "case-a"}, {"case_id": "case-b"}]
+    )
 
-    with pytest.raises(gate.ProductionGateError, match="changed or is incomplete"):
-        gate._marker_evidence(
-            path,
-            [case],
-            "d" * 64,
-            "e" * 64,
-            "f" * 64,
-            "1" * 64,
+    assert evaluated is False
+    assert counts == {"case-a": 0, "case-b": 0}
+    assert content is None
+    assert "external precomputed marker-result injection is prohibited" in blockers[0]
+
+    args = gate.parse_args(
+        [
+            "evaluate",
+            "--frozen-root", "frozen",
+            "--conversion-report", "conversion.json",
+            "--source-root", "source",
+            "--output-root", "output",
+        ]
+    )
+    assert not hasattr(args, "marker_evidence")
+
+
+def test_every_embedded_resource_is_bounded_before_report_creation() -> None:
+    with pytest.raises(gate.ProductionGateError, match="exceeds the gate resource limit"):
+        gate._embedded_resource(
+            "application/json",
+            b"x" * (gate.MAXIMUM_RESOURCE_BYTES + 1),
+            "Oversized evidence",
         )
