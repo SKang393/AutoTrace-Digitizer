@@ -1,0 +1,32 @@
+{
+  "binding": {
+    "candidate_hash_key_schema": [
+      "onnx_sha256"
+    ],
+    "candidate_hashes": {
+      "onnx_sha256": "a6a7249d3993e08b83ec4e4bb7b0d7f8a09a14a233e166920610f14f97f80be8"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "6232d1ab2a50479211ce6888e55a2d51471a870d0b679713dd7570d94091b768",
+    "evaluator_source_bundle_sha256": "7d8122fc553c328a63cda5eb01d766fa178ed8d08b6d6397767803550da6a3c5",
+    "evaluator_source_paths": [
+      "ml/markers/center/candidate_level_v1/dataset.py",
+      "ml/markers/center/candidate_level_v1/model.py",
+      "ml/markers/center/candidate_level_v1/pipeline.py",
+      "ml/markers/center/candidate_level_v1/sealed_gate.py"
+    ],
+    "gate_config_sha256": "20ff5161cd9f0bcb9050e9045d749a7ae4e03457a956936b1bc379b3e22fa0a9",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "marker-center-candidate-level-public-v1",
+    "split_config_path": "ml/markers/center/candidate_level_v1/gates/sealed-public-v1.json",
+    "split_config_sha256": "0c933d937474fa772ab02b48d8f626a5a86a5e5fde2e6056ba1572ef1f1bdc2a",
+    "task": "marker-center"
+  },
+  "evaluation_count": 1,
+  "key": "68efa4110e689a28dec5d0acfa46b06042d8ef734fee08b2de5d9848f4dadf31",
+  "opened_utc": "2026-08-10T17:11:50.775644+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

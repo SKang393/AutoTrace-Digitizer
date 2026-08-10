@@ -43,16 +43,18 @@ model-store, provider, packaging, and clean-machine gates all pass.
   The exact P2 ONNX at threshold `0.2` produced 9/9 exact validation scenes,
   zero false positives, false negatives, duplicates, and prohibited hits, and
   CPU parity maximum absolute error `1.1920928955078125e-6`.
-- P3 is selected for the single authorized sealed public evaluation. The
-  sealed fixture bytes and truth remain unopened at this checkpoint. Selection
-  success is not production approval.
-- Selection compares only the preregistered thresholds. The sealed public gate
-  opens once for the exact selected ONNX hash.
+- P3 opened the single authorized sealed public evaluation exactly once. It
+  passed 11/16 scenes exactly, with one false positive, two false negatives,
+  zero duplicates, and two prohibited divider hits. The public gate failed.
+- All three candidate slots and the sealed-gate budget are exhausted. Do not
+  rerun, repair, tune, manifest, store, package, or approve this payload.
+- Selection compared only the preregistered thresholds. The sealed public gate
+  was opened once for the exact selected ONNX hash.
 - Approval requires exact counts in every scene, zero false positives, zero
   false negatives, zero duplicates, zero text/axis/tick/divider/bracket/arrow/
   legend/intersection hits, CPU execution, and ONNX parity at most `1e-5`.
 
-The gate remains fail closed after a scientific pass. A passing model still
-needs a production adapter, approved manifest, checksum-bound model-store
-discovery, notices, provider evidence, packaging discovery, and clean-machine
-evidence.
+Even a scientific pass would remain fail closed until the production adapter,
+approved manifest, checksum-bound model-store discovery, notices, provider
+evidence, packaging discovery, and clean-machine evidence pass. P3 did not
+reach that boundary because its scientific gate failed.
