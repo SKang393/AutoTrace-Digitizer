@@ -6,8 +6,9 @@
   "prior_revision": "marker-center-line-aware-v1",
   "prior_candidate_bytes_reused": false,
   "experiment_budget": 3,
-  "currently_preregistered_candidate": "P3",
-  "consumed_candidates": ["P1", "P2"],
+  "status": "candidate_3_selected_pending_public_authorization",
+  "currently_preregistered_candidate": null,
+  "consumed_candidates": ["P1", "P2", "P3"],
   "architecture": "radial-topology-projection-mlp-v1",
   "isolated_change": "P3 reuses the exact best P1 checkpoint and ONNX with zero optimizer steps and replaces only failed geometry-consensus rejection with a deterministic one-pixel local consensus refinement before unchanged nonmaximum suppression",
   "p1_result": {
@@ -42,6 +43,25 @@
     "onnx_parity_maximum_absolute_error": 9.5367431640625e-07,
     "sealed_public_archive_opened": false
   },
+  "p3_result": {
+    "status": "selected",
+    "training_report_path": "ml/markers/center/artifacts/radial-feature-v1/P3-run/candidate-report.json",
+    "training_report_sha256": "67b5ea3b28973f0bd24ae0f755713af1c70b6fe6a9b2437268be5975b9f14af3",
+    "checkpoint_sha256": "6b670a6f29454d7f63527f57210aa918540a817fca156a71b96872ff09aa2787",
+    "onnx_sha256": "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b",
+    "optimizer_steps": 0,
+    "weights_changed": false,
+    "selected_threshold": 0.3,
+    "exact_scene_count": 9,
+    "scene_count": 9,
+    "true_positives": 63,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "duplicate_count": 0,
+    "prohibited_structure_hits": 0,
+    "onnx_parity_maximum_absolute_error": 1.9073486328125e-06,
+    "sealed_public_archive_opened": false
+  },
   "selection_requirements": {
     "exact_count_every_scene": true,
     "false_positives": 0,
@@ -52,6 +72,7 @@
     "provider": "CPUExecutionProvider"
   },
   "public_gate_budget": 1,
+  "public_gate_authorized": false,
   "public_gate_evaluations": 0,
   "private_or_article_images": false,
   "chandler_included": false,

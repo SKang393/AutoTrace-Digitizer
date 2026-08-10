@@ -101,8 +101,9 @@ def test_preregistration_binds_source_split_and_canonical_gate_schema() -> None:
     seal = json.loads(seal_path.read_text(encoding="utf-8"))
     gate = json.loads(gate_path.read_text(encoding="utf-8"))
     config = json.loads(config_path.read_text(encoding="utf-8"))
-    assert protocol["currently_preregistered_candidate"] == "P3"
-    assert protocol["consumed_candidates"] == ["P1", "P2"]
+    assert protocol["status"] == "candidate_3_selected_pending_public_authorization"
+    assert protocol["currently_preregistered_candidate"] is None
+    assert protocol["consumed_candidates"] == ["P1", "P2", "P3"]
     assert protocol["prior_candidate_bytes_reused"] is False
     assert protocol["p1_result"]["status"] == "failed_selection"
     assert protocol["p1_result"]["exact_scene_count"] == 7
@@ -112,6 +113,13 @@ def test_preregistration_binds_source_split_and_canonical_gate_schema() -> None:
     assert protocol["p2_result"]["exact_scene_count"] == 5
     assert protocol["p2_result"]["false_negatives"] == 4
     assert protocol["p2_result"]["sealed_public_archive_opened"] is False
+    assert protocol["p3_result"]["status"] == "selected"
+    assert protocol["p3_result"]["exact_scene_count"] == 9
+    assert protocol["p3_result"]["true_positives"] == 63
+    assert protocol["p3_result"]["false_positives"] == 0
+    assert protocol["p3_result"]["false_negatives"] == 0
+    assert protocol["p3_result"]["sealed_public_archive_opened"] is False
+    assert protocol["public_gate_authorized"] is False
     assert seal["scene_count"] == 16
     assert seal["truth_hidden_from_training_runner"] is True
     assert seal["chandler_included"] is False
@@ -127,16 +135,16 @@ def test_preregistration_binds_source_split_and_canonical_gate_schema() -> None:
     assert gate["release_eligible"] is False
 
 
-def test_canonical_budget_consumes_p1_p2_and_authorizes_only_radial_p3() -> None:
+def test_canonical_budget_seals_selected_p3_before_public_authorization() -> None:
     config_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/training/p3.json"
     config = json.loads(config_path.read_text(encoding="utf-8"))
     ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-radial-feature-v1")
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["status"] == "candidate_3_selected_pending_public_authorization"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["candidate_config_sha256"]["P3"] == sha256_file(config_path)
     assert config["optimizer_steps"] == 0
     assert config["reused_candidate_id"] == "P1"
@@ -153,6 +161,18 @@ def test_canonical_budget_consumes_p1_p2_and_authorizes_only_radial_p3() -> None
     assert entry["p2_training_result_seal_sha256"] == sha256_file(
         REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-radial-feature-v1/P2/result.json"
     )
+    assert entry["p3_training_opened_seal_sha256"] == sha256_file(
+        REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-radial-feature-v1/P3/opened.json"
+    )
+    assert entry["p3_training_result_seal_sha256"] == sha256_file(
+        REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-radial-feature-v1/P3/result.json"
+    )
+    p3_result = json.loads(
+        (REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-radial-feature-v1/P3/result.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert entry["p3_training_report_sha256"] == p3_result["report_sha256"]
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(
         REPO_ROOT / entry["sealed_public_test_seal_path"]
     )

@@ -24,15 +24,16 @@ new deterministic seed, and produced CPU ONNX parity error
 59 of 63 retained markers at threshold `0.15`, still with zero false positives,
 duplicates, or prohibited hits. Its public archive remained closed.
 
-P3 is the only currently preregistered candidate and the final candidate in
-this defect-class budget. It performs zero optimizer steps and reuses the exact
-best P1 checkpoint and ONNX. The isolated change is postprocessing: when the
-existing discrete geometry probe rejects a regressed center, P3 searches only
-the deterministic one-pixel neighborhood for the nearest unmasked position
-that satisfies the same geometry consensus. Nonmaximum suppression and every
-other contract remain unchanged. Direct validation analysis selected this
-defect correction because both P1 misses had valid, high-confidence proposals
-and were rejected only by one-pixel probe quantization.
+P3 is consumed and selected as the final candidate in this defect-class budget.
+It performed zero optimizer steps and reused the exact best P1 checkpoint and
+ONNX. The isolated postprocessing change searches only the deterministic
+one-pixel neighborhood when the existing discrete geometry probe rejects a
+regressed center. P3 passed all 9 frozen selection scenes and all 63 markers at
+threshold `0.3` with zero false positives, misses, duplicates, or prohibited
+hits. CPU ONNX parity remained `1.9073486328125e-06`. Its report SHA-256 is
+`67b5ea3b28973f0bd24ae0f755713af1c70b6fe6a9b2437268be5975b9f14af3`.
+The truth-hidden public archive remains closed. Public-gate authorization is a
+separate checkpoint and is still false.
 
 Training and selection use only new procedural families. The truth-hidden
 16-scene public archive is frozen before optimizer execution. Chandler and
