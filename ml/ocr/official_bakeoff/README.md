@@ -171,7 +171,12 @@ original bytes.
 The new protocol forbids the exposed 220-case split and Chandler, freezes a new
 public validation and inference-locked sealed split, retains the original OCR
 quality thresholds, adds zero-duplicate and zero-exclusion-hit requirements,
-and permits exactly one evaluation. No evaluator or fixtures have been created
-or executed at this checkpoint. Production approval, manifests, model-store
-promotion, package discovery, and release authorization therefore remain
-false.
+and permits exactly one evaluation. The evaluator and C# approval gate are now
+frozen and checksum-bound before any model execution. They rederive the
+one-to-one structure consensus, truth matching, duplicate counts, source BGR
+pixels, and axis/tick/divider-masked detector BGR pixels from embedded fixture
+bytes and frozen mask geometry. No fixtures have been generated and no official
+composition has been executed at this checkpoint. Once the split is frozen,
+the official composition must not be rerun or tuned. Production approval,
+manifests, model-store promotion, package discovery, and release authorization
+therefore remain false.

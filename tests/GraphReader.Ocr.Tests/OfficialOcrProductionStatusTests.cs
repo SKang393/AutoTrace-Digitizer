@@ -76,8 +76,11 @@ public sealed class OfficialOcrProductionStatusTests
         System.Text.Json.JsonElement protocol = document.RootElement;
 
         Assert.AreEqual(
-            "preregistered_before_fixture_generation_and_inference",
+            "frozen_before_fixture_generation_and_inference",
             protocol.GetProperty("status").GetString());
+        Assert.AreEqual(
+            ProductionOcrProfile,
+            protocol.GetProperty("profile").GetString());
         Assert.IsFalse(protocol.GetProperty("private_data").GetBoolean());
         Assert.IsFalse(protocol.GetProperty("chandler_used").GetBoolean());
         Assert.AreEqual(
@@ -100,7 +103,7 @@ public sealed class OfficialOcrProductionStatusTests
                 .GetInt32());
 
         foreach (System.Text.Json.JsonProperty source in
-            protocol.GetProperty("workflow_source_sha256").EnumerateObject())
+            protocol.GetProperty("reviewed_source_sha256").EnumerateObject())
         {
             string sourcePath = Path.Combine(root, source.Name.Replace('/', Path.DirectorySeparatorChar));
             Assert.IsTrue(File.Exists(sourcePath), $"Preregistered OCR source is missing: {source.Name}");
@@ -116,10 +119,15 @@ public sealed class OfficialOcrProductionStatusTests
             "ocr",
             "official_bakeoff",
             "README.md"));
-        StringAssert.Contains(readme, "No evaluator or fixtures have been created");
+        StringAssert.Contains(readme, "The evaluator and C# approval gate are now");
+        StringAssert.Contains(readme, "frozen and checksum-bound");
+        StringAssert.Contains(readme, "No fixtures have been generated");
         StringAssert.Contains(readme, "executed at this checkpoint");
         StringAssert.Contains(readme, "must not be rerun");
     }
+
+    private const string ProductionOcrProfile =
+        "graphreader-ocr-structure-consensus-public-gate-v1";
 
     private static string FindRepositoryRoot()
     {

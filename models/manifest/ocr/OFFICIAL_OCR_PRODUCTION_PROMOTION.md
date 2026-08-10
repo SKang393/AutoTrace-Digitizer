@@ -7,12 +7,14 @@ Copyright 2026 Sungwoo Kang
 
 ## Current decision
 
-The official PP-OCRv5 pair has completed its one authorized public synthetic
-evaluation and failed the fixed production gates. There is no tracked OCR model
-manifest, no approved benchmark report, and no OCR payload in the production
-model store or a release package. The reviewed Apache-2.0 license and ONNX
-change-notice bundle exists, but it has not been bound through a model-store
-index or package. This is an intentional fail-closed state.
+The official PP-OCRv5 pair completed the one authorized legacy dense-detector
+public synthetic evaluation and failed the fixed production gates. The distinct
+source-bound structure-consensus composition is frozen before its new split or
+one allowed execution. There is no tracked OCR model manifest, no approved
+benchmark report, and no OCR payload in the production model store or a release
+package. The reviewed Apache-2.0 license and ONNX change-notice bundle exists,
+but it has not been bound through a model-store index or package. This is an
+intentional fail-closed state.
 
 | Task | Model | Converted ONNX SHA-256 | Current status |
 | --- | --- | --- | --- |
@@ -60,15 +62,19 @@ another item.
    SHA-256.
 3. Validation and sealed-test exact match are each at least `0.90`; CER is at
    most `0.05`; role accuracy is at least `0.90`; detection exact-count rate is
-   `1.0`; and marker creation from OCR text is zero.
+   `1.0`; duplicate regions and exclusion false regions are zero; and marker
+   creation from OCR text is zero.
 4. At least 16 direct parity pairs per model establish ONNX maximum absolute
    error at most `1e-4`. The runtime report identifies CPU execution for both
    payloads.
 5. The report embeds and hashes the reviewed evaluator, execution workflow,
    fixture ZIP, sealed split, direct core predictions, final predictions,
    runtime results, and independently composed marker-stage results required by
-   `graphreader-ocr-public-gate-v1`. Reported aggregate metrics must equal
-   metrics derived from those resources.
+   `graphreader-ocr-structure-consensus-public-gate-v1`. The gate must also
+   rederive decoded source BGR, axis/tick/divider-masked detector BGR, DB model
+   to structure-candidate matches, final regions, truth matches, duplicates,
+   and exclusion hits. Reported aggregate metrics must equal metrics derived
+   from those resources.
 6. The reviewed Apache-2.0 license and ONNX change-notice files exist at
    `LICENSES/PaddlePaddle-PP-OCRv5-Models-Apache-2.0.txt` and
    `LICENSES/PaddlePaddle-PP-OCRv5-Models-Notice.txt`, with SHA-256 values
@@ -114,7 +120,7 @@ Promotion is one atomic evidence change for both tasks. Each final manifest
 must contain exactly one such approval benchmark with:
 
 ```text
-profile = graphreader-ocr-public-gate-v1
+profile = graphreader-ocr-structure-consensus-public-gate-v1
 evidence_path
 evidence_sha256
 evaluator_source_sha256

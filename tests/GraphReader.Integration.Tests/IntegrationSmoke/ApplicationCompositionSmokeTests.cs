@@ -794,6 +794,66 @@ public sealed class ApplicationCompositionSmokeTests
     }
 
     [TestMethod]
+    public async Task OcrPairRejectsUnboundMaskedDetectorPixels()
+    {
+        using var package = ApprovedOcrPairPackageFixture.Create(tamperMaskedDetectorHash: true);
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(package.Root),
+            applicationRoot: package.ApplicationRoot,
+            cancellationToken: CancellationToken.None);
+        try
+        {
+            Assert.IsNull(composition.OcrAdapter);
+            Assert.AreEqual("OCR_ADAPTER_UNAVAILABLE", composition.StartupError?.Code);
+            StringAssert.Contains(
+                composition.StartupError?.TechnicalMessage,
+                "exact detector input pixels");
+            Assert.IsFalse(
+                Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService)
+                    .UsesFakeGraphData);
+        }
+        finally
+        {
+            if (composition.InferenceRuntimeHost is not null)
+            {
+                await composition.InferenceRuntimeHost.DisposeAsync();
+            }
+        }
+    }
+
+    [TestMethod]
+    public async Task OcrPairRejectsSelfReportedConsensusThatDoesNotReproduce()
+    {
+        using var package = ApprovedOcrPairPackageFixture.Create(tamperConsensus: true);
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(package.Root),
+            applicationRoot: package.ApplicationRoot,
+            cancellationToken: CancellationToken.None);
+        try
+        {
+            Assert.IsNull(composition.OcrAdapter);
+            Assert.AreEqual("OCR_ADAPTER_UNAVAILABLE", composition.StartupError?.Code);
+            StringAssert.Contains(
+                composition.StartupError?.TechnicalMessage,
+                "do not reproduce the frozen one-to-one composition");
+            Assert.IsFalse(
+                Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService)
+                    .UsesFakeGraphData);
+        }
+        finally
+        {
+            if (composition.InferenceRuntimeHost is not null)
+            {
+                await composition.InferenceRuntimeHost.DisposeAsync();
+            }
+        }
+    }
+
+    [TestMethod]
     public async Task DirectArtifactGateComposesLazyMaskAdapterWithoutApprovingAutomaticWorkflow()
     {
         using var package = ApprovedModelPackageFixture.Create(
@@ -1528,6 +1588,14 @@ public sealed class ApplicationCompositionSmokeTests
 
     private sealed class ApprovedOcrPairPackageFixture : IDisposable
     {
+        private const string FixtureSourceBgrSha256 =
+            "709e80c88487a2411e1ee4dfb9f22a861492d20c4765150c0c794abd70f8147c";
+        private const string FixtureDetectorBgrSha256 =
+            "5ae7e6a42304dc6e4176210b83c43024f99a0bce9a870c3b6d2c95fc8ebfb74c";
+        private const string FixtureWorkflowSourceSha256 =
+            "56890be869a3a58cfacc2687ac92c81644835030ef45b2e73375e854dad1fb7d";
+        private static readonly double[] FixtureUnitBounds = [0d, 0d, 1d, 1d];
+
         private ApprovedOcrPairPackageFixture(string root, string applicationRoot)
         {
             Root = root;
@@ -1544,6 +1612,8 @@ public sealed class ApplicationCompositionSmokeTests
             bool negativeParity = false,
             bool invalidOnnxPayload = false,
             bool tamperPredictions = false,
+            bool tamperMaskedDetectorHash = false,
+            bool tamperConsensus = false,
             string? channelOrder = "BGR",
             bool grayscaleChannels = false,
             string detectionAlgorithm = "db_postprocess_v1",
@@ -1596,7 +1666,9 @@ public sealed class ApplicationCompositionSmokeTests
                 recognitionSha256,
                 failingCer,
                 negativeParity,
-                tamperPredictions);
+                tamperPredictions,
+                tamperMaskedDetectorHash,
+                tamperConsensus);
             Dictionary<string, object?> detection = WriteModel(
                 root,
                 "fixture-ocr-detection",
@@ -1866,7 +1938,9 @@ public sealed class ApplicationCompositionSmokeTests
             string recognitionSha256,
             bool failingCer,
             bool negativeParity,
-            bool tamperPredictions)
+            bool tamperPredictions,
+            bool tamperMaskedDetectorHash,
+            bool tamperConsensus)
         {
             byte[] evaluatorSource = File.ReadAllBytes(Path.Combine(
                 RepositoryRoot.Find(),
@@ -1874,15 +1948,22 @@ public sealed class ApplicationCompositionSmokeTests
                 "ocr",
                 "production_gate.py"));
             string evaluatorSourceSha256 = Sha256(evaluatorSource);
+            byte[] gateProtocol = File.ReadAllBytes(Path.Combine(
+                RepositoryRoot.Find(),
+                "ml",
+                "ocr",
+                "official_bakeoff",
+                "STRUCTURE_CONSENSUS_GATE_PROTOCOL.json"));
+            string gateProtocolSha256 = Sha256(gateProtocol);
             string[] families = ["integer", "decimal", "negative", "percentage", "ambiguity"];
             string[] roles = ["x_tick", "y_tick", "annotation", "participant", "phase_header"];
             var cases = new List<Dictionary<string, object?>>();
             var corePredictions = new List<Dictionary<string, object?>>();
             var predictions = new List<Dictionary<string, object?>>();
             var fixtureAssets = new Dictionary<string, byte[]>(StringComparer.Ordinal);
-            for (int index = 0; index < 200; index++)
+            for (int index = 0; index < 400; index++)
             {
-                string partition = index < 100 ? "validation" : "sealed_test";
+                string partition = index < 200 ? "validation" : "sealed_test";
                 string family = families[index % families.Length];
                 string display = family switch
                 {
@@ -1913,6 +1994,12 @@ public sealed class ApplicationCompositionSmokeTests
                     ["expected_region_count"] = 1,
                     ["source_path"] = sourcePath,
                     ["source_sha256"] = sourceSha256,
+                    ["source_width"] = 1,
+                    ["source_height"] = 1,
+                    ["source_bgr_sha256"] = FixtureSourceBgrSha256,
+                    ["detector_image_bgr_sha256"] = FixtureDetectorBgrSha256,
+                    ["truth_bbox"] = FixtureUnitBounds,
+                    ["mask_rectangles"] = FixtureMaskRectangles(),
                 });
                 Dictionary<string, object?> direct = DirectOcrRecord(
                     caseId,
@@ -1929,9 +2016,9 @@ public sealed class ApplicationCompositionSmokeTests
                 });
             }
 
-            for (int index = 0; index < 20; index++)
+            for (int index = 0; index < 100; index++)
             {
-                string partition = index < 10 ? "validation" : "sealed_test";
+                string partition = index < 50 ? "validation" : "sealed_test";
                 string caseId = $"{partition}-exclusion-{index:D2}";
                 string sourcePath = $"assets/{caseId}.png";
                 byte[] sourceBytes = FixturePng(caseId);
@@ -1949,6 +2036,12 @@ public sealed class ApplicationCompositionSmokeTests
                     ["expected_region_count"] = 0,
                     ["source_path"] = sourcePath,
                     ["source_sha256"] = sourceSha256,
+                    ["source_width"] = 1,
+                    ["source_height"] = 1,
+                    ["source_bgr_sha256"] = FixtureSourceBgrSha256,
+                    ["detector_image_bgr_sha256"] = FixtureDetectorBgrSha256,
+                    ["truth_bbox"] = null,
+                    ["mask_rectangles"] = FixtureMaskRectangles(),
                 });
                 Dictionary<string, object?> direct = DirectOcrRecord(
                     caseId,
@@ -1965,28 +2058,42 @@ public sealed class ApplicationCompositionSmokeTests
                 });
             }
 
+            if (tamperMaskedDetectorHash)
+            {
+                cases[0]["detector_image_bgr_sha256"] = new string('0', 64);
+            }
+
+            if (tamperConsensus)
+            {
+                corePredictions[0]["consensus_matches"] = Array.Empty<Dictionary<string, object?>>();
+                predictions[0]["consensus_matches"] = Array.Empty<Dictionary<string, object?>>();
+            }
+
             byte[] fixtureArchiveBytes = CreateFixtureArchive(fixtureAssets);
             string fixtureArchiveSha256 = Sha256(fixtureArchiveBytes);
 
             byte[] splitBytes = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object?>
             {
-                ["schema"] = "graphreader.ocr-sealed-split.v1",
+                ["schema"] = "graphreader.ocr-structure-consensus-split.v1",
                 ["profile"] = ProductionOcrAdapter.ApprovalBenchmarkProfile,
                 ["scope"] = "public_synthetic",
                 ["sealed"] = true,
                 ["selection_locked_before_inference"] = true,
                 ["private_data"] = false,
                 ["chandler_used"] = false,
+                ["protocol_sha256"] = gateProtocolSha256,
                 ["evaluator_source_sha256"] = evaluatorSourceSha256,
+                ["workflow_source_sha256"] = FixtureWorkflowSourceSha256,
                 ["fixture_archive_sha256"] = fixtureArchiveSha256,
                 ["cases"] = cases,
             });
             string splitSha256 = Sha256(splitBytes);
             byte[] corePredictionBytes = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object?>
             {
-                ["schema"] = "graphreader.ocr-core-predictions.v1",
+                ["schema"] = "graphreader.ocr-structure-consensus-core-predictions.v1",
                 ["profile"] = ProductionOcrAdapter.ApprovalBenchmarkProfile,
                 ["provider"] = "cpu",
+                ["composition_id"] = "graph-structure-consensus-v1",
                 ["sealed_split_sha256"] = splitSha256,
                 ["fixture_archive_sha256"] = fixtureArchiveSha256,
                 ["detection_model_sha256"] = detectionSha256,
@@ -1996,9 +2103,10 @@ public sealed class ApplicationCompositionSmokeTests
             string corePredictionsSha256 = Sha256(corePredictionBytes);
             byte[] predictionBytes = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object?>
             {
-                ["schema"] = "graphreader.ocr-predictions.v1",
+                ["schema"] = "graphreader.ocr-structure-consensus-predictions.v1",
                 ["profile"] = ProductionOcrAdapter.ApprovalBenchmarkProfile,
                 ["provider"] = "cpu",
+                ["composition_id"] = "graph-structure-consensus-v1",
                 ["sealed_split_sha256"] = splitSha256,
                 ["fixture_archive_sha256"] = fixtureArchiveSha256,
                 ["core_predictions_sha256"] = corePredictionsSha256,
@@ -2012,11 +2120,11 @@ public sealed class ApplicationCompositionSmokeTests
                 "ml",
                 "ocr",
                 "official_bakeoff",
-                "production_evaluate.py"));
+                "structure_consensus_evaluate.py"));
             string workflowSourceSha256 = Sha256(workflowSource);
             byte[] markerCreationBytes = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object?>
             {
-                ["schema"] = "graphreader.ocr-marker-creation-results.v1",
+                ["schema"] = "graphreader.ocr-structure-consensus-marker-results.v1",
                 ["profile"] = ProductionOcrAdapter.ApprovalBenchmarkProfile,
                 ["provider"] = "cpu",
                 ["run_id"] = "4f8d6d53-102c-48ee-89ce-20b060880ac8",
@@ -2032,6 +2140,7 @@ public sealed class ApplicationCompositionSmokeTests
                 {
                     ["case_id"] = item["case_id"],
                     ["source_sha256"] = item["source_sha256"],
+                    ["detector_image_bgr_sha256"] = item["detector_image_bgr_sha256"],
                     ["marker_creation_count"] = 0,
                 }).ToArray(),
             });
@@ -2045,9 +2154,10 @@ public sealed class ApplicationCompositionSmokeTests
                 .ToArray();
             byte[] runtimeBytes = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object?>
             {
-                ["schema"] = "graphreader.ocr-runtime-results.v1",
+                ["schema"] = "graphreader.ocr-structure-consensus-runtime-results.v1",
                 ["profile"] = ProductionOcrAdapter.ApprovalBenchmarkProfile,
                 ["provider"] = "cpu",
+                ["composition_id"] = "graph-structure-consensus-v1",
                 ["detection_executed"] = true,
                 ["recognition_executed"] = true,
                 ["evaluator_source_sha256"] = evaluatorSourceSha256,
@@ -2068,6 +2178,7 @@ public sealed class ApplicationCompositionSmokeTests
                     ["onnxruntime_version"] = "1.22.1",
                     ["numpy_version"] = "2.2.6",
                     ["pillow_version"] = "11.2.1",
+                    ["opencv_version"] = "4.10.0",
                     ["platform"] = "Windows-11-x64",
                     ["onnxruntime_providers"] = OcrRuntimeProviders,
                 },
@@ -2077,8 +2188,9 @@ public sealed class ApplicationCompositionSmokeTests
             string runtimeSha256 = Sha256(runtimeBytes);
             byte[] reportBytes = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object?>
             {
-                ["schema"] = "graphreader.ocr-production-gate.v1",
+                ["schema"] = "graphreader.ocr-structure-consensus-production-gate.v1",
                 ["profile"] = ProductionOcrAdapter.ApprovalBenchmarkProfile,
+                ["composition_id"] = "graph-structure-consensus-v1",
                 ["status"] = "pass",
                 ["scope"] = "public_synthetic_sealed",
                 ["release_eligible"] = true,
@@ -2089,6 +2201,7 @@ public sealed class ApplicationCompositionSmokeTests
                 ["coordinate_space"] = "original_pixels",
                 ["detection_model_sha256"] = detectionSha256,
                 ["recognition_model_sha256"] = recognitionSha256,
+                ["protocol_sha256"] = gateProtocolSha256,
                 ["evaluator_source_sha256"] = evaluatorSourceSha256,
                 ["workflow_source_sha256"] = workflowSourceSha256,
                 ["sealed_split_sha256"] = splitSha256,
@@ -2104,10 +2217,13 @@ public sealed class ApplicationCompositionSmokeTests
                 ["sealed_test_role_accuracy"] = 1.0,
                 ["onnx_max_abs_error"] = negativeParity ? -0.00001 : 0.00005,
                 ["detection_exact_rate"] = 1.0,
+                ["duplicate_region_count"] = 0,
+                ["exclusion_false_region_count"] = 0,
                 ["marker_creation_evaluated"] = true,
                 ["marker_creation_count"] = 0,
                 ["reviewed_resources"] = new Dictionary<string, object?>
                 {
+                    ["gate_protocol"] = Embedded("application/json", gateProtocol, gateProtocolSha256),
                     ["evaluator_source"] = Embedded("text/x-python", evaluatorSource, evaluatorSourceSha256),
                     ["workflow_source"] = Embedded("text/x-python", workflowSource, workflowSourceSha256),
                     ["sealed_split"] = Embedded("application/json", splitBytes, splitSha256),
@@ -2170,10 +2286,45 @@ public sealed class ApplicationCompositionSmokeTests
             {
                 ["case_id"] = caseId,
                 ["source_sha256"] = sourceSha256,
+                ["source_bgr_sha256"] = FixtureSourceBgrSha256,
+                ["detector_image_bgr_sha256"] = FixtureDetectorBgrSha256,
+                ["composition_id"] = "graph-structure-consensus-v1",
                 ["predicted_text"] = predictedText,
                 ["predicted_role"] = predictedRole,
                 ["detected_region_count"] = detectedRegionCount,
                 ["false_region_count"] = falseRegionCount,
+                ["duplicate_region_count"] = 0,
+                ["model_regions"] = detectedRegionCount == 1
+                    ? new[] { EvidenceRegion("model-region", 0.95) }
+                    : Array.Empty<Dictionary<string, object?>>(),
+                ["structure_candidates"] = detectedRegionCount == 1
+                    ? new[]
+                    {
+                        new Dictionary<string, object?>
+                        {
+                            ["region_id"] = "structure-candidate",
+                            ["bounds"] = FixtureUnitBounds,
+                            ["text_likelihood"] = 0.90,
+                            ["structure_likelihood"] = 0.10,
+                            ["likely_graph_structure"] = false,
+                            ["component_count"] = 2,
+                        },
+                    }
+                    : Array.Empty<Dictionary<string, object?>>(),
+                ["consensus_matches"] = detectedRegionCount == 1
+                    ? new[]
+                    {
+                        new Dictionary<string, object?>
+                        {
+                            ["model_region_id"] = "model-region",
+                            ["candidate_region_id"] = "structure-candidate",
+                            ["overlap_coefficient"] = 1.0,
+                        },
+                    }
+                    : Array.Empty<Dictionary<string, object?>>(),
+                ["final_regions"] = detectedRegionCount == 1
+                    ? new[] { EvidenceRegion("model-region", 0.95) }
+                    : Array.Empty<Dictionary<string, object?>>(),
                 ["detector_input_tensor"] = TensorEvidence(caseId, "detector-input", [1, 3, 48, 320]),
                 ["detector_output_tensor"] = TensorEvidence(caseId, "detector-output", [1, 1, 48, 320]),
                 ["recognizer_executed"] = recognizerExecuted,
@@ -2184,6 +2335,26 @@ public sealed class ApplicationCompositionSmokeTests
                     ? TensorEvidence(caseId, "recognizer-output", [1, 40, 438])
                     : null,
             };
+
+        private static Dictionary<string, object?> EvidenceRegion(string regionId, double confidence) =>
+            new()
+            {
+                ["region_id"] = regionId,
+                ["bounds"] = FixtureUnitBounds,
+                ["confidence"] = confidence,
+            };
+
+        private static Dictionary<string, object?>[] FixtureMaskRectangles() =>
+        [
+            new Dictionary<string, object?>
+            {
+                ["kind"] = "x_axis",
+                ["left"] = 0,
+                ["top"] = 0,
+                ["right"] = 1,
+                ["bottom"] = 1,
+            },
+        ];
 
         private static Dictionary<string, object?> TensorEvidence(
             string caseId,

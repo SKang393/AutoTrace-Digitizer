@@ -1,7 +1,7 @@
 {
   "schema": "graphreader.ocr-structure-consensus-gate-protocol.v1",
   "profile": "graphreader-ocr-structure-consensus-public-gate-v1",
-  "status": "preregistered_before_fixture_generation_and_inference",
+  "status": "frozen_before_fixture_generation_and_inference",
   "scope": "public_synthetic",
   "private_data": false,
   "chandler_used": false,
@@ -29,6 +29,8 @@
     "structure_consensus": {
       "minimum_overlap_coefficient": 0.5,
       "minimum_text_likelihood": 0.45,
+      "truth_match_iou_minimum": 0.5,
+      "duplicate_region_iou_minimum": 0.7,
       "one_model_region_per_structure_candidate": true,
       "candidate_may_replace_model_region": false,
       "explicit_non_structure_evidence_required": true
@@ -50,11 +52,16 @@
       "recognition_crops_use_unmasked_original": true
     }
   },
-  "workflow_source_sha256": {
+  "metrics_evaluator_sha256": "cc354ec53e4d0ecc5eab7dcf6243e5538e39f043057a949fd3d6ce84a83d50ee",
+  "execution_workflow_sha256": "56890be869a3a58cfacc2687ac92c81644835030ef45b2e73375e854dad1fb7d",
+  "reviewed_source_sha256": {
+    "ml/ocr/production_gate.py": "cc354ec53e4d0ecc5eab7dcf6243e5538e39f043057a949fd3d6ce84a83d50ee",
+    "ml/ocr/official_bakeoff/structure_consensus_evaluate.py": "56890be869a3a58cfacc2687ac92c81644835030ef45b2e73375e854dad1fb7d",
     "src/GraphReader.Ocr/GraphStructureConsensusTextRegionDetector.cs": "496a2e674cc2ed9393aecbb8df9c95ec0f3e4183312f9857710eb303d1ba7c6e",
     "src/GraphReader.Ocr/ConnectedComponentTextRegionDetector.cs": "c77e65eb53bb9d15bc94b2956a96b87cfdcdd79509cbf87d2beada3b29afc3c4",
     "src/GraphReader.Ocr/LocalOnnxTextRegionDetector.cs": "c17cbd77bc646f7646f2f3f60b2120be735201b79c0b32a48318a30464b0aa38",
-    "src/GraphReader.App/Integration/Workflow/ProductionOcrAdapter.cs": "56743698efa16c9f6dba90d55b4c241ee851bd5c9cdc302347a0140f098a2a6e",
+    "src/GraphReader.App/Integration/Workflow/ProductionOcrAdapter.cs": "e57550f89e7eff4656ea6b9d74f0f2f0473da852471c8dcfa9647bb2e9f9e1fd",
+    "src/GraphReader.App/Integration/Workflow/ProductionOcrApprovalGate.cs": "63042fb24fab70cd8916d1d693df59cb1242bbd53424c09448de8e8318c65936",
     "src/GraphReader.App/Integration/Workflow/ProductionRasterFrameDecoder.cs": "29e93889ca0da9f98d2070aaa8a22d24d6b9975a7bb873a3c82832f8eff1a931"
   },
   "new_split": {

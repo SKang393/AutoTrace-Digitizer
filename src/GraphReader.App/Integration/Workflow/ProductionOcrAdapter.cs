@@ -45,7 +45,8 @@ public sealed class ProductionOcrEvidence
 /// </summary>
 public sealed class ProductionOcrAdapter : IProductionOcrAdapter
 {
-    public const string ApprovalBenchmarkProfile = "graphreader-ocr-public-gate-v1";
+    public const string ApprovalBenchmarkProfile =
+        "graphreader-ocr-structure-consensus-public-gate-v1";
     private const string CombinedTimingWarning = "ocr_pipeline_timing_not_model_isolated";
     private readonly Lazy<OcrPipeline> pipeline;
     private readonly ModelIdentity detectionModel;
