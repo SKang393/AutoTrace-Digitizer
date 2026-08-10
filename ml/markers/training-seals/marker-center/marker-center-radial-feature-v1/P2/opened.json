@@ -1,0 +1,24 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/markers/center/radial_feature_v1/training/p2.json",
+    "candidate_config_sha256": "59be1bdc3539f135c250153edf6760f73fa16424f2c7a0b17a8f15449fa612c6",
+    "candidate_id": "P2",
+    "committed_source_enforcement": true,
+    "revision": "marker-center-radial-feature-v1",
+    "runner_source_bundle_sha256": "b51677e4da7998d8118161029dfcfdcbbc80440631e02c0bad2d735745bd3e55",
+    "runner_source_paths": [
+      "ml/markers/center/line_aware_v1/model.py",
+      "ml/markers/center/line_aware_v1/pipeline.py",
+      "ml/markers/center/radial_feature_v1/dataset.py",
+      "ml/markers/center/radial_feature_v1/model.py",
+      "ml/markers/center/radial_feature_v1/train_p2.py",
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py"
+    ],
+    "task": "marker-center",
+    "training_budget_ledger_sha256": "a9c4634e58e0d56ec13a2bec16856b822b699b3459a5d750db2c214c517721e7"
+  },
+  "opened_utc": "2026-08-10T19:29:24.382162+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

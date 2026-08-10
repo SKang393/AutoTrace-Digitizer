@@ -6,10 +6,10 @@
   "prior_revision": "marker-center-line-aware-v1",
   "prior_candidate_bytes_reused": false,
   "experiment_budget": 3,
-  "currently_preregistered_candidate": "P2",
-  "consumed_candidates": ["P1"],
+  "currently_preregistered_candidate": "P3",
+  "consumed_candidates": ["P1", "P2"],
   "architecture": "radial-topology-projection-mlp-v1",
-  "isolated_change": "P2 increases only the positive center-offset loss weight from 1.5 to 3.0 and trains new weights from a new seed; the P1 architecture, data, proposal, postprocessing, thresholds, optimizer, and epoch count remain frozen",
+  "isolated_change": "P3 reuses the exact best P1 checkpoint and ONNX with zero optimizer steps and replaces only failed geometry-consensus rejection with a deterministic one-pixel local consensus refinement before unchanged nonmaximum suppression",
   "p1_result": {
     "status": "failed_selection",
     "training_report_path": "ml/markers/center/artifacts/radial-feature-v1/P1-run/candidate-report.json",
@@ -24,6 +24,22 @@
     "duplicate_count": 0,
     "prohibited_structure_hits": 0,
     "onnx_parity_maximum_absolute_error": 1.9073486328125e-06,
+    "sealed_public_archive_opened": false
+  },
+  "p2_result": {
+    "status": "failed_selection",
+    "training_report_path": "ml/markers/center/artifacts/radial-feature-v1/P2-run/candidate-report.json",
+    "training_report_sha256": "6d9398092fee307aa4f59e2a423d386e5e0be0923e3a36e2efa2d75a6201029b",
+    "checkpoint_sha256": "16023ff1ee95fa90f5da449a92e68e0f312956a4d62b0924b4725ac83ac9f88e",
+    "onnx_sha256": "64f4c23795ab9e953a2e8aeba1887f8c99785f02385f453c9a46e6885578ff58",
+    "exact_scene_count": 5,
+    "scene_count": 9,
+    "true_positives": 59,
+    "false_positives": 0,
+    "false_negatives": 4,
+    "duplicate_count": 0,
+    "prohibited_structure_hits": 0,
+    "onnx_parity_maximum_absolute_error": 9.5367431640625e-07,
     "sealed_public_archive_opened": false
   },
   "selection_requirements": {

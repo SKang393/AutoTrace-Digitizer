@@ -17,17 +17,26 @@ positives, duplicates, or prohibited-structure hits. Both misses had available
 high-confidence proposals whose regressed centers failed the unchanged
 geometry-consensus filter. The public archive remained closed.
 
-P2 is the only currently preregistered candidate. It changes one training
-coefficient: the positive center-offset loss weight increases from `1.5` to
-`3.0`. It uses a new deterministic seed and new weights while retaining P1's
-architecture, frozen data, proposal and postprocessing code, thresholds,
-optimizer, and epoch count. P2 cannot execute until its configuration, runner
-source bundle, P1 result seals, and canonical budget authorization are
-committed together.
+P2 is also consumed and cannot rerun. It changed one training coefficient by
+increasing the positive center-offset loss weight from `1.5` to `3.0`, used a
+new deterministic seed, and produced CPU ONNX parity error
+`9.5367431640625e-07`. It worsened frozen selection to 5 of 9 exact scenes and
+59 of 63 retained markers at threshold `0.15`, still with zero false positives,
+duplicates, or prohibited hits. Its public archive remained closed.
+
+P3 is the only currently preregistered candidate and the final candidate in
+this defect-class budget. It performs zero optimizer steps and reuses the exact
+best P1 checkpoint and ONNX. The isolated change is postprocessing: when the
+existing discrete geometry probe rejects a regressed center, P3 searches only
+the deterministic one-pixel neighborhood for the nearest unmasked position
+that satisfies the same geometry consensus. Nonmaximum suppression and every
+other contract remain unchanged. Direct validation analysis selected this
+defect correction because both P1 misses had valid, high-confidence proposals
+and were rejected only by one-pixel probe quantization.
 
 Training and selection use only new procedural families. The truth-hidden
 16-scene public archive is frozen before optimizer execution. Chandler and
-private article images are excluded. P2 may open that archive only after every
+private article images are excluded. P3 may open that archive only after every
 selection scene and CPU ONNX parity gate passes. A selection or public pass
 does not approve production without the independent artifact-mask gate,
 production adapter, manifest, model store, notices, packaging, and clean-machine

@@ -24,9 +24,11 @@ from ml.markers.center.radial_feature_v1.dataset import (
     build_selection_scenes, selection_manifest,
 )
 from ml.markers.center.radial_feature_v1.model import RadialFeatureNet
+from ml.markers.center.radial_feature_v1.pipeline_p3 import _refine_geometry_center
 from ml.markers.center.radial_feature_v1.prepare_split import SOURCE_PATHS as SPLIT_SOURCE_PATHS
 from ml.markers.center.radial_feature_v1.sealed_gate import EVALUATOR_SOURCE_PATHS, GATE_CONFIG
-from ml.markers.center.radial_feature_v1.train_p2 import RUNNER_SOURCE_PATHS, _export
+from ml.markers.center.radial_feature_v1.train_p2 import _export
+from ml.markers.center.radial_feature_v1.train_p3 import RUNNER_SOURCE_PATHS
 from ml.markers.gate_seal import canonical_json_bytes, sha256_bytes, sha256_file, source_bundle_sha256
 
 
@@ -74,22 +76,42 @@ def test_non_convolutional_model_exports_dynamic_candidate_count() -> None:
         assert output.stat().st_size > 0
 
 
+def test_p3_local_consensus_refines_only_to_an_existing_geometry_hit() -> None:
+    refined = None
+    for scene in build_selection_scenes("validation"):
+        for (center_x, center_y), radius in zip(scene.centers, scene.radii, strict=True):
+            candidate = _refine_geometry_center(scene, center_x - 1.0, center_y - 1.0, radius)
+            if candidate is not None and candidate != (center_x - 1.0, center_y - 1.0):
+                refined = (center_x, center_y, candidate)
+                break
+        if refined is not None:
+            break
+    assert refined is not None
+    center_x, center_y, candidate = refined
+    assert abs(candidate[0] - center_x) <= 2.0
+    assert abs(candidate[1] - center_y) <= 2.0
+
+
 def test_preregistration_binds_source_split_and_canonical_gate_schema() -> None:
     protocol = json.loads((REPO_ROOT / "ml/markers/center/radial_feature_v1/PROTOCOL.json").read_text(encoding="utf-8"))
     selection_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/SELECTION_MANIFEST.json"
     seal_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/SEALED_PUBLIC_TEST_SEAL.json"
     gate_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/gates/sealed-public-v1.json"
-    config_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/training/p2.json"
+    config_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/training/p3.json"
     seal = json.loads(seal_path.read_text(encoding="utf-8"))
     gate = json.loads(gate_path.read_text(encoding="utf-8"))
     config = json.loads(config_path.read_text(encoding="utf-8"))
-    assert protocol["currently_preregistered_candidate"] == "P2"
-    assert protocol["consumed_candidates"] == ["P1"]
+    assert protocol["currently_preregistered_candidate"] == "P3"
+    assert protocol["consumed_candidates"] == ["P1", "P2"]
     assert protocol["prior_candidate_bytes_reused"] is False
     assert protocol["p1_result"]["status"] == "failed_selection"
     assert protocol["p1_result"]["exact_scene_count"] == 7
     assert protocol["p1_result"]["false_negatives"] == 2
     assert protocol["p1_result"]["sealed_public_archive_opened"] is False
+    assert protocol["p2_result"]["status"] == "failed_selection"
+    assert protocol["p2_result"]["exact_scene_count"] == 5
+    assert protocol["p2_result"]["false_negatives"] == 4
+    assert protocol["p2_result"]["sealed_public_archive_opened"] is False
     assert seal["scene_count"] == 16
     assert seal["truth_hidden_from_training_runner"] is True
     assert seal["chandler_included"] is False
@@ -105,24 +127,31 @@ def test_preregistration_binds_source_split_and_canonical_gate_schema() -> None:
     assert gate["release_eligible"] is False
 
 
-def test_canonical_budget_consumes_p1_and_authorizes_only_radial_p2() -> None:
-    config_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/training/p2.json"
+def test_canonical_budget_consumes_p1_p2_and_authorizes_only_radial_p3() -> None:
+    config_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/training/p3.json"
     config = json.loads(config_path.read_text(encoding="utf-8"))
     ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-radial-feature-v1")
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
-    assert entry["candidate_config_sha256"]["P2"] == sha256_file(config_path)
-    assert config["offset_loss_weight"] == 3.0
+    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["candidate_config_sha256"]["P3"] == sha256_file(config_path)
+    assert config["optimizer_steps"] == 0
+    assert config["reused_candidate_id"] == "P1"
     assert config["p1_training_report_sha256"] == entry["p1_training_report_sha256"]
     assert entry["p1_training_opened_seal_sha256"] == sha256_file(
         REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-radial-feature-v1/P1/opened.json"
     )
     assert entry["p1_training_result_seal_sha256"] == sha256_file(
         REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-radial-feature-v1/P1/result.json"
+    )
+    assert entry["p2_training_opened_seal_sha256"] == sha256_file(
+        REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-radial-feature-v1/P2/opened.json"
+    )
+    assert entry["p2_training_result_seal_sha256"] == sha256_file(
+        REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-radial-feature-v1/P2/result.json"
     )
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(
         REPO_ROOT / entry["sealed_public_test_seal_path"]
