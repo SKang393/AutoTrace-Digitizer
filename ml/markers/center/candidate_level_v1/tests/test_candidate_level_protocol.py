@@ -168,7 +168,9 @@ def test_protocol_declares_new_defect_class_and_keeps_production_closed() -> Non
     assert protocol["prior_revision"] == "marker-center-production-repair-v2"
     assert protocol["prior_revision_reuse"] is False
     assert protocol["experiment_budget"] == 3
-    assert protocol["currently_preregistered_candidate"] == "P3"
+    assert protocol["currently_preregistered_candidate"] is None
+    assert protocol["selected_candidate"] == "P3"
+    assert protocol["sealed_public_gate_authorized"] is True
     assert "P1" in protocol["consumed_candidates"]
     assert "P2" in protocol["consumed_candidates"]
     assert protocol["public_contract_schema_changes"] is False
@@ -218,7 +220,7 @@ def test_split_config_and_candidate_are_fully_hash_bound_and_fail_closed() -> No
     assert gate["release_eligible"] is False
 
 
-def test_canonical_budget_consumes_failed_p1_p2_and_authorizes_only_unused_p3() -> None:
+def test_canonical_budget_records_selected_p3_and_authorizes_only_its_public_gate() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(
             encoding="utf-8"
@@ -230,14 +232,28 @@ def test_canonical_budget_consumes_failed_p1_p2_and_authorizes_only_unused_p3() 
         if item["revision"] == "marker-center-candidate-level-v1"
     )
     p3_path = PACKAGE_ROOT / "training/p3.json"
-    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["status"] == "candidate_3_selected_public_gate_authorized"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["authorized_candidate_id"] == "P3"
-    assert entry["execution_authorized"] is True
-    assert entry["public_gate_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is False
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_candidate_id"] == "P3"
+    assert entry["public_gate_authorized_onnx_sha256"] == entry["p3_onnx_sha256"]
+    assert (
+        entry["public_gate_authorized_training_report_sha256"]
+        == entry["p3_training_report_sha256"]
+    )
+    assert entry["public_gate_evaluations"] == 0
+    assert entry["p3_optimizer_steps"] == 0
+    assert entry["p3_weights_changed"] is False
+    assert entry["p3_selection_exact_scene_count"] == entry["p3_selection_scene_count"] == 9
+    assert entry["p3_selection_false_positives"] == 0
+    assert entry["p3_selection_false_negatives"] == 0
+    assert entry["p3_selection_duplicate_count"] == 0
+    assert entry["p3_selection_prohibited_structure_hits"] == 0
     assert entry["candidate_config_sha256"]["P3"] == sha256_file(p3_path)
     assert entry["p1_checkpoint_sha256"] == "94324c6c74327a2ae3dd0b1b349db77d779eee5dd7423c12fd37ab4ce0affa6f"
     assert entry["p1_training_report_sha256"] == "a9deea9fdf1d0ffaf5d015bcb994af13542867ae44826df2286c5f2b07188b75"
@@ -259,6 +275,15 @@ def test_canonical_budget_consumes_failed_p1_p2_and_authorizes_only_unused_p3() 
     p2_result = json.loads((p2_seal_root / "result.json").read_text(encoding="utf-8"))
     assert p2_result["status"] == "failed_selection"
     assert p2_result["report_sha256"] == entry["p2_training_report_sha256"]
+    p3_seal_root = (
+        REPO_ROOT
+        / "ml/markers/training-seals/marker-center/marker-center-candidate-level-v1/P3"
+    )
+    assert entry["p3_training_opened_seal_sha256"] == sha256_file(p3_seal_root / "opened.json")
+    assert entry["p3_training_result_seal_sha256"] == sha256_file(p3_seal_root / "result.json")
+    p3_result = json.loads((p3_seal_root / "result.json").read_text(encoding="utf-8"))
+    assert p3_result["status"] == "selected"
+    assert p3_result["report_sha256"] == entry["p3_training_report_sha256"]
     prior = next(
         item
         for item in ledger["revisions"]

@@ -39,10 +39,13 @@ model-store, provider, packaging, and clean-machine gates all pass.
   P1 false positives and all seven duplicates, and retained zero prohibited
   hits. At threshold `0.7`, it still missed one of 63 validation markers and
   therefore did not open the sealed gate.
-- Only P3 is now preregistered. It reuses the exact P2 checkpoint and ONNX with
-  zero optimizer steps and freezes threshold `0.2`, the only value in one
-  bounded diagnostic that produced 9/9 exact validation scenes. P3 remains
-  unexecuted and the sealed truth remains unopened.
+- P3 consumed the final candidate without optimizer steps or weight changes.
+  The exact P2 ONNX at threshold `0.2` produced 9/9 exact validation scenes,
+  zero false positives, false negatives, duplicates, and prohibited hits, and
+  CPU parity maximum absolute error `1.1920928955078125e-6`.
+- P3 is selected for the single authorized sealed public evaluation. The
+  sealed fixture bytes and truth remain unopened at this checkpoint. Selection
+  success is not production approval.
 - Selection compares only the preregistered thresholds. The sealed public gate
   opens once for the exact selected ONNX hash.
 - Approval requires exact counts in every scene, zero false positives, zero
