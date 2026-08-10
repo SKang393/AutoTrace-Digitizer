@@ -1,0 +1,23 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/markers/center/line_aware_v1/training/p1.json",
+    "candidate_config_sha256": "8b252b458131c5c9b66b47ef8450d16cf5829903f2546e125b4f915a90512e76",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "marker-center-line-aware-v1",
+    "runner_source_bundle_sha256": "eb6d6c5c7b9a960ff86ab9c010c6bc32a1fd856df327699aa21733537e72c26a",
+    "runner_source_paths": [
+      "ml/markers/center/line_aware_v1/dataset.py",
+      "ml/markers/center/line_aware_v1/model.py",
+      "ml/markers/center/line_aware_v1/pipeline.py",
+      "ml/markers/center/line_aware_v1/train_p1.py",
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py"
+    ],
+    "task": "marker-center",
+    "training_budget_ledger_sha256": "7eecc28b128d96e30b7806bd9842b5baa50f4f23bec015ee46b3c323c25fdafc"
+  },
+  "opened_utc": "2026-08-10T17:57:41.044804+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

@@ -246,24 +246,27 @@
     {
       "task": "marker-center",
       "revision": "marker-center-line-aware-v1",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_2_preregistered",
       "defect_class": "proposal-and-predicted-center mask consensus with radial marker geometry",
       "prior_revision": "marker-center-candidate-level-v1",
       "prior_candidate_bytes_reused": false,
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
+        "P2"
+      ],
+      "consumed_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "candidate_config_paths": {
-        "P1": "ml/markers/center/line_aware_v1/training/p1.json"
+        "P1": "ml/markers/center/line_aware_v1/training/p1.json",
+        "P2": "ml/markers/center/line_aware_v1/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "8b252b458131c5c9b66b47ef8450d16cf5829903f2546e125b4f915a90512e76"
+        "P1": "8b252b458131c5c9b66b47ef8450d16cf5829903f2546e125b4f915a90512e76",
+        "P2": "9b329aa26a9261d445d8db48ce2f9c83e18475f723bf71f47ccb68ab4704d5a0"
       },
       "trigger_evidence_path": "ml/markers/center/artifacts/candidate-level-v1/P3-sealed-public/gate-report.json",
       "trigger_evidence_sha256": "02490587ef0bffccd5ca636fcd9e2d69f8ee55f9943fd22100065499755f321f",
@@ -276,8 +279,20 @@
       "sealed_public_fixture_archive_sha256": "69e905d2ae2a07544e2426446f1fc7e0008d7701d7831103c74a1cf7ed9795b6",
       "sealed_public_private_manifest_sha256": "3226eafe50bd5c46908de0954109a561da5be27a54b457f62badd160947ed9d8",
       "expected_runner_source_bundle_sha256": "eb6d6c5c7b9a960ff86ab9c010c6bc32a1fd856df327699aa21733537e72c26a",
+      "p1_training_report_path": "ml/markers/center/artifacts/line-aware-v1/P1-run/candidate-report.json",
+      "p1_training_report_sha256": "9e3bee532c852ba13c3bdde9390ab9dcbf1a1fcf091072f802dddefe20b6d56c",
+      "p1_training_opened_seal_sha256": "3fb5782b05a62a882b4a5f9aaadf39b0190743eda0d92df5da95cc66be5df7c0",
+      "p1_training_result_seal_sha256": "30e7eb643f8fa507296dc7b54db75093addc5f289edefdc878a7289694b7ffb3",
+      "p1_training_phase": "onnx_preflight",
+      "p1_optimizer_steps": 0,
+      "p1_public_gate_evaluations": 0,
+      "p1_failure": "P1 failed ONNX preflight before the optimizer was created because adaptive 8-to-3 pooling is unsupported. P1 is consumed and cannot rerun.",
+      "p2_trigger_evidence_path": "ml/markers/center/artifacts/line-aware-v1/P1-run/candidate-report.json",
+      "p2_trigger_evidence_sha256": "9e3bee532c852ba13c3bdde9390ab9dcbf1a1fcf091072f802dddefe20b6d56c",
+      "p2_isolated_change": "replace only the unsupported adaptive 8-to-3 pool with a fixed 4-by-4 stride-two average pool and train new weights from a new seed because P1 produced no checkpoint",
+      "p2_expected_runner_source_bundle_sha256": "aeee5089cfe9085cd0ca765ff106caa77748e23b4073f291cb171efcd1e705d7",
       "execution_authorized": true,
-      "authorized_candidate_id": "P1",
+      "authorized_candidate_id": "P2",
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "production_approval": false,
