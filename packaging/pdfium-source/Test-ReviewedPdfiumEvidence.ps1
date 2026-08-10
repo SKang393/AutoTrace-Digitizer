@@ -15,7 +15,9 @@ if (-not (Test-Path -LiteralPath $approvalPath -PathType Leaf)) {
 }
 $approval = Get-Content -LiteralPath $approvalPath -Raw | ConvertFrom-Json
 foreach ($field in @('reviewApproved', 'redistributionApproved', 'bundlingApproved')) {
-    if ($approval.$field -ne $true) { throw "PDFium approval field '$field' is not true." }
+    if (-not ($approval.$field -is [bool]) -or [bool]$approval.$field -ne $true) {
+        throw "PDFium approval field '$field' must be the JSON Boolean true."
+    }
 }
 if ($approval.sourceRevision -ne '2870fa9244b0f0f69fb743fab1e08deefcb07b2b') {
     throw 'PDFium approval does not use the pinned revision.'

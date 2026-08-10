@@ -45,7 +45,17 @@ public partial class App : Application, IDisposable
         RuntimeEnvironment = RuntimeModeSelector.Select();
         if (startupArguments.ProductionRuntimeSmoke)
         {
-            Shutdown(RuntimeModeSelector.SelectBuildDefault() == WorkflowRuntimeEnvironment.Production ? 0 : 2);
+            bool productionRuntime =
+                RuntimeModeSelector.SelectBuildDefault() == WorkflowRuntimeEnvironment.Production;
+            bool packagedPdfiumReady = true;
+            if (productionRuntime && startupArguments.RequirePackagedPdfium)
+            {
+                (_, bool configured, DomainError? error) =
+                    ApplicationComposition.CreateReviewedPdfImporter(AppContext.BaseDirectory);
+                packagedPdfiumReady = configured && error is null;
+            }
+
+            Shutdown(productionRuntime && packagedPdfiumReady ? 0 : 2);
             return;
         }
 

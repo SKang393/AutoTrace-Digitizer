@@ -576,7 +576,7 @@ public static class ApplicationComposition
             : $"{resolution.Diagnostic.Code}: {resolution.Diagnostic.TechnicalMessage}";
     }
 
-    private static (IPdfImportService PdfImporter, bool ReviewedRendererConfigured, DomainError? Error)
+    internal static (IPdfImportService PdfImporter, bool ReviewedRendererConfigured, DomainError? Error)
         CreateReviewedPdfImporter(
             string applicationRoot)
     {

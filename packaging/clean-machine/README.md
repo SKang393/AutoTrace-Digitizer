@@ -24,3 +24,18 @@ This script does not edit `packaging/common/release-audit.json` and cannot appro
 a public release by itself. The report must be reviewed, copied to the tracked
 release-evidence location, checksum-bound in the mandatory gate, and revalidated
 by `Install-ReleaseRuntime.ps1` before production packaging may consume it.
+
+`Invoke-GraphReaderPdfiumCleanMachineValidation.ps1` applies the same VM, ISO,
+freshness, toolchain, and offline checks to a production common-publish payload.
+It validates all five packaged PDFium files, executes the exact reviewed runner
+against the fixed public synthetic 72 by 72 PDF fixture, checks the exact raw
+output hash and dimensions, binds both the application host EXE and the
+`GraphReader.App.dll` code bytes, and launches the exact production application with
+`--production-runtime-smoke --require-packaged-pdfium`. The environment override
+is cleared for that launch, so success directly exercises the packaged
+`pdfium/reviewed-approval.json` fallback.
+
+The PDFium report is `pdfium-clean-machine.json`. Like the OpenCV report, it
+cannot approve release packaging. `Install-ReleaseRenderer.ps1` must independently
+validate the current harness hash, report schema, typed results, VM identity,
+application bytes, renderer bytes, resources, fixed render, and packaged fallback.

@@ -1847,6 +1847,8 @@ if ($reviewedPdfiumRequired) {
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $releasePdfiumInstallerPath `
         -EvidenceRoot $reviewedPdfiumEvidencePath `
         -DestinationRoot $commonPublishPath `
+        -ExpectedCommit $gitCommit `
+        -ExpectedVersion $version.Version `
         -RepositoryRoot $repositoryRoot
     if ($LASTEXITCODE -ne 0) {
         throw "Release PDFium renderer installation failed with exit code $LASTEXITCODE."

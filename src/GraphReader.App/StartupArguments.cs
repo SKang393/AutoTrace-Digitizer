@@ -8,6 +8,7 @@ namespace GraphReader.App;
 public sealed record StartupArguments(
     bool PortableSmoke,
     bool ProductionRuntimeSmoke,
+    bool RequirePackagedPdfium,
     string? OpenImagePath)
 {
     public static StartupArguments Parse(IReadOnlyList<string> arguments)
@@ -16,6 +17,7 @@ public sealed record StartupArguments(
 
         bool portableSmoke = false;
         bool productionRuntimeSmoke = false;
+        bool requirePackagedPdfium = false;
         string? openImagePath = null;
         for (int index = 0; index < arguments.Count; index++)
         {
@@ -29,6 +31,12 @@ public sealed record StartupArguments(
             if (string.Equals(argument, "--production-runtime-smoke", StringComparison.OrdinalIgnoreCase))
             {
                 productionRuntimeSmoke = true;
+                continue;
+            }
+
+            if (string.Equals(argument, "--require-packaged-pdfium", StringComparison.OrdinalIgnoreCase))
+            {
+                requirePackagedPdfium = true;
                 continue;
             }
 
@@ -56,6 +64,10 @@ public sealed record StartupArguments(
             openImagePath = Path.GetFullPath(requestedPath);
         }
 
-        return new StartupArguments(portableSmoke, productionRuntimeSmoke, openImagePath);
+        return new StartupArguments(
+            portableSmoke,
+            productionRuntimeSmoke,
+            requirePackagedPdfium,
+            openImagePath);
     }
 }

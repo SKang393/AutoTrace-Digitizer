@@ -6,6 +6,7 @@ Set-StrictMode -Version Latest
 
 $profileRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $validatorPath = Join-Path $profileRoot 'Invoke-GraphReaderCleanMachineValidation.ps1'
+$pdfiumValidatorPath = Join-Path $profileRoot 'Invoke-GraphReaderPdfiumCleanMachineValidation.ps1'
 $readmePath = Join-Path $profileRoot 'README.md'
 $passed = 0
 $failed = 0
@@ -45,6 +46,18 @@ Invoke-Case -Name 'Validator parses in Windows PowerShell' -Action {
     $errors = $null
     [Management.Automation.Language.Parser]::ParseFile(
         $validatorPath,
+        [ref]$tokens,
+        [ref]$errors) | Out-Null
+    if ($errors.Count -ne 0) {
+        throw ($errors | ForEach-Object { $_.Message } | Out-String)
+    }
+}
+
+Invoke-Case -Name 'PDFium validator parses in Windows PowerShell' -Action {
+    $tokens = $null
+    $errors = $null
+    [Management.Automation.Language.Parser]::ParseFile(
+        $pdfiumValidatorPath,
         [ref]$tokens,
         [ref]$errors) | Out-Null
     if ($errors.Count -ne 0) {
@@ -125,6 +138,69 @@ Invoke-Case -Name 'Validator keeps release promotion outside the guest harness' 
     if ($source.IndexOf('releaseApproved = $true', [StringComparison]::Ordinal) -ge 0 -or
         $readme.IndexOf('cannot approve', [StringComparison]::OrdinalIgnoreCase) -lt 0) {
         throw 'Guest validation can cross or obscures the public release boundary.'
+    }
+}
+
+Invoke-Case -Name 'Missing PDFium payload fails closed and writes structured evidence' -Action {
+    $root = Join-Path ([IO.Path]::GetTempPath()) ('GraphReader-PdfiumCleanMachineHarness-' + [Guid]::NewGuid().ToString('N'))
+    $output = Join-Path $root 'output'
+    $provenancePath = Join-Path $root 'vm-provenance.json'
+    try {
+        New-Item -ItemType Directory -Path $root -Force | Out-Null
+        Write-Utf8NoBom -Path $provenancePath -Content '{}'
+        $hash = ('a' * 64)
+        $previousErrorPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $pdfiumValidatorPath `
+                -PayloadRoot (Join-Path $root 'missing-payload') `
+                -OutputRoot $output `
+                -VmProvenancePath $provenancePath `
+                -ExpectedCommit ('c' * 40) `
+                -ExpectedVersion '0.0.21' `
+                -ExpectedExecutableSha256 $hash `
+                -ExpectedApplicationDllSha256 $hash `
+                -ExpectedRendererSha256 $hash 2>&1 | Out-Null
+            $exitCode = $LASTEXITCODE
+        }
+        finally {
+            $ErrorActionPreference = $previousErrorPreference
+        }
+
+        if ($exitCode -eq 0) { throw 'Missing PDFium payload unexpectedly passed.' }
+        $evidencePath = Join-Path $output 'pdfium-clean-machine.json'
+        if (-not (Test-Path -LiteralPath $evidencePath -PathType Leaf)) {
+            throw 'Fail-closed PDFium run did not write evidence.'
+        }
+        $evidence = Get-Content -LiteralPath $evidencePath -Raw | ConvertFrom-Json
+        if ([string]$evidence.schema -cne 'graphreader.pdfium-clean-machine-load.v1' -or
+            [string]$evidence.status -cne 'fail' -or
+            @($evidence.failures).Count -eq 0) {
+            throw 'PDFium failure evidence does not preserve its schema and blockers.'
+        }
+    }
+    finally {
+        if (Test-Path -LiteralPath $root) {
+            Remove-Item -LiteralPath $root -Recurse -Force
+        }
+    }
+}
+
+Invoke-Case -Name 'PDFium validator keeps release promotion outside the guest harness' -Action {
+    $source = Get-Content -LiteralPath $pdfiumValidatorPath -Raw
+    foreach ($required in @(
+            'graphreader.pdfium-clean-machine-load.v1',
+            'expectedPdfiumRendererSha256',
+            'controlled-synthetic-fixture',
+            '--require-packaged-pdfium',
+            'networkAdaptersUp',
+            'developerToolsOnPath')) {
+        if ($source.IndexOf($required, [StringComparison]::Ordinal) -lt 0) {
+            throw "PDFium validator is missing required boundary '$required'."
+        }
+    }
+    if ($source.IndexOf('releaseApproved = $true', [StringComparison]::Ordinal) -ge 0) {
+        throw 'PDFium guest validation can cross the public release boundary.'
     }
 }
 
