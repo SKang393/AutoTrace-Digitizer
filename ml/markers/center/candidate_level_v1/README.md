@@ -34,9 +34,15 @@ model-store, provider, packaging, and clean-machine gates all pass.
   scenes, 134 false positives, and seven duplicates at threshold `0.7`. Its
   ONNX export also failed because adaptive `5 x 5` to `3 x 3` pooling is not
   supported by the pinned exporter. No sealed fixture was opened.
-- Only P2 is now preregistered. It keeps the tensor and public contracts, uses
-  an export-safe fixed spatial pool, and adds one deterministic hard-negative
-  refinement phase using train scenes only. P3 remains unregistered.
+- P2 is consumed and cannot rerun. Its export-safe fixed pool and deterministic
+  train-only hard-negative refinement passed CPU ONNX parity, removed all 134
+  P1 false positives and all seven duplicates, and retained zero prohibited
+  hits. At threshold `0.7`, it still missed one of 63 validation markers and
+  therefore did not open the sealed gate.
+- Only P3 is now preregistered. It reuses the exact P2 checkpoint and ONNX with
+  zero optimizer steps and freezes threshold `0.2`, the only value in one
+  bounded diagnostic that produced 9/9 exact validation scenes. P3 remains
+  unexecuted and the sealed truth remains unopened.
 - Selection compares only the preregistered thresholds. The sealed public gate
   opens once for the exact selected ONNX hash.
 - Approval requires exact counts in every scene, zero false positives, zero

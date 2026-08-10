@@ -29,6 +29,7 @@ from ml.markers.center.candidate_level_v1.prepare_split import SOURCE_PATHS as S
 from ml.markers.center.candidate_level_v1.sealed_gate import EVALUATOR_SOURCE_PATHS, GATE_CONFIG
 from ml.markers.center.candidate_level_v1.train_p1 import RUNNER_SOURCE_PATHS as P1_RUNNER_SOURCE_PATHS
 from ml.markers.center.candidate_level_v1.train_p2 import RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS
+from ml.markers.center.candidate_level_v1.train_p3 import RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS
 from ml.markers.center.candidate_level_v1.pipeline import (
     PROPOSAL_STRIDE,
     extract_proposals,
@@ -138,7 +139,7 @@ def test_sealed_archive_round_trip_keeps_exact_fixture_bytes(tmp_path: Path) -> 
 
 
 def test_training_runner_cannot_open_or_import_sealed_fixture_loader() -> None:
-    for runner_name in ("train_p1.py", "train_p2.py"):
+    for runner_name in ("train_p1.py", "train_p2.py", "train_p3.py"):
         source = (PACKAGE_ROOT / runner_name).read_text(encoding="utf-8")
         tree = ast.parse(source)
         imported_names = {
@@ -151,14 +152,25 @@ def test_training_runner_cannot_open_or_import_sealed_fixture_loader() -> None:
         assert "np.load" not in source
 
 
+def test_p3_is_zero_optimizer_and_cannot_change_weights() -> None:
+    source = (PACKAGE_ROOT / "train_p3.py").read_text(encoding="utf-8")
+    assert "torch.optim" not in source
+    assert ".backward(" not in source
+    config = json.loads((PACKAGE_ROOT / "training/p3.json").read_text(encoding="utf-8"))
+    assert config["optimizer_steps"] == 0
+    assert config["weights_changed"] is False
+    assert config["selection_thresholds"] == [0.2]
+
+
 def test_protocol_declares_new_defect_class_and_keeps_production_closed() -> None:
     protocol = json.loads((PACKAGE_ROOT / "PROTOCOL.json").read_text(encoding="utf-8"))
     assert protocol["revision"] == "marker-center-candidate-level-v1"
     assert protocol["prior_revision"] == "marker-center-production-repair-v2"
     assert protocol["prior_revision_reuse"] is False
     assert protocol["experiment_budget"] == 3
-    assert protocol["currently_preregistered_candidate"] == "P2"
+    assert protocol["currently_preregistered_candidate"] == "P3"
     assert "P1" in protocol["consumed_candidates"]
+    assert "P2" in protocol["consumed_candidates"]
     assert protocol["public_contract_schema_changes"] is False
     assert protocol["production_approval"] is False
     assert protocol["release_eligible"] is False
@@ -169,15 +181,19 @@ def test_split_config_and_candidate_are_fully_hash_bound_and_fail_closed() -> No
     seal_path = PACKAGE_ROOT / "SEALED_PUBLIC_TEST_SEAL.json"
     p1_path = PACKAGE_ROOT / "training/p1.json"
     p2_path = PACKAGE_ROOT / "training/p2.json"
+    p3_path = PACKAGE_ROOT / "training/p3.json"
     gate_path = PACKAGE_ROOT / "gates/sealed-public-v1.json"
     p1 = json.loads(p1_path.read_text(encoding="utf-8"))
     p2 = json.loads(p2_path.read_text(encoding="utf-8"))
+    p3 = json.loads(p3_path.read_text(encoding="utf-8"))
     gate = json.loads(gate_path.read_text(encoding="utf-8"))
     seal = json.loads(seal_path.read_text(encoding="utf-8"))
     assert p1["selection_manifest_sha256"] == sha256_file(selection_path)
     assert p1["sealed_public_test_seal_sha256"] == sha256_file(seal_path)
     assert p2["selection_manifest_sha256"] == sha256_file(selection_path)
     assert p2["sealed_public_test_seal_sha256"] == sha256_file(seal_path)
+    assert p3["selection_manifest_sha256"] == sha256_file(selection_path)
+    assert p3["sealed_public_test_seal_sha256"] == sha256_file(seal_path)
     assert seal["split_generator_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, SPLIT_SOURCE_PATHS
     )
@@ -186,6 +202,9 @@ def test_split_config_and_candidate_are_fully_hash_bound_and_fail_closed() -> No
     )
     assert p2["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, P2_RUNNER_SOURCE_PATHS
+    )
+    assert p3["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, P3_RUNNER_SOURCE_PATHS
     )
     assert gate["sealed_public_test_seal_sha256"] == sha256_file(seal_path)
     assert gate["expected_dataset_manifest_sha256"] == seal["private_manifest_sha256"]
@@ -199,7 +218,7 @@ def test_split_config_and_candidate_are_fully_hash_bound_and_fail_closed() -> No
     assert gate["release_eligible"] is False
 
 
-def test_canonical_budget_consumes_failed_p1_and_authorizes_only_unused_p2() -> None:
+def test_canonical_budget_consumes_failed_p1_p2_and_authorizes_only_unused_p3() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(
             encoding="utf-8"
@@ -210,16 +229,16 @@ def test_canonical_budget_consumes_failed_p1_and_authorizes_only_unused_p2() -> 
         for item in ledger["revisions"]
         if item["revision"] == "marker-center-candidate-level-v1"
     )
-    p2_path = PACKAGE_ROOT / "training/p2.json"
-    assert entry["status"] == "candidate_2_preregistered"
+    p3_path = PACKAGE_ROOT / "training/p3.json"
+    assert entry["status"] == "candidate_3_preregistered"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["execution_authorized"] is True
     assert entry["public_gate_authorized"] is False
-    assert entry["candidate_config_sha256"]["P2"] == sha256_file(p2_path)
+    assert entry["candidate_config_sha256"]["P3"] == sha256_file(p3_path)
     assert entry["p1_checkpoint_sha256"] == "94324c6c74327a2ae3dd0b1b349db77d779eee5dd7423c12fd37ab4ce0affa6f"
     assert entry["p1_training_report_sha256"] == "a9deea9fdf1d0ffaf5d015bcb994af13542867ae44826df2286c5f2b07188b75"
     p1_seal_root = (
@@ -231,6 +250,15 @@ def test_canonical_budget_consumes_failed_p1_and_authorizes_only_unused_p2() -> 
     result = json.loads((p1_seal_root / "result.json").read_text(encoding="utf-8"))
     assert result["status"] == "failed_runner_and_selection"
     assert result["report_sha256"] == entry["p1_training_report_sha256"]
+    p2_seal_root = (
+        REPO_ROOT
+        / "ml/markers/training-seals/marker-center/marker-center-candidate-level-v1/P2"
+    )
+    assert entry["p2_training_opened_seal_sha256"] == sha256_file(p2_seal_root / "opened.json")
+    assert entry["p2_training_result_seal_sha256"] == sha256_file(p2_seal_root / "result.json")
+    p2_result = json.loads((p2_seal_root / "result.json").read_text(encoding="utf-8"))
+    assert p2_result["status"] == "failed_selection"
+    assert p2_result["report_sha256"] == entry["p2_training_report_sha256"]
     prior = next(
         item
         for item in ledger["revisions"]

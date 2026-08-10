@@ -1,0 +1,24 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/markers/center/candidate_level_v1/training/p2.json",
+    "candidate_config_sha256": "55b94d6aa50dd892231b63ca6e2a55ac390adfc3c4428ffc9244dd000273964f",
+    "candidate_id": "P2",
+    "committed_source_enforcement": true,
+    "revision": "marker-center-candidate-level-v1",
+    "runner_source_bundle_sha256": "1a0aa8ca7cc9e6c0da3a7ce87f4128f38762ed272277a45af6ecdb2917681625",
+    "runner_source_paths": [
+      "ml/markers/center/candidate_level_v1/dataset.py",
+      "ml/markers/center/candidate_level_v1/model.py",
+      "ml/markers/center/candidate_level_v1/model_p2.py",
+      "ml/markers/center/candidate_level_v1/pipeline.py",
+      "ml/markers/center/candidate_level_v1/train_p2.py",
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py"
+    ],
+    "task": "marker-center",
+    "training_budget_ledger_sha256": "7f5c67d9a291df77a62ed5f9e1e4687063c5f7b630395711d5eb68be79aa4270"
+  },
+  "opened_utc": "2026-08-10T16:36:46.709142+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

@@ -6,12 +6,14 @@
   "prior_revision": "marker-center-production-repair-v2",
   "prior_revision_reuse": false,
   "experiment_budget": 3,
-  "currently_preregistered_candidate": "P2",
+  "currently_preregistered_candidate": "P3",
   "architecture": "candidate-spatial-patch-cnn-v2-export-safe",
   "consumed_candidates": {
-    "P1": "failed frozen validation with 0 of 9 exact scenes, 134 false positives, and 7 duplicates at threshold 0.7; then failed ONNX export at unsupported adaptive 5-to-3 pooling"
+    "P1": "failed frozen validation with 0 of 9 exact scenes, 134 false positives, and 7 duplicates at threshold 0.7; then failed ONNX export at unsupported adaptive 5-to-3 pooling",
+    "P2": "passed CPU ONNX parity and removed all false positives, duplicates, and prohibited hits, but missed 1 of 63 validation markers at threshold 0.7"
   },
   "p2_isolated_change": "fixed export-safe spatial pool plus one deterministic train-split hard-negative refinement phase with unweighted classification loss",
+  "p3_isolated_change": "reuse the exact P2 checkpoint and ONNX with zero optimizer steps and freeze the single validation-selected threshold 0.2",
   "input_contract": {
     "name": "candidate_patches",
     "shape": ["candidate_count", 3, 33, 33],
@@ -23,7 +25,7 @@
     "columns": ["marker_probability", "offset_x_grid", "offset_y_grid", "radius_pixels"]
   },
   "proposal_stride_pixels": 4,
-  "selection_thresholds": [0.4, 0.55, 0.7],
+  "selection_thresholds": [0.2],
   "sealed_gate_requirements": {
     "exact_count_every_scene": true,
     "false_positives": 0,
