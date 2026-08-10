@@ -53,7 +53,7 @@ public sealed class ApplicationCompositionSmokeTests
     }
 
     [TestMethod]
-    public async Task AsyncCompositionDoesNotAdvertiseRejectedEnhancementConfiguration()
+    public async Task AsyncCompositionDoesNotAdvertiseMissingDeveloperEnhancementRuntime()
     {
         string? previousManifest = Environment.GetEnvironmentVariable(
             ApplicationComposition.RealEsrganManifestEnvironmentVariable);
@@ -77,7 +77,7 @@ public sealed class ApplicationCompositionSmokeTests
                 manifestPath);
             Environment.SetEnvironmentVariable(
                 ApplicationComposition.RealEsrganRuntimeRootEnvironmentVariable,
-                Path.Combine(root, "runtime-not-required-for-manifest-rejection"));
+                Path.Combine(root, "missing-developer-runtime"));
 
             ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
                 WorkflowRuntimeEnvironment.ManualPreview,
@@ -89,8 +89,8 @@ public sealed class ApplicationCompositionSmokeTests
             AutomaticStageStatus enhancement = workspace.AutomaticStages.Single(stage =>
                 string.Equals(stage.Stage, "enhancement", StringComparison.Ordinal));
             Assert.AreEqual(AutomaticStageState.Unavailable, enhancement.State);
-            StringAssert.Contains(enhancement.Explanation, "MODEL_RUNTIME_INCOMPATIBLE");
-            StringAssert.Contains(enhancement.Explanation, "scientific-fidelity benchmark");
+            StringAssert.Contains(enhancement.Explanation, "RUNTIME_NOT_FOUND");
+            StringAssert.Contains(enhancement.Explanation, "original image remains editable");
             Assert.IsFalse(workspace.UsesFakeGraphData);
         }
         finally
