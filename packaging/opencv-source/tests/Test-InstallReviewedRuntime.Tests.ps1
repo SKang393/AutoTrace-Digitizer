@@ -31,7 +31,7 @@ function New-Fixture {
     $profile = Join-Path $repository 'packaging\opencv-source'
     $evidence = Join-Path $root 'evidence'
     $destination = Join-Path $root 'destination'
-    New-Item -ItemType Directory -Path (Join-Path $profile 'review'), (Join-Path $repository 'packaging\common'), (Join-Path $repository 'packaging\evidence'), (Join-Path $evidence 'bin'), (Join-Path $destination 'runtimes\win-x64\native') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $profile 'review'), (Join-Path $repository 'packaging\common'), (Join-Path $repository 'packaging\evidence'), (Join-Path $repository 'packaging\clean-machine'), (Join-Path $evidence 'bin'), (Join-Path $destination 'runtimes\win-x64\native') -Force | Out-Null
     Copy-Item -LiteralPath $installerPath -Destination (Join-Path $profile 'Install-ReviewedRuntime.ps1')
 
     $reviewedBytes = [Text.Encoding]::UTF8.GetBytes('reviewed deterministic OpenCV runtime')
@@ -66,8 +66,92 @@ exit 0
     }
     Write-Utf8NoBom -Path (Join-Path $profile 'review\source-build-review-policy.json') -Content ($policy | ConvertTo-Json -Depth 10)
 
+    $expectedCommit = ('c' * 40)
+    $expectedVersion = '0.0.21'
+    $executablePath = Join-Path $destination 'GraphReader.App.exe'
+    Write-Utf8NoBom -Path $executablePath -Content "fixture self-contained application`n"
+    $executableSha256 = (Get-FileHash -LiteralPath $executablePath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $vmId = '11111111-2222-4333-8444-555555555555'
+    $cleanMachineHarnessPath = Join-Path $repository 'packaging\clean-machine\Invoke-GraphReaderCleanMachineValidation.ps1'
+    Write-Utf8NoBom -Path $cleanMachineHarnessPath -Content "# fixture clean-machine harness`n"
+    $cleanMachineHarnessSha256 = (Get-FileHash -LiteralPath $cleanMachineHarnessPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $cleanMachineEvidence = [ordered]@{
+        schema = 'graphreader.opencv-clean-machine-load.v1'
+        status = 'pass'
+        observedAtUtc = '2026-08-10T00:00:00.0000000+00:00'
+        harnessSha256 = $cleanMachineHarnessSha256
+        vmProvenance = [ordered]@{
+            schema = 'graphreader.clean-windows-vm-provenance.v1'
+            isoSha256 = ('e' * 64)
+            officialIsoSha256 = ('e' * 64)
+            isoSha256Verified = $true
+            environmentKind = 'fresh-windows-evaluation-vm'
+            networkMode = 'none'
+            freshInstall = $true
+            vmId = $vmId
+            vmConfigurationSha256 = ('f' * 64)
+            qemuInstallerSha256 = ('1' * 64)
+            qemuVersion = 'QEMU emulator version fixture'
+            expectedOsBuild = '26200'
+            expectedOsUbr = 6584
+            expectedCommit = $expectedCommit
+            expectedVersion = $expectedVersion
+            expectedExecutableSha256 = $executableSha256
+            expectedOpenCvSha256 = $reviewedHash
+            expectedHarnessSha256 = $cleanMachineHarnessSha256
+        }
+        machine = [ordered]@{
+            productName = 'Microsoft Windows 11 Enterprise Evaluation'
+            version = '10.0.26200'
+            buildNumber = '26200'
+            architecture = '64-bit'
+            installTimeUtc = '2026-08-10T00:00:00.0000000Z'
+            installAgeHours = 1.25
+            powerShellVersion = '5.1.26200.1'
+            is64BitOperatingSystem = $true
+            is64BitProcess = $true
+            manufacturer = 'QEMU'
+            model = 'Standard PC (Q35 + ICH9, 2009)'
+            biosManufacturer = 'SeaBIOS'
+            machineUuid = $vmId
+            updateBuildRevision = 6584
+            developerToolsOnPath = @()
+            networkQuerySucceeded = $true
+            networkAdapters = @()
+            networkAdaptersUp = 0
+        }
+        payload = [ordered]@{
+            root = 'D:\payload'
+            version = $expectedVersion
+            commit = $expectedCommit
+            dirty = $false
+            executablePath = 'D:\payload\GraphReader.App.exe'
+            executableSha256 = $executableSha256
+            portableModePresent = $true
+            openCvPath = 'D:\payload\OpenCvSharpExtern.dll'
+            openCvSha256 = $reviewedHash
+            modelPayloadFileCount = 0
+            reparsePointCount = 0
+        }
+        nativeLoad = [ordered]@{
+            attempted = $true
+            succeeded = $true
+            win32Error = $null
+            flags = 'LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_DEFAULT_DIRS'
+        }
+        applicationSmoke = [ordered]@{
+            argument = '--portable-smoke'
+            startedUtc = '2026-08-10T00:00:01.0000000+00:00'
+            finishedUtc = '2026-08-10T00:00:02.0000000+00:00'
+            timeoutSeconds = 60
+            timedOut = $false
+            exitCode = 0
+            passed = $true
+        }
+        failures = @()
+    }
     $cleanMachineEvidencePath = Join-Path $repository 'packaging\evidence\opencv-clean-machine.json'
-    Write-Utf8NoBom -Path $cleanMachineEvidencePath -Content '{"status":"pass","machine":"fixture"}'
+    Write-Utf8NoBom -Path $cleanMachineEvidencePath -Content (($cleanMachineEvidence | ConvertTo-Json -Depth 12) + [Environment]::NewLine)
     $cleanMachineEvidenceHash = (Get-FileHash -LiteralPath $cleanMachineEvidencePath -Algorithm SHA256).Hash.ToLowerInvariant()
     $releaseAudit = [ordered]@{
         schemaVersion = 1
@@ -96,7 +180,19 @@ exit 0
         Destination = $destination
         ReviewedHash = $reviewedHash
         CleanMachineEvidencePath = $cleanMachineEvidencePath
+        ExpectedCommit = $expectedCommit
+        ExpectedVersion = $expectedVersion
     }
+}
+
+function Update-CleanMachineEvidenceHash {
+    param([Parameter(Mandatory = $true)][pscustomobject]$Fixture)
+
+    $auditPath = Join-Path $Fixture.Repository 'packaging\common\release-audit.json'
+    $audit = Get-Content -LiteralPath $auditPath -Raw | ConvertFrom-Json
+    $audit.mandatoryEvidenceGates[0].evidence[0].sha256 =
+        (Get-FileHash -LiteralPath $Fixture.CleanMachineEvidencePath -Algorithm SHA256).Hash.ToLowerInvariant()
+    Write-Utf8NoBom -Path $auditPath -Content (($audit | ConvertTo-Json -Depth 12) + [Environment]::NewLine)
 }
 
 function Invoke-Case {
@@ -148,10 +244,10 @@ function Invoke-ReleaseInstallerFixture {
     try {
         $ErrorActionPreference = 'Continue'
         if ($DiscardOutput.IsPresent) {
-            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $releaseInstallerPath -EvidenceRoot $Fixture.Evidence -DestinationRoot $Fixture.Destination -RepositoryRoot $Fixture.Repository 2>&1 | Out-Null
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $releaseInstallerPath -EvidenceRoot $Fixture.Evidence -DestinationRoot $Fixture.Destination -ExpectedCommit $Fixture.ExpectedCommit -ExpectedVersion $Fixture.ExpectedVersion -RepositoryRoot $Fixture.Repository 2>&1 | Out-Null
         }
         else {
-            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $releaseInstallerPath -EvidenceRoot $Fixture.Evidence -DestinationRoot $Fixture.Destination -RepositoryRoot $Fixture.Repository 2>&1 | Out-Host
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $releaseInstallerPath -EvidenceRoot $Fixture.Evidence -DestinationRoot $Fixture.Destination -ExpectedCommit $Fixture.ExpectedCommit -ExpectedVersion $Fixture.ExpectedVersion -RepositoryRoot $Fixture.Repository 2>&1 | Out-Host
         }
         return $LASTEXITCODE
     }
@@ -231,6 +327,108 @@ Invoke-Case -Name 'Tampered clean-machine evidence blocks release promotion befo
         if (Test-Path -LiteralPath (Join-Path $fixture.Destination 'reviewed-opencv-runtime.json')) {
             throw 'Release metadata was written after evidence rejection.'
         }
+    }
+    finally {
+        if (Test-Path -LiteralPath $fixture.Root) { Remove-Item -LiteralPath $fixture.Root -Recurse -Force }
+    }
+}
+
+Invoke-Case -Name 'Hash-valid arbitrary JSON cannot promote release runtime' -Action {
+    $fixture = New-Fixture
+    try {
+        Write-Utf8NoBom -Path $fixture.CleanMachineEvidencePath -Content '{"status":"pass","machine":"fixture"}'
+        Update-CleanMachineEvidenceHash -Fixture $fixture
+        $exitCode = Invoke-ReleaseInstallerFixture -Fixture $fixture -DiscardOutput
+        if ($exitCode -eq 0) { throw 'Arbitrary hash-valid JSON unexpectedly promoted the runtime.' }
+    }
+    finally {
+        if (Test-Path -LiteralPath $fixture.Root) { Remove-Item -LiteralPath $fixture.Root -Recurse -Force }
+    }
+}
+
+Invoke-Case -Name 'Fail-status structured evidence cannot promote release runtime' -Action {
+    $fixture = New-Fixture
+    try {
+        $report = Get-Content -LiteralPath $fixture.CleanMachineEvidencePath -Raw | ConvertFrom-Json
+        $report.status = 'fail'
+        Write-Utf8NoBom -Path $fixture.CleanMachineEvidencePath -Content (($report | ConvertTo-Json -Depth 12) + [Environment]::NewLine)
+        Update-CleanMachineEvidenceHash -Fixture $fixture
+        $exitCode = Invoke-ReleaseInstallerFixture -Fixture $fixture -DiscardOutput
+        if ($exitCode -eq 0) { throw 'Fail-status evidence unexpectedly promoted the runtime.' }
+    }
+    finally {
+        if (Test-Path -LiteralPath $fixture.Root) { Remove-Item -LiteralPath $fixture.Root -Recurse -Force }
+    }
+}
+
+Invoke-Case -Name 'Wrong payload hash cannot promote release runtime' -Action {
+    $fixture = New-Fixture
+    try {
+        $report = Get-Content -LiteralPath $fixture.CleanMachineEvidencePath -Raw | ConvertFrom-Json
+        $report.payload.executableSha256 = ('9' * 64)
+        Write-Utf8NoBom -Path $fixture.CleanMachineEvidencePath -Content (($report | ConvertTo-Json -Depth 12) + [Environment]::NewLine)
+        Update-CleanMachineEvidenceHash -Fixture $fixture
+        $exitCode = Invoke-ReleaseInstallerFixture -Fixture $fixture -DiscardOutput
+        if ($exitCode -eq 0) { throw 'Wrong payload hash unexpectedly promoted the runtime.' }
+    }
+    finally {
+        if (Test-Path -LiteralPath $fixture.Root) { Remove-Item -LiteralPath $fixture.Root -Recurse -Force }
+    }
+}
+
+Invoke-Case -Name 'Different published executable cannot reuse clean-machine evidence' -Action {
+    $fixture = New-Fixture
+    try {
+        Write-Utf8NoBom -Path (Join-Path $fixture.Destination 'GraphReader.App.exe') -Content "different application bytes`n"
+        $exitCode = Invoke-ReleaseInstallerFixture -Fixture $fixture -DiscardOutput
+        if ($exitCode -eq 0) { throw 'Different published executable unexpectedly reused clean-machine evidence.' }
+    }
+    finally {
+        if (Test-Path -LiteralPath $fixture.Root) { Remove-Item -LiteralPath $fixture.Root -Recurse -Force }
+    }
+}
+
+Invoke-Case -Name 'Failed native load cannot promote release runtime' -Action {
+    $fixture = New-Fixture
+    try {
+        $report = Get-Content -LiteralPath $fixture.CleanMachineEvidencePath -Raw | ConvertFrom-Json
+        $report.nativeLoad.succeeded = $false
+        $report.nativeLoad.win32Error = 126
+        Write-Utf8NoBom -Path $fixture.CleanMachineEvidencePath -Content (($report | ConvertTo-Json -Depth 12) + [Environment]::NewLine)
+        Update-CleanMachineEvidenceHash -Fixture $fixture
+        $exitCode = Invoke-ReleaseInstallerFixture -Fixture $fixture -DiscardOutput
+        if ($exitCode -eq 0) { throw 'Failed native load unexpectedly promoted the runtime.' }
+    }
+    finally {
+        if (Test-Path -LiteralPath $fixture.Root) { Remove-Item -LiteralPath $fixture.Root -Recurse -Force }
+    }
+}
+
+Invoke-Case -Name 'Failed application smoke cannot promote release runtime' -Action {
+    $fixture = New-Fixture
+    try {
+        $report = Get-Content -LiteralPath $fixture.CleanMachineEvidencePath -Raw | ConvertFrom-Json
+        $report.applicationSmoke.passed = $false
+        $report.applicationSmoke.exitCode = 2
+        Write-Utf8NoBom -Path $fixture.CleanMachineEvidencePath -Content (($report | ConvertTo-Json -Depth 12) + [Environment]::NewLine)
+        Update-CleanMachineEvidenceHash -Fixture $fixture
+        $exitCode = Invoke-ReleaseInstallerFixture -Fixture $fixture -DiscardOutput
+        if ($exitCode -eq 0) { throw 'Failed application smoke unexpectedly promoted the runtime.' }
+    }
+    finally {
+        if (Test-Path -LiteralPath $fixture.Root) { Remove-Item -LiteralPath $fixture.Root -Recurse -Force }
+    }
+}
+
+Invoke-Case -Name 'String false provenance cannot promote release runtime' -Action {
+    $fixture = New-Fixture
+    try {
+        $report = Get-Content -LiteralPath $fixture.CleanMachineEvidencePath -Raw | ConvertFrom-Json
+        $report.vmProvenance.isoSha256Verified = 'false'
+        Write-Utf8NoBom -Path $fixture.CleanMachineEvidencePath -Content (($report | ConvertTo-Json -Depth 12) + [Environment]::NewLine)
+        Update-CleanMachineEvidenceHash -Fixture $fixture
+        $exitCode = Invoke-ReleaseInstallerFixture -Fixture $fixture -DiscardOutput
+        if ($exitCode -eq 0) { throw 'String false provenance unexpectedly promoted the runtime.' }
     }
     finally {
         if (Test-Path -LiteralPath $fixture.Root) { Remove-Item -LiteralPath $fixture.Root -Recurse -Force }

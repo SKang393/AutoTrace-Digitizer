@@ -1825,6 +1825,8 @@ if ($reviewedOpenCvRequired) {
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $releaseOpenCvInstallerPath `
         -EvidenceRoot $reviewedOpenCvEvidencePath `
         -DestinationRoot $commonPublishPath `
+        -ExpectedCommit $gitCommit `
+        -ExpectedVersion $version.Version `
         -RepositoryRoot $repositoryRoot
     if ($LASTEXITCODE -ne 0) {
         throw "Release OpenCV runtime installation failed with exit code $LASTEXITCODE."
