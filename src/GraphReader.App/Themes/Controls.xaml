@@ -248,11 +248,71 @@
 
   <Style x:Key="App.Style.ListBoxItem" TargetType="ListBoxItem">
     <Setter Property="Padding" Value="8,6" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
     <Setter Property="Foreground" Value="{DynamicResource App.Brush.Text}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Tag" Value="{DynamicResource App.Motion.Enabled}" />
     <Setter Property="FocusVisualStyle" Value="{StaticResource App.Style.FocusVisual}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListBoxItem">
+          <Border x:Name="Chrome"
+                  Padding="{TemplateBinding Padding}"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{DynamicResource App.CornerRadius.Medium}"
+                  SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource App.Brush.PrimarySubtle}" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter Property="Foreground" Value="{DynamicResource App.Brush.SelectionText}" />
+              <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource App.Brush.Selection}" />
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource App.Brush.Primary}" />
+            </Trigger>
+            <MultiTrigger>
+              <MultiTrigger.Conditions>
+                <Condition Property="IsSelected" Value="True" />
+                <Condition Property="Tag" Value="True" />
+              </MultiTrigger.Conditions>
+              <MultiTrigger.EnterActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Chrome"
+                                     Storyboard.TargetProperty="Opacity"
+                                     From="0.88"
+                                     To="1"
+                                     Duration="0:0:0.14" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </MultiTrigger.EnterActions>
+            </MultiTrigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Foreground" Value="{DynamicResource App.Brush.TextDisabled}" />
+              <Setter TargetName="Chrome" Property="Opacity" Value="0.62" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="App.Style.ListItemButton" BasedOn="{StaticResource App.Style.SubtleButton}" TargetType="Button">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     <Style.Triggers>
-      <Trigger Property="IsSelected" Value="True">
-        <Setter Property="Background" Value="{DynamicResource App.Brush.Selection}" />
+      <Trigger Property="IsMouseOver" Value="True">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
       </Trigger>
     </Style.Triggers>
   </Style>

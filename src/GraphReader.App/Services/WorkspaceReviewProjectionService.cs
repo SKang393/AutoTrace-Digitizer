@@ -2,6 +2,7 @@
 // Copyright 2026 Sungwoo Kang
 
 using GraphReader.App.Models;
+using GraphReader.App.Localization;
 using GraphReader.App.ViewModels;
 using GraphReader.Domain;
 
@@ -12,7 +13,8 @@ public static class WorkspaceReviewProjectionService
     public static IReadOnlyList<ReviewIssueViewModel> ProjectIssues(
         WorkspaceTabViewModel tab,
         ProjectDocument? project,
-        Func<string, string> localize)
+        Func<string, string> localize,
+        IEnumerable<PipelineWarningPresentation>? pipelineWarnings = null)
     {
         ArgumentNullException.ThrowIfNull(tab);
         ArgumentNullException.ThrowIfNull(localize);
@@ -44,6 +46,7 @@ public static class WorkspaceReviewProjectionService
 
         if (panel is null)
         {
+            AppendPipelineWarnings(issues, tab, localize, pipelineWarnings);
             return issues;
         }
 
@@ -105,7 +108,42 @@ public static class WorkspaceReviewProjectionService
                 "Review.PhaseUnknown", localize));
         }
 
+        AppendPipelineWarnings(issues, tab, localize, pipelineWarnings);
+
         return issues;
+    }
+
+    private static void AppendPipelineWarnings(
+        List<ReviewIssueViewModel> issues,
+        WorkspaceTabViewModel tab,
+        Func<string, string> localize,
+        IEnumerable<PipelineWarningPresentation>? pipelineWarnings)
+    {
+        int warningIndex = 0;
+        foreach (PipelineWarningPresentation warning in
+                 (pipelineWarnings ?? Array.Empty<PipelineWarningPresentation>())
+                 .Where(static value => !string.IsNullOrWhiteSpace(value.TechnicalMessage))
+                 .DistinctBy(static value => value.TechnicalMessage, StringComparer.Ordinal))
+        {
+            string interpretationKey = LocalizationKeys.All.Contains(
+                warning.UserMessageKey,
+                StringComparer.Ordinal)
+                    ? warning.UserMessageKey
+                    : LocalizationKeys.ReviewPipelineWarningInterpretation;
+            issues.Add(new ReviewIssueViewModel(
+                $"pipeline-warning-{warningIndex++}",
+                tab.TabId,
+                EntityId: null,
+                ReviewIssueKind.PipelineWarning,
+                ReviewIssueSeverity.Warning,
+                LocalizationKeys.ReviewPipelineWarningTitle,
+                interpretationKey,
+                LocalizationKeys.ReviewPipelineWarningAction,
+                localize(LocalizationKeys.ReviewPipelineWarningTitle),
+                localize(interpretationKey),
+                localize(LocalizationKeys.ReviewPipelineWarningAction),
+                warning.TechnicalMessage.Trim()));
+        }
     }
 
     public static IReadOnlyList<DataPreviewRowViewModel> ProjectRows(

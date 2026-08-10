@@ -24,8 +24,9 @@
   <SolidColorBrush x:Key="App.Brush.TextDisabled" Color="{DynamicResource {x:Static SystemColors.GrayTextColorKey}}" />
   <SolidColorBrush x:Key="App.Brush.Focus" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
   <SolidColorBrush x:Key="App.Brush.Selection" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
-  <SolidColorBrush x:Key="App.Brush.Danger" Color="#FFC42B1C" />
-  <SolidColorBrush x:Key="App.Brush.Warning" Color="#FF9A6700" />
-  <SolidColorBrush x:Key="App.Brush.Success" Color="#FF107C41" />
-  <SolidColorBrush x:Key="App.Brush.Overlay" Color="#99000000" />
+  <SolidColorBrush x:Key="App.Brush.SelectionText" Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.Danger" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.Warning" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.Success" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.Overlay" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" Opacity="0.95" />
 </ResourceDictionary>

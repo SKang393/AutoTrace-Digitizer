@@ -3,7 +3,6 @@
 
 using System.IO;
 using System.Windows;
-using System.Windows.Media;
 using GraphReader.App.Controls;
 using GraphReader.App.Localization;
 using GraphReader.App.Services;
@@ -46,13 +45,13 @@ public sealed class ScreenshotSmokeTests
             () =>
             {
                 FrameworkElement workspace = CreateFakeWorkspace(LightThemeSource, true);
-                workspace.Width = 1280;
-                workspace.Height = 800;
-                workspace.LayoutTransform = new ScaleTransform(scale, scale);
+                workspace.Width = pixelWidth / scale;
+                workspace.Height = pixelHeight / scale;
                 return workspace;
             },
             pixelWidth,
-            pixelHeight);
+            pixelHeight,
+            scale);
 
         Assert.AreEqual(pixelWidth, rendered.Width);
         Assert.AreEqual(pixelHeight, rendered.Height);
@@ -181,6 +180,7 @@ public sealed class ScreenshotSmokeTests
 
     private static FrameworkElement CreateFakeWorkspace(string themeSource, bool showPhaseOverlay)
     {
+        Application.ResourceAssembly ??= typeof(MainWindow).Assembly;
         var localizationResources = new ResourceDictionary
         {
             Source = new Uri(

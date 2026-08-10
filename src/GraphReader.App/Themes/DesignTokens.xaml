@@ -34,4 +34,7 @@
   <Thickness x:Key="App.Thickness.ControlPadding">12,6</Thickness>
   <Thickness x:Key="App.Thickness.CompactPadding">8,4</Thickness>
   <Thickness x:Key="App.Thickness.Focus">2</Thickness>
+
+  <sys:Boolean x:Key="App.Motion.Enabled">True</sys:Boolean>
+  <Duration x:Key="App.Motion.Duration.Short">0:0:0.14</Duration>
 </ResourceDictionary>

@@ -24,6 +24,8 @@ public sealed class ThemeService : IThemeService
     private readonly ResourceDictionary _resources;
     private readonly ISystemThemeProvider _systemThemeProvider;
     private readonly bool _ownsSystemThemeProvider;
+    private string? _activeThemeSource;
+    private bool _animationsEnabled;
     private bool _disposed;
 
     public ThemeService(
@@ -53,11 +55,21 @@ public sealed class ThemeService : IThemeService
         ApplicationTheme effectiveTheme = theme == ApplicationTheme.System
             ? NormalizeEffectiveTheme(_systemThemeProvider.EffectiveTheme)
             : NormalizeEffectiveTheme(theme);
+        string themeSource = GetThemeSource(
+            effectiveTheme,
+            _systemThemeProvider.IsHighContrast);
+        bool animationsEnabled = _systemThemeProvider.AreClientAreaAnimationsEnabled;
 
-        bool changed = Theme != theme || EffectiveTheme != effectiveTheme;
+        bool changed = Theme != theme ||
+            EffectiveTheme != effectiveTheme ||
+            !string.Equals(_activeThemeSource, themeSource, StringComparison.OrdinalIgnoreCase) ||
+            _animationsEnabled != animationsEnabled;
         Theme = theme;
         EffectiveTheme = effectiveTheme;
-        ReplaceThemeDictionary(GetThemeSource(effectiveTheme));
+        _activeThemeSource = themeSource;
+        _animationsEnabled = animationsEnabled;
+        ReplaceThemeDictionary(themeSource);
+        ApplyMotionResources(animationsEnabled);
 
         if (changed)
         {
@@ -84,15 +96,29 @@ public sealed class ThemeService : IThemeService
     private static ApplicationTheme NormalizeEffectiveTheme(ApplicationTheme theme) =>
         theme == ApplicationTheme.Dark ? ApplicationTheme.Dark : ApplicationTheme.Light;
 
-    private static string GetThemeSource(ApplicationTheme effectiveTheme) =>
-        effectiveTheme == ApplicationTheme.Dark ? DarkThemeSource : LightThemeSource;
+    private static string GetThemeSource(
+        ApplicationTheme effectiveTheme,
+        bool isHighContrast)
+    {
+        if (isHighContrast)
+        {
+            return SystemThemeSource;
+        }
+
+        return effectiveTheme == ApplicationTheme.Dark ? DarkThemeSource : LightThemeSource;
+    }
 
     private void OnSystemThemeChanged(object? sender, EventArgs e)
     {
-        if (Theme == ApplicationTheme.System)
-        {
-            ApplyTheme(ApplicationTheme.System);
-        }
+        _ = sender;
+        ApplyTheme(Theme);
+    }
+
+    private void ApplyMotionResources(bool animationsEnabled)
+    {
+        _resources["App.Motion.Enabled"] = animationsEnabled;
+        _resources["App.Motion.Duration.Short"] = new Duration(
+            animationsEnabled ? TimeSpan.FromMilliseconds(140) : TimeSpan.Zero);
     }
 
     private void ReplaceThemeDictionary(string source)

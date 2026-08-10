@@ -36,6 +36,147 @@ function Assert-Equal {
     }
 }
 
+function Get-ExpectedNotoComponents {
+    return @(
+        [pscustomobject]@{
+            Id = 'noto-sans-regular'
+            Name = 'Noto Sans Regular'
+            FileName = 'NotoSans-Regular.ttf'
+            Sha256 = '478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823'
+        },
+        [pscustomobject]@{
+            Id = 'noto-sans-medium'
+            Name = 'Noto Sans Medium'
+            FileName = 'NotoSans-Medium.ttf'
+            Sha256 = '635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb'
+        },
+        [pscustomobject]@{
+            Id = 'noto-sans-semibold'
+            Name = 'Noto Sans SemiBold'
+            FileName = 'NotoSans-SemiBold.ttf'
+            Sha256 = 'a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0'
+        })
+}
+
+function Assert-NotoReleaseAuditMetadata {
+    param(
+        [Parameter(Mandatory)]
+        [object]$ReleaseAudit,
+
+        [Parameter(Mandatory)]
+        [string]$Description
+    )
+
+    $expected = @(Get-ExpectedNotoComponents)
+    $components = @{}
+    foreach ($component in @($ReleaseAudit.components)) {
+        $components[[string]$component.id] = $component
+    }
+
+    foreach ($font in $expected) {
+        if (-not $components.ContainsKey([string]$font.Id)) {
+            throw "$Description is missing embedded component '$($font.Id)'."
+        }
+
+        $component = $components[[string]$font.Id]
+        Assert-Equal -Actual ([string]$component.component) -Expected ([string]$font.Name) -Description "$Description component name differs for '$($font.Id)'"
+        Assert-Equal -Actual ([string]$component.version) -Expected '2.015' -Description "$Description component version differs for '$($font.Id)'"
+        Assert-Equal -Actual ([string]$component.license) -Expected 'OFL-1.1' -Description "$Description component license differs for '$($font.Id)'"
+        Assert-Equal -Actual ([string]$component.checksumPolicy) -Expected 'exact-binary' -Description "$Description checksum policy differs for '$($font.Id)'"
+        Assert-Equal -Actual ([string]$component.artifactSha256).ToLowerInvariant() -Expected ([string]$font.Sha256) -Description "$Description checksum differs for '$($font.Id)'"
+        Assert-Equal -Actual ([string]$component.reviewStatus) -Expected 'reviewed' -Description "$Description review status differs for '$($font.Id)'"
+        Assert-Equal -Actual ([bool]$component.commercialUse) -Expected $true -Description "$Description commercial-use status differs for '$($font.Id)'"
+        Assert-Equal -Actual ([bool]$component.redistribution) -Expected $true -Description "$Description redistribution status differs for '$($font.Id)'"
+        if ([string]$component.source -notmatch [regex]::Escape("/66c4b351c58f99ace5a6265d329080d74b057909/fonts/NotoSans/hinted/ttf/$($font.FileName)")) {
+            throw "$Description source differs for '$($font.Id)'."
+        }
+        if ([string]$component.sourceRevision -notmatch 'noto-monthly-release-2026\.05\.01' -or
+            [string]$component.sourceRevision -notmatch '66c4b351c58f99ace5a6265d329080d74b057909') {
+            throw "$Description source revision differs for '$($font.Id)'."
+        }
+
+        [string[]]$noticePaths = @($component.noticePaths | ForEach-Object { [string]$_ })
+        [Array]::Sort($noticePaths, [StringComparer]::Ordinal)
+        Assert-Equal `
+            -Actual ($noticePaths -join ';') `
+            -Expected 'LICENSES/NotoSans-OFL-1.1.txt;THIRD_PARTY_NOTICES.md' `
+            -Description "$Description notice paths differ for '$($font.Id)'"
+    }
+
+    $fontRules = @($ReleaseAudit.binaryCoverage.rules | Where-Object {
+            [string]$_.pattern -ceq 'GraphReader.App.dll'
+        })
+    if ($fontRules.Count -ne 1 -or [string]$fontRules[0].componentId -ne 'graph-auto-reader') {
+        throw "$Description must bind embedded Noto components to GraphReader.App.dll."
+    }
+    [string[]]$expectedIds = @($expected.Id)
+    [string[]]$actualIds = @($fontRules[0].embeddedComponentIds | ForEach-Object { [string]$_ })
+    [Array]::Sort($expectedIds, [StringComparer]::Ordinal)
+    [Array]::Sort($actualIds, [StringComparer]::Ordinal)
+    Assert-Equal `
+        -Actual ($actualIds -join ';') `
+        -Expected ($expectedIds -join ';') `
+        -Description "$Description embedded Noto component binding differs"
+}
+
+function Assert-NotoGeneratedMetadata {
+    param(
+        [Parameter(Mandatory)]
+        [object]$Metadata,
+
+        [Parameter(Mandatory)]
+        [string]$ApplicationSha256
+    )
+
+    $expected = @(Get-ExpectedNotoComponents)
+    $records = @($Metadata.embeddedComponents)
+    Assert-Equal -Actual $records.Count -Expected $expected.Count -Description 'Release metadata embedded Noto component count differs'
+    foreach ($font in $expected) {
+        $matches = @($records | Where-Object { [string]$_.id -ceq [string]$font.Id })
+        if ($matches.Count -ne 1) {
+            throw "Release metadata requires exactly one embedded component '$($font.Id)'."
+        }
+        $record = $matches[0]
+        Assert-Equal -Actual ([string]$record.containerPath) -Expected 'GraphReader.App.dll' -Description "Release metadata container path differs for '$($font.Id)'"
+        Assert-Equal -Actual ([string]$record.containerSha256).ToLowerInvariant() -Expected $ApplicationSha256 -Description "Release metadata container checksum differs for '$($font.Id)'"
+        Assert-Equal -Actual ([string]$record.component) -Expected ([string]$font.Name) -Description "Release metadata component name differs for '$($font.Id)'"
+        Assert-Equal -Actual ([string]$record.version) -Expected '2.015' -Description "Release metadata component version differs for '$($font.Id)'"
+        Assert-Equal -Actual ([string]$record.license) -Expected 'OFL-1.1' -Description "Release metadata component license differs for '$($font.Id)'"
+        Assert-Equal -Actual ([string]$record.artifactSha256).ToLowerInvariant() -Expected ([string]$font.Sha256) -Description "Release metadata component checksum differs for '$($font.Id)'"
+        Assert-Equal -Actual ([string]$record.checksumPolicy) -Expected 'exact-binary' -Description "Release metadata checksum policy differs for '$($font.Id)'"
+        if ([string]$record.source -notmatch [regex]::Escape("/66c4b351c58f99ace5a6265d329080d74b057909/fonts/NotoSans/hinted/ttf/$($font.FileName)")) {
+            throw "Release metadata source differs for '$($font.Id)'."
+        }
+        if ([string]$record.sourceRevision -notmatch 'noto-monthly-release-2026\.05\.01' -or
+            [string]$record.sourceRevision -notmatch '66c4b351c58f99ace5a6265d329080d74b057909') {
+            throw "Release metadata source revision differs for '$($font.Id)'."
+        }
+        [string[]]$noticePaths = @($record.noticePaths | ForEach-Object { [string]$_ })
+        [Array]::Sort($noticePaths, [StringComparer]::Ordinal)
+        Assert-Equal -Actual ($noticePaths -join ';') -Expected 'LICENSES/NotoSans-OFL-1.1.txt;THIRD_PARTY_NOTICES.md' -Description "Release metadata notice paths differ for '$($font.Id)'"
+    }
+
+    [string[]]$expectedIds = @($expected.Id)
+    [Array]::Sort($expectedIds, [StringComparer]::Ordinal)
+    foreach ($distribution in @($Metadata.installer, $Metadata.portable)) {
+        if ($null -eq $distribution.PSObject.Properties['provenance']) {
+            throw 'Release metadata distribution provenance is missing for embedded Noto components.'
+        }
+        [string[]]$actualIds = @($distribution.provenance.embeddedComponentIds | ForEach-Object { [string]$_ })
+        [Array]::Sort($actualIds, [StringComparer]::Ordinal)
+        Assert-Equal -Actual ($actualIds -join ';') -Expected ($expectedIds -join ';') -Description 'Release metadata embedded Noto identities differ between distribution forms'
+        $payloads = @($distribution.provenance.fontBearingPayloads)
+        if ($payloads.Count -ne 1 -or
+            [string]$payloads[0].path -cne 'GraphReader.App.dll' -or
+            [string]$payloads[0].sha256 -ine $ApplicationSha256) {
+            throw 'Release metadata font-bearing application payload differs between distribution forms.'
+        }
+        [string[]]$payloadIds = @($payloads[0].embeddedComponentIds | ForEach-Object { [string]$_ })
+        [Array]::Sort($payloadIds, [StringComparer]::Ordinal)
+        Assert-Equal -Actual ($payloadIds -join ';') -Expected ($expectedIds -join ';') -Description 'Release metadata font-bearing payload component identities differ'
+    }
+}
+
 function Assert-NoDuplicateJsonPropertyNames {
     param(
         [Parameter(Mandatory)]
@@ -924,6 +1065,79 @@ function Assert-ModelManifests {
     return @($modelArtifactPaths)
 }
 
+function Assert-NotoArtifactParity {
+    param(
+        [Parameter(Mandatory)]
+        [object[]]$CommonRecords,
+
+        [Parameter(Mandatory)]
+        [object[]]$InstallerRecords,
+
+        [Parameter(Mandatory)]
+        [object[]]$PortableStageRecords,
+
+        [Parameter(Mandatory)]
+        [object[]]$PortableArchiveRecords,
+
+        [Parameter(Mandatory)]
+        [string]$CommonPublishRoot,
+
+        [Parameter(Mandatory)]
+        [string]$RepositoryRoot
+    )
+
+    foreach ($relativePath in @(
+            'GraphReader.App.dll',
+            'THIRD_PARTY_NOTICES.md',
+            'LICENSES/NotoSans-OFL-1.1.txt')) {
+        $common = @($CommonRecords | Where-Object { [string]$_.path -ceq $relativePath })
+        $installer = @($InstallerRecords | Where-Object { [string]$_.path -ceq $relativePath })
+        $portableStage = @($PortableStageRecords | Where-Object { [string]$_.path -ceq $relativePath })
+        $portableArchive = @($PortableArchiveRecords | Where-Object { [string]$_.path -ceq $relativePath })
+        foreach ($candidateCount in @($common.Count, $installer.Count, $portableStage.Count, $portableArchive.Count)) {
+            if ($candidateCount -ne 1) {
+                throw "Noto artifact proof requires exactly one '$relativePath' in every shared package form."
+            }
+        }
+        foreach ($candidate in @($installer[0], $portableStage[0], $portableArchive[0])) {
+            Assert-Equal `
+                -Actual ([string]$candidate.sha256) `
+                -Expected ([string]$common[0].sha256) `
+                -Description "Noto artifact proof checksum differs for '$relativePath'"
+        }
+    }
+
+    foreach ($relativePath in @('THIRD_PARTY_NOTICES.md', 'LICENSES/NotoSans-OFL-1.1.txt')) {
+        Assert-Equal `
+            -Actual (Get-Sha256 -Path (Join-Path $CommonPublishRoot $relativePath)) `
+            -Expected (Get-Sha256 -Path (Join-Path $RepositoryRoot $relativePath)) `
+            -Description "Packaged Noto legal file differs from tracked source '$relativePath'"
+    }
+
+    $notice = Get-Content -LiteralPath (Join-Path $CommonPublishRoot 'THIRD_PARTY_NOTICES.md') -Raw
+    foreach ($font in @(Get-ExpectedNotoComponents)) {
+        foreach ($expectedText in @($font.FileName, $font.Sha256)) {
+            if ($notice.IndexOf([string]$expectedText, [StringComparison]::Ordinal) -lt 0) {
+                throw "Packaged THIRD_PARTY_NOTICES.md lacks '$expectedText'."
+            }
+        }
+    }
+    foreach ($expectedText in @(
+            'noto-monthly-release-2026.05.01',
+            '66c4b351c58f99ace5a6265d329080d74b057909',
+            'LICENSES/NotoSans-OFL-1.1.txt')) {
+        if ($notice.IndexOf($expectedText, [StringComparison]::Ordinal) -lt 0) {
+            throw "Packaged THIRD_PARTY_NOTICES.md lacks '$expectedText'."
+        }
+    }
+
+    $licenseHash = Get-Sha256 -Path (Join-Path $CommonPublishRoot 'LICENSES/NotoSans-OFL-1.1.txt')
+    Assert-Equal `
+        -Actual $licenseHash `
+        -Expected 'cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a' `
+        -Description 'Packaged Noto OFL license checksum differs'
+}
+
 function Assert-ReleaseChecksums {
     param(
         [Parameter(Mandatory)]
@@ -1091,6 +1305,57 @@ function Assert-Sbom {
     $auditComponents = @{}
     foreach ($component in @($releaseAudit.components)) {
         $auditComponents[[string]$component.id] = $component
+    }
+
+    $expectedNoto = @(Get-ExpectedNotoComponents)
+    if (@($expectedNoto | Where-Object { -not $auditComponents.ContainsKey([string]$_.Id) }).Count -eq 0) {
+        $fontBearingSbom = @($components | Where-Object { [string]$_.name -ceq 'GraphReader.App.dll' })
+        if ($fontBearingSbom.Count -ne 1) {
+            throw 'SBOM must contain exactly one font-bearing GraphReader.App.dll component.'
+        }
+        $fontBearingProperties = @{}
+        foreach ($property in @($fontBearingSbom[0].properties)) {
+            $fontBearingProperties[[string]$property.name] = [string]$property.value
+        }
+        [string[]]$expectedNotoIds = @($expectedNoto.Id)
+        [string[]]$actualNotoIds = @(([string]$fontBearingProperties['graphreader:embeddedComponentIds']).Split(';'))
+        [Array]::Sort($expectedNotoIds, [StringComparer]::Ordinal)
+        [Array]::Sort($actualNotoIds, [StringComparer]::Ordinal)
+        Assert-Equal -Actual ($actualNotoIds -join ';') -Expected ($expectedNotoIds -join ';') -Description 'SBOM embedded Noto component identities differ'
+
+        $nestedComponents = @($fontBearingSbom[0].components)
+        Assert-Equal -Actual $nestedComponents.Count -Expected $expectedNoto.Count -Description 'SBOM embedded Noto component count differs'
+        foreach ($font in $expectedNoto) {
+            $matches = @($nestedComponents | Where-Object { [string]$_.'bom-ref' -ceq [string]$font.Id })
+            if ($matches.Count -ne 1) {
+                throw "SBOM requires exactly one embedded component '$($font.Id)'."
+            }
+            $nested = $matches[0]
+            $auditFont = $auditComponents[[string]$font.Id]
+            Assert-Equal -Actual ([string]$nested.type) -Expected 'library' -Description "SBOM embedded component type differs for '$($font.Id)'"
+            Assert-Equal -Actual ([string]$nested.name) -Expected ([string]$font.Name) -Description "SBOM embedded component name differs for '$($font.Id)'"
+            Assert-Equal -Actual ([string]$nested.version) -Expected '2.015' -Description "SBOM embedded component version differs for '$($font.Id)'"
+            $hashes = @($nested.hashes | Where-Object { [string]$_.alg -eq 'SHA-256' })
+            if ($hashes.Count -ne 1) {
+                throw "SBOM embedded component '$($font.Id)' requires one SHA-256 checksum."
+            }
+            Assert-Equal -Actual ([string]$hashes[0].content).ToLowerInvariant() -Expected ([string]$font.Sha256) -Description "SBOM embedded component checksum differs for '$($font.Id)'"
+            $licenses = @($nested.licenses | ForEach-Object { [string]$_.expression })
+            Assert-Equal -Actual ($licenses -join ';') -Expected 'OFL-1.1' -Description "SBOM embedded component license differs for '$($font.Id)'"
+            $distributionReferences = @($nested.externalReferences | Where-Object { [string]$_.type -eq 'distribution' })
+            if ($distributionReferences.Count -ne 1) {
+                throw "SBOM embedded component '$($font.Id)' requires one distribution source."
+            }
+            Assert-Equal -Actual ([string]$distributionReferences[0].url) -Expected ([string]$auditFont.source) -Description "SBOM embedded component source differs for '$($font.Id)'"
+            $nestedProperties = @{}
+            foreach ($property in @($nested.properties)) {
+                $nestedProperties[[string]$property.name] = [string]$property.value
+            }
+            Assert-Equal -Actual ([string]$nestedProperties['graphreader:sourceRevision']) -Expected ([string]$auditFont.sourceRevision) -Description "SBOM source revision differs for '$($font.Id)'"
+            Assert-Equal -Actual ([string]$nestedProperties['graphreader:checksumPolicy']) -Expected 'exact-binary' -Description "SBOM checksum policy differs for '$($font.Id)'"
+            Assert-Equal -Actual ([string]$nestedProperties['graphreader:noticePaths']) -Expected (@($auditFont.noticePaths) -join ';') -Description "SBOM notice paths differ for '$($font.Id)'"
+            Assert-Equal -Actual ([string]$nestedProperties['graphreader:embeddedIn']) -Expected 'GraphReader.App.dll' -Description "SBOM embedded payload differs for '$($font.Id)'"
+        }
     }
 
     foreach ($binaryFile in @($expectedSbomFiles | Where-Object {
@@ -1306,6 +1571,33 @@ $manifestFullPath = [System.IO.Path]::GetFullPath($ManifestPath)
 $packagingRoot = Split-Path -Parent $manifestFullPath
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $packagingRoot '..'))
 $manifest = Get-Content -LiteralPath $manifestFullPath -Raw | ConvertFrom-Json
+$appProjectPath = Join-Path $repositoryRoot 'src\GraphReader.App\GraphReader.App.csproj'
+$repositoryRequiresNoto = $false
+if (Test-Path -LiteralPath $appProjectPath -PathType Leaf) {
+    $appProjectContent = Get-Content -LiteralPath $appProjectPath -Raw
+    $repositoryRequiresNoto = @(
+        Get-ExpectedNotoComponents | Where-Object {
+            $appProjectContent -notmatch [regex]::Escape([string]$_.FileName)
+        }).Count -eq 0
+}
+$trackedReleaseAuditPath = Join-Path $repositoryRoot 'packaging\common\release-audit.json'
+$notoMetadataChecked = $false
+if (Test-Path -LiteralPath $trackedReleaseAuditPath -PathType Leaf) {
+    $definitionReleaseAudit = Get-Content -LiteralPath $trackedReleaseAuditPath -Raw | ConvertFrom-Json
+    $expectedNotoIds = @(Get-ExpectedNotoComponents | ForEach-Object { [string]$_.Id })
+    $foundNotoIds = @($definitionReleaseAudit.components | Where-Object {
+            [string]$_.id -in $expectedNotoIds
+        })
+    if ($repositoryRequiresNoto -or $foundNotoIds.Count -gt 0) {
+        Assert-NotoReleaseAuditMetadata `
+            -ReleaseAudit $definitionReleaseAudit `
+            -Description 'Tracked release audit'
+        $notoMetadataChecked = $true
+    }
+}
+elseif ($repositoryRequiresNoto) {
+    throw "Tracked release audit is missing: $trackedReleaseAuditPath"
+}
 
 Assert-Equal -Actual $manifest.schemaVersion -Expected 2 -Description 'Packaging manifest schema version is invalid'
 Assert-Equal -Actual ([string]$manifest.rid) -Expected 'win-x64' -Description 'Packaging RID is invalid'
@@ -1434,7 +1726,6 @@ elseif ([System.IO.Path]::GetFullPath($packagingRoot).Equals(
 }
 
 if (-not [string]::IsNullOrWhiteSpace($ArtifactRoot)) {
-    $trackedReleaseAuditPath = Join-Path $repositoryRoot 'packaging\common\release-audit.json'
     if (-not (Test-Path -LiteralPath $trackedReleaseAuditPath -PathType Leaf)) {
         throw "Tracked release audit is missing: $trackedReleaseAuditPath"
     }
@@ -1492,12 +1783,27 @@ if (-not [string]::IsNullOrWhiteSpace($ArtifactRoot)) {
     Assert-PayloadRecordsEqual -Actual $installerPayloadRecords -Expected $commonPayloadRecords -Description 'Installer and common payloads'
     Assert-PayloadRecordsEqual -Actual $portableStageRecords -Expected $commonPayloadRecords -Description 'Portable stage and common payloads'
     Assert-PayloadRecordsEqual -Actual $portablePayloadRecords -Expected $commonPayloadRecords -Description 'Portable ZIP and common payloads'
+    if ($notoMetadataChecked) {
+        Assert-NotoArtifactParity `
+            -CommonRecords $commonPayloadRecords `
+            -InstallerRecords $installerPayloadRecords `
+            -PortableStageRecords $portableStageRecords `
+            -PortableArchiveRecords $portablePayloadRecords `
+            -CommonPublishRoot $commonPublishPath `
+            -RepositoryRoot $repositoryRoot
+    }
 
     $packagedReleaseAuditPath = Join-Path $commonPublishPath 'release-audit.json'
     Assert-Equal `
         -Actual (Get-Sha256 -Path $packagedReleaseAuditPath) `
         -Expected (Get-Sha256 -Path $trackedReleaseAuditPath) `
         -Description 'Packaged release audit differs from the tracked source'
+    if ($notoMetadataChecked) {
+        $packagedReleaseAudit = Get-Content -LiteralPath $packagedReleaseAuditPath -Raw | ConvertFrom-Json
+        Assert-NotoReleaseAuditMetadata `
+            -ReleaseAudit $packagedReleaseAudit `
+            -Description 'Packaged release audit'
+    }
 
     $portableSentinelPath = Join-Path $portableStagePath 'portable.mode'
     if (-not (Test-Path -LiteralPath $portableSentinelPath -PathType Leaf) -or
@@ -1544,6 +1850,17 @@ if (-not [string]::IsNullOrWhiteSpace($ArtifactRoot)) {
             }
         }))
     Assert-PayloadRecordsEqual -Actual $metadataPayloadRecords -Expected $commonPayloadRecords -Description 'Release metadata and common payloads'
+    if ($notoMetadataChecked) {
+        $fontBearingApplication = @($commonPayloadRecords | Where-Object {
+                [string]$_.path -ceq 'GraphReader.App.dll'
+            })
+        if ($fontBearingApplication.Count -ne 1) {
+            throw 'Release metadata Noto proof requires exactly one GraphReader.App.dll payload.'
+        }
+        Assert-NotoGeneratedMetadata `
+            -Metadata $metadata `
+            -ApplicationSha256 ([string]$fontBearingApplication[0].sha256)
+    }
     $commonPayloadDigest = Get-PayloadDigest -Records $commonPayloadRecords
     $portablePayloadDigest = Get-PayloadDigest -Records $portableAllStageRecords
     Assert-Equal -Actual ([string]$metadata.commonPayload.sha256).ToLowerInvariant() -Expected $commonPayloadDigest -Description 'Release metadata common payload digest differs'
@@ -1604,6 +1921,17 @@ if (-not [string]::IsNullOrWhiteSpace($ArtifactRoot)) {
     Installer = $expectedInstallerName
     Portable = $expectedPortableName
     ArtifactFilesChecked = -not [string]::IsNullOrWhiteSpace($ArtifactRoot)
+    ArtifactProofStatus = if ([string]::IsNullOrWhiteSpace($ArtifactRoot)) { 'NOT_PERFORMED' } else { 'PASS' }
+    NotoMetadataChecked = $notoMetadataChecked
+    NotoArtifactProofStatus = if (-not $notoMetadataChecked) {
+        'NOT_APPLICABLE'
+    }
+    elseif ([string]::IsNullOrWhiteSpace($ArtifactRoot)) {
+        'NOT_PERFORMED'
+    }
+    else {
+        'PASS'
+    }
     LocalizationChecked = $localizationChecked
     Status = 'PASS'
 }

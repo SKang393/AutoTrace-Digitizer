@@ -7,5 +7,9 @@ public interface ISystemThemeProvider : IDisposable
 {
     ApplicationTheme EffectiveTheme { get; }
 
+    bool IsHighContrast { get; }
+
+    bool AreClientAreaAnimationsEnabled { get; }
+
     event EventHandler? ThemeChanged;
 }

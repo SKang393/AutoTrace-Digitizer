@@ -19,6 +19,7 @@
   <SolidColorBrush x:Key="App.Brush.TextDisabled" Color="#FF8A919D" />
   <SolidColorBrush x:Key="App.Brush.Focus" Color="#FF3659E3" />
   <SolidColorBrush x:Key="App.Brush.Selection" Color="#FFE1E7FF" />
+  <SolidColorBrush x:Key="App.Brush.SelectionText" Color="#FF1B1D22" />
   <SolidColorBrush x:Key="App.Brush.Danger" Color="#FFB42318" />
   <SolidColorBrush x:Key="App.Brush.Warning" Color="#FFA15C00" />
   <SolidColorBrush x:Key="App.Brush.Success" Color="#FF087E6B" />

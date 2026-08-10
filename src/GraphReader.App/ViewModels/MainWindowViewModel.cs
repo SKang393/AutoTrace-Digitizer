@@ -11,6 +11,7 @@ using System.Windows.Input;
 using GraphReader.App.Appearance;
 using GraphReader.App.Controls;
 using GraphReader.App.Integration;
+using GraphReader.App.Integration.Workflow;
 using GraphReader.App.Localization;
 using GraphReader.App.Models;
 using GraphReader.App.Services;
@@ -33,11 +34,23 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 {
     private static readonly string[] RequiredAutomaticDetectionStages =
         ["axis", "ocr", "markers", "legends", "phases"];
+    private static readonly HashSet<char> InvalidExportFileNameCharacters =
+        ['<', '>', ':', '"', '/', '\\', '|', '?', '*'];
+    private static readonly HashSet<string> ReservedExportDeviceNames = new(
+        [
+            "CON", "PRN", "AUX", "NUL", "CLOCK$", "CONIN$", "CONOUT$",
+            "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+            "COM¹", "COM²", "COM³", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6",
+            "LPT7", "LPT8", "LPT9", "LPT¹", "LPT²", "LPT³",
+        ],
+        StringComparer.OrdinalIgnoreCase);
+    private const int MaximumExportStemLength = 229;
     private readonly IWorkspaceService _workspaceService;
     private readonly ILocalizationService? _localizationService;
     private readonly IManualWorkspaceService? _manualWorkspaceService;
     private readonly IWorkspaceDialogService? _dialogService;
     private readonly string? _recentProjectsPath;
+    private readonly Func<WorkspaceTabViewModel, IReadOnlyList<PipelineWarningPresentation>> _pipelineWarningsProvider;
     private readonly bool _isWorkflowAvailable;
     private readonly CancellationTokenSource _shutdown = new();
     private WorkspaceTabViewModel? _selectedTab;
@@ -75,6 +88,8 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
     private DataPreviewRowViewModel? _selectedDataPreviewRow;
     private bool _isDataPreviewExpanded;
     private ExportSummaryViewModel? _exportSummary;
+    private WorkspaceOperationStatus? _lastOperationStatus;
+    private WorkspaceOperationStatus? _operationStatusBeforeOperation;
     private bool _isRestoringHistory;
 
     public MainWindowViewModel(IWorkspaceService workspaceService)
@@ -87,13 +102,15 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         ILocalizationService? localizationService,
         string? startupErrorMessageKey = null,
         IWorkspaceDialogService? dialogService = null,
-        string? recentProjectsPath = null)
+        string? recentProjectsPath = null,
+        Func<WorkspaceTabViewModel, IReadOnlyList<PipelineWarningPresentation>>? pipelineWarningsProvider = null)
     {
         _workspaceService = workspaceService ?? throw new ArgumentNullException(nameof(workspaceService));
         _localizationService = localizationService;
         _manualWorkspaceService = workspaceService as IManualWorkspaceService;
         _dialogService = dialogService;
         _recentProjectsPath = recentProjectsPath;
+        _pipelineWarningsProvider = pipelineWarningsProvider ?? ResolvePipelineWarnings;
         _newSeriesName = GetLocalizedString(LocalizationKeys.ManualDefaultIntervention);
         _phaseLabel = GetLocalizedString(LocalizationKeys.ManualDefaultIntervention);
         MarkerShapeChoices =
@@ -350,12 +367,18 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         private set => SetProperty(ref _surfaceState, value);
     }
 
+    public WorkspaceOperationStatus? LastOperationStatus
+    {
+        get => _lastOperationStatus;
+        private set => SetProperty(ref _lastOperationStatus, value);
+    }
+
     public ObservableCollection<ReviewIssueViewModel> ReviewIssues { get; }
 
     public ReviewIssueViewModel? SelectedReviewIssue
     {
         get => _selectedReviewIssue;
-        private set => SetProperty(ref _selectedReviewIssue, value);
+        set => SetSelectedReviewIssue(value, synchronizeWorkspace: true);
     }
 
     public int ReviewIssueCount => ReviewIssues.Count;
@@ -373,24 +396,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
     public DataPreviewRowViewModel? SelectedDataPreviewRow
     {
         get => _selectedDataPreviewRow;
-        private set
-        {
-            if (ReferenceEquals(_selectedDataPreviewRow, value))
-            {
-                return;
-            }
-
-            if (_selectedDataPreviewRow is not null)
-            {
-                _selectedDataPreviewRow.IsSelected = false;
-            }
-            _selectedDataPreviewRow = value;
-            if (_selectedDataPreviewRow is not null)
-            {
-                _selectedDataPreviewRow.IsSelected = true;
-            }
-            OnPropertyChanged();
-        }
+        set => SetSelectedDataPreviewRow(value, synchronizeWorkspace: true);
     }
 
     public bool IsDataPreviewExpanded
@@ -520,7 +526,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
                         StringComparison.Ordinal));
                 if (!ReferenceEquals(SelectedDataPreviewRow, row))
                 {
-                    SelectedDataPreviewRow = row;
+                    SetSelectedDataPreviewRow(row, synchronizeWorkspace: false);
                 }
                 RelayCommand.RaiseCanExecuteChanged();
             }
@@ -1045,7 +1051,11 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             _calibrationAnchors.Clear();
             OnPropertyChanged(nameof(EditorInstruction));
             EditorMode = ManualEditorMode.Select;
-            SetStatus(FormatLocalizedString(LocalizationKeys.StatusManualEditRejectedFormat, exception.Message));
+            SetOperationFailure(
+                exception,
+                LocalizationKeys.ManualEditRejected,
+                "MANUAL_EDIT_REJECTED",
+                "review-input");
         }
     }
 
@@ -1350,17 +1360,19 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
                 await _manualWorkspaceService.ExportAsync(tab.TabId, directory, token);
             if (!exported.Succeeded)
             {
-                throw new InvalidOperationException(string.Join(" | ", exported.Failures.Select(failure => failure.TechnicalMessage)));
+                SetOperationFailure(exported.Failures);
+                return;
             }
 
             CurrentStage = WorkflowStage.Export;
             SurfaceState = WorkspaceSurfaceState.ExportPreview;
             ExportSummary = CreateExportSummary(
                 directory,
-                exported.MinimalArtifacts.Select(static artifact => artifact.FileName));
+                exported.MinimalArtifacts.Select(static artifact => artifact.FileName)
+                    .Concat(exported.AuditArtifacts.Select(static artifact => artifact.FileName)));
             SetStatus(FormatLocalizedString(
                 LocalizationKeys.StatusExportedFormat,
-                exported.MinimalArtifacts.Count));
+                exported.MinimalArtifacts.Count + exported.AuditArtifacts.Count));
         }, cancellationToken);
     }
 
@@ -1382,9 +1394,9 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         {
             SetStatus(GetLocalizedString(LocalizationKeys.StatusCancelled));
         }
-        catch (InvalidOperationException exception)
+        catch (Exception exception)
         {
-            SetStatus(exception.Message);
+            SetOperationFailure(exception);
         }
         finally
         {
@@ -1427,7 +1439,11 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
         {
-            SetStatus(FormatLocalizedString(LocalizationKeys.StatusManualEditRejectedFormat, exception.Message));
+            SetOperationFailure(
+                exception,
+                LocalizationKeys.ManualEditRejected,
+                "MANUAL_EDIT_REJECTED",
+                "review-input");
         }
     }
 
@@ -1465,7 +1481,11 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
         {
-            SetStatus(FormatLocalizedString(LocalizationKeys.StatusManualEditRejectedFormat, exception.Message));
+            SetOperationFailure(
+                exception,
+                LocalizationKeys.ManualEditRejected,
+                "MANUAL_EDIT_REJECTED",
+                "review-input");
         }
     }
 
@@ -1517,6 +1537,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
         try
         {
+            WorkspaceTabSnapshot before = CaptureTabSnapshot(tab);
             string[] probeSeriesIds = ProbeRelationChoices
                 .Where(static choice => choice.IsSelected && choice.SeriesId is not null)
                 .Select(static choice => choice.SeriesId!)
@@ -1526,13 +1547,18 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
                 interventionSeriesId,
                 SelectedSharedBaselineSeriesId,
                 probeSeriesIds);
+            RecordManualEdit(tab, LocalizationKeys.ManualApplySeriesRelations, before);
             SetStatus(GetLocalizedString(LocalizationKeys.ManualRelationsApplied));
             QueueAutosave(SnapshotTrigger.ExportSettingsChanged, tab.TabId, interventionSeriesId);
             RefreshSeriesRelationChoices();
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or KeyNotFoundException)
         {
-            SetStatus(FormatLocalizedString(LocalizationKeys.StatusManualEditRejectedFormat, exception.Message));
+            SetOperationFailure(
+                exception,
+                LocalizationKeys.ManualEditRejected,
+                "MANUAL_EDIT_REJECTED",
+                "review-input");
         }
     }
 
@@ -1652,7 +1678,11 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
         {
-            SetStatus(FormatLocalizedString(LocalizationKeys.StatusManualEditRejectedFormat, exception.Message));
+            SetOperationFailure(
+                exception,
+                LocalizationKeys.ManualEditRejected,
+                "MANUAL_EDIT_REJECTED",
+                "review-input");
         }
     }
 
@@ -1707,7 +1737,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         if (!result.IsSuccess && result.Errors.All(static error =>
             error.Code is not "AUTOSAVE_PATHS_UNAVAILABLE" and not "AUTOSAVE_NOT_ELIGIBLE"))
         {
-            SetStatus(string.Join(" | ", result.Errors.Select(static error => error.TechnicalMessage)));
+            SetOperationFailure(result.Errors);
         }
     }
 
@@ -1723,7 +1753,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         if (!result.IsSuccess && result.Errors.All(static error =>
             error.Code is not "AUTOSAVE_NOT_ELIGIBLE" and not "AUTOSAVE_NOT_DUE" and not "AUTOSAVE_PATHS_UNAVAILABLE"))
         {
-            SetStatus(string.Join(" | ", result.Errors.Select(static error => error.TechnicalMessage)));
+            SetOperationFailure(result.Errors);
         }
     }
 
@@ -1739,9 +1769,13 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         catch (OperationCanceledException) when (_shutdown.IsCancellationRequested)
         {
         }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidOperationException)
+        catch (Exception exception)
         {
-            SetStatus(exception.Message);
+            SetOperationFailure(
+                exception,
+                LocalizationKeys.ApplicationDataNotWritable,
+                "AUTOSAVE_FAILED",
+                "check-storage-permissions");
         }
     }
 
@@ -1755,6 +1789,120 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
     {
         _statusMessageOverride = message;
         OnPropertyChanged(nameof(StatusMessage));
+    }
+
+    private void SetOperationFailure(
+        Exception exception,
+        string fallbackUserMessageKey = LocalizationKeys.OperationFailed,
+        string fallbackCode = "WORKSPACE_OPERATION_FAILED",
+        string fallbackSuggestedAction = "review-and-retry")
+    {
+        ArgumentNullException.ThrowIfNull(exception);
+
+        WorkspaceOperationStatus status;
+        if (exception is ProductionWorkflowStageException productionFailure)
+        {
+            ProductionWorkflowFailure failure = productionFailure.Failure;
+            status = new WorkspaceOperationStatus(
+                failure.Code,
+                ReviewIssueSeverity.Blocking,
+                SafeUserMessageKey(failure.UserMessageKey),
+                failure.TechnicalMessage,
+                failure.Recoverable,
+                failure.SuggestedAction);
+        }
+        else
+        {
+            status = new WorkspaceOperationStatus(
+                fallbackCode,
+                ReviewIssueSeverity.Blocking,
+                fallbackUserMessageKey,
+                exception.Message,
+                Recoverable: true,
+                fallbackSuggestedAction);
+        }
+
+        LastOperationStatus = status;
+        StatusMessageKey = status.UserMessageKey;
+    }
+
+    private void SetOperationFailure(IReadOnlyList<DomainError> failures)
+    {
+        ArgumentNullException.ThrowIfNull(failures);
+        if (failures.Count == 0)
+        {
+            SetOperationFailure(new InvalidOperationException("The operation failed without structured domain details."));
+            return;
+        }
+
+        DomainError primary = failures[0];
+        SetStructuredOperationFailure(
+            primary.Code,
+            primary.Severity == DomainErrorSeverity.Error
+                ? ReviewIssueSeverity.Blocking
+                : ReviewIssueSeverity.Warning,
+            primary.UserMessageKey,
+            string.Join(" | ", failures.Select(static failure => failure.TechnicalMessage)),
+            primary.Recoverable,
+            primary.SuggestedAction);
+    }
+
+    private void SetOperationFailure(IReadOnlyList<GraphReader.Export.ExportFailure> failures)
+    {
+        ArgumentNullException.ThrowIfNull(failures);
+        if (failures.Count == 0)
+        {
+            SetOperationFailure(new InvalidOperationException("The export failed without structured details."));
+            return;
+        }
+
+        GraphReader.Export.ExportFailure primary = failures[0];
+        SetStructuredOperationFailure(
+            primary.Code,
+            primary.Severity == GraphReader.Export.ExportFailureSeverity.Error
+                ? ReviewIssueSeverity.Blocking
+                : ReviewIssueSeverity.Warning,
+            primary.UserMessageKey,
+            string.Join(" | ", failures.Select(static failure => failure.TechnicalMessage)),
+            primary.Recoverable,
+            primary.SuggestedAction);
+    }
+
+    private void SetStructuredOperationFailure(
+        string code,
+        ReviewIssueSeverity severity,
+        string userMessageKey,
+        string technicalMessage,
+        bool recoverable,
+        string suggestedAction)
+    {
+        LastOperationStatus = new WorkspaceOperationStatus(
+            code,
+            severity,
+            SafeUserMessageKey(userMessageKey),
+            technicalMessage,
+            recoverable,
+            suggestedAction);
+        StatusMessageKey = LastOperationStatus.UserMessageKey;
+    }
+
+    private static string SafeUserMessageKey(string? userMessageKey) =>
+        userMessageKey is not null && LocalizationKeys.All.Contains(userMessageKey, StringComparer.Ordinal)
+            ? userMessageKey
+            : LocalizationKeys.OperationFailed;
+
+    private PipelineWarningPresentation[] ResolvePipelineWarnings(WorkspaceTabViewModel tab)
+    {
+        string panelIdText = tab.PanelId ?? tab.TabId;
+        return _workspaceService is IAutomaticWorkspaceService { LastAutomaticRun: { } run } &&
+            Guid.TryParse(panelIdText, out Guid panelId) &&
+            run.Review.Panels.Any(panel => panel.PanelId == panelId)
+                ? run.Review.Warnings
+                    .Select(static warning => new PipelineWarningPresentation(
+                        LocalizationKeys.ReviewPipelineWarningInterpretation,
+                        warning))
+                    .ToArray()
+                : [];
     }
 
     private static string SymbolFor(MarkerShape shape, MarkerFill fill) => (shape, fill) switch
@@ -1927,6 +2075,8 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         _surfaceBeforeOperation = SurfaceState;
         _statusKeyBeforeOperation = StatusMessageKey;
         _statusOverrideBeforeOperation = _statusMessageOverride;
+        _operationStatusBeforeOperation = LastOperationStatus;
+        LastOperationStatus = null;
         StatusMessageKey = statusMessageKey;
         if (stage == WorkflowStage.Detect)
         {
@@ -1967,12 +2117,17 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             _statusMessageOverride = _statusOverrideBeforeOperation;
             OnPropertyChanged(nameof(StatusMessageKey));
             OnPropertyChanged(nameof(StatusMessage));
+            LastOperationStatus = _operationStatusBeforeOperation;
             SurfaceState = _surfaceBeforeOperation;
             RefreshWorkspaceProjection();
         }
-        catch (InvalidOperationException exception)
+        catch (Exception exception)
         {
-            SetStatus(exception.Message);
+            SetOperationFailure(
+                exception,
+                LocalizationKeys.ProductionWorkflowUnavailable,
+                "WORKSPACE_STAGE_FAILED",
+                "retry");
             SurfaceState = _surfaceBeforeOperation;
             RefreshWorkspaceProjection();
         }
@@ -2074,7 +2229,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         RelayCommand.RaiseCanExecuteChanged();
     }
 
-    private static WorkspaceTabSnapshot CaptureTabSnapshot(WorkspaceTabViewModel tab) => new(
+    private WorkspaceTabSnapshot CaptureTabSnapshot(WorkspaceTabViewModel tab) => new(
         tab.Calibration,
         tab.Points.Select(static point => new PointSnapshot(
             point.PointId,
@@ -2101,7 +2256,31 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             divider.OriginalX,
             divider.Code,
             divider.Label)).ToArray(),
+        CaptureSeriesRelations(tab),
         tab.IsDirty);
+
+    private SeriesRelationSnapshot[] CaptureSeriesRelations(WorkspaceTabViewModel tab)
+    {
+        if (_manualWorkspaceService is null ||
+            !Guid.TryParse(tab.PanelId, out Guid panelId))
+        {
+            return Array.Empty<SeriesRelationSnapshot>();
+        }
+
+        PanelRecord? panel = _manualWorkspaceService.CurrentProject.Panels.FirstOrDefault(
+            candidate => candidate.PanelId.Value == panelId);
+        return panel?.Series
+            .Where(static series => series.SemanticRole == SemanticRole.Intervention)
+            .OrderBy(static series => series.SeriesId.Value)
+            .Select(static series => new SeriesRelationSnapshot(
+                series.SeriesId.Value.ToString("D"),
+                series.SharedBaselineSeriesId?.Value.ToString("D"),
+                series.ApplicableProbeSeriesIds
+                    .Select(static id => id.Value.ToString("D"))
+                    .ToArray()))
+            .ToArray()
+            ?? Array.Empty<SeriesRelationSnapshot>();
+    }
 
     private void RestoreTabSnapshot(WorkspaceTabViewModel tab, WorkspaceTabSnapshot snapshot)
     {
@@ -2163,6 +2342,18 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         {
             stateSink.SynchronizeRestoredTab(tab.TabId);
         }
+        if (_manualWorkspaceService is not null)
+        {
+            foreach (SeriesRelationSnapshot relation in snapshot.SeriesRelations)
+            {
+                _manualWorkspaceService.SetSeriesRelations(
+                    tab.TabId,
+                    relation.InterventionSeriesId,
+                    relation.SharedBaselineSeriesId,
+                    relation.ApplicableProbeSeriesIds);
+            }
+            RefreshSeriesRelationChoices();
+        }
         if (tab.Points.Count == 0 && tab.Calibration is null)
         {
             _reviewReadyTabIds.Remove(tab.TabId);
@@ -2188,8 +2379,8 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         DataPreviewRows.Clear();
         if (SelectedTab is not { } tab)
         {
-            SelectedReviewIssue = null;
-            SelectedDataPreviewRow = null;
+            SetSelectedReviewIssue(null, synchronizeWorkspace: false);
+            SetSelectedDataPreviewRow(null, synchronizeWorkspace: false);
             ExportSummary = null;
             NotifyReviewStateChanged();
             return;
@@ -2199,7 +2390,8 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         foreach (ReviewIssueViewModel issue in WorkspaceReviewProjectionService.ProjectIssues(
                      tab,
                      project,
-                     GetLocalizedString))
+                     GetLocalizedString,
+                     _pipelineWarningsProvider(tab)))
         {
             ReviewIssues.Add(issue);
         }
@@ -2208,11 +2400,11 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             DataPreviewRows.Add(row);
         }
 
-        SelectedReviewIssue = ReviewIssues.FirstOrDefault();
-        SelectedDataPreviewRow = DataPreviewRows.FirstOrDefault(row => string.Equals(
+        SetSelectedReviewIssue(ReviewIssues.FirstOrDefault(), synchronizeWorkspace: false);
+        SetSelectedDataPreviewRow(DataPreviewRows.FirstOrDefault(row => string.Equals(
             row.PointId,
             selectedPointId,
-            StringComparison.Ordinal));
+            StringComparison.Ordinal)), synchronizeWorkspace: false);
         if (SurfaceState == WorkspaceSurfaceState.ExportPreview)
         {
             bool warningsAcknowledged = ExportSummary?.WarningsAcknowledged == true;
@@ -2236,19 +2428,28 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
     private void SelectReviewIssue(ReviewIssueViewModel? issue)
     {
-        if (issue is null)
+        SetSelectedReviewIssue(issue, synchronizeWorkspace: true);
+    }
+
+    private void SetSelectedReviewIssue(
+        ReviewIssueViewModel? issue,
+        bool synchronizeWorkspace)
+    {
+        _ = SetProperty(ref _selectedReviewIssue, issue);
+        if (!synchronizeWorkspace || issue is null)
         {
             return;
         }
 
-        SelectedReviewIssue = issue;
         if (issue.EntityId is not { } entityId)
         {
             return;
         }
-        if (FindPoint(entityId) is not null)
+        if (FindPoint(entityId) is { } point)
         {
             SelectedPointId = entityId;
+            SelectedSeriesId = point.SeriesId;
+            HandleCanvasNavigation(new Point(point.PixelX, point.PixelY));
         }
         else if (FindSeries(entityId) is not null)
         {
@@ -2262,12 +2463,33 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
     private void SelectDataPreviewRow(DataPreviewRowViewModel? row)
     {
-        if (row is null)
+        SetSelectedDataPreviewRow(row, synchronizeWorkspace: true);
+    }
+
+    private void SetSelectedDataPreviewRow(
+        DataPreviewRowViewModel? row,
+        bool synchronizeWorkspace)
+    {
+        bool selectionChanged = !ReferenceEquals(_selectedDataPreviewRow, row);
+        if (selectionChanged)
+        {
+            if (_selectedDataPreviewRow is not null)
+            {
+                _selectedDataPreviewRow.IsSelected = false;
+            }
+            _selectedDataPreviewRow = row;
+            if (_selectedDataPreviewRow is not null)
+            {
+                _selectedDataPreviewRow.IsSelected = true;
+            }
+            OnPropertyChanged(nameof(SelectedDataPreviewRow));
+        }
+
+        if (!synchronizeWorkspace || row is null)
         {
             return;
         }
 
-        SelectedDataPreviewRow = row;
         SelectedPointId = row.PointId;
         SelectedSeriesId = row.SeriesId;
         HandleCanvasNavigation(new Point(row.PixelX, row.PixelY));
@@ -2294,22 +2516,174 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         IEnumerable<string>? outputFileNames)
     {
         WorkspaceTabViewModel? tab = SelectedTab;
-        int phaseCount = tab?.Points.Select(static point => point.PhaseCode)
-            .Distinct(StringComparer.OrdinalIgnoreCase).Count() ?? 0;
-        int blockers = BlockingReviewIssueCount;
-        int warnings = ReviewIssues.Count(static issue => issue.Severity == ReviewIssueSeverity.Warning);
+        PanelRecord? panel = tab is not null && Guid.TryParse(tab.PanelId, out Guid panelId)
+            ? _manualWorkspaceService?.CurrentProject.Panels.FirstOrDefault(
+                candidate => candidate.PanelId.Value == panelId)
+            : null;
+        int phaseCount = panel?.Phases.Count ??
+            tab?.Points.Select(static point => point.PhaseCode)
+                .Distinct(StringComparer.OrdinalIgnoreCase).Count() ?? 0;
+        ReviewIssueViewModel[] blockingIssues = ReviewIssues
+            .Where(static issue => issue.IsBlocking)
+            .ToArray();
+        ReviewIssueViewModel[] warningIssues = ReviewIssues
+            .Where(static issue => issue.Severity == ReviewIssueSeverity.Warning)
+            .ToArray();
+        string[] expectedFileNames = outputFileNames?.ToArray()
+            ?? CreateExpectedExportFileNames(tab, panel);
         return new ExportSummaryViewModel(
             tab?.Points.Count ?? 0,
             tab?.SeriesCards.Count ?? 0,
             phaseCount,
-            blockers,
-            warnings,
+            blockingIssues.Length,
+            warningIssues.Length,
             outputDirectory,
-            (outputFileNames ?? Array.Empty<string>()).ToArray(),
+            expectedFileNames,
             FormatLocalizedString(
                 LocalizationKeys.ExportPreviewProvenanceFormat,
                 Path.GetFileName(tab?.SourcePath) ?? GetLocalizedString(LocalizationKeys.PreviewUnknown)),
-            GetLocalizedString(LocalizationKeys.ExportPreviewDestinationPending));
+            GetLocalizedString(LocalizationKeys.ExportPreviewDestinationPending),
+            blockingIssues,
+            warningIssues,
+            outputDirectory is null
+                ? ExportDestinationStatus.PendingSelection
+                : ExportDestinationStatus.Written);
+    }
+
+    private static string[] CreateExpectedExportFileNames(
+        WorkspaceTabViewModel? tab,
+        PanelRecord? panel)
+    {
+        if (tab is null)
+        {
+            return [];
+        }
+
+        string? participant = panel?.Participant ?? Path.GetFileNameWithoutExtension(tab.DisplayName);
+        ExpectedExportSeries[] series = panel is not null
+            ? panel.Series
+                .Where(static item => item.SemanticRole == SemanticRole.Intervention)
+                .Select(static item => new ExpectedExportSeries(
+                    item.SeriesId.Value,
+                    item.SeriesId.Value.ToString("D"),
+                    item.DisplayName,
+                    item.Symbol))
+                .ToArray()
+            : tab.SeriesCards
+                .Where(static item => item.SemanticRole == SemanticRole.Intervention)
+                .Select(static item => new ExpectedExportSeries(
+                    Guid.TryParse(item.SeriesId, out Guid seriesId) ? seriesId : null,
+                    item.SeriesId,
+                    item.Label,
+                    item.Symbol))
+                .ToArray();
+
+        string participantName = SanitizeExpectedExportComponent(participant, "participant");
+        var usedFileNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var nextSuffixByStem = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var fileNames = new List<string>(series.Length * 3);
+        foreach (ExpectedExportSeries item in series
+                     .OrderBy(static item => item.SeriesId.HasValue ? 0 : 1)
+                     .ThenBy(static item => item.SeriesId)
+                     .ThenBy(static item => item.StableId, StringComparer.Ordinal))
+        {
+            string displayName = string.IsNullOrEmpty(item.Symbol)
+                ? item.DisplayName
+                : item.DisplayName.Replace(item.Symbol, string.Empty, StringComparison.Ordinal);
+            string fallback = item.SeriesId is Guid seriesId
+                ? $"series-{seriesId:N}"
+                : $"series-{SanitizeExpectedExportComponent(item.StableId, "unknown")}";
+            string seriesName = SanitizeExpectedExportComponent(displayName, fallback);
+            string stem = LimitExpectedExportStem($"{participantName}_{seriesName}", suffixLength: 0);
+            int suffixNumber = nextSuffixByStem.TryGetValue(stem, out int previousSuffix)
+                ? checked(previousSuffix + 1)
+                : 1;
+
+            while (true)
+            {
+                string duplicateSuffix = suffixNumber == 1 ? string.Empty : $"-{suffixNumber}";
+                string uniqueStem = LimitExpectedExportStem(stem, duplicateSuffix.Length) + duplicateSuffix;
+                string minimalCsv = uniqueStem + ".csv";
+                string extendedAuditCsv = uniqueStem + ".audit.csv";
+                string auditJson = uniqueStem + ".audit.json";
+                if (!usedFileNames.Contains(minimalCsv) &&
+                    !usedFileNames.Contains(extendedAuditCsv) &&
+                    !usedFileNames.Contains(auditJson))
+                {
+                    usedFileNames.Add(minimalCsv);
+                    usedFileNames.Add(extendedAuditCsv);
+                    usedFileNames.Add(auditJson);
+                    fileNames.Add(minimalCsv);
+                    fileNames.Add(extendedAuditCsv);
+                    fileNames.Add(auditJson);
+                    nextSuffixByStem[stem] = suffixNumber;
+                    break;
+                }
+
+                suffixNumber = checked(suffixNumber + 1);
+            }
+        }
+
+        return fileNames.ToArray();
+    }
+
+    private static string SanitizeExpectedExportComponent(string? value, string fallback)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return fallback;
+        }
+
+        var sanitized = new char[value.Length];
+        int written = 0;
+        bool lastWasReplacement = false;
+        foreach (char character in value)
+        {
+            bool mustReplace = char.IsControl(character) ||
+                InvalidExportFileNameCharacters.Contains(character);
+            if (mustReplace)
+            {
+                if (!lastWasReplacement)
+                {
+                    sanitized[written++] = '-';
+                    lastWasReplacement = true;
+                }
+                continue;
+            }
+
+            sanitized[written++] = character;
+            lastWasReplacement = false;
+        }
+
+        string result = new string(sanitized, 0, written).Trim().TrimEnd('.', ' ');
+        if (string.IsNullOrWhiteSpace(result))
+        {
+            return fallback;
+        }
+
+        int periodIndex = result.IndexOf('.');
+        string deviceCandidate = periodIndex >= 0 ? result[..periodIndex] : result;
+        return ReservedExportDeviceNames.Contains(deviceCandidate.TrimEnd('.', ' '))
+            ? $"_{result}"
+            : result;
+    }
+
+    private static string LimitExpectedExportStem(string stem, int suffixLength)
+    {
+        int maximumLength = MaximumExportStemLength - suffixLength;
+        if (stem.Length <= maximumLength)
+        {
+            return stem;
+        }
+
+        int length = maximumLength;
+        if (char.IsHighSurrogate(stem[length - 1]) &&
+            length < stem.Length &&
+            char.IsLowSurrogate(stem[length]))
+        {
+            length--;
+        }
+        return stem[..length].TrimEnd('.', ' ');
     }
 
     private bool CanExecuteReassignCommand(object? parameter)
@@ -2441,7 +2815,13 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         IReadOnlyList<PointSnapshot> Points,
         IReadOnlyList<SeriesSnapshot> Series,
         IReadOnlyList<DividerSnapshot> Dividers,
+        IReadOnlyList<SeriesRelationSnapshot> SeriesRelations,
         bool IsDirty);
+
+    private sealed record SeriesRelationSnapshot(
+        string InterventionSeriesId,
+        string? SharedBaselineSeriesId,
+        IReadOnlyList<string> ApplicableProbeSeriesIds);
 
     private sealed record PointSnapshot(
         string PointId,
@@ -2470,4 +2850,10 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         double OriginalX,
         string Code,
         string Label);
+
+    private sealed record ExpectedExportSeries(
+        Guid? SeriesId,
+        string StableId,
+        string DisplayName,
+        string Symbol);
 }

@@ -30,6 +30,24 @@ public enum ReviewIssueSeverity
     Blocking,
 }
 
+public enum ExportDestinationStatus
+{
+    PendingSelection,
+    Written,
+}
+
+public sealed record WorkspaceOperationStatus(
+    string Code,
+    ReviewIssueSeverity Severity,
+    string UserMessageKey,
+    string TechnicalMessage,
+    bool Recoverable,
+    string SuggestedAction);
+
+public sealed record PipelineWarningPresentation(
+    string UserMessageKey,
+    string TechnicalMessage);
+
 public sealed record ReviewIssueViewModel(
     string IssueId,
     string TabId,
@@ -41,7 +59,8 @@ public sealed record ReviewIssueViewModel(
     string RecommendedActionKey,
     string Title,
     string Interpretation,
-    string RecommendedAction)
+    string RecommendedAction,
+    string? TechnicalMessage = null)
 {
     public bool IsBlocking => Severity == ReviewIssueSeverity.Blocking;
 }
@@ -127,7 +146,10 @@ public sealed class ExportSummaryViewModel : ObservableObject
         string? outputDirectory,
         IReadOnlyList<string> outputFileNames,
         string? provenanceSummary = null,
-        string? destinationPendingText = null)
+        string? destinationPendingText = null,
+        IReadOnlyList<ReviewIssueViewModel>? blockingIssues = null,
+        IReadOnlyList<ReviewIssueViewModel>? warningIssues = null,
+        ExportDestinationStatus destinationStatus = ExportDestinationStatus.PendingSelection)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(pointCount);
         ArgumentOutOfRangeException.ThrowIfNegative(seriesCount);
@@ -143,6 +165,9 @@ public sealed class ExportSummaryViewModel : ObservableObject
         OutputDirectoryDisplay = outputDirectory ?? destinationPendingText ?? string.Empty;
         OutputFileNames = outputFileNames ?? throw new ArgumentNullException(nameof(outputFileNames));
         ProvenanceSummary = provenanceSummary ?? string.Empty;
+        BlockingIssues = blockingIssues ?? Array.Empty<ReviewIssueViewModel>();
+        WarningIssues = warningIssues ?? Array.Empty<ReviewIssueViewModel>();
+        DestinationStatus = destinationStatus;
     }
 
     public int PointCount { get; }
@@ -165,11 +190,12 @@ public sealed class ExportSummaryViewModel : ObservableObject
             if (SetProperty(ref _warningsAcknowledged, value))
             {
                 OnPropertyChanged(nameof(CanExport));
+                OnPropertyChanged(nameof(AcknowledgedWarningIssues));
             }
         }
     }
 
-    public bool CanExport => BlockingIssueCount == 0 &&
+    public bool CanExport => BlockingIssueCount == 0 && OutputFileNames.Count > 0 &&
         (!RequiresWarningAcknowledgement || WarningsAcknowledged);
 
     public string? OutputDirectory { get; }
@@ -179,6 +205,17 @@ public sealed class ExportSummaryViewModel : ObservableObject
     public IReadOnlyList<string> OutputFileNames { get; }
 
     public string ProvenanceSummary { get; }
+
+    public IReadOnlyList<ReviewIssueViewModel> BlockingIssues { get; }
+
+    public IReadOnlyList<ReviewIssueViewModel> WarningIssues { get; }
+
+    public IReadOnlyList<ReviewIssueViewModel> AcknowledgedWarningIssues =>
+        WarningsAcknowledged ? WarningIssues : Array.Empty<ReviewIssueViewModel>();
+
+    public ExportDestinationStatus DestinationStatus { get; }
+
+    public bool IsDestinationPending => DestinationStatus == ExportDestinationStatus.PendingSelection;
 }
 
 public sealed class TabEditHistory : ObservableObject

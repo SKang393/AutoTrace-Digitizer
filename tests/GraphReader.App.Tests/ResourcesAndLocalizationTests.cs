@@ -237,6 +237,10 @@ public sealed class ResourcesAndLocalizationTests
     {
         public ApplicationTheme EffectiveTheme { get; private set; } = theme;
 
+        public bool IsHighContrast => false;
+
+        public bool AreClientAreaAnimationsEnabled => true;
+
         public event EventHandler? ThemeChanged;
 
         public void SetTheme(ApplicationTheme themeValue)

@@ -126,14 +126,19 @@ public sealed class CalmPrecisionDesignTests
     }
 
     [TestMethod]
-    public void DecorativePopupAnimationsAreDisabled()
+    public void DecorativePopupAnimationsAreDisabledAndMotionIsSystemControlled()
     {
         string shell = File.ReadAllText(Path.Combine(AppDirectory, "MainWindow.xaml"));
         string controls = File.ReadAllText(Path.Combine(AppDirectory, "Themes", "Controls.xaml"));
+        string themeService = File.ReadAllText(Path.Combine(AppDirectory, "Appearance", "ThemeService.cs"));
         Assert.IsFalse(shell.Contains("PopupAnimation=\"Fade\"", StringComparison.Ordinal));
         Assert.IsFalse(controls.Contains("PopupAnimation=\"Fade\"", StringComparison.Ordinal));
         Assert.IsFalse(shell.Contains("Storyboard", StringComparison.Ordinal));
-        Assert.IsFalse(controls.Contains("Storyboard", StringComparison.Ordinal));
+        StringAssert.Contains(controls, "App.Motion.Enabled");
+        StringAssert.Contains(controls, "DoubleAnimation");
+        StringAssert.Contains(controls, "Duration=\"0:0:0.14\"");
+        StringAssert.Contains(themeService, "AreClientAreaAnimationsEnabled");
+        StringAssert.Contains(themeService, "TimeSpan.Zero");
     }
 
     [TestMethod]

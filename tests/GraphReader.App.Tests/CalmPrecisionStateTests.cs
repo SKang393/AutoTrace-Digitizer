@@ -3,15 +3,28 @@
 
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Reflection;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using GraphReader.App.Integration.Workflow;
 using GraphReader.App.Models;
 using GraphReader.App.Services;
 using GraphReader.App.ViewModels;
+using GraphReader.Domain;
+using GraphPoint = GraphReader.App.Models.GraphPoint;
 
 namespace GraphReader.App.Tests;
 
 [TestClass]
 public sealed class CalmPrecisionStateTests
 {
+    private static readonly string[] ExpectedPreviewFileNames =
+        [
+            "Example graph_Primary intervention.csv",
+            "Example graph_Primary intervention.audit.csv",
+            "Example graph_Primary intervention.audit.json",
+        ];
+
     [TestMethod]
     public void EmptyReadyAndRecordedReviewStatesAreDerivedWithoutGuessing()
     {
@@ -52,6 +65,31 @@ public sealed class CalmPrecisionStateTests
     }
 
     [TestMethod]
+    public async Task AnalyzeFailureRestoresReviewAndShowsOnlySafeLocalizedStatus()
+    {
+        WorkspaceTabViewModel reviewTab = new FakeWorkspaceService().CreateWorkspace()[0];
+        using var viewModel = new MainWindowViewModel(new ControlledWorkspaceService(
+            reviewTab,
+            static (_, _) => throw new InvalidDataException(
+                "C:\\private\\models\\detector.onnx failed with internal stack details")));
+        int pointCount = viewModel.DataPreviewRows.Count;
+        int issueCount = viewModel.ReviewIssues.Count;
+
+        viewModel.AutoDetectCommand.Execute(null);
+        await WaitUntilAsync(() => !viewModel.IsBusy);
+
+        Assert.AreEqual(WorkspaceSurfaceState.Reviewing, viewModel.SurfaceState);
+        Assert.AreEqual(pointCount, viewModel.DataPreviewRows.Count);
+        Assert.AreEqual(issueCount, viewModel.ReviewIssues.Count);
+        Assert.IsNotNull(viewModel.LastOperationStatus);
+        Assert.AreEqual("WORKSPACE_STAGE_FAILED", viewModel.LastOperationStatus.Code);
+        Assert.AreEqual("Errors.ProductionWorkflowUnavailable", viewModel.StatusMessageKey);
+        Assert.Contains("detector.onnx", viewModel.LastOperationStatus.TechnicalMessage);
+        Assert.DoesNotContain("detector.onnx", viewModel.StatusMessage);
+        Assert.DoesNotContain("internal stack", viewModel.StatusMessage);
+    }
+
+    [TestMethod]
     public void ReviewProjectionAndTableSelectionStaySynchronized()
     {
         using var viewModel = new MainWindowViewModel(new FakeWorkspaceService());
@@ -62,12 +100,100 @@ public sealed class CalmPrecisionStateTests
         Assert.AreEqual(viewModel.SelectedTab!.Points.Count, viewModel.DataPreviewRows.Count);
 
         DataPreviewRowViewModel target = viewModel.DataPreviewRows[^1];
-        viewModel.SelectDataPreviewRowCommand.Execute(target);
+        viewModel.SelectedDataPreviewRow = target;
 
         Assert.AreEqual(target.PointId, viewModel.SelectedPointId);
         Assert.AreSame(target, viewModel.SelectedDataPreviewRow);
         Assert.AreEqual(target.PixelX, viewModel.Magnifier.PixelPosition.X);
         Assert.AreEqual(target.PixelY, viewModel.Magnifier.PixelPosition.Y);
+
+        viewModel.HandleCanvasNavigation(new System.Windows.Point(0, 0));
+        viewModel.SelectDataPreviewRowCommand.Execute(target);
+
+        Assert.AreEqual(target.PixelX, viewModel.Magnifier.PixelPosition.X);
+        Assert.AreEqual(target.PixelY, viewModel.Magnifier.PixelPosition.Y);
+
+        var pointIssue = new ReviewIssueViewModel(
+            "point-backed-test",
+            viewModel.SelectedTab.TabId,
+            target.PointId,
+            ReviewIssueKind.Point,
+            ReviewIssueSeverity.Warning,
+            "Review.Title",
+            "Review.PointConfidence.Interpretation",
+            "Review.PointConfidence.Action",
+            "Point review",
+            "Inspect the selected point.",
+            "Correct or accept the point.");
+        viewModel.SelectedReviewIssue = pointIssue;
+
+        Assert.AreEqual(target.PointId, viewModel.SelectedPointId);
+        Assert.AreEqual(target.SeriesId, viewModel.SelectedSeriesId);
+        Assert.AreSame(target, viewModel.SelectedDataPreviewRow);
+        Assert.AreEqual(target.PixelX, viewModel.Magnifier.PixelPosition.X);
+        Assert.AreEqual(target.PixelY, viewModel.Magnifier.PixelPosition.Y);
+        double expectedCrosshairX = viewModel.SelectedTab.PixelWidth > 0
+            ? target.PixelX / viewModel.SelectedTab.PixelWidth
+            : 0;
+        double expectedCrosshairY = viewModel.SelectedTab.PixelHeight > 0
+            ? target.PixelY / viewModel.SelectedTab.PixelHeight
+            : 0;
+        Assert.AreEqual(expectedCrosshairX, viewModel.Magnifier.CrosshairPosition.X, 0.0001);
+        Assert.AreEqual(expectedCrosshairY, viewModel.Magnifier.CrosshairPosition.Y, 0.0001);
+
+        viewModel.HandleCanvasNavigation(new System.Windows.Point(0, 0));
+        viewModel.SelectReviewIssueCommand.Execute(pointIssue);
+
+        Assert.AreEqual(target.PixelX, viewModel.Magnifier.PixelPosition.X);
+        Assert.AreEqual(target.PixelY, viewModel.Magnifier.PixelPosition.Y);
+    }
+
+    [TestMethod]
+    public void DefaultPipelineWarningsStayWithTheAnalyzedTab()
+    {
+        string root = Path.Combine(Path.GetTempPath(), $"graph-reader-warning-scope-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        string analyzedPath = Path.Combine(root, "analyzed.png");
+        string otherPath = Path.Combine(root, "other.png");
+
+        try
+        {
+            StaTestHost.Run(() =>
+            {
+                WriteImage(analyzedPath, 160, 120);
+                WriteImage(otherPath, 160, 120);
+                var workspace = new ProductionWorkspaceService();
+                IReadOnlyList<WorkspaceTabViewModel> tabs = workspace
+                    .ImportImagesAsync([analyzedPath, otherPath], CancellationToken.None)
+                    .GetAwaiter()
+                    .GetResult();
+                WorkspaceTabViewModel analyzedTab = tabs[0];
+                WorkspaceTabViewModel otherTab = tabs[1];
+                WorkflowRunResult run = CreateWarningRun(analyzedTab);
+                PropertyInfo lastRunProperty = typeof(ProductionWorkspaceService).GetProperty(
+                    nameof(ProductionWorkspaceService.LastAutomaticRun)) ??
+                    throw new InvalidOperationException("LastAutomaticRun property is unavailable.");
+                lastRunProperty.SetValue(workspace, run);
+                using var viewModel = new MainWindowViewModel(workspace);
+
+                viewModel.SelectedTab = otherTab;
+
+                Assert.IsFalse(viewModel.ReviewIssues.Any(
+                    static issue => issue.Kind == ReviewIssueKind.PipelineWarning));
+
+                viewModel.SelectedTab = analyzedTab;
+
+                ReviewIssueViewModel warning = viewModel.ReviewIssues.Single(
+                    static issue => issue.Kind == ReviewIssueKind.PipelineWarning);
+                Assert.DoesNotContain("private", warning.Interpretation);
+                Assert.IsNotNull(warning.TechnicalMessage);
+                Assert.Contains("private", warning.TechnicalMessage!);
+            });
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
     }
 
     [TestMethod]
@@ -109,9 +235,101 @@ public sealed class CalmPrecisionStateTests
     }
 
     [TestMethod]
+    public void EditHistoryRestoresSharedBaselineAndApplicableProbeRelations()
+    {
+        string root = Path.Combine(Path.GetTempPath(), $"graph-reader-relations-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        string imagePath = Path.Combine(root, "relations.png");
+
+        try
+        {
+            StaTestHost.Run(() =>
+            {
+                WriteImage(imagePath, 160, 120);
+                var workspace = new ManualPreviewWorkspaceService();
+                WorkspaceTabViewModel tab = workspace.ImportImagesAsync([imagePath], CancellationToken.None)
+                    .GetAwaiter().GetResult().Single();
+                SeriesCardViewModel baseline = workspace.AddSeries(
+                    tab.TabId,
+                    new ManualSeriesDefinition(
+                        "Baseline",
+                        "□",
+                        MarkerShape.Square,
+                        MarkerFill.Open,
+                        SemanticRole.Baseline));
+                SeriesCardViewModel intervention = workspace.AddSeries(
+                    tab.TabId,
+                    new ManualSeriesDefinition(
+                        "Intervention",
+                        "●",
+                        MarkerShape.Circle,
+                        MarkerFill.Filled,
+                        SemanticRole.Intervention));
+                SeriesCardViewModel maintenance = workspace.AddSeries(
+                    tab.TabId,
+                    new ManualSeriesDefinition(
+                        "Maintenance",
+                        "△",
+                        MarkerShape.TriangleUp,
+                        MarkerFill.Open,
+                        SemanticRole.Maintenance));
+                using var viewModel = new MainWindowViewModel(workspace);
+                viewModel.SelectedSeriesId = intervention.SeriesId;
+                viewModel.SelectedSharedBaselineSeriesId = baseline.SeriesId;
+                viewModel.ProbeRelationChoices.Single(
+                    choice => choice.SeriesId == maintenance.SeriesId).IsSelected = true;
+
+                viewModel.ApplySeriesRelationsCommand.Execute(null);
+
+                SeriesRecord applied = FindSeries(workspace, intervention.SeriesId);
+                Assert.AreEqual(Guid.Parse(baseline.SeriesId), applied.SharedBaselineSeriesId?.Value);
+                CollectionAssert.AreEqual(
+                    new[] { Guid.Parse(maintenance.SeriesId) },
+                    applied.ApplicableProbeSeriesIds.Select(static id => id.Value).ToArray());
+                Assert.IsTrue(viewModel.CanUndo);
+
+                viewModel.UndoCommand.Execute(null);
+
+                SeriesRecord undone = FindSeries(workspace, intervention.SeriesId);
+                Assert.IsNull(undone.SharedBaselineSeriesId);
+                Assert.HasCount(0, undone.ApplicableProbeSeriesIds);
+                Assert.IsTrue(viewModel.CanRedo);
+
+                viewModel.RedoCommand.Execute(null);
+
+                SeriesRecord redone = FindSeries(workspace, intervention.SeriesId);
+                Assert.AreEqual(Guid.Parse(baseline.SeriesId), redone.SharedBaselineSeriesId?.Value);
+                CollectionAssert.AreEqual(
+                    new[] { Guid.Parse(maintenance.SeriesId) },
+                    redone.ApplicableProbeSeriesIds.Select(static id => id.Value).ToArray());
+            });
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public void ExportPreviewSummarizesEvidenceAndHonorsBlockingIssues()
     {
-        using var viewModel = new MainWindowViewModel(new FakeWorkspaceService());
+        WorkspaceTabViewModel tab = new FakeWorkspaceService().CreateWorkspace()[0];
+        tab.SeriesCards[0].SemanticRole = SemanticRole.Intervention;
+        tab.SeriesCards[1].SemanticRole = SemanticRole.Generalization;
+        tab.Calibration = CreateCalibration();
+        int stagesRun = 0;
+        using var viewModel = new MainWindowViewModel(
+            new ControlledWorkspaceService(
+                tab,
+                (_, _) =>
+                {
+                    stagesRun++;
+                    return Task.CompletedTask;
+                }),
+            localizationService: null,
+            pipelineWarningsProvider: static _ => [new PipelineWarningPresentation(
+                "Review.PipelineWarning.Interpretation",
+                "Axis labels require review before export.")]);
 
         viewModel.OpenExportPreviewCommand.Execute(null);
 
@@ -119,11 +337,34 @@ public sealed class CalmPrecisionStateTests
         Assert.IsNotNull(viewModel.ExportSummary);
         Assert.AreEqual(viewModel.SelectedTab!.Points.Count, viewModel.ExportSummary.PointCount);
         Assert.AreEqual(viewModel.SeriesCards.Count, viewModel.ExportSummary.SeriesCount);
+        Assert.AreEqual(2, viewModel.ExportSummary.PhaseCount);
         Assert.AreEqual(viewModel.BlockingReviewIssueCount, viewModel.ExportSummary.BlockingIssueCount);
         Assert.IsFalse(string.IsNullOrWhiteSpace(viewModel.ExportSummary.ProvenanceSummary));
         Assert.IsFalse(string.IsNullOrWhiteSpace(viewModel.ExportSummary.OutputDirectoryDisplay));
+        Assert.AreEqual(ExportDestinationStatus.PendingSelection, viewModel.ExportSummary.DestinationStatus);
+        Assert.IsTrue(viewModel.ExportSummary.IsDestinationPending);
+        CollectionAssert.AreEqual(
+            ExpectedPreviewFileNames,
+            viewModel.ExportSummary.OutputFileNames.ToArray());
+        Assert.HasCount(0, viewModel.ExportSummary.BlockingIssues);
+        Assert.HasCount(1, viewModel.ExportSummary.WarningIssues);
+        Assert.AreEqual(ReviewIssueKind.PipelineWarning, viewModel.ExportSummary.WarningIssues[0].Kind);
+        Assert.AreEqual(
+            "Review.PipelineWarning.Interpretation",
+            viewModel.ExportSummary.WarningIssues[0].InterpretationKey);
+        Assert.IsNotNull(viewModel.ExportSummary.WarningIssues[0].TechnicalMessage);
+        Assert.Contains("Axis labels", viewModel.ExportSummary.WarningIssues[0].TechnicalMessage!);
+        Assert.IsFalse(viewModel.ExportSummary.WarningsAcknowledged);
+        Assert.HasCount(0, viewModel.ExportSummary.AcknowledgedWarningIssues);
         Assert.IsFalse(viewModel.ExportSummary.CanExport);
         Assert.IsFalse(viewModel.ConfirmExportCommand.CanExecute(null));
+
+        viewModel.ExportSummary.WarningsAcknowledged = true;
+
+        Assert.HasCount(1, viewModel.ExportSummary.AcknowledgedWarningIssues);
+        Assert.IsTrue(viewModel.ExportSummary.CanExport);
+        Assert.IsTrue(viewModel.ConfirmExportCommand.CanExecute(null));
+        Assert.AreEqual(0, stagesRun);
     }
 
     [TestMethod]
@@ -136,7 +377,7 @@ public sealed class CalmPrecisionStateTests
             blockingIssueCount: 0,
             warningCount: 1,
             outputDirectory: null,
-            outputFileNames: Array.Empty<string>());
+            outputFileNames: ["participant_intervention.csv"]);
 
         Assert.IsTrue(summary.RequiresWarningAcknowledgement);
         Assert.IsFalse(summary.CanExport);
@@ -184,6 +425,62 @@ public sealed class CalmPrecisionStateTests
         pixelWidth: 640,
         pixelHeight: 480,
         overlayContent: new object());
+
+    private static ManualCalibrationState CreateCalibration() => new(
+        new GraphReader.Axis.PixelPoint(10, 100),
+        new GraphReader.Axis.PixelPoint(10, 10),
+        new GraphReader.Axis.PixelPoint(500, 100),
+        YMaximum: 100,
+        XMaximum: 10,
+        new GraphReader.Axis.LinearAxisTransform(9d / 490d, 40d / 49d),
+        new GraphReader.Axis.LinearAxisTransform(-10d / 9d, 1000d / 9d),
+        Confidence: 1);
+
+    private static WorkflowRunResult CreateWarningRun(WorkspaceTabViewModel tab)
+    {
+        var original = new WorkflowImageEvidence(
+            tab.SourcePath ?? throw new InvalidOperationException("Source path is required."),
+            tab.SourceSha256 ?? throw new InvalidOperationException("Source hash is required."),
+            tab.PixelWidth,
+            tab.PixelHeight,
+            WorkflowImageVariant.Original);
+        var imported = new WorkflowImportedPanel(
+            Guid.Parse(tab.PanelId ?? throw new InvalidOperationException("Panel ID is required.")),
+            Guid.Parse(tab.SourceId ?? throw new InvalidOperationException("Source ID is required.")),
+            tab.DisplayName,
+            original);
+        var prepared = new WorkflowPreparedPanel(imported, original, enhanced: null);
+        var reviewPanel = new WorkflowReviewPanel(prepared, []);
+        return new WorkflowRunResult(
+            Guid.NewGuid(),
+            new WorkflowReviewState(
+                Guid.NewGuid(),
+                [reviewPanel],
+                warnings: ["C:\\private\\models\\axis.onnx requires review."]),
+            []);
+    }
+
+    private static SeriesRecord FindSeries(ManualPreviewWorkspaceService workspace, string seriesId) =>
+        workspace.CurrentProject.Panels.SelectMany(static panel => panel.Series).Single(
+            series => series.SeriesId.Value == Guid.Parse(seriesId));
+
+    private static void WriteImage(string path, int width, int height)
+    {
+        byte[] pixels = Enumerable.Repeat((byte)255, width * height * 4).ToArray();
+        BitmapSource bitmap = BitmapSource.Create(
+            width,
+            height,
+            96,
+            96,
+            PixelFormats.Bgra32,
+            palette: null,
+            pixels,
+            width * 4);
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+        using FileStream stream = File.Create(path);
+        encoder.Save(stream);
+    }
 
     private static async Task WaitUntilAsync(Func<bool> condition)
     {

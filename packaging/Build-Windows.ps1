@@ -1043,6 +1043,34 @@ function Get-ReleaseAudit {
                 -not $components.ContainsKey([string]$rule.componentId)) {
                 $issues.Add("Release binary coverage rule '$($rule.pattern)' references an invalid component.")
             }
+
+            if ($null -ne $rule.PSObject.Properties['embeddedComponentIds']) {
+                $embeddedIds = @($rule.embeddedComponentIds)
+                if ($embeddedIds.Count -eq 0 -or
+                    @($embeddedIds | Where-Object {
+                            $_ -isnot [string] -or [string]::IsNullOrWhiteSpace([string]$_)
+                        }).Count -gt 0 -or
+                    @($embeddedIds | Select-Object -Unique).Count -ne $embeddedIds.Count) {
+                    $issues.Add("Release binary coverage rule '$($rule.pattern)' has invalid embedded component identities.")
+                    continue
+                }
+
+                foreach ($embeddedId in $embeddedIds) {
+                    if (-not $components.ContainsKey([string]$embeddedId)) {
+                        $issues.Add("Release binary coverage rule '$($rule.pattern)' references unknown embedded component '$embeddedId'.")
+                        continue
+                    }
+
+                    $embeddedComponent = $components[[string]$embeddedId]
+                    if ([string]$embeddedComponent.reviewStatus -ne 'reviewed' -or
+                        -not [bool]$embeddedComponent.commercialUse -or
+                        -not [bool]$embeddedComponent.redistribution -or
+                        [string]$embeddedComponent.checksumPolicy -ne 'exact-binary' -or
+                        [string]$embeddedComponent.artifactSha256 -notmatch '^[a-fA-F0-9]{64}$') {
+                        $issues.Add("Release binary coverage rule '$($rule.pattern)' references unreleasable embedded component '$embeddedId'.")
+                    }
+                }
+            }
         }
     }
 
@@ -1151,6 +1179,12 @@ function Assert-PublishBinaryCoverage {
                 path = $relativePath
                 componentId = [string]$component.id
                 sha256 = $binarySha256
+                embeddedComponentIds = if ($null -ne $matchedRule.PSObject.Properties['embeddedComponentIds']) {
+                    @($matchedRule.embeddedComponentIds | ForEach-Object { [string]$_ })
+                }
+                else {
+                    @()
+                }
             })
     }
 
@@ -1159,6 +1193,47 @@ function Assert-PublishBinaryCoverage {
     }
 
     return $mappings.ToArray()
+}
+
+function Get-EmbeddedComponentRecords {
+    param(
+        [Parameter(Mandatory)]
+        [object[]]$BinaryCoverage,
+
+        [Parameter(Mandatory)]
+        [object]$ReleaseAudit
+    )
+
+    $records = New-Object System.Collections.Generic.List[object]
+    $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+    foreach ($coverage in $BinaryCoverage) {
+        foreach ($componentId in @($coverage.embeddedComponentIds)) {
+            $identity = "$($coverage.path)|$componentId"
+            if (-not $seen.Add($identity)) {
+                throw "Embedded release component mapping is duplicated: $identity"
+            }
+
+            $component = $ReleaseAudit.Components[[string]$componentId]
+            $records.Add([ordered]@{
+                    containerPath = [string]$coverage.path
+                    containerSha256 = [string]$coverage.sha256
+                    id = [string]$component.id
+                    component = [string]$component.component
+                    version = [string]$component.version
+                    source = [string]$component.source
+                    sourceRevision = [string]$component.sourceRevision
+                    license = [string]$component.license
+                    artifactSha256 = ([string]$component.artifactSha256).ToLowerInvariant()
+                    checksumPolicy = [string]$component.checksumPolicy
+                    noticePaths = @($component.noticePaths | ForEach-Object { [string]$_ })
+                    commercialUse = [bool]$component.commercialUse
+                    redistribution = [bool]$component.redistribution
+                    reviewStatus = [string]$component.reviewStatus
+                })
+        }
+    }
+
+    return $records.ToArray()
 }
 
 function Resolve-ArtifactLeafName {
@@ -1928,6 +2003,19 @@ Write-JsonFile -Path $productionModelIndexPath -Value ([ordered]@{
     })
 
 $publishBinaryCoverage = @(Assert-PublishBinaryCoverage -PublishRoot $commonPublishPath -ReleaseAudit $releaseAudit)
+$embeddedComponentRecords = @(Get-EmbeddedComponentRecords `
+        -BinaryCoverage $publishBinaryCoverage `
+        -ReleaseAudit $releaseAudit)
+$embeddedComponentIds = @($embeddedComponentRecords | ForEach-Object { [string]$_.id } | Sort-Object -Unique)
+$fontBearingPayloads = @($publishBinaryCoverage | Where-Object {
+        @($_.embeddedComponentIds).Count -gt 0
+    } | ForEach-Object {
+        [ordered]@{
+            path = [string]$_.path
+            sha256 = [string]$_.sha256
+            embeddedComponentIds = @($_.embeddedComponentIds | ForEach-Object { [string]$_ })
+        }
+    })
 $buildUtc = [DateTime]::UtcNow.ToString(
     "yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'",
     [System.Globalization.CultureInfo]::InvariantCulture)
@@ -2047,6 +2135,8 @@ $installerProvenance = [ordered]@{
     componentIds = $installerComponentIds
     licenses = $installerLicenses
     noticePaths = $installerNoticePaths
+    embeddedComponentIds = $embeddedComponentIds
+    fontBearingPayloads = $fontBearingPayloads
     checksumPolicy = 'release-sbom'
     setupSha256 = $installerHash
     installedCopyName = [string]$installerCoverageRecords[0].installedCopyName
@@ -2074,6 +2164,7 @@ $releaseMetadata = [ordered]@{
         fileCount = $commonFiles.Count
         files = $commonFiles
     }
+    embeddedComponents = $embeddedComponentRecords
     installer = [ordered]@{
         fileName = $installerFileName
         sha256 = $installerHash
@@ -2090,6 +2181,8 @@ $releaseMetadata = [ordered]@{
             componentIds = $portableComponentIds
             licenses = $portableLicenses
             noticePaths = $portableNoticePaths
+            embeddedComponentIds = $embeddedComponentIds
+            fontBearingPayloads = $fontBearingPayloads
             checksumPolicy = 'release-sbom'
             archiveSha256 = $portableHash
         }
@@ -2124,9 +2217,42 @@ foreach ($file in $commonFiles) {
         $coverage = $binaryCoverageByPath[[string]$file.path]
         $component = $releaseAudit.Components[[string]$coverage.componentId]
         $sbomComponent['licenses'] = @([ordered]@{ expression = [string]$component.license })
-        $sbomComponent['properties'] = @(
-            [ordered]@{ name = 'graphreader:releaseAuditComponentIds'; value = [string]$component.id },
+        $componentProperties = New-Object System.Collections.Generic.List[object]
+        $componentProperties.Add(
+            [ordered]@{ name = 'graphreader:releaseAuditComponentIds'; value = [string]$component.id })
+        $componentProperties.Add(
             [ordered]@{ name = 'graphreader:noticePaths'; value = (@($component.noticePaths) -join ';') })
+        $coverageEmbeddedIds = @($coverage.embeddedComponentIds | ForEach-Object { [string]$_ })
+        if ($coverageEmbeddedIds.Count -gt 0) {
+            $componentProperties.Add([ordered]@{
+                    name = 'graphreader:embeddedComponentIds'
+                    value = ($coverageEmbeddedIds -join ';')
+                })
+            $sbomComponent['components'] = @($coverageEmbeddedIds | ForEach-Object {
+                    $embedded = $releaseAudit.Components[$_]
+                    [ordered]@{
+                        type = 'library'
+                        'bom-ref' = [string]$embedded.id
+                        name = [string]$embedded.component
+                        version = [string]$embedded.version
+                        hashes = @([ordered]@{
+                                alg = 'SHA-256'
+                                content = ([string]$embedded.artifactSha256).ToLowerInvariant()
+                            })
+                        licenses = @([ordered]@{ expression = [string]$embedded.license })
+                        externalReferences = @([ordered]@{
+                                type = 'distribution'
+                                url = [string]$embedded.source
+                            })
+                        properties = @(
+                            [ordered]@{ name = 'graphreader:sourceRevision'; value = [string]$embedded.sourceRevision },
+                            [ordered]@{ name = 'graphreader:checksumPolicy'; value = [string]$embedded.checksumPolicy },
+                            [ordered]@{ name = 'graphreader:noticePaths'; value = (@($embedded.noticePaths) -join ';') },
+                            [ordered]@{ name = 'graphreader:embeddedIn'; value = [string]$coverage.path })
+                    }
+                })
+        }
+        $sbomComponent['properties'] = $componentProperties.ToArray()
     }
     $sbomComponents.Add($sbomComponent)
 }
@@ -2139,6 +2265,8 @@ $sbomComponents.Add([ordered]@{
         properties = @(
             [ordered]@{ name = 'graphreader:releaseAuditComponentIds'; value = ($installerComponentIds -join ';') },
             [ordered]@{ name = 'graphreader:noticePaths'; value = ($installerNoticePaths -join ';') },
+            [ordered]@{ name = 'graphreader:embeddedComponentIds'; value = ($embeddedComponentIds -join ';') },
+            [ordered]@{ name = 'graphreader:fontBearingPayloads'; value = ($fontBearingPayloads | ConvertTo-Json -Compress -Depth 5) },
             [ordered]@{ name = 'graphreader:installedCopyName'; value = [string]$installerCoverageRecords[0].installedCopyName },
             [ordered]@{ name = 'graphreader:installedCopySha256'; value = $installerHash })
     })
@@ -2149,7 +2277,9 @@ $sbomComponents.Add([ordered]@{
         licenses = @($portableLicenses | ForEach-Object { [ordered]@{ expression = $_ } })
         properties = @(
             [ordered]@{ name = 'graphreader:releaseAuditComponentIds'; value = ($portableComponentIds -join ';') },
-            [ordered]@{ name = 'graphreader:noticePaths'; value = ($portableNoticePaths -join ';') })
+            [ordered]@{ name = 'graphreader:noticePaths'; value = ($portableNoticePaths -join ';') },
+            [ordered]@{ name = 'graphreader:embeddedComponentIds'; value = ($embeddedComponentIds -join ';') },
+            [ordered]@{ name = 'graphreader:fontBearingPayloads'; value = ($fontBearingPayloads | ConvertTo-Json -Compress -Depth 5) })
     })
 
 $sbom = [ordered]@{

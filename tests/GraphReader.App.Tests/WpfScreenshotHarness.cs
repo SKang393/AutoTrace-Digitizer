@@ -15,23 +15,30 @@ internal sealed record RenderedScreenshot(int Width, int Height, byte[] PngBytes
 
 internal static class WpfScreenshotHarness
 {
-    public static RenderedScreenshot Render(Func<FrameworkElement> elementFactory, int width, int height)
+    public static RenderedScreenshot Render(
+        Func<FrameworkElement> elementFactory,
+        int width,
+        int height,
+        double pixelScale = 1)
     {
         ArgumentNullException.ThrowIfNull(elementFactory);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pixelScale);
 
         return StaTestHost.Run(
             () =>
             {
                 var element = elementFactory();
                 ArgumentNullException.ThrowIfNull(element);
+                double logicalWidth = width / pixelScale;
+                double logicalHeight = height / pixelScale;
                 var host = new Window
                 {
-                    Width = width,
-                    Height = height,
-                    Left = SystemParameters.VirtualScreenLeft - width - 100,
-                    Top = SystemParameters.VirtualScreenTop - height - 100,
+                    Width = logicalWidth,
+                    Height = logicalHeight,
+                    Left = SystemParameters.VirtualScreenLeft - logicalWidth - 100,
+                    Top = SystemParameters.VirtualScreenTop - logicalHeight - 100,
                     WindowStartupLocation = WindowStartupLocation.Manual,
                     WindowStyle = WindowStyle.None,
                     ResizeMode = ResizeMode.NoResize,
@@ -70,11 +77,17 @@ internal static class WpfScreenshotHarness
                     element.Dispatcher.Invoke(
                         static () => { },
                         DispatcherPriority.ApplicationIdle);
-                    element.Measure(new Size(width, height));
-                    element.Arrange(new Rect(0, 0, width, height));
+                    element.Measure(new Size(logicalWidth, logicalHeight));
+                    element.Arrange(new Rect(0, 0, logicalWidth, logicalHeight));
                     element.UpdateLayout();
 
-                    RenderTargetBitmap bitmap = CaptureWindow(host, width, height);
+                    RenderTargetBitmap bitmap = CaptureWindow(
+                        host,
+                        width,
+                        height,
+                        logicalWidth,
+                        logicalHeight,
+                        pixelScale);
 
                     var encoder = new PngBitmapEncoder();
                     encoder.Frames.Add(BitmapFrame.Create(bitmap));
@@ -95,7 +108,13 @@ internal static class WpfScreenshotHarness
             });
     }
 
-    private static RenderTargetBitmap CaptureWindow(Window host, int width, int height)
+    private static RenderTargetBitmap CaptureWindow(
+        Window host,
+        int width,
+        int height,
+        double logicalWidth,
+        double logicalHeight,
+        double pixelScale)
     {
         if (new WindowInteropHelper(host).Handle == 0)
         {
@@ -111,13 +130,14 @@ internal static class WpfScreenshotHarness
                     AlignmentX = AlignmentX.Left,
                     AlignmentY = AlignmentY.Top,
                     AutoLayoutContent = true,
-                    Stretch = Stretch.None,
+                    Stretch = Stretch.Fill,
                 },
                 null,
-                new Rect(0, 0, width, height));
+                new Rect(0, 0, logicalWidth, logicalHeight));
         }
 
-        var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+        double dpi = 96 * pixelScale;
+        var bitmap = new RenderTargetBitmap(width, height, dpi, dpi, PixelFormats.Pbgra32);
         bitmap.Render(visual);
         int stride = checked(width * 4);
         byte[] pixels = new byte[checked(stride * height)];

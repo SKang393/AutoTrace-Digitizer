@@ -1018,7 +1018,10 @@ function New-ModelAuditFixture {
 }
 
 function New-ValidModelBuildFixture {
-    param([Parameter(Mandatory)][string]$Name)
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [switch]$IncludeNoto
+    )
 
     $fixture = New-PackagingFixture -Name $Name -Version '0.0.21'
     foreach ($directory in @('contracts', 'models/manifest', 'models', 'LICENSES')) {
@@ -1028,6 +1031,28 @@ function New-ValidModelBuildFixture {
     'Fixture notice' | Set-Content -LiteralPath (Join-Path $fixture.Root 'NOTICE') -Encoding utf8
     'License: `LICENSES/MIT.txt`' | Set-Content -LiteralPath (Join-Path $fixture.Root 'THIRD_PARTY_NOTICES.md') -Encoding utf8
     'MIT License' | Set-Content -LiteralPath (Join-Path $fixture.Root 'LICENSES/MIT.txt') -Encoding utf8
+    $sourceRepositoryRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
+    if ($IncludeNoto) {
+        Copy-Item `
+            -LiteralPath (Join-Path $sourceRepositoryRoot 'THIRD_PARTY_NOTICES.md') `
+            -Destination (Join-Path $fixture.Root 'THIRD_PARTY_NOTICES.md') `
+            -Force
+        $notoFixtureNotice = Get-Content `
+            -LiteralPath (Join-Path $fixture.Root 'THIRD_PARTY_NOTICES.md') `
+            -Raw
+        $referencedLicensePaths = @(
+            [regex]::Matches(
+                $notoFixtureNotice,
+                '(?i)LICENSES/[A-Za-z0-9._+\-]+(?:\.[A-Za-z0-9._+\-]+)*') |
+                ForEach-Object { [string]$_.Value } |
+                Sort-Object -Unique)
+        foreach ($licensePath in $referencedLicensePaths) {
+            Copy-Item `
+                -LiteralPath (Join-Path $sourceRepositoryRoot $licensePath) `
+                -Destination (Join-Path $fixture.Root $licensePath) `
+                -Force
+        }
+    }
     Write-JsonFile -Path (Join-Path $fixture.Root 'contracts/vision-result.schema.json') -Value (@{
             properties = @{ contract_version = @{ const = 1 } }
         })
@@ -1099,6 +1124,36 @@ function New-ValidModelBuildFixture {
                     checksumPolicy = 'release-sbom'
                 })
         })
+    if ($IncludeNoto) {
+        $fixtureAuditPath = Join-Path $fixture.Root 'packaging/common/release-audit.json'
+        $fixtureAudit = Get-Content -LiteralPath $fixtureAuditPath -Raw | ConvertFrom-Json
+        $sourceAudit = Get-Content `
+            -LiteralPath (Join-Path $sourceRepositoryRoot 'packaging/common/release-audit.json') `
+            -Raw | ConvertFrom-Json
+        foreach ($componentId in @(
+                'graph-auto-reader',
+                'noto-sans-regular',
+                'noto-sans-medium',
+                'noto-sans-semibold')) {
+            $matches = @($sourceAudit.components | Where-Object { [string]$_.id -ceq $componentId })
+            if ($matches.Count -ne 1) {
+                throw "Source release audit requires exactly one '$componentId' component for the Noto fixture."
+            }
+            $fixtureAudit.components += $matches[0]
+        }
+        $fixtureAudit.binaryCoverage.rules = @(
+            [pscustomobject]@{
+                pattern = 'GraphReader.App.dll'
+                componentId = 'graph-auto-reader'
+                embeddedComponentIds = @(
+                    'noto-sans-regular',
+                    'noto-sans-medium',
+                    'noto-sans-semibold')
+            },
+            [pscustomobject]@{ pattern = '*.exe'; componentId = 'fixture-app' },
+            [pscustomobject]@{ pattern = '*.dll'; componentId = 'fixture-app' })
+        Write-JsonFile -Path $fixtureAuditPath -Value $fixtureAudit
+    }
 
     $validModelPath = Join-Path $fixture.Root 'models/valid-model.onnx'
     [IO.File]::WriteAllBytes($validModelPath, [byte[]](5, 6, 7, 8))
@@ -1149,6 +1204,28 @@ function New-ValidModelBuildFixture {
   </Target>
 </Project>
 '@ | Set-Content -LiteralPath (Join-Path $applicationProjectRoot 'GraphReader.App.csproj') -Encoding utf8
+    if ($IncludeNoto) {
+        $applicationProjectPath = Join-Path $applicationProjectRoot 'GraphReader.App.csproj'
+        $applicationProject = Get-Content -LiteralPath $applicationProjectPath -Raw
+        $fontResources = @'
+  <ItemGroup>
+    <Resource Include="Assets\Fonts\NotoSans-Regular.ttf" />
+    <Resource Include="Assets\Fonts\NotoSans-Medium.ttf" />
+    <Resource Include="Assets\Fonts\NotoSans-SemiBold.ttf" />
+  </ItemGroup>
+'@
+        $applicationProject = $applicationProject.Replace('</Project>', "$fontResources</Project>")
+        $applicationProject | Set-Content -LiteralPath $applicationProjectPath -Encoding utf8
+
+        $fontFixtureRoot = Join-Path $applicationProjectRoot 'Assets/Fonts'
+        $null = New-Item -ItemType Directory -Path $fontFixtureRoot -Force
+        foreach ($fontName in @('NotoSans-Regular.ttf', 'NotoSans-Medium.ttf', 'NotoSans-SemiBold.ttf')) {
+            Copy-Item `
+                -LiteralPath (Join-Path $sourceRepositoryRoot "src/GraphReader.App/Assets/Fonts/$fontName") `
+                -Destination (Join-Path $fontFixtureRoot $fontName) `
+                -Force
+        }
+    }
     @'
 using System;
 
@@ -1355,6 +1432,32 @@ function Assert-ExitCode {
 }
 
 try {
+    Assert-Case 'Repository Noto metadata is validated while definition-only artifact proof is explicit' {
+        $fixture = New-PackagingFixture -Name 'noto-definition-proof' -Version '0.0.21'
+        Copy-Item `
+            -LiteralPath (Join-Path $PSScriptRoot '..\common\release-audit.json') `
+            -Destination (Join-Path $fixture.Root 'packaging\common\release-audit.json')
+        $result = Invoke-Gate -Arguments @('-ManifestPath', $fixture.Manifest)
+        Assert-ExitCode -Result $result -Expected 0 -Contains 'NotoMetadataChecked'
+        foreach ($expectedText in @('ArtifactProofStatus', 'NotoArtifactProofStatus', 'NOT_PERFORMED')) {
+            if ($result.Output -notlike "*$expectedText*") {
+                throw "Definition-only output does not state '$expectedText'. Output: $($result.Output)"
+            }
+        }
+    }
+
+    Assert-Case 'Repository Noto metadata checksum drift is rejected during definition preflight' {
+        $fixture = New-PackagingFixture -Name 'noto-definition-tamper' -Version '0.0.21'
+        $auditPath = Join-Path $fixture.Root 'packaging\common\release-audit.json'
+        Copy-Item -LiteralPath (Join-Path $PSScriptRoot '..\common\release-audit.json') -Destination $auditPath
+        $audit = Get-Content -LiteralPath $auditPath -Raw | ConvertFrom-Json
+        $regular = @($audit.components | Where-Object { [string]$_.id -eq 'noto-sans-regular' })
+        $regular[0].artifactSha256 = ('0' * 64)
+        Write-JsonFile -Path $auditPath -Value $audit
+        $result = Invoke-Gate -Arguments @('-ManifestPath', $fixture.Manifest)
+        Assert-ExitCode -Result $result -Expected 1 -Contains "checksum differs for 'noto-sans-regular'"
+    }
+
     Assert-Case 'Internal build passes definition preflight' {
         $fixture = New-PackagingFixture -Name 'internal'
         $result = Invoke-Gate -Arguments @('-ManifestPath', $fixture.Manifest)
@@ -1494,6 +1597,9 @@ try {
             '-ArtifactRoot', $fixture.ReleaseRoot,
             '-LocalizationReportPath', $fixture.LocalizationReport)
         Assert-ExitCode -Result $result -Expected 0 -Contains 'ArtifactFilesChecked'
+        if ($result.Output -notlike '*ArtifactProofStatus*PASS*') {
+            throw "Artifact verification did not report PASS proof status. Output: $($result.Output)"
+        }
     }
 
     Assert-Case 'Unexpected release-root content is rejected' {
@@ -2014,8 +2120,8 @@ try {
         Assert-ExitCode -Result $result -Expected 1 -Contains 'Installer SBOM notice paths differ'
     }
 
-    Assert-Case 'Valid redistributable model is emitted at the deterministic portable archive path' {
-        $fixture = New-ValidModelBuildFixture -Name 'valid-model-build'
+    Assert-Case 'Valid redistributable model and embedded Noto payload pass generated artifact verification' {
+        $fixture = New-ValidModelBuildFixture -Name 'valid-model-build' -IncludeNoto
         $buildScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Build-Windows.ps1'))
 
         $result = & $buildScript `
@@ -2084,6 +2190,28 @@ try {
         if ([string]($probeOutput | Select-Object -Last 1) -cne $expectedProbe) {
             throw 'ProductionModelStore did not resolve the exact common-publish model bytes.'
         }
+
+        $verification = Invoke-Gate -Arguments @(
+            '-ManifestPath', $fixture.Manifest,
+            '-ArtifactRoot', $result.ArtifactRoot,
+            '-RequireReleaseVersion')
+        Assert-ExitCode -Result $verification -Expected 0 -Contains 'NotoArtifactProofStatus'
+        if ($verification.Output -notlike '*NotoArtifactProofStatus*PASS*') {
+            throw "Generated Noto artifact verification did not report PASS. Output: $($verification.Output)"
+        }
+
+        Add-Content `
+            -LiteralPath (Join-Path $fixture.Root 'THIRD_PARTY_NOTICES.md') `
+            -Value 'tampered tracked notice' `
+            -Encoding utf8
+        $tamperResult = Invoke-Gate -Arguments @(
+            '-ManifestPath', $fixture.Manifest,
+            '-ArtifactRoot', $result.ArtifactRoot,
+            '-RequireReleaseVersion')
+        Assert-ExitCode `
+            -Result $tamperResult `
+            -Expected 1 `
+            -Contains "Packaged Noto legal file differs from tracked source 'THIRD_PARTY_NOTICES.md'"
     }
 
     Assert-Case 'Valid multi-file model payloads are emitted and verified independently' {

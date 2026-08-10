@@ -111,7 +111,7 @@
       "reviewStatus": "reviewed",
       "reviewer": "Session 17",
       "reviewDate": "2026-08-03",
-      "notes": "Original project binaries are hashed after the shared publish. GraphReader.App.exe embeds the reviewed unmodified Noto Sans resources covered by OFL-1.1."
+      "notes": "Original project binaries are hashed after the shared publish. GraphReader.App.dll embeds the reviewed unmodified Noto Sans resources covered by OFL-1.1."
     },
     {
       "id": "noto-sans-regular",
@@ -387,6 +387,7 @@
   "binaryCoverage": {
     "firstMatchWins": true,
     "rules": [
+      {"pattern": "GraphReader.App.dll", "componentId": "graph-auto-reader", "embeddedComponentIds": ["noto-sans-regular", "noto-sans-medium", "noto-sans-semibold"]},
       {"pattern": "GraphReader.App.exe", "componentId": "graph-auto-reader"},
       {"pattern": "graphreader_pdfium_renderer.exe", "componentId": "pdfium-native"},
       {"pattern": "GraphReader.*.dll", "componentId": "graph-auto-reader"},

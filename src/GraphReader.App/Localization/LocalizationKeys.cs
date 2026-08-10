@@ -29,6 +29,8 @@ public static class LocalizationKeys
     public const string ApplicationDataNotWritable = "Errors.ApplicationDataNotWritable";
     public const string PortableDataNotWritable = "Errors.PortableDataNotWritable";
     public const string ProductionWorkflowUnavailable = "Errors.ProductionWorkflowUnavailable";
+    public const string OperationFailed = "Errors.OperationFailed";
+    public const string ManualEditRejected = "Errors.ManualEditRejected";
     public const string EnhancementConfigurationInvalid = "Errors.EnhancementConfigurationInvalid";
     public const string EnhancementModelIncompatible = "Errors.EnhancementModelIncompatible";
     public const string EnhancementRuntimeUnavailable = "Errors.EnhancementRuntimeUnavailable";
@@ -247,6 +249,9 @@ public static class LocalizationKeys
     public const string ReviewPhaseUnknownTitle = "Review.PhaseUnknown.Title";
     public const string ReviewPhaseUnknownInterpretation = "Review.PhaseUnknown.Interpretation";
     public const string ReviewPhaseUnknownAction = "Review.PhaseUnknown.Action";
+    public const string ReviewPipelineWarningTitle = "Review.PipelineWarning.Title";
+    public const string ReviewPipelineWarningInterpretation = "Review.PipelineWarning.Interpretation";
+    public const string ReviewPipelineWarningAction = "Review.PipelineWarning.Action";
     public const string ExportPreviewTitle = "ExportPreview.Title";
     public const string ExportPreviewPoints = "ExportPreview.Points";
     public const string ExportPreviewSeries = "ExportPreview.Series";
@@ -287,6 +292,8 @@ public static class LocalizationKeys
         ApplicationDataNotWritable,
         PortableDataNotWritable,
         ProductionWorkflowUnavailable,
+        OperationFailed,
+        ManualEditRejected,
         EnhancementConfigurationInvalid,
         EnhancementModelIncompatible,
         EnhancementRuntimeUnavailable,
@@ -503,6 +510,9 @@ public static class LocalizationKeys
         ReviewPhaseUnknownTitle,
         ReviewPhaseUnknownInterpretation,
         ReviewPhaseUnknownAction,
+        ReviewPipelineWarningTitle,
+        ReviewPipelineWarningInterpretation,
+        ReviewPipelineWarningAction,
         ExportPreviewTitle,
         ExportPreviewPoints,
         ExportPreviewSeries,

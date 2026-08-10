@@ -15,15 +15,23 @@ public sealed class WindowsSystemThemeProvider : ISystemThemeProvider
 
     private bool _disposed;
     private ApplicationTheme _effectiveTheme;
+    private bool _isHighContrast;
+    private bool _areClientAreaAnimationsEnabled;
 
     public WindowsSystemThemeProvider()
     {
         _effectiveTheme = ReadEffectiveTheme();
+        _isHighContrast = SystemParameters.HighContrast;
+        _areClientAreaAnimationsEnabled = SystemParameters.ClientAreaAnimation;
         SystemParameters.StaticPropertyChanged += OnSystemParametersChanged;
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
     }
 
     public ApplicationTheme EffectiveTheme => _effectiveTheme;
+
+    public bool IsHighContrast => _isHighContrast;
+
+    public bool AreClientAreaAnimationsEnabled => _areClientAreaAnimationsEnabled;
 
     public event EventHandler? ThemeChanged;
 
@@ -66,12 +74,18 @@ public sealed class WindowsSystemThemeProvider : ISystemThemeProvider
     private void RefreshTheme()
     {
         ApplicationTheme nextTheme = ReadEffectiveTheme();
-        if (nextTheme == _effectiveTheme)
+        bool nextHighContrast = SystemParameters.HighContrast;
+        bool nextAnimationsEnabled = SystemParameters.ClientAreaAnimation;
+        if (nextTheme == _effectiveTheme &&
+            nextHighContrast == _isHighContrast &&
+            nextAnimationsEnabled == _areClientAreaAnimationsEnabled)
         {
             return;
         }
 
         _effectiveTheme = nextTheme;
+        _isHighContrast = nextHighContrast;
+        _areClientAreaAnimationsEnabled = nextAnimationsEnabled;
         EventHandler? handler = ThemeChanged;
         if (handler is null)
         {
