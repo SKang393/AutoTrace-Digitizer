@@ -10,4 +10,9 @@
   <ItemGroup>
     <ProjectReference Include="..\GraphReader.Inference\GraphReader.Inference.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenCvSharp4" />
+    <PackageReference Include="OpenCvSharp4.runtime.win.slim" />
+  </ItemGroup>
 </Project>

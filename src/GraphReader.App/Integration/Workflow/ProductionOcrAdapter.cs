@@ -59,6 +59,7 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         InferenceProvider detectionProvider,
         ModelIdentity recognitionModel,
         InferenceProvider recognitionProvider,
+        string openCvRuntimeSha256,
         bool isApproved)
         : this(
             () => pipeline ?? throw new ArgumentNullException(nameof(pipeline)),
@@ -66,6 +67,7 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
             detectionProvider,
             recognitionModel,
             recognitionProvider,
+            openCvRuntimeSha256,
             isApproved)
     {
     }
@@ -76,6 +78,7 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         InferenceProvider detectionProvider,
         ModelIdentity recognitionModel,
         InferenceProvider recognitionProvider,
+        string openCvRuntimeSha256,
         bool isApproved)
     {
         ArgumentNullException.ThrowIfNull(pipelineFactory);
@@ -86,23 +89,30 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         this.recognitionModel = ValidateModel(recognitionModel, nameof(recognitionModel));
         this.detectionProvider = ValidateProvider(detectionProvider, nameof(detectionProvider));
         this.recognitionProvider = ValidateProvider(recognitionProvider, nameof(recognitionProvider));
+        OpenCvRuntimeSha256 = ValidateSha256(openCvRuntimeSha256, nameof(openCvRuntimeSha256));
         IsApproved = isApproved;
     }
 
     public string AdapterId =>
-        $"graphreader-ocr:{detectionModel.Sha256[..12].ToLowerInvariant()}:{recognitionModel.Sha256[..12].ToLowerInvariant()}";
+        $"graphreader-ocr:{detectionModel.Sha256[..12].ToLowerInvariant()}:{recognitionModel.Sha256[..12].ToLowerInvariant()}:{OpenCvRuntimeSha256[..12]}";
 
     public bool IsApproved { get; }
+
+    public string OpenCvRuntimeSha256 { get; }
 
     public static async Task<ProductionOcrAdapter> CreateAsync(
         ResolvedProductionModel detectionModel,
         ResolvedProductionModel recognitionModel,
         ProductionInferenceRuntimeHost runtimeHost,
+        string reviewedOpenCvRuntimeSha256,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(detectionModel);
         ArgumentNullException.ThrowIfNull(recognitionModel);
         ArgumentNullException.ThrowIfNull(runtimeHost);
+        reviewedOpenCvRuntimeSha256 = ValidateSha256(
+            reviewedOpenCvRuntimeSha256,
+            nameof(reviewedOpenCvRuntimeSha256));
         RequireTask(detectionModel, "ocr_detection");
         RequireTask(recognitionModel, "ocr_recognition");
         RequireCpu(detectionModel);
@@ -142,6 +152,7 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
             InferenceProvider.Cpu,
             recognitionModel.Identity,
             InferenceProvider.Cpu,
+            reviewedOpenCvRuntimeSha256,
             isApproved: true);
     }
 
@@ -417,6 +428,18 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         return model;
     }
 
+    private static string ValidateSha256(string value, string parameterName)
+    {
+        if (string.IsNullOrWhiteSpace(value) ||
+            value.Length != 64 ||
+            value.Any(static character => !Uri.IsHexDigit(character)))
+        {
+            throw new ArgumentException("A canonical SHA-256 value is required.", parameterName);
+        }
+
+        return value.ToLowerInvariant();
+    }
+
     private static InferenceProvider ValidateProvider(InferenceProvider provider, string parameterName) =>
         provider is InferenceProvider.Cpu or InferenceProvider.DirectMl
             ? provider
@@ -464,18 +487,52 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         RequireString(
             postprocessing,
             "algorithm",
-            "dense_probability_components_v1",
+            "db_postprocess_v1",
+            "OCR detection postprocessing");
+        int maximumSideLength = RequiredReviewedInt32(
+            preprocessing,
+            "maximum_side_length",
+            960,
+            "OCR detection preprocessing");
+        int dimensionMultiple = RequiredReviewedInt32(
+            preprocessing,
+            "dimension_multiple",
+            128,
+            "OCR detection preprocessing");
+        RequireString(
+            postprocessing,
+            "score_mode",
+            "fast",
+            "OCR detection postprocessing");
+        float probabilityThreshold = RequiredReviewedSingle(
+            postprocessing,
+            "probability_threshold",
+            0.30f,
+            "OCR detection postprocessing");
+        float boxConfidenceThreshold = RequiredReviewedSingle(
+            postprocessing,
+            "box_confidence_threshold",
+            0.60f,
+            "OCR detection postprocessing");
+        double unclipRatio = RequiredReviewedDouble(
+            postprocessing,
+            "unclip_ratio",
+            1.5,
+            "OCR detection postprocessing");
+        int minimumSideLength = RequiredReviewedInt32(
+            postprocessing,
+            "minimum_side_length",
+            3,
+            "OCR detection postprocessing");
+        int maximumRegions = RequiredReviewedInt32(
+            postprocessing,
+            "maximum_regions",
+            1000,
             "OCR detection postprocessing");
         var options = new LocalOnnxTextRegionDetectorOptions(resolvedModel.Identity)
         {
-            MaximumSideLength = RequiredInt32(
-                preprocessing,
-                "maximum_side_length",
-                "OCR detection preprocessing"),
-            DimensionMultiple = RequiredInt32(
-                preprocessing,
-                "dimension_multiple",
-                "OCR detection preprocessing"),
+            MaximumSideLength = maximumSideLength,
+            DimensionMultiple = dimensionMultiple,
             InputChannels = 3,
             InputLayout = OcrTensorLayout.ChannelsFirst,
             InputColorMode = inputColorMode,
@@ -485,30 +542,13 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
             OutputName = RequiredString(output, "name", "OCR detection output"),
             StageVersion = resolvedModel.Identity.Version,
             OutputActivation = outputActivation,
-            ProbabilityThreshold = RequiredSingle(
-                postprocessing,
-                "probability_threshold",
-                "OCR detection postprocessing"),
-            BoxConfidenceThreshold = RequiredSingle(
-                postprocessing,
-                "box_confidence_threshold",
-                "OCR detection postprocessing"),
-            UnclipRatio = RequiredDouble(
-                postprocessing,
-                "unclip_ratio",
-                "OCR detection postprocessing"),
-            MinimumComponentArea = RequiredInt32(
-                postprocessing,
-                "minimum_component_area",
-                "OCR detection postprocessing"),
-            MinimumSideLength = RequiredInt32(
-                postprocessing,
-                "minimum_side_length",
-                "OCR detection postprocessing"),
-            MaximumRegions = RequiredInt32(
-                postprocessing,
-                "maximum_regions",
-                "OCR detection postprocessing"),
+            PostprocessAlgorithm = OcrDetectionPostprocessAlgorithm.DbPostprocessV1,
+            DbScoreMode = OcrDbScoreMode.FastMiniBox,
+            ProbabilityThreshold = probabilityThreshold,
+            BoxConfidenceThreshold = boxConfidenceThreshold,
+            UnclipRatio = unclipRatio,
+            MinimumSideLength = minimumSideLength,
+            MaximumRegions = maximumRegions,
             AllowedProviders = [InferenceProvider.Cpu],
         };
         LocalOnnxTextRegionDetector.ValidateOptions(options);
@@ -776,6 +816,22 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         return result;
     }
 
+    private static float RequiredReviewedSingle(
+        JsonElement parent,
+        string propertyName,
+        float expected,
+        string label)
+    {
+        float actual = RequiredSingle(parent, propertyName, label);
+        if (actual != expected)
+        {
+            throw new InvalidDataException(
+                $"{label} field '{propertyName}' must match the reviewed value {expected:R}, found {actual:R}.");
+        }
+
+        return actual;
+    }
+
     private static double RequiredDouble(JsonElement parent, string propertyName, string label)
     {
         if (!parent.TryGetProperty(propertyName, out JsonElement value) ||
@@ -788,6 +844,22 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         return result;
     }
 
+    private static double RequiredReviewedDouble(
+        JsonElement parent,
+        string propertyName,
+        double expected,
+        string label)
+    {
+        double actual = RequiredDouble(parent, propertyName, label);
+        if (actual != expected)
+        {
+            throw new InvalidDataException(
+                $"{label} field '{propertyName}' must match the reviewed value {expected:R}, found {actual:R}.");
+        }
+
+        return actual;
+    }
+
     private static int RequiredInt32(JsonElement parent, string propertyName, string label)
     {
         if (!parent.TryGetProperty(propertyName, out JsonElement value) ||
@@ -797,6 +869,22 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         }
 
         return result;
+    }
+
+    private static int RequiredReviewedInt32(
+        JsonElement parent,
+        string propertyName,
+        int expected,
+        string label)
+    {
+        int actual = RequiredInt32(parent, propertyName, label);
+        if (actual != expected)
+        {
+            throw new InvalidDataException(
+                $"{label} field '{propertyName}' must match the reviewed value {expected}, found {actual}.");
+        }
+
+        return actual;
     }
 
     private static bool TryReadInt32(JsonElement value, out int result)

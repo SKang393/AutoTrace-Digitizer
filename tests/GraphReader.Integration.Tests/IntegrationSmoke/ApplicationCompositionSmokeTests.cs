@@ -484,6 +484,7 @@ public sealed class ApplicationCompositionSmokeTests
         ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
             WorkflowRuntimeEnvironment.Production,
             new ModelRootApplicationPaths(package.Root),
+            applicationRoot: package.ApplicationRoot,
             cancellationToken: CancellationToken.None);
         try
         {
@@ -512,6 +513,41 @@ public sealed class ApplicationCompositionSmokeTests
     }
 
     [TestMethod]
+    [DataRow(OcrOpenCvFixtureState.Missing)]
+    [DataRow(OcrOpenCvFixtureState.Tampered)]
+    [DataRow(OcrOpenCvFixtureState.Unapproved)]
+    public async Task ApprovedOcrPairRequiresReviewedOpenCvRuntimeBeforeNativePreflight(
+        OcrOpenCvFixtureState runtimeState)
+    {
+        using var package = ApprovedOcrPairPackageFixture.Create(openCvRuntimeState: runtimeState);
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(package.Root),
+            applicationRoot: package.ApplicationRoot,
+            cancellationToken: CancellationToken.None);
+        try
+        {
+            var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+            Assert.IsNull(composition.OcrAdapter);
+            Assert.AreEqual("OCR_ADAPTER_UNAVAILABLE", composition.StartupError?.Code);
+            StringAssert.Contains(composition.StartupError?.TechnicalMessage, "reviewed OpenCV runtime");
+            Assert.AreEqual(
+                AutomaticStageState.Unavailable,
+                workspace.AutomaticStages.Single(stage => stage.Stage == "ocr").State);
+            Assert.IsNotNull(composition.InferenceRuntimeHost);
+            Assert.IsFalse(composition.InferenceRuntimeHost.IsInitialized);
+        }
+        finally
+        {
+            if (composition.InferenceRuntimeHost is not null)
+            {
+                await composition.InferenceRuntimeHost.DisposeAsync();
+            }
+        }
+    }
+
+    [TestMethod]
     public async Task OcrPairWithMismatchedTensorContractFailsClosedBeforeRuntimeInitialization()
     {
         using var package = ApprovedOcrPairPackageFixture.Create(invalidDetectionShape: true);
@@ -519,6 +555,7 @@ public sealed class ApplicationCompositionSmokeTests
         ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
             WorkflowRuntimeEnvironment.Production,
             new ModelRootApplicationPaths(package.Root),
+            applicationRoot: package.ApplicationRoot,
             cancellationToken: CancellationToken.None);
         try
         {
@@ -560,6 +597,51 @@ public sealed class ApplicationCompositionSmokeTests
         ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
             WorkflowRuntimeEnvironment.Production,
             new ModelRootApplicationPaths(package.Root),
+            applicationRoot: package.ApplicationRoot,
+            cancellationToken: CancellationToken.None);
+        try
+        {
+            var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+            Assert.IsNull(composition.OcrAdapter);
+            Assert.AreEqual("OCR_ADAPTER_UNAVAILABLE", composition.StartupError?.Code);
+            StringAssert.Contains(composition.StartupError?.TechnicalMessage, expectedField);
+            Assert.AreEqual(
+                AutomaticStageState.Unavailable,
+                workspace.AutomaticStages.Single(stage => stage.Stage == "ocr").State);
+            Assert.IsNotNull(composition.InferenceRuntimeHost);
+            Assert.IsFalse(composition.InferenceRuntimeHost.IsInitialized);
+        }
+        finally
+        {
+            if (composition.InferenceRuntimeHost is not null)
+            {
+                await composition.InferenceRuntimeHost.DisposeAsync();
+            }
+        }
+    }
+
+    [TestMethod]
+    [DataRow("dense_probability_components_v1", 0.60, 128, "fast", "algorithm")]
+    [DataRow("db_postprocess_v1", 0.55, 128, "fast", "box_confidence_threshold")]
+    [DataRow("db_postprocess_v1", 0.60, 32, "fast", "dimension_multiple")]
+    [DataRow("db_postprocess_v1", 0.60, 128, "slow", "score_mode")]
+    public async Task OcrPairWithoutReviewedDbPostprocessFailsClosedBeforeRuntimeInitialization(
+        string detectionAlgorithm,
+        double detectionBoxThreshold,
+        int detectionDimensionMultiple,
+        string detectionScoreMode,
+        string expectedField)
+    {
+        using var package = ApprovedOcrPairPackageFixture.Create(
+            detectionAlgorithm: detectionAlgorithm,
+            detectionBoxThreshold: detectionBoxThreshold,
+            detectionDimensionMultiple: detectionDimensionMultiple,
+            detectionScoreMode: detectionScoreMode);
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(package.Root),
+            applicationRoot: package.ApplicationRoot,
             cancellationToken: CancellationToken.None);
         try
         {
@@ -590,6 +672,7 @@ public sealed class ApplicationCompositionSmokeTests
         ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
             WorkflowRuntimeEnvironment.Production,
             new ModelRootApplicationPaths(package.Root),
+            applicationRoot: package.ApplicationRoot,
             cancellationToken: CancellationToken.None);
         try
         {
@@ -622,6 +705,7 @@ public sealed class ApplicationCompositionSmokeTests
         ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
             WorkflowRuntimeEnvironment.Production,
             new ModelRootApplicationPaths(package.Root),
+            applicationRoot: package.ApplicationRoot,
             cancellationToken: CancellationToken.None);
         try
         {
@@ -652,6 +736,7 @@ public sealed class ApplicationCompositionSmokeTests
         ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
             WorkflowRuntimeEnvironment.Production,
             new ModelRootApplicationPaths(package.Root),
+            applicationRoot: package.ApplicationRoot,
             cancellationToken: CancellationToken.None);
         try
         {
@@ -684,6 +769,7 @@ public sealed class ApplicationCompositionSmokeTests
         ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
             WorkflowRuntimeEnvironment.Production,
             new ModelRootApplicationPaths(package.Root),
+            applicationRoot: package.ApplicationRoot,
             cancellationToken: CancellationToken.None);
         try
         {
@@ -1432,14 +1518,25 @@ public sealed class ApplicationCompositionSmokeTests
             Convert.ToHexString(SHA256.HashData(bytes));
     }
 
+    public enum OcrOpenCvFixtureState
+    {
+        Approved,
+        Missing,
+        Tampered,
+        Unapproved,
+    }
+
     private sealed class ApprovedOcrPairPackageFixture : IDisposable
     {
-        private ApprovedOcrPairPackageFixture(string root)
+        private ApprovedOcrPairPackageFixture(string root, string applicationRoot)
         {
             Root = root;
+            ApplicationRoot = applicationRoot;
         }
 
         public string Root { get; }
+
+        public string ApplicationRoot { get; }
 
         public static ApprovedOcrPairPackageFixture Create(
             bool invalidDetectionShape = false,
@@ -1448,13 +1545,43 @@ public sealed class ApplicationCompositionSmokeTests
             bool invalidOnnxPayload = false,
             bool tamperPredictions = false,
             string? channelOrder = "BGR",
-            bool grayscaleChannels = false)
+            bool grayscaleChannels = false,
+            string detectionAlgorithm = "db_postprocess_v1",
+            double detectionBoxThreshold = 0.60,
+            int detectionDimensionMultiple = 128,
+            string detectionScoreMode = "fast",
+            OcrOpenCvFixtureState openCvRuntimeState = OcrOpenCvFixtureState.Approved)
         {
             string root = Path.Combine(
                 Path.GetTempPath(),
                 "GraphReader.ApplicationComposition.OcrModels",
                 Guid.NewGuid().ToString("N"));
+            string applicationRoot = Path.Combine(
+                Path.GetTempPath(),
+                "GraphReader.ApplicationComposition.OcrRuntime",
+                Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
+            Directory.CreateDirectory(applicationRoot);
+            if (openCvRuntimeState != OcrOpenCvFixtureState.Missing)
+            {
+                string openCvRuntimePath = Path.Combine(applicationRoot, "OpenCvSharpExtern.dll");
+                File.WriteAllBytes(openCvRuntimePath, "reviewed-opencv-ocr-fixture"u8.ToArray());
+                WriteRuntimeMetadata(
+                    applicationRoot,
+                    RuntimeSha256(openCvRuntimePath),
+                    cleanMachineEvidence: openCvRuntimeState != OcrOpenCvFixtureState.Unapproved,
+                    releaseApproved: openCvRuntimeState != OcrOpenCvFixtureState.Unapproved);
+                if (openCvRuntimeState == OcrOpenCvFixtureState.Tampered)
+                {
+                    using FileStream stream = File.Open(
+                        openCvRuntimePath,
+                        FileMode.Append,
+                        FileAccess.Write,
+                        FileShare.None);
+                    stream.Write("tampered"u8);
+                }
+            }
+
             const string alphabet = "0123456789.-%OolI";
             byte[] detectionPayload = invalidOnnxPayload
                 ? [1, 9, 3, 7]
@@ -1481,7 +1608,11 @@ public sealed class ApplicationCompositionSmokeTests
                 alphabet,
                 evidence,
                 channelOrder,
-                grayscaleChannels);
+                grayscaleChannels,
+                detectionAlgorithm,
+                detectionBoxThreshold,
+                detectionDimensionMultiple,
+                detectionScoreMode);
             Dictionary<string, object?> recognition = WriteModel(
                 root,
                 "fixture-ocr-recognition",
@@ -1493,7 +1624,11 @@ public sealed class ApplicationCompositionSmokeTests
                 alphabet,
                 evidence,
                 channelOrder,
-                grayscaleChannels);
+                grayscaleChannels,
+                detectionAlgorithm,
+                detectionBoxThreshold,
+                detectionDimensionMultiple,
+                detectionScoreMode);
             var index = new Dictionary<string, object?>
             {
                 ["schema_version"] = 1,
@@ -1503,7 +1638,7 @@ public sealed class ApplicationCompositionSmokeTests
                 Path.Combine(root, "production-model-index.json"),
                 JsonSerializer.Serialize(index),
                 Encoding.UTF8);
-            return new ApprovedOcrPairPackageFixture(root);
+            return new ApprovedOcrPairPackageFixture(root, applicationRoot);
         }
 
         private static Dictionary<string, object?> WriteModel(
@@ -1517,7 +1652,11 @@ public sealed class ApplicationCompositionSmokeTests
             string alphabet,
             OcrEvidenceFixture evidence,
             string? channelOrder,
-            bool grayscaleChannels)
+            bool grayscaleChannels,
+            string detectionAlgorithm,
+            double detectionBoxThreshold,
+            int detectionDimensionMultiple,
+            string detectionScoreMode)
         {
             const string version = "1.0.0";
             string runtimeDirectory = Path.Combine(root, "runtime", modelId, version);
@@ -1578,7 +1717,7 @@ public sealed class ApplicationCompositionSmokeTests
                 preprocessing = new Dictionary<string, object?>
                 {
                     ["maximum_side_length"] = 960,
-                    ["dimension_multiple"] = 32,
+                    ["dimension_multiple"] = detectionDimensionMultiple,
                     ["channel_means"] = new[] { 0.485f, 0.456f, 0.406f },
                     ["channel_scales"] = new[] { 1f / 0.229f, 1f / 0.224f, 1f / 0.225f },
                 };
@@ -1588,12 +1727,12 @@ public sealed class ApplicationCompositionSmokeTests
                 }
                 postprocessing = new Dictionary<string, object?>
                 {
-                    ["algorithm"] = "dense_probability_components_v1",
+                    ["algorithm"] = detectionAlgorithm,
+                    ["score_mode"] = detectionScoreMode,
                     ["probability_threshold"] = 0.3f,
-                    ["box_confidence_threshold"] = 0.55f,
+                    ["box_confidence_threshold"] = detectionBoxThreshold,
                     ["unclip_ratio"] = 1.5,
-                    ["minimum_component_area"] = 3,
-                    ["minimum_side_length"] = 2,
+                    ["minimum_side_length"] = 3,
                     ["maximum_regions"] = 1000,
                 };
             }
@@ -2087,6 +2226,11 @@ public sealed class ApplicationCompositionSmokeTests
             if (Directory.Exists(Root))
             {
                 Directory.Delete(Root, recursive: true);
+            }
+
+            if (Directory.Exists(ApplicationRoot))
+            {
+                Directory.Delete(ApplicationRoot, recursive: true);
             }
         }
     }

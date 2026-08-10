@@ -98,6 +98,7 @@ public static class ApplicationComposition
                         await CreateApprovedOcrAdapterAsync(
                                 modelAvailability,
                                 inference?.Value,
+                                runtimeAvailability,
                                 cancellationToken)
                             .ConfigureAwait(false);
                     return CreateCore(
@@ -415,6 +416,7 @@ public static class ApplicationComposition
         CreateApprovedOcrAdapterAsync(
             ProductionModelAvailabilitySnapshot? modelAvailability,
             ProductionInferenceRuntimeHost? runtimeHost,
+            ProductionRuntimeAvailabilitySnapshot? runtimeAvailability,
             CancellationToken cancellationToken)
     {
         if (runtimeHost is null || modelAvailability is null ||
@@ -428,12 +430,27 @@ public static class ApplicationComposition
             return (null, null);
         }
 
+        if (runtimeAvailability is not { AxisApproved: true } ||
+            string.IsNullOrWhiteSpace(runtimeAvailability.RuntimeSha256))
+        {
+            return (
+                null,
+                new DomainError(
+                    "OCR_ADAPTER_UNAVAILABLE",
+                    DomainErrorSeverity.Warning,
+                    "Errors.ProductionWorkflowUnavailable",
+                    "The checksum-resolved OCR pair requires the exact reviewed OpenCV runtime with provenance, notice, clean-machine, and release approval evidence.",
+                    Recoverable: true,
+                    "continue_manual_or_restore_reviewed_opencv_runtime"));
+        }
+
         try
         {
             ProductionOcrAdapter adapter = await ProductionOcrAdapter.CreateAsync(
                     detectionModel,
                     recognitionModel,
                     runtimeHost,
+                    runtimeAvailability.RuntimeSha256,
                     cancellationToken)
                 .ConfigureAwait(false);
             return (adapter, null);

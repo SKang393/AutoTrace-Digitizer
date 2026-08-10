@@ -92,7 +92,7 @@ runtime SHA-256 after every stable checkpoint. The current verified behavior is:
 - dirty development build: no
 - running process: responsive visible window titled `Graph Auto Reader`, exact
   Chandler path supplied by `--open-image`
-- current full Release rerun: PASS, 790 passed and 9 expected hardware or opt-in skips; all 84 App tests passed on the current interactive desktop
+- current full Release rerun: PASS, 814 passed and 9 expected hardware or opt-in skips; all 87 App tests passed on the current interactive desktop
 - production-model IDs reported available: `0`
 - automatic stages reported unavailable: `6`
 - mutable root: `artifacts/dev-portable/Data`
@@ -135,7 +135,7 @@ in Production composition. Automatic stages currently report:
 | --- | --- | --- |
 | Enhancement | Unavailable | Exact runtime redistribution provenance is reviewed, but local-adapter, scientific, CPU fallback, clean-machine, production, and release approvals remain false. |
 | Axis | Unavailable | Deterministic adapter exists; OpenCvSharp native redistribution audit is blocked. |
-| OCR | Unavailable | The executable detector, recognizer, strict two-manifest factory, CPU provider binding, checksum-bound axis-mask derivative, exact BGR24 detector and recognizer path, and strengthened fail-closed composition boundary are implemented. Color mode is part of stage identity; detector masking whitens Gray8 and all BGR channels; recognition crops preserve original BGR samples; missing or non-BGR production metadata fails before provider execution. The official DB contour and rotated-polygon postprocessor remains unimplemented. No approved OCR payload pair exists. Project numeric Candidates 1, 2, and 3 failed the frozen validation gate and exhausted their budget. The exact official PP-OCRv5 pair passed reproducible conversion and parity, then failed its once-only frozen 220-case public and sealed evaluation: exact match `0.0`, CER `1.0`, role accuracy `0.03` and `0.02`, detection exact count `18/220`, 195 false text regions, and false regions on 7/20 exclusions. Independent composed marker-stage evidence was absent. The reviewed model license and change notice are tracked, but no OCR manifest, model-store entry, or package payload exists. Do not tune or rerun against the exposed split. |
+| OCR | Unavailable | The executable detector, recognizer, strict two-manifest factory, CPU provider binding, checksum-bound axis-mask derivative, exact BGR24 detector and recognizer path, and strengthened fail-closed composition boundary are implemented. Color mode is part of stage identity; detector masking whitens Gray8 and all BGR channels; recognition crops preserve original BGR samples; missing or non-BGR production metadata fails before provider execution. The explicitly selected DB postprocessor now performs OpenCV contour extraction, default fast mini-box scoring, rotated minimum-area boxes, geometric unclip, original-coordinate quadrilateral mapping, deterministic raw-contour caps and IDs, and cooperative cancellation. The `resize_long` path includes the pinned small-image padding, truncation, and 128-stride ceiling alignment semantics. Production metadata must declare `db_postprocess_v1`, `score_mode=fast`, and the reviewed PP-OCR values. No approved OCR payload pair exists. Project numeric Candidates 1, 2, and 3 failed the frozen validation gate and exhausted their budget. The exact official PP-OCRv5 pair passed reproducible conversion and parity, then failed its once-only frozen 220-case public and sealed evaluation: exact match `0.0`, CER `1.0`, role accuracy `0.03` and `0.02`, detection exact count `18/220`, 195 false text regions, and false regions on 7/20 exclusions. Independent composed marker-stage evidence was absent. The reviewed model license and change notice are tracked, but no OCR manifest, model-store entry, or package payload exists. Do not tune or rerun against the exposed split. |
 | Markers | Unavailable | Marker-center exhausted its budget after one public false positive. The unchanged-weight probability-runtime classifier passed selection, public-v3, disjoint confirmation-v3, exact package discovery, and CPU/DirectML runtime validation. The concrete artifact-mask runtime bridge exists under the frozen marker-center task, but the current marker-center manifest lacks the separately required direct full-frame artifact-mask approval profile. The stage still requires an approved center model and checksum-bound artifact-mask evidence. |
 | Legends | Unavailable | Deterministic reasoner requires approved OCR and marker evidence. |
 | Phases | Unavailable | Deterministic reasoner requires approved axis, OCR, and marker evidence. |
@@ -308,7 +308,7 @@ files are not tracked.
 ## Tests and commands
 
 - `dotnet test GraphAutoReader.slnx -c Release --no-restore` in the current
-  Release run: 790 passed and 9 expected hardware or opt-in skips; all 84 App
+  Release run: 814 passed and 9 expected hardware or opt-in skips; all 87 App
   tests passed on the current interactive desktop.
 - focused manual workflow: 8/8 passed.
 - bounded WPF manual composition: 1/1 passed.
@@ -327,7 +327,7 @@ files are not tracked.
   stale-authority, reproducibility, ONNX checker, and parity suite passed
   142/142. The official evaluation itself ran once and failed its fixed model
   thresholds as recorded above.
-- OCR .NET assembly: 103/103 passed with two expected opt-in provider skips.
+- OCR .NET assembly: 110/110 passed with two expected opt-in provider skips.
 - OpenCV source-audit behavior tests: 6/6 passed in Windows PowerShell and
   PowerShell 7. Retained lock/cache/triplet inputs, preflight metadata, and both
   CMake toolchain caches are bound fail closed to the tracked source lock.
@@ -356,7 +356,7 @@ files are not tracked.
 - Production runtime availability: 12/12 focused composition cases passed;
   exact OpenCV bytes plus provenance, notice, clean-machine, and release flags
   are required before the axis stage becomes approved.
-- Public scoreboard: 37/37 synthetic metric-contract gates passed in 207.154 ms with peak managed memory 987216 bytes.
+- Public scoreboard: 37/37 synthetic metric-contract gates passed in 219.286 ms with peak managed memory 987216 bytes.
 - `packaging/localization/Test-LocalizationAudit.ps1`: 9/9 passed.
 - repository localization audit: 181 keys, 0 missing, 0 extra, 0 duplicate,
   and 0 unresolved references.
@@ -367,7 +367,7 @@ files are not tracked.
 
 ## Metrics and timing
 
-- current full .NET Release suite: 790 tests passed with 9 expected hardware or opt-in skips; all 84 App tests passed on the current interactive desktop
+- current full .NET Release suite: 814 tests passed with 9 expected hardware or opt-in skips; all 87 App tests passed on the current interactive desktop
 - direct exact Real-ESRGAN Chandler invocation: 1054.545 ms, exit code 0,
   1726 by 790 output, output SHA-256
   `954090b7f3b0783123f51b5a523672fdc889ab5e13b1dc935b5818f05b4729d1`,

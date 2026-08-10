@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Sungwoo Kang
 
+using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using GraphReader.Inference;
+using OpenCvSharp;
 
 namespace GraphReader.Ocr;
 
@@ -12,6 +15,17 @@ public enum OcrDetectionOutputActivation
 {
     Probability,
     SigmoidLogit,
+}
+
+public enum OcrDetectionPostprocessAlgorithm
+{
+    DenseProbabilityComponentsV1,
+    DbPostprocessV1,
+}
+
+public enum OcrDbScoreMode
+{
+    FastMiniBox,
 }
 
 public sealed record LocalOnnxTextRegionDetectorOptions(ModelIdentity Model)
@@ -40,6 +54,11 @@ public sealed record LocalOnnxTextRegionDetectorOptions(ModelIdentity Model)
     public OcrDetectionOutputActivation OutputActivation { get; init; } =
         OcrDetectionOutputActivation.Probability;
 
+    public OcrDetectionPostprocessAlgorithm PostprocessAlgorithm { get; init; } =
+        OcrDetectionPostprocessAlgorithm.DenseProbabilityComponentsV1;
+
+    public OcrDbScoreMode DbScoreMode { get; init; } = OcrDbScoreMode.FastMiniBox;
+
     public float ProbabilityThreshold { get; init; } = 0.30f;
 
     public float BoxConfidenceThreshold { get; init; } = 0.55f;
@@ -60,9 +79,9 @@ public sealed record LocalOnnxTextRegionDetectorOptions(ModelIdentity Model)
 }
 
 /// <summary>
-/// Executes a checksum-bound local ONNX dense text-probability model and maps
-/// deterministic axis-aligned regions back to immutable original pixels. This
-/// adapter contains no weights and does not imply that any model is approved.
+/// Executes a checksum-bound local ONNX text-probability model and maps the
+/// selected deterministic postprocessing geometry back to immutable original
+/// pixels. This adapter contains no weights and does not imply model approval.
 /// </summary>
 public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
 {
@@ -131,10 +150,16 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
                     ["channel_means"] = options.ChannelMeans.ToArray(),
                     ["channel_scales"] = options.ChannelScales.ToArray(),
                     ["output_activation"] = options.OutputActivation.ToString(),
+                    ["postprocess_algorithm"] = options.PostprocessAlgorithm.ToString(),
+                    ["db_score_mode"] = options.PostprocessAlgorithm == OcrDetectionPostprocessAlgorithm.DbPostprocessV1
+                        ? options.DbScoreMode.ToString()
+                        : null,
                     ["probability_threshold"] = options.ProbabilityThreshold,
                     ["box_confidence_threshold"] = options.BoxConfidenceThreshold,
                     ["unclip_ratio"] = options.UnclipRatio,
-                    ["minimum_component_area"] = options.MinimumComponentArea,
+                    ["minimum_component_area"] = options.PostprocessAlgorithm == OcrDetectionPostprocessAlgorithm.DenseProbabilityComponentsV1
+                        ? options.MinimumComponentArea
+                        : null,
                     ["minimum_side_length"] = options.MinimumSideLength,
                     ["maximum_regions"] = options.MaximumRegions,
                     ["allowed_providers"] = ProviderFingerprint(options.AllowedProviders),
@@ -174,6 +199,25 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
             probabilities[index] = ToProbability(probabilities[index], options.OutputActivation);
         }
 
+        return options.PostprocessAlgorithm switch
+        {
+            OcrDetectionPostprocessAlgorithm.DenseProbabilityComponentsV1 =>
+                BuildDenseRegions(probabilities, image, tensorWidth, tensorHeight, options, cancellationToken),
+            OcrDetectionPostprocessAlgorithm.DbPostprocessV1 =>
+                BuildDbRegions(probabilities, image, tensorWidth, tensorHeight, options, cancellationToken),
+            _ => throw new InvalidOperationException(
+                $"Unsupported OCR detection postprocess algorithm '{options.PostprocessAlgorithm}'."),
+        };
+    }
+
+    private static ReadOnlyCollection<OcrDetectedRegion> BuildDenseRegions(
+        float[] probabilities,
+        OcrImage image,
+        int tensorWidth,
+        int tensorHeight,
+        LocalOnnxTextRegionDetectorOptions options,
+        CancellationToken cancellationToken)
+    {
         Component[] components = FindComponents(
                 probabilities,
                 tensorWidth,
@@ -207,9 +251,10 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
 
             double density = component.PixelCount /
                 (double)checked(component.Width * component.Height);
+            OcrPolygon polygon = OcrPolygon.FromRectangle(rectangle);
             regions.Add(new OcrDetectedRegion(
-                DeterministicRegionId(options.Model.Sha256, rectangle),
-                OcrPolygon.FromRectangle(rectangle),
+                DeterministicRegionId(options.Model.Sha256, options.PostprocessAlgorithm, polygon),
+                polygon,
                 OrientationDegrees: 0,
                 DetectionConfidence: component.Confidence,
                 CoordinateSpace: OcrContract.CoordinateSpace,
@@ -223,6 +268,115 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
         }
 
         return regions.AsReadOnly();
+    }
+
+    private static ReadOnlyCollection<OcrDetectedRegion> BuildDbRegions(
+        float[] probabilities,
+        OcrImage image,
+        int tensorWidth,
+        int tensorHeight,
+        LocalOnnxTextRegionDetectorOptions options,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        using var binary = new Mat(tensorHeight, tensorWidth, MatType.CV_8UC1);
+        var binaryPixels = new byte[probabilities.Length];
+        for (var index = 0; index < probabilities.Length; index++)
+        {
+            if ((index & 4095) == 0)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
+            binaryPixels[index] = probabilities[index] > options.ProbabilityThreshold
+                ? byte.MaxValue
+                : (byte)0;
+        }
+
+        Marshal.Copy(binaryPixels, 0, binary.Data, binaryPixels.Length);
+        cancellationToken.ThrowIfCancellationRequested();
+        Cv2.FindContours(
+            binary,
+            out Point[][] contours,
+            out _,
+            RetrievalModes.List,
+            ContourApproximationModes.ApproxSimple);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        int candidateCount = Math.Min(contours.Length, options.MaximumRegions);
+        var candidates = new List<DbCandidate>(candidateCount);
+        for (var contourIndex = 0; contourIndex < candidateCount; contourIndex++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Point[] contour = contours[contourIndex];
+            if (contour.Length < 3)
+            {
+                continue;
+            }
+
+            MiniBox initial = GetMiniBox(contour);
+            if (initial.ShortSide < options.MinimumSideLength)
+            {
+                continue;
+            }
+
+            PolygonScore score = ScorePolygon(
+                probabilities,
+                tensorWidth,
+                tensorHeight,
+                initial.Points,
+                options.ProbabilityThreshold,
+                cancellationToken);
+            if (score.Confidence < options.BoxConfidenceThreshold)
+            {
+                continue;
+            }
+
+            Point2f[][] offsetPaths = UnclipRound(initial.Points, options.UnclipRatio);
+            if (offsetPaths.Length != 1)
+            {
+                continue;
+            }
+
+            MiniBox expanded = GetMiniBox(offsetPaths[0]);
+            if (expanded.ShortSide < options.MinimumSideLength + 2)
+            {
+                continue;
+            }
+
+            OcrPolygon polygon = MapPolygonToOriginal(
+                expanded.Points,
+                image,
+                tensorWidth,
+                tensorHeight);
+            if (!polygon.Bounds.IsValid)
+            {
+                continue;
+            }
+
+            candidates.Add(new DbCandidate(
+                polygon,
+                OrientationDegrees(polygon.Points.ToArray()),
+                score.Confidence,
+                score.InkDensity));
+        }
+
+        OcrDetectedRegion[] regions = candidates
+            .Select(candidate => new OcrDetectedRegion(
+                DeterministicRegionId(options.Model.Sha256, options.PostprocessAlgorithm, candidate.Polygon),
+                candidate.Polygon,
+                candidate.OrientationDegrees,
+                candidate.Confidence,
+                CoordinateSpace: OcrContract.CoordinateSpace,
+                Evidence: new OcrRegionEvidence(
+                    ComponentCount: 1,
+                    InkDensity: candidate.InkDensity,
+                    TextLikelihood: candidate.Confidence,
+                    StructureLikelihood: 1 - candidate.Confidence,
+                    LikelyGraphStructure: false,
+                    Reasons: Array.AsReadOnly(["onnx_db_text_probability"]))))
+            .ToArray();
+        return Array.AsReadOnly(regions);
     }
 
     private static IEnumerable<Component> FindComponents(
@@ -359,6 +513,308 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
         return new OcrRectangle(left, top, right - left, bottom - top);
     }
 
+    private static PolygonScore ScorePolygon(
+        float[] probabilities,
+        int width,
+        int height,
+        Point2f[] box,
+        float probabilityThreshold,
+        CancellationToken cancellationToken)
+    {
+        int left = Math.Clamp((int)Math.Floor(box.Min(static point => point.X)), 0, width - 1);
+        int top = Math.Clamp((int)Math.Floor(box.Min(static point => point.Y)), 0, height - 1);
+        int right = Math.Clamp((int)Math.Ceiling(box.Max(static point => point.X)), 0, width - 1);
+        int bottom = Math.Clamp((int)Math.Ceiling(box.Max(static point => point.Y)), 0, height - 1);
+        int maskWidth = checked(right - left + 1);
+        int maskHeight = checked(bottom - top + 1);
+        Point[] localBox = box
+            .Select(point => new Point((int)(point.X - left), (int)(point.Y - top)))
+            .ToArray();
+        cancellationToken.ThrowIfCancellationRequested();
+        using var mask = new Mat(maskHeight, maskWidth, MatType.CV_8UC1, Scalar.Black);
+        Cv2.FillPoly(mask, [localBox], Scalar.White);
+        cancellationToken.ThrowIfCancellationRequested();
+        var maskPixels = new byte[checked(maskWidth * maskHeight)];
+        Marshal.Copy(mask.Data, maskPixels, 0, maskPixels.Length);
+
+        double confidenceSum = 0;
+        int includedPixels = 0;
+        int thresholdPixels = 0;
+        for (var localY = 0; localY < maskHeight; localY++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            for (var localX = 0; localX < maskWidth; localX++)
+            {
+                int localIndex = checked((localY * maskWidth) + localX);
+                if (maskPixels[localIndex] == 0)
+                {
+                    continue;
+                }
+
+                float probability = probabilities[checked(((top + localY) * width) + left + localX)];
+                confidenceSum += probability;
+                includedPixels++;
+                if (probability > probabilityThreshold)
+                {
+                    thresholdPixels++;
+                }
+            }
+        }
+
+        return includedPixels == 0
+            ? new PolygonScore(0, 0)
+            : new PolygonScore(
+                Math.Clamp(confidenceSum / includedPixels, 0, 1),
+                Math.Clamp(thresholdPixels / (double)includedPixels, 0, 1));
+    }
+
+    /// <summary>
+    /// Produces the single convex round-join offset path used by pinned Paddle
+    /// DB quad postprocessing. OpenCvSharp exposes no polygon-offset primitive,
+    /// so arcs are tessellated with at most 0.25 pixel radial error, matching
+    /// PyclipperOffset's default arc-tolerance bound. A degenerate or oversized
+    /// path returns zero paths; callers reject any result count other than one.
+    /// </summary>
+    private static Point2f[][] UnclipRound(Point2f[] polygon, double unclipRatio)
+    {
+        Point2f[] ordered = OrderPolygon(polygon);
+        if (ordered.Length < 3)
+        {
+            return [];
+        }
+
+        if (unclipRatio <= 0)
+        {
+            return [ordered];
+        }
+
+        double area = Math.Abs(SignedArea(ordered));
+        double perimeter = 0;
+        for (var index = 0; index < ordered.Length; index++)
+        {
+            Point2f first = ordered[index];
+            Point2f second = ordered[(index + 1) % ordered.Length];
+            perimeter += Distance(first, second);
+        }
+
+        if (area <= 0 || perimeter <= 0)
+        {
+            return [];
+        }
+
+        double distance = area * unclipRatio / perimeter;
+        if (!double.IsFinite(distance) || distance <= 0)
+        {
+            return [];
+        }
+
+        const double arcTolerance = 0.25;
+        double maximumStep = distance <= arcTolerance
+            ? Math.PI / 2d
+            : 2d * Math.Acos(Math.Clamp(1d - (arcTolerance / distance), -1d, 1d));
+        if (!double.IsFinite(maximumStep) || maximumStep <= 0)
+        {
+            return [];
+        }
+
+        var expanded = new List<Point2f>();
+        for (var index = 0; index < ordered.Length; index++)
+        {
+            Point2f previous = ordered[(index + ordered.Length - 1) % ordered.Length];
+            Point2f vertex = ordered[index];
+            Point2f next = ordered[(index + 1) % ordered.Length];
+            if (!TryOutwardNormal(previous, vertex, out Point2f previousNormal) ||
+                !TryOutwardNormal(vertex, next, out Point2f nextNormal))
+            {
+                return [];
+            }
+
+            double startAngle = Math.Atan2(previousNormal.Y, previousNormal.X);
+            double endAngle = Math.Atan2(nextNormal.Y, nextNormal.X);
+            while (endAngle <= startAngle)
+            {
+                endAngle += 2d * Math.PI;
+            }
+
+            double sweep = endAngle - startAngle;
+            int segments = Math.Max(1, checked((int)Math.Ceiling(sweep / maximumStep)));
+            for (var segment = 0; segment <= segments; segment++)
+            {
+                double angle = startAngle + (sweep * segment / segments);
+                expanded.Add(new Point2f(
+                    (float)(vertex.X + (Math.Cos(angle) * distance)),
+                    (float)(vertex.Y + (Math.Sin(angle) * distance))));
+            }
+
+            if (expanded.Count > 4096)
+            {
+                return [];
+            }
+        }
+
+        return expanded.Count < 3 ? [] : [OrderPolygon(expanded)];
+    }
+
+    private static bool TryOutwardNormal(Point2f first, Point2f second, out Point2f normal)
+    {
+        double dx = second.X - first.X;
+        double dy = second.Y - first.Y;
+        double length = Math.Sqrt((dx * dx) + (dy * dy));
+        if (length <= 1e-9)
+        {
+            normal = default;
+            return false;
+        }
+
+        normal = new Point2f((float)(dy / length), (float)(-dx / length));
+        return true;
+    }
+
+    private static Point2f[] OrderPolygon(IEnumerable<Point2f> points)
+    {
+        Point2f[] source = points.ToArray();
+        if (source.Length == 0)
+        {
+            return source;
+        }
+
+        double centerX = source.Average(static point => point.X);
+        double centerY = source.Average(static point => point.Y);
+        Point2f[] ordered = source
+            .OrderBy(point => Math.Atan2(point.Y - centerY, point.X - centerX))
+            .ThenBy(static point => point.Y)
+            .ThenBy(static point => point.X)
+            .ToArray();
+        if (SignedArea(ordered) < 0)
+        {
+            Array.Reverse(ordered);
+        }
+
+        int start = Enumerable.Range(0, ordered.Length)
+            .OrderBy(index => ordered[index].Y)
+            .ThenBy(index => ordered[index].X)
+            .First();
+        return Enumerable.Range(0, ordered.Length)
+            .Select(offset => ordered[(start + offset) % ordered.Length])
+            .ToArray();
+    }
+
+    private static MiniBox GetMiniBox(IEnumerable<Point> points) =>
+        GetMiniBox(points.Select(static point => new Point2f(point.X, point.Y)).ToArray());
+
+    private static MiniBox GetMiniBox(Point2f[] points)
+    {
+        RotatedRect rectangle = Cv2.MinAreaRect(points);
+        Point2f[] box = rectangle.Points()
+            .OrderBy(static point => point.X)
+            .ToArray();
+        int firstIndex;
+        int fourthIndex;
+        if (box[1].Y > box[0].Y)
+        {
+            firstIndex = 0;
+            fourthIndex = 1;
+        }
+        else
+        {
+            firstIndex = 1;
+            fourthIndex = 0;
+        }
+
+        int secondIndex;
+        int thirdIndex;
+        if (box[3].Y > box[2].Y)
+        {
+            secondIndex = 2;
+            thirdIndex = 3;
+        }
+        else
+        {
+            secondIndex = 3;
+            thirdIndex = 2;
+        }
+
+        return new MiniBox(
+            [box[firstIndex], box[secondIndex], box[thirdIndex], box[fourthIndex]],
+            Math.Min(rectangle.Size.Width, rectangle.Size.Height));
+    }
+
+    private static OcrPolygon MapPolygonToOriginal(
+        Point2f[] tensorPolygon,
+        OcrImage image,
+        int tensorWidth,
+        int tensorHeight)
+    {
+        int canonicalWidth = image.CanonicalOriginalWidth ?? image.Width;
+        int canonicalHeight = image.CanonicalOriginalHeight ?? image.Height;
+        OcrPoint[] mapped = tensorPolygon
+            .Select(point => new OcrPoint(
+                Math.Clamp(
+                    Math.Round(point.X * image.Width / tensorWidth, MidpointRounding.ToEven),
+                    0,
+                    image.Width),
+                Math.Clamp(
+                    Math.Round(point.Y * image.Height / tensorHeight, MidpointRounding.ToEven),
+                    0,
+                    image.Height)))
+            .Select(imagePoint => image.OriginalToImage.MapToOriginal(imagePoint))
+            .Select(point => new OcrPoint(
+                Math.Clamp(point.X, 0, canonicalWidth),
+                Math.Clamp(point.Y, 0, canonicalHeight)))
+            .ToArray();
+        return new OcrPolygon(mapped);
+    }
+
+    private static double OrientationDegrees(OcrPoint[] polygon)
+    {
+        OcrPoint first = polygon[0];
+        OcrPoint second = polygon[1];
+        OcrPoint third = polygon[2];
+        double firstLength = Distance(first, second);
+        double secondLength = Distance(second, third);
+        OcrPoint start = firstLength >= secondLength ? first : second;
+        OcrPoint end = firstLength >= secondLength ? second : third;
+        double angle = Math.Atan2(end.Y - start.Y, end.X - start.X) * 180d / Math.PI;
+        while (angle >= 90)
+        {
+            angle -= 180;
+        }
+
+        while (angle < -90)
+        {
+            angle += 180;
+        }
+
+        return Math.Abs(angle) <= 1e-9 ? 0 : angle;
+    }
+
+    private static double SignedArea(Point2f[] polygon)
+    {
+        double area = 0;
+        for (var index = 0; index < polygon.Length; index++)
+        {
+            Point2f first = polygon[index];
+            Point2f second = polygon[(index + 1) % polygon.Length];
+            area += (first.X * second.Y) - (second.X * first.Y);
+        }
+
+        return area / 2d;
+    }
+
+    private static double Distance(Point2f first, Point2f second)
+    {
+        double x = second.X - first.X;
+        double y = second.Y - first.Y;
+        return Math.Sqrt((x * x) + (y * y));
+    }
+
+    private static double Distance(OcrPoint first, OcrPoint second)
+    {
+        double x = second.X - first.X;
+        double y = second.Y - first.Y;
+        return Math.Sqrt((x * x) + (y * y));
+    }
+
     private static float[] CreateTensor(
         OcrImage image,
         int targetWidth,
@@ -368,18 +824,19 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
     {
         int pixelsPerChannel = checked(targetWidth * targetHeight);
         var values = new float[checked(pixelsPerChannel * options.InputChannels)];
+        (int sourceWidth, int sourceHeight) = ResizeSourceDimensions(image, options);
         for (var targetY = 0; targetY < targetHeight; targetY++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            double sourceY = ((targetY + 0.5) * image.Height / targetHeight) - 0.5;
-            int y0 = Math.Clamp((int)Math.Floor(sourceY), 0, image.Height - 1);
-            int y1 = Math.Min(y0 + 1, image.Height - 1);
+            double sourceY = ((targetY + 0.5) * sourceHeight / targetHeight) - 0.5;
+            int y0 = Math.Clamp((int)Math.Floor(sourceY), 0, sourceHeight - 1);
+            int y1 = Math.Min(y0 + 1, sourceHeight - 1);
             double yWeight = Math.Clamp(sourceY - Math.Floor(sourceY), 0, 1);
             for (var targetX = 0; targetX < targetWidth; targetX++)
             {
-                double sourceX = ((targetX + 0.5) * image.Width / targetWidth) - 0.5;
-                int x0 = Math.Clamp((int)Math.Floor(sourceX), 0, image.Width - 1);
-                int x1 = Math.Min(x0 + 1, image.Width - 1);
+                double sourceX = ((targetX + 0.5) * sourceWidth / targetWidth) - 0.5;
+                int x0 = Math.Clamp((int)Math.Floor(sourceX), 0, sourceWidth - 1);
+                int x1 = Math.Min(x0 + 1, sourceWidth - 1);
                 double xWeight = Math.Clamp(sourceX - Math.Floor(sourceX), 0, 1);
                 int pixelIndex = checked((targetY * targetWidth) + targetX);
                 for (var channel = 0; channel < options.InputChannels; channel++)
@@ -406,21 +863,58 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
         int x,
         int y,
         int channel,
-        OcrTensorColorMode colorMode) =>
-        colorMode == OcrTensorColorMode.Bgr
+        OcrTensorColorMode colorMode)
+    {
+        if (x >= image.Width || y >= image.Height)
+        {
+            return 0;
+        }
+
+        return colorMode == OcrTensorColorMode.Bgr
             ? image.BgrPixels!.Pixels.Span[checked(
                 (y * image.BgrPixels.Stride) + (x * 3) + channel)]
             : image.Pixels.Span[checked((y * image.Stride) + x)];
+    }
 
     private static (int Width, int Height) TensorDimensions(
         OcrImage image,
         LocalOnnxTextRegionDetectorOptions options)
     {
+        if (options.PostprocessAlgorithm == OcrDetectionPostprocessAlgorithm.DbPostprocessV1)
+        {
+            (int sourceWidth, int sourceHeight) = ResizeSourceDimensions(image, options);
+            double ratio = options.MaximumSideLength / (double)Math.Max(sourceWidth, sourceHeight);
+            int resizedWidth = checked((int)(sourceWidth * ratio));
+            int resizedHeight = checked((int)(sourceHeight * ratio));
+            return (
+                CeilingAligned(resizedWidth, options.DimensionMultiple),
+                CeilingAligned(resizedHeight, options.DimensionMultiple));
+        }
+
         int alignedMaximum = options.MaximumSideLength / options.DimensionMultiple * options.DimensionMultiple;
         double scale = Math.Min(1d, alignedMaximum / (double)Math.Max(image.Width, image.Height));
         int width = RoundAligned(image.Width * scale, options.DimensionMultiple, alignedMaximum);
         int height = RoundAligned(image.Height * scale, options.DimensionMultiple, alignedMaximum);
         return (width, height);
+    }
+
+    private static (int Width, int Height) ResizeSourceDimensions(
+        OcrImage image,
+        LocalOnnxTextRegionDetectorOptions options) =>
+        options.PostprocessAlgorithm == OcrDetectionPostprocessAlgorithm.DbPostprocessV1 &&
+        checked(image.Width + image.Height) < 64
+            ? (Math.Max(32, image.Width), Math.Max(32, image.Height))
+            : (image.Width, image.Height);
+
+    private static int CeilingAligned(int value, int multiple)
+    {
+        if (value <= 0)
+        {
+            throw new InvalidDataException(
+                "OCR DB resize produced a zero dimension for the source aspect ratio.");
+        }
+
+        return checked(((value + multiple - 1) / multiple) * multiple);
     }
 
     private static int RoundAligned(double value, int multiple, int maximum) =>
@@ -491,6 +985,7 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
             options.ChannelScales.Any(static value => !float.IsFinite(value) || value == 0) ||
             string.IsNullOrWhiteSpace(options.InputName) || string.IsNullOrWhiteSpace(options.OutputName) ||
             string.IsNullOrWhiteSpace(options.StageVersion) || !Enum.IsDefined(options.OutputActivation) ||
+            !Enum.IsDefined(options.PostprocessAlgorithm) || !Enum.IsDefined(options.DbScoreMode) ||
             options.ProbabilityThreshold is < 0 or > 1 ||
             options.BoxConfidenceThreshold is < 0 or > 1 ||
             !double.IsFinite(options.UnclipRatio) || options.UnclipRatio is < 0 or > 10 ||
@@ -518,20 +1013,32 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
             options.OutputName,
             options.StageVersion,
             options.OutputActivation,
+            options.PostprocessAlgorithm,
+            options.PostprocessAlgorithm == OcrDetectionPostprocessAlgorithm.DbPostprocessV1
+                ? options.DbScoreMode
+                : "not-applicable",
             options.ProbabilityThreshold.ToString("R", CultureInfo.InvariantCulture),
             options.BoxConfidenceThreshold.ToString("R", CultureInfo.InvariantCulture),
             options.UnclipRatio.ToString("R", CultureInfo.InvariantCulture),
-            options.MinimumComponentArea.ToString(CultureInfo.InvariantCulture),
+            options.PostprocessAlgorithm == OcrDetectionPostprocessAlgorithm.DenseProbabilityComponentsV1
+                ? options.MinimumComponentArea.ToString(CultureInfo.InvariantCulture)
+                : "not-applicable",
             options.MinimumSideLength.ToString(CultureInfo.InvariantCulture),
             options.MaximumRegions.ToString(CultureInfo.InvariantCulture),
             ProviderFingerprint(options.AllowedProviders));
         return Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(material)));
     }
 
-    private static string DeterministicRegionId(string modelSha256, OcrRectangle rectangle)
+    private static string DeterministicRegionId(
+        string modelSha256,
+        OcrDetectionPostprocessAlgorithm algorithm,
+        OcrPolygon polygon)
     {
-        string material = FormattableString.Invariant(
-            $"{modelSha256.ToLowerInvariant()}:{rectangle.X:R},{rectangle.Y:R},{rectangle.Width:R},{rectangle.Height:R}");
+        string material = string.Join(':',
+            modelSha256.ToLowerInvariant(),
+            algorithm,
+            string.Join(';', polygon.Points.Select(static point =>
+                FormattableString.Invariant($"{point.X:R},{point.Y:R}"))));
         byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(material));
         return new Guid(hash.AsSpan(0, 16)).ToString("D");
     }
@@ -560,4 +1067,14 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
 
         public int Height => Bottom - Top + 1;
     }
+
+    private sealed record DbCandidate(
+        OcrPolygon Polygon,
+        double OrientationDegrees,
+        double Confidence,
+        double InkDensity);
+
+    private readonly record struct PolygonScore(double Confidence, double InkDensity);
+
+    private readonly record struct MiniBox(Point2f[] Points, double ShortSide);
 }

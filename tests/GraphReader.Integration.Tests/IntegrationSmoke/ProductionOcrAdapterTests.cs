@@ -193,6 +193,7 @@ public sealed class ProductionOcrAdapterTests
                 new string('b', 64),
                 "recognizer.onnx"),
             InferenceProvider.Cpu,
+            new string('c', 64),
             isApproved);
 
     private static OcrDetectorImage DetectorImage(ProductionDecodedRaster raster)
