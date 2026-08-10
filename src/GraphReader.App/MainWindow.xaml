@@ -344,7 +344,22 @@
                     automation:AutomationProperties.AutomationId="Manual.SharedBaseline"
                     automation:AutomationProperties.Name="{DynamicResource Manual.SharedBaseline}" />
           <TextBlock Text="{DynamicResource Manual.ApplicableProbes}" />
-          <ItemsControl Margin="0,0,0,6" ItemsSource="{Binding ProbeRelationChoices}">
+          <ItemsControl Margin="0,0,0,6"
+                        ItemsSource="{Binding ProbeRelationChoices}"
+                        Focusable="False"
+                        IsTabStop="False"
+                        automation:AutomationProperties.AutomationId="Manual.ApplicableProbes"
+                        automation:AutomationProperties.Name="{DynamicResource Manual.ApplicableProbes}">
+            <ItemsControl.Style>
+              <Style TargetType="ItemsControl">
+                <Setter Property="Visibility" Value="Visible" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding ProbeRelationChoices.Count}" Value="0">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </ItemsControl.Style>
             <ItemsControl.ItemTemplate>
               <DataTemplate>
                 <CheckBox Content="{Binding Label}"
@@ -438,6 +453,11 @@
                     SelectedItem="{Binding SelectedTab, Mode=TwoWay}"
                     automation:AutomationProperties.AutomationId="Navigation.GraphTabs"
                     automation:AutomationProperties.Name="{DynamicResource Navigation.AutomationName}">
+          <TabControl.ItemContainerStyle>
+            <Style TargetType="TabItem">
+              <Setter Property="automation:AutomationProperties.Name" Value="{Binding DisplayName}" />
+            </Style>
+          </TabControl.ItemContainerStyle>
           <TabControl.ItemTemplate>
             <DataTemplate>
               <StackPanel Orientation="Horizontal">
@@ -882,7 +902,10 @@
             </ListBox>
           </StackPanel>
         </Border>
-        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="3"
+                      VerticalScrollBarVisibility="Auto"
+                      automation:AutomationProperties.AutomationId="Inspector.ManualTools"
+                      automation:AutomationProperties.Name="{DynamicResource Manual.Title}">
           <StackPanel>
             <TextBlock FontSize="{DynamicResource App.FontSize.Subtitle}"
                        FontWeight="SemiBold"

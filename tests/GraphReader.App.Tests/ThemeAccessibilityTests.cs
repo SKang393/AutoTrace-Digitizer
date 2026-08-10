@@ -3,8 +3,10 @@
 
 using System.IO;
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Xml.Linq;
 using GraphReader.App.Appearance;
+using GraphReader.App.Controls;
 
 namespace GraphReader.App.Tests;
 
@@ -13,6 +15,7 @@ public sealed class ThemeAccessibilityTests
 {
     private const string PresentationNamespace = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
     private const string XamlNamespace = "http://schemas.microsoft.com/winfx/2006/xaml";
+    private const string AutomationNamespace = "clr-namespace:System.Windows.Automation;assembly=PresentationCore";
 
     [TestMethod]
     public void HighContrastUsesSystemPaletteAndReducedMotionUsesZeroDuration()
@@ -20,6 +23,7 @@ public sealed class ThemeAccessibilityTests
         StaTestHost.Run(
             () =>
             {
+                Application.ResourceAssembly ??= typeof(ThemeService).Assembly;
                 var resources = new ResourceDictionary();
                 using var systemTheme = new FakeSystemThemeProvider(
                     ApplicationTheme.Dark,
@@ -103,6 +107,68 @@ public sealed class ThemeAccessibilityTests
         string controls = File.ReadAllText(Path.Combine(AppDirectory, "Themes", "Controls.xaml"));
         StringAssert.Contains(controls, "Tag\" Value=\"{DynamicResource App.Motion.Enabled}\"");
         StringAssert.Contains(controls, "Duration=\"0:0:0.14\"");
+    }
+
+    [TestMethod]
+    public void GraphCanvasExposesSemanticPaneAutomationType()
+    {
+        StaTestHost.Run(
+            () =>
+            {
+                Application.ResourceAssembly ??= typeof(GraphCanvasControl).Assembly;
+                var control = new GraphCanvasControl();
+                AutomationPeer? peer = UIElementAutomationPeer.CreatePeerForElement(control);
+
+                Assert.IsNotNull(peer);
+                Assert.AreEqual(AutomationControlType.Pane, peer.GetAutomationControlType());
+                Assert.AreEqual(nameof(GraphCanvasControl), peer.GetClassName());
+            });
+    }
+
+    [TestMethod]
+    public void InteractiveContainersExposeReadableAutomationNames()
+    {
+        XDocument shell = LoadAppXaml("MainWindow.xaml");
+        XNamespace presentation = PresentationNamespace;
+        XNamespace xaml = XamlNamespace;
+        XNamespace automation = AutomationNamespace;
+
+        XElement tabs = shell.Descendants(presentation + "TabControl")
+            .Single(element => element.Attribute(xaml + "Name")?.Value == "GraphTabStrip");
+        XElement tabNameSetter = tabs.Descendants(presentation + "Setter")
+            .Single(element =>
+                element.Attribute("Property")?.Value == "automation:AutomationProperties.Name");
+        Assert.AreEqual("{Binding DisplayName}", tabNameSetter.Attribute("Value")?.Value);
+
+        XElement probes = shell.Descendants(presentation + "ItemsControl")
+            .Single(element => element.Attribute("ItemsSource")?.Value == "{Binding ProbeRelationChoices}");
+        Assert.AreEqual("False", probes.Attribute("Focusable")?.Value);
+        Assert.AreEqual("False", probes.Attribute("IsTabStop")?.Value);
+        Assert.AreEqual(
+            "Manual.ApplicableProbes",
+            probes.Attribute(automation + "AutomationProperties.AutomationId")?.Value);
+        Assert.AreEqual(
+            "{DynamicResource Manual.ApplicableProbes}",
+            probes.Attribute(automation + "AutomationProperties.Name")?.Value);
+        XElement emptyProbeTrigger = probes.Descendants(presentation + "DataTrigger")
+            .Single(element => element.Attribute("Value")?.Value == "0");
+        Assert.AreEqual(
+            "{Binding ProbeRelationChoices.Count}",
+            emptyProbeTrigger.Attribute("Binding")?.Value);
+        Assert.IsTrue(emptyProbeTrigger.Descendants(presentation + "Setter")
+            .Any(element =>
+                element.Attribute("Property")?.Value == "Visibility" &&
+                element.Attribute("Value")?.Value == "Collapsed"));
+
+        XElement manualTools = shell.Descendants(presentation + "ScrollViewer")
+            .Single(element => element.Descendants(presentation + "TextBlock")
+                .Any(text => text.Attribute("Text")?.Value == "{DynamicResource Manual.Title}"));
+        Assert.AreEqual(
+            "Inspector.ManualTools",
+            manualTools.Attribute(automation + "AutomationProperties.AutomationId")?.Value);
+        Assert.AreEqual(
+            "{DynamicResource Manual.Title}",
+            manualTools.Attribute(automation + "AutomationProperties.Name")?.Value);
     }
 
     private static XElement FindList(XDocument shell, string itemsSource) =>

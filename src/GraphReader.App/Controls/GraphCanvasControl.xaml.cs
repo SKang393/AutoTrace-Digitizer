@@ -2,6 +2,7 @@
 // Copyright 2026 Sungwoo Kang
 
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -94,6 +95,9 @@ public partial class GraphCanvasControl : UserControl
     public event EventHandler<GraphImagePointEventArgs>? ImagePointInvoked;
 
     public event EventHandler<GraphImagePointEventArgs>? ImagePointNavigated;
+
+    protected override AutomationPeer OnCreateAutomationPeer() =>
+        new GraphCanvasControlAutomationPeer(this);
 
     public ImageSource? ImageSource
     {
@@ -308,6 +312,15 @@ public partial class GraphCanvasControl : UserControl
 
         ImagePointInvoked?.Invoke(this, new GraphImagePointEventArgs(point));
         e.Handled = true;
+    }
+
+    private sealed class GraphCanvasControlAutomationPeer(GraphCanvasControl owner)
+        : FrameworkElementAutomationPeer(owner)
+    {
+        protected override AutomationControlType GetAutomationControlTypeCore() =>
+            AutomationControlType.Pane;
+
+        protected override string GetClassNameCore() => nameof(GraphCanvasControl);
     }
 
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
