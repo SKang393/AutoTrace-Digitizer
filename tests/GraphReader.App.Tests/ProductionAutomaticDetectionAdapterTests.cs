@@ -286,7 +286,19 @@ public sealed class ProductionAutomaticDetectionAdapterTests
             Assert.AreEqual(
                 detectorImage.PixelSha256,
                 Convert.ToHexStringLower(SHA256.HashData(detectorImage.Image.Pixels.Span)));
+            Assert.IsNotNull(detectorImage.Image.BgrPixels);
+            foreach (int pixelIndex in new[] { (50 * 100) + 10, (50 * 100) + 50, (90 * 100) + 20 })
+            {
+                int offset = pixelIndex * 3;
+                Assert.IsTrue(detectorImage.Image.BgrPixels.Pixels.Span.Slice(offset, 3).ToArray()
+                    .All(static channel => channel == byte.MaxValue));
+            }
+            Assert.AreEqual(
+                detectorImage.BgrPixelSha256,
+                Convert.ToHexStringLower(SHA256.HashData(detectorImage.Image.BgrPixels.Pixels.Span)));
             Assert.IsTrue(originalRaster.CreateOcrImage().Pixels.Span.ToArray()
+                .All(static pixel => pixel == 0));
+            Assert.IsTrue(originalRaster.CreateOcrImage().BgrPixels!.Pixels.Span.ToArray()
                 .All(static pixel => pixel == 0));
             OcrRegion[] regions =
             [

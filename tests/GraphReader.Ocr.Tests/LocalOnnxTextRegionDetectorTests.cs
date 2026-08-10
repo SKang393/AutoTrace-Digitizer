@@ -10,6 +10,10 @@ namespace GraphReader.Ocr.Tests;
 [TestClass]
 public sealed class LocalOnnxTextRegionDetectorTests
 {
+    private static readonly float[] ExpectedBgrTensor = [10f / 255f, 20f / 255f, 30f / 255f];
+    private static readonly byte[] BgrDetectorGrayscalePixel = [99];
+    private static readonly byte[] MissingBgrGrayscalePixel = [0];
+
     [TestMethod]
     public async Task DetectorRunsOnBoundCpuPolicyAndMapsProbabilityRegionToOriginalPixels()
     {
@@ -111,6 +115,82 @@ public sealed class LocalOnnxTextRegionDetectorTests
                     () => detector.DetectAsync(image, CancellationToken.None).AsTask());
                 StringAssert.Contains(invalid.Message, "within [0,1]");
             }
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task DetectorPreservesDeclaredBgrChannelOrder()
+    {
+        string directory = CreateDirectory();
+        string modelPath = Path.Combine(directory, "bgr-detector.onnx");
+        await File.WriteAllBytesAsync(modelPath, [9, 3, 7]);
+        try
+        {
+            var factory = new ProbabilityMapSessionFactory([0f]);
+            await using InferenceRuntime runtime = CreateRuntime(directory, factory);
+            var detector = new LocalOnnxTextRegionDetector(
+                runtime,
+                Options(Identity(modelPath)) with
+                {
+                    InputColorMode = OcrTensorColorMode.Bgr,
+                    ChannelMeans = [0f, 0f, 0f],
+                    ChannelScales = [1f, 1f, 1f],
+                });
+            var image = new OcrImage(
+                1,
+                1,
+                1,
+                BgrDetectorGrayscalePixel,
+                OcrSourceImage.Original,
+                OcrFrameTransform.Identity,
+                CanonicalOriginalWidth: 1,
+                CanonicalOriginalHeight: 1,
+                BgrPixels: new OcrBgrBytePixels(3, new byte[] { 10, 20, 30 }));
+
+            _ = await detector.DetectAsync(image, CancellationToken.None);
+
+            Assert.IsNotNull(factory.LastInput);
+            CollectionAssert.AreEqual(new long[] { 1, 3, 1, 1 }, factory.LastInput.Shape.ToArray());
+            CollectionAssert.AreEqual(ExpectedBgrTensor, factory.LastInput.Values.ToArray());
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task BgrDetectorRejectsMissingColorPlaneBeforeProviderExecution()
+    {
+        string directory = CreateDirectory();
+        string modelPath = Path.Combine(directory, "missing-bgr.onnx");
+        await File.WriteAllBytesAsync(modelPath, [7, 1, 3]);
+        try
+        {
+            var factory = new ProbabilityMapSessionFactory([0f]);
+            await using InferenceRuntime runtime = CreateRuntime(directory, factory);
+            var detector = new LocalOnnxTextRegionDetector(
+                runtime,
+                Options(Identity(modelPath)) with { InputColorMode = OcrTensorColorMode.Bgr });
+
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() =>
+                detector.DetectAsync(
+                    new OcrImage(
+                        1,
+                        1,
+                        1,
+                        MissingBgrGrayscalePixel,
+                        OcrSourceImage.Original,
+                        OcrFrameTransform.Identity,
+                        CanonicalOriginalWidth: 1,
+                        CanonicalOriginalHeight: 1),
+                    CancellationToken.None).AsTask());
+
+            Assert.AreEqual(0, factory.RunCount);
         }
         finally
         {

@@ -11,6 +11,7 @@ namespace GraphReader.Ocr.Tests;
 public sealed class LocalOnnxTextRecognizerTests
 {
     private static readonly float[] ExpectedChannelTensor = [1f, 1f, 0f];
+    private static readonly float[] ExpectedBgrCropPixels = [0.1f, 0.2f, 0.3f];
 
     [TestMethod]
     public async Task LocalAdapterBatchesThroughInferenceRuntimeAndDecodesCtcOutput()
@@ -307,6 +308,49 @@ public sealed class LocalOnnxTextRecognizerTests
             FakeInferenceSession session = factory.Sessions.Single();
             Assert.AreEqual(InferenceProvider.Cpu, session.Provider);
             CollectionAssert.AreEqual(ExpectedChannelTensor, session.LastInputValues.ToArray());
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task RecognizerPreservesDeclaredBgrChannelOrder()
+    {
+        string directory = CreateDirectory();
+        string modelPath = Path.Combine(directory, "bgr-recognizer.onnx");
+        await File.WriteAllBytesAsync(modelPath, [4, 8, 1]);
+        try
+        {
+            var identity = new ModelIdentity(
+                "bgr-recognizer",
+                "1",
+                Convert.ToHexStringLower(SHA256.HashData(await File.ReadAllBytesAsync(modelPath))),
+                modelPath);
+            var factory = new FakeInferenceSessionFactory(scale: 1);
+            await using InferenceRuntime runtime = CreateRuntime(directory, factory);
+            var recognizer = new LocalOnnxTextRecognizer(
+                runtime,
+                new LocalOnnxTextRecognizerOptions(identity, "01")
+                {
+                    InputWidth = 1,
+                    InputHeight = 1,
+                    InputChannels = 3,
+                    InputColorMode = OcrTensorColorMode.Bgr,
+                    ChannelMeans = [0f, 0f, 0f],
+                    ChannelScales = [1f, 1f, 1f],
+                });
+            OcrCrop crop = Crop("bgr", [0.9f], width: 1) with
+            {
+                BgrPixels = new OcrBgrFloatPixels(3, ExpectedBgrCropPixels),
+            };
+
+            _ = await recognizer.RecognizeBatchAsync([crop], CancellationToken.None);
+
+            CollectionAssert.AreEqual(
+                ExpectedBgrCropPixels,
+                factory.Sessions.Single().LastInputValues.ToArray());
         }
         finally
         {

@@ -24,6 +24,8 @@ namespace GraphReader.Integration.Tests.IntegrationSmoke;
 [TestClass]
 public sealed class ProductionWorkflowStagesTests
 {
+    private static readonly byte[] ExpectedDecodedBgr = [10, 20, 30];
+
     private const string OnePixelPng =
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
 
@@ -388,6 +390,39 @@ public sealed class ProductionWorkflowStagesTests
         Assert.Throws<ProductionWorkflowStageException>(() => raster.CreateMarkerFrame(
             new MarkerDetection.MarkerMask(1, 1, new float[1]),
             MarkerDetection.MarkerMask.Empty(96, 72)));
+    }
+
+    [TestMethod]
+    public void RasterDecoderPreservesExactBgr24OrderFromColoredSource()
+    {
+        byte[] encoded = CreateSolidBgrPng(10, 20, 30);
+        string sha256 = Convert.ToHexStringLower(SHA256.HashData(encoded));
+        Guid sourceId = Guid.Parse("21000000-0000-0000-0000-000000000011");
+        Guid panelId = Guid.Parse("31000000-0000-0000-0000-000000000011");
+        var original = new WorkflowImageEvidence(
+            "memory:colored-bgr.png",
+            sha256,
+            width: 1,
+            height: 1,
+            WorkflowImageVariant.Original);
+        var imported = new WorkflowImportedPanel(panelId, sourceId, "colored-bgr.png", original);
+        var request = new ProductionWorkflowDetectionRequest(
+            new WorkflowPreparedPanel(imported, original, enhanced: null),
+            original,
+            WorkflowImageVariant.Original,
+            Guid.Parse("41000000-0000-0000-0000-000000000011"),
+            Guid.Parse("11000000-0000-0000-0000-000000000011"),
+            encoded);
+
+        GraphReader.Ocr.OcrImage ocr = new ProductionRasterFrameDecoder()
+            .Decode(request, CancellationToken.None)
+            .CreateOcrImage();
+
+        Assert.IsNotNull(ocr.BgrPixels);
+        Assert.AreEqual(3, ocr.BgrPixels.Stride);
+        CollectionAssert.AreEqual(
+            ExpectedDecodedBgr,
+            ocr.BgrPixels.Pixels.ToArray());
     }
 
     [TestMethod]
@@ -2269,6 +2304,26 @@ public sealed class ProductionWorkflowStagesTests
             palette: null,
             pixels,
             stride: width);
+        source.Freeze();
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(source));
+        using var stream = new MemoryStream();
+        encoder.Save(stream);
+        return stream.ToArray();
+    }
+
+    private static byte[] CreateSolidBgrPng(byte blue, byte green, byte red)
+    {
+        byte[] pixels = [blue, green, red];
+        BitmapSource source = BitmapSource.Create(
+            1,
+            1,
+            96,
+            96,
+            PixelFormats.Bgr24,
+            palette: null,
+            pixels,
+            stride: 3);
         source.Freeze();
         var encoder = new PngBitmapEncoder();
         encoder.Frames.Add(BitmapFrame.Create(source));

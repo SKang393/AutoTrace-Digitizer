@@ -38,6 +38,9 @@ public sealed record LocalOnnxTextRecognizerOptions(
 
     public OcrTensorLayout InputLayout { get; init; } = OcrTensorLayout.ChannelsFirst;
 
+    public OcrTensorColorMode InputColorMode { get; init; } =
+        OcrTensorColorMode.GrayscaleReplicated;
+
     public OcrOutputLayout OutputLayout { get; init; } = OcrOutputLayout.BatchTimeClass;
 
     public OcrRecognitionOutputActivation OutputActivation { get; init; } =
@@ -315,7 +318,9 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
 
         if (crops.Any(crop =>
                 crop.Width != _options.InputWidth || crop.Height != _options.InputHeight ||
-                crop.Pixels.Length != checked(crop.Width * crop.Height)))
+                crop.Pixels.Length != checked(crop.Width * crop.Height) ||
+                (_options.InputColorMode == OcrTensorColorMode.Bgr &&
+                 !HasValidBgrPixels(crop))))
         {
             throw new ArgumentException("Every OCR crop must match the configured model input dimensions.", nameof(crops));
         }
@@ -326,14 +331,20 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
         for (var cropIndex = 0; cropIndex < crops.Count; cropIndex++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var source = crops[cropIndex].Pixels.Span;
-            for (var valueIndex = 0; valueIndex < source.Length; valueIndex++)
+            OcrCrop crop = crops[cropIndex];
+            ReadOnlySpan<float> grayscale = crop.Pixels.Span;
+            for (var valueIndex = 0; valueIndex < grayscale.Length; valueIndex++)
             {
                 for (var channel = 0; channel < _options.InputChannels; channel++)
                 {
                     float mean = _options.ChannelMeans?[channel] ?? _options.NormalizeMean;
                     float scale = _options.ChannelScales?[channel] ?? _options.NormalizeScale;
-                    var normalized = (source[valueIndex] - mean) * scale;
+                    float sourceValue = _options.InputColorMode == OcrTensorColorMode.Bgr
+                        ? crop.BgrPixels!.Pixels.Span[
+                            checked(((valueIndex / crop.Width) * crop.BgrPixels.Stride) +
+                                    ((valueIndex % crop.Width) * 3) + channel)]
+                        : grayscale[valueIndex];
+                    var normalized = (sourceValue - mean) * scale;
                     var destinationIndex = _options.InputLayout == OcrTensorLayout.ChannelsFirst
                         ? (cropIndex * valuesPerCrop) + (channel * pixelsPerCrop) + valueIndex
                         : (cropIndex * valuesPerCrop) + (valueIndex * _options.InputChannels) + channel;
@@ -368,6 +379,7 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
                     ["input_width"] = _options.InputWidth,
                     ["input_channels"] = _options.InputChannels,
                     ["input_layout"] = _options.InputLayout.ToString(),
+                    ["input_color_mode"] = _options.InputColorMode.ToString(),
                     ["output_layout"] = _options.OutputLayout.ToString(),
                     ["output_activation"] = _options.OutputActivation.ToString(),
                     ["expected_time_steps"] = _options.ExpectedTimeSteps,
@@ -489,6 +501,7 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
             options.InputHeight.ToString(System.Globalization.CultureInfo.InvariantCulture),
             options.InputChannels.ToString(System.Globalization.CultureInfo.InvariantCulture),
             options.InputLayout.ToString(),
+            options.InputColorMode.ToString(),
             options.OutputLayout.ToString(),
             options.OutputActivation.ToString(),
             options.ExpectedTimeSteps?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "dynamic",
@@ -529,7 +542,12 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
          providers.Contains(InferenceProvider.Cpu) &&
          providers.All(static provider =>
              provider is InferenceProvider.Cpu or InferenceProvider.DirectMl) &&
-         providers.Distinct().Count() == providers.Count);
+             providers.Distinct().Count() == providers.Count);
+
+    private static bool HasValidBgrPixels(OcrCrop crop) =>
+        crop.BgrPixels is { } bgr &&
+        bgr.Stride >= checked(crop.Width * 3) &&
+        bgr.Pixels.Length == checked(bgr.Stride * crop.Height);
 
     public static void ValidateOptions(LocalOnnxTextRecognizerOptions options)
     {
@@ -541,7 +559,9 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
             alphabetSymbols.Distinct(StringComparer.Ordinal).Count() != alphabetSymbols.Count ||
             options.InputWidth is < 1 or > 4096 || options.InputHeight is < 1 or > 4096 ||
             options.InputChannels is < 1 or > 4 ||
-            !Enum.IsDefined(options.InputLayout) || !Enum.IsDefined(options.OutputLayout) ||
+            !Enum.IsDefined(options.InputLayout) || !Enum.IsDefined(options.InputColorMode) ||
+            !Enum.IsDefined(options.OutputLayout) ||
+            (options.InputColorMode == OcrTensorColorMode.Bgr && options.InputChannels != 3) ||
             !Enum.IsDefined(options.OutputActivation) ||
             options.ExpectedTimeSteps is <= 0 or > 16_384 ||
             options.BlankClassIndex < 0 || options.BlankClassIndex > alphabetSymbols.Count ||

@@ -24,6 +24,9 @@ public sealed record LocalOnnxTextRegionDetectorOptions(ModelIdentity Model)
 
     public OcrTensorLayout InputLayout { get; init; } = OcrTensorLayout.ChannelsFirst;
 
+    public OcrTensorColorMode InputColorMode { get; init; } =
+        OcrTensorColorMode.GrayscaleReplicated;
+
     public IReadOnlyList<float> ChannelMeans { get; init; } = [0.485f, 0.456f, 0.406f];
 
     public IReadOnlyList<float> ChannelScales { get; init; } = [1f / 0.229f, 1f / 0.224f, 1f / 0.225f];
@@ -97,7 +100,7 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(image);
-        ValidateImage(image);
+        ValidateImage(image, options);
         cancellationToken.ThrowIfCancellationRequested();
 
         (int tensorWidth, int tensorHeight) = TensorDimensions(image, options);
@@ -105,7 +108,10 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
         IReadOnlyList<long> shape = options.InputLayout == OcrTensorLayout.ChannelsFirst
             ? [1, options.InputChannels, tensorHeight, tensorWidth]
             : [1, tensorHeight, tensorWidth, options.InputChannels];
-        string imageSha256 = Convert.ToHexStringLower(SHA256.HashData(image.Pixels.Span));
+        ReadOnlySpan<byte> consumedPixels = options.InputColorMode == OcrTensorColorMode.Bgr
+            ? image.BgrPixels!.Pixels.Span
+            : image.Pixels.Span;
+        string imageSha256 = Convert.ToHexStringLower(SHA256.HashData(consumedPixels));
         var request = new InferenceRequest(
             options.Model,
             new InferenceInput(tensor, shape, options.InputName, options.OutputName),
@@ -121,6 +127,7 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
                     ["input_height"] = tensorHeight,
                     ["input_channels"] = options.InputChannels,
                     ["input_layout"] = options.InputLayout.ToString(),
+                    ["input_color_mode"] = options.InputColorMode.ToString(),
                     ["channel_means"] = options.ChannelMeans.ToArray(),
                     ["channel_scales"] = options.ChannelScales.ToArray(),
                     ["output_activation"] = options.OutputActivation.ToString(),
@@ -374,19 +381,19 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
                 int x0 = Math.Clamp((int)Math.Floor(sourceX), 0, image.Width - 1);
                 int x1 = Math.Min(x0 + 1, image.Width - 1);
                 double xWeight = Math.Clamp(sourceX - Math.Floor(sourceX), 0, 1);
-                double top = Luminance(image, x0, y0) * (1 - xWeight) +
-                    Luminance(image, x1, y0) * xWeight;
-                double bottom = Luminance(image, x0, y1) * (1 - xWeight) +
-                    Luminance(image, x1, y1) * xWeight;
-                float luminance = (float)((top * (1 - yWeight) + bottom * yWeight) / 255d);
                 int pixelIndex = checked((targetY * targetWidth) + targetX);
                 for (var channel = 0; channel < options.InputChannels; channel++)
                 {
+                    double top = SourceValue(image, x0, y0, channel, options.InputColorMode) * (1 - xWeight) +
+                        SourceValue(image, x1, y0, channel, options.InputColorMode) * xWeight;
+                    double bottom = SourceValue(image, x0, y1, channel, options.InputColorMode) * (1 - xWeight) +
+                        SourceValue(image, x1, y1, channel, options.InputColorMode) * xWeight;
+                    float sample = (float)((top * (1 - yWeight) + bottom * yWeight) / 255d);
                     int destination = options.InputLayout == OcrTensorLayout.ChannelsFirst
                         ? checked((channel * pixelsPerChannel) + pixelIndex)
                         : checked((pixelIndex * options.InputChannels) + channel);
                     values[destination] =
-                        (luminance - options.ChannelMeans[channel]) * options.ChannelScales[channel];
+                        (sample - options.ChannelMeans[channel]) * options.ChannelScales[channel];
                 }
             }
         }
@@ -394,8 +401,16 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
         return values;
     }
 
-    private static byte Luminance(OcrImage image, int x, int y) =>
-        image.Pixels.Span[checked((y * image.Stride) + x)];
+    private static byte SourceValue(
+        OcrImage image,
+        int x,
+        int y,
+        int channel,
+        OcrTensorColorMode colorMode) =>
+        colorMode == OcrTensorColorMode.Bgr
+            ? image.BgrPixels!.Pixels.Span[checked(
+                (y * image.BgrPixels.Stride) + (x * 3) + channel)]
+            : image.Pixels.Span[checked((y * image.Stride) + x)];
 
     private static (int Width, int Height) TensorDimensions(
         OcrImage image,
@@ -434,17 +449,25 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
         };
     }
 
-    private static void ValidateImage(OcrImage image)
+    private static void ValidateImage(
+        OcrImage image,
+        LocalOnnxTextRegionDetectorOptions options)
     {
         if (image.Width <= 0 || image.Height <= 0 || image.Stride < image.Width ||
             image.Pixels.Length < checked(image.Stride * image.Height) ||
             !image.OriginalToImage.IsInvertible ||
             !string.Equals(image.CoordinateSpace, OcrContract.CoordinateSpace, StringComparison.Ordinal) ||
-            image.CanonicalOriginalWidth is <= 0 || image.CanonicalOriginalHeight is <= 0)
+            image.CanonicalOriginalWidth is <= 0 || image.CanonicalOriginalHeight is <= 0 ||
+            (options.InputColorMode == OcrTensorColorMode.Bgr && !HasValidBgrPlane(image)))
         {
             throw new ArgumentException("OCR detection image is invalid.", nameof(image));
         }
     }
+
+    private static bool HasValidBgrPlane(OcrImage image) =>
+        image.BgrPixels is { } bgr &&
+        bgr.Stride >= checked(image.Width * 3) &&
+        bgr.Pixels.Length == checked(bgr.Stride * image.Height);
 
     public static void ValidateOptions(LocalOnnxTextRegionDetectorOptions options)
     {
@@ -460,6 +483,8 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
             options.DimensionMultiple is < 1 or > 128 ||
             options.DimensionMultiple > options.MaximumSideLength ||
             options.InputChannels is < 1 or > 4 || !Enum.IsDefined(options.InputLayout) ||
+            !Enum.IsDefined(options.InputColorMode) ||
+            (options.InputColorMode == OcrTensorColorMode.Bgr && options.InputChannels != 3) ||
             options.ChannelMeans.Count != options.InputChannels ||
             options.ChannelScales.Count != options.InputChannels ||
             options.ChannelMeans.Any(static value => !float.IsFinite(value)) ||
@@ -486,6 +511,7 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
             options.DimensionMultiple.ToString(CultureInfo.InvariantCulture),
             options.InputChannels.ToString(CultureInfo.InvariantCulture),
             options.InputLayout,
+            options.InputColorMode,
             string.Join(',', options.ChannelMeans.Select(static value => value.ToString("R", CultureInfo.InvariantCulture))),
             string.Join(',', options.ChannelScales.Select(static value => value.ToString("R", CultureInfo.InvariantCulture))),
             options.InputName,

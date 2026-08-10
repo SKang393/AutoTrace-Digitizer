@@ -115,6 +115,40 @@ public sealed class CropAndMaskTests
     }
 
     [TestMethod]
+    public void EqualSizeResizePreservesInterleavedBgrAndBindsItIntoCropHash()
+    {
+        var grayscale = new byte[] { 0, 255 };
+        var image = new OcrImage(
+            2,
+            1,
+            2,
+            grayscale,
+            OcrSourceImage.Original,
+            OcrFrameTransform.Identity,
+            BgrPixels: new OcrBgrBytePixels(6, new byte[] { 10, 20, 30, 40, 50, 60 }));
+        OcrDetectedRegion region = OcrTestFixtures.Region("bgr-two-pixels", 0, 0, 2, 1);
+        var options = new OcrCropBatcherOptions
+        {
+            TargetWidth = 2,
+            TargetHeight = 1,
+            PaddingPixels = 0,
+            ResizeMode = OcrCropResizeMode.Stretch,
+        };
+
+        OcrCrop colorCrop = OcrCropBatcher.CreateBatches(image, [region], options)[0][0];
+        OcrCrop grayscaleCrop = OcrCropBatcher.CreateBatches(
+            image with { BgrPixels = null },
+            [region],
+            options)[0][0];
+
+        Assert.IsNotNull(colorCrop.BgrPixels);
+        CollectionAssert.AreEqual(
+            new float[] { 10f / 255f, 20f / 255f, 30f / 255f, 40f / 255f, 50f / 255f, 60f / 255f },
+            colorCrop.BgrPixels.Pixels.ToArray());
+        Assert.AreNotEqual(grayscaleCrop.CropSha256, colorCrop.CropSha256);
+    }
+
+    [TestMethod]
     public void EnhancedCropMapsOriginalPolygonThroughDeclaredTransform()
     {
         OcrDetectedRegion region = OcrTestFixtures.Region("scaled", 20, 30, 12, 8);

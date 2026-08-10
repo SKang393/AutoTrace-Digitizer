@@ -199,7 +199,9 @@ public sealed class ProductionOcrAdapterTests
     {
         OcrImage image = raster.CreateOcrImage();
         string sha256 = Convert.ToHexStringLower(SHA256.HashData(image.Pixels.Span));
-        return new OcrDetectorImage(image, sha256);
+        Assert.IsNotNull(image.BgrPixels);
+        string bgrSha256 = Convert.ToHexStringLower(SHA256.HashData(image.BgrPixels.Pixels.Span));
+        return new OcrDetectorImage(image, sha256, bgrSha256);
     }
 
     private static Fixture CreateFixture(Guid? projectId = null)

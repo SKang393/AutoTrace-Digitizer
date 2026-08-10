@@ -19,7 +19,7 @@ public interface IProductionRasterFrameDecoder
 }
 
 /// <summary>
-/// Owns a checksum-verified grayscale decode and creates isolated stage inputs.
+/// Owns checksum-verified Gray8 and BGR24 decodes and creates isolated stage inputs.
 /// Marker masks are always supplied by upstream evidence and are never inferred
 /// or silently replaced by this boundary.
 /// </summary>
@@ -27,6 +27,7 @@ public sealed class ProductionDecodedRaster
 {
     private const double OcrStructureMaskHalfWidthPixels = 2;
     private readonly byte[] grayscalePixels;
+    private readonly byte[] bgrPixels;
     private readonly float[] normalizedLuminance;
 
     internal ProductionDecodedRaster(
@@ -39,7 +40,8 @@ public sealed class ProductionDecodedRaster
         int canonicalOriginalWidth,
         int canonicalOriginalHeight,
         byte[] grayscalePixels,
-        float[] normalizedLuminance)
+        float[] normalizedLuminance,
+        byte[]? bgrPixels = null)
     {
         Width = width;
         Height = height;
@@ -50,6 +52,13 @@ public sealed class ProductionDecodedRaster
         CanonicalOriginalWidth = canonicalOriginalWidth;
         CanonicalOriginalHeight = canonicalOriginalHeight;
         this.grayscalePixels = (byte[])grayscalePixels.Clone();
+        this.bgrPixels = bgrPixels is null
+            ? ReplicateGrayscaleToBgr(grayscalePixels, width, height)
+            : (byte[])bgrPixels.Clone();
+        if (this.bgrPixels.Length != checked(width * height * 3))
+        {
+            throw new ArgumentException("BGR24 raster length does not match its dimensions.", nameof(bgrPixels));
+        }
         this.normalizedLuminance = (float[])normalizedLuminance.Clone();
     }
 
@@ -96,7 +105,8 @@ public sealed class ProductionDecodedRaster
         OriginalToImage,
         OcrContract.CoordinateSpace,
         CanonicalOriginalWidth,
-        CanonicalOriginalHeight);
+        CanonicalOriginalHeight,
+        new OcrBgrBytePixels(checked(Width * 3), (byte[])bgrPixels.Clone()));
 
     /// <summary>
     /// Creates a detector-only derivative with checksum-bound axis, tick, and
@@ -122,6 +132,7 @@ public sealed class ProductionDecodedRaster
         }
 
         var pixels = (byte[])grayscalePixels.Clone();
+        var detectorBgrPixels = (byte[])bgrPixels.Clone();
         IEnumerable<GeometryLineSegment> structures =
             new[] { geometry.XAxis.Line, geometry.YAxis.Line }
                 .Concat(geometry.Ticks.Select(static tick => tick.Line))
@@ -130,7 +141,7 @@ public sealed class ProductionDecodedRaster
         foreach (GeometryLineSegment structure in structures)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            RasterizeOcrExclusion(pixels, structure, cancellationToken);
+            RasterizeOcrExclusion(pixels, detectorBgrPixels, structure, cancellationToken);
         }
 
         var image = new OcrImage(
@@ -142,9 +153,11 @@ public sealed class ProductionDecodedRaster
             OcrFrameTransform.Identity,
             OcrContract.CoordinateSpace,
             CanonicalOriginalWidth,
-            CanonicalOriginalHeight);
+            CanonicalOriginalHeight,
+            new OcrBgrBytePixels(checked(Width * 3), detectorBgrPixels));
         string pixelSha256 = Convert.ToHexStringLower(SHA256.HashData(pixels));
-        return new OcrDetectorImage(image, pixelSha256);
+        string bgrPixelSha256 = Convert.ToHexStringLower(SHA256.HashData(detectorBgrPixels));
+        return new OcrDetectorImage(image, pixelSha256, bgrPixelSha256);
     }
 
     public MarkerImageFrame CreateMarkerFrame(
@@ -191,6 +204,7 @@ public sealed class ProductionDecodedRaster
 
     private void RasterizeOcrExclusion(
         byte[] pixels,
+        byte[] detectorBgrPixels,
         GeometryLineSegment line,
         CancellationToken cancellationToken)
     {
@@ -241,6 +255,10 @@ public sealed class ProductionDecodedRaster
                 if ((distanceX * distanceX) + (distanceY * distanceY) <= maximumDistanceSquared)
                 {
                     pixels[(y * Width) + x] = byte.MaxValue;
+                    int bgrOffset = checked(((y * Width) + x) * 3);
+                    detectorBgrPixels[bgrOffset] = byte.MaxValue;
+                    detectorBgrPixels[bgrOffset + 1] = byte.MaxValue;
+                    detectorBgrPixels[bgrOffset + 2] = byte.MaxValue;
                 }
             }
         }
@@ -268,6 +286,25 @@ public sealed class ProductionDecodedRaster
         }
 
         return true;
+    }
+
+    private static byte[] ReplicateGrayscaleToBgr(byte[] grayscale, int width, int height)
+    {
+        if (grayscale.Length != checked(width * height))
+        {
+            throw new ArgumentException("Gray8 raster length does not match its dimensions.", nameof(grayscale));
+        }
+
+        var output = new byte[checked(grayscale.Length * 3)];
+        for (int index = 0; index < grayscale.Length; index++)
+        {
+            int outputOffset = index * 3;
+            output[outputOffset] = grayscale[index];
+            output[outputOffset + 1] = grayscale[index];
+            output[outputOffset + 2] = grayscale[index];
+        }
+
+        return output;
     }
 
     private static ProductionWorkflowStageException Failure(string technicalMessage) =>
@@ -301,9 +338,14 @@ public sealed class ProductionRasterFrameDecoder : IProductionRasterFrameDecoder
         }
 
         byte[] grayscalePixels;
+        byte[] bgrPixels;
         try
         {
             grayscalePixels = DecodeGray8(
+                encodedBytes,
+                request.Image.Width,
+                request.Image.Height);
+            bgrPixels = DecodeBgr24(
                 encodedBytes,
                 request.Image.Width,
                 request.Image.Height);
@@ -338,7 +380,8 @@ public sealed class ProductionRasterFrameDecoder : IProductionRasterFrameDecoder
             request.Panel.Original.Width,
             request.Panel.Original.Height,
             grayscalePixels,
-            normalizedLuminance);
+            normalizedLuminance,
+            bgrPixels);
     }
 
     private static void ValidateIdentity(ProductionWorkflowDetectionRequest request)
@@ -399,6 +442,36 @@ public sealed class ProductionRasterFrameDecoder : IProductionRasterFrameDecoder
         grayscale.Freeze();
         var pixels = new byte[checked(grayscale.PixelWidth * grayscale.PixelHeight)];
         grayscale.CopyPixels(pixels, grayscale.PixelWidth, 0);
+        return pixels;
+    }
+
+    private static byte[] DecodeBgr24(
+        byte[] encodedBytes,
+        int expectedWidth,
+        int expectedHeight)
+    {
+        using var stream = new MemoryStream(encodedBytes, writable: false);
+        BitmapDecoder decoder = BitmapDecoder.Create(
+            stream,
+            BitmapCreateOptions.PreservePixelFormat,
+            BitmapCacheOption.OnLoad);
+        if (decoder.Frames.Count == 0)
+        {
+            throw new InvalidDataException("The image contains no decodable frame.");
+        }
+
+        BitmapSource source = decoder.Frames[0];
+        if (source.PixelWidth != expectedWidth || source.PixelHeight != expectedHeight)
+        {
+            throw new InvalidDataException(
+                "Decoded image dimensions do not match retained image evidence.");
+        }
+
+        var bgr = new FormatConvertedBitmap(source, PixelFormats.Bgr24, null, 0);
+        bgr.Freeze();
+        int stride = checked(bgr.PixelWidth * 3);
+        var pixels = new byte[checked(stride * bgr.PixelHeight)];
+        bgr.CopyPixels(pixels, stride, 0);
         return pixels;
     }
 

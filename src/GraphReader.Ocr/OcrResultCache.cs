@@ -106,7 +106,7 @@ public static class OcrCacheKeyDeriver
         yield return request.EnhancedImage is null ? "no_enhanced_image" : ImageMaterial(request.EnhancedImage);
         yield return request.DetectorImage is null
             ? "no_detector_image"
-            : $"{request.DetectorImage.PixelSha256.ToLowerInvariant()}:{ImageMaterial(request.DetectorImage.Image)}";
+            : $"{request.DetectorImage.PixelSha256.ToLowerInvariant()}:{request.DetectorImage.BgrPixelSha256?.ToLowerInvariant() ?? "no_bgr_hash"}:{ImageMaterial(request.DetectorImage.Image)}";
         if (request.DetectedRegions is null)
         {
             yield return "detect_regions";
@@ -130,9 +130,12 @@ public static class OcrCacheKeyDeriver
     private static string ImageMaterial(OcrImage image)
     {
         var pixelHash = Convert.ToHexString(SHA256.HashData(image.Pixels.Span)).ToLowerInvariant();
+        string bgrMaterial = image.BgrPixels is null
+            ? "no_bgr"
+            : $"bgr24,{image.BgrPixels.Stride}:{Convert.ToHexString(SHA256.HashData(image.BgrPixels.Pixels.Span)).ToLowerInvariant()}";
         return string.Create(
             CultureInfo.InvariantCulture,
-            $"{image.SourceImage}:{image.Width},{image.Height},{image.Stride}:{image.OriginalToImage.ScaleX:R},{image.OriginalToImage.ScaleY:R},{image.OriginalToImage.OffsetX:R},{image.OriginalToImage.OffsetY:R}:{image.CanonicalOriginalWidth?.ToString(CultureInfo.InvariantCulture) ?? "unspecified"},{image.CanonicalOriginalHeight?.ToString(CultureInfo.InvariantCulture) ?? "unspecified"}:{pixelHash}");
+            $"{image.SourceImage}:{image.Width},{image.Height},{image.Stride}:{image.OriginalToImage.ScaleX:R},{image.OriginalToImage.ScaleY:R},{image.OriginalToImage.OffsetX:R},{image.OriginalToImage.OffsetY:R}:{image.CanonicalOriginalWidth?.ToString(CultureInfo.InvariantCulture) ?? "unspecified"},{image.CanonicalOriginalHeight?.ToString(CultureInfo.InvariantCulture) ?? "unspecified"}:{pixelHash}:{bgrMaterial}");
     }
 
     private static string RectangleMaterial(OcrRectangle rectangle) =>

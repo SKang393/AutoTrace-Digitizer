@@ -5,6 +5,12 @@ using System.Collections;
 
 namespace GraphReader.Ocr;
 
+public enum OcrTensorColorMode
+{
+    GrayscaleReplicated,
+    Bgr,
+}
+
 public static class OcrContract
 {
     public const int Version = 1;
@@ -144,7 +150,16 @@ public sealed record OcrImage(
     OcrFrameTransform OriginalToImage,
     string CoordinateSpace = OcrContract.CoordinateSpace,
     int? CanonicalOriginalWidth = null,
-    int? CanonicalOriginalHeight = null);
+    int? CanonicalOriginalHeight = null,
+    OcrBgrBytePixels? BgrPixels = null);
+
+/// <summary>
+/// Optional interleaved BGR24 pixels retained alongside the canonical Gray8
+/// OCR plane. The separate plane lets graph-structure code keep its stable
+/// grayscale contract while color-sensitive production models consume the
+/// exact channel order declared by their manifests.
+/// </summary>
+public sealed record OcrBgrBytePixels(int Stride, ReadOnlyMemory<byte> Pixels);
 
 public sealed record OcrRegionEvidence(
     int ComponentCount,
@@ -179,7 +194,13 @@ public sealed record OcrCrop(
     int Height,
     ReadOnlyMemory<float> Pixels,
     string CropSha256,
-    OcrPolygon OriginalPolygon);
+    OcrPolygon OriginalPolygon,
+    OcrBgrFloatPixels? BgrPixels = null);
+
+/// <summary>
+/// Optional interleaved BGR crop samples normalized to [0,1].
+/// </summary>
+public sealed record OcrBgrFloatPixels(int Stride, ReadOnlyMemory<float> Pixels);
 
 public sealed record OcrRecognitionAlternative(
     string Text,
@@ -241,7 +262,10 @@ public sealed record OcrCacheDiagnostics(
 /// Optional checksum-bound derivative used only for text-region detection.
 /// Recognition crops always come from <see cref="OcrRequest.OriginalImage"/>.
 /// </summary>
-public sealed record OcrDetectorImage(OcrImage Image, string PixelSha256);
+public sealed record OcrDetectorImage(
+    OcrImage Image,
+    string PixelSha256,
+    string? BgrPixelSha256 = null);
 
 public sealed record OcrRequest(
     string ProjectId,

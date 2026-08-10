@@ -90,6 +90,12 @@ public static class OcrCropBatcher
                 options.PaddingValue,
                 checked(options.TargetWidth * options.TargetHeight))
             .ToArray();
+        float[]? bgrOutput = image.BgrPixels is null
+            ? null
+            : Enumerable.Repeat(
+                    options.PaddingValue,
+                    checked(options.TargetWidth * options.TargetHeight * 3))
+                .ToArray();
         for (var targetY = 0; targetY < options.TargetHeight; targetY++)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -100,8 +106,20 @@ public static class OcrCropBatcher
                 var original = MapSample(padded, u, v, orientation);
                 var source = image.OriginalToImage.MapFromOriginal(original);
                 output[(targetY * options.TargetWidth) + targetX] = Sample(image, source.X, source.Y);
+                if (bgrOutput is not null)
+                {
+                    int targetOffset = checked(((targetY * options.TargetWidth) + targetX) * 3);
+                    for (int channel = 0; channel < 3; channel++)
+                    {
+                        bgrOutput[targetOffset + channel] = SampleBgr(image, source.X, source.Y, channel);
+                    }
+                }
             }
         }
+
+        var bgrPixels = bgrOutput is null
+            ? null
+            : new OcrBgrFloatPixels(checked(options.TargetWidth * 3), bgrOutput);
 
         return new OcrCrop(
             region.RegionId,
@@ -109,8 +127,9 @@ public static class OcrCropBatcher
             options.TargetWidth,
             options.TargetHeight,
             output,
-            HashCrop(output, image.SourceImage, options.TargetWidth, options.TargetHeight),
-            region.Polygon);
+            HashCrop(output, bgrOutput, image.SourceImage, options.TargetWidth, options.TargetHeight),
+            region.Polygon,
+            bgrPixels);
     }
 
     private static int ContentWidth(
@@ -176,8 +195,29 @@ public static class OcrCropBatcher
         return (float)(((top * (1 - yWeight)) + (bottom * yWeight)) / 255d);
     }
 
+    private static float SampleBgr(OcrImage image, double x, double y, int channel)
+    {
+        OcrBgrBytePixels bgr = image.BgrPixels ??
+            throw new InvalidOperationException("BGR sampling requires a BGR24 image plane.");
+        double boundedX = Math.Clamp(x, 0, image.Width - 1d);
+        double boundedY = Math.Clamp(y, 0, image.Height - 1d);
+        int x0 = (int)Math.Floor(boundedX);
+        int y0 = (int)Math.Floor(boundedY);
+        int x1 = Math.Min(x0 + 1, image.Width - 1);
+        int y1 = Math.Min(y0 + 1, image.Height - 1);
+        double xWeight = boundedX - x0;
+        double yWeight = boundedY - y0;
+        ReadOnlySpan<byte> pixels = bgr.Pixels.Span;
+        double top = (pixels[(y0 * bgr.Stride) + (x0 * 3) + channel] * (1 - xWeight)) +
+            (pixels[(y0 * bgr.Stride) + (x1 * 3) + channel] * xWeight);
+        double bottom = (pixels[(y1 * bgr.Stride) + (x0 * 3) + channel] * (1 - xWeight)) +
+            (pixels[(y1 * bgr.Stride) + (x1 * 3) + channel] * xWeight);
+        return (float)(((top * (1 - yWeight)) + (bottom * yWeight)) / 255d);
+    }
+
     private static string HashCrop(
         ReadOnlySpan<float> values,
+        float[]? bgrValues,
         OcrSourceImage source,
         int width,
         int height)
@@ -194,6 +234,17 @@ public static class OcrCropBatcher
         {
             BinaryPrimitives.WriteSingleLittleEndian(integer, value);
             hash.AppendData(integer);
+        }
+
+        BinaryPrimitives.WriteInt32LittleEndian(integer, bgrValues is null ? 0 : 3);
+        hash.AppendData(integer);
+        if (bgrValues is not null)
+        {
+            foreach (float value in bgrValues)
+            {
+                BinaryPrimitives.WriteSingleLittleEndian(integer, value);
+                hash.AppendData(integer);
+            }
         }
 
         return Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant();
@@ -218,6 +269,13 @@ public static class OcrCropBatcher
             !float.IsFinite(options.PaddingValue) || options.PaddingValue is < 0 or > 1)
         {
             throw new ArgumentOutOfRangeException(nameof(options));
+        }
+
+        if (image.BgrPixels is { } bgr &&
+            (bgr.Stride < checked(image.Width * 3) ||
+             bgr.Pixels.Length != checked(bgr.Stride * image.Height)))
+        {
+            throw new ArgumentException("OCR BGR24 dimensions, stride, or pixel buffer are invalid.", nameof(image));
         }
     }
 }

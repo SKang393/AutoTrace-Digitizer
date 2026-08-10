@@ -544,6 +544,45 @@ public sealed class ApplicationCompositionSmokeTests
     }
 
     [TestMethod]
+    [DataRow(false, null, "channel_order")]
+    [DataRow(false, "RGB", "channel_order")]
+    [DataRow(true, null, "channels")]
+    [DataRow(true, "BGR", "channels")]
+    public async Task OcrPairWithoutExactBgrOrderFailsClosedBeforeRuntimeInitialization(
+        bool grayscaleChannels,
+        string? channelOrder,
+        string expectedField)
+    {
+        using var package = ApprovedOcrPairPackageFixture.Create(
+            channelOrder: channelOrder,
+            grayscaleChannels: grayscaleChannels);
+
+        ApplicationCompositionResult composition = await ApplicationComposition.CreateAsync(
+            WorkflowRuntimeEnvironment.Production,
+            new ModelRootApplicationPaths(package.Root),
+            cancellationToken: CancellationToken.None);
+        try
+        {
+            var workspace = Assert.IsInstanceOfType<ProductionWorkspaceService>(composition.WorkspaceService);
+            Assert.IsNull(composition.OcrAdapter);
+            Assert.AreEqual("OCR_ADAPTER_UNAVAILABLE", composition.StartupError?.Code);
+            StringAssert.Contains(composition.StartupError?.TechnicalMessage, expectedField);
+            Assert.AreEqual(
+                AutomaticStageState.Unavailable,
+                workspace.AutomaticStages.Single(stage => stage.Stage == "ocr").State);
+            Assert.IsNotNull(composition.InferenceRuntimeHost);
+            Assert.IsFalse(composition.InferenceRuntimeHost.IsInitialized);
+        }
+        finally
+        {
+            if (composition.InferenceRuntimeHost is not null)
+            {
+                await composition.InferenceRuntimeHost.DisposeAsync();
+            }
+        }
+    }
+
+    [TestMethod]
     public async Task OcrPairWithoutPassingDirectPublicGateEvidenceFailsClosed()
     {
         using var package = ApprovedOcrPairPackageFixture.Create(failingCer: true);
@@ -1407,7 +1446,9 @@ public sealed class ApplicationCompositionSmokeTests
             bool failingCer = false,
             bool negativeParity = false,
             bool invalidOnnxPayload = false,
-            bool tamperPredictions = false)
+            bool tamperPredictions = false,
+            string? channelOrder = "BGR",
+            bool grayscaleChannels = false)
         {
             string root = Path.Combine(
                 Path.GetTempPath(),
@@ -1438,7 +1479,9 @@ public sealed class ApplicationCompositionSmokeTests
                 recognitionSha256,
                 invalidDetectionShape,
                 alphabet,
-                evidence);
+                evidence,
+                channelOrder,
+                grayscaleChannels);
             Dictionary<string, object?> recognition = WriteModel(
                 root,
                 "fixture-ocr-recognition",
@@ -1448,7 +1491,9 @@ public sealed class ApplicationCompositionSmokeTests
                 recognitionSha256,
                 invalidDetectionShape: false,
                 alphabet,
-                evidence);
+                evidence,
+                channelOrder,
+                grayscaleChannels);
             var index = new Dictionary<string, object?>
             {
                 ["schema_version"] = 1,
@@ -1470,7 +1515,9 @@ public sealed class ApplicationCompositionSmokeTests
             string recognitionSha256,
             bool invalidDetectionShape,
             string alphabet,
-            OcrEvidenceFixture evidence)
+            OcrEvidenceFixture evidence,
+            string? channelOrder,
+            bool grayscaleChannels)
         {
             const string version = "1.0.0";
             string runtimeDirectory = Path.Combine(root, "runtime", modelId, version);
@@ -1494,7 +1541,9 @@ public sealed class ApplicationCompositionSmokeTests
             string evidencePath = Path.Combine(evidenceDirectory, "fixture-benchmark.json");
             File.WriteAllBytes(evidencePath, evidence.ReportBytes);
             string evidenceSha256 = Sha256(evidencePath);
-            object[] channels = ["grayscale", "grayscale", "grayscale"];
+            object[] channels = grayscaleChannels
+                ? ["grayscale", "grayscale", "grayscale"]
+                : ["b", "g", "r"];
             object[] inputs;
             object[] outputs;
             Dictionary<string, object?> preprocessing;
@@ -1533,6 +1582,10 @@ public sealed class ApplicationCompositionSmokeTests
                     ["channel_means"] = new[] { 0.485f, 0.456f, 0.406f },
                     ["channel_scales"] = new[] { 1f / 0.229f, 1f / 0.224f, 1f / 0.225f },
                 };
+                if (channelOrder is not null)
+                {
+                    preprocessing["channel_order"] = channelOrder;
+                }
                 postprocessing = new Dictionary<string, object?>
                 {
                     ["algorithm"] = "dense_probability_components_v1",
@@ -1575,6 +1628,10 @@ public sealed class ApplicationCompositionSmokeTests
                     ["channel_means"] = new[] { 0.5f, 0.5f, 0.5f },
                     ["channel_scales"] = new[] { 2f, 2f, 2f },
                 };
+                if (channelOrder is not null)
+                {
+                    preprocessing["channel_order"] = channelOrder;
+                }
                 postprocessing = new Dictionary<string, object?>
                 {
                     ["algorithm"] = "ctc_greedy_alternatives_v1",

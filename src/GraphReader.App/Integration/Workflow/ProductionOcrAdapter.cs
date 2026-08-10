@@ -165,13 +165,23 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
                 OcrSourceImage.Original,
                 OcrFrameTransform.Identity,
                 CanonicalOriginalWidth: detectorProbeSize,
-                CanonicalOriginalHeight: detectorProbeSize);
+                CanonicalOriginalHeight: detectorProbeSize,
+                BgrPixels: detectorOptions.InputColorMode == OcrTensorColorMode.Bgr
+                    ? new OcrBgrBytePixels(
+                        detectorProbeSize * 3,
+                        new byte[detectorProbeSize * detectorProbeSize * 3])
+                    : null);
             _ = await detector.DetectAsync(detectorImage, cancellationToken).ConfigureAwait(false);
 
             var recognizer = new LocalOnnxTextRecognizer(
                 runtime,
                 recognizerOptions with { BypassCache = true });
             var cropPixels = new float[checked(recognizerOptions.InputWidth * recognizerOptions.InputHeight)];
+            OcrBgrFloatPixels? bgrCropPixels = recognizerOptions.InputColorMode == OcrTensorColorMode.Bgr
+                ? new OcrBgrFloatPixels(
+                    recognizerOptions.InputWidth * 3,
+                    new float[checked(cropPixels.Length * 3)])
+                : null;
             string cropSha256 = Convert.ToHexStringLower(
                 SHA256.HashData(new byte[checked(cropPixels.Length * sizeof(float))]));
             OcrPolygon polygon = OcrPolygon.FromRectangle(new OcrRectangle(
@@ -182,9 +192,9 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
             OcrCrop[] crops =
             [
                 new("probe-1", OcrSourceImage.Original, recognizerOptions.InputWidth,
-                    recognizerOptions.InputHeight, cropPixels, cropSha256, polygon),
+                    recognizerOptions.InputHeight, cropPixels, cropSha256, polygon, bgrCropPixels),
                 new("probe-2", OcrSourceImage.Original, recognizerOptions.InputWidth,
-                    recognizerOptions.InputHeight, cropPixels, cropSha256, polygon),
+                    recognizerOptions.InputHeight, cropPixels, cropSha256, polygon, bgrCropPixels),
             ];
             IReadOnlyList<OcrRecognition> results = await recognizer
                 .RecognizeBatchAsync(crops, cancellationToken)
@@ -432,11 +442,7 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         RequireString(input, "element_type", "float32", "OCR detection input");
         RequireString(input, "layout", "NCHW", "OCR detection input");
         RequireShape(input, "shape", ["1", "3", "H", "W"], "OCR detection input");
-        RequireStringArray(
-            input,
-            "channels",
-            ["grayscale", "grayscale", "grayscale"],
-            "OCR detection input");
+        OcrTensorColorMode inputColorMode = ReadInputColorMode(input, "OCR detection input");
         RequireString(output, "element_type", "float32", "OCR detection output");
         RequireString(output, "layout", "NCHW", "OCR detection output");
         RequireShape(output, "shape", ["1", "1", "H", "W"], "OCR detection output");
@@ -451,6 +457,7 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         };
 
         JsonElement preprocessing = RequiredObject(root, "preprocessing", "OCR detection manifest");
+        RequireBgrChannelOrder(preprocessing, inputColorMode, "OCR detection preprocessing");
         float[] means = RequiredSingles(preprocessing, "channel_means", 3, "OCR detection preprocessing");
         float[] scales = RequiredSingles(preprocessing, "channel_scales", 3, "OCR detection preprocessing");
         JsonElement postprocessing = RequiredObject(root, "postprocessing", "OCR detection manifest");
@@ -471,6 +478,7 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
                 "OCR detection preprocessing"),
             InputChannels = 3,
             InputLayout = OcrTensorLayout.ChannelsFirst,
+            InputColorMode = inputColorMode,
             ChannelMeans = means,
             ChannelScales = scales,
             InputName = RequiredString(input, "name", "OCR detection input"),
@@ -527,11 +535,7 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
                 "OCR recognition input shape must be the reviewed [N,3,48,320] contract.");
         }
 
-        RequireStringArray(
-            input,
-            "channels",
-            ["grayscale", "grayscale", "grayscale"],
-            "OCR recognition input");
+        OcrTensorColorMode inputColorMode = ReadInputColorMode(input, "OCR recognition input");
         RequireString(output, "element_type", "float32", "OCR recognition output");
         string outputLayout = RequiredString(output, "layout", "OCR recognition output");
         OcrOutputLayout runtimeOutputLayout = outputLayout switch
@@ -551,6 +555,7 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         int expectedTimeSteps = RequiredInt32(output, "time_steps", "OCR recognition output");
         int blankClassIndex = RequiredInt32(output, "blank_class_index", "OCR recognition output");
         JsonElement preprocessing = RequiredObject(root, "preprocessing", "OCR recognition manifest");
+        RequireBgrChannelOrder(preprocessing, inputColorMode, "OCR recognition preprocessing");
         float[] means = RequiredSingles(preprocessing, "channel_means", 3, "OCR recognition preprocessing");
         float[] scales = RequiredSingles(preprocessing, "channel_scales", 3, "OCR recognition preprocessing");
         JsonElement postprocessing = RequiredObject(root, "postprocessing", "OCR recognition manifest");
@@ -569,6 +574,7 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
             InputHeight = inputHeight,
             InputChannels = channels,
             InputLayout = OcrTensorLayout.ChannelsFirst,
+            InputColorMode = inputColorMode,
             OutputLayout = runtimeOutputLayout,
             ExpectedTimeSteps = expectedTimeSteps,
             BlankClassIndex = blankClassIndex,
@@ -681,6 +687,34 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
             throw new InvalidDataException(
                 $"{label} field '{propertyName}' does not match the frozen order.");
         }
+    }
+
+    private static OcrTensorColorMode ReadInputColorMode(JsonElement input, string label)
+    {
+        JsonElement values = RequiredArray(input, "channels", label);
+        string?[] actual = values.EnumerateArray()
+            .Select(static value => value.ValueKind == JsonValueKind.String ? value.GetString() : null)
+            .ToArray();
+        if (actual.SequenceEqual(new[] { "b", "g", "r" }, StringComparer.Ordinal))
+        {
+            return OcrTensorColorMode.Bgr;
+        }
+
+        throw new InvalidDataException(
+            $"{label} field 'channels' must use the frozen [b,g,r] production order.");
+    }
+
+    private static void RequireBgrChannelOrder(
+        JsonElement preprocessing,
+        OcrTensorColorMode colorMode,
+        string label)
+    {
+        if (colorMode != OcrTensorColorMode.Bgr)
+        {
+            throw new InvalidDataException($"{label} must select the BGR production color mode.");
+        }
+
+        RequireString(preprocessing, "channel_order", "BGR", label);
     }
 
     private static void RequireShape(

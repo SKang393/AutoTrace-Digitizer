@@ -143,6 +143,36 @@ public sealed class OcrCacheRegressionTests
         Assert.AreNotEqual(firstKey, secondKey);
     }
 
+    [TestMethod]
+    public void ColorOnlyChangeInvalidatesRequestAlias()
+    {
+        var recognizer = new StubTextRecognizer(
+            new Dictionary<(string RegionId, OcrSourceImage Source), IReadOnlyList<OcrRecognitionAlternative>>());
+        OcrRequest baseline = OcrTestFixtures.Request();
+        int pixelCount = checked(baseline.OriginalImage.Width * baseline.OriginalImage.Height);
+        OcrImage firstImage = baseline.OriginalImage with
+        {
+            BgrPixels = new OcrBgrBytePixels(
+                baseline.OriginalImage.Width * 3,
+                new byte[pixelCount * 3]),
+        };
+        byte[] changed = new byte[pixelCount * 3];
+        changed[0] = 1;
+        OcrImage secondImage = firstImage with
+        {
+            BgrPixels = new OcrBgrBytePixels(baseline.OriginalImage.Width * 3, changed),
+        };
+        OcrRequest first = baseline with { OriginalImage = firstImage };
+        OcrRequest second = baseline with { OriginalImage = secondImage };
+
+        string firstKey = OcrCacheKeyDeriver.CreateRequestAlias(
+            first, recognizer, new OcrPipelineOptions(), "detector-v1");
+        string secondKey = OcrCacheKeyDeriver.CreateRequestAlias(
+            second, recognizer, new OcrPipelineOptions(), "detector-v1");
+
+        Assert.AreNotEqual(firstKey, secondKey);
+    }
+
     private static OcrDetectorImage DetectorImage(OcrImage image) => new(
         image,
         Convert.ToHexStringLower(SHA256.HashData(image.Pixels.Span)));

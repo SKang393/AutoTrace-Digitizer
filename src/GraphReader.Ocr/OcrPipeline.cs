@@ -946,14 +946,40 @@ public sealed class OcrPipeline
             image.OriginalToImage != original.OriginalToImage ||
             !string.Equals(image.CoordinateSpace, original.CoordinateSpace, StringComparison.Ordinal) ||
             image.CanonicalOriginalWidth != original.CanonicalOriginalWidth ||
-            image.CanonicalOriginalHeight != original.CanonicalOriginalHeight)
+            image.CanonicalOriginalHeight != original.CanonicalOriginalHeight ||
+            (image.BgrPixels is null) != (original.BgrPixels is null))
         {
             return false;
         }
 
         string actual = Convert.ToHexStringLower(
             System.Security.Cryptography.SHA256.HashData(image.Pixels.Span));
-        return string.Equals(actual, detector.PixelSha256, StringComparison.OrdinalIgnoreCase);
+        if (!string.Equals(actual, detector.PixelSha256, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (image.BgrPixels is null)
+        {
+            return detector.BgrPixelSha256 is null;
+        }
+
+        OcrBgrBytePixels bgr = image.BgrPixels;
+        if (bgr.Stride < checked(image.Width * 3) ||
+            bgr.Pixels.Length != checked(bgr.Stride * image.Height) ||
+            string.IsNullOrWhiteSpace(detector.BgrPixelSha256) ||
+            detector.BgrPixelSha256.Length != 64 ||
+            !detector.BgrPixelSha256.All(Uri.IsHexDigit))
+        {
+            return false;
+        }
+
+        string actualBgr = Convert.ToHexStringLower(
+            System.Security.Cryptography.SHA256.HashData(bgr.Pixels.Span));
+        return string.Equals(
+            actualBgr,
+            detector.BgrPixelSha256,
+            StringComparison.OrdinalIgnoreCase);
     }
 
     private static void ValidateDetectedRegions(IReadOnlyList<OcrDetectedRegion> regions)
