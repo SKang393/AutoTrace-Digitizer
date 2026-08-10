@@ -98,10 +98,12 @@ def test_p2_fixed_pool_exports_with_the_frozen_tensor_contract() -> None:
     assert model.export_contract()["architecture"] == "line-aware-dual-branch-patch-cnn-v2-export-safe"
 
 
-def test_protocol_is_fail_closed_and_p3_only() -> None:
+def test_protocol_is_fail_closed_with_p3_public_gate_only() -> None:
     protocol = json.loads((REPO_ROOT / "ml/markers/center/line_aware_v1/PROTOCOL.json").read_text(encoding="utf-8"))
-    assert protocol["currently_preregistered_candidate"] == "P3"
-    assert protocol["consumed_candidates"] == ["P1", "P2"]
+    assert protocol["currently_preregistered_candidate"] is None
+    assert protocol["selected_candidate"] == "P3"
+    assert protocol["sealed_public_gate_authorized"] is True
+    assert protocol["consumed_candidates"] == ["P1", "P2", "P3"]
     assert protocol["experiment_budget"] == 3
     assert protocol["prior_candidate_bytes_reused"] is False
     assert protocol["public_gate_budget"] == 1
@@ -132,11 +134,11 @@ def test_frozen_split_and_budget_bind_the_single_authorized_candidate() -> None:
     assert config["weights_changed"] is False
     ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-line-aware-v1")
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["status"] == "candidate_3_selected_public_gate_authorized"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["candidate_config_sha256"]["P3"] == sha256_file(config_path)
     assert entry["p1_training_report_sha256"] == "9e3bee532c852ba13c3bdde9390ab9dcbf1a1fcf091072f802dddefe20b6d56c"
     assert entry["p1_training_opened_seal_sha256"] == sha256_file(
@@ -157,4 +159,21 @@ def test_frozen_split_and_budget_bind_the_single_authorized_candidate() -> None:
     assert entry["p2_checkpoint_sha256"] == config["source_checkpoint_sha256"]
     assert entry["p2_onnx_sha256"] == config["source_onnx_sha256"]
     assert entry["p2_public_gate_evaluations"] == 0
-    assert entry["public_gate_authorized"] is False
+    assert entry["p3_training_report_sha256"] == "7f1ddf0955dbc3de85c8ede6a8bb874a89d68428dd1b9cdbbd391ebc09d9cdfc"
+    assert entry["p3_training_opened_seal_sha256"] == sha256_file(
+        REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-line-aware-v1/P3/opened.json"
+    )
+    assert entry["p3_training_result_seal_sha256"] == sha256_file(
+        REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-line-aware-v1/P3/result.json"
+    )
+    assert entry["p3_selection_exact_scene_count"] == entry["p3_selection_scene_count"] == 9
+    assert entry["p3_selection_true_positives"] == 63
+    assert entry["p3_selection_false_positives"] == 0
+    assert entry["p3_selection_false_negatives"] == 0
+    assert entry["p3_optimizer_steps"] == 0
+    assert entry["p3_weights_changed"] is False
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_candidate_id"] == "P3"
+    assert entry["public_gate_authorized_onnx_sha256"] == entry["p3_onnx_sha256"]
+    assert entry["public_gate_authorized_training_report_sha256"] == entry["p3_training_report_sha256"]
+    assert entry["public_gate_evaluations"] == 0

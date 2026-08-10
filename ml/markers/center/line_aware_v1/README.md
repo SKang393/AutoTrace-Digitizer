@@ -20,10 +20,14 @@ procedural families. P2 passed CPU ONNX parity at `8.270144462585449e-07`
 with zero false positives, duplicates, or prohibited hits, but missed four of
 63 validation markers. It opened no public fixture and is consumed.
 
-P3 is the only authorized candidate. A single bounded validation diagnostic
+P3 consumed the final candidate slot. A single bounded validation diagnostic
 found that the exact P2 payload passes all nine scenes at thresholds `0.03`,
 `0.05`, and `0.07`. P3 freezes the most conservative passing value, `0.07`,
-and reuses the exact P2 checkpoint and ONNX with zero optimizer steps.
+and reuses the exact P2 checkpoint and ONNX with zero optimizer steps. It
+reproduced all nine exact selection scenes and all 63 markers with zero false
+positives, misses, duplicates, or prohibited hits. CPU ONNX parity passed at
+`8.270144462585449e-07`. The single truth-hidden public evaluation is now
+authorized but has not run.
 
 The truth-hidden public archive is generated once before training and can be
 opened once only after a candidate passes every selection scene and CPU ONNX
