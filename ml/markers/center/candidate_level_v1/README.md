@@ -29,9 +29,14 @@ model-store, provider, packaging, and clean-machine gates all pass.
   selection manifest before training.
 - Training can inspect only train and validation data. It verifies the sealed
   archive checksum but does not open its contents.
-- The candidate budget is three. Only P1 is preregistered. P2 or P3 requires a
-  documented trigger, isolated change, new config, and a committed ledger
-  update after the prior candidate result.
+- The candidate budget is three. P1 is consumed and cannot rerun. It completed
+  60 frozen epochs, then its saved checkpoint produced zero exact validation
+  scenes, 134 false positives, and seven duplicates at threshold `0.7`. Its
+  ONNX export also failed because adaptive `5 x 5` to `3 x 3` pooling is not
+  supported by the pinned exporter. No sealed fixture was opened.
+- Only P2 is now preregistered. It keeps the tensor and public contracts, uses
+  an export-safe fixed spatial pool, and adds one deterministic hard-negative
+  refinement phase using train scenes only. P3 remains unregistered.
 - Selection compares only the preregistered thresholds. The sealed public gate
   opens once for the exact selected ONNX hash.
 - Approval requires exact counts in every scene, zero false positives, zero

@@ -6,8 +6,12 @@
   "prior_revision": "marker-center-production-repair-v2",
   "prior_revision_reuse": false,
   "experiment_budget": 3,
-  "currently_preregistered_candidate": "P1",
-  "architecture": "candidate-spatial-patch-cnn-v1",
+  "currently_preregistered_candidate": "P2",
+  "architecture": "candidate-spatial-patch-cnn-v2-export-safe",
+  "consumed_candidates": {
+    "P1": "failed frozen validation with 0 of 9 exact scenes, 134 false positives, and 7 duplicates at threshold 0.7; then failed ONNX export at unsupported adaptive 5-to-3 pooling"
+  },
+  "p2_isolated_change": "fixed export-safe spatial pool plus one deterministic train-split hard-negative refinement phase with unweighted classification loss",
   "input_contract": {
     "name": "candidate_patches",
     "shape": ["candidate_count", 3, 33, 33],
