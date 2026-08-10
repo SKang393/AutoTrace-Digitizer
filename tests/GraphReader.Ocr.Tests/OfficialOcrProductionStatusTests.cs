@@ -62,7 +62,7 @@ public sealed class OfficialOcrProductionStatusTests
     }
 
     [TestMethod]
-    public void StructureConsensusCandidateIsPreregisteredAndSourceBoundBeforeInference()
+    public void StructureConsensusRunRemainsSourceBoundAndRecordedAsFailedClosed()
     {
         string root = FindRepositoryRoot();
         string protocolPath = Path.Combine(
@@ -119,11 +119,27 @@ public sealed class OfficialOcrProductionStatusTests
             "ocr",
             "official_bakeoff",
             "README.md"));
-        StringAssert.Contains(readme, "The evaluator and C# approval gate are now");
+        StringAssert.Contains(readme, "The authoritative 500-case split was frozen once before inference");
+        StringAssert.Contains(
+            readme,
+            "8685a3dfcb8212f612115c20d0f70437e0738fa1c4d86743cfd0e50bc5a41a8d");
         StringAssert.Contains(readme, "frozen and checksum-bound");
-        StringAssert.Contains(readme, "No fixtures have been generated");
-        StringAssert.Contains(readme, "executed at this checkpoint");
-        StringAssert.Contains(readme, "must not be rerun");
+        StringAssert.Contains(readme, "The single authorized official composition execution then failed closed");
+        StringAssert.Contains(readme, "BLOCKED: Detector output is not a probability tensor.");
+        StringAssert.Contains(readme, "must not be rerun, repaired, or tuned");
+        StringAssert.Contains(readme, "release authorization therefore remain false");
+
+        string evaluationRequirements = File.ReadAllText(Path.Combine(
+            root,
+            "ml",
+            "ocr",
+            "official_bakeoff",
+            "requirements-structure-consensus.txt"));
+        StringAssert.Contains(evaluationRequirements, "-r requirements-conversion.txt");
+        StringAssert.Contains(evaluationRequirements, "opencv-python-headless==4.10.0.84");
+        StringAssert.Contains(
+            evaluationRequirements,
+            "afcf28bd1209dd58810d33defb622b325d3cbe49dcd7a43a902982c33e5fad05");
     }
 
     private const string ProductionOcrProfile =

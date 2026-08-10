@@ -171,7 +171,7 @@ original bytes.
 The new protocol forbids the exposed 220-case split and Chandler, freezes a new
 public validation and inference-locked sealed split, retains the original OCR
 quality thresholds, adds zero-duplicate and zero-exclusion-hit requirements,
-and permits exactly one evaluation. The evaluator and C# approval gate are now
+and permits exactly one evaluation. The evaluator and C# approval gate were
 frozen and checksum-bound before any model execution. They rederive the
 one-to-one structure consensus, truth matching, duplicate counts, source BGR
 pixels, and axis/tick/divider-masked detector BGR pixels from embedded fixture
@@ -181,7 +181,23 @@ vertical-glyph grouping and rejects every embedded resource above the C# gate's
 result file. Because the three-candidate marker-center budget is exhausted and
 the selected P3 candidate remains rejected, the official OCR run must record
 `marker_creation_evaluated=false` and cannot approve even if its OCR metrics
-pass. No fixtures have been generated and no official composition has been
-executed at this checkpoint. Once the split is frozen, the official composition
-must not be rerun or tuned. Production approval, manifests, model-store
-promotion, package discovery, and release authorization therefore remain false.
+pass.
+
+The authoritative 500-case split was frozen once before inference at SHA-256
+`8685a3dfcb8212f612115c20d0f70437e0738fa1c4d86743cfd0e50bc5a41a8d`.
+Its 1,732,541-byte fixture archive has SHA-256
+`6bd83d6b05918a6829a99e4cfecbb5af0e0629c458242398429856baae5e02b2`,
+and post-freeze verification passed. `requirements-structure-consensus.txt`
+extends the exact conversion lock with evaluation-only
+`opencv-python-headless` `4.10.0.84`; the reviewed wheel SHA-256 is
+`afcf28bd1209dd58810d33defb622b325d3cbe49dcd7a43a902982c33e5fad05`.
+
+The single authorized official composition execution then failed closed on the
+first detector inference because the exact detector output violated the frozen
+probability-tensor range contract. The evaluator emitted
+`BLOCKED: Detector output is not a probability tensor.` before creating its
+output root or report. The consumed run must not be rerun, repaired, or tuned
+against these exposed fixtures. The ignored failure record has SHA-256
+`b14dd36632224254933fad9c826ab80298e25371a0e32040bcab66a4684fd4e0`.
+Production approval, manifests, model-store promotion, package discovery, and
+release authorization therefore remain false.

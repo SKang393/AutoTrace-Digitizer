@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sungwoo Kang
+
+# Evaluation-only Windows x64 CPU toolchain. The conversion dependencies remain
+# hash-locked by the included file. OpenCV supplies the preregistered DB and
+# connected-component postprocessing and never enters the application payload.
+-r requirements-conversion.txt
+
+opencv-python-headless==4.10.0.84 \
+    --hash=sha256:afcf28bd1209dd58810d33defb622b325d3cbe49dcd7a43a902982c33e5fad05

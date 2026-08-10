@@ -9,20 +9,21 @@ Copyright 2026 Sungwoo Kang
 
 The official PP-OCRv5 pair completed the one authorized legacy dense-detector
 public synthetic evaluation and failed the fixed production gates. The distinct
-source-bound structure-consensus composition is frozen before its new split or
-one allowed execution. There is no tracked OCR model manifest, no approved
+source-bound structure-consensus composition also consumed its one allowed
+execution and failed closed before report creation. There is no tracked OCR
+model manifest, no approved
 benchmark report, and no OCR payload in the production model store or a release
 package. The reviewed Apache-2.0 license and ONNX change-notice bundle exists,
 but it has not been bound through a model-store index or package. This is an
 intentional fail-closed state.
 
-The preregistered structure-consensus workflow now matches the production
+The preregistered structure-consensus workflow matches the production
 vertical-glyph grouping, enforces the C# gate's 8 MiB limit for every embedded
 resource, and does not accept an external precomputed marker-result file. The
 marker-center P1 through P3 budget is exhausted and P3 remains rejected after
-one false positive in its once-only public gate. The official OCR evaluation
-must therefore report `marker_creation_evaluated=false` and cannot approve,
-even if all OCR-only metrics pass.
+one false positive in its once-only public gate. The official OCR execution
+failed earlier at the detector probability-tensor contract, so no OCR metrics
+or marker-stage result was emitted and approval remains impossible.
 
 | Task | Model | Converted ONNX SHA-256 | Current status |
 | --- | --- | --- | --- |
@@ -55,6 +56,34 @@ and produced false regions on 7 of 20 exclusion fixtures. Independent composed
 marker-stage evidence was not available, so `marker_creation_evaluated=false`.
 ONNX parity remained passing at maximum absolute error
 `2.205371856689453e-06`.
+
+## Structure-consensus execution result
+
+The new public validation and inference-locked sealed split was frozen once
+before model execution with 200 text and 50 exclusion cases in each partition.
+No private image or Chandler data was used. The 1,289,983-byte split SHA-256 is
+`8685a3dfcb8212f612115c20d0f70437e0738fa1c4d86743cfd0e50bc5a41a8d`.
+Its 1,732,541-byte fixture archive SHA-256 is
+`6bd83d6b05918a6829a99e4cfecbb5af0e0629c458242398429856baae5e02b2`.
+Post-freeze verification passed.
+
+The separate evaluation environment retained the exact conversion lock and
+added only evaluation-time `opencv-python-headless` `4.10.0.84` from wheel
+SHA-256 `afcf28bd1209dd58810d33defb622b325d3cbe49dcd7a43a902982c33e5fad05`.
+The exact detector and recognizer ONNX hashes remained unchanged. The single
+authorized official composition run began CPU inference, then failed with
+`BLOCKED: Detector output is not a probability tensor.` before it created an
+output root or report. The static ONNX graph still identifies a final `Sigmoid`
+producer for its sole output, but the executed tensor violated the exact frozen
+`[0,1]` range check. No minimum or maximum value was captured, so none is
+asserted. No metrics, predictions, parity pairs, marker evidence, manifest,
+store entry, or package evidence was emitted.
+
+The ignored failure record at
+`ml/ocr/official_bakeoff/runs/structure-consensus/official-evaluation-failure.json`
+has SHA-256 `b14dd36632224254933fad9c826ab80298e25371a0e32040bcab66a4684fd4e0`.
+The one-run budget is consumed. Do not rerun, repair, or tune this composition
+against the exposed 500-case split.
 
 ## Evidence that must exist before approval
 
