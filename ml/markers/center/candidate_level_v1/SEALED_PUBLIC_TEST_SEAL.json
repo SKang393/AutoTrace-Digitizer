@@ -1,0 +1,35 @@
+{
+  "chandler_included": false,
+  "dataset_revision": "marker-center-candidate-level-procedural-v1",
+  "degradation_ids": [
+    "resample_noise_public",
+    "high_contrast_public"
+  ],
+  "family_ids": [
+    "mixed_open_filled_public",
+    "stair_connector_public",
+    "clustered_generalization_public",
+    "small_marker_public"
+  ],
+  "fixture_archive_path": "ml/markers/center/artifacts/candidate-level-v1/split-freeze/sealed-public-fixtures.npz",
+  "fixture_archive_sha256": "99091ce6ec9608c1fc72bba7e8277f452ae9d13c4bfb04bbd259ccbc6c14b0c0",
+  "frozen_utc": "2026-08-10T15:50:46.626716+00:00",
+  "private_manifest_path": "ml/markers/center/artifacts/candidate-level-v1/split-freeze/sealed-public-private-manifest.json",
+  "private_manifest_sha256": "6232d1ab2a50479211ce6888e55a2d51471a870d0b679713dd7570d94091b768",
+  "private_or_article_images": false,
+  "private_seed_sha256": "23ae1e3a018f7719bf19230e7aca2c8aa1fd7ae966fe276a820412efc865bb2b",
+  "public_release_eligible": false,
+  "revision": "marker-center-candidate-level-v1",
+  "scene_count": 16,
+  "schema": "graphreader.marker-center-sealed-public-test-seal.v1",
+  "selection_manifest_path": "ml/markers/center/candidate_level_v1/SELECTION_MANIFEST.json",
+  "selection_manifest_sha256": "23cc48ceb322e50bc3dd3d054430270eb258e13bc2a24ddb2d3c674db3f7bec7",
+  "split_generator_source_bundle_sha256": "e8cd4517f0f0b16d2b5e8ff923cde8d6946c0672788ff026cc7f9473e716599e",
+  "split_generator_source_paths": [
+    "ml/markers/center/candidate_level_v1/dataset.py",
+    "ml/markers/center/candidate_level_v1/prepare_split.py"
+  ],
+  "synthetic_only": true,
+  "task": "marker-center",
+  "truth_hidden_from_training_runner": true
+}

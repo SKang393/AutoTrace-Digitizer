@@ -1,0 +1,47 @@
+{
+  "schema": "graphreader.marker-center-candidate-protocol.v1",
+  "task": "marker-center",
+  "revision": "marker-center-candidate-level-v1",
+  "defect_class": "candidate-level marker proposal classification and center regression",
+  "prior_revision": "marker-center-production-repair-v2",
+  "prior_revision_reuse": false,
+  "experiment_budget": 3,
+  "currently_preregistered_candidate": "P1",
+  "architecture": "candidate-spatial-patch-cnn-v1",
+  "input_contract": {
+    "name": "candidate_patches",
+    "shape": ["candidate_count", 3, 33, 33],
+    "channels": ["ink_probability", "text_mask", "artifact_mask"]
+  },
+  "output_contract": {
+    "name": "candidate_predictions",
+    "shape": ["candidate_count", 4],
+    "columns": ["marker_probability", "offset_x_grid", "offset_y_grid", "radius_pixels"]
+  },
+  "proposal_stride_pixels": 4,
+  "selection_thresholds": [0.4, 0.55, 0.7],
+  "sealed_gate_requirements": {
+    "exact_count_every_scene": true,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "duplicates": 0,
+    "prohibited_structure_hits": 0,
+    "onnx_parity_maximum_absolute_error": 0.00001,
+    "provider": "CPUExecutionProvider"
+  },
+  "prohibited_structures": [
+    "text",
+    "axis",
+    "tick",
+    "divider",
+    "bracket",
+    "arrowhead",
+    "legend",
+    "line_intersection"
+  ],
+  "private_or_article_images": false,
+  "chandler_included": false,
+  "public_contract_schema_changes": false,
+  "production_approval": false,
+  "release_eligible": false
+}

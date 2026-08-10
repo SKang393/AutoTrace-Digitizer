@@ -125,6 +125,47 @@
       "refusal_required_before_output": true
     },
     {
+      "task": "marker-center",
+      "revision": "marker-center-candidate-level-v1",
+      "status": "candidate_1_preregistered",
+      "defect_class": "candidate-level marker proposal classification and center regression",
+      "prior_revision": "marker-center-production-repair-v2",
+      "prior_revision_reuse": false,
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "candidate_config_paths": {
+        "P1": "ml/markers/center/candidate_level_v1/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "b97574b8ae48dde92b8a0cac4ad61d787e5736ca7029be54416d132f165123b1"
+      },
+      "selection_manifest_path": "ml/markers/center/candidate_level_v1/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "23cc48ceb322e50bc3dd3d054430270eb258e13bc2a24ddb2d3c674db3f7bec7",
+      "sealed_public_test_seal_path": "ml/markers/center/candidate_level_v1/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "e664f902c3e63e0df8becb348564b7a433f6117de5370620db99bbcb5b9f405f",
+      "sealed_public_fixture_archive_sha256": "99091ce6ec9608c1fc72bba7e8277f452ae9d13c4bfb04bbd259ccbc6c14b0c0",
+      "sealed_public_private_manifest_sha256": "6232d1ab2a50479211ce6888e55a2d51471a870d0b679713dd7570d94091b768",
+      "trigger_evidence_path": "ml/markers/center/artifacts/production-public-gate-v2-p3-20260804/public-gate-report.json",
+      "trigger_evidence_sha256": "6f92923bcc54dd60e4cb0e69a2ad759437abc99c0314e496c37b4c285bd99386",
+      "trigger_evidence": "The exhausted dense P3 candidate produced one false positive in public-stair after passing selection.",
+      "isolated_change": "replace dense stride-one center heads with candidate patch classification, sub-grid center regression, and radius regression",
+      "expected_runner_source_bundle_sha256": "f0ff20168119f1eede35899f09199b334a5b368b1d7d3e58c7c165051271e0e8",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "public_gate_authorized": false,
+      "public_gate_evaluations": 0,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
+    },
+    {
       "task": "marker-classifier",
       "revision": "marker-classifier-production-runtime-repair-v2",
       "status": "candidate_1_production_approved",

@@ -1,0 +1,7499 @@
+{
+  "cases": [
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          43.0,
+          102.0
+        ],
+        [
+          60.0,
+          93.0
+        ],
+        [
+          85.0,
+          77.0
+        ],
+        [
+          103.0,
+          66.0
+        ],
+        [
+          122.0,
+          57.0
+        ],
+        [
+          146.0,
+          70.0
+        ],
+        [
+          168.0,
+          84.0
+        ]
+      ],
+      "degradation": "clean_train",
+      "family": "rising_clusters_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 104.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0
+      ],
+      "scene_id": "train-rising_clusters_train-0",
+      "seed": 521000,
+      "split": "train",
+      "tensor_sha256": "3e0baf3298a4785fc7ea43b0fc74e19c618758914e5202858e3e6e6c3b76e2fa"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          44.0,
+          103.0
+        ],
+        [
+          63.0,
+          93.0
+        ],
+        [
+          82.0,
+          80.0
+        ],
+        [
+          106.0,
+          66.0
+        ],
+        [
+          127.0,
+          57.0
+        ],
+        [
+          144.0,
+          70.0
+        ],
+        [
+          167.0,
+          80.0
+        ]
+      ],
+      "degradation": "low_contrast_train",
+      "family": "rising_clusters_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 28.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 109.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0
+      ],
+      "scene_id": "train-rising_clusters_train-1",
+      "seed": 521001,
+      "split": "train",
+      "tensor_sha256": "dc7edf7a0e6a973647a28f8d9a1b144db9b28524e4870a64d43f53b20514e56c"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          42.0,
+          103.0
+        ],
+        [
+          61.0,
+          92.0
+        ],
+        [
+          85.0,
+          80.0
+        ],
+        [
+          103.0,
+          67.0
+        ],
+        [
+          124.0,
+          56.0
+        ],
+        [
+          145.0,
+          68.0
+        ],
+        [
+          166.0,
+          82.0
+        ]
+      ],
+      "degradation": "thin_scan_train",
+      "family": "rising_clusters_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 114.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        },
+        {
+          "kind": "line_intersection",
+          "x": 114.0,
+          "y": 61.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "line_intersection",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0
+      ],
+      "scene_id": "train-rising_clusters_train-2",
+      "seed": 521002,
+      "split": "train",
+      "tensor_sha256": "122efafff75874007e3961800d177e648d83ea583a8d3b09e350681ab162c632"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          43.0,
+          101.0
+        ],
+        [
+          65.0,
+          93.0
+        ],
+        [
+          83.0,
+          80.0
+        ],
+        [
+          106.0,
+          66.0
+        ],
+        [
+          123.0,
+          57.0
+        ],
+        [
+          145.0,
+          68.0
+        ],
+        [
+          166.0,
+          80.0
+        ]
+      ],
+      "degradation": "clean_train",
+      "family": "rising_clusters_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 28.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 104.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0
+      ],
+      "scene_id": "train-rising_clusters_train-3",
+      "seed": 521003,
+      "split": "train",
+      "tensor_sha256": "3f10deb36273f3b261731f95cb1d53b2f0c8379106f1b5d50fbc5667b956f3b2"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          43.0,
+          91.0
+        ],
+        [
+          60.0,
+          60.0
+        ],
+        [
+          81.0,
+          92.0
+        ],
+        [
+          102.0,
+          59.0
+        ],
+        [
+          124.0,
+          91.0
+        ],
+        [
+          143.0,
+          61.0
+        ],
+        [
+          165.0,
+          88.0
+        ]
+      ],
+      "degradation": "low_contrast_train",
+      "family": "alternating_plateau_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 104.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0
+      ],
+      "scene_id": "train-alternating_plateau_train-0",
+      "seed": 521100,
+      "split": "train",
+      "tensor_sha256": "9c3d013b75d198dfb1674fca7e10fd7c3b8b7ead0b3ea9730a2c8bc6f5c39f8c"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          44.0,
+          93.0
+        ],
+        [
+          65.0,
+          64.0
+        ],
+        [
+          85.0,
+          89.0
+        ],
+        [
+          105.0,
+          59.0
+        ],
+        [
+          124.0,
+          88.0
+        ],
+        [
+          148.0,
+          62.0
+        ],
+        [
+          169.0,
+          88.0
+        ]
+      ],
+      "degradation": "thin_scan_train",
+      "family": "alternating_plateau_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 28.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 109.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0
+      ],
+      "scene_id": "train-alternating_plateau_train-1",
+      "seed": 521101,
+      "split": "train",
+      "tensor_sha256": "ceb0c5ad7c0110b0b2e9dcc2fd65fe80f59ab631e3898a7a321b90ce9d5e6856"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          44.0,
+          94.0
+        ],
+        [
+          60.0,
+          64.0
+        ],
+        [
+          84.0,
+          93.0
+        ],
+        [
+          104.0,
+          62.0
+        ],
+        [
+          123.0,
+          92.0
+        ],
+        [
+          143.0,
+          62.0
+        ],
+        [
+          165.0,
+          87.0
+        ]
+      ],
+      "degradation": "clean_train",
+      "family": "alternating_plateau_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 114.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        },
+        {
+          "kind": "line_intersection",
+          "x": 114.0,
+          "y": 77.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "line_intersection",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0
+      ],
+      "scene_id": "train-alternating_plateau_train-2",
+      "seed": 521102,
+      "split": "train",
+      "tensor_sha256": "be55af2df88b283c0c71254d3567a44844d26d93af01408c5c5e68af810455c6"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          45.0,
+          94.0
+        ],
+        [
+          61.0,
+          63.0
+        ],
+        [
+          84.0,
+          93.0
+        ],
+        [
+          106.0,
+          63.0
+        ],
+        [
+          124.0,
+          92.0
+        ],
+        [
+          146.0,
+          62.0
+        ],
+        [
+          168.0,
+          90.0
+        ]
+      ],
+      "degradation": "low_contrast_train",
+      "family": "alternating_plateau_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 28.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 104.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0
+      ],
+      "scene_id": "train-alternating_plateau_train-3",
+      "seed": 521103,
+      "split": "train",
+      "tensor_sha256": "4ea0828f1a75d31ecce4b5a8e2dc3f5fbffb6ddcdf9bff03aa1c7e8422bb4464"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          42.0,
+          49.0
+        ],
+        [
+          61.0,
+          57.0
+        ],
+        [
+          81.0,
+          58.0
+        ],
+        [
+          105.0,
+          70.0
+        ],
+        [
+          122.0,
+          72.0
+        ],
+        [
+          145.0,
+          86.0
+        ],
+        [
+          165.0,
+          96.0
+        ]
+      ],
+      "degradation": "thin_scan_train",
+      "family": "descending_probe_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 104.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0
+      ],
+      "scene_id": "train-descending_probe_train-0",
+      "seed": 521200,
+      "split": "train",
+      "tensor_sha256": "f3de92fe1535e8355cd238d2a36babf09e970d5a8ae4c4572769af069659e298"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          41.0,
+          46.0
+        ],
+        [
+          64.0,
+          56.0
+        ],
+        [
+          84.0,
+          59.0
+        ],
+        [
+          103.0,
+          71.0
+        ],
+        [
+          123.0,
+          71.0
+        ],
+        [
+          145.0,
+          85.0
+        ],
+        [
+          166.0,
+          97.0
+        ]
+      ],
+      "degradation": "clean_train",
+      "family": "descending_probe_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 28.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 109.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0
+      ],
+      "scene_id": "train-descending_probe_train-1",
+      "seed": 521201,
+      "split": "train",
+      "tensor_sha256": "5650248557fb134674541464db8fd29d69b95d703428cbdad41cc2973f781f5a"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          41.0,
+          46.0
+        ],
+        [
+          60.0,
+          59.0
+        ],
+        [
+          85.0,
+          58.0
+        ],
+        [
+          102.0,
+          70.0
+        ],
+        [
+          123.0,
+          72.0
+        ],
+        [
+          147.0,
+          82.0
+        ],
+        [
+          165.0,
+          97.0
+        ]
+      ],
+      "degradation": "low_contrast_train",
+      "family": "descending_probe_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 114.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0
+      ],
+      "scene_id": "train-descending_probe_train-2",
+      "seed": 521202,
+      "split": "train",
+      "tensor_sha256": "37b486b76b6d8fc30fa2eda14b9b5ed9c02e40249de307d31d31a3514d1ded89"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          43.0,
+          47.0
+        ],
+        [
+          62.0,
+          56.0
+        ],
+        [
+          83.0,
+          56.0
+        ],
+        [
+          106.0,
+          71.0
+        ],
+        [
+          126.0,
+          70.0
+        ],
+        [
+          145.0,
+          82.0
+        ],
+        [
+          165.0,
+          97.0
+        ]
+      ],
+      "degradation": "thin_scan_train",
+      "family": "descending_probe_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 28.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 104.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0
+      ],
+      "scene_id": "train-descending_probe_train-3",
+      "seed": 521203,
+      "split": "train",
+      "tensor_sha256": "31ca515130639ae7480e1791902fbfaa0d4c1d135efc7fc0b7dfa199058b9a08"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          41.0,
+          93.0
+        ],
+        [
+          61.0,
+          84.0
+        ],
+        [
+          84.0,
+          72.0
+        ],
+        [
+          104.0,
+          71.0
+        ],
+        [
+          122.0,
+          57.0
+        ],
+        [
+          146.0,
+          60.0
+        ],
+        [
+          165.0,
+          44.0
+        ]
+      ],
+      "degradation": "clean_train",
+      "family": "shared_baseline_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 104.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0
+      ],
+      "scene_id": "train-shared_baseline_train-0",
+      "seed": 521300,
+      "split": "train",
+      "tensor_sha256": "7409ff620dfc7c83895afd98ea518d7cbf32a667c8307ba51ffc46ede25d447a"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          44.0,
+          92.0
+        ],
+        [
+          65.0,
+          85.0
+        ],
+        [
+          84.0,
+          74.0
+        ],
+        [
+          105.0,
+          72.0
+        ],
+        [
+          125.0,
+          60.0
+        ],
+        [
+          148.0,
+          56.0
+        ],
+        [
+          169.0,
+          45.0
+        ]
+      ],
+      "degradation": "low_contrast_train",
+      "family": "shared_baseline_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 28.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 109.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0
+      ],
+      "scene_id": "train-shared_baseline_train-1",
+      "seed": 521301,
+      "split": "train",
+      "tensor_sha256": "21dc1c3a24cd97f9dcbe8417b449e79b98e5033f7efee800bbe85a16788fcf7f"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          42.0,
+          94.0
+        ],
+        [
+          60.0,
+          86.0
+        ],
+        [
+          82.0,
+          71.0
+        ],
+        [
+          104.0,
+          72.0
+        ],
+        [
+          125.0,
+          57.0
+        ],
+        [
+          143.0,
+          56.0
+        ],
+        [
+          165.0,
+          45.0
+        ]
+      ],
+      "degradation": "thin_scan_train",
+      "family": "shared_baseline_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 114.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        },
+        {
+          "kind": "line_intersection",
+          "x": 114.0,
+          "y": 64.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "line_intersection",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0
+      ],
+      "scene_id": "train-shared_baseline_train-2",
+      "seed": 521302,
+      "split": "train",
+      "tensor_sha256": "be2f287d6cd1215bc1fbddd3e7f602166cb7e469b7d959a2977fba0e16566a3a"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          45.0,
+          96.0
+        ],
+        [
+          64.0,
+          86.0
+        ],
+        [
+          84.0,
+          72.0
+        ],
+        [
+          105.0,
+          72.0
+        ],
+        [
+          127.0,
+          56.0
+        ],
+        [
+          146.0,
+          56.0
+        ],
+        [
+          165.0,
+          43.0
+        ]
+      ],
+      "degradation": "clean_train",
+      "family": "shared_baseline_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 28.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 104.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0
+      ],
+      "scene_id": "train-shared_baseline_train-3",
+      "seed": 521303,
+      "split": "train",
+      "tensor_sha256": "f2405aa3c3c5b7d749ed62e3d879d4853aca90afe81629fb22513391bf2dba5d"
+    },
+    {
+      "center_count": 8,
+      "centers": [
+        [
+          44.0,
+          85.0
+        ],
+        [
+          59.0,
+          79.0
+        ],
+        [
+          75.0,
+          67.0
+        ],
+        [
+          95.0,
+          74.0
+        ],
+        [
+          113.0,
+          63.0
+        ],
+        [
+          129.0,
+          57.0
+        ],
+        [
+          147.0,
+          62.0
+        ],
+        [
+          162.0,
+          46.0
+        ]
+      ],
+      "degradation": "low_contrast_train",
+      "family": "dense_turn_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 104.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        },
+        {
+          "kind": "line_intersection",
+          "x": 104.0,
+          "y": 68.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "line_intersection",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0
+      ],
+      "scene_id": "train-dense_turn_train-0",
+      "seed": 521400,
+      "split": "train",
+      "tensor_sha256": "62848930c7f650da0471d2cd012af8a8a480017705fb3aad4aea9235bc24a8fa"
+    },
+    {
+      "center_count": 8,
+      "centers": [
+        [
+          46.0,
+          86.0
+        ],
+        [
+          61.0,
+          76.0
+        ],
+        [
+          79.0,
+          70.0
+        ],
+        [
+          97.0,
+          74.0
+        ],
+        [
+          110.0,
+          61.0
+        ],
+        [
+          127.0,
+          57.0
+        ],
+        [
+          148.0,
+          63.0
+        ],
+        [
+          165.0,
+          49.0
+        ]
+      ],
+      "degradation": "thin_scan_train",
+      "family": "dense_turn_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 28.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 109.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0
+      ],
+      "scene_id": "train-dense_turn_train-1",
+      "seed": 521401,
+      "split": "train",
+      "tensor_sha256": "8e3549d552e6cff4af4000dd25b4665ac6b47a41151bbd5dbab1905d61c99b9c"
+    },
+    {
+      "center_count": 8,
+      "centers": [
+        [
+          43.0,
+          87.0
+        ],
+        [
+          62.0,
+          79.0
+        ],
+        [
+          79.0,
+          69.0
+        ],
+        [
+          94.0,
+          76.0
+        ],
+        [
+          109.0,
+          64.0
+        ],
+        [
+          130.0,
+          57.0
+        ],
+        [
+          147.0,
+          63.0
+        ],
+        [
+          160.0,
+          47.0
+        ]
+      ],
+      "degradation": "clean_train",
+      "family": "dense_turn_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 114.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0
+      ],
+      "scene_id": "train-dense_turn_train-2",
+      "seed": 521402,
+      "split": "train",
+      "tensor_sha256": "664667ab1b6e6c08b17476eb61fc979d911ec2fb8830046c7c4d1f3961c475f4"
+    },
+    {
+      "center_count": 8,
+      "centers": [
+        [
+          44.0,
+          87.0
+        ],
+        [
+          63.0,
+          79.0
+        ],
+        [
+          80.0,
+          69.0
+        ],
+        [
+          96.0,
+          78.0
+        ],
+        [
+          113.0,
+          64.0
+        ],
+        [
+          127.0,
+          55.0
+        ],
+        [
+          148.0,
+          65.0
+        ],
+        [
+          163.0,
+          49.0
+        ]
+      ],
+      "degradation": "low_contrast_train",
+      "family": "dense_turn_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 28.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 104.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        },
+        {
+          "kind": "line_intersection",
+          "x": 104.0,
+          "y": 71.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "line_intersection",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0
+      ],
+      "scene_id": "train-dense_turn_train-3",
+      "seed": 521403,
+      "split": "train",
+      "tensor_sha256": "2d63ebd39f38efe23db7f9f112971ca1f892c3db5e6e33ebbe0afd396a80f22c"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          43.0,
+          87.0
+        ],
+        [
+          63.0,
+          73.0
+        ],
+        [
+          85.0,
+          61.0
+        ],
+        [
+          105.0,
+          77.0
+        ],
+        [
+          124.0,
+          56.0
+        ],
+        [
+          147.0,
+          72.0
+        ],
+        [
+          166.0,
+          48.0
+        ]
+      ],
+      "degradation": "thin_scan_train",
+      "family": "sparse_open_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 104.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0
+      ],
+      "scene_id": "train-sparse_open_train-0",
+      "seed": 521500,
+      "split": "train",
+      "tensor_sha256": "7b8fda76d91cc33ffe2340f865088b55adce94c0b38a7e19f3b2ba6479712822"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          42.0,
+          88.0
+        ],
+        [
+          62.0,
+          73.0
+        ],
+        [
+          86.0,
+          63.0
+        ],
+        [
+          106.0,
+          77.0
+        ],
+        [
+          126.0,
+          58.0
+        ],
+        [
+          147.0,
+          71.0
+        ],
+        [
+          166.0,
+          48.0
+        ]
+      ],
+      "degradation": "clean_train",
+      "family": "sparse_open_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 28.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 109.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0
+      ],
+      "scene_id": "train-sparse_open_train-1",
+      "seed": 521501,
+      "split": "train",
+      "tensor_sha256": "bdcf70f798de273032d19c721ca5195dad4a454757567bb2ff03aaeb862c6afc"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          44.0,
+          89.0
+        ],
+        [
+          64.0,
+          75.0
+        ],
+        [
+          83.0,
+          60.0
+        ],
+        [
+          105.0,
+          75.0
+        ],
+        [
+          125.0,
+          56.0
+        ],
+        [
+          143.0,
+          71.0
+        ],
+        [
+          168.0,
+          50.0
+        ]
+      ],
+      "degradation": "low_contrast_train",
+      "family": "sparse_open_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 114.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        },
+        {
+          "kind": "line_intersection",
+          "x": 114.0,
+          "y": 66.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "line_intersection",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0
+      ],
+      "scene_id": "train-sparse_open_train-2",
+      "seed": 521502,
+      "split": "train",
+      "tensor_sha256": "9461187ade949ae8054c9dee490e43aa77fd8e616d9725a3a00a0ca42fbb2452"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          44.0,
+          89.0
+        ],
+        [
+          61.0,
+          73.0
+        ],
+        [
+          83.0,
+          63.0
+        ],
+        [
+          107.0,
+          74.0
+        ],
+        [
+          123.0,
+          60.0
+        ],
+        [
+          146.0,
+          73.0
+        ],
+        [
+          169.0,
+          48.0
+        ]
+      ],
+      "degradation": "thin_scan_train",
+      "family": "sparse_open_train",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 28.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 104.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0
+      ],
+      "scene_id": "train-sparse_open_train-3",
+      "seed": 521503,
+      "split": "train",
+      "tensor_sha256": "38ab11656390152f76cbf4c499e4b6abfd69461d4a26c14f478a18ce2a3580ca"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          41.0,
+          105.0
+        ],
+        [
+          64.0,
+          90.0
+        ],
+        [
+          82.0,
+          78.0
+        ],
+        [
+          106.0,
+          69.0
+        ],
+        [
+          122.0,
+          57.0
+        ],
+        [
+          146.0,
+          70.0
+        ],
+        [
+          164.0,
+          81.0
+        ]
+      ],
+      "degradation": "box_blur_validation",
+      "family": "reversal_arc_validation",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 104.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0
+      ],
+      "scene_id": "validation-reversal_arc_validation-0",
+      "seed": 622000,
+      "split": "validation",
+      "tensor_sha256": "ba81844cef060ee1c65274db79192bac252a9c6653b8651eacc9d665826c30a4"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          41.0,
+          102.0
+        ],
+        [
+          64.0,
+          91.0
+        ],
+        [
+          84.0,
+          80.0
+        ],
+        [
+          103.0,
+          66.0
+        ],
+        [
+          126.0,
+          54.0
+        ],
+        [
+          144.0,
+          71.0
+        ],
+        [
+          168.0,
+          81.0
+        ]
+      ],
+      "degradation": "uneven_gray_validation",
+      "family": "reversal_arc_validation",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 28.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 109.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0
+      ],
+      "scene_id": "validation-reversal_arc_validation-1",
+      "seed": 622001,
+      "split": "validation",
+      "tensor_sha256": "0c544638a56efdc1225067c843f009579917483c9eb7449456879ec44a2400eb"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          41.0,
+          105.0
+        ],
+        [
+          63.0,
+          93.0
+        ],
+        [
+          81.0,
+          78.0
+        ],
+        [
+          102.0,
+          69.0
+        ],
+        [
+          123.0,
+          55.0
+        ],
+        [
+          147.0,
+          69.0
+        ],
+        [
+          166.0,
+          82.0
+        ]
+      ],
+      "degradation": "box_blur_validation",
+      "family": "reversal_arc_validation",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 114.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        },
+        {
+          "kind": "line_intersection",
+          "x": 114.0,
+          "y": 61.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "line_intersection",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0
+      ],
+      "scene_id": "validation-reversal_arc_validation-2",
+      "seed": 622002,
+      "split": "validation",
+      "tensor_sha256": "a40d5d9e9235ade9e5077e48b2e56bf4dfb173755bcb24ef244be70379d81294"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          40.0,
+          90.0
+        ],
+        [
+          64.0,
+          73.0
+        ],
+        [
+          82.0,
+          59.0
+        ],
+        [
+          102.0,
+          77.0
+        ],
+        [
+          125.0,
+          57.0
+        ],
+        [
+          145.0,
+          70.0
+        ],
+        [
+          164.0,
+          48.0
+        ]
+      ],
+      "degradation": "uneven_gray_validation",
+      "family": "maintenance_steps_validation",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 104.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0
+      ],
+      "scene_id": "validation-maintenance_steps_validation-0",
+      "seed": 622100,
+      "split": "validation",
+      "tensor_sha256": "02f5c06521f4414b81082438832998b036dc86b1b24237b7228bce28334b01b6"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          42.0,
+          89.0
+        ],
+        [
+          64.0,
+          74.0
+        ],
+        [
+          86.0,
+          61.0
+        ],
+        [
+          103.0,
+          75.0
+        ],
+        [
+          123.0,
+          58.0
+        ],
+        [
+          147.0,
+          71.0
+        ],
+        [
+          166.0,
+          47.0
+        ]
+      ],
+      "degradation": "box_blur_validation",
+      "family": "maintenance_steps_validation",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 28.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 109.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0
+      ],
+      "scene_id": "validation-maintenance_steps_validation-1",
+      "seed": 622101,
+      "split": "validation",
+      "tensor_sha256": "be50841829bd6122e6a0cdf81dba3ab9009fcfcc7169ae5f0635e1680a5e2b09"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          40.0,
+          90.0
+        ],
+        [
+          61.0,
+          74.0
+        ],
+        [
+          82.0,
+          60.0
+        ],
+        [
+          106.0,
+          74.0
+        ],
+        [
+          125.0,
+          59.0
+        ],
+        [
+          144.0,
+          69.0
+        ],
+        [
+          166.0,
+          50.0
+        ]
+      ],
+      "degradation": "uneven_gray_validation",
+      "family": "maintenance_steps_validation",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 114.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        },
+        {
+          "kind": "line_intersection",
+          "x": 114.0,
+          "y": 67.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "line_intersection",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0
+      ],
+      "scene_id": "validation-maintenance_steps_validation-2",
+      "seed": 622102,
+      "split": "validation",
+      "tensor_sha256": "1728dbedd77b97190d44069695ba17bc0ce2207a560646e805edcb2ca0a4dc8f"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          41.0,
+          94.0
+        ],
+        [
+          60.0,
+          84.0
+        ],
+        [
+          84.0,
+          73.0
+        ],
+        [
+          105.0,
+          72.0
+        ],
+        [
+          124.0,
+          56.0
+        ],
+        [
+          146.0,
+          58.0
+        ],
+        [
+          168.0,
+          44.0
+        ]
+      ],
+      "degradation": "box_blur_validation",
+      "family": "paired_phase_validation",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 119.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 104.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0
+      ],
+      "scene_id": "validation-paired_phase_validation-0",
+      "seed": 622200,
+      "split": "validation",
+      "tensor_sha256": "0854b96eadf008652195d5b20f3ae3302c4fc70a89e77aef2c561464ffda125a"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          43.0,
+          94.0
+        ],
+        [
+          65.0,
+          84.0
+        ],
+        [
+          83.0,
+          74.0
+        ],
+        [
+          107.0,
+          71.0
+        ],
+        [
+          124.0,
+          60.0
+        ],
+        [
+          146.0,
+          60.0
+        ],
+        [
+          166.0,
+          41.0
+        ]
+      ],
+      "degradation": "uneven_gray_validation",
+      "family": "paired_phase_validation",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 28.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 118.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 28.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 109.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0
+      ],
+      "scene_id": "validation-paired_phase_validation-1",
+      "seed": 622201,
+      "split": "validation",
+      "tensor_sha256": "b9d32fafa81fab103d6bd9a34e628cb5b61f6e786f9f351da32f668b3041cf68"
+    },
+    {
+      "center_count": 7,
+      "centers": [
+        [
+          43.0,
+          96.0
+        ],
+        [
+          60.0,
+          82.0
+        ],
+        [
+          85.0,
+          73.0
+        ],
+        [
+          102.0,
+          73.0
+        ],
+        [
+          122.0,
+          57.0
+        ],
+        [
+          144.0,
+          58.0
+        ],
+        [
+          168.0,
+          42.0
+        ]
+      ],
+      "degradation": "box_blur_validation",
+      "family": "paired_phase_validation",
+      "prohibited": [
+        {
+          "kind": "axis",
+          "x": 27.0,
+          "y": 62.0
+        },
+        {
+          "kind": "axis",
+          "x": 100.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 43.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 65.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 87.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 109.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 131.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 153.0,
+          "y": 117.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 31.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 51.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 71.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 91.0
+        },
+        {
+          "kind": "tick",
+          "x": 27.0,
+          "y": 111.0
+        },
+        {
+          "kind": "divider",
+          "x": 114.0,
+          "y": 47.0
+        },
+        {
+          "kind": "legend",
+          "x": 155.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 139.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 144.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 149.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 154.0,
+          "y": 33.0
+        },
+        {
+          "kind": "text",
+          "x": 159.0,
+          "y": 32.0
+        },
+        {
+          "kind": "text",
+          "x": 164.0,
+          "y": 33.0
+        },
+        {
+          "kind": "bracket",
+          "x": 65.0,
+          "y": 19.0
+        },
+        {
+          "kind": "arrowhead",
+          "x": 89.0,
+          "y": 26.0
+        },
+        {
+          "kind": "text",
+          "x": 33.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 38.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 43.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 48.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 53.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 58.0,
+          "y": 129.0
+        },
+        {
+          "kind": "text",
+          "x": 63.0,
+          "y": 128.0
+        },
+        {
+          "kind": "text",
+          "x": 7.0,
+          "y": 55.0
+        },
+        {
+          "kind": "text",
+          "x": 12.0,
+          "y": 56.0
+        },
+        {
+          "kind": "text",
+          "x": 17.0,
+          "y": 55.0
+        }
+      ],
+      "prohibited_kinds": [
+        "arrowhead",
+        "axis",
+        "bracket",
+        "divider",
+        "legend",
+        "text",
+        "tick"
+      ],
+      "radii": [
+        5.0,
+        3.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        5.0
+      ],
+      "scene_id": "validation-paired_phase_validation-2",
+      "seed": 622202,
+      "split": "validation",
+      "tensor_sha256": "997d355b0dad19cc3c6c819b1feba1dc33ec9dbeeb4e6ea42862adfc44720db9"
+    }
+  ],
+  "chandler_included": false,
+  "dataset_revision": "marker-center-candidate-level-procedural-v1",
+  "degradations": {
+    "sealed_public": [
+      "resample_noise_public",
+      "high_contrast_public"
+    ],
+    "train": [
+      "clean_train",
+      "low_contrast_train",
+      "thin_scan_train"
+    ],
+    "validation": [
+      "box_blur_validation",
+      "uneven_gray_validation"
+    ]
+  },
+  "public_or_private_images": false,
+  "schema": "graphreader.marker-center-candidate-selection.v1",
+  "split_families": {
+    "train": [
+      "rising_clusters_train",
+      "alternating_plateau_train",
+      "descending_probe_train",
+      "shared_baseline_train",
+      "dense_turn_train",
+      "sparse_open_train"
+    ],
+    "validation": [
+      "reversal_arc_validation",
+      "maintenance_steps_validation",
+      "paired_phase_validation"
+    ]
+  },
+  "synthetic_only": true
+}

@@ -1,0 +1,14 @@
+{
+  "schema": "graphreader.marker-center-candidate-gate-config.v1",
+  "task": "marker-center",
+  "revision": "marker-center-candidate-level-public-v1",
+  "expected_candidate_hash_keys": ["onnx_sha256"],
+  "sealed_public_test_seal_path": "ml/markers/center/candidate_level_v1/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "e664f902c3e63e0df8becb348564b7a433f6117de5370620db99bbcb5b9f405f",
+  "expected_dataset_manifest_sha256": "6232d1ab2a50479211ce6888e55a2d51471a870d0b679713dd7570d94091b768",
+  "expected_evaluator_source_bundle_sha256": "7d8122fc553c328a63cda5eb01d766fa178ed8d08b6d6397767803550da6a3c5",
+  "expected_gate_config_sha256": "20ff5161cd9f0bcb9050e9045d749a7ae4e03457a956936b1bc379b3e22fa0a9",
+  "evaluation_limit": 1,
+  "production_approval": false,
+  "release_eligible": false
+}
