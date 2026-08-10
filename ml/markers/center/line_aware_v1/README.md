@@ -26,14 +26,23 @@ found that the exact P2 payload passes all nine scenes at thresholds `0.03`,
 and reuses the exact P2 checkpoint and ONNX with zero optimizer steps. It
 reproduced all nine exact selection scenes and all 63 markers with zero false
 positives, misses, duplicates, or prohibited hits. CPU ONNX parity passed at
-`8.270144462585449e-07`. The single truth-hidden public evaluation is now
-authorized but has not run.
+`8.270144462585449e-07`.
+
+The single authorized public-gate attempt failed closed before a gate seal was
+opened. The frozen public configuration omitted the `expected_*` bindings
+required by the canonical gate-seal implementation, so candidate-hash schema
+validation stopped the command before the public archive was loaded. No output,
+metric, opened seal, or result seal exists. The attempt record is checksum-bound
+in `PUBLIC_GATE_ATTEMPT_FAILURE.json`. The one-run budget is consumed and this
+revision must not be repaired, rerun, tuned, manifested, stored, packaged, or
+approved.
 
 The truth-hidden public archive is generated once before training and can be
 opened once only after a candidate passes every selection scene and CPU ONNX
 parity.
 
-No result from selection or the public gate alone authorizes production. A
-passing candidate still requires an independent artifact-mask gate, production
-adapter execution, a checksum-bound manifest and model store, notices,
-packaging discovery, and clean-machine proof.
+No result from selection alone authorizes production. A future, separately
+authorized defect class would still require a compatible frozen public gate,
+an independent artifact-mask gate, production adapter execution, a
+checksum-bound manifest and model store, notices, packaging discovery, and
+clean-machine proof.

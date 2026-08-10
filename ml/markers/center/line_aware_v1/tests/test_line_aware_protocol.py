@@ -98,15 +98,31 @@ def test_p2_fixed_pool_exports_with_the_frozen_tensor_contract() -> None:
     assert model.export_contract()["architecture"] == "line-aware-dual-branch-patch-cnn-v2-export-safe"
 
 
-def test_protocol_is_fail_closed_with_p3_public_gate_only() -> None:
+def test_protocol_is_fail_closed_after_single_p3_public_gate_attempt() -> None:
     protocol = json.loads((REPO_ROOT / "ml/markers/center/line_aware_v1/PROTOCOL.json").read_text(encoding="utf-8"))
     assert protocol["currently_preregistered_candidate"] is None
     assert protocol["selected_candidate"] == "P3"
-    assert protocol["sealed_public_gate_authorized"] is True
+    assert protocol["sealed_public_gate_authorized"] is False
+    assert protocol["status"] == "exhausted_public_gate_configuration_failure"
     assert protocol["consumed_candidates"] == ["P1", "P2", "P3"]
     assert protocol["experiment_budget"] == 3
     assert protocol["prior_candidate_bytes_reused"] is False
     assert protocol["public_gate_budget"] == 1
+    assert protocol["public_gate_attempts"] == 1
+    assert protocol["public_gate_evaluations"] == 0
+    assert protocol["public_gate_budget_consumed"] is True
+    failure_path = REPO_ROOT / protocol["public_gate_attempt_failure_path"]
+    assert protocol["public_gate_attempt_failure_sha256"] == sha256_file(failure_path)
+    failure = json.loads(failure_path.read_text(encoding="utf-8"))
+    assert failure["status"] == "fail_closed_before_seal"
+    assert failure["attempt_count"] == 1
+    assert failure["evaluation_count"] == 0
+    assert failure["public_archive_loaded"] is False
+    assert failure["gate_output_created"] is False
+    assert failure["opened_seal_created"] is False
+    assert failure["result_seal_created"] is False
+    assert failure["public_gate_budget_consumed"] is True
+    assert failure["rerun_authorized"] is False
     assert protocol["production_approval"] is False
     assert protocol["release_eligible"] is False
 
@@ -134,7 +150,7 @@ def test_frozen_split_and_budget_bind_the_single_authorized_candidate() -> None:
     assert config["weights_changed"] is False
     ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-line-aware-v1")
-    assert entry["status"] == "candidate_3_selected_public_gate_authorized"
+    assert entry["status"] == "exhausted_public_gate_configuration_failure"
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["execution_authorized"] is False
@@ -172,8 +188,17 @@ def test_frozen_split_and_budget_bind_the_single_authorized_candidate() -> None:
     assert entry["p3_selection_false_negatives"] == 0
     assert entry["p3_optimizer_steps"] == 0
     assert entry["p3_weights_changed"] is False
-    assert entry["public_gate_authorized"] is True
-    assert entry["public_gate_authorized_candidate_id"] == "P3"
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized_candidate_id"] is None
     assert entry["public_gate_authorized_onnx_sha256"] == entry["p3_onnx_sha256"]
     assert entry["public_gate_authorized_training_report_sha256"] == entry["p3_training_report_sha256"]
+    assert entry["public_gate_attempted_candidate_id"] == "P3"
+    assert entry["public_gate_attempts"] == 1
     assert entry["public_gate_evaluations"] == 0
+    assert entry["public_gate_attempt_failure_sha256"] == sha256_file(
+        REPO_ROOT / entry["public_gate_attempt_failure_path"]
+    )
+    assert entry["public_gate_archive_loaded"] is False
+    assert entry["public_gate_output_created"] is False
+    assert entry["production_approval"] is False
+    assert entry["release_eligible"] is False
