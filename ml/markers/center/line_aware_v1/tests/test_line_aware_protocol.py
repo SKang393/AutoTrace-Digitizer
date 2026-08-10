@@ -28,6 +28,7 @@ from ml.markers.center.line_aware_v1.model_p2 import LineAwarePatchNetP2
 from ml.markers.center.line_aware_v1.pipeline import extract_proposals, postprocess_predictions
 from ml.markers.center.line_aware_v1.train_p1 import RUNNER_SOURCE_PATHS as P1_RUNNER_SOURCE_PATHS
 from ml.markers.center.line_aware_v1.train_p2 import RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS, _export
+from ml.markers.center.line_aware_v1.train_p3 import RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 
 
@@ -97,10 +98,10 @@ def test_p2_fixed_pool_exports_with_the_frozen_tensor_contract() -> None:
     assert model.export_contract()["architecture"] == "line-aware-dual-branch-patch-cnn-v2-export-safe"
 
 
-def test_protocol_is_fail_closed_and_p2_only() -> None:
+def test_protocol_is_fail_closed_and_p3_only() -> None:
     protocol = json.loads((REPO_ROOT / "ml/markers/center/line_aware_v1/PROTOCOL.json").read_text(encoding="utf-8"))
-    assert protocol["currently_preregistered_candidate"] == "P2"
-    assert protocol["consumed_candidates"] == ["P1"]
+    assert protocol["currently_preregistered_candidate"] == "P3"
+    assert protocol["consumed_candidates"] == ["P1", "P2"]
     assert protocol["experiment_budget"] == 3
     assert protocol["prior_candidate_bytes_reused"] is False
     assert protocol["public_gate_budget"] == 1
@@ -112,7 +113,8 @@ def test_frozen_split_and_budget_bind_the_single_authorized_candidate() -> None:
     selection = REPO_ROOT / "ml/markers/center/line_aware_v1/SELECTION_MANIFEST.json"
     seal_path = REPO_ROOT / "ml/markers/center/line_aware_v1/SEALED_PUBLIC_TEST_SEAL.json"
     p1_config_path = REPO_ROOT / "ml/markers/center/line_aware_v1/training/p1.json"
-    config_path = REPO_ROOT / "ml/markers/center/line_aware_v1/training/p2.json"
+    p2_config_path = REPO_ROOT / "ml/markers/center/line_aware_v1/training/p2.json"
+    config_path = REPO_ROOT / "ml/markers/center/line_aware_v1/training/p3.json"
     seal = json.loads(seal_path.read_text(encoding="utf-8"))
     config = json.loads(config_path.read_text(encoding="utf-8"))
     assert seal["scene_count"] == 16
@@ -122,15 +124,20 @@ def test_frozen_split_and_budget_bind_the_single_authorized_candidate() -> None:
     assert config["sealed_public_test_seal_sha256"] == sha256_file(seal_path)
     assert sha256_file(p1_config_path) == "8b252b458131c5c9b66b47ef8450d16cf5829903f2546e125b4f915a90512e76"
     assert source_bundle_sha256(REPO_ROOT, P1_RUNNER_SOURCE_PATHS) == "eb6d6c5c7b9a960ff86ab9c010c6bc32a1fd856df327699aa21733537e72c26a"
-    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, P2_RUNNER_SOURCE_PATHS)
+    assert sha256_file(p2_config_path) == "9b329aa26a9261d445d8db48ce2f9c83e18475f723bf71f47ccb68ab4704d5a0"
+    assert source_bundle_sha256(REPO_ROOT, P2_RUNNER_SOURCE_PATHS) == "aeee5089cfe9085cd0ca765ff106caa77748e23b4073f291cb171efcd1e705d7"
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, P3_RUNNER_SOURCE_PATHS)
+    assert config["selection_threshold"] == 0.07
+    assert config["optimizer_steps"] == 0
+    assert config["weights_changed"] is False
     ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-line-aware-v1")
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
-    assert entry["candidate_config_sha256"]["P2"] == sha256_file(config_path)
+    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["candidate_config_sha256"]["P3"] == sha256_file(config_path)
     assert entry["p1_training_report_sha256"] == "9e3bee532c852ba13c3bdde9390ab9dcbf1a1fcf091072f802dddefe20b6d56c"
     assert entry["p1_training_opened_seal_sha256"] == sha256_file(
         REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-line-aware-v1/P1/opened.json"
@@ -140,4 +147,14 @@ def test_frozen_split_and_budget_bind_the_single_authorized_candidate() -> None:
     )
     assert entry["p1_optimizer_steps"] == 0
     assert entry["p1_public_gate_evaluations"] == 0
+    assert entry["p2_training_report_sha256"] == "3c94148b84f88b30568276ff0650f08bfbc23e123fc1ab310c9c72f20aabcda7"
+    assert entry["p2_training_opened_seal_sha256"] == sha256_file(
+        REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-line-aware-v1/P2/opened.json"
+    )
+    assert entry["p2_training_result_seal_sha256"] == sha256_file(
+        REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-line-aware-v1/P2/result.json"
+    )
+    assert entry["p2_checkpoint_sha256"] == config["source_checkpoint_sha256"]
+    assert entry["p2_onnx_sha256"] == config["source_onnx_sha256"]
+    assert entry["p2_public_gate_evaluations"] == 0
     assert entry["public_gate_authorized"] is False

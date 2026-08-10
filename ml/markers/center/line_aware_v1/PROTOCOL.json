@@ -6,11 +6,12 @@
   "prior_revision": "marker-center-candidate-level-v1",
   "prior_candidate_bytes_reused": false,
   "experiment_budget": 3,
-  "currently_preregistered_candidate": "P2",
-  "consumed_candidates": ["P1"],
+  "currently_preregistered_candidate": "P3",
+  "consumed_candidates": ["P1", "P2"],
   "p1_result": "failed ONNX preflight before optimizer creation; zero public evaluations; no checkpoint; cannot rerun",
+  "p2_result": "passed CPU ONNX parity with zero false positives, duplicates, or prohibited hits; missed four of 63 selection markers; zero public evaluations; cannot rerun",
   "architecture": "line-aware-dual-branch-patch-cnn-v2-export-safe",
-  "isolated_change": "replace only P1's unsupported adaptive 8-to-3 pool with a fixed 4-by-4 stride-two average pool that preserves the 3-by-3 head contract; train new weights from a new seed because P1 produced no checkpoint",
+  "isolated_change": "reuse the exact P2 checkpoint and ONNX with zero optimizer steps and freeze the most conservative passing selection threshold 0.07",
   "input_contract": {
     "name": "candidate_patches",
     "shape": ["candidate_count", 3, 33, 33],
@@ -21,7 +22,7 @@
     "shape": ["candidate_count", 4],
     "columns": ["marker_probability", "offset_x_grid", "offset_y_grid", "radius_pixels"]
   },
-  "selection_thresholds": [0.25, 0.4, 0.55],
+  "selection_thresholds": [0.07],
   "sealed_gate_requirements": {
     "exact_count_every_scene": true,
     "false_positives": 0,

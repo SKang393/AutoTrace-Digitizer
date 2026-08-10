@@ -246,27 +246,28 @@
     {
       "task": "marker-center",
       "revision": "marker-center-line-aware-v1",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_3_preregistered",
       "defect_class": "proposal-and-predicted-center mask consensus with radial marker geometry",
       "prior_revision": "marker-center-candidate-level-v1",
       "prior_candidate_bytes_reused": false,
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P2"
-      ],
-      "consumed_candidate_ids": [
-        "P1"
-      ],
-      "remaining_unregistered_candidate_ids": [
         "P3"
       ],
+      "consumed_candidate_ids": [
+        "P1",
+        "P2"
+      ],
+      "remaining_unregistered_candidate_ids": [],
       "candidate_config_paths": {
         "P1": "ml/markers/center/line_aware_v1/training/p1.json",
-        "P2": "ml/markers/center/line_aware_v1/training/p2.json"
+        "P2": "ml/markers/center/line_aware_v1/training/p2.json",
+        "P3": "ml/markers/center/line_aware_v1/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "8b252b458131c5c9b66b47ef8450d16cf5829903f2546e125b4f915a90512e76",
-        "P2": "9b329aa26a9261d445d8db48ce2f9c83e18475f723bf71f47ccb68ab4704d5a0"
+        "P2": "9b329aa26a9261d445d8db48ce2f9c83e18475f723bf71f47ccb68ab4704d5a0",
+        "P3": "41046d48fe7d02ba6ffe0356cc5acfa904928d732d2915869c0933afb162520d"
       },
       "trigger_evidence_path": "ml/markers/center/artifacts/candidate-level-v1/P3-sealed-public/gate-report.json",
       "trigger_evidence_sha256": "02490587ef0bffccd5ca636fcd9e2d69f8ee55f9943fd22100065499755f321f",
@@ -291,8 +292,29 @@
       "p2_trigger_evidence_sha256": "9e3bee532c852ba13c3bdde9390ab9dcbf1a1fcf091072f802dddefe20b6d56c",
       "p2_isolated_change": "replace only the unsupported adaptive 8-to-3 pool with a fixed 4-by-4 stride-two average pool and train new weights from a new seed because P1 produced no checkpoint",
       "p2_expected_runner_source_bundle_sha256": "aeee5089cfe9085cd0ca765ff106caa77748e23b4073f291cb171efcd1e705d7",
+      "p2_training_report_path": "ml/markers/center/artifacts/line-aware-v1/P2-run/candidate-report.json",
+      "p2_training_report_sha256": "3c94148b84f88b30568276ff0650f08bfbc23e123fc1ab310c9c72f20aabcda7",
+      "p2_training_opened_seal_sha256": "4190cf4a532f79934a86022d2367198e29c076583eced64a565cd83b9c8bfd06",
+      "p2_training_result_seal_sha256": "3fa63630a967fefb6eb769e47dc4479495cbfaeda574d383eafbe069d58605d3",
+      "p2_checkpoint_sha256": "d80732ae317faa3a315fec0d2add194091fe5ce4295be3ff1d6faa65af7562fb",
+      "p2_onnx_sha256": "25d79f6f207f35180d7482e147a1fb1fc099dcd15ab098f109cfb3242c7ff144",
+      "p2_optimizer_steps": 1320,
+      "p2_onnx_parity_maximum_absolute_error": 8.270144462585449e-07,
+      "p2_selection_threshold": 0.4,
+      "p2_selection_exact_scene_count": 5,
+      "p2_selection_scene_count": 9,
+      "p2_selection_false_positives": 0,
+      "p2_selection_false_negatives": 4,
+      "p2_selection_duplicate_count": 0,
+      "p2_selection_prohibited_structure_hits": 0,
+      "p2_public_gate_evaluations": 0,
+      "p2_failure": "P2 passed CPU ONNX parity with zero false positives, duplicates, or prohibited hits, but missed four of 63 validation markers and cannot open the sealed public gate.",
+      "p3_trigger_evidence_path": "ml/markers/center/artifacts/line-aware-v1/P2-run/candidate-report.json",
+      "p3_trigger_evidence_sha256": "3c94148b84f88b30568276ff0650f08bfbc23e123fc1ab310c9c72f20aabcda7",
+      "p3_isolated_change": "reuse the exact P2 checkpoint and ONNX with zero optimizer steps and freeze the most conservative passing selection threshold 0.07",
+      "p3_expected_runner_source_bundle_sha256": "cfb1e9f4db2ba97a920284a3f82c480a28fdb546956d1fa982a6ef9d26cf76de",
       "execution_authorized": true,
-      "authorized_candidate_id": "P2",
+      "authorized_candidate_id": "P3",
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "production_approval": false,
