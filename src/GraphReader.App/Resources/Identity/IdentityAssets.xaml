@@ -1,0 +1,60 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Copyright 2026 Sungwoo Kang -->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Project-authored Calm Precision geometry. The mark joins calibration anchors to an editable data row. -->
+  <Geometry x:Key="Identity.Geometry.MarkAxes">M4,3 L4,25 L28,25</Geometry>
+  <Geometry x:Key="Identity.Geometry.MarkTrace">M7,20 L13,15 L19,17 L25,8</Geometry>
+  <Geometry x:Key="Identity.Geometry.MarkAnchors">M7,18 A2,2 0 1 1 6.99,18 M13,13 A2,2 0 1 1 12.99,13 M19,15 A2,2 0 1 1 18.99,15 M25,6 A3,3 0 1 1 24.99,6</Geometry>
+  <Geometry x:Key="Identity.Geometry.MarkEvidence">M25,10 L25,18 L30,18 M23,21 L30,21 M23,24 L30,24</Geometry>
+
+  <Geometry x:Key="Identity.Icon.Open">M3,5 L9,5 L11,8 L21,8 L21,21 L3,21 Z M3,5 L3,3 L8,3 L10,6</Geometry>
+  <Geometry x:Key="Identity.Icon.Save">M4,3 L18,3 L21,6 L21,21 L3,21 L3,3 Z M7,3 L7,9 L17,9 L17,3 M7,14 L17,14 L17,21 L7,21 Z</Geometry>
+  <Geometry x:Key="Identity.Icon.Undo">M9,7 L4,12 L9,17 M5,12 L14,12 C18,12 20,15 20,19</Geometry>
+  <Geometry x:Key="Identity.Icon.Redo">M15,7 L20,12 L15,17 M19,12 L10,12 C6,12 4,15 4,19</Geometry>
+  <Geometry x:Key="Identity.Icon.Analyze">M4,20 L4,4 L20,4 M7,16 L11,12 L14,14 L19,8 M19,8 L15,8 M19,8 L19,12</Geometry>
+  <Geometry x:Key="Identity.Icon.Review">M4,5 L20,5 L20,19 L4,19 Z M8,10 L10,12 L15,8 M8,16 L16,16</Geometry>
+  <Geometry x:Key="Identity.Icon.Export">M12,3 L12,15 M7,10 L12,15 L17,10 M4,17 L4,21 L20,21 L20,17</Geometry>
+  <Geometry x:Key="Identity.Icon.Settings">M12,7 A5,5 0 1 1 11.99,7 M12,2 L12,5 M12,19 L12,22 M2,12 L5,12 M19,12 L22,12 M5,5 L7,7 M17,17 L19,19 M19,5 L17,7 M7,17 L5,19</Geometry>
+  <Geometry x:Key="Identity.Icon.ZoomOut">M10,4 A6,6 0 1 1 9.99,4 M14.5,14.5 L21,21 M7,10 L13,10</Geometry>
+  <Geometry x:Key="Identity.Icon.ZoomIn">M10,4 A6,6 0 1 1 9.99,4 M14.5,14.5 L21,21 M7,10 L13,10 M10,7 L10,13</Geometry>
+  <Geometry x:Key="Identity.Icon.Fit">M4,9 L4,4 L9,4 M15,4 L20,4 L20,9 M20,15 L20,20 L15,20 M9,20 L4,20 L4,15</Geometry>
+
+  <DrawingImage x:Key="Identity.Illustration.EmptyState">
+    <DrawingImage.Drawing>
+      <DrawingGroup>
+        <GeometryDrawing Brush="{DynamicResource App.Brush.Surface}"
+                         Geometry="M8,10 L136,10 L136,94 L8,94 Z">
+          <GeometryDrawing.Pen>
+            <Pen Brush="{DynamicResource App.Brush.Border}" Thickness="1" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="M24,24 L24,76 L116,76">
+          <GeometryDrawing.Pen>
+            <Pen Brush="{DynamicResource App.Brush.TextMuted}" Thickness="1.5" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="M30,66 L48,57 L64,61 L82,40 L101,47 L116,28">
+          <GeometryDrawing.Pen>
+            <Pen Brush="{DynamicResource App.Brush.Primary}" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Brush="{DynamicResource App.Brush.Surface}"
+                         Geometry="M30,62 A4,4 0 1 1 29.99,62 M48,53 A4,4 0 1 1 47.99,53 M64,57 A4,4 0 1 1 63.99,57 M82,36 A4,4 0 1 1 81.99,36 M101,43 A4,4 0 1 1 100.99,43">
+          <GeometryDrawing.Pen>
+            <Pen Brush="{DynamicResource App.Brush.Primary}" Thickness="2" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Brush="{DynamicResource App.Brush.Primary}"
+                         Geometry="M116,23 A5,5 0 1 1 115.99,23" />
+        <GeometryDrawing Geometry="M116,34 L116,55 L130,55 M112,62 L130,62 M112,69 L130,69">
+          <GeometryDrawing.Pen>
+            <Pen Brush="{DynamicResource App.Brush.Primary}" Thickness="1.5" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+  </DrawingImage>
+</ResourceDictionary>

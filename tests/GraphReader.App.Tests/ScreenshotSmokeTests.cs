@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Windows;
+using System.Windows.Media;
 using GraphReader.App.Controls;
 using GraphReader.App.Localization;
 using GraphReader.App.Services;
@@ -21,13 +22,51 @@ public sealed class ScreenshotSmokeTests
     [TestMethod]
     public void FakeGraphWorkspaceRendersDeterministicLightTheme()
     {
-        AssertDeterministicRender(LightThemeSource, "session02-workspace-light.png");
+        AssertDeterministicRender(LightThemeSource, "calm-precision-workspace-light");
     }
 
     [TestMethod]
     public void FakeGraphWorkspaceRendersDeterministicDarkTheme()
     {
-        AssertDeterministicRender(DarkThemeSource, "session02-workspace-dark.png");
+        AssertDeterministicRender(DarkThemeSource, "calm-precision-workspace-dark");
+    }
+
+    [TestMethod]
+    [DataRow(100, 1280, 800)]
+    [DataRow(125, 1600, 1000)]
+    [DataRow(150, 1920, 1200)]
+    [DataRow(200, 2560, 1600)]
+    public void WorkspaceLayoutRendersAtSupportedDpiScale(
+        int scalePercent,
+        int pixelWidth,
+        int pixelHeight)
+    {
+        double scale = scalePercent / 100d;
+        RenderedScreenshot rendered = WpfScreenshotHarness.Render(
+            () =>
+            {
+                FrameworkElement workspace = CreateFakeWorkspace(LightThemeSource, true);
+                workspace.Width = 1280;
+                workspace.Height = 800;
+                workspace.LayoutTransform = new ScaleTransform(scale, scale);
+                return workspace;
+            },
+            pixelWidth,
+            pixelHeight);
+
+        Assert.AreEqual(pixelWidth, rendered.Width);
+        Assert.AreEqual(pixelHeight, rendered.Height);
+        Assert.IsGreaterThan(2_000, rendered.PngBytes.Length);
+
+        string evidenceDirectory = Path.Combine(
+            RepositoryTestPaths.Root,
+            ".codex",
+            "full-build",
+            "evidence");
+        Directory.CreateDirectory(evidenceDirectory);
+        File.WriteAllBytes(
+            Path.Combine(evidenceDirectory, $"calm-precision-dpi-{scalePercent}.png"),
+            rendered.PngBytes);
     }
 
     [TestMethod]
@@ -109,37 +148,48 @@ public sealed class ScreenshotSmokeTests
         return canvas;
     }
 
-    private static void AssertDeterministicRender(string themeSource, string evidenceFileName)
+    private static void AssertDeterministicRender(string themeSource, string evidenceFilePrefix)
     {
-        var first = WpfScreenshotHarness.Render(
-            () => CreateFakeWorkspace(themeSource, true),
-            1180,
-            720);
-        var second = WpfScreenshotHarness.Render(
-            () => CreateFakeWorkspace(themeSource, true),
-            1180,
-            720);
+        foreach ((int width, int height) in new[] { (1280, 800), (1440, 900) })
+        {
+            var first = WpfScreenshotHarness.Render(
+                () => CreateFakeWorkspace(themeSource, true),
+                width,
+                height);
+            var second = WpfScreenshotHarness.Render(
+                () => CreateFakeWorkspace(themeSource, true),
+                width,
+                height);
 
-        Assert.AreEqual(1180, first.Width);
-        Assert.AreEqual(720, first.Height);
-        Assert.IsGreaterThan(2_000, first.PngBytes.Length);
-        Assert.AreEqual(first.Sha256, second.Sha256);
-        CollectionAssert.AreEqual(first.PngBytes, second.PngBytes);
+            Assert.AreEqual(width, first.Width);
+            Assert.AreEqual(height, first.Height);
+            Assert.IsGreaterThan(2_000, first.PngBytes.Length);
+            Assert.AreEqual(first.Sha256, second.Sha256);
+            CollectionAssert.AreEqual(first.PngBytes, second.PngBytes);
 
-        var evidenceDirectory = Path.Combine(
-            RepositoryTestPaths.Root,
-            ".codex",
-            "full-build",
-            "evidence");
-        Directory.CreateDirectory(evidenceDirectory);
-        File.WriteAllBytes(
-            Path.Combine(evidenceDirectory, evidenceFileName),
-            first.PngBytes);
+            var evidenceDirectory = Path.Combine(
+                RepositoryTestPaths.Root,
+                ".codex",
+                "full-build",
+                "evidence");
+            Directory.CreateDirectory(evidenceDirectory);
+            File.WriteAllBytes(
+                Path.Combine(evidenceDirectory, $"{evidenceFilePrefix}-{width}x{height}.png"),
+                first.PngBytes);
+        }
     }
 
     private static FrameworkElement CreateFakeWorkspace(string themeSource, bool showPhaseOverlay)
     {
-        var viewModel = new MainWindowViewModel(new FakeWorkspaceService())
+        var localizationResources = new ResourceDictionary
+        {
+            Source = new Uri(
+                "/GraphReader.App;component/Localization/Resources.en-US.xaml",
+                UriKind.RelativeOrAbsolute),
+        };
+        var viewModel = new MainWindowViewModel(
+            new FakeWorkspaceService(),
+            new LocalizationService(localizationResources))
         {
             IsPhaseOverlayVisible = showPhaseOverlay,
         };
@@ -175,6 +225,7 @@ public sealed class ScreenshotSmokeTests
             themeSource,
             "/GraphReader.App;component/Themes/Controls.xaml",
             "/GraphReader.App;component/Localization/Resources.en-US.xaml",
+            "/GraphReader.App;component/Resources/Identity/IdentityAssets.xaml",
         ];
         foreach (var source in resourceSources)
         {

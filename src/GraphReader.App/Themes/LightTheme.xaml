@@ -4,22 +4,23 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-  <SolidColorBrush x:Key="App.Brush.Window" Color="#FFF6F7F9" />
+  <SolidColorBrush x:Key="App.Brush.Window" Color="#FFF5F7FA" />
   <SolidColorBrush x:Key="App.Brush.Surface" Color="#FFFFFFFF" />
-  <SolidColorBrush x:Key="App.Brush.SurfaceRaised" Color="#FFF1F3F6" />
-  <SolidColorBrush x:Key="App.Brush.Canvas" Color="#FFE9EDF2" />
-  <SolidColorBrush x:Key="App.Brush.Border" Color="#FFBEC5CF" />
-  <SolidColorBrush x:Key="App.Brush.Primary" Color="#FF2158A8" />
-  <SolidColorBrush x:Key="App.Brush.PrimaryHover" Color="#FF194887" />
-  <SolidColorBrush x:Key="App.Brush.PrimaryPressed" Color="#FF123663" />
-  <SolidColorBrush x:Key="App.Brush.Text" Color="#FF171A1F" />
+  <SolidColorBrush x:Key="App.Brush.SurfaceRaised" Color="#FFF8F9FB" />
+  <SolidColorBrush x:Key="App.Brush.Canvas" Color="#FFF5F7FA" />
+  <SolidColorBrush x:Key="App.Brush.Border" Color="#FFD9DEE7" />
+  <SolidColorBrush x:Key="App.Brush.Primary" Color="#FF3659E3" />
+  <SolidColorBrush x:Key="App.Brush.PrimaryHover" Color="#FF2948C7" />
+  <SolidColorBrush x:Key="App.Brush.PrimaryPressed" Color="#FF2039A3" />
+  <SolidColorBrush x:Key="App.Brush.PrimarySubtle" Color="#FFE9EDFF" />
+  <SolidColorBrush x:Key="App.Brush.Text" Color="#FF1B1D22" />
   <SolidColorBrush x:Key="App.Brush.TextOnPrimary" Color="#FFFFFFFF" />
-  <SolidColorBrush x:Key="App.Brush.TextMuted" Color="#FF565E69" />
-  <SolidColorBrush x:Key="App.Brush.TextDisabled" Color="#FF858C95" />
-  <SolidColorBrush x:Key="App.Brush.Focus" Color="#FF0067C0" />
-  <SolidColorBrush x:Key="App.Brush.Selection" Color="#FFD7E8FF" />
+  <SolidColorBrush x:Key="App.Brush.TextMuted" Color="#FF5F6673" />
+  <SolidColorBrush x:Key="App.Brush.TextDisabled" Color="#FF8A919D" />
+  <SolidColorBrush x:Key="App.Brush.Focus" Color="#FF3659E3" />
+  <SolidColorBrush x:Key="App.Brush.Selection" Color="#FFE1E7FF" />
   <SolidColorBrush x:Key="App.Brush.Danger" Color="#FFB42318" />
-  <SolidColorBrush x:Key="App.Brush.Warning" Color="#FF9A6700" />
-  <SolidColorBrush x:Key="App.Brush.Success" Color="#FF18794E" />
+  <SolidColorBrush x:Key="App.Brush.Warning" Color="#FFA15C00" />
+  <SolidColorBrush x:Key="App.Brush.Success" Color="#FF087E6B" />
   <SolidColorBrush x:Key="App.Brush.Overlay" Color="#99000000" />
 </ResourceDictionary>

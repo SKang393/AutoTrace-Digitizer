@@ -17,6 +17,7 @@
   <SolidColorBrush x:Key="App.Brush.Primary" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
   <SolidColorBrush x:Key="App.Brush.PrimaryHover" Color="{DynamicResource {x:Static SystemColors.HotTrackColorKey}}" />
   <SolidColorBrush x:Key="App.Brush.PrimaryPressed" Color="{DynamicResource {x:Static SystemColors.MenuHighlightColorKey}}" />
+  <SolidColorBrush x:Key="App.Brush.PrimarySubtle" Color="{DynamicResource {x:Static SystemColors.ControlLightColorKey}}" />
   <SolidColorBrush x:Key="App.Brush.Text" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
   <SolidColorBrush x:Key="App.Brush.TextOnPrimary" Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}" />
   <SolidColorBrush x:Key="App.Brush.TextMuted" Color="{DynamicResource {x:Static SystemColors.GrayTextColorKey}}" />

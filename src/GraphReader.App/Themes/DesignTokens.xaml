@@ -5,12 +5,16 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:sys="clr-namespace:System;assembly=System.Runtime">
 
-  <FontFamily x:Key="App.FontFamily.Default">IBM Plex Sans, Noto Sans, Segoe UI</FontFamily>
+  <FontFamily x:Key="App.FontFamily.Default">../Assets/Fonts/#Noto Sans</FontFamily>
 
-  <sys:Double x:Key="App.FontSize.Caption">11</sys:Double>
-  <sys:Double x:Key="App.FontSize.Body">13</sys:Double>
-  <sys:Double x:Key="App.FontSize.Subtitle">16</sys:Double>
-  <sys:Double x:Key="App.FontSize.Title">22</sys:Double>
+  <sys:Double x:Key="App.FontSize.Caption">12</sys:Double>
+  <sys:Double x:Key="App.FontSize.Body">14</sys:Double>
+  <sys:Double x:Key="App.FontSize.Subtitle">18</sys:Double>
+  <sys:Double x:Key="App.FontSize.Title">24</sys:Double>
+  <sys:Double x:Key="App.LineHeight.Caption">16</sys:Double>
+  <sys:Double x:Key="App.LineHeight.Body">20</sys:Double>
+  <sys:Double x:Key="App.LineHeight.Subtitle">24</sys:Double>
+  <sys:Double x:Key="App.LineHeight.Title">32</sys:Double>
 
   <sys:Double x:Key="App.Spacing.2">2</sys:Double>
   <sys:Double x:Key="App.Spacing.4">4</sys:Double>

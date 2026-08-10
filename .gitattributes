@@ -3,6 +3,7 @@ packaging/pdfium-source/review/third-party-notices.dependency-mapped.txt text eo
 packaging/pdfium-source/review/target-dependencies.reviewed.txt text eol=crlf
 packaging/pdfium-source/review/pe-imports.reviewed.txt text eol=crlf
 LICENSES/Microsoft-Visual-Cpp-2022-Redistribution-Reference.md text eol=lf
+LICENSES/NotoSans-OFL-1.1.txt whitespace=-blank-at-eol
 models/manifest/super-resolution/runtime-review/** text eol=lf
 packaging/pdfium-source/internal-portable-policy.json text eol=lf
 ml/ocr/project_numeric_v1/** text eol=lf

@@ -11,6 +11,12 @@ public static class LocalizationKeys
     public const string WorkflowAutoDetect = "Workflow.AutoDetect";
     public const string WorkflowReview = "Workflow.Review";
     public const string WorkflowExport = "Workflow.Export";
+    public const string WorkflowOpen = "Workflow.Open";
+    public const string WorkflowAnalyze = "Workflow.Analyze";
+    public const string WorkflowAnalyzing = "Workflow.Analyzing";
+    public const string WorkflowCancel = "Workflow.Cancel";
+    public const string EditUndo = "Edit.Undo";
+    public const string EditRedo = "Edit.Redo";
     public const string WorkflowImportToolTip = "Workflow.Import.ToolTip";
     public const string WorkflowEnhanceToolTip = "Workflow.Enhance.ToolTip";
     public const string WorkflowAutoDetectToolTip = "Workflow.AutoDetect.ToolTip";
@@ -51,6 +57,10 @@ public static class LocalizationKeys
     public const string ProjectCloseTab = "Project.CloseTab";
     public const string ProjectCloseDirtyBlocked = "Project.CloseDirtyBlocked";
     public const string ManualTitle = "Manual.Title";
+    public const string ManualModeSelect = "Manual.Mode.Select";
+    public const string ManualModeCalibrate = "Manual.Mode.Calibrate";
+    public const string ManualModePoints = "Manual.Mode.Points";
+    public const string ManualModePhases = "Manual.Mode.Phases";
     public const string ManualInstruction = "Manual.Instruction";
     public const string ManualCalibration = "Manual.Calibration";
     public const string ManualYMaximum = "Manual.YMaximum";
@@ -134,6 +144,7 @@ public static class LocalizationKeys
     public const string NavigationEmpty = "Navigation.Empty";
     public const string NavigationAutomationName = "Navigation.AutomationName";
     public const string SeriesResizeAutomationName = "Series.Resize.AutomationName";
+    public const string SeriesToggleAutomationName = "Series.Toggle.AutomationName";
     public const string CanvasEmpty = "Canvas.Empty";
     public const string CanvasPhaseOverlay = "Canvas.PhaseOverlay";
     public const string CanvasZoomIn = "Canvas.ZoomIn";
@@ -149,6 +160,7 @@ public static class LocalizationKeys
         "GraphCanvas.Crosshair.AutomationName";
     public const string InspectorTitle = "Inspector.Title";
     public const string InspectorResizeAutomationName = "Inspector.Resize.AutomationName";
+    public const string InspectorToggleAutomationName = "Inspector.Toggle.AutomationName";
     public const string ManualPhaseDividersAutomationName = "Manual.PhaseDividers.AutomationName";
     public const string MagnifierTitle = "Magnifier.Title";
     public const string MagnifierOriginal = "Magnifier.Original";
@@ -184,10 +196,70 @@ public static class LocalizationKeys
     public const string SeriesSplitSymbolName = "Series.Split.SymbolName";
     public const string SeriesSplitLabel = "Series.Split.Label";
     public const string ThemeLabel = "Theme.Label";
+    public const string SettingsTitle = "Settings.Title";
     public const string ThemeSystem = "Theme.System";
     public const string ThemeLight = "Theme.Light";
     public const string ThemeDark = "Theme.Dark";
     public const string ThemeSelectAutomationName = "Theme.Select.AutomationName";
+    public const string AboutTitle = "About.Title";
+    public const string AboutAppLicense = "About.AppLicense";
+    public const string AboutFontLicense = "About.FontLicense";
+    public const string AboutFontProvenance = "About.FontProvenance";
+    public const string AboutNoticeLocation = "About.NoticeLocation";
+    public const string EmptyTitle = "Empty.Title";
+    public const string EmptyDescription = "Empty.Description";
+    public const string EmptySupportedFormats = "Empty.SupportedFormats";
+    public const string EmptySupportedFormatsDetail = "Empty.SupportedFormats.Detail";
+    public const string EmptyPrivacy = "Empty.Privacy";
+    public const string EmptyIllustrationAutomationName = "Empty.Illustration.AutomationName";
+    public const string EmptyRecentProjects = "Empty.RecentProjects";
+    public const string DataPreviewTitle = "DataPreview.Title";
+    public const string DataPreviewObservation = "DataPreview.Observation";
+    public const string DataPreviewXValue = "DataPreview.XValue";
+    public const string DataPreviewYValue = "DataPreview.YValue";
+    public const string DataPreviewPhase = "DataPreview.Phase";
+    public const string DataPreviewSeries = "DataPreview.Series";
+    public const string ReviewTitle = "Review.Title";
+    public const string ReviewCalibrationMissingTitle = "Review.CalibrationMissing.Title";
+    public const string ReviewCalibrationMissingInterpretation = "Review.CalibrationMissing.Interpretation";
+    public const string ReviewCalibrationMissingAction = "Review.CalibrationMissing.Action";
+    public const string ReviewCalibrationInvalidTitle = "Review.CalibrationInvalid.Title";
+    public const string ReviewCalibrationInvalidInterpretation = "Review.CalibrationInvalid.Interpretation";
+    public const string ReviewCalibrationInvalidAction = "Review.CalibrationInvalid.Action";
+    public const string ReviewPointRejectedTitle = "Review.PointRejected.Title";
+    public const string ReviewPointRejectedInterpretation = "Review.PointRejected.Interpretation";
+    public const string ReviewPointRejectedAction = "Review.PointRejected.Action";
+    public const string ReviewPointUnreviewedTitle = "Review.PointUnreviewed.Title";
+    public const string ReviewPointUnreviewedInterpretation = "Review.PointUnreviewed.Interpretation";
+    public const string ReviewPointUnreviewedAction = "Review.PointUnreviewed.Action";
+    public const string ReviewPointMissingSeriesTitle = "Review.PointMissingSeries.Title";
+    public const string ReviewPointMissingSeriesInterpretation = "Review.PointMissingSeries.Interpretation";
+    public const string ReviewPointMissingSeriesAction = "Review.PointMissingSeries.Action";
+    public const string ReviewPointMissingCoordinatesTitle = "Review.PointMissingCoordinates.Title";
+    public const string ReviewPointMissingCoordinatesInterpretation = "Review.PointMissingCoordinates.Interpretation";
+    public const string ReviewPointMissingCoordinatesAction = "Review.PointMissingCoordinates.Action";
+    public const string ReviewPointMissingPhaseTitle = "Review.PointMissingPhase.Title";
+    public const string ReviewPointMissingPhaseInterpretation = "Review.PointMissingPhase.Interpretation";
+    public const string ReviewPointMissingPhaseAction = "Review.PointMissingPhase.Action";
+    public const string ReviewSeriesUnknownTitle = "Review.SeriesUnknown.Title";
+    public const string ReviewSeriesUnknownInterpretation = "Review.SeriesUnknown.Interpretation";
+    public const string ReviewSeriesUnknownAction = "Review.SeriesUnknown.Action";
+    public const string ReviewPhaseUnknownTitle = "Review.PhaseUnknown.Title";
+    public const string ReviewPhaseUnknownInterpretation = "Review.PhaseUnknown.Interpretation";
+    public const string ReviewPhaseUnknownAction = "Review.PhaseUnknown.Action";
+    public const string ExportPreviewTitle = "ExportPreview.Title";
+    public const string ExportPreviewPoints = "ExportPreview.Points";
+    public const string ExportPreviewSeries = "ExportPreview.Series";
+    public const string ExportPreviewPhases = "ExportPreview.Phases";
+    public const string ExportPreviewBlockers = "ExportPreview.Blockers";
+    public const string ExportPreviewWarnings = "ExportPreview.Warnings";
+    public const string ExportPreviewAcknowledgeWarnings = "ExportPreview.AcknowledgeWarnings";
+    public const string ExportPreviewConfirm = "ExportPreview.Confirm";
+    public const string ExportPreviewProvenance = "ExportPreview.Provenance";
+    public const string ExportPreviewProvenanceFormat = "ExportPreview.ProvenanceFormat";
+    public const string ExportPreviewDestination = "ExportPreview.Destination";
+    public const string ExportPreviewDestinationPending = "ExportPreview.DestinationPending";
+    public const string ExportPreviewFiles = "ExportPreview.Files";
 
     public static IReadOnlyList<string> All { get; } =
     [
@@ -197,6 +269,12 @@ public static class LocalizationKeys
         WorkflowAutoDetect,
         WorkflowReview,
         WorkflowExport,
+        WorkflowOpen,
+        WorkflowAnalyze,
+        WorkflowAnalyzing,
+        WorkflowCancel,
+        EditUndo,
+        EditRedo,
         WorkflowImportToolTip,
         WorkflowEnhanceToolTip,
         WorkflowAutoDetectToolTip,
@@ -237,6 +315,10 @@ public static class LocalizationKeys
         ProjectCloseTab,
         ProjectCloseDirtyBlocked,
         ManualTitle,
+        ManualModeSelect,
+        ManualModeCalibrate,
+        ManualModePoints,
+        ManualModePhases,
         ManualInstruction,
         ManualCalibration,
         ManualYMaximum,
@@ -320,6 +402,7 @@ public static class LocalizationKeys
         NavigationEmpty,
         NavigationAutomationName,
         SeriesResizeAutomationName,
+        SeriesToggleAutomationName,
         CanvasEmpty,
         CanvasPhaseOverlay,
         CanvasZoomIn,
@@ -333,6 +416,7 @@ public static class LocalizationKeys
         GraphCanvasCrosshairAutomationName,
         InspectorTitle,
         InspectorResizeAutomationName,
+        InspectorToggleAutomationName,
         ManualPhaseDividersAutomationName,
         MagnifierTitle,
         MagnifierOriginal,
@@ -368,9 +452,69 @@ public static class LocalizationKeys
         SeriesSplitSymbolName,
         SeriesSplitLabel,
         ThemeLabel,
+        SettingsTitle,
         ThemeSystem,
         ThemeLight,
         ThemeDark,
         ThemeSelectAutomationName,
+        AboutTitle,
+        AboutAppLicense,
+        AboutFontLicense,
+        AboutFontProvenance,
+        AboutNoticeLocation,
+        EmptyTitle,
+        EmptyDescription,
+        EmptySupportedFormats,
+        EmptySupportedFormatsDetail,
+        EmptyPrivacy,
+        EmptyIllustrationAutomationName,
+        EmptyRecentProjects,
+        DataPreviewTitle,
+        DataPreviewObservation,
+        DataPreviewXValue,
+        DataPreviewYValue,
+        DataPreviewPhase,
+        DataPreviewSeries,
+        ReviewTitle,
+        ReviewCalibrationMissingTitle,
+        ReviewCalibrationMissingInterpretation,
+        ReviewCalibrationMissingAction,
+        ReviewCalibrationInvalidTitle,
+        ReviewCalibrationInvalidInterpretation,
+        ReviewCalibrationInvalidAction,
+        ReviewPointRejectedTitle,
+        ReviewPointRejectedInterpretation,
+        ReviewPointRejectedAction,
+        ReviewPointUnreviewedTitle,
+        ReviewPointUnreviewedInterpretation,
+        ReviewPointUnreviewedAction,
+        ReviewPointMissingSeriesTitle,
+        ReviewPointMissingSeriesInterpretation,
+        ReviewPointMissingSeriesAction,
+        ReviewPointMissingCoordinatesTitle,
+        ReviewPointMissingCoordinatesInterpretation,
+        ReviewPointMissingCoordinatesAction,
+        ReviewPointMissingPhaseTitle,
+        ReviewPointMissingPhaseInterpretation,
+        ReviewPointMissingPhaseAction,
+        ReviewSeriesUnknownTitle,
+        ReviewSeriesUnknownInterpretation,
+        ReviewSeriesUnknownAction,
+        ReviewPhaseUnknownTitle,
+        ReviewPhaseUnknownInterpretation,
+        ReviewPhaseUnknownAction,
+        ExportPreviewTitle,
+        ExportPreviewPoints,
+        ExportPreviewSeries,
+        ExportPreviewPhases,
+        ExportPreviewBlockers,
+        ExportPreviewWarnings,
+        ExportPreviewAcknowledgeWarnings,
+        ExportPreviewConfirm,
+        ExportPreviewProvenance,
+        ExportPreviewProvenanceFormat,
+        ExportPreviewDestination,
+        ExportPreviewDestinationPending,
+        ExportPreviewFiles,
     ];
 }

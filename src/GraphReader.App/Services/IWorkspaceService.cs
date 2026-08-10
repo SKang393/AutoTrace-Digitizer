@@ -148,6 +148,11 @@ public interface IManualWorkspaceService : IRuntimeWorkspaceService
         CancellationToken cancellationToken);
 }
 
+public interface IWorkspaceEditStateSink
+{
+    void SynchronizeRestoredTab(string tabId);
+}
+
 /// <summary>
 /// Real-data workspace contract for an evidence-backed automatic workflow.
 /// Implementations must never substitute recorded or synthetic detections.

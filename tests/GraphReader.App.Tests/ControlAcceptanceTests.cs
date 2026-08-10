@@ -309,24 +309,36 @@ public sealed class ControlAcceptanceTests
     }
 
     [TestMethod]
-    public void InspectorWidthPersistenceClampsAndFailsSoft()
+    public void PaneWidthPersistenceClampsAndFailsSoft()
     {
         string root = Path.Combine(Path.GetTempPath(), $"graph-reader-ui-{Guid.NewGuid():N}");
         string path = Path.Combine(root, "window-layout.txt");
         MethodInfo read = typeof(MainWindow).GetMethod("ReadInspectorWidth", BindingFlags.NonPublic | BindingFlags.Static)!;
         MethodInfo write = typeof(MainWindow).GetMethod("WriteInspectorWidth", BindingFlags.NonPublic | BindingFlags.Static)!;
+        MethodInfo readSeries = typeof(MainWindow).GetMethod("ReadSeriesWidth", BindingFlags.NonPublic | BindingFlags.Static)!;
+        MethodInfo writeSeries = typeof(MainWindow).GetMethod("WriteSeriesWidth", BindingFlags.NonPublic | BindingFlags.Static)!;
 
         try
         {
             write.Invoke(null, [path, 512d]);
-            Assert.AreEqual(512d, (double)read.Invoke(null, [path, 390d])!);
+            Assert.AreEqual(512d, (double)read.Invoke(null, [path, 384d])!);
 
             File.WriteAllText(path, "99999");
-            Assert.AreEqual(800d, (double)read.Invoke(null, [path, 390d])!);
+            Assert.AreEqual(800d, (double)read.Invoke(null, [path, 384d])!);
 
             File.WriteAllText(path, "not-a-width");
-            Assert.AreEqual(390d, (double)read.Invoke(null, [path, 390d])!);
-            Assert.AreEqual(390d, (double)read.Invoke(null, [null, 390d])!);
+            Assert.AreEqual(384d, (double)read.Invoke(null, [path, 384d])!);
+            Assert.AreEqual(384d, (double)read.Invoke(null, [null, 384d])!);
+
+            string seriesPath = Path.Combine(root, "series-pane-width.txt");
+            writeSeries.Invoke(null, [seriesPath, 310d]);
+            Assert.AreEqual(310d, (double)readSeries.Invoke(null, [seriesPath, 272d])!);
+
+            File.WriteAllText(seriesPath, "99999");
+            Assert.AreEqual(560d, (double)readSeries.Invoke(null, [seriesPath, 272d])!);
+
+            File.WriteAllText(seriesPath, "not-a-width");
+            Assert.AreEqual(272d, (double)readSeries.Invoke(null, [seriesPath, 272d])!);
         }
         finally
         {

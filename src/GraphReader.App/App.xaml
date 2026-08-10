@@ -9,6 +9,7 @@
         <ResourceDictionary Source="Themes/DesignTokens.xaml" />
         <ResourceDictionary Source="Themes/SystemTheme.xaml" />
         <ResourceDictionary Source="Themes/Controls.xaml" />
+        <ResourceDictionary Source="Resources/Identity/IdentityAssets.xaml" />
         <ResourceDictionary Source="Localization/Resources.en-US.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>

@@ -147,7 +147,7 @@ public static class ScoreboardReportGenerator
             .Append("<meta charset=\"utf-8\">\n")
             .Append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n")
             .Append("<title>Graph Auto Reader validation scoreboard</title>\n")
-            .Append("<style>body{font-family:Segoe UI,sans-serif;max-width:1200px;margin:2rem auto;padding:0 1rem;color:#222}")
+            .Append("<style>body{font-family:Noto Sans,sans-serif;max-width:1200px;margin:2rem auto;padding:0 1rem;color:#222}")
             .Append("table{border-collapse:collapse;width:100%;margin-bottom:2rem}th,td{border:1px solid #bbb;padding:.4rem;text-align:left}")
             .Append("th{background:#eee}.number{text-align:right}.pass{color:#176b2c}.fail{color:#a51d1d}.muted{color:#666}</style>\n")
             .Append("</head>\n<body>\n<h1>Graph Auto Reader validation scoreboard</h1>\n")

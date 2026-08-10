@@ -211,17 +211,32 @@ Current release blockers are:
   for this exact candidate, but the runner is not selected or bundled and has
   no runtime-package, clean-machine, or release-approval evidence.
 
-## IBM Plex Sans
-
-- License: SIL Open Font License 1.1.
-- Required action: preserve the OFL and follow reserved-font-name rules.
-- No font file is distributed by the repository.
-
 ## Noto Sans
 
-- License: SIL Open Font License 1.1.
-- Required action: preserve the OFL.
-- No font file is distributed by the repository.
+- Version: 2.015, hinted static TrueType Regular, Medium, and SemiBold.
+- Copyright: Copyright 2022 The Noto Project Authors
+  (https://github.com/notofonts/latin-greek-cyrillic).
+- Distribution source: official `notofonts/notofonts.github.io` monthly release
+  `noto-monthly-release-2026.05.01`, target commit
+  `66c4b351c58f99ace5a6265d329080d74b057909`.
+- Source files:
+  `fonts/NotoSans/hinted/ttf/NotoSans-Regular.ttf`,
+  `fonts/NotoSans/hinted/ttf/NotoSans-Medium.ttf`, and
+  `fonts/NotoSans/hinted/ttf/NotoSans-SemiBold.ttf`.
+- License: SIL Open Font License 1.1. Full notice:
+  `LICENSES/NotoSans-OFL-1.1.txt`.
+- SHA-256:
+  `NotoSans-Regular.ttf` is
+  `478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823`;
+  `NotoSans-Medium.ttf` is
+  `635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb`;
+  `NotoSans-SemiBold.ttf` is
+  `a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0`.
+- Distribution: bundled as unmodified WPF resources in both Windows package
+  forms. Commercial use and redistribution with the application are permitted
+  under OFL-1.1; the font files may not be sold by themselves.
+- Privacy and Git eligibility: public upstream artifacts with no private data;
+  eligible for Git and release packaging.
 
 ## Original Graph Auto Reader models
 
@@ -282,6 +297,9 @@ Current release blockers are:
 | Imazen WebP native runtime win-x64 | 1.6.1 | NuGet / imazen/libwebp-net | MIT + libwebp BSD-3-Clause | `32df07f31f18b5f4e35409a73621d776d97761f4b601cbbbdc4efbacb6ab62f6` | Yes | Imazen MIT and libwebp BSD-3-Clause texts | Yes |
 | PdfPig | 0.1.14 | NuGet / UglyToad/PdfPig `88172af1c4d4f440949f59c94966c3880e3f6032` | Apache-2.0 plus bundled external terms | `fe50ec7757adbb487bb52a30f1621384bbb5781fd0bff2169d9f18bc4bb91220` | Yes | `LICENSES/PdfPig-0.1.14-License.txt` | Yes |
 | PDFium minimal renderer candidate | `2870fa9244b0f0f69fb743fab1e08deefcb07b2b` | Official PDFium source build | BSD-3-Clause plus 15-component dependency notice closure | `efd13a38cf3cd8e04d8284a42fff42923267293170424153b1a2a96dbf6fe8ea` | No | `packaging/pdfium-source/review/third-party-notices.dependency-mapped.txt` | Dependency closure reviewed; runtime packaging, clean-machine, and release approval blocked |
+| Noto Sans Regular | 2.015 | Official Noto monthly release `noto-monthly-release-2026.05.01` at `66c4b351c58f99ace5a6265d329080d74b057909` | OFL-1.1 | `478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823` | Yes | `LICENSES/NotoSans-OFL-1.1.txt` | Yes |
+| Noto Sans Medium | 2.015 | Official Noto monthly release `noto-monthly-release-2026.05.01` at `66c4b351c58f99ace5a6265d329080d74b057909` | OFL-1.1 | `635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb` | Yes | `LICENSES/NotoSans-OFL-1.1.txt` | Yes |
+| Noto Sans SemiBold | 2.015 | Official Noto monthly release `noto-monthly-release-2026.05.01` at `66c4b351c58f99ace5a6265d329080d74b057909` | OFL-1.1 | `a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0` | Yes | `LICENSES/NotoSans-OFL-1.1.txt` | Yes |
 
 A release is blocked while any shipped row remains unreviewed or any required
 core model class remains absent or unapproved.

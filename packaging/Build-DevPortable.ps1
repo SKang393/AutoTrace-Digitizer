@@ -192,6 +192,10 @@ try {
             -o $stagingDirectory
     }
 
+    Copy-DevPortableRequiredContent `
+        -RepositoryRoot $repositoryRoot `
+        -DestinationRoot $stagingDirectory
+
     $executablePath = Join-Path $stagingDirectory 'GraphReader.App.exe'
     $runtimeConfigPath = Join-Path $stagingDirectory 'GraphReader.App.runtimeconfig.json'
     if (-not (Test-Path -LiteralPath $executablePath -PathType Leaf)) {

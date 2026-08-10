@@ -36,7 +36,7 @@ namespace GraphReader.App.Services;
 /// Real-data manual workspace. It intentionally begins empty and never supplies
 /// recorded detections when production models are absent.
 /// </summary>
-public class ManualPreviewWorkspaceService : IManualWorkspaceService
+public class ManualPreviewWorkspaceService : IManualWorkspaceService, IWorkspaceEditStateSink
 {
     private const string ProductionProjectionAuditKind = "production_review_projection";
     private const string ProductionAddAuditKind = "production_point_added";
@@ -130,6 +130,35 @@ public class ManualPreviewWorkspaceService : IManualWorkspaceService
     public IReadOnlyList<ImageImportError> LastImportErrors => _lastImportErrors;
 
     public IReadOnlyList<WorkspaceTabViewModel> CreateWorkspace() => _tabs.ToArray();
+
+    public void SynchronizeRestoredTab(string tabId)
+    {
+        WorkspaceTabViewModel tab = RequireTab(tabId);
+        _phaseOverrides[tab.TabId] = CreatePhaseOverrides(tab);
+        HashSet<string> activePointIds = _tabs.SelectMany(static item => item.Points)
+            .Select(static point => point.PointId)
+            .ToHashSet(StringComparer.Ordinal);
+        foreach (string removedPointId in _pointXStates.Keys.Where(id => !activePointIds.Contains(id)).ToArray())
+        {
+            _pointXStates.Remove(removedPointId);
+            _pointModificationHistories.Remove(removedPointId);
+        }
+        foreach (AppGraphPoint point in tab.Points)
+        {
+            _pointXStates[point.PointId] = tab.Calibration is null
+                ? new ManualPointXState(null, null, PointXSource.Unknown, 0, HasGraphX: false)
+                : new ManualPointXState(null, point.GraphX, PointXSource.Estimated, 1, HasGraphX: true);
+            if (!_pointModificationHistories.ContainsKey(point.PointId))
+            {
+                _pointModificationHistories[point.PointId] = [];
+            }
+        }
+        SynchronizeProject(
+            DomainEventKind.PointEdited,
+            Guid.Parse(tab.PanelId!),
+            entityId: null,
+            "Session edit history restored a tab state");
+    }
 
     public async Task<IReadOnlyList<WorkspaceTabViewModel>> ImportImagesAsync(
         IEnumerable<string> paths,

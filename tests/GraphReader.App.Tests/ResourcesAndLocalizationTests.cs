@@ -17,6 +17,13 @@ namespace GraphReader.App.Tests;
 [TestClass]
 public sealed class ResourcesAndLocalizationTests
 {
+    private static readonly string[] ExpectedFontFiles =
+    [
+        "NotoSans-Regular.ttf",
+        "NotoSans-Medium.ttf",
+        "NotoSans-SemiBold.ttf",
+    ];
+
     private static readonly string[] ThemeFiles =
     {
         "LightTheme.xaml",
@@ -35,9 +42,18 @@ public sealed class ResourcesAndLocalizationTests
         CollectionAssert.AreEquivalent(themeKeys[0].ToArray(), themeKeys[2].ToArray());
 
         var designTokens = File.ReadAllText(Path.Combine(themeDirectory, "DesignTokens.xaml"));
-        StringAssert.Contains(designTokens, "IBM Plex Sans, Noto Sans, Segoe UI");
-        Assert.IsFalse(Directory.EnumerateFiles(themeDirectory, "*", SearchOption.AllDirectories)
-            .Any(path => new[] { ".ttf", ".otf", ".woff", ".woff2" }.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase)));
+        StringAssert.Contains(designTokens, "../Assets/Fonts/#Noto Sans");
+        Assert.IsFalse(designTokens.Contains("IBM Plex", StringComparison.Ordinal));
+        Assert.IsFalse(designTokens.Contains("Segoe UI", StringComparison.Ordinal));
+
+        var fontDirectory = Path.Combine(RepositoryTestPaths.Root, "src", "GraphReader.App", "Assets", "Fonts");
+        string[] fontFiles = Directory.EnumerateFiles(fontDirectory, "*.ttf", SearchOption.TopDirectoryOnly)
+            .Select(path => Path.GetFileName(path)!)
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+        CollectionAssert.AreEquivalent(
+            ExpectedFontFiles,
+            fontFiles);
     }
 
     [TestMethod]

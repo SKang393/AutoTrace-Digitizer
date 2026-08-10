@@ -8,54 +8,95 @@
              MinWidth="240"
              IsTabStop="False"
              AutomationProperties.Name="{DynamicResource Magnifier.Title}">
+  <UserControl.Resources>
+    <Style x:Key="Magnifier.ModeButton" TargetType="RadioButton">
+      <Setter Property="MinHeight" Value="32" />
+      <Setter Property="Padding" Value="10,5" />
+      <Setter Property="Foreground" Value="{DynamicResource App.Brush.TextMuted}" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="FocusVisualStyle" Value="{DynamicResource App.Style.FocusVisual}" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="RadioButton">
+            <Border x:Name="Chrome"
+                    Padding="{TemplateBinding Padding}"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{DynamicResource App.CornerRadius.Medium}">
+              <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource App.Brush.Surface}" />
+              </Trigger>
+              <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Foreground" Value="{DynamicResource App.Brush.Text}" />
+                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource App.Brush.Surface}" />
+                <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource App.Brush.Border}" />
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource App.Brush.TextDisabled}" />
+                <Setter TargetName="Chrome" Property="Opacity" Value="0.6" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </UserControl.Resources>
+
   <Border Padding="12"
-          Background="{DynamicResource App.Brush.SurfaceRaised}"
-          BorderBrush="{DynamicResource App.Brush.Border}"
-          BorderThickness="1"
-          CornerRadius="12">
+          Style="{DynamicResource App.Style.Card}">
     <Grid>
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
         <RowDefinition Height="Auto" />
-        <RowDefinition Height="160" />
+        <RowDefinition Height="150" />
         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
 
       <TextBlock Grid.Row="0"
                  Margin="0,0,0,8"
-                 FontSize="16"
+                 FontSize="{DynamicResource App.FontSize.Subtitle}"
                  FontWeight="SemiBold"
                  Text="{DynamicResource Magnifier.Title}" />
 
-      <UniformGrid Grid.Row="1"
-                   Margin="0,0,0,8"
-                   Columns="2"
-                   AutomationProperties.Name="{DynamicResource Magnifier.ImageMode.GroupName}">
-        <RadioButton x:Name="OriginalModeButton"
-                     Margin="0,0,4,0"
-                     Padding="8,4"
-                     Foreground="{DynamicResource App.Brush.Text}"
-                     GroupName="MagnifierImageMode"
-                     IsChecked="True"
-                     Checked="OnOriginalModeChecked"
-                     AutomationProperties.Name="{DynamicResource Magnifier.ImageMode.Original}"
-                     Content="{DynamicResource Magnifier.ImageMode.Original}" />
-        <RadioButton x:Name="EnhancedModeButton"
-                     Margin="4,0,0,0"
-                     Padding="8,4"
-                     Foreground="{DynamicResource App.Brush.Text}"
-                     GroupName="MagnifierImageMode"
-                     Checked="OnEnhancedModeChecked"
-                     AutomationProperties.Name="{DynamicResource Magnifier.ImageMode.Enhanced}"
-                     Content="{DynamicResource Magnifier.ImageMode.Enhanced}" />
-      </UniformGrid>
+      <Border Grid.Row="1"
+              Margin="0,0,0,8"
+              Padding="2"
+              Background="{DynamicResource App.Brush.Canvas}"
+              CornerRadius="{DynamicResource App.CornerRadius.Medium}">
+        <UniformGrid Columns="2"
+                     AutomationProperties.Name="{DynamicResource Magnifier.ImageMode.GroupName}">
+          <RadioButton x:Name="OriginalModeButton"
+                       Margin="0,0,2,0"
+                       GroupName="MagnifierImageMode"
+                       IsChecked="True"
+                       Checked="OnOriginalModeChecked"
+                       Style="{StaticResource Magnifier.ModeButton}"
+                       AutomationProperties.Name="{DynamicResource Magnifier.ImageMode.Original}"
+                       Content="{DynamicResource Magnifier.ImageMode.Original}" />
+          <RadioButton x:Name="EnhancedModeButton"
+                       Margin="2,0,0,0"
+                       GroupName="MagnifierImageMode"
+                       Checked="OnEnhancedModeChecked"
+                       Style="{StaticResource Magnifier.ModeButton}"
+                       AutomationProperties.Name="{DynamicResource Magnifier.ImageMode.Enhanced}"
+                       Content="{DynamicResource Magnifier.ImageMode.Enhanced}" />
+        </UniformGrid>
+      </Border>
 
       <Border Grid.Row="2"
               ClipToBounds="True"
               Background="{DynamicResource App.Brush.Canvas}"
               BorderBrush="{DynamicResource App.Brush.Border}"
               BorderThickness="1"
-              CornerRadius="8"
+              CornerRadius="{DynamicResource App.CornerRadius.Medium}"
               AutomationProperties.Name="{DynamicResource Magnifier.Viewport.AutomationName}">
         <Grid>
           <Image x:Name="ViewportImage"
@@ -69,7 +110,7 @@
             </Image.RenderTransform>
           </Image>
           <controls:CrosshairOverlay Position="{Binding CrosshairPosition, ElementName=Root}"
-                                     Stroke="{DynamicResource App.Brush.Focus}"
+                                     Stroke="{DynamicResource App.Brush.Primary}"
                                      AutomationProperties.Name="{DynamicResource Magnifier.Crosshair.AutomationName}">
             <controls:CrosshairOverlay.Style>
               <Style TargetType="controls:CrosshairOverlay">
@@ -85,11 +126,12 @@
           <TextBlock x:Name="EmptyImageText"
                      HorizontalAlignment="Center"
                      VerticalAlignment="Center"
+                     Foreground="{DynamicResource App.Brush.TextMuted}"
                      Text="{DynamicResource Magnifier.EmptyImage}" />
         </Grid>
       </Border>
 
-      <Grid Grid.Row="3" Margin="0,8,0,0">
+      <Grid Grid.Row="3" Margin="0,9,0,0">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="Auto" />
           <ColumnDefinition Width="*" />
@@ -102,34 +144,19 @@
           <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,2,12,2"
-                   Text="{DynamicResource Magnifier.PixelCoordinates}" />
-        <TextBlock x:Name="PixelPositionText" Grid.Row="0" Grid.Column="1" Margin="0,2"
-                   TextAlignment="Right" />
-
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,2,12,2"
-                   Text="{DynamicResource Magnifier.GraphCoordinates}" />
-        <TextBlock x:Name="GraphPositionText" Grid.Row="1" Grid.Column="1" Margin="0,2"
-                   TextAlignment="Right" />
-
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,2,12,2"
-                   Text="{DynamicResource Magnifier.NearestDetection}" />
+        <TextBlock Grid.Row="0" Margin="0,2,12,2" Foreground="{DynamicResource App.Brush.TextMuted}" Text="{DynamicResource Magnifier.PixelCoordinates}" />
+        <TextBlock x:Name="PixelPositionText" Grid.Row="0" Grid.Column="1" Margin="0,2" TextAlignment="Right" />
+        <TextBlock Grid.Row="1" Margin="0,2,12,2" Foreground="{DynamicResource App.Brush.TextMuted}" Text="{DynamicResource Magnifier.GraphCoordinates}" />
+        <TextBlock x:Name="GraphPositionText" Grid.Row="1" Grid.Column="1" Margin="0,2" TextAlignment="Right" />
+        <TextBlock Grid.Row="2" Margin="0,2,12,2" Foreground="{DynamicResource App.Brush.TextMuted}" Text="{DynamicResource Magnifier.NearestDetection}" />
         <Grid Grid.Row="2" Grid.Column="1" Margin="0,2">
-          <TextBlock x:Name="NearestDetectionText" TextAlignment="Right" />
-          <TextBlock x:Name="NoDetectionText"
-                     Text="{DynamicResource Magnifier.NearestDetection.None}"
-                     TextAlignment="Right" />
+          <TextBlock x:Name="NearestDetectionText" TextAlignment="Right" TextTrimming="CharacterEllipsis" />
+          <TextBlock x:Name="NoDetectionText" Text="{DynamicResource Magnifier.NearestDetection.None}" TextAlignment="Right" />
         </Grid>
-
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,2,12,2"
-                   Text="{DynamicResource Magnifier.Confidence}" />
-        <TextBlock x:Name="ConfidenceText" Grid.Row="3" Grid.Column="1" Margin="0,2"
-                   TextAlignment="Right" />
-
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,2,12,2"
-                   Text="{DynamicResource Magnifier.Zoom}" />
-        <TextBlock x:Name="ZoomText" Grid.Row="4" Grid.Column="1" Margin="0,2"
-                   TextAlignment="Right" />
+        <TextBlock Grid.Row="3" Margin="0,2,12,2" Foreground="{DynamicResource App.Brush.TextMuted}" Text="{DynamicResource Magnifier.Confidence}" />
+        <TextBlock x:Name="ConfidenceText" Grid.Row="3" Grid.Column="1" Margin="0,2" TextAlignment="Right" />
+        <TextBlock Grid.Row="4" Margin="0,2,12,2" Foreground="{DynamicResource App.Brush.TextMuted}" Text="{DynamicResource Magnifier.Zoom}" />
+        <TextBlock x:Name="ZoomText" Grid.Row="4" Grid.Column="1" Margin="0,2" TextAlignment="Right" />
       </Grid>
     </Grid>
   </Border>

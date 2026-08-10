@@ -64,6 +64,60 @@ function Write-JsonFileAtomic {
     }
 }
 
+function Copy-DevPortableRequiredContent {
+    param(
+        [Parameter(Mandatory)]
+        [string]$RepositoryRoot,
+
+        [Parameter(Mandatory)]
+        [string]$DestinationRoot
+    )
+
+    $repositoryPath = [System.IO.Path]::GetFullPath($RepositoryRoot).TrimEnd('\', '/')
+    $destinationPath = [System.IO.Path]::GetFullPath($DestinationRoot).TrimEnd('\', '/')
+    $definitionPath = Join-Path $repositoryPath 'packaging\common\publish.json'
+    if (-not (Test-Path -LiteralPath $definitionPath -PathType Leaf)) {
+        throw "Common publish definition is missing: $definitionPath"
+    }
+
+    $definition = Get-Content -LiteralPath $definitionPath -Raw | ConvertFrom-Json
+    foreach ($content in @($definition.requiredContent)) {
+        $source = ([string]$content.source).Replace('/', '\')
+        $target = ([string]$content.target).Replace('/', '\')
+        if ([string]::IsNullOrWhiteSpace($source) -or
+            [string]::IsNullOrWhiteSpace($target) -or
+            [System.IO.Path]::IsPathRooted($source) -or
+            [System.IO.Path]::IsPathRooted($target) -or
+            @($source.Split('\')) -contains '..' -or
+            @($target.Split('\')) -contains '..') {
+            throw "Common publish contains an unsafe required-content mapping: '$source' -> '$target'."
+        }
+
+        $sourcePath = [System.IO.Path]::GetFullPath((Join-Path $repositoryPath $source))
+        $targetPath = [System.IO.Path]::GetFullPath((Join-Path $destinationPath $target))
+        if (-not $sourcePath.StartsWith($repositoryPath + [System.IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase) -or
+            -not $targetPath.StartsWith($destinationPath + [System.IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+            throw "Common publish required content resolves outside its allowed root: '$source' -> '$target'."
+        }
+        if (-not (Test-Path -LiteralPath $sourcePath)) {
+            throw "Required common publish content is missing: $sourcePath"
+        }
+
+        if (Test-Path -LiteralPath $sourcePath -PathType Container) {
+            New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
+            Get-ChildItem -LiteralPath $sourcePath -Force |
+                Copy-Item -Destination $targetPath -Recurse -Force
+        }
+        else {
+            $targetParent = Split-Path -Parent $targetPath
+            if (-not [string]::IsNullOrWhiteSpace($targetParent)) {
+                New-Item -ItemType Directory -Path $targetParent -Force | Out-Null
+            }
+            Copy-Item -LiteralPath $sourcePath -Destination $targetPath -Force
+        }
+    }
+}
+
 function Get-DevPortableApprovedModelIds {
     param(
         [Parameter(Mandatory)]

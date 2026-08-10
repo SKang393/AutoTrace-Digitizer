@@ -13,14 +13,13 @@ public sealed class ShellContractTests
     private const string XamlNamespace = "http://schemas.microsoft.com/winfx/2006/xaml";
     private const string AutomationNamespace = "clr-namespace:System.Windows.Automation;assembly=PresentationCore";
 
-    private static readonly Dictionary<string, (string AutomationId, string Command)> WorkflowControls =
-        new Dictionary<string, (string, string)>(StringComparer.Ordinal)
+    private static readonly Dictionary<string, (string AutomationId, string AutomationName, string Command)> WorkflowControls =
+        new Dictionary<string, (string, string, string)>(StringComparer.Ordinal)
         {
-            ["WorkflowImportButton"] = ("Workflow.Import", "{Binding ImportCommand}"),
-            ["WorkflowEnhanceButton"] = ("Workflow.Enhance", "{Binding EnhanceCommand}"),
-            ["WorkflowAutoDetectButton"] = ("Workflow.AutoDetect", "{Binding AutoDetectCommand}"),
-            ["WorkflowReviewButton"] = ("Workflow.Review", "{Binding ReviewCommand}"),
-            ["WorkflowExportButton"] = ("Workflow.Export", "{Binding ExportCommand}"),
+            ["WorkflowImportButton"] = ("Workflow.Import", "Workflow.Open", "{Binding ImportCommand}"),
+            ["WorkflowAutoDetectButton"] = ("Workflow.AutoDetect", "Workflow.Analyze", "{Binding AutoDetectCommand}"),
+            ["WorkflowReviewButton"] = ("Workflow.Review", "Workflow.Review", "{Binding ReviewCommand}"),
+            ["WorkflowExportButton"] = ("Workflow.Export", "Workflow.Export", "{Binding OpenExportPreviewCommand}"),
         };
 
     [TestMethod]
@@ -38,7 +37,7 @@ public sealed class ShellContractTests
             var button = FindNamed(document, expected.Key);
             Assert.AreEqual(presentation + "Button", button.Name);
             Assert.AreEqual(expected.Value.AutomationId, button.Attribute(automation + "AutomationProperties.AutomationId")?.Value);
-            Assert.AreEqual($"{{DynamicResource {expected.Value.AutomationId}}}", button.Attribute(automation + "AutomationProperties.Name")?.Value);
+            Assert.AreEqual($"{{DynamicResource {expected.Value.AutomationName}}}", button.Attribute(automation + "AutomationProperties.Name")?.Value);
             Assert.AreEqual(expected.Value.Command, button.Attribute("Command")?.Value);
             Assert.IsTrue(tabIndices.Add(button.Attribute("TabIndex")?.Value ?? string.Empty));
             Assert.IsTrue(button.Descendants(presentation + "AccessText").Any());
@@ -68,7 +67,7 @@ public sealed class ShellContractTests
             ("E", "Control", "{Binding EnhanceCommand}"),
             ("F5", string.Empty, "{Binding AutoDetectCommand}"),
             ("R", "Control", "{Binding ReviewCommand}"),
-            ("E", "Control+Shift", "{Binding ExportCommand}"),
+            ("E", "Control+Shift", "{Binding OpenExportPreviewCommand}"),
             ("P", "Control", "{Binding TogglePhaseOverlayCommand}"),
             ("Tab", "Control", "{Binding NextTabCommand}"),
             ("Tab", "Control+Shift", "{Binding PreviousTabCommand}"),
@@ -113,7 +112,7 @@ public sealed class ShellContractTests
                 element.Attribute(automation + "AutomationProperties.AutomationId")?.Value))
             .ToArray();
 
-        Assert.HasCount(51, identified);
+        Assert.HasCount(58, identified);
         string[] unnamed = identified
             .Where(element => string.IsNullOrWhiteSpace(
                 element.Attribute(automation + "AutomationProperties.Name")?.Value))
@@ -184,7 +183,7 @@ public sealed class ShellContractTests
     }
 
     [TestMethod]
-    public void InspectorIsWiderResizableAndManualCommandsAreVisible()
+    public void CalmPrecisionPaneDefaultsAreResizableAndManualCommandsAreVisible()
     {
         var document = LoadMainWindow();
         XNamespace presentation = PresentationNamespace;
@@ -193,8 +192,12 @@ public sealed class ShellContractTests
 
         var inspectorColumn = document.Descendants(presentation + "ColumnDefinition")
             .Single(element => element.Attribute(xaml + "Name")?.Value == "InspectorColumn");
-        Assert.IsTrue(double.Parse(inspectorColumn.Attribute("Width")!.Value, System.Globalization.CultureInfo.InvariantCulture) >= 390);
+        Assert.AreEqual(384, double.Parse(inspectorColumn.Attribute("Width")!.Value, System.Globalization.CultureInfo.InvariantCulture));
         Assert.IsTrue(double.Parse(inspectorColumn.Attribute("MinWidth")!.Value, System.Globalization.CultureInfo.InvariantCulture) >= 340);
+
+        var seriesColumn = document.Descendants(presentation + "ColumnDefinition")
+            .Single(element => element.Attribute(xaml + "Name")?.Value == "SeriesColumn");
+        Assert.AreEqual(272, double.Parse(seriesColumn.Attribute("Width")!.Value, System.Globalization.CultureInfo.InvariantCulture));
 
         var resizeGrip = document.Descendants(presentation + "GridSplitter")
             .Single(element => element.Attribute(automation + "AutomationProperties.AutomationId")?.Value == "Inspector.Resize");
@@ -252,7 +255,7 @@ public sealed class ShellContractTests
         var selector = FindNamed(document, "ThemeSelector");
 
         Assert.AreEqual(presentation + "ComboBox", selector.Name);
-        Assert.AreEqual("5", selector.Attribute("TabIndex")?.Value);
+        Assert.AreEqual("4", selector.Attribute("TabIndex")?.Value);
         Assert.AreEqual("{Binding AppearanceMode, Mode=TwoWay}", selector.Attribute("SelectedValue")?.Value);
         Assert.AreEqual("Theme.Select", selector.Attribute(automation + "AutomationProperties.AutomationId")?.Value);
         Assert.AreEqual(
@@ -286,7 +289,7 @@ public sealed class ShellContractTests
             .Where(attribute => visibleAttributes.Contains(attribute.Name))
             .Where(attribute => !string.IsNullOrWhiteSpace(attribute.Value))
             .Where(attribute => !attribute.Value.StartsWith("{DynamicResource ", StringComparison.Ordinal))
-            .Where(attribute => !attribute.Value.StartsWith("{Binding ", StringComparison.Ordinal))
+            .Where(attribute => !attribute.Value.StartsWith("{Binding", StringComparison.Ordinal))
             .ToArray();
 
         Assert.IsEmpty(

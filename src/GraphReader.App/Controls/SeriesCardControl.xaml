@@ -6,11 +6,8 @@
              x:Name="Root"
              IsTabStop="False"
              AutomationProperties.Name="{Binding AccessibleSymbolName, ElementName=Root}">
-  <Border Padding="10"
-          Background="{DynamicResource App.Brush.SurfaceRaised}"
-          BorderBrush="{DynamicResource App.Brush.Border}"
-          BorderThickness="1"
-          CornerRadius="8">
+  <Border Padding="12"
+          Style="{DynamicResource App.Style.Card}">
     <Grid>
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
@@ -18,21 +15,20 @@
         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
 
-      <Grid Grid.Row="0">
+      <Grid>
         <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="40" />
+          <ColumnDefinition Width="38" />
           <ColumnDefinition Width="*" />
           <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0"
-                Width="32"
+        <Border Width="32"
                 Height="32"
                 HorizontalAlignment="Left"
                 Background="{DynamicResource App.Brush.Surface}"
                 BorderBrush="{DynamicResource App.Brush.Text}"
                 BorderThickness="1"
-                CornerRadius="4"
+                CornerRadius="{DynamicResource App.CornerRadius.Small}"
                 AutomationProperties.Name="{Binding AccessibleSymbolName, ElementName=Root}">
           <TextBlock HorizontalAlignment="Center"
                      VerticalAlignment="Center"
@@ -45,39 +41,48 @@
           <TextBlock FontWeight="SemiBold"
                      Text="{Binding InferredLabel, ElementName=Root}"
                      TextTrimming="CharacterEllipsis" />
-          <TextBlock Text="{Binding AccessibleSymbolName, ElementName=Root}"
+          <TextBlock Margin="0,2,0,0"
+                     FontSize="{DynamicResource App.FontSize.Caption}"
+                     Foreground="{DynamicResource App.Brush.TextMuted}"
+                     Text="{Binding AccessibleSymbolName, ElementName=Root}"
                      TextTrimming="CharacterEllipsis" />
         </StackPanel>
 
         <ToggleButton Grid.Column="2"
-                      Padding="8,4"
+                      MinWidth="32"
+                      Padding="6,3"
                       VerticalAlignment="Center"
                       IsChecked="{Binding IsSeriesVisible, ElementName=Root, Mode=TwoWay}"
                       Style="{DynamicResource App.Style.ToggleButton}"
-                      AutomationProperties.Name="{DynamicResource SeriesCard.Visibility}"
-                      Content="{DynamicResource SeriesCard.Visibility}" />
+                      ToolTip="{DynamicResource SeriesCard.Visibility}"
+                      AutomationProperties.Name="{DynamicResource SeriesCard.Visibility}">
+          <TextBlock FontSize="{DynamicResource App.FontSize.Caption}" Text="{DynamicResource SeriesCard.Visibility}" />
+        </ToggleButton>
       </Grid>
 
-      <Grid Grid.Row="1" Margin="0,8,0,0">
+      <Grid Grid.Row="1" Margin="0,10,0,0">
         <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="Auto" />
           <ColumnDefinition Width="*" />
-          <ColumnDefinition Width="Auto" />
           <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-
-        <TextBlock Grid.Column="0" Margin="0,0,8,0"
-                   Text="{DynamicResource SeriesCard.MarkerCount}" />
-        <TextBlock Grid.Column="1" Margin="0,0,12,0"
-                   Text="{Binding MarkerCount, ElementName=Root}"
-                   AutomationProperties.Name="{DynamicResource SeriesCard.MarkerCount}" />
-        <TextBlock Grid.Column="2" Margin="0,0,8,0"
-                   Text="{DynamicResource SeriesCard.Confidence}" />
-        <TextBlock x:Name="ConfidenceText" Grid.Column="3"
-                   AutomationProperties.Name="{DynamicResource SeriesCard.Confidence}" />
+        <StackPanel Margin="0,0,6,0">
+          <TextBlock FontSize="{DynamicResource App.FontSize.Caption}" Foreground="{DynamicResource App.Brush.TextMuted}" Text="{DynamicResource SeriesCard.MarkerCount}" />
+          <Border Margin="0,2,0,0"
+                  HorizontalAlignment="Left"
+                  Padding="6,1"
+                  Background="{DynamicResource App.Brush.PrimarySubtle}"
+                  CornerRadius="8">
+            <TextBlock Text="{Binding MarkerCount, ElementName=Root}"
+                       AutomationProperties.Name="{DynamicResource SeriesCard.MarkerCount}" />
+          </Border>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Margin="6,0,0,0">
+          <TextBlock FontSize="{DynamicResource App.FontSize.Caption}" Foreground="{DynamicResource App.Brush.TextMuted}" Text="{DynamicResource SeriesCard.Confidence}" />
+          <TextBlock x:Name="ConfidenceText" Margin="0,2,0,0" FontWeight="SemiBold" AutomationProperties.Name="{DynamicResource SeriesCard.Confidence}" />
+        </StackPanel>
       </Grid>
 
-      <UniformGrid Grid.Row="2" Margin="0,8,0,0" Columns="2">
+      <UniformGrid Grid.Row="2" Margin="0,10,0,0" Columns="2">
         <Button Margin="0,0,4,0"
                 Padding="8,4"
                 Style="{DynamicResource App.Style.Button}"
@@ -87,7 +92,7 @@
                 Content="{DynamicResource SeriesCard.Select}" />
         <Button Margin="4,0,0,0"
                 Padding="8,4"
-                Style="{DynamicResource App.Style.Button}"
+                Style="{DynamicResource App.Style.SubtleButton}"
                 Command="{Binding ReassignCommand, ElementName=Root}"
                 CommandParameter="{Binding CommandParameter, ElementName=Root}"
                 AutomationProperties.Name="{DynamicResource SeriesCard.Reassign}"

@@ -2,8 +2,10 @@
 // Copyright 2026 Sungwoo Kang
 
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Security;
 using System.Windows;
 using System.Windows.Input;
 using GraphReader.App.Appearance;
@@ -35,6 +37,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
     private readonly ILocalizationService? _localizationService;
     private readonly IManualWorkspaceService? _manualWorkspaceService;
     private readonly IWorkspaceDialogService? _dialogService;
+    private readonly string? _recentProjectsPath;
     private readonly bool _isWorkflowAvailable;
     private readonly CancellationTokenSource _shutdown = new();
     private WorkspaceTabViewModel? _selectedTab;
@@ -62,6 +65,17 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
     private string? _selectedSharedBaselineSeriesId;
     private double _manualYMaximum = 100;
     private double _manualXMaximum = 20;
+    private readonly Dictionary<string, TabEditHistory> _editHistories = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _reviewReadyTabIds = new(StringComparer.Ordinal);
+    private WorkspaceSurfaceState _surfaceState;
+    private WorkspaceSurfaceState _surfaceBeforeOperation;
+    private string _statusKeyBeforeOperation = "Workflow.Review";
+    private string? _statusOverrideBeforeOperation;
+    private ReviewIssueViewModel? _selectedReviewIssue;
+    private DataPreviewRowViewModel? _selectedDataPreviewRow;
+    private bool _isDataPreviewExpanded;
+    private ExportSummaryViewModel? _exportSummary;
+    private bool _isRestoringHistory;
 
     public MainWindowViewModel(IWorkspaceService workspaceService)
         : this(workspaceService, null)
@@ -72,12 +86,14 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         IWorkspaceService workspaceService,
         ILocalizationService? localizationService,
         string? startupErrorMessageKey = null,
-        IWorkspaceDialogService? dialogService = null)
+        IWorkspaceDialogService? dialogService = null,
+        string? recentProjectsPath = null)
     {
         _workspaceService = workspaceService ?? throw new ArgumentNullException(nameof(workspaceService));
         _localizationService = localizationService;
         _manualWorkspaceService = workspaceService as IManualWorkspaceService;
         _dialogService = dialogService;
+        _recentProjectsPath = recentProjectsPath;
         _newSeriesName = GetLocalizedString(LocalizationKeys.ManualDefaultIntervention);
         _phaseLabel = GetLocalizedString(LocalizationKeys.ManualDefaultIntervention);
         MarkerShapeChoices =
@@ -108,6 +124,9 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         ];
         BaselineRelationChoices = [];
         ProbeRelationChoices = [];
+        ReviewIssues = [];
+        DataPreviewRows = [];
+        RecentProjects = new ObservableCollection<string>(LoadRecentProjectPaths(recentProjectsPath));
         _isWorkflowAvailable = string.IsNullOrWhiteSpace(startupErrorMessageKey);
         if (!_isWorkflowAvailable)
         {
@@ -118,11 +137,21 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         {
             EnsureManualOverlay(tab);
             ConfigureSeriesSelection(tab);
+            EnsureEditHistory(tab);
+            if (tab.Points.Count > 0 || tab.Calibration is not null)
+            {
+                _reviewReadyTabIds.Add(tab.TabId);
+            }
         }
         _selectedTab = Tabs.FirstOrDefault();
         _selectedPointId = _selectedTab?.Points.FirstOrDefault()?.PointId;
         Magnifier = new MagnifierViewModel();
         Magnifier.IsCrosshairVisible = _selectedTab is not null;
+        _surfaceState = _selectedTab is null
+            ? WorkspaceSurfaceState.Empty
+            : _reviewReadyTabIds.Contains(_selectedTab.TabId)
+                ? WorkspaceSurfaceState.Reviewing
+                : WorkspaceSurfaceState.Ready;
 
         ImportCommand = new AsyncRelayCommand(
             ImportImagesFromDialogAsync,
@@ -192,6 +221,15 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         NextTabCommand = new RelayCommand(_ => SelectRelativeTab(1), _ => Tabs.Count > 1);
         PreviousTabCommand = new RelayCommand(_ => SelectRelativeTab(-1), _ => Tabs.Count > 1);
         OpenProjectCommand = new AsyncRelayCommand(OpenProjectFromDialogAsync, () => !IsBusy && _manualWorkspaceService is not null);
+        OpenRecentProjectCommand = new RelayCommand(
+            parameter =>
+            {
+                if (parameter is string path)
+                {
+                    _ = OpenProjectPathAsync(path, CancellationToken.None);
+                }
+            },
+            parameter => parameter is string path && File.Exists(path) && !IsBusy && _manualWorkspaceService is not null);
         SaveProjectCommand = new AsyncRelayCommand(
             cancellationToken => SaveProjectFromDialogAsync(saveAs: false, cancellationToken),
             () => !IsBusy && _manualWorkspaceService is not null && Tabs.Count > 0);
@@ -205,6 +243,9 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             parameter => CloseTab(parameter as WorkspaceTabViewModel ?? SelectedTab),
             parameter => parameter is WorkspaceTabViewModel || SelectedTab is not null);
         StartCalibrationCommand = new RelayCommand(_ => BeginCalibration(), _ => SelectedTab is not null && _manualWorkspaceService is not null);
+        SelectEditorModeCommand = new RelayCommand(
+            _ => EditorMode = ManualEditorMode.Select,
+            _ => SelectedTab is not null);
         CreateSeriesCommand = new RelayCommand(_ => CreateSeries(), _ => SelectedTab is not null && _manualWorkspaceService is not null);
         EditSeriesCommand = new RelayCommand(_ => EditSelectedSeries(), _ => CanEditSelectedSeries());
         ApplySeriesRelationsCommand = new RelayCommand(_ => ApplySeriesRelations(), _ => CanApplySeriesRelations());
@@ -220,6 +261,20 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         BeginMovePhaseDividerCommand = new RelayCommand(_ => EditorMode = ManualEditorMode.MovePhaseDivider, _ => SelectedDividerId is not null && _manualWorkspaceService is not null);
         DeletePhaseDividerCommand = new RelayCommand(_ => DeleteSelectedPhaseDivider(), _ => SelectedDividerId is not null && _manualWorkspaceService is not null);
         LabelPhaseDividerCommand = new RelayCommand(_ => LabelSelectedPhaseDivider(), _ => SelectedDividerId is not null && _manualWorkspaceService is not null);
+        UndoCommand = new RelayCommand(_ => UndoSelectedTab(), _ => CanUndo && !IsBusy);
+        RedoCommand = new RelayCommand(_ => RedoSelectedTab(), _ => CanRedo && !IsBusy);
+        OpenExportPreviewCommand = new RelayCommand(
+            _ => OpenExportPreview(),
+            _ => SelectedTab is not null && !IsBusy);
+        ConfirmExportCommand = new AsyncRelayCommand(
+            ExportFromDialogAsync,
+            () => ExportSummary?.CanExport == true && !IsBusy);
+        SelectReviewIssueCommand = new RelayCommand(
+            parameter => SelectReviewIssue(parameter as ReviewIssueViewModel),
+            parameter => parameter is ReviewIssueViewModel);
+        SelectDataPreviewRowCommand = new RelayCommand(
+            parameter => SelectDataPreviewRow(parameter as DataPreviewRowViewModel),
+            parameter => parameter is DataPreviewRowViewModel);
 
         BuildIdentity identity = BuildIdentity.Current();
         VersionText = identity.Version;
@@ -243,6 +298,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         AutoDetectionAvailabilityText = CanRunAutomaticStage(WorkflowStage.Detect)
             ? string.Empty
             : GetLocalizedString(LocalizationKeys.WorkflowAutoDetectUnavailable);
+        RefreshWorkspaceProjection();
     }
 
     public ObservableCollection<WorkspaceTabViewModel> Tabs { get; }
@@ -266,6 +322,20 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
                 Magnifier.GraphPosition = null;
                 Magnifier.NearestDetectionName = null;
                 Magnifier.NearestDetectionConfidence = null;
+                if (value is not null)
+                {
+                    EnsureEditHistory(value);
+                }
+                if (SurfaceState is not WorkspaceSurfaceState.Analyzing and not WorkspaceSurfaceState.ExportPreview)
+                {
+                    SurfaceState = value is null
+                        ? WorkspaceSurfaceState.Empty
+                        : _reviewReadyTabIds.Contains(value.TabId)
+                            ? WorkspaceSurfaceState.Reviewing
+                            : WorkspaceSurfaceState.Ready;
+                }
+                RefreshWorkspaceProjection();
+                NotifyHistoryStateChanged();
                 RelayCommand.RaiseCanExecuteChanged();
                 AsyncRelayCommand.RaiseCanExecuteChanged();
             }
@@ -273,6 +343,93 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
     }
 
     public MagnifierViewModel Magnifier { get; }
+
+    public WorkspaceSurfaceState SurfaceState
+    {
+        get => _surfaceState;
+        private set => SetProperty(ref _surfaceState, value);
+    }
+
+    public ObservableCollection<ReviewIssueViewModel> ReviewIssues { get; }
+
+    public ReviewIssueViewModel? SelectedReviewIssue
+    {
+        get => _selectedReviewIssue;
+        private set => SetProperty(ref _selectedReviewIssue, value);
+    }
+
+    public int ReviewIssueCount => ReviewIssues.Count;
+
+    public int BlockingReviewIssueCount => ReviewIssues.Count(static issue => issue.IsBlocking);
+
+    public bool HasReviewIssues => ReviewIssues.Count > 0;
+
+    public ObservableCollection<DataPreviewRowViewModel> DataPreviewRows { get; }
+
+    public ObservableCollection<string> RecentProjects { get; }
+
+    public bool HasRecentProjects => RecentProjects.Count > 0;
+
+    public DataPreviewRowViewModel? SelectedDataPreviewRow
+    {
+        get => _selectedDataPreviewRow;
+        private set
+        {
+            if (ReferenceEquals(_selectedDataPreviewRow, value))
+            {
+                return;
+            }
+
+            if (_selectedDataPreviewRow is not null)
+            {
+                _selectedDataPreviewRow.IsSelected = false;
+            }
+            _selectedDataPreviewRow = value;
+            if (_selectedDataPreviewRow is not null)
+            {
+                _selectedDataPreviewRow.IsSelected = true;
+            }
+            OnPropertyChanged();
+        }
+    }
+
+    public bool IsDataPreviewExpanded
+    {
+        get => _isDataPreviewExpanded;
+        set => SetProperty(ref _isDataPreviewExpanded, value);
+    }
+
+    public ExportSummaryViewModel? ExportSummary
+    {
+        get => _exportSummary;
+        private set
+        {
+            if (ReferenceEquals(_exportSummary, value))
+            {
+                return;
+            }
+            if (_exportSummary is not null)
+            {
+                _exportSummary.PropertyChanged -= HandleExportSummaryPropertyChanged;
+            }
+            if (SetProperty(ref _exportSummary, value))
+            {
+                if (_exportSummary is not null)
+                {
+                    _exportSummary.PropertyChanged += HandleExportSummaryPropertyChanged;
+                }
+                AsyncRelayCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public bool CanUndo => SelectedTab is not null && GetEditHistory(SelectedTab).CanUndo;
+
+    public bool CanRedo => SelectedTab is not null && GetEditHistory(SelectedTab).CanRedo;
+
+    public string? UndoDescription => SelectedTab is null ? null : GetEditHistory(SelectedTab).UndoDescription;
+
+    public string? RedoDescription => SelectedTab is null ? null : GetEditHistory(SelectedTab).RedoDescription;
 
     public ObservableCollection<SeriesCardViewModel> SeriesCards =>
         SelectedTab?.SeriesCards ?? EmptySeriesCards;
@@ -355,6 +512,16 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         {
             if (SetProperty(ref _selectedPointId, value))
             {
+                DataPreviewRowViewModel? row = value is null
+                    ? null
+                    : DataPreviewRows.FirstOrDefault(candidate => string.Equals(
+                        candidate.PointId,
+                        value,
+                        StringComparison.Ordinal));
+                if (!ReferenceEquals(SelectedDataPreviewRow, row))
+                {
+                    SelectedDataPreviewRow = row;
+                }
                 RelayCommand.RaiseCanExecuteChanged();
             }
         }
@@ -514,6 +681,8 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
     public ICommand OpenProjectCommand { get; }
 
+    public ICommand OpenRecentProjectCommand { get; }
+
     public ICommand SaveProjectCommand { get; }
 
     public ICommand SaveProjectAsCommand { get; }
@@ -523,6 +692,8 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
     public ICommand CloseTabCommand { get; }
 
     public ICommand StartCalibrationCommand { get; }
+
+    public ICommand SelectEditorModeCommand { get; }
 
     public ICommand CreateSeriesCommand { get; }
 
@@ -546,10 +717,38 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
     public ICommand LabelPhaseDividerCommand { get; }
 
+    public ICommand UndoCommand { get; }
+
+    public ICommand RedoCommand { get; }
+
+    public ICommand OpenExportPreviewCommand { get; }
+
+    public ICommand ConfirmExportCommand { get; }
+
+    public ICommand SelectReviewIssueCommand { get; }
+
+    public ICommand SelectDataPreviewRowCommand { get; }
+
     private static ObservableCollection<SeriesCardViewModel> EmptySeriesCards { get; } = [];
+
+    public Task ImportPathsAsync(
+        IEnumerable<string> paths,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(paths);
+        string[] distinctPaths = paths
+            .Where(static path => !string.IsNullOrWhiteSpace(path))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        return distinctPaths.Length == 0
+            ? Task.CompletedTask
+            : ImportPathsCoreAsync(distinctPaths, cancellationToken);
+    }
 
     public void AddPoint(string seriesId)
     {
+        WorkspaceTabViewModel historyTab = RequireSelectedTab();
+        WorkspaceTabSnapshot before = CaptureTabSnapshot(historyTab);
         if (_manualWorkspaceService is not null && SelectedTab is { } manualTab)
         {
             GraphPoint added = _manualWorkspaceService.AddPoint(
@@ -559,6 +758,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
                 Magnifier.PixelPosition.Y);
             SelectedPointId = added.PointId;
             SelectedSeriesId = seriesId;
+            RecordManualEdit(manualTab, "Edit.AddPoint", before);
             QueueAutosave(SnapshotTrigger.PointEdited, manualTab.TabId, added.PointId);
             return;
         }
@@ -576,10 +776,14 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         tab.Points.Add(point);
         SelectedPointId = point.PointId;
         series.NotifyCountChanged();
+        RecordManualEdit(tab, "Edit.AddPoint", before);
+        RefreshWorkspaceProjection();
     }
 
     public void DeletePoint(string pointId)
     {
+        WorkspaceTabViewModel historyTab = RequireSelectedTab();
+        WorkspaceTabSnapshot before = CaptureTabSnapshot(historyTab);
         if (_manualWorkspaceService is not null && SelectedTab is { } manualTab)
         {
             GraphPoint manualPoint = RequirePoint(pointId);
@@ -590,6 +794,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             }
 
             FindSeries(manualPoint.SeriesId)?.NotifyCountChanged();
+            RecordManualEdit(manualTab, "Edit.DeletePoint", before);
             QueueAutosave(SnapshotTrigger.PointEdited, manualTab.TabId, pointId);
             return;
         }
@@ -604,6 +809,8 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         }
 
         FindSeries(seriesId)?.NotifyCountChanged();
+        RecordManualEdit(tab, "Edit.DeletePoint", before);
+        RefreshWorkspaceProjection();
     }
 
     public void MovePoint(string pointId, double pixelX, double pixelY)
@@ -613,10 +820,13 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             throw new ArgumentOutOfRangeException(nameof(pixelX));
         }
 
+        WorkspaceTabViewModel historyTab = RequireSelectedTab();
+        WorkspaceTabSnapshot before = CaptureTabSnapshot(historyTab);
         if (_manualWorkspaceService is not null && SelectedTab is { } manualTab)
         {
             _manualWorkspaceService.MovePoint(manualTab.TabId, pointId, pixelX, pixelY);
             SelectedPointId = pointId;
+            RecordManualEdit(manualTab, "Edit.MovePoint", before);
             QueueAutosave(SnapshotTrigger.PointEdited, manualTab.TabId, pointId);
             return;
         }
@@ -626,6 +836,8 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         point.PixelY = pixelY;
         SelectedPointId = point.PointId;
         FindSeries(point.SeriesId)?.NotifyCountChanged();
+        RecordManualEdit(historyTab, "Edit.MovePoint", before);
+        RefreshWorkspaceProjection();
     }
 
     public void MergeSeries(string sourceSeriesId, string targetSeriesId)
@@ -636,6 +848,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         }
 
         WorkspaceTabViewModel tab = RequireSelectedTab();
+        WorkspaceTabSnapshot before = CaptureTabSnapshot(tab);
         SeriesCardViewModel source = RequireSeries(sourceSeriesId);
         SeriesCardViewModel target = RequireSeries(targetSeriesId);
         foreach (GraphPoint point in tab.Points.Where(point => point.SeriesId == sourceSeriesId))
@@ -646,6 +859,8 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         source.NotifyCountChanged();
         target.NotifyCountChanged();
         tab.SeriesCards.Remove(source);
+        RecordManualEdit(tab, "Edit.MergeSeries", before);
+        RefreshWorkspaceProjection();
     }
 
     public void SplitSeries(string sourceSeriesId, IReadOnlyCollection<string> pointIds)
@@ -657,6 +872,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         }
 
         WorkspaceTabViewModel tab = RequireSelectedTab();
+        WorkspaceTabSnapshot before = CaptureTabSnapshot(tab);
         SeriesCardViewModel source = RequireSeries(sourceSeriesId);
         HashSet<string> selectedIds = pointIds.ToHashSet(StringComparer.Ordinal);
         GraphPoint[] selectedPoints = tab.Points
@@ -683,6 +899,9 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
         source.NotifyCountChanged();
         created.NotifyCountChanged();
+        ConfigureSeriesSelection(created);
+        RecordManualEdit(tab, "Edit.SplitSeries", before);
+        RefreshWorkspaceProjection();
     }
 
     private string GetLocalizedString(string key) =>
@@ -697,11 +916,19 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
     public void ReassignPoint(string pointId, string targetSeriesId)
     {
+        GraphPoint existingPoint = RequirePoint(pointId);
+        if (string.Equals(existingPoint.SeriesId, targetSeriesId, StringComparison.Ordinal))
+        {
+            return;
+        }
+        WorkspaceTabViewModel historyTab = RequireSelectedTab();
+        WorkspaceTabSnapshot before = CaptureTabSnapshot(historyTab);
         if (_manualWorkspaceService is not null && SelectedTab is { } manualTab)
         {
             _manualWorkspaceService.ReassignPoint(manualTab.TabId, pointId, targetSeriesId);
             SelectedPointId = pointId;
             SelectedSeriesId = targetSeriesId;
+            RecordManualEdit(manualTab, "Edit.ReassignPoint", before);
             QueueAutosave(SnapshotTrigger.PointEdited, manualTab.TabId, pointId);
             return;
         }
@@ -719,6 +946,8 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         point.SeriesId = targetSeriesId;
         FindSeries(sourceSeriesId)?.NotifyCountChanged();
         target.NotifyCountChanged();
+        RecordManualEdit(historyTab, "Edit.ReassignPoint", before);
+        RefreshWorkspaceProjection();
     }
 
     public async Task HandleCanvasPointAsync(Point point, CancellationToken cancellationToken = default)
@@ -729,6 +958,9 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         }
 
         HandleCanvasNavigation(point);
+        WorkspaceTabSnapshot? before = EditorMode == ManualEditorMode.Select
+            ? null
+            : CaptureTabSnapshot(tab);
 
         try
         {
@@ -749,6 +981,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
                             ManualXMaximum));
                     EditorMode = ManualEditorMode.Select;
                     SetStatus(GetLocalizedString(LocalizationKeys.ManualCalibrationSaved));
+                    RecordManualEdit(tab, "Edit.Calibrate", before!);
                     await TryAutosaveAsync(SnapshotTrigger.CalibrationChanged, tab.TabId, null, cancellationToken);
                 }
                     break;
@@ -767,6 +1000,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
                 SelectedPointId = added.PointId;
                 EditorMode = ManualEditorMode.Select;
                 SetStatus(GetLocalizedString(LocalizationKeys.ManualPointAdded));
+                RecordManualEdit(tab, "Edit.AddPoint", before!);
                 await TryAutosaveAsync(SnapshotTrigger.PointEdited, tab.TabId, added.PointId, cancellationToken);
                     break;
                 case ManualEditorMode.MovePoint:
@@ -775,6 +1009,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
                     _manualWorkspaceService.MovePoint(tab.TabId, SelectedPointId, point.X, point.Y);
                     EditorMode = ManualEditorMode.Select;
                     SetStatus(GetLocalizedString(LocalizationKeys.ManualPointMoved));
+                    RecordManualEdit(tab, "Edit.MovePoint", before!);
                     await TryAutosaveAsync(SnapshotTrigger.PointEdited, tab.TabId, SelectedPointId, cancellationToken);
                 }
                     break;
@@ -787,6 +1022,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
                 SelectedDividerId = divider.DividerId;
                 EditorMode = ManualEditorMode.Select;
                 SetStatus(GetLocalizedString(LocalizationKeys.ManualDividerAdded));
+                RecordManualEdit(tab, "Edit.AddPhaseDivider", before!);
                 await TryAutosaveAsync(SnapshotTrigger.PhaseEdited, tab.TabId, divider.DividerId, cancellationToken);
                     break;
                 case ManualEditorMode.MovePhaseDivider:
@@ -795,6 +1031,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
                     _manualWorkspaceService.MovePhaseDivider(tab.TabId, SelectedDividerId, point.X);
                     EditorMode = ManualEditorMode.Select;
                     SetStatus(GetLocalizedString(LocalizationKeys.ManualDividerMoved));
+                    RecordManualEdit(tab, "Edit.MovePhaseDivider", before!);
                     await TryAutosaveAsync(SnapshotTrigger.PhaseEdited, tab.TabId, SelectedDividerId, cancellationToken);
                 }
                     break;
@@ -849,6 +1086,18 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             return;
         }
 
+        await ImportPathsCoreAsync(paths, cancellationToken);
+    }
+
+    private async Task ImportPathsCoreAsync(
+        IReadOnlyList<string> paths,
+        CancellationToken cancellationToken)
+    {
+        if (_manualWorkspaceService is null)
+        {
+            return;
+        }
+
         await RunBusyAsync(async token =>
         {
             try
@@ -859,6 +1108,12 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
                 SelectedTab = imported.Count > 0 ? imported[^1] : SelectedTab;
                 CurrentStage = WorkflowStage.Import;
+                if (SelectedTab is not null)
+                {
+                    _reviewReadyTabIds.Remove(SelectedTab.TabId);
+                    SurfaceState = WorkspaceSurfaceState.Ready;
+                }
+                RefreshWorkspaceProjection();
                 SetStatus(_manualWorkspaceService.LastImportErrors.Count == 0
                     ? FormatLocalizedString(LocalizationKeys.StatusImportedFormat, imported.Count)
                     : FormatLocalizedString(
@@ -888,6 +1143,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
             EnsureManualOverlay(tab);
             ConfigureSeriesSelection(tab);
+            EnsureEditHistory(tab);
             Tabs.Add(tab);
             lastAdded = tab;
         }
@@ -948,19 +1204,43 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             return;
         }
 
+        await OpenProjectPathAsync(path, cancellationToken);
+    }
+
+    private async Task OpenProjectPathAsync(string path, CancellationToken cancellationToken)
+    {
+        if (_manualWorkspaceService is null || string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
         await RunBusyAsync(async token =>
         {
             IReadOnlyList<WorkspaceTabViewModel> opened =
                 await _manualWorkspaceService.OpenProjectAsync(path, token);
             Tabs.Clear();
+            _editHistories.Clear();
+            _reviewReadyTabIds.Clear();
             foreach (WorkspaceTabViewModel tab in opened)
             {
                 EnsureManualOverlay(tab);
                 ConfigureSeriesSelection(tab);
+                EnsureEditHistory(tab);
+                if (tab.Points.Count > 0 || tab.Calibration is not null)
+                {
+                    _reviewReadyTabIds.Add(tab.TabId);
+                }
                 Tabs.Add(tab);
             }
 
             SelectedTab = Tabs.FirstOrDefault();
+            SurfaceState = SelectedTab is null
+                ? WorkspaceSurfaceState.Empty
+                : _reviewReadyTabIds.Contains(SelectedTab.TabId)
+                    ? WorkspaceSurfaceState.Reviewing
+                    : WorkspaceSurfaceState.Ready;
+            RefreshWorkspaceProjection();
+            RememberRecentProject(path);
             SetStatus(FormatLocalizedString(LocalizationKeys.StatusOpenedFormat, Path.GetFileName(path)));
         }, cancellationToken);
     }
@@ -993,6 +1273,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             {
                 tab.IsDirty = false;
             }
+            RememberRecentProject(saved.Value!.Path);
             SetStatus(FormatLocalizedString(LocalizationKeys.StatusSavedFormat, Path.GetFileName(saved.Value!.Path)));
         }, cancellationToken);
     }
@@ -1028,14 +1309,22 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             IReadOnlyList<WorkspaceTabViewModel> opened = await _manualWorkspaceService
                 .OpenProjectAsync(recovered.Value.Path, token);
             Tabs.Clear();
+            _editHistories.Clear();
+            _reviewReadyTabIds.Clear();
             foreach (WorkspaceTabViewModel tab in opened)
             {
                 EnsureManualOverlay(tab);
                 ConfigureSeriesSelection(tab);
+                EnsureEditHistory(tab);
+                if (tab.Points.Count > 0 || tab.Calibration is not null)
+                {
+                    _reviewReadyTabIds.Add(tab.TabId);
+                }
                 Tabs.Add(tab);
             }
 
             SelectedTab = Tabs.FirstOrDefault();
+            RememberRecentProject(recovered.Value.Path);
             SetStatus(FormatLocalizedString(
                 LocalizationKeys.StatusRecoveredFormat,
                 Path.GetFileName(recovered.Value.Path)));
@@ -1065,6 +1354,10 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             }
 
             CurrentStage = WorkflowStage.Export;
+            SurfaceState = WorkspaceSurfaceState.ExportPreview;
+            ExportSummary = CreateExportSummary(
+                directory,
+                exported.MinimalArtifacts.Select(static artifact => artifact.FileName));
             SetStatus(FormatLocalizedString(
                 LocalizationKeys.StatusExportedFormat,
                 exported.MinimalArtifacts.Count));
@@ -1121,12 +1414,14 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
         try
         {
+            WorkspaceTabSnapshot before = CaptureTabSnapshot(tab);
             string symbol = SymbolFor(NewSeriesShape, NewSeriesFill);
             SeriesCardViewModel series = _manualWorkspaceService.AddSeries(
                 tab.TabId,
                 new ManualSeriesDefinition(NewSeriesName, symbol, NewSeriesShape, NewSeriesFill, NewSeriesRole));
             ConfigureSeriesSelection(series);
             SelectedSeriesId = series.SeriesId;
+            RecordManualEdit(tab, "Edit.CreateSeries", before);
             SetStatus(FormatLocalizedString(LocalizationKeys.ManualSeriesCreatedFormat, series.Label));
             QueueAutosave(SnapshotTrigger.PointEdited, tab.TabId, series.SeriesId);
         }
@@ -1153,6 +1448,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
         try
         {
+            WorkspaceTabSnapshot before = CaptureTabSnapshot(tab);
             _manualWorkspaceService.UpdateSeries(
                 tab.TabId,
                 seriesId,
@@ -1162,6 +1458,7 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
                     NewSeriesShape,
                     NewSeriesFill,
                     NewSeriesRole));
+            RecordManualEdit(tab, "Edit.EditSeries", before);
             SetStatus(FormatLocalizedString(LocalizationKeys.ManualSeriesSelectedFormat, NewSeriesName));
             QueueAutosave(SnapshotTrigger.PointEdited, tab.TabId, seriesId);
             RefreshSeriesRelationChoices();
@@ -1311,6 +1608,8 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         }
 
         Tabs.Remove(tab);
+        _editHistories.Remove(tab.TabId);
+        _reviewReadyTabIds.Remove(tab.TabId);
         SelectedTab = Tabs.Count == 0 ? null : Tabs[Math.Min(index, Tabs.Count - 1)];
         RelayCommand.RaiseCanExecuteChanged();
     }
@@ -1322,8 +1621,10 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
             return;
         }
 
+        WorkspaceTabSnapshot before = CaptureTabSnapshot(tab);
         _manualWorkspaceService.DeletePhaseDivider(tab.TabId, dividerId);
         SelectedDividerId = tab.PhaseDividers.FirstOrDefault()?.DividerId;
+        RecordManualEdit(tab, "Edit.DeletePhaseDivider", before);
         SetStatus(GetLocalizedString(LocalizationKeys.ManualDividerDeleted));
         QueueAutosave(SnapshotTrigger.PhaseEdited, tab.TabId, dividerId);
     }
@@ -1343,7 +1644,9 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
         try
         {
+            WorkspaceTabSnapshot before = CaptureTabSnapshot(tab);
             _manualWorkspaceService.LabelPhaseDivider(tab.TabId, dividerId, PhaseCode, PhaseLabel);
+            RecordManualEdit(tab, "Edit.LabelPhaseDivider", before);
             SetStatus(GetLocalizedString(LocalizationKeys.ManualDividerLabeled));
             QueueAutosave(SnapshotTrigger.PhaseEdited, tab.TabId, dividerId);
         }
@@ -1579,6 +1882,14 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
     private bool CanRunAutomaticStage(WorkflowStage stage)
     {
+        if (stage == WorkflowStage.Detect && SelectedTab is null)
+        {
+            return false;
+        }
+        if (stage == WorkflowStage.Review)
+        {
+            return SelectedTab is not null && _reviewReadyTabIds.Contains(SelectedTab.TabId);
+        }
         if (_workspaceService is not IRuntimeWorkspaceService runtime)
         {
             return true;
@@ -1613,20 +1924,57 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         _activeOperation = CancellationTokenSource.CreateLinkedTokenSource(
             _shutdown.Token,
             commandCancellationToken);
+        _surfaceBeforeOperation = SurfaceState;
+        _statusKeyBeforeOperation = StatusMessageKey;
+        _statusOverrideBeforeOperation = _statusMessageOverride;
+        StatusMessageKey = statusMessageKey;
+        if (stage == WorkflowStage.Detect)
+        {
+            SurfaceState = WorkspaceSurfaceState.Analyzing;
+        }
         IsBusy = true;
         try
         {
             await _workspaceService.RunStageAsync(stage, _activeOperation.Token);
             CurrentStage = stage;
             StatusMessageKey = statusMessageKey;
+            if (stage is WorkflowStage.Detect or WorkflowStage.Review)
+            {
+                foreach (WorkspaceTabViewModel tab in Tabs)
+                {
+                    _reviewReadyTabIds.Add(tab.TabId);
+                    if (stage == WorkflowStage.Detect)
+                    {
+                        GetEditHistory(tab).Clear();
+                    }
+                }
+                SurfaceState = WorkspaceSurfaceState.Reviewing;
+                RefreshWorkspaceProjection();
+                NotifyHistoryStateChanged();
+            }
+            else if (stage == WorkflowStage.Import)
+            {
+                SurfaceState = Tabs.Count == 0 ? WorkspaceSurfaceState.Empty : WorkspaceSurfaceState.Ready;
+            }
+            else if (stage == WorkflowStage.Export)
+            {
+                SurfaceState = WorkspaceSurfaceState.ExportPreview;
+            }
         }
         catch (OperationCanceledException) when (_activeOperation.IsCancellationRequested)
         {
-            StatusMessageKey = "Workflow.Review";
+            _statusMessageKey = _statusKeyBeforeOperation;
+            _statusMessageOverride = _statusOverrideBeforeOperation;
+            OnPropertyChanged(nameof(StatusMessageKey));
+            OnPropertyChanged(nameof(StatusMessage));
+            SurfaceState = _surfaceBeforeOperation;
+            RefreshWorkspaceProjection();
         }
         catch (InvalidOperationException exception)
         {
             SetStatus(exception.Message);
+            SurfaceState = _surfaceBeforeOperation;
+            RefreshWorkspaceProjection();
         }
         finally
         {
@@ -1635,6 +1983,334 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
     }
 
     private void CancelActiveOperation() => _activeOperation?.Cancel();
+
+    private void EnsureEditHistory(WorkspaceTabViewModel tab)
+    {
+        if (!_editHistories.ContainsKey(tab.TabId))
+        {
+            _editHistories.Add(tab.TabId, new TabEditHistory());
+        }
+    }
+
+    private TabEditHistory GetEditHistory(WorkspaceTabViewModel tab)
+    {
+        EnsureEditHistory(tab);
+        return _editHistories[tab.TabId];
+    }
+
+    private void RecordManualEdit(
+        WorkspaceTabViewModel tab,
+        string descriptionKey,
+        WorkspaceTabSnapshot before)
+    {
+        if (_isRestoringHistory)
+        {
+            return;
+        }
+
+        WorkspaceTabSnapshot after = CaptureTabSnapshot(tab);
+        GetEditHistory(tab).Record(
+            GetLocalizedString(descriptionKey),
+            () => RestoreTabSnapshot(tab, before),
+            () => RestoreTabSnapshot(tab, after));
+        _reviewReadyTabIds.Add(tab.TabId);
+        if (ReferenceEquals(SelectedTab, tab) && SurfaceState == WorkspaceSurfaceState.Ready)
+        {
+            SurfaceState = WorkspaceSurfaceState.Reviewing;
+        }
+        tab.IsDirty = true;
+        RefreshWorkspaceProjection();
+        NotifyHistoryStateChanged();
+    }
+
+    private void UndoSelectedTab()
+    {
+        if (SelectedTab is not { } tab)
+        {
+            return;
+        }
+
+        _isRestoringHistory = true;
+        try
+        {
+            GetEditHistory(tab).Undo();
+        }
+        finally
+        {
+            _isRestoringHistory = false;
+        }
+        RefreshWorkspaceProjection();
+        NotifyHistoryStateChanged();
+        QueueAutosave(SnapshotTrigger.PointEdited, tab.TabId, "undo");
+    }
+
+    private void RedoSelectedTab()
+    {
+        if (SelectedTab is not { } tab)
+        {
+            return;
+        }
+
+        _isRestoringHistory = true;
+        try
+        {
+            GetEditHistory(tab).Redo();
+        }
+        finally
+        {
+            _isRestoringHistory = false;
+        }
+        RefreshWorkspaceProjection();
+        NotifyHistoryStateChanged();
+        QueueAutosave(SnapshotTrigger.PointEdited, tab.TabId, "redo");
+    }
+
+    private void NotifyHistoryStateChanged()
+    {
+        OnPropertyChanged(nameof(CanUndo));
+        OnPropertyChanged(nameof(CanRedo));
+        OnPropertyChanged(nameof(UndoDescription));
+        OnPropertyChanged(nameof(RedoDescription));
+        RelayCommand.RaiseCanExecuteChanged();
+    }
+
+    private static WorkspaceTabSnapshot CaptureTabSnapshot(WorkspaceTabViewModel tab) => new(
+        tab.Calibration,
+        tab.Points.Select(static point => new PointSnapshot(
+            point.PointId,
+            point.SeriesId,
+            point.PixelX,
+            point.PixelY,
+            point.GraphX,
+            point.GraphY,
+            point.PhaseCode,
+            point.PhaseId,
+            point.ObservationIndex)).ToArray(),
+        tab.SeriesCards.Select(static series => new SeriesSnapshot(
+            series.SeriesId,
+            series.Symbol,
+            series.AccessibleName,
+            series.Label,
+            series.Confidence,
+            series.Shape,
+            series.Fill,
+            series.SemanticRole,
+            series.IsVisible)).ToArray(),
+        tab.PhaseDividers.Select(static divider => new DividerSnapshot(
+            divider.DividerId,
+            divider.OriginalX,
+            divider.Code,
+            divider.Label)).ToArray(),
+        tab.IsDirty);
+
+    private void RestoreTabSnapshot(WorkspaceTabViewModel tab, WorkspaceTabSnapshot snapshot)
+    {
+        tab.Calibration = snapshot.Calibration;
+        tab.Points.Clear();
+        foreach (PointSnapshot point in snapshot.Points)
+        {
+            tab.Points.Add(new GraphPoint(
+                point.PointId,
+                point.SeriesId,
+                point.PixelX,
+                point.PixelY,
+                point.GraphX,
+                point.GraphY,
+                point.PhaseCode,
+                point.PhaseId,
+                point.ObservationIndex));
+        }
+
+        tab.SeriesCards.Clear();
+        foreach (SeriesSnapshot series in snapshot.Series)
+        {
+            var restored = new SeriesCardViewModel(
+                series.SeriesId,
+                series.Symbol,
+                series.AccessibleName,
+                series.Label,
+                series.Confidence,
+                tab.Points,
+                series.Shape,
+                series.Fill,
+                series.SemanticRole)
+            {
+                IsVisible = series.IsVisible,
+            };
+            ConfigureSeriesSelection(restored);
+            tab.SeriesCards.Add(restored);
+        }
+
+        tab.PhaseDividers.Clear();
+        foreach (DividerSnapshot divider in snapshot.Dividers)
+        {
+            tab.PhaseDividers.Add(new EditablePhaseDivider(
+                divider.DividerId,
+                divider.OriginalX,
+                divider.Code,
+                divider.Label));
+        }
+
+        tab.IsDirty = snapshot.IsDirty;
+        SelectedPointId = tab.Points.FirstOrDefault()?.PointId;
+        SelectedSeriesId = tab.SeriesCards.FirstOrDefault()?.SeriesId;
+        SelectedDividerId = tab.PhaseDividers.FirstOrDefault()?.DividerId;
+        foreach (SeriesCardViewModel series in tab.SeriesCards)
+        {
+            series.NotifyCountChanged();
+        }
+        if (_workspaceService is IWorkspaceEditStateSink stateSink)
+        {
+            stateSink.SynchronizeRestoredTab(tab.TabId);
+        }
+        if (tab.Points.Count == 0 && tab.Calibration is null)
+        {
+            _reviewReadyTabIds.Remove(tab.TabId);
+            if (ReferenceEquals(SelectedTab, tab))
+            {
+                SurfaceState = WorkspaceSurfaceState.Ready;
+            }
+        }
+        else
+        {
+            _reviewReadyTabIds.Add(tab.TabId);
+            if (ReferenceEquals(SelectedTab, tab) && SurfaceState != WorkspaceSurfaceState.ExportPreview)
+            {
+                SurfaceState = WorkspaceSurfaceState.Reviewing;
+            }
+        }
+    }
+
+    private void RefreshWorkspaceProjection()
+    {
+        string? selectedPointId = SelectedPointId;
+        ReviewIssues.Clear();
+        DataPreviewRows.Clear();
+        if (SelectedTab is not { } tab)
+        {
+            SelectedReviewIssue = null;
+            SelectedDataPreviewRow = null;
+            ExportSummary = null;
+            NotifyReviewStateChanged();
+            return;
+        }
+
+        ProjectDocument? project = _manualWorkspaceService?.CurrentProject;
+        foreach (ReviewIssueViewModel issue in WorkspaceReviewProjectionService.ProjectIssues(
+                     tab,
+                     project,
+                     GetLocalizedString))
+        {
+            ReviewIssues.Add(issue);
+        }
+        foreach (DataPreviewRowViewModel row in WorkspaceReviewProjectionService.ProjectRows(tab, project))
+        {
+            DataPreviewRows.Add(row);
+        }
+
+        SelectedReviewIssue = ReviewIssues.FirstOrDefault();
+        SelectedDataPreviewRow = DataPreviewRows.FirstOrDefault(row => string.Equals(
+            row.PointId,
+            selectedPointId,
+            StringComparison.Ordinal));
+        if (SurfaceState == WorkspaceSurfaceState.ExportPreview)
+        {
+            bool warningsAcknowledged = ExportSummary?.WarningsAcknowledged == true;
+            ExportSummaryViewModel refreshed = CreateExportSummary(
+                ExportSummary?.OutputDirectory,
+                ExportSummary?.OutputFileNames);
+            refreshed.WarningsAcknowledged = warningsAcknowledged;
+            ExportSummary = refreshed;
+        }
+        NotifyReviewStateChanged();
+    }
+
+    private void NotifyReviewStateChanged()
+    {
+        OnPropertyChanged(nameof(ReviewIssueCount));
+        OnPropertyChanged(nameof(BlockingReviewIssueCount));
+        OnPropertyChanged(nameof(HasReviewIssues));
+        RelayCommand.RaiseCanExecuteChanged();
+        AsyncRelayCommand.RaiseCanExecuteChanged();
+    }
+
+    private void SelectReviewIssue(ReviewIssueViewModel? issue)
+    {
+        if (issue is null)
+        {
+            return;
+        }
+
+        SelectedReviewIssue = issue;
+        if (issue.EntityId is not { } entityId)
+        {
+            return;
+        }
+        if (FindPoint(entityId) is not null)
+        {
+            SelectedPointId = entityId;
+        }
+        else if (FindSeries(entityId) is not null)
+        {
+            SelectedSeriesId = entityId;
+        }
+        else if (SelectedTab?.PhaseDividers.Any(divider => divider.DividerId == entityId) == true)
+        {
+            SelectedDividerId = entityId;
+        }
+    }
+
+    private void SelectDataPreviewRow(DataPreviewRowViewModel? row)
+    {
+        if (row is null)
+        {
+            return;
+        }
+
+        SelectedDataPreviewRow = row;
+        SelectedPointId = row.PointId;
+        SelectedSeriesId = row.SeriesId;
+        HandleCanvasNavigation(new Point(row.PixelX, row.PixelY));
+    }
+
+    private void OpenExportPreview()
+    {
+        RefreshWorkspaceProjection();
+        SurfaceState = WorkspaceSurfaceState.ExportPreview;
+        ExportSummary = CreateExportSummary(outputDirectory: null, outputFileNames: null);
+    }
+
+    private static void HandleExportSummaryPropertyChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        _ = sender;
+        if (args.PropertyName is nameof(ExportSummaryViewModel.CanExport) or null or "")
+        {
+            AsyncRelayCommand.RaiseCanExecuteChanged();
+        }
+    }
+
+    private ExportSummaryViewModel CreateExportSummary(
+        string? outputDirectory,
+        IEnumerable<string>? outputFileNames)
+    {
+        WorkspaceTabViewModel? tab = SelectedTab;
+        int phaseCount = tab?.Points.Select(static point => point.PhaseCode)
+            .Distinct(StringComparer.OrdinalIgnoreCase).Count() ?? 0;
+        int blockers = BlockingReviewIssueCount;
+        int warnings = ReviewIssues.Count(static issue => issue.Severity == ReviewIssueSeverity.Warning);
+        return new ExportSummaryViewModel(
+            tab?.Points.Count ?? 0,
+            tab?.SeriesCards.Count ?? 0,
+            phaseCount,
+            blockers,
+            warnings,
+            outputDirectory,
+            (outputFileNames ?? Array.Empty<string>()).ToArray(),
+            FormatLocalizedString(
+                LocalizationKeys.ExportPreviewProvenanceFormat,
+                Path.GetFileName(tab?.SourcePath) ?? GetLocalizedString(LocalizationKeys.PreviewUnknown)),
+            GetLocalizedString(LocalizationKeys.ExportPreviewDestinationPending));
+    }
 
     private bool CanExecuteReassignCommand(object? parameter)
     {
@@ -1668,6 +2344,83 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
         throw new ArgumentException("A point and target series are required.", nameof(parameter));
     }
 
+    private static string[] LoadRecentProjectPaths(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return [];
+        }
+
+        try
+        {
+            return File.ReadAllLines(path)
+                .Select(static value => value.Trim())
+                .Where(static value => !string.IsNullOrWhiteSpace(value) && File.Exists(value))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Take(8)
+                .ToArray();
+        }
+        catch (Exception exception) when (IsExpectedRecentProjectException(exception))
+        {
+            return [];
+        }
+    }
+
+    private void RememberRecentProject(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        string fullPath;
+        try
+        {
+            fullPath = Path.GetFullPath(path);
+        }
+        catch (Exception exception) when (IsExpectedRecentProjectException(exception))
+        {
+            return;
+        }
+
+        string? existing = RecentProjects.FirstOrDefault(candidate =>
+            string.Equals(candidate, fullPath, StringComparison.OrdinalIgnoreCase));
+        if (existing is not null)
+        {
+            RecentProjects.Remove(existing);
+        }
+        RecentProjects.Insert(0, fullPath);
+        while (RecentProjects.Count > 8)
+        {
+            RecentProjects.RemoveAt(RecentProjects.Count - 1);
+        }
+        OnPropertyChanged(nameof(HasRecentProjects));
+        RelayCommand.RaiseCanExecuteChanged();
+
+        if (string.IsNullOrWhiteSpace(_recentProjectsPath))
+        {
+            return;
+        }
+
+        try
+        {
+            string? directory = Path.GetDirectoryName(_recentProjectsPath);
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+            File.WriteAllLines(_recentProjectsPath, RecentProjects);
+        }
+        catch (Exception exception) when (IsExpectedRecentProjectException(exception))
+        {
+            // Recent-project persistence is fail-soft and cannot block scientific work.
+        }
+    }
+
+    private static bool IsExpectedRecentProjectException(Exception exception) =>
+        exception is IOException or UnauthorizedAccessException or SecurityException or
+        ArgumentException or NotSupportedException;
+
     private WorkspaceTabViewModel RequireSelectedTab() =>
         SelectedTab ?? throw new InvalidOperationException("No workspace tab is selected.");
 
@@ -1682,4 +2435,39 @@ public sealed class MainWindowViewModel : ObservableObject, IDisposable
 
     private SeriesCardViewModel RequireSeries(string seriesId) =>
         FindSeries(seriesId) ?? throw new KeyNotFoundException($"Series '{seriesId}' does not exist.");
+
+    private sealed record WorkspaceTabSnapshot(
+        ManualCalibrationState? Calibration,
+        IReadOnlyList<PointSnapshot> Points,
+        IReadOnlyList<SeriesSnapshot> Series,
+        IReadOnlyList<DividerSnapshot> Dividers,
+        bool IsDirty);
+
+    private sealed record PointSnapshot(
+        string PointId,
+        string SeriesId,
+        double PixelX,
+        double PixelY,
+        double GraphX,
+        double GraphY,
+        string PhaseCode,
+        string? PhaseId,
+        int ObservationIndex);
+
+    private sealed record SeriesSnapshot(
+        string SeriesId,
+        string Symbol,
+        string AccessibleName,
+        string Label,
+        double Confidence,
+        MarkerShape Shape,
+        MarkerFill Fill,
+        SemanticRole SemanticRole,
+        bool IsVisible);
+
+    private sealed record DividerSnapshot(
+        string DividerId,
+        double OriginalX,
+        string Code,
+        string Label);
 }

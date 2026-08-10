@@ -95,6 +95,25 @@ try {
         'Atomic metadata replacement left temporary files behind.'
     $passed++
 
+    $requiredContentRoot = Join-Path $testRoot 'required content'
+    $requiredContentOutput = Join-Path $testRoot 'required content output'
+    New-Item -ItemType Directory -Path (Join-Path $requiredContentRoot 'packaging\common') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $requiredContentRoot 'LICENSES') -Force | Out-Null
+    [System.IO.File]::WriteAllText((Join-Path $requiredContentRoot 'THIRD_PARTY_NOTICES.md'), 'Noto Sans notice')
+    [System.IO.File]::WriteAllText((Join-Path $requiredContentRoot 'LICENSES\NotoSans-OFL-1.1.txt'), 'OFL-1.1')
+    Write-JsonFile -Path (Join-Path $requiredContentRoot 'packaging\common\publish.json') -Value ([ordered]@{
+            requiredContent = @(
+                [ordered]@{ source = 'THIRD_PARTY_NOTICES.md'; target = 'THIRD_PARTY_NOTICES.md' },
+                [ordered]@{ source = 'LICENSES'; target = 'LICENSES' }
+            )
+        })
+    Copy-DevPortableRequiredContent -RepositoryRoot $requiredContentRoot -DestinationRoot $requiredContentOutput
+    Assert-True (Test-Path -LiteralPath (Join-Path $requiredContentOutput 'THIRD_PARTY_NOTICES.md') -PathType Leaf) `
+        'Development portable required-content copy omitted THIRD_PARTY_NOTICES.md.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $requiredContentOutput 'LICENSES\NotoSans-OFL-1.1.txt') -PathType Leaf) `
+        'Development portable required-content copy omitted the Noto Sans OFL license.'
+    $passed++
+
     $modelRoot = Join-Path $testRoot 'approved model discovery'
     $modelManifestRoot = Join-Path $modelRoot 'models\manifest'
     $modelPayloadRoot = Join-Path $modelRoot 'models\runtime'
@@ -475,7 +494,7 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
         '-File', (Join-Path $launcherRoot 'Run-Latest-DevPortable.ps1'))
     $passed++
 
-    Write-Host "Development portable packaging tests passed: $passed/8"
+    Write-Host "Development portable packaging tests passed: $passed/9"
 }
 finally {
     if (Test-Path -LiteralPath $dirtyMarker -PathType Leaf) {

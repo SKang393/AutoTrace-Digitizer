@@ -12,6 +12,7 @@
   <SolidColorBrush x:Key="App.Brush.Primary" Color="#FF76B7FF" />
   <SolidColorBrush x:Key="App.Brush.PrimaryHover" Color="#FF9AC9FF" />
   <SolidColorBrush x:Key="App.Brush.PrimaryPressed" Color="#FF4F96E5" />
+  <SolidColorBrush x:Key="App.Brush.PrimarySubtle" Color="#FF243858" />
   <SolidColorBrush x:Key="App.Brush.Text" Color="#FFF4F6F8" />
   <SolidColorBrush x:Key="App.Brush.TextOnPrimary" Color="#FF101820" />
   <SolidColorBrush x:Key="App.Brush.TextMuted" Color="#FFBDC3CC" />

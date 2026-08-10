@@ -12,6 +12,12 @@
   <sys:String x:Key="Workflow.AutoDetect">Auto Detect</sys:String>
   <sys:String x:Key="Workflow.Review">Review</sys:String>
   <sys:String x:Key="Workflow.Export">Export</sys:String>
+  <sys:String x:Key="Workflow.Open">Open</sys:String>
+  <sys:String x:Key="Workflow.Analyze">Analyze</sys:String>
+  <sys:String x:Key="Workflow.Analyzing">Analyzing locally</sys:String>
+  <sys:String x:Key="Workflow.Cancel">Cancel</sys:String>
+  <sys:String x:Key="Edit.Undo">Undo</sys:String>
+  <sys:String x:Key="Edit.Redo">Redo</sys:String>
   <sys:String x:Key="Workflow.Import.ToolTip">Import one or more graph images or PDFs</sys:String>
   <sys:String x:Key="Workflow.Enhance.ToolTip">Create a derived enhanced image</sys:String>
   <sys:String x:Key="Workflow.AutoDetect.ToolTip">Detect graph structure and data</sys:String>
@@ -52,6 +58,10 @@
   <sys:String x:Key="Project.CloseTab">Close tab</sys:String>
   <sys:String x:Key="Project.CloseDirtyBlocked">Save the project before closing a tab with unsaved changes.</sys:String>
   <sys:String x:Key="Manual.Title">Manual tools</sys:String>
+  <sys:String x:Key="Manual.Mode.Select">Select</sys:String>
+  <sys:String x:Key="Manual.Mode.Calibrate">Calibrate</sys:String>
+  <sys:String x:Key="Manual.Mode.Points">Points</sys:String>
+  <sys:String x:Key="Manual.Mode.Phases">Phases</sys:String>
   <sys:String x:Key="Manual.Instruction">Current action</sys:String>
   <sys:String x:Key="Manual.Calibration">Start three-anchor calibration</sys:String>
   <sys:String x:Key="Manual.YMaximum">Y maximum</sys:String>
@@ -136,6 +146,7 @@
   <sys:String x:Key="Navigation.Empty">No graphs imported</sys:String>
   <sys:String x:Key="Navigation.AutomationName">Project graph navigator</sys:String>
   <sys:String x:Key="Series.Resize.AutomationName">Resize the series panel</sys:String>
+  <sys:String x:Key="Series.Toggle.AutomationName">Collapse or restore the series panel</sys:String>
 
   <sys:String x:Key="Canvas.Empty">Import a graph to begin.</sys:String>
   <sys:String x:Key="Canvas.PhaseOverlay">Phase overlay</sys:String>
@@ -151,6 +162,7 @@
 
   <sys:String x:Key="Inspector.Title">Inspector</sys:String>
   <sys:String x:Key="Inspector.Resize.AutomationName">Resize the inspector panel</sys:String>
+  <sys:String x:Key="Inspector.Toggle.AutomationName">Collapse or restore the inspector panel</sys:String>
   <sys:String x:Key="Manual.PhaseDividers.AutomationName">Phase dividers</sys:String>
 
   <sys:String x:Key="Magnifier.Title">Magnifier</sys:String>
@@ -181,16 +193,80 @@
   <sys:String x:Key="SeriesCard.MarkerCount">Marker count</sys:String>
   <sys:String x:Key="SeriesCard.Confidence">Confidence</sys:String>
   <sys:String x:Key="SeriesCard.Visibility">Visible</sys:String>
-  <sys:String x:Key="SeriesCard.Select">Select series</sys:String>
-  <sys:String x:Key="SeriesCard.Reassign">Reassign points</sys:String>
+  <sys:String x:Key="SeriesCard.Select">Select</sys:String>
+  <sys:String x:Key="SeriesCard.Reassign">Reassign</sys:String>
   <sys:String x:Key="SeriesCard.MarkerCountFormat">{0}</sys:String>
   <sys:String x:Key="SeriesCard.ConfidenceFormat">{0:P0}</sys:String>
   <sys:String x:Key="Series.Split.SymbolName">Diamond</sys:String>
   <sys:String x:Key="Series.Split.Label">Split series</sys:String>
 
   <sys:String x:Key="Theme.Label">Theme</sys:String>
+  <sys:String x:Key="Settings.Title">Settings</sys:String>
   <sys:String x:Key="Theme.System">System</sys:String>
   <sys:String x:Key="Theme.Light">Light</sys:String>
   <sys:String x:Key="Theme.Dark">Dark</sys:String>
   <sys:String x:Key="Theme.Select.AutomationName">Application theme</sys:String>
+
+  <sys:String x:Key="About.Title">About and legal</sys:String>
+  <sys:String x:Key="About.AppLicense">Graph Auto Reader application code is licensed under Apache-2.0.</sys:String>
+  <sys:String x:Key="About.FontLicense">Copyright 2022 The Noto Project Authors. Noto Sans 2.015 Regular, Medium, and SemiBold are bundled unmodified under SIL Open Font License 1.1. Commercial use and redistribution are permitted when the license and notices remain.</sys:String>
+  <sys:String x:Key="About.FontProvenance">Source: official noto-monthly-release-2026.05.01 at 66c4b351c58f99ace5a6265d329080d74b057909. SHA-256: NotoSans-Regular.ttf 478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823; NotoSans-Medium.ttf 635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb; NotoSans-SemiBold.ttf a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0.</sys:String>
+  <sys:String x:Key="About.NoticeLocation">Full font copyright, source release, filenames, SHA-256 checksums, and redistribution details are included in THIRD_PARTY_NOTICES.md and LICENSES/NotoSans-OFL-1.1.txt.</sys:String>
+
+  <sys:String x:Key="Empty.Title">Turn a graph into reviewable data</sys:String>
+  <sys:String x:Key="Empty.Description">Open or drop a graph image or PDF. Analysis starts only when you choose Analyze.</sys:String>
+  <sys:String x:Key="Empty.SupportedFormats">Supported files</sys:String>
+  <sys:String x:Key="Empty.SupportedFormats.Detail">PNG, JPEG, TIFF, BMP, and PDF</sys:String>
+  <sys:String x:Key="Empty.Privacy">Your files and processing stay on this computer.</sys:String>
+  <sys:String x:Key="Empty.Illustration.AutomationName">Graph axes with calibration anchors and a selected point linked to a data row</sys:String>
+  <sys:String x:Key="Empty.RecentProjects">Recent projects</sys:String>
+
+  <sys:String x:Key="DataPreview.Title">Data preview</sys:String>
+  <sys:String x:Key="DataPreview.Observation">Observation</sys:String>
+  <sys:String x:Key="DataPreview.XValue">X value</sys:String>
+  <sys:String x:Key="DataPreview.YValue">Y value</sys:String>
+  <sys:String x:Key="DataPreview.Phase">Phase</sys:String>
+  <sys:String x:Key="DataPreview.Series">Series</sys:String>
+  <sys:String x:Key="Review.Title">Issues to review</sys:String>
+  <sys:String x:Key="Review.CalibrationMissing.Title">Calibration required</sys:String>
+  <sys:String x:Key="Review.CalibrationMissing.Interpretation">Graph coordinates cannot be derived until calibration anchors are set.</sys:String>
+  <sys:String x:Key="Review.CalibrationMissing.Action">Set (1,0), (1,y maximum), and (x maximum,0).</sys:String>
+  <sys:String x:Key="Review.CalibrationInvalid.Title">Calibration is invalid</sys:String>
+  <sys:String x:Key="Review.CalibrationInvalid.Interpretation">The current transform cannot support reliable graph coordinates.</sys:String>
+  <sys:String x:Key="Review.CalibrationInvalid.Action">Review and replace the three calibration anchors.</sys:String>
+  <sys:String x:Key="Review.PointRejected.Title">Rejected point</sys:String>
+  <sys:String x:Key="Review.PointRejected.Interpretation">This candidate was rejected and will not be exported as an accepted point.</sys:String>
+  <sys:String x:Key="Review.PointRejected.Action">Confirm the rejection or correct the point.</sys:String>
+  <sys:String x:Key="Review.PointUnreviewed.Title">Point needs review</sys:String>
+  <sys:String x:Key="Review.PointUnreviewed.Interpretation">This point is still ambiguous because it has not been accepted, corrected, or rejected.</sys:String>
+  <sys:String x:Key="Review.PointUnreviewed.Action">Inspect the source pixels and accept, correct, or reject the point.</sys:String>
+  <sys:String x:Key="Review.PointMissingSeries.Title">Series assignment missing</sys:String>
+  <sys:String x:Key="Review.PointMissingSeries.Interpretation">The point is not assigned to a known series.</sys:String>
+  <sys:String x:Key="Review.PointMissingSeries.Action">Assign the point to the appropriate series.</sys:String>
+  <sys:String x:Key="Review.PointMissingCoordinates.Title">Graph coordinates missing</sys:String>
+  <sys:String x:Key="Review.PointMissingCoordinates.Interpretation">The point does not have both graph x and graph y values.</sys:String>
+  <sys:String x:Key="Review.PointMissingCoordinates.Action">Correct calibration or the point location before export.</sys:String>
+  <sys:String x:Key="Review.PointMissingPhase.Title">Phase assignment missing</sys:String>
+  <sys:String x:Key="Review.PointMissingPhase.Interpretation">The point is not assigned to a known phase.</sys:String>
+  <sys:String x:Key="Review.PointMissingPhase.Action">Review phase boundaries and assign the point.</sys:String>
+  <sys:String x:Key="Review.SeriesUnknown.Title">Series role is unknown</sys:String>
+  <sys:String x:Key="Review.SeriesUnknown.Interpretation">The series has no confirmed scientific role.</sys:String>
+  <sys:String x:Key="Review.SeriesUnknown.Action">Choose the supported role or leave it explicitly unknown.</sys:String>
+  <sys:String x:Key="Review.PhaseUnknown.Title">Phase type is unknown</sys:String>
+  <sys:String x:Key="Review.PhaseUnknown.Interpretation">The phase has no supported normalized interpretation.</sys:String>
+  <sys:String x:Key="Review.PhaseUnknown.Action">Confirm a supported phase label or retain the explicit unknown value.</sys:String>
+
+  <sys:String x:Key="ExportPreview.Title">Export preview</sys:String>
+  <sys:String x:Key="ExportPreview.Points">Points</sys:String>
+  <sys:String x:Key="ExportPreview.Series">Series</sys:String>
+  <sys:String x:Key="ExportPreview.Phases">Phases</sys:String>
+  <sys:String x:Key="ExportPreview.Blockers">Blockers</sys:String>
+  <sys:String x:Key="ExportPreview.Warnings">Warnings</sys:String>
+  <sys:String x:Key="ExportPreview.AcknowledgeWarnings">I reviewed and acknowledge the warnings</sys:String>
+  <sys:String x:Key="ExportPreview.Confirm">Choose folder and export</sys:String>
+  <sys:String x:Key="ExportPreview.Provenance">Provenance</sys:String>
+  <sys:String x:Key="ExportPreview.ProvenanceFormat">Source: {0}. Original-pixel coordinates retained. Processing: local.</sys:String>
+  <sys:String x:Key="ExportPreview.Destination">Destination folder</sys:String>
+  <sys:String x:Key="ExportPreview.DestinationPending">Choose a folder when you confirm export.</sys:String>
+  <sys:String x:Key="ExportPreview.Files">Output files</sys:String>
 </ResourceDictionary>
