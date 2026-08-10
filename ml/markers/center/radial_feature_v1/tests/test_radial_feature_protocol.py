@@ -26,7 +26,7 @@ from ml.markers.center.radial_feature_v1.dataset import (
 from ml.markers.center.radial_feature_v1.model import RadialFeatureNet
 from ml.markers.center.radial_feature_v1.prepare_split import SOURCE_PATHS as SPLIT_SOURCE_PATHS
 from ml.markers.center.radial_feature_v1.sealed_gate import EVALUATOR_SOURCE_PATHS, GATE_CONFIG
-from ml.markers.center.radial_feature_v1.train_p1 import RUNNER_SOURCE_PATHS, _export
+from ml.markers.center.radial_feature_v1.train_p2 import RUNNER_SOURCE_PATHS, _export
 from ml.markers.gate_seal import canonical_json_bytes, sha256_bytes, sha256_file, source_bundle_sha256
 
 
@@ -79,13 +79,17 @@ def test_preregistration_binds_source_split_and_canonical_gate_schema() -> None:
     selection_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/SELECTION_MANIFEST.json"
     seal_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/SEALED_PUBLIC_TEST_SEAL.json"
     gate_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/gates/sealed-public-v1.json"
-    config_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/training/p1.json"
+    config_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/training/p2.json"
     seal = json.loads(seal_path.read_text(encoding="utf-8"))
     gate = json.loads(gate_path.read_text(encoding="utf-8"))
     config = json.loads(config_path.read_text(encoding="utf-8"))
-    assert protocol["currently_preregistered_candidate"] == "P1"
-    assert protocol["consumed_candidates"] == []
+    assert protocol["currently_preregistered_candidate"] == "P2"
+    assert protocol["consumed_candidates"] == ["P1"]
     assert protocol["prior_candidate_bytes_reused"] is False
+    assert protocol["p1_result"]["status"] == "failed_selection"
+    assert protocol["p1_result"]["exact_scene_count"] == 7
+    assert protocol["p1_result"]["false_negatives"] == 2
+    assert protocol["p1_result"]["sealed_public_archive_opened"] is False
     assert seal["scene_count"] == 16
     assert seal["truth_hidden_from_training_runner"] is True
     assert seal["chandler_included"] is False
@@ -101,16 +105,25 @@ def test_preregistration_binds_source_split_and_canonical_gate_schema() -> None:
     assert gate["release_eligible"] is False
 
 
-def test_canonical_budget_authorizes_only_radial_p1() -> None:
-    config_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/training/p1.json"
+def test_canonical_budget_consumes_p1_and_authorizes_only_radial_p2() -> None:
+    config_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/training/p2.json"
+    config = json.loads(config_path.read_text(encoding="utf-8"))
     ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-radial-feature-v1")
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
+    assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
-    assert entry["candidate_config_sha256"]["P1"] == sha256_file(config_path)
+    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["candidate_config_sha256"]["P2"] == sha256_file(config_path)
+    assert config["offset_loss_weight"] == 3.0
+    assert config["p1_training_report_sha256"] == entry["p1_training_report_sha256"]
+    assert entry["p1_training_opened_seal_sha256"] == sha256_file(
+        REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-radial-feature-v1/P1/opened.json"
+    )
+    assert entry["p1_training_result_seal_sha256"] == sha256_file(
+        REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-radial-feature-v1/P1/result.json"
+    )
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(
         REPO_ROOT / entry["sealed_public_test_seal_path"]
     )
