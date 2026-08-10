@@ -32,8 +32,10 @@ regressed center. P3 passed all 9 frozen selection scenes and all 63 markers at
 threshold `0.3` with zero false positives, misses, duplicates, or prohibited
 hits. CPU ONNX parity remained `1.9073486328125e-06`. Its report SHA-256 is
 `67b5ea3b28973f0bd24ae0f755713af1c70b6fe6a9b2437268be5975b9f14af3`.
-The truth-hidden public archive remains closed. Public-gate authorization is a
-separate checkpoint and is still false.
+The truth-hidden public archive remains closed. A separate committed checkpoint
+now authorizes only the exact P3 ONNX, training report, and selected threshold
+for the single public-gate attempt. Production approval and release eligibility
+remain false.
 
 Training and selection use only new procedural families. The truth-hidden
 16-scene public archive is frozen before optimizer execution. Chandler and

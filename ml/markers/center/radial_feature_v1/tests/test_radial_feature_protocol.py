@@ -101,7 +101,7 @@ def test_preregistration_binds_source_split_and_canonical_gate_schema() -> None:
     seal = json.loads(seal_path.read_text(encoding="utf-8"))
     gate = json.loads(gate_path.read_text(encoding="utf-8"))
     config = json.loads(config_path.read_text(encoding="utf-8"))
-    assert protocol["status"] == "candidate_3_selected_pending_public_authorization"
+    assert protocol["status"] == "candidate_3_public_gate_authorized"
     assert protocol["currently_preregistered_candidate"] is None
     assert protocol["consumed_candidates"] == ["P1", "P2", "P3"]
     assert protocol["prior_candidate_bytes_reused"] is False
@@ -119,7 +119,14 @@ def test_preregistration_binds_source_split_and_canonical_gate_schema() -> None:
     assert protocol["p3_result"]["false_positives"] == 0
     assert protocol["p3_result"]["false_negatives"] == 0
     assert protocol["p3_result"]["sealed_public_archive_opened"] is False
-    assert protocol["public_gate_authorized"] is False
+    assert protocol["public_gate_authorized"] is True
+    assert protocol["public_gate_authorized_candidate_id"] == "P3"
+    assert protocol["public_gate_authorized_onnx_sha256"] == protocol["p3_result"]["onnx_sha256"]
+    assert (
+        protocol["public_gate_authorized_training_report_sha256"]
+        == protocol["p3_result"]["training_report_sha256"]
+    )
+    assert protocol["public_gate_authorized_threshold"] == protocol["p3_result"]["selected_threshold"]
     assert seal["scene_count"] == 16
     assert seal["truth_hidden_from_training_runner"] is True
     assert seal["chandler_included"] is False
@@ -135,16 +142,21 @@ def test_preregistration_binds_source_split_and_canonical_gate_schema() -> None:
     assert gate["release_eligible"] is False
 
 
-def test_canonical_budget_seals_selected_p3_before_public_authorization() -> None:
+def test_canonical_budget_authorizes_only_selected_p3_for_public_gate() -> None:
     config_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/training/p3.json"
     config = json.loads(config_path.read_text(encoding="utf-8"))
     ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-radial-feature-v1")
-    assert entry["status"] == "candidate_3_selected_pending_public_authorization"
+    assert entry["status"] == "candidate_3_public_gate_authorized"
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_candidate_id"] == "P3"
+    assert entry["public_gate_authorized_onnx_sha256"] == entry["p3_onnx_sha256"]
+    assert entry["public_gate_authorized_training_report_sha256"] == entry["p3_training_report_sha256"]
+    assert entry["public_gate_authorized_threshold"] == entry["p3_selection_threshold"]
     assert entry["candidate_config_sha256"]["P3"] == sha256_file(config_path)
     assert config["optimizer_steps"] == 0
     assert config["reused_candidate_id"] == "P1"
