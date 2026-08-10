@@ -1,0 +1,28 @@
+{
+  "schema": "graphreader.marker-center-radial-feature-protocol.v1",
+  "task": "marker-center",
+  "revision": "marker-center-radial-feature-v1",
+  "defect_class": "fixed radial and topology projections with a trainable non-convolutional candidate head",
+  "prior_revision": "marker-center-line-aware-v1",
+  "prior_candidate_bytes_reused": false,
+  "experiment_budget": 3,
+  "currently_preregistered_candidate": "P1",
+  "consumed_candidates": [],
+  "architecture": "radial-topology-projection-mlp-v1",
+  "isolated_change": "replace learned convolutional patch features with fixed radial and topology projections plus a small MLP; retain the three-plane patch and coordinate contract",
+  "selection_requirements": {
+    "exact_count_every_scene": true,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "duplicates": 0,
+    "prohibited_structure_hits": 0,
+    "onnx_parity_maximum_absolute_error": 0.00001,
+    "provider": "CPUExecutionProvider"
+  },
+  "public_gate_budget": 1,
+  "public_gate_evaluations": 0,
+  "private_or_article_images": false,
+  "chandler_included": false,
+  "production_approval": false,
+  "release_eligible": false
+}

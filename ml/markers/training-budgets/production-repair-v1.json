@@ -350,6 +350,51 @@
       "refusal_required_before_output": true
     },
     {
+      "task": "marker-center",
+      "revision": "marker-center-radial-feature-v1",
+      "status": "candidate_1_preregistered",
+      "defect_class": "fixed radial and topology projections with a trainable non-convolutional candidate head",
+      "prior_revision": "marker-center-line-aware-v1",
+      "prior_candidate_bytes_reused": false,
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "candidate_config_paths": {
+        "P1": "ml/markers/center/radial_feature_v1/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "d7cead29718e5f49edd5ac18817643c8209cb689f78f547010dd9d4b36894ded"
+      },
+      "trigger_evidence_path": "ml/markers/center/line_aware_v1/PUBLIC_GATE_ATTEMPT_FAILURE.json",
+      "trigger_evidence_sha256": "fff7b6dc33c76bcc8a5257aac0fa629697947030ec2d048609b0ebf9c5394ce5",
+      "trigger_evidence": "The exhausted line-aware revision consumed its only public attempt before seal opening because its frozen configuration omitted the canonical expected binding schema.",
+      "isolated_change": "replace learned convolutional patch features with fixed radial and topology projections plus a small MLP; train new weights from a new seed on disjoint procedural families",
+      "selection_manifest_path": "ml/markers/center/radial_feature_v1/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "46240244d2f8267a5e037896a3dd9199c2da4d521c7dc41ebbf9fa85300b5fa8",
+      "sealed_public_test_seal_path": "ml/markers/center/radial_feature_v1/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "ae8a5a1dd95a5cb51733d31685d736391a5b5014ad16241f6370e81a5a745e9a",
+      "sealed_public_fixture_archive_sha256": "4b03a4ba48ccd323ef91cfc4779078f2ffdc6d78a013cc03fe465e1eaac510f1",
+      "sealed_public_private_manifest_sha256": "5121b373ca314a934b88c1ea611880d7c4f743b22cd4cad5d16c7993fd1e27e7",
+      "split_generator_source_bundle_sha256": "e03841baeae6adcb8252c8fcc8c666c77d6789d3cfa8c7dd36e6b21addcd47b4",
+      "public_gate_config_path": "ml/markers/center/radial_feature_v1/gates/sealed-public-v1.json",
+      "public_gate_config_sha256": "3c24ba6f47b42bf853e5748248388fd59458174ef0bac41143acb05f336ddd8f",
+      "expected_runner_source_bundle_sha256": "7859c76c490739aeab52c920c825b75499dc1c8927c66ae9e4e378801b624a86",
+      "expected_public_evaluator_source_bundle_sha256": "84460dd183b950682f330752d5bb6ce154e5d387ac94263499e698ebdc868f27",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "public_gate_authorized": false,
+      "public_gate_evaluations": 0,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
+    },
+    {
       "task": "marker-classifier",
       "revision": "marker-classifier-production-runtime-repair-v2",
       "status": "candidate_1_production_approved",
