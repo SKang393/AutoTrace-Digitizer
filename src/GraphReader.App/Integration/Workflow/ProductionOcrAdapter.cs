@@ -94,7 +94,7 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
     }
 
     public string AdapterId =>
-        $"graphreader-ocr:{detectionModel.Sha256[..12].ToLowerInvariant()}:{recognitionModel.Sha256[..12].ToLowerInvariant()}:{OpenCvRuntimeSha256[..12]}";
+        $"graphreader-ocr:{GraphStructureConsensusTextRegionDetector.CompositionVersion}:{detectionModel.Sha256[..12].ToLowerInvariant()}:{recognitionModel.Sha256[..12].ToLowerInvariant()}:{OpenCvRuntimeSha256[..12]}";
 
     public bool IsApproved { get; }
 
@@ -140,7 +140,10 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
             () =>
             {
                 InferenceRuntime runtime = runtimeHost.Runtime;
-                var detector = new LocalOnnxTextRegionDetector(runtime, detectorOptions);
+                var modelDetector = new LocalOnnxTextRegionDetector(runtime, detectorOptions);
+                var detector = new GraphStructureConsensusTextRegionDetector(
+                    modelDetector,
+                    new ConnectedComponentTextRegionDetector());
                 var recognizer = new LocalOnnxTextRecognizer(runtime, recognition.Recognizer);
                 return new OcrPipeline(
                     detector,
@@ -164,9 +167,12 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         Task.Run(async () =>
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var detector = new LocalOnnxTextRegionDetector(
+            var modelDetector = new LocalOnnxTextRegionDetector(
                 runtime,
                 detectorOptions with { BypassCache = true });
+            var detector = new GraphStructureConsensusTextRegionDetector(
+                modelDetector,
+                new ConnectedComponentTextRegionDetector());
             const int detectorProbeSize = 32;
             var detectorImage = new OcrImage(
                 detectorProbeSize,

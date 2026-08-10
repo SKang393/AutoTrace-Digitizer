@@ -151,3 +151,27 @@ downstream marker-creation evidence. A later integrated CPU workflow may supply
 `graphreader.ocr-marker-creation-results.v1`. The command still fails when any
 exact match, CER, role, detection, parity, marker, split-integrity, or C#
 contract gate is missing.
+
+## Preregistered structure-consensus composition
+
+The first official-model evaluation used a dense connected-component
+postprocessor rather than the production DB postprocessor and exposed the
+complete split. It remains a recorded failed experiment and must not be rerun,
+tuned, or rewritten as production evidence.
+
+`STRUCTURE_CONSENSUS_GATE_PROTOCOL.json` preregisters one distinct production
+composition before any new fixture generation or model inference. The exact
+DB detector must agree with an independent connected-component candidate that
+carries explicit non-structure evidence. A candidate can filter a model box but
+can never create or replace one. Greedy one-to-one matching also prevents
+duplicate model boxes from sharing one candidate. Axis, tick, and divider
+masking is checksum-bound, while recognition crops continue to use immutable
+original bytes.
+
+The new protocol forbids the exposed 220-case split and Chandler, freezes a new
+public validation and inference-locked sealed split, retains the original OCR
+quality thresholds, adds zero-duplicate and zero-exclusion-hit requirements,
+and permits exactly one evaluation. No evaluator or fixtures have been created
+or executed at this checkpoint. Production approval, manifests, model-store
+promotion, package discovery, and release authorization therefore remain
+false.

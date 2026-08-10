@@ -61,6 +61,66 @@ public sealed class OfficialOcrProductionStatusTests
         Assert.AreEqual(NoticeSha256, Sha256(noticePath));
     }
 
+    [TestMethod]
+    public void StructureConsensusCandidateIsPreregisteredAndSourceBoundBeforeInference()
+    {
+        string root = FindRepositoryRoot();
+        string protocolPath = Path.Combine(
+            root,
+            "ml",
+            "ocr",
+            "official_bakeoff",
+            "STRUCTURE_CONSENSUS_GATE_PROTOCOL.json");
+        using System.Text.Json.JsonDocument document = System.Text.Json.JsonDocument.Parse(
+            File.ReadAllText(protocolPath));
+        System.Text.Json.JsonElement protocol = document.RootElement;
+
+        Assert.AreEqual(
+            "preregistered_before_fixture_generation_and_inference",
+            protocol.GetProperty("status").GetString());
+        Assert.IsFalse(protocol.GetProperty("private_data").GetBoolean());
+        Assert.IsFalse(protocol.GetProperty("chandler_used").GetBoolean());
+        Assert.AreEqual(
+            "graph-structure-consensus-v1",
+            protocol.GetProperty("candidate").GetProperty("composition_id").GetString());
+        Assert.AreEqual(
+            "1fc3b2e72f89cbfb0d8854ec8701368e7ae764cbd5c6fef17b7e497d06ec9f09",
+            protocol.GetProperty("prior_exposed_split_forbidden")
+                .GetProperty("split_sha256")
+                .GetString());
+        Assert.AreEqual(
+            1,
+            protocol.GetProperty("experiment_budget")
+                .GetProperty("official_composition_evaluations")
+                .GetInt32());
+        Assert.AreEqual(
+            0,
+            protocol.GetProperty("experiment_budget")
+                .GetProperty("workflow_changes_after_inference")
+                .GetInt32());
+
+        foreach (System.Text.Json.JsonProperty source in
+            protocol.GetProperty("workflow_source_sha256").EnumerateObject())
+        {
+            string sourcePath = Path.Combine(root, source.Name.Replace('/', Path.DirectorySeparatorChar));
+            Assert.IsTrue(File.Exists(sourcePath), $"Preregistered OCR source is missing: {source.Name}");
+            Assert.AreEqual(
+                source.Value.GetString(),
+                Sha256(sourcePath),
+                $"Preregistered OCR source changed before the one-run gate: {source.Name}");
+        }
+
+        string readme = File.ReadAllText(Path.Combine(
+            root,
+            "ml",
+            "ocr",
+            "official_bakeoff",
+            "README.md"));
+        StringAssert.Contains(readme, "No evaluator or fixtures have been created");
+        StringAssert.Contains(readme, "executed at this checkpoint");
+        StringAssert.Contains(readme, "must not be rerun");
+    }
+
     private static string FindRepositoryRoot()
     {
         DirectoryInfo? directory = new(AppContext.BaseDirectory);
