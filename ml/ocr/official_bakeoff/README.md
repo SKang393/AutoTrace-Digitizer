@@ -50,3 +50,58 @@ Exit code `0` means these source bytes are license-cleared for conversion only.
 It does not approve an ONNX conversion, benchmark, manifest, runtime provider,
 notice bundle, packaging discovery, or production composition. Exit code `2`
 means provenance is blocked and conversion must not proceed.
+
+## Locked Windows conversion and parity gate
+
+The converter runs only from the ignored project-local CPython 3.11.9
+toolchain. `requirements-conversion.txt` binds every installed distribution by
+version and SHA-256. The selected Paddle nightly is the exact minimum Windows
+build accepted by Paddle2ONNX 2.0.2rc3. The three rejected stable-toolchain
+attempts and the selected-toolchain intake are recorded in ignored local
+evidence under `runs/toolchain/`.
+
+Create a clean environment and install it offline from the audited wheelhouse:
+
+```powershell
+& artifacts/toolchains/python-3.11.9/python.exe -m venv `
+  artifacts/toolchains/ppocr-conversion-locked-py311
+
+& artifacts/toolchains/ppocr-conversion-locked-py311/Scripts/python.exe -m pip install `
+  --no-index `
+  --find-links ml/ocr/official_bakeoff/runs/toolchain/wheelhouse `
+  --require-hashes `
+  --requirement ml/ocr/official_bakeoff/requirements-conversion.txt
+```
+
+Convert both exact audited source directories twice, require byte-identical
+ONNX outputs, and compare 16 deterministic raw tensor inputs per model between
+Paddle CPU and ONNX Runtime CPU:
+
+```powershell
+& artifacts/toolchains/ppocr-conversion-locked-py311/Scripts/python.exe `
+  -m ml.ocr.official_bakeoff.convert_models `
+  --audit ml/ocr/official_bakeoff/runs/archive-audit.json `
+  --source ml/ocr/official_bakeoff/runs/extracted `
+  --output ml/ocr/official_bakeoff/runs/conversion `
+  --report ml/ocr/official_bakeoff/runs/conversion/report.json `
+  --toolchain-root artifacts/toolchains/ppocr-conversion-locked-py311 `
+  --converter artifacts/toolchains/ppocr-conversion-locked-py311/Scripts/paddle2onnx.exe `
+  --wheelhouse ml/ocr/official_bakeoff/runs/toolchain/wheelhouse `
+  --toolchain-intake ml/ocr/official_bakeoff/runs/toolchain/INTAKE.json `
+  --python-installer artifacts/toolchains/downloads/python-3.11.9-amd64.exe
+```
+
+The gate verifies the upstream audit, exact extracted inventory, signed Python
+installer intake, venv and converter hashes, all 27 locked distributions, exact
+bootstrap versions, every installed `RECORD` file, one selected wheel per lock
+entry, and the absence of unexpected packages. It also verifies the CPU
+provider, two independent converter runs, byte reproducibility, reviewed exact
+converter-warning profiles, ONNX full check, exact opset 11, no external tensor
+payloads, representative dynamic input shapes, and maximum raw tensor
+difference of `1e-4`. It deletes a stale model output before each conversion so
+an earlier ONNX file cannot satisfy a failed run. Exit code `0` remains
+conversion-only evidence.
+
+The report explicitly keeps `production_approved` and `release_ready` false.
+No model manifest, notice bundle, production-model-store entry, or application
+package is created by this command.

@@ -17,10 +17,19 @@ ungated state, complete file inventory, model-card SHA-256, license metadata,
 revision-specific Git blob and LFS identities, and all six inference payload
 hashes.
 
-No ONNX has yet been converted, no CPU inference or parity claim is made, no
-role or text-mask benchmark has run, and no manifest or production approval
-exists. License clearance permits the controlled conversion experiment. It does
-not pass the model, notice, packaging, or release gates.
+The controlled conversion experiment now passes for both exact source models.
+Two independent opset-11 conversions per model were byte-identical, the ONNX
+full checker passed, and 16 deterministic raw tensor comparisons per model ran
+on `CPUExecutionProvider`. The detector ONNX SHA-256 is
+`d4aa24d408cd70b8b9f66cc758e20f397fc31a9c69d8477cf8887fc53bd5fceb`
+with maximum Paddle-to-ONNX difference `1.349323213162279e-07`. The recognizer
+ONNX SHA-256 is
+`7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743`
+with maximum difference `2.205371856689453e-06`. The ignored conversion report
+SHA-256 is `8c6c8aa522663c0594894f0b526c9fcc0055139217d8d1b6bac968ed1c4d9d15`.
+This is conversion-only evidence. No role, text-mask, public, or sealed OCR
+benchmark has passed, no notice bundle or approved production manifest exists,
+and no payload entered the production model store or packaging.
 
 ## Pinned official source
 
@@ -156,13 +165,13 @@ byte-identical to all six BOS payload members. Current executable result:
 |---|---|---|
 | Artifact redistribution | PASS for conversion source | Exact official model-repository revisions scope Apache-2.0 to byte-identical BOS payloads |
 | Notices | BLOCKED | No artifact notice exists to package |
-| Paddle-to-ONNX conversion provenance | READY | Source revision, archive, repository revision, license scope, and six payload hashes are bound |
-| ONNX parity | BLOCKED | Controlled conversion and source-runtime comparison have not run |
-| CPU execution | BLOCKED | No converted ONNX exists |
+| Paddle-to-ONNX conversion provenance | PASS for conversion only | Exact source, toolchain, selected wheel hashes, installed RECORD files, command, logs, opset, and two byte-identical output hashes are bound |
+| ONNX parity | PASS for conversion only | 16 deterministic CPU raw-tensor cases per model passed `1e-4` across four detector shapes and five recognizer widths; maxima were `1.349323213162279e-07` and `2.205371856689453e-06` |
+| CPU execution | PASS for conversion only | Both checked ONNX files executed through CPU-only ONNX Runtime sessions |
 | Frozen public/sealed OCR accuracy | BLOCKED | No converted candidate has run the fixed public gates |
 | Role accuracy | BLOCKED | No converted candidate has run the role gate |
 | Text masks and no marker creation | BLOCKED | No converted detector has run the exclusion gate |
-| Model manifest | BLOCKED | Converted checksums, parity, providers, benchmarks, notice, and packaging discovery are unresolved |
+| Model manifest | BLOCKED | Public and sealed benchmarks, reviewed notice, production approval, model-store discovery, and packaging discovery are unresolved |
 
 No private graph or Chandler data was read, tuned, or evaluated. Downloaded
 archives, extracted payloads, and audit JSON remain ignored under
@@ -170,9 +179,10 @@ archives, extracted payloads, and audit JSON remain ignored under
 
 ## Required next evidence
 
-Run a checksum-bound conversion from these exact source bytes, retain tool and
-runtime provenance, compare source and ONNX outputs, and execute CPU inference
-against the frozen public and sealed gates. Create and review the Apache-2.0
-license and attribution notice bundle before any manifest becomes approved or
-any payload enters packaging. Production composition must remain unavailable
-until both OCR tasks pass every model-store and packaging requirement together.
+Freeze the public-synthetic validation and inference-locked sealed split, then
+run the converted pair through exact detection, recognition, role, exclusion,
+and marker-creation gates without Chandler or private input. Create and review
+the Apache-2.0 license and attribution notice bundle before any manifest becomes
+approved or any payload enters packaging. Production composition must remain
+unavailable until both OCR tasks pass every model-store and packaging
+requirement together.

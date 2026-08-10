@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sungwoo Kang
+
+# Conversion-only Windows x64 CPU toolchain. The generated hash lock is the
+# executable authority. These packages never enter the application payload.
+paddlepaddle @ https://paddle-whl.bj.bcebos.com/nightly/cpu/paddlepaddle/paddlepaddle-3.0.0.dev20250426-cp311-cp311-win_amd64.whl#sha256=f62aaab2bd8d3ad4f4f7781bdeed43403546057b7afcdc10a4b33847b2617f1f
+paddle2onnx==2.0.2rc3
+onnx==1.17.0
+onnxruntime==1.22.0
