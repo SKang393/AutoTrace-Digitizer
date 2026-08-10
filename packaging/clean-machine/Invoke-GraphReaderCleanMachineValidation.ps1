@@ -284,8 +284,10 @@ try {
     $modelPayloads = @(Get-ChildItem -LiteralPath $PayloadRoot -File -Recurse | Where-Object {
             $_.Extension -in @('.onnx', '.param', '.bin')
         })
-    $reparsePoints = @(Get-Item -LiteralPath $PayloadRoot -Force; Get-ChildItem -LiteralPath $PayloadRoot -Force -Recurse) |
-        Where-Object { ($_.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 }
+    $reparsePoints = @(
+        @(Get-Item -LiteralPath $PayloadRoot -Force; Get-ChildItem -LiteralPath $PayloadRoot -Force -Recurse) |
+            Where-Object { ($_.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 }
+    )
 
     if (-not (Test-Path -LiteralPath $executablePath -PathType Leaf)) {
         Add-Failure "Application executable is missing: $executablePath"

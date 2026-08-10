@@ -141,6 +141,21 @@ Invoke-Case -Name 'Validator keeps release promotion outside the guest harness' 
     }
 }
 
+Invoke-Case -Name 'Validator keeps an empty reparse-point result countable under strict mode' -Action {
+    $source = Get-Content -LiteralPath $validatorPath -Raw
+    if ($source -cnotmatch '\$reparsePoints = @\(\r?\n\s+@\(Get-Item') {
+        throw 'Reparse-point discovery no longer materializes the filtered pipeline as an array.'
+    }
+
+    $empty = @(
+        @(Get-Item -LiteralPath $profileRoot -Force) |
+            Where-Object { $false }
+    )
+    if ($empty.Count -ne 0) {
+        throw 'The empty collection regression fixture is not empty.'
+    }
+}
+
 Invoke-Case -Name 'Missing PDFium payload fails closed and writes structured evidence' -Action {
     $root = Join-Path ([IO.Path]::GetTempPath()) ('GraphReader-PdfiumCleanMachineHarness-' + [Guid]::NewGuid().ToString('N'))
     $output = Join-Path $root 'output'
