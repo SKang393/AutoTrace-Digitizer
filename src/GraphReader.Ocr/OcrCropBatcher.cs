@@ -6,6 +6,12 @@ using System.Security.Cryptography;
 
 namespace GraphReader.Ocr;
 
+public enum OcrCropResizeMode
+{
+    PreserveAspectRatioPad,
+    Stretch,
+}
+
 public sealed record OcrCropBatcherOptions
 {
     public int TargetWidth { get; init; } = 128;
@@ -15,6 +21,20 @@ public sealed record OcrCropBatcherOptions
     public int BatchSize { get; init; } = 16;
 
     public double PaddingPixels { get; init; } = 1;
+
+    /// <summary>
+    /// Controls how a detected text region is mapped into the recognition tensor.
+    /// PP-OCR recognition preserves the source aspect ratio and pads the remaining
+    /// width instead of stretching every crop to the model's maximum width.
+    /// </summary>
+    public OcrCropResizeMode ResizeMode { get; init; } =
+        OcrCropResizeMode.PreserveAspectRatioPad;
+
+    /// <summary>
+    /// Source-space value used for right padding. The PP-OCR normalization
+    /// (value - 0.5) * 2 maps the default 0.5 value to tensor-space zero.
+    /// </summary>
+    public float PaddingValue { get; init; } = 0.5f;
 }
 
 public static class OcrCropBatcher
@@ -64,15 +84,19 @@ public static class OcrCropBatcher
             bounds.Y - options.PaddingPixels,
             bounds.Width + (2 * options.PaddingPixels),
             bounds.Height + (2 * options.PaddingPixels));
-        var output = new float[checked(options.TargetWidth * options.TargetHeight)];
         var orientation = GraphTextRoleClassifier.GetOrientation(region.OrientationDegrees);
+        int contentWidth = ContentWidth(padded, orientation, options);
+        var output = Enumerable.Repeat(
+                options.PaddingValue,
+                checked(options.TargetWidth * options.TargetHeight))
+            .ToArray();
         for (var targetY = 0; targetY < options.TargetHeight; targetY++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var v = (targetY + 0.5) / options.TargetHeight;
-            for (var targetX = 0; targetX < options.TargetWidth; targetX++)
+            for (var targetX = 0; targetX < contentWidth; targetX++)
             {
-                var u = (targetX + 0.5) / options.TargetWidth;
+                var u = (targetX + 0.5) / contentWidth;
                 var original = MapSample(padded, u, v, orientation);
                 var source = image.OriginalToImage.MapFromOriginal(original);
                 output[(targetY * options.TargetWidth) + targetX] = Sample(image, source.X, source.Y);
@@ -89,6 +113,31 @@ public static class OcrCropBatcher
             region.Polygon);
     }
 
+    private static int ContentWidth(
+        OcrRectangle bounds,
+        OcrOrientation orientation,
+        OcrCropBatcherOptions options)
+    {
+        if (options.ResizeMode == OcrCropResizeMode.Stretch)
+        {
+            return options.TargetWidth;
+        }
+
+        double orientedWidth = orientation is
+            OcrOrientation.RotatedClockwise or OcrOrientation.RotatedCounterClockwise
+                ? bounds.Height
+                : bounds.Width;
+        double orientedHeight = orientation is
+            OcrOrientation.RotatedClockwise or OcrOrientation.RotatedCounterClockwise
+                ? bounds.Width
+                : bounds.Height;
+        double ratio = orientedWidth / orientedHeight;
+        return Math.Clamp(
+            checked((int)Math.Ceiling(options.TargetHeight * ratio)),
+            1,
+            options.TargetWidth);
+    }
+
     private static OcrPoint MapSample(
         OcrRectangle bounds,
         double u,
@@ -97,17 +146,34 @@ public static class OcrCropBatcher
         orientation switch
         {
             OcrOrientation.RotatedClockwise =>
-                new OcrPoint(bounds.Left + (v * bounds.Width), bounds.Top + ((1 - u) * bounds.Height)),
+                new OcrPoint(
+                    bounds.Left + (v * bounds.Width) - 0.5,
+                    bounds.Top + ((1 - u) * bounds.Height) - 0.5),
             OcrOrientation.RotatedCounterClockwise =>
-                new OcrPoint(bounds.Left + ((1 - v) * bounds.Width), bounds.Top + (u * bounds.Height)),
-            _ => new OcrPoint(bounds.Left + (u * bounds.Width), bounds.Top + (v * bounds.Height)),
+                new OcrPoint(
+                    bounds.Left + ((1 - v) * bounds.Width) - 0.5,
+                    bounds.Top + (u * bounds.Height) - 0.5),
+            _ => new OcrPoint(
+                bounds.Left + (u * bounds.Width) - 0.5,
+                bounds.Top + (v * bounds.Height) - 0.5),
         };
 
     private static float Sample(OcrImage image, double x, double y)
     {
-        var sourceX = Math.Clamp((int)Math.Round(x), 0, image.Width - 1);
-        var sourceY = Math.Clamp((int)Math.Round(y), 0, image.Height - 1);
-        return image.Pixels.Span[(sourceY * image.Stride) + sourceX] / 255f;
+        double boundedX = Math.Clamp(x, 0, image.Width - 1d);
+        double boundedY = Math.Clamp(y, 0, image.Height - 1d);
+        int x0 = (int)Math.Floor(boundedX);
+        int y0 = (int)Math.Floor(boundedY);
+        int x1 = Math.Min(x0 + 1, image.Width - 1);
+        int y1 = Math.Min(y0 + 1, image.Height - 1);
+        double xWeight = boundedX - x0;
+        double yWeight = boundedY - y0;
+        ReadOnlySpan<byte> pixels = image.Pixels.Span;
+        double top = (pixels[(y0 * image.Stride) + x0] * (1 - xWeight)) +
+            (pixels[(y0 * image.Stride) + x1] * xWeight);
+        double bottom = (pixels[(y1 * image.Stride) + x0] * (1 - xWeight)) +
+            (pixels[(y1 * image.Stride) + x1] * xWeight);
+        return (float)(((top * (1 - yWeight)) + (bottom * yWeight)) / 255d);
     }
 
     private static string HashCrop(
@@ -147,7 +213,9 @@ public static class OcrCropBatcher
         }
 
         if (options.TargetWidth <= 0 || options.TargetHeight <= 0 || options.BatchSize <= 0 ||
-            !double.IsFinite(options.PaddingPixels) || options.PaddingPixels < 0)
+            !double.IsFinite(options.PaddingPixels) || options.PaddingPixels < 0 ||
+            !Enum.IsDefined(options.ResizeMode) ||
+            !float.IsFinite(options.PaddingValue) || options.PaddingValue is < 0 or > 1)
         {
             throw new ArgumentOutOfRangeException(nameof(options));
         }

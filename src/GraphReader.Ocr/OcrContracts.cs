@@ -237,6 +237,12 @@ public sealed record OcrCacheDiagnostics(
     bool RecognitionCacheHit = false,
     string? RecognitionCacheKey = null);
 
+/// <summary>
+/// Optional checksum-bound derivative used only for text-region detection.
+/// Recognition crops always come from <see cref="OcrRequest.OriginalImage"/>.
+/// </summary>
+public sealed record OcrDetectorImage(OcrImage Image, string PixelSha256);
+
 public sealed record OcrRequest(
     string ProjectId,
     string PanelId,
@@ -246,7 +252,8 @@ public sealed record OcrRequest(
     OcrImage? EnhancedImage = null,
     IReadOnlyList<OcrDetectedRegion>? DetectedRegions = null,
     int ContractVersion = OcrContract.Version,
-    string TransformChain = "identity");
+    string TransformChain = "identity",
+    OcrDetectorImage? DetectorImage = null);
 
 public sealed record OcrResult(
     int ContractVersion,

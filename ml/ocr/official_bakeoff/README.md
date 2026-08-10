@@ -105,3 +105,49 @@ conversion-only evidence.
 The report explicitly keeps `production_approved` and `release_ready` false.
 No model manifest, notice bundle, production-model-store entry, or application
 package is created by this command.
+
+## Frozen public and sealed production evaluation
+
+`PRODUCTION_GATE_PROTOCOL.json` freezes the public synthetic renderer,
+degradations, validation and sealed-test counts, thresholds, and one-evaluation
+budget before model inference. Generated images, predictions, and reports stay
+under ignored `runs/production-gate/`. Chandler and all private images are
+forbidden.
+
+The ambiguity family renders common `O/0`, `l/1`, and `I/1` confusions in
+`display_text` while `truth_text` stores the normalized numeric meaning. This is
+intentional scientific truth, not a model-specific accommodation. The current
+C# `ProductionOcrApprovalGate.TruthMatchesFamily` cannot represent this
+separation and therefore remains a mandatory production blocker. The evaluator
+records that blocker and cannot emit a production pass until the reviewed gate
+is corrected.
+
+Freeze once, then verify the exact bytes without regenerating them:
+
+```powershell
+& artifacts/toolchains/ppocr-conversion-locked-py311/Scripts/python.exe `
+  -m ml.ocr.official_bakeoff.production_evaluate freeze `
+  --output-root ml/ocr/official_bakeoff/runs/production-gate/frozen
+
+& artifacts/toolchains/ppocr-conversion-locked-py311/Scripts/python.exe `
+  -m ml.ocr.official_bakeoff.production_evaluate verify-freeze `
+  --frozen-root ml/ocr/official_bakeoff/runs/production-gate/frozen
+```
+
+Run the official detector and recognizer once against that fixed split:
+
+```powershell
+& artifacts/toolchains/ppocr-conversion-locked-py311/Scripts/python.exe `
+  -m ml.ocr.official_bakeoff.production_evaluate evaluate `
+  --frozen-root ml/ocr/official_bakeoff/runs/production-gate/frozen `
+  --conversion-report ml/ocr/official_bakeoff/runs/conversion/report.json `
+  --source-root ml/ocr/official_bakeoff/runs/extracted `
+  --output-root ml/ocr/official_bakeoff/runs/production-gate/evaluation
+```
+
+The default evaluation remains fail-closed because it has no checksum-bound
+downstream marker-creation evidence. A later integrated CPU workflow may supply
+`--marker-evidence` using schema
+`graphreader.ocr-marker-creation-results.v1`. The command still fails when any
+exact match, CER, role, detection, parity, marker, split-integrity, or C#
+contract gate is missing.

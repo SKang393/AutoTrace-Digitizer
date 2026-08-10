@@ -2,6 +2,7 @@
 // Copyright 2026 Sungwoo Kang
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Security.Cryptography;
 
 namespace GraphReader.Ocr.Tests;
 
@@ -102,6 +103,49 @@ public sealed class OcrCacheRegressionTests
         Assert.AreNotEqual(priorDetectorKey, repairedKey);
         Assert.AreNotEqual(priorStageKey, repairedKey);
     }
+
+    [TestMethod]
+    public void DetectorOnlyDerivativeChecksumInvalidatesRequestAlias()
+    {
+        var recognizer = new StubTextRecognizer(
+            new Dictionary<(string RegionId, OcrSourceImage Source), IReadOnlyList<OcrRecognitionAlternative>>());
+        OcrRequest baseline = OcrTestFixtures.Request();
+        OcrImage firstImage = baseline.OriginalImage with
+        {
+            Pixels = new byte[checked(baseline.OriginalImage.Width * baseline.OriginalImage.Height)],
+        };
+        OcrImage secondImage = firstImage with
+        {
+            Pixels = Enumerable.Repeat(
+                (byte)1,
+                checked(firstImage.Width * firstImage.Height)).ToArray(),
+        };
+        OcrRequest first = baseline with
+        {
+            DetectorImage = DetectorImage(firstImage),
+        };
+        OcrRequest second = baseline with
+        {
+            DetectorImage = DetectorImage(secondImage),
+        };
+
+        string firstKey = OcrCacheKeyDeriver.CreateRequestAlias(
+            first,
+            recognizer,
+            new OcrPipelineOptions(),
+            "detector-v1");
+        string secondKey = OcrCacheKeyDeriver.CreateRequestAlias(
+            second,
+            recognizer,
+            new OcrPipelineOptions(),
+            "detector-v1");
+
+        Assert.AreNotEqual(firstKey, secondKey);
+    }
+
+    private static OcrDetectorImage DetectorImage(OcrImage image) => new(
+        image,
+        Convert.ToHexStringLower(SHA256.HashData(image.Pixels.Span)));
 
     private static OcrRegion Region(string id, string text) =>
         new(

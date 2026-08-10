@@ -8,6 +8,8 @@ namespace GraphReader.Ocr.Tests;
 [TestClass]
 public sealed class CropAndMaskTests
 {
+    private static readonly float[] ExpectedTwoPixelCrop = [0f, 1f];
+
     [TestMethod]
     public void TinyRegionIsNormalizedWithoutLosingItsOriginalPolygon()
     {
@@ -27,6 +29,89 @@ public sealed class CropAndMaskTests
         Assert.AreEqual(64, crop.CropSha256.Length);
         CollectionAssert.AreEqual(tiny.Polygon.Points.ToArray(), crop.OriginalPolygon.Points.ToArray());
         Assert.IsTrue(crop.Pixels.Span.ToArray().All(float.IsFinite));
+    }
+
+    [TestMethod]
+    public void DefaultResizePreservesAspectRatioAndPadsWithNormalizedZeroSourceValue()
+    {
+        var pixels = Enumerable.Repeat((byte)255, 20 * 10).ToArray();
+        var image = new OcrImage(
+            20,
+            10,
+            20,
+            pixels,
+            OcrSourceImage.Original,
+            OcrFrameTransform.Identity);
+        OcrDetectedRegion region = OcrTestFixtures.Region("wide", 0, 0, 20, 10);
+
+        OcrCrop crop = OcrCropBatcher.CreateBatches(
+            image,
+            [region],
+            new OcrCropBatcherOptions
+            {
+                TargetWidth = 40,
+                TargetHeight = 10,
+                PaddingPixels = 0,
+            })[0][0];
+
+        for (var y = 0; y < crop.Height; y++)
+        {
+            ReadOnlySpan<float> row = crop.Pixels.Span.Slice(y * crop.Width, crop.Width);
+            Assert.IsTrue(row[..20].ToArray().All(static value => value == 1f));
+            Assert.IsTrue(row[20..].ToArray().All(static value => value == 0.5f));
+        }
+    }
+
+    [TestMethod]
+    public void StretchModeRemainsAvailableForModelsWithFixedWarpedTrainingInputs()
+    {
+        var image = new OcrImage(
+            20,
+            10,
+            20,
+            Enumerable.Repeat((byte)255, 20 * 10).ToArray(),
+            OcrSourceImage.Original,
+            OcrFrameTransform.Identity);
+        OcrDetectedRegion region = OcrTestFixtures.Region("wide", 0, 0, 20, 10);
+
+        OcrCrop crop = OcrCropBatcher.CreateBatches(
+            image,
+            [region],
+            new OcrCropBatcherOptions
+            {
+                TargetWidth = 40,
+                TargetHeight = 10,
+                PaddingPixels = 0,
+                ResizeMode = OcrCropResizeMode.Stretch,
+            })[0][0];
+
+        Assert.IsTrue(crop.Pixels.Span.ToArray().All(static value => value == 1f));
+    }
+
+    [TestMethod]
+    public void EqualSizeResizeKeepsSourcePixelCenters()
+    {
+        var image = new OcrImage(
+            2,
+            1,
+            2,
+            new byte[] { 0, 255 },
+            OcrSourceImage.Original,
+            OcrFrameTransform.Identity);
+        OcrDetectedRegion region = OcrTestFixtures.Region("two-pixels", 0, 0, 2, 1);
+
+        OcrCrop crop = OcrCropBatcher.CreateBatches(
+            image,
+            [region],
+            new OcrCropBatcherOptions
+            {
+                TargetWidth = 2,
+                TargetHeight = 1,
+                PaddingPixels = 0,
+                ResizeMode = OcrCropResizeMode.Stretch,
+            })[0][0];
+
+        CollectionAssert.AreEqual(ExpectedTwoPixelCrop, crop.Pixels.ToArray());
     }
 
     [TestMethod]

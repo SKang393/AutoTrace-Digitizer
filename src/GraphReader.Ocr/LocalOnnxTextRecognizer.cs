@@ -19,6 +19,13 @@ public enum OcrOutputLayout
     TimeBatchClass,
 }
 
+public enum OcrRecognitionOutputActivation
+{
+    Auto,
+    Probabilities,
+    Logits,
+}
+
 public sealed record LocalOnnxTextRecognizerOptions(
     ModelIdentity Model,
     string Alphabet)
@@ -32,6 +39,9 @@ public sealed record LocalOnnxTextRecognizerOptions(
     public OcrTensorLayout InputLayout { get; init; } = OcrTensorLayout.ChannelsFirst;
 
     public OcrOutputLayout OutputLayout { get; init; } = OcrOutputLayout.BatchTimeClass;
+
+    public OcrRecognitionOutputActivation OutputActivation { get; init; } =
+        OcrRecognitionOutputActivation.Auto;
 
     public int? ExpectedTimeSteps { get; init; }
 
@@ -69,12 +79,15 @@ public static class CtcRecognitionDecoder
         int timeSteps,
         string alphabet,
         int blankClassIndex = 0,
-        int maximumAlternatives = 3)
+        int maximumAlternatives = 3,
+        OcrRecognitionOutputActivation outputActivation = OcrRecognitionOutputActivation.Auto)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(alphabet);
-        var classCount = alphabet.Length + 1;
+        List<string> alphabetSymbols = GetAlphabetSymbols(alphabet);
+        var classCount = alphabetSymbols.Count + 1;
         if (timeSteps <= 0 || logits.Length != checked(timeSteps * classCount) ||
-            blankClassIndex < 0 || blankClassIndex >= classCount || maximumAlternatives <= 0)
+            blankClassIndex < 0 || blankClassIndex >= classCount || maximumAlternatives <= 0 ||
+            !Enum.IsDefined(outputActivation))
         {
             throw new ArgumentException("CTC logits or decoder options are invalid.", nameof(logits));
         }
@@ -86,12 +99,7 @@ public static class CtcRecognitionDecoder
         for (var time = 0; time < timeSteps; time++)
         {
             var row = logits.Slice(time * classCount, classCount);
-            var maximum = row.ToArray().Max();
-            var denominator = 0d;
-            for (var classIndex = 0; classIndex < classCount; classIndex++)
-            {
-                denominator += Math.Exp(row[classIndex] - maximum);
-            }
+            double[] probabilities = ToProbabilities(row, outputActivation);
 
             var best = -1;
             var second = -1;
@@ -99,7 +107,7 @@ public static class CtcRecognitionDecoder
             var secondProbability = double.NegativeInfinity;
             for (var classIndex = 0; classIndex < classCount; classIndex++)
             {
-                var probability = Math.Exp(row[classIndex] - maximum) / denominator;
+                double probability = probabilities[classIndex];
                 if (probability > bestProbability)
                 {
                     second = best;
@@ -120,7 +128,7 @@ public static class CtcRecognitionDecoder
             uncertainty[time] = secondProbability / Math.Max(bestProbability, double.Epsilon);
         }
 
-        var greedy = DecodeClasses(bestClasses, bestProbabilities, alphabet, blankClassIndex);
+        var greedy = DecodeClasses(bestClasses, bestProbabilities, alphabetSymbols, blankClassIndex);
         var candidates = new List<CtcDecodedAlternative>
         {
             greedy,
@@ -136,7 +144,7 @@ public static class CtcRecognitionDecoder
             modified[time] = secondClasses[time];
             var probabilities = (double[])bestProbabilities.Clone();
             probabilities[time] *= uncertainty[time];
-            var candidate = DecodeClasses(modified, probabilities, alphabet, blankClassIndex);
+            var candidate = DecodeClasses(modified, probabilities, alphabetSymbols, blankClassIndex);
             if (candidate.Text.Length > 0 && candidates.All(item => !string.Equals(item.Text, candidate.Text, StringComparison.Ordinal)))
             {
                 candidates.Add(candidate with
@@ -149,10 +157,87 @@ public static class CtcRecognitionDecoder
         return OcrCollections.Freeze(candidates.Where(static candidate => candidate.Text.Length > 0));
     }
 
+    internal static int CountAlphabetSymbols(string alphabet) => GetAlphabetSymbols(alphabet).Count;
+
+    internal static IReadOnlyList<string> GetAlphabetSymbolsForValidation(string? alphabet) =>
+        string.IsNullOrEmpty(alphabet) ? Array.Empty<string>() : GetAlphabetSymbols(alphabet);
+
+    private static List<string> GetAlphabetSymbols(string alphabet)
+    {
+        var symbols = new List<string>();
+        foreach (Rune rune in alphabet.EnumerateRunes())
+        {
+            symbols.Add(rune.ToString());
+        }
+
+        return symbols;
+    }
+
+    private static double[] ToProbabilities(
+        ReadOnlySpan<float> values,
+        OcrRecognitionOutputActivation activation)
+    {
+        bool probabilityDistribution = IsProbabilityDistribution(values);
+        if (activation == OcrRecognitionOutputActivation.Probabilities && !probabilityDistribution)
+        {
+            throw new InvalidDataException(
+                "CTC probability output must contain finite [0,1] rows whose values sum to one.");
+        }
+
+        if (activation == OcrRecognitionOutputActivation.Probabilities ||
+            (activation == OcrRecognitionOutputActivation.Auto && probabilityDistribution))
+        {
+            return values.ToArray().Select(static value => (double)value).ToArray();
+        }
+
+        float maximum = float.NegativeInfinity;
+        foreach (float value in values)
+        {
+            if (!float.IsFinite(value))
+            {
+                throw new InvalidDataException("CTC output contains a non-finite value.");
+            }
+
+            maximum = Math.Max(maximum, value);
+        }
+
+        var probabilities = new double[values.Length];
+        double denominator = 0;
+        for (var index = 0; index < values.Length; index++)
+        {
+            probabilities[index] = Math.Exp(values[index] - maximum);
+            denominator += probabilities[index];
+        }
+
+        for (var index = 0; index < probabilities.Length; index++)
+        {
+            probabilities[index] /= denominator;
+        }
+
+        return probabilities;
+    }
+
+    private static bool IsProbabilityDistribution(ReadOnlySpan<float> values)
+    {
+        double sum = 0;
+        foreach (float value in values)
+        {
+            if (!float.IsFinite(value) || value is < 0 or > 1)
+            {
+                return false;
+            }
+
+            sum += value;
+        }
+
+        double tolerance = Math.Max(1e-5, values.Length * 1e-6);
+        return Math.Abs(sum - 1d) <= tolerance;
+    }
+
     private static CtcDecodedAlternative DecodeClasses(
         int[] classes,
         double[] probabilities,
-        string alphabet,
+        List<string> alphabet,
         int blankClassIndex)
     {
         var builder = new StringBuilder(classes.Length);
@@ -284,6 +369,7 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
                     ["input_channels"] = _options.InputChannels,
                     ["input_layout"] = _options.InputLayout.ToString(),
                     ["output_layout"] = _options.OutputLayout.ToString(),
+                    ["output_activation"] = _options.OutputActivation.ToString(),
                     ["expected_time_steps"] = _options.ExpectedTimeSteps,
                     ["normalization_mean"] = _options.NormalizeMean,
                     ["normalization_scale"] = _options.NormalizeScale,
@@ -326,7 +412,7 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
                 failure)));
         }
 
-        var classCount = _options.Alphabet.Length + 1;
+        var classCount = CtcRecognitionDecoder.CountAlphabetSymbols(_options.Alphabet) + 1;
         var denominator = checked(crops.Count * classCount);
         if (response.Execution.Output.Count == 0 || response.Execution.Output.Count % denominator != 0)
         {
@@ -381,7 +467,8 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
                 timeSteps,
                 _options.Alphabet,
                 _options.BlankClassIndex,
-                _options.MaximumAlternatives);
+                _options.MaximumAlternatives,
+                _options.OutputActivation);
             results[cropIndex] = new OcrRecognition(
                 crops[cropIndex].RegionId,
                 crops[cropIndex].SourceImage,
@@ -403,6 +490,7 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
             options.InputChannels.ToString(System.Globalization.CultureInfo.InvariantCulture),
             options.InputLayout.ToString(),
             options.OutputLayout.ToString(),
+            options.OutputActivation.ToString(),
             options.ExpectedTimeSteps?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "dynamic",
             options.BlankClassIndex.ToString(System.Globalization.CultureInfo.InvariantCulture),
             options.InputName,
@@ -447,13 +535,16 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
     {
         ArgumentNullException.ThrowIfNull(options);
         options.Model.Validate();
-        if (string.IsNullOrEmpty(options.Alphabet) ||
-            options.Alphabet.Distinct().Count() != options.Alphabet.Length ||
+        IReadOnlyList<string> alphabetSymbols = CtcRecognitionDecoder.GetAlphabetSymbolsForValidation(
+            options.Alphabet);
+        if (alphabetSymbols.Count == 0 ||
+            alphabetSymbols.Distinct(StringComparer.Ordinal).Count() != alphabetSymbols.Count ||
             options.InputWidth is < 1 or > 4096 || options.InputHeight is < 1 or > 4096 ||
             options.InputChannels is < 1 or > 4 ||
             !Enum.IsDefined(options.InputLayout) || !Enum.IsDefined(options.OutputLayout) ||
+            !Enum.IsDefined(options.OutputActivation) ||
             options.ExpectedTimeSteps is <= 0 or > 16_384 ||
-            options.BlankClassIndex < 0 || options.BlankClassIndex > options.Alphabet.Length ||
+            options.BlankClassIndex < 0 || options.BlankClassIndex > alphabetSymbols.Count ||
             options.MaximumAlternatives is < 1 or > 16 ||
             options.Timeout <= TimeSpan.Zero || options.Timeout > TimeSpan.FromMinutes(5) ||
             !float.IsFinite(options.NormalizeMean) || !float.IsFinite(options.NormalizeScale) ||

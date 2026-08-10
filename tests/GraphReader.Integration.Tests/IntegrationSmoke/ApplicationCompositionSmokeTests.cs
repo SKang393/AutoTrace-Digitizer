@@ -7,6 +7,7 @@ using GraphReader.App.Services;
 using GraphReader.Inference;
 using GraphReader.Pdf;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -21,6 +22,7 @@ public sealed class ApplicationCompositionSmokeTests
         "GRAPHREADER_PRODUCTION_MODEL_STORE";
     private static readonly int[] MarkerProviderInputShape = [1, 3, 128, 128];
     private static readonly int[] MarkerProviderOutputShape = [1, 3, 128, 128];
+    private static readonly string[] OcrRuntimeProviders = ["CPUExecutionProvider"];
 
     [TestMethod]
     public void OrdinaryRuntimeSelectionDefaultsToRealEmptyManualPreview()
@@ -1679,12 +1681,14 @@ public sealed class ApplicationCompositionSmokeTests
             string[] families = ["integer", "decimal", "negative", "percentage", "ambiguity"];
             string[] roles = ["x_tick", "y_tick", "annotation", "participant", "phase_header"];
             var cases = new List<Dictionary<string, object?>>();
+            var corePredictions = new List<Dictionary<string, object?>>();
             var predictions = new List<Dictionary<string, object?>>();
+            var fixtureAssets = new Dictionary<string, byte[]>(StringComparer.Ordinal);
             for (int index = 0; index < 200; index++)
             {
                 string partition = index < 100 ? "validation" : "sealed_test";
                 string family = families[index % families.Length];
-                string truth = family switch
+                string display = family switch
                 {
                     "integer" => (index % 101).ToString(System.Globalization.CultureInfo.InvariantCulture),
                     "decimal" => $"{index % 10}.{(index + 3) % 10}",
@@ -1692,26 +1696,39 @@ public sealed class ApplicationCompositionSmokeTests
                     "percentage" => $"{index % 101}%",
                     _ => $"O{index % 10}l",
                 };
+                string truth = family == "ambiguity"
+                    ? $"0{index % 10}1"
+                    : display;
                 string role = roles[index % roles.Length];
                 string caseId = $"{partition}-text-{index:D3}";
+                string sourcePath = $"assets/{caseId}.png";
+                byte[] sourceBytes = FixturePng(caseId);
+                string sourceSha256 = Sha256(sourceBytes);
+                fixtureAssets.Add(sourcePath, sourceBytes);
                 cases.Add(new Dictionary<string, object?>
                 {
                     ["case_id"] = caseId,
                     ["partition"] = partition,
                     ["kind"] = "text",
                     ["family"] = family,
+                    ["display_text"] = display,
                     ["truth_text"] = truth,
                     ["truth_role"] = role,
                     ["expected_region_count"] = 1,
-                    ["source_sha256"] = Sha256(Encoding.UTF8.GetBytes($"source:{caseId}")),
+                    ["source_path"] = sourcePath,
+                    ["source_sha256"] = sourceSha256,
                 });
-                predictions.Add(new Dictionary<string, object?>
+                Dictionary<string, object?> direct = DirectOcrRecord(
+                    caseId,
+                    sourceSha256,
+                    truth,
+                    role,
+                    detectedRegionCount: 1,
+                    falseRegionCount: 0,
+                    recognizerExecuted: true);
+                corePredictions.Add(direct);
+                predictions.Add(new Dictionary<string, object?>(direct)
                 {
-                    ["case_id"] = caseId,
-                    ["predicted_text"] = truth,
-                    ["predicted_role"] = role,
-                    ["detected_region_count"] = 1,
-                    ["false_region_count"] = 0,
                     ["marker_creation_count"] = 0,
                 });
             }
@@ -1720,27 +1737,40 @@ public sealed class ApplicationCompositionSmokeTests
             {
                 string partition = index < 10 ? "validation" : "sealed_test";
                 string caseId = $"{partition}-exclusion-{index:D2}";
+                string sourcePath = $"assets/{caseId}.png";
+                byte[] sourceBytes = FixturePng(caseId);
+                string sourceSha256 = Sha256(sourceBytes);
+                fixtureAssets.Add(sourcePath, sourceBytes);
                 cases.Add(new Dictionary<string, object?>
                 {
                     ["case_id"] = caseId,
                     ["partition"] = partition,
                     ["kind"] = "exclusion",
                     ["family"] = "exclusion",
+                    ["display_text"] = string.Empty,
                     ["truth_text"] = string.Empty,
                     ["truth_role"] = "other",
                     ["expected_region_count"] = 0,
-                    ["source_sha256"] = Sha256(Encoding.UTF8.GetBytes($"source:{caseId}")),
+                    ["source_path"] = sourcePath,
+                    ["source_sha256"] = sourceSha256,
                 });
-                predictions.Add(new Dictionary<string, object?>
+                Dictionary<string, object?> direct = DirectOcrRecord(
+                    caseId,
+                    sourceSha256,
+                    string.Empty,
+                    "other",
+                    detectedRegionCount: 0,
+                    falseRegionCount: 0,
+                    recognizerExecuted: false);
+                corePredictions.Add(direct);
+                predictions.Add(new Dictionary<string, object?>(direct)
                 {
-                    ["case_id"] = caseId,
-                    ["predicted_text"] = string.Empty,
-                    ["predicted_role"] = "other",
-                    ["detected_region_count"] = 0,
-                    ["false_region_count"] = 0,
                     ["marker_creation_count"] = 0,
                 });
             }
+
+            byte[] fixtureArchiveBytes = CreateFixtureArchive(fixtureAssets);
+            string fixtureArchiveSha256 = Sha256(fixtureArchiveBytes);
 
             byte[] splitBytes = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object?>
             {
@@ -1752,20 +1782,64 @@ public sealed class ApplicationCompositionSmokeTests
                 ["private_data"] = false,
                 ["chandler_used"] = false,
                 ["evaluator_source_sha256"] = evaluatorSourceSha256,
+                ["fixture_archive_sha256"] = fixtureArchiveSha256,
                 ["cases"] = cases,
             });
             string splitSha256 = Sha256(splitBytes);
+            byte[] corePredictionBytes = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object?>
+            {
+                ["schema"] = "graphreader.ocr-core-predictions.v1",
+                ["profile"] = ProductionOcrAdapter.ApprovalBenchmarkProfile,
+                ["provider"] = "cpu",
+                ["sealed_split_sha256"] = splitSha256,
+                ["fixture_archive_sha256"] = fixtureArchiveSha256,
+                ["detection_model_sha256"] = detectionSha256,
+                ["recognition_model_sha256"] = recognitionSha256,
+                ["records"] = corePredictions,
+            });
+            string corePredictionsSha256 = Sha256(corePredictionBytes);
             byte[] predictionBytes = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object?>
             {
                 ["schema"] = "graphreader.ocr-predictions.v1",
                 ["profile"] = ProductionOcrAdapter.ApprovalBenchmarkProfile,
                 ["provider"] = "cpu",
                 ["sealed_split_sha256"] = splitSha256,
+                ["fixture_archive_sha256"] = fixtureArchiveSha256,
+                ["core_predictions_sha256"] = corePredictionsSha256,
                 ["detection_model_sha256"] = detectionSha256,
                 ["recognition_model_sha256"] = recognitionSha256,
                 ["records"] = predictions,
             });
             string predictionsSha256 = Sha256(predictionBytes);
+            byte[] workflowSource = File.ReadAllBytes(Path.Combine(
+                RepositoryRoot.Find(),
+                "ml",
+                "ocr",
+                "official_bakeoff",
+                "production_evaluate.py"));
+            string workflowSourceSha256 = Sha256(workflowSource);
+            byte[] markerCreationBytes = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object?>
+            {
+                ["schema"] = "graphreader.ocr-marker-creation-results.v1",
+                ["profile"] = ProductionOcrAdapter.ApprovalBenchmarkProfile,
+                ["provider"] = "cpu",
+                ["run_id"] = "4f8d6d53-102c-48ee-89ce-20b060880ac8",
+                ["stage"] = "markers",
+                ["composition_id"] = "production-ocr-to-marker-composed-v1",
+                ["marker_model_id"] = "graphreader-marker-center-fixture",
+                ["marker_model_sha256"] = Sha256("marker-model"u8.ToArray()),
+                ["sealed_split_sha256"] = splitSha256,
+                ["ocr_core_predictions_sha256"] = corePredictionsSha256,
+                ["detection_model_sha256"] = detectionSha256,
+                ["recognition_model_sha256"] = recognitionSha256,
+                ["records"] = cases.Select(item => new Dictionary<string, object?>
+                {
+                    ["case_id"] = item["case_id"],
+                    ["source_sha256"] = item["source_sha256"],
+                    ["marker_creation_count"] = 0,
+                }).ToArray(),
+            });
+            string markerCreationSha256 = Sha256(markerCreationBytes);
             Dictionary<string, object?>[] parity = Enumerable.Range(0, 16)
                 .Select(index => new Dictionary<string, object?>
                 {
@@ -1782,9 +1856,25 @@ public sealed class ApplicationCompositionSmokeTests
                 ["recognition_executed"] = true,
                 ["evaluator_source_sha256"] = evaluatorSourceSha256,
                 ["sealed_split_sha256"] = splitSha256,
+                ["core_predictions_sha256"] = corePredictionsSha256,
                 ["predictions_sha256"] = predictionsSha256,
                 ["detection_model_sha256"] = detectionSha256,
                 ["recognition_model_sha256"] = recognitionSha256,
+                ["execution_provenance"] = new Dictionary<string, object?>
+                {
+                    ["conversion_report_sha256"] = Sha256("conversion-report"u8.ToArray()),
+                    ["fixture_archive_sha256"] = fixtureArchiveSha256,
+                    ["workflow_source_sha256"] = workflowSourceSha256,
+                    ["python_executable"] = "C:/controlled/python.exe",
+                    ["python_executable_sha256"] = Sha256("python-executable"u8.ToArray()),
+                    ["python_implementation"] = "CPython",
+                    ["python_version"] = "3.12.10",
+                    ["onnxruntime_version"] = "1.22.1",
+                    ["numpy_version"] = "2.2.6",
+                    ["pillow_version"] = "11.2.1",
+                    ["platform"] = "Windows-11-x64",
+                    ["onnxruntime_providers"] = OcrRuntimeProviders,
+                },
                 ["detection_parity"] = parity,
                 ["recognition_parity"] = parity,
             });
@@ -1804,7 +1894,10 @@ public sealed class ApplicationCompositionSmokeTests
                 ["detection_model_sha256"] = detectionSha256,
                 ["recognition_model_sha256"] = recognitionSha256,
                 ["evaluator_source_sha256"] = evaluatorSourceSha256,
+                ["workflow_source_sha256"] = workflowSourceSha256,
                 ["sealed_split_sha256"] = splitSha256,
+                ["fixture_archive_sha256"] = fixtureArchiveSha256,
+                ["core_predictions_sha256"] = corePredictionsSha256,
                 ["predictions_sha256"] = predictionsSha256,
                 ["runtime_results_sha256"] = runtimeSha256,
                 ["validation_exact_match"] = 1.0,
@@ -1820,12 +1913,19 @@ public sealed class ApplicationCompositionSmokeTests
                 ["reviewed_resources"] = new Dictionary<string, object?>
                 {
                     ["evaluator_source"] = Embedded("text/x-python", evaluatorSource, evaluatorSourceSha256),
+                    ["workflow_source"] = Embedded("text/x-python", workflowSource, workflowSourceSha256),
                     ["sealed_split"] = Embedded("application/json", splitBytes, splitSha256),
+                    ["fixture_archive"] = Embedded("application/zip", fixtureArchiveBytes, fixtureArchiveSha256),
+                    ["core_predictions"] = Embedded("application/json", corePredictionBytes, corePredictionsSha256),
                     ["predictions"] = Embedded(
                         "application/json",
                         tamperPredictions ? predictionBytes.Append((byte)0).ToArray() : predictionBytes,
                         predictionsSha256),
                     ["runtime_results"] = Embedded("application/json", runtimeBytes, runtimeSha256),
+                    ["marker_creation_results"] = Embedded(
+                        "application/json",
+                        markerCreationBytes,
+                        markerCreationSha256),
                 },
             });
             return new OcrEvidenceFixture(
@@ -1835,6 +1935,70 @@ public sealed class ApplicationCompositionSmokeTests
                 predictionsSha256,
                 runtimeSha256);
         }
+
+        private static byte[] FixturePng(string caseId)
+        {
+            byte[] png = Convert.FromBase64String(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=");
+            return png.Concat(Encoding.UTF8.GetBytes(caseId)).ToArray();
+        }
+
+        private static byte[] CreateFixtureArchive(IReadOnlyDictionary<string, byte[]> assets)
+        {
+            using var output = new MemoryStream();
+            using (var archive = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true))
+            {
+                foreach ((string path, byte[] bytes) in assets.OrderBy(
+                             static item => item.Key,
+                             StringComparer.Ordinal))
+                {
+                    ZipArchiveEntry entry = archive.CreateEntry(path, CompressionLevel.NoCompression);
+                    entry.LastWriteTime = new DateTimeOffset(1980, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                    using Stream stream = entry.Open();
+                    stream.Write(bytes);
+                }
+            }
+
+            return output.ToArray();
+        }
+
+        private static Dictionary<string, object?> DirectOcrRecord(
+            string caseId,
+            string sourceSha256,
+            string predictedText,
+            string predictedRole,
+            int detectedRegionCount,
+            int falseRegionCount,
+            bool recognizerExecuted) =>
+            new()
+            {
+                ["case_id"] = caseId,
+                ["source_sha256"] = sourceSha256,
+                ["predicted_text"] = predictedText,
+                ["predicted_role"] = predictedRole,
+                ["detected_region_count"] = detectedRegionCount,
+                ["false_region_count"] = falseRegionCount,
+                ["detector_input_tensor"] = TensorEvidence(caseId, "detector-input", [1, 3, 48, 320]),
+                ["detector_output_tensor"] = TensorEvidence(caseId, "detector-output", [1, 1, 48, 320]),
+                ["recognizer_executed"] = recognizerExecuted,
+                ["recognizer_input_tensor"] = recognizerExecuted
+                    ? TensorEvidence(caseId, "recognizer-input", [1, 3, 48, 320])
+                    : null,
+                ["recognizer_output_tensor"] = recognizerExecuted
+                    ? TensorEvidence(caseId, "recognizer-output", [1, 40, 438])
+                    : null,
+            };
+
+        private static Dictionary<string, object?> TensorEvidence(
+            string caseId,
+            string label,
+            int[] shape) =>
+            new()
+            {
+                ["sha256"] = Sha256(Encoding.UTF8.GetBytes($"{caseId}:{label}")),
+                ["dtype"] = "float32",
+                ["shape"] = shape,
+            };
 
         private static Dictionary<string, object?> Embedded(
             string mediaType,

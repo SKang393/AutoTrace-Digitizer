@@ -19,6 +19,7 @@ public interface IProductionOcrAdapter
         ProductionWorkflowDetectionRequest request,
         ProductionDecodedRaster originalRaster,
         OcrRectangle plotBounds,
+        OcrDetectorImage detectorImage,
         CancellationToken cancellationToken);
 }
 
@@ -204,10 +205,12 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         ProductionWorkflowDetectionRequest request,
         ProductionDecodedRaster originalRaster,
         OcrRectangle plotBounds,
+        OcrDetectorImage detectorImage,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(originalRaster);
+        ArgumentNullException.ThrowIfNull(detectorImage);
         cancellationToken.ThrowIfCancellationRequested();
         if (!IsApproved)
         {
@@ -228,13 +231,24 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
             EnhancedImage: null,
             DetectedRegions: null,
             OcrContract.Version,
-            TransformChain: "identity");
+            TransformChain: "identity",
+            DetectorImage: detectorImage);
 
         OcrResult result = await pipeline.Value
             .RecognizeAsync(ocrRequest, cancellationToken)
             .ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
         ValidateOutput(request, originalRaster, result);
+
+        string detectorInputWarning = $"ocr_detector_input_sha256:{detectorImage.PixelSha256.ToLowerInvariant()}";
+        result = result with
+        {
+            Warnings = Array.AsReadOnly(result.Warnings
+                .Append("ocr_detector_axis_geometry_mask_applied")
+                .Append(detectorInputWarning)
+                .Distinct(StringComparer.Ordinal)
+                .ToArray()),
+        };
 
         IReadOnlyList<string> envelopeWarnings = result.Warnings
             .Append(CombinedTimingWarning)

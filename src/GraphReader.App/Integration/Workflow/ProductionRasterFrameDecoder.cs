@@ -25,6 +25,7 @@ public interface IProductionRasterFrameDecoder
 /// </summary>
 public sealed class ProductionDecodedRaster
 {
+    private const double OcrStructureMaskHalfWidthPixels = 2;
     private readonly byte[] grayscalePixels;
     private readonly float[] normalizedLuminance;
 
@@ -97,6 +98,55 @@ public sealed class ProductionDecodedRaster
         CanonicalOriginalWidth,
         CanonicalOriginalHeight);
 
+    /// <summary>
+    /// Creates a detector-only derivative with checksum-bound axis, tick, and
+    /// divider geometry removed. Recognition still reads <see cref="CreateOcrImage"/>
+    /// so the immutable source pixels remain available for every crop.
+    /// </summary>
+    public OcrDetectorImage CreateOcrDetectorImage(
+        AxisGeometryResult geometry,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(geometry);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (Variant != WorkflowImageVariant.Original ||
+            OriginalToFrame != MarkerAffineTransform.Identity ||
+            OriginalToImage != OcrFrameTransform.Identity ||
+            !string.Equals(
+                geometry.CoordinateSpace,
+                AxisGeometryCoordinateSpaces.OriginalPixels,
+                StringComparison.Ordinal))
+        {
+            throw Failure(
+                "OCR detector masking requires original-pixel axis evidence and an immutable original raster.");
+        }
+
+        var pixels = (byte[])grayscalePixels.Clone();
+        IEnumerable<GeometryLineSegment> structures =
+            new[] { geometry.XAxis.Line, geometry.YAxis.Line }
+                .Concat(geometry.Ticks.Select(static tick => tick.Line))
+                .Concat(geometry.PhaseDividers.Select(static divider => divider.Line))
+                .Concat(geometry.AmbiguousGridOrDividers.Select(static item => item.Line));
+        foreach (GeometryLineSegment structure in structures)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            RasterizeOcrExclusion(pixels, structure, cancellationToken);
+        }
+
+        var image = new OcrImage(
+            Width,
+            Height,
+            Width,
+            pixels,
+            OcrSourceImage.Original,
+            OcrFrameTransform.Identity,
+            OcrContract.CoordinateSpace,
+            CanonicalOriginalWidth,
+            CanonicalOriginalHeight);
+        string pixelSha256 = Convert.ToHexStringLower(SHA256.HashData(pixels));
+        return new OcrDetectorImage(image, pixelSha256);
+    }
+
     public MarkerImageFrame CreateMarkerFrame(
         MarkerMask ocrMask,
         MarkerMask artifactMask)
@@ -137,6 +187,63 @@ public sealed class ProductionDecodedRaster
             OriginalToFrame,
             validatedOcrMask,
             validatedArtifactMask);
+    }
+
+    private void RasterizeOcrExclusion(
+        byte[] pixels,
+        GeometryLineSegment line,
+        CancellationToken cancellationToken)
+    {
+        double dx = line.End.X - line.Start.X;
+        double dy = line.End.Y - line.Start.Y;
+        double lengthSquared = (dx * dx) + (dy * dy);
+        bool invalid = !double.IsFinite(line.Start.X) || !double.IsFinite(line.Start.Y) ||
+            !double.IsFinite(line.End.X) || !double.IsFinite(line.End.Y) ||
+            line.Start.X < 0 || line.Start.Y < 0 || line.End.X < 0 || line.End.Y < 0 ||
+            line.Start.X > Width || line.End.X > Width ||
+            line.Start.Y > Height || line.End.Y > Height ||
+            lengthSquared <= double.Epsilon;
+        if (invalid)
+        {
+            throw Failure("Axis evidence contains an invalid OCR exclusion line.");
+        }
+
+        int left = Math.Clamp(
+            (int)Math.Floor(Math.Min(line.Start.X, line.End.X) - OcrStructureMaskHalfWidthPixels),
+            0,
+            Width - 1);
+        int right = Math.Clamp(
+            (int)Math.Ceiling(Math.Max(line.Start.X, line.End.X) + OcrStructureMaskHalfWidthPixels),
+            0,
+            Width - 1);
+        int top = Math.Clamp(
+            (int)Math.Floor(Math.Min(line.Start.Y, line.End.Y) - OcrStructureMaskHalfWidthPixels),
+            0,
+            Height - 1);
+        int bottom = Math.Clamp(
+            (int)Math.Ceiling(Math.Max(line.Start.Y, line.End.Y) + OcrStructureMaskHalfWidthPixels),
+            0,
+            Height - 1);
+        double maximumDistanceSquared =
+            OcrStructureMaskHalfWidthPixels * OcrStructureMaskHalfWidthPixels;
+        for (int y = top; y <= bottom; y++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            for (int x = left; x <= right; x++)
+            {
+                double projection = (((x - line.Start.X) * dx) + ((y - line.Start.Y) * dy)) /
+                    lengthSquared;
+                projection = Math.Clamp(projection, 0, 1);
+                double nearestX = line.Start.X + (projection * dx);
+                double nearestY = line.Start.Y + (projection * dy);
+                double distanceX = x - nearestX;
+                double distanceY = y - nearestY;
+                if ((distanceX * distanceX) + (distanceY * distanceY) <= maximumDistanceSquared)
+                {
+                    pixels[(y * Width) + x] = byte.MaxValue;
+                }
+            }
+        }
     }
 
     private void ValidateMask(MarkerMask mask, string parameterName)

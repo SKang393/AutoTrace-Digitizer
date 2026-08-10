@@ -104,6 +104,9 @@ public static class OcrCacheKeyDeriver
         yield return RectangleMaterial(request.PlotBounds);
         yield return ImageMaterial(request.OriginalImage);
         yield return request.EnhancedImage is null ? "no_enhanced_image" : ImageMaterial(request.EnhancedImage);
+        yield return request.DetectorImage is null
+            ? "no_detector_image"
+            : $"{request.DetectorImage.PixelSha256.ToLowerInvariant()}:{ImageMaterial(request.DetectorImage.Image)}";
         if (request.DetectedRegions is null)
         {
             yield return "detect_regions";

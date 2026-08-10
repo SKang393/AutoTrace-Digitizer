@@ -126,7 +126,10 @@ public sealed class OcrPipeline
         try
         {
             detectedRegions = request.DetectedRegions ??
-                await _detector.DetectAsync(request.OriginalImage, cancellationToken).ConfigureAwait(false);
+                await _detector.DetectAsync(
+                        request.DetectorImage?.Image ?? request.OriginalImage,
+                        cancellationToken)
+                    .ConfigureAwait(false);
             ValidateDetectedRegions(detectedRegions);
             detectedRegions = EnrichGeometry(detectedRegions, request.PlotBounds);
         }
@@ -909,7 +912,8 @@ public sealed class OcrPipeline
         }
 
         if (!HasValidCanonicalDimensions(request.OriginalImage) ||
-            (request.EnhancedImage is not null && !HasValidCanonicalDimensions(request.EnhancedImage)))
+            (request.EnhancedImage is not null && !HasValidCanonicalDimensions(request.EnhancedImage)) ||
+            (request.DetectorImage is not null && !HasValidCanonicalDimensions(request.DetectorImage.Image)))
         {
             return Error(
                 "OCR_INPUT_INVALID",
@@ -917,7 +921,39 @@ public sealed class OcrPipeline
                 "retry");
         }
 
+        if (request.DetectorImage is not null && !ValidDetectorImage(request))
+        {
+            return Error(
+                "OCR_INPUT_INVALID",
+                "DetectorImage must be a checksum-matched, same-size original-pixel derivative with the original transform.",
+                "retry");
+        }
+
         return null;
+    }
+
+    private static bool ValidDetectorImage(OcrRequest request)
+    {
+        OcrDetectorImage detector = request.DetectorImage!;
+        OcrImage image = detector.Image;
+        OcrImage original = request.OriginalImage;
+        if (string.IsNullOrWhiteSpace(detector.PixelSha256) ||
+            detector.PixelSha256.Length != 64 || !detector.PixelSha256.All(Uri.IsHexDigit) ||
+            image.SourceImage != OcrSourceImage.Original ||
+            image.Width != original.Width || image.Height != original.Height ||
+            image.Stride != original.Stride || image.Stride < image.Width ||
+            image.Pixels.Length != checked(image.Stride * image.Height) ||
+            image.OriginalToImage != original.OriginalToImage ||
+            !string.Equals(image.CoordinateSpace, original.CoordinateSpace, StringComparison.Ordinal) ||
+            image.CanonicalOriginalWidth != original.CanonicalOriginalWidth ||
+            image.CanonicalOriginalHeight != original.CanonicalOriginalHeight)
+        {
+            return false;
+        }
+
+        string actual = Convert.ToHexStringLower(
+            System.Security.Cryptography.SHA256.HashData(image.Pixels.Span));
+        return string.Equals(actual, detector.PixelSha256, StringComparison.OrdinalIgnoreCase);
     }
 
     private static void ValidateDetectedRegions(IReadOnlyList<OcrDetectedRegion> regions)

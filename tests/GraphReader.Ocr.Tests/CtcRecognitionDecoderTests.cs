@@ -62,6 +62,59 @@ public sealed class CtcRecognitionDecoderTests
             blankClassIndex: 0));
     }
 
+    [TestMethod]
+    public void ProbabilityOutputKeepsModelConfidenceWithoutApplyingSoftmaxAgain()
+    {
+        IReadOnlyList<CtcDecodedAlternative> alternatives = CtcRecognitionDecoder.Decode(
+            [0.1f, 0.8f, 0.1f],
+            timeSteps: 1,
+            alphabet: "01",
+            blankClassIndex: 0,
+            outputActivation: OcrRecognitionOutputActivation.Probabilities);
+
+        Assert.HasCount(1, alternatives);
+        Assert.AreEqual("0", alternatives[0].Text);
+        Assert.AreEqual(0.8d, alternatives[0].Confidence, 1e-6);
+    }
+
+    [TestMethod]
+    public void AutoActivationRecognizesSoftmaxProbabilityRows()
+    {
+        IReadOnlyList<CtcDecodedAlternative> alternatives = CtcRecognitionDecoder.Decode(
+            [0.05f, 0.15f, 0.8f],
+            timeSteps: 1,
+            alphabet: "01",
+            blankClassIndex: 0);
+
+        Assert.AreEqual("1", alternatives[0].Text);
+        Assert.AreEqual(0.8d, alternatives[0].Confidence, 1e-6);
+    }
+
+    [TestMethod]
+    public void UnicodeScalarAlphabetMapsAstralCharacterToOneCtcClass()
+    {
+        IReadOnlyList<CtcDecodedAlternative> alternatives = CtcRecognitionDecoder.Decode(
+            [0.05f, 0.05f, 0.9f],
+            timeSteps: 1,
+            alphabet: "0𝑢",
+            blankClassIndex: 0,
+            outputActivation: OcrRecognitionOutputActivation.Probabilities);
+
+        Assert.AreEqual("𝑢", alternatives[0].Text);
+        Assert.AreEqual(0.9d, alternatives[0].Confidence, 1e-6);
+    }
+
+    [TestMethod]
+    public void DeclaredProbabilityOutputRejectsNonProbabilityRows()
+    {
+        Assert.Throws<InvalidDataException>(() => CtcRecognitionDecoder.Decode(
+            [0f, 4f, 3f],
+            timeSteps: 1,
+            alphabet: "01",
+            blankClassIndex: 0,
+            outputActivation: OcrRecognitionOutputActivation.Probabilities));
+    }
+
     private static float[] Logits(int classCount, params int[] winningClasses)
     {
         var values = Enumerable.Repeat(-6f, classCount * winningClasses.Length).ToArray();

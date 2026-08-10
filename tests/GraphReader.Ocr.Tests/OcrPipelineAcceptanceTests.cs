@@ -3,6 +3,7 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Globalization;
+using System.Security.Cryptography;
 
 namespace GraphReader.Ocr.Tests;
 
@@ -96,6 +97,130 @@ public sealed class OcrPipelineAcceptanceTests
         Assert.AreEqual(2, cache.ReadCount);
         Assert.AreEqual(1, cache.WriteCount);
         CollectionAssert.AreEqual(cold.Regions.ToArray(), warm.Regions.ToArray());
+    }
+
+    [TestMethod]
+    public async Task DetectorOnlyDerivativeDoesNotReplaceImmutableRecognitionPixels()
+    {
+        const int width = 40;
+        const int height = 10;
+        var original = new OcrImage(
+            width,
+            height,
+            width,
+            Enumerable.Repeat((byte)255, width * height).ToArray(),
+            OcrSourceImage.Original,
+            OcrFrameTransform.Identity);
+        var masked = new OcrImage(
+            width,
+            height,
+            width,
+            new byte[width * height],
+            OcrSourceImage.Original,
+            OcrFrameTransform.Identity);
+        string maskedSha256 = Convert.ToHexStringLower(SHA256.HashData(masked.Pixels.Span));
+        OcrDetectedRegion region = OcrTestFixtures.Region(
+            "detector-only",
+            0,
+            0,
+            width,
+            height,
+            context: new OcrRegionContext(NumericExpected: true));
+        var detector = new StubTextRegionDetector((image, cancellationToken) =>
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Assert.IsTrue(image.Pixels.Span.ToArray().All(static value => value == 0));
+            return ValueTask.FromResult<IReadOnlyList<OcrDetectedRegion>>([region]);
+        });
+        var recognizer = new StubTextRecognizer((crops, cancellationToken) =>
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Assert.HasCount(1, crops);
+            Assert.AreEqual(OcrSourceImage.Original, crops[0].SourceImage);
+            Assert.IsTrue(crops[0].Pixels.Span.ToArray().All(static value => value == 1f));
+            return ValueTask.FromResult<IReadOnlyList<OcrRecognition>>([
+                new OcrRecognition(
+                    crops[0].RegionId,
+                    crops[0].SourceImage,
+                    [new OcrRecognitionAlternative("10", 0.95, crops[0].SourceImage)],
+                    0.1),
+            ]);
+        });
+        var pipeline = new OcrPipeline(
+            detector,
+            recognizer,
+            new InMemoryOcrResultCache(),
+            new OcrPipelineOptions
+            {
+                CropWidth = width,
+                CropHeight = height,
+                CropPaddingPixels = 0,
+            });
+        var request = new OcrRequest(
+            "11111111-1111-1111-1111-111111111111",
+            "22222222-2222-2222-2222-222222222222",
+            new string('a', 64),
+            original,
+            new OcrRectangle(0, 0, width, height),
+            DetectorImage: new OcrDetectorImage(masked, maskedSha256));
+
+        OcrResult result = await pipeline.RecognizeAsync(request, CancellationToken.None);
+
+        Assert.IsTrue(result.Succeeded, result.Failure?.TechnicalMessage);
+        Assert.AreEqual(1, detector.CallCount);
+        Assert.AreEqual(1, recognizer.CallCount);
+        Assert.AreEqual("10", result.Regions[0].Text);
+    }
+
+    [TestMethod]
+    public async Task DetectorOnlyDerivativeRequiresMatchingPixelChecksum()
+    {
+        OcrImage original = OcrTestFixtures.Image(width: 40, height: 10);
+        OcrImage masked = original with { Pixels = new byte[400] };
+        var detector = new StubTextRegionDetector([]);
+        var pipeline = new OcrPipeline(
+            detector,
+            new StubTextRecognizer((_, _) => throw new AssertFailedException("Recognizer must not run.")),
+            new InMemoryOcrResultCache());
+        OcrRequest request = OcrTestFixtures.Request() with
+        {
+            OriginalImage = original,
+            PlotBounds = new OcrRectangle(0, 0, 40, 10),
+            DetectorImage = new OcrDetectorImage(masked, new string('f', 64)),
+        };
+
+        OcrResult result = await pipeline.RecognizeAsync(request, CancellationToken.None);
+
+        Assert.AreEqual("OCR_INPUT_INVALID", result.Failure?.Code);
+        Assert.AreEqual(0, detector.CallCount);
+    }
+
+    [TestMethod]
+    public async Task DetectorOnlyDerivativeRequiresOriginalPixelGeometry()
+    {
+        OcrImage original = OcrTestFixtures.Image(width: 40, height: 10);
+        OcrImage misaligned = original with
+        {
+            Pixels = new byte[400],
+            OriginalToImage = new OcrFrameTransform(2, 2, 0, 0),
+        };
+        string checksum = Convert.ToHexStringLower(SHA256.HashData(misaligned.Pixels.Span));
+        var detector = new StubTextRegionDetector([]);
+        var pipeline = new OcrPipeline(
+            detector,
+            new StubTextRecognizer((_, _) => throw new AssertFailedException("Recognizer must not run.")),
+            new InMemoryOcrResultCache());
+        OcrRequest request = OcrTestFixtures.Request() with
+        {
+            OriginalImage = original,
+            PlotBounds = new OcrRectangle(0, 0, 40, 10),
+            DetectorImage = new OcrDetectorImage(misaligned, checksum),
+        };
+
+        OcrResult result = await pipeline.RecognizeAsync(request, CancellationToken.None);
+
+        Assert.AreEqual("OCR_INPUT_INVALID", result.Failure?.Code);
+        Assert.AreEqual(0, detector.CallCount);
     }
 
     [TestMethod]

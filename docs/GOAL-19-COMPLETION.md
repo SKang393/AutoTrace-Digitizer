@@ -135,7 +135,7 @@ in Production composition. Automatic stages currently report:
 | --- | --- | --- |
 | Enhancement | Unavailable | Exact runtime redistribution provenance is reviewed, but local-adapter, scientific, CPU fallback, clean-machine, production, and release approvals remain false. |
 | Axis | Unavailable | Deterministic adapter exists; OpenCvSharp native redistribution audit is blocked. |
-| OCR | Unavailable | The executable detector, recognizer, strict two-manifest factory, CPU provider binding, and fail-closed composition boundary are implemented. No approved OCR payload pair exists. Project numeric Candidates 1, 2, and 3 failed the frozen validation gate and produced no ONNX; the authorized budget is exhausted. Exact official PP-OCRv5 BOS payloads are bound byte for byte to immutable official PaddlePaddle model repositories whose exact model cards declare Apache-2.0. Two checksum-bound opset-11 conversions per model were byte-identical, both ONNX files passed full checking and CPU execution, and 16 raw-tensor parity cases per model passed `1e-4`. This is conversion-only evidence. Public and sealed metrics, notices, manifests, model-store discovery, and packaging remain blocked. |
+| OCR | Unavailable | The executable detector, recognizer, strict two-manifest factory, CPU provider binding, checksum-bound axis-mask derivative, and strengthened fail-closed composition boundary are implemented. No approved OCR payload pair exists. Project numeric Candidates 1, 2, and 3 failed the frozen validation gate and exhausted their budget. The exact official PP-OCRv5 pair passed reproducible conversion and parity, then failed its once-only frozen 220-case public and sealed evaluation: exact match `0.0`, CER `1.0`, role accuracy `0.03` and `0.02`, detection exact count `18/220`, 195 false text regions, and false regions on 7/20 exclusions. Independent composed marker-stage evidence was absent. The reviewed model license and change notice are tracked, but no OCR manifest, model-store entry, or package payload exists. Do not tune or rerun against the exposed split. |
 | Markers | Unavailable | Marker-center exhausted its budget after one public false positive. The unchanged-weight probability-runtime classifier passed selection, public-v3, disjoint confirmation-v3, exact package discovery, and CPU/DirectML runtime validation. The concrete artifact-mask runtime bridge exists under the frozen marker-center task, but the current marker-center manifest lacks the separately required direct full-frame artifact-mask approval profile. The stage still requires an approved center model and checksum-bound artifact-mask evidence. |
 | Legends | Unavailable | Deterministic reasoner requires approved OCR and marker evidence. |
 | Phases | Unavailable | Deterministic reasoner requires approved axis, OCR, and marker evidence. |
@@ -218,8 +218,20 @@ marker classifier reached approval:
   `7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743`
   with maximum difference `2.205371856689453e-06`. The ignored report is
   checksum-bound to the final harness and remains `production_approved=false`
-  and `release_ready=false`. No public or sealed benchmark, reviewed notice,
-  manifest, package discovery, or approval exists.
+  and `release_ready=false`. The reviewed Apache-2.0 model license and ONNX
+  change notice are tracked.
+- The official pair then ran once against a split frozen before inference with
+  100 validation text cases, 100 sealed text cases, and 20 exclusions. No
+  Chandler or private data was used. Split SHA-256 is
+  `1fc3b2e72f89cbfb0d8854ec8701368e7ae764cbd5c6fef17b7e497d06ec9f09`;
+  fixture ZIP SHA-256 is
+  `69eeeff73f4cfd2dd6580ad9538f1a89527f8e5b320ce6a9cd7155d2bd22ea99`.
+  The report failed with validation and sealed exact match `0.0`, CER `1.0`,
+  role accuracy `0.03` and `0.02`, detection exact count `18/220`, 195 false
+  text regions, and false regions on 7/20 exclusions. It lacked independent
+  composed marker-stage evidence. Report SHA-256 is
+  `3fceb688d44a2f4c322e40bdfa3dd09ca74ec6d5742ab257ae102ccf76e1c44b`.
+  No manifest, model-store discovery, package discovery, or approval exists.
 - Project numeric OCR Candidate 1 completed its recovery with zero optimizer
   steps and unchanged checkpoint SHA-256 `6e941b2b...8235`. It failed with
   validation exact `0.3359375`, sealed exact `0.119140625`, sealed CER
@@ -311,11 +323,11 @@ files are not tracked.
 - Super-resolution tests: 57/57 passed.
 - Marker Python pipelines: 30/30 passed with four exporter deprecation warnings.
 - Marker .NET assembly with the exact ignored candidate: 83/83 passed.
-- OCR Python pipelines: 127/127 passed after rebinding the exact committed V3
-  model and protocol source bytes. The focused official archive, conversion,
+- OCR Python pipelines: the focused official archive, conversion, frozen-gate,
   stale-authority, reproducibility, ONNX checker, and parity suite passed
-  132/132.
-- OCR .NET assembly with both exact ignored failed experiments: 82/82 passed.
+  142/142. The official evaluation itself ran once and failed its fixed model
+  thresholds as recorded above.
+- OCR .NET assembly: 98/98 passed with two expected opt-in provider skips.
 - OpenCV source-audit behavior tests: 6/6 passed in Windows PowerShell and
   PowerShell 7. Retained lock/cache/triplet inputs, preflight metadata, and both
   CMake toolchain caches are bound fail closed to the tracked source lock.
@@ -399,14 +411,16 @@ clean-machine, production, and release approval remain false.
 
 - Manual-first development preview: implemented and running.
 - Stage-aware production composition: implemented, automatic stages fail closed.
-- Production OCR adapter boundary: implemented and directly tested with
-  checksum-resolved public-synthetic resources and executable generated ONNX
-  composition fixtures. The factory remains null for the real model store
-  because both approved payloads are absent.
-- Official PP-OCRv5 conversion boundary: PASS for conversion-only provenance,
-  byte reproducibility, ONNX full checking, and CPU raw-tensor parity. Public
-  and sealed graph metrics, notice review, manifests, model-store installation,
-  packaged discovery, and production approval remain blocked.
+- Production OCR adapter boundary: implemented and directly tested with exact
+  fixture archive bytes, per-case tensor identities, execution provenance,
+  independently composed marker-stage evidence, and a checksum-bound detector
+  derivative that masks verified axes while retaining original recognition
+  crops. The factory remains null because both approved payloads are absent.
+- Official PP-OCRv5 boundary: PASS for provenance, byte reproducibility, ONNX
+  checking, CPU parity, and reviewed Apache-2.0 notice files; FAIL for the
+  once-only fixed accuracy, role, detection, and exclusion gates. Manifests,
+  model-store installation, package discovery, and production approval remain
+  blocked.
 - Production stage availability: asynchronously derived from checksum, manifest,
   notice, benchmark, license, redistribution, and CPU-provider validation for
   every indexed model; invalid or partial stores remain unavailable.
@@ -475,6 +489,9 @@ clean-machine, production, and release approval remain false.
 - `models/manifest/ocr/GRAPH_NUMERIC_SEQUENCE_V2_EXPERIMENT_AUDIT.md`
 - `ml/ocr/official_bakeoff/runs/conversion/report.json`, ignored conversion-only
   evidence SHA-256 `8c6c8aa522663c0594894f0b526c9fcc0055139217d8d1b6bac968ed1c4d9d15`
+- `ml/ocr/official_bakeoff/runs/production-gate/evaluation/report.json`, ignored
+  failed fixed-gate evidence SHA-256
+  `3fceb688d44a2f4c322e40bdfa3dd09ca74ec6d5742ab257ae102ccf76e1c44b`
 - `artifacts/goal19-opencv-source/evidence-repro-pass2-final-a/`
 - `artifacts/goal19-opencv-source/evidence-repro-pass2-final-b/`
 - `artifacts/goal19-opencv-source/runtime-parity/run-20260804T195149029Z-487978feedc04c248ffab7b315191fc2/runtime-parity-summary.json`

@@ -1,0 +1,58 @@
+PP-OCRv5 OFFICIAL MODEL SOURCE AND CHANGE NOTICE
+
+Scope
+-----
+This notice applies only to the following immutable official PaddlePaddle model
+repository revisions and the byte-identical Paddle inference payloads identified
+below.
+
+PP-OCRv5 mobile text detection
+
+Model ID: PP-OCRv5_mobile_det
+Repository: https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_det
+Revision: 0d63e78e2b680928f6b1747d76a08db6e645efb7
+Model-card SHA-256: 4cc20ad6d41af86b3ce9885ffb0956e152574a2eb14179aeb07fd2d3956161ca
+Source inference payload SHA-256 values:
+  inference.json: 05feef1acb00aa4cd7362b15f7f501fc4f99d7b1fa73c1c871e0c7b1504b0f5c
+  inference.pdiparams: afa1820cb16c1fd0dad589d0f8b389139061c1ef6d68019685fd07be997dda5b
+  inference.yml: 98069072e1b6b37d727fd9d9f11725faa46d6ea0de012f2ed26caea011c37699
+
+PP-OCRv5 mobile English text recognition
+
+Model ID: en_PP-OCRv5_mobile_rec
+Repository: https://huggingface.co/PaddlePaddle/en_PP-OCRv5_mobile_rec
+Revision: 267c36e24c331595590fe7bd72bde2436fd286f2
+Model-card SHA-256: 4c1cfd6e103b0966fe97505b5254cfa35a931d47d7effca97a9db47fb57dd699
+Source inference payload SHA-256 values:
+  inference.json: fd1b6ec722ea841a72d3ba43e527df1d1066d5d7808e0503ee3eec7265188753
+  inference.pdiparams: 3ec8a97ed6cefe8568d3e2ee90bb193299b566a7661aa4fd52d224b96b59f66b
+  inference.yml: 27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067
+
+License declaration and upstream notices
+----------------------------------------
+At each revision above, the exact model-card README declares
+"license: apache-2.0". A copy of the Apache License, Version 2.0 is provided in
+PaddlePaddle-PP-OCRv5-Models-Apache-2.0.txt.
+
+Neither reviewed six-file model repository inventory contains a separate
+LICENSE or NOTICE file. The model cards attribute development of both models
+to the PaddleOCR team. This file retains that attribution and identifies the
+official PaddlePaddle repository owner above. No separate copyright, patent,
+trademark, or NOTICE attribution text appears in either reviewed inventory.
+This file therefore does not add an upstream copyright statement or reproduce
+nonexistent upstream NOTICE text.
+
+Graph Auto Reader change notice
+-------------------------------
+Graph Auto Reader converted the audited Paddle inference payloads to ONNX
+opset 11. The conversion produced these checksum-bound derivative files:
+
+  PP-OCRv5_mobile_det.onnx
+  SHA-256: d4aa24d408cd70b8b9f66cc758e20f397fc31a9c69d8477cf8887fc53bd5fceb
+
+  en_PP-OCRv5_mobile_rec.onnx
+  SHA-256: 7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743
+
+The ONNX files are changed derivative-format files. Distributions containing
+either checksum above must also include this change notice and the complete
+Apache License, Version 2.0 named above.

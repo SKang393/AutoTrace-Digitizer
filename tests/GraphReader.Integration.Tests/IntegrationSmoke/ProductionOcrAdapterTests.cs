@@ -29,6 +29,7 @@ public sealed class ProductionOcrAdapterTests
             fixture.Request,
             fixture.Raster,
             new OcrRectangle(4, 4, 24, 20),
+            DetectorImage(fixture.Raster),
             CancellationToken.None);
 
         Assert.IsTrue(evidence.Result.Succeeded);
@@ -69,6 +70,7 @@ public sealed class ProductionOcrAdapterTests
                 fixture.Request,
                 fixture.Raster,
                 new OcrRectangle(4, 4, 24, 20),
+                DetectorImage(fixture.Raster),
                 CancellationToken.None));
 
         Assert.AreEqual(
@@ -93,6 +95,7 @@ public sealed class ProductionOcrAdapterTests
                 fixture.Request,
                 other.Raster,
                 new OcrRectangle(4, 4, 24, 20),
+                DetectorImage(other.Raster),
                 CancellationToken.None));
 
         Assert.AreEqual(
@@ -117,6 +120,7 @@ public sealed class ProductionOcrAdapterTests
             fixture.Request,
             fixture.Raster,
             new OcrRectangle(4, 4, 24, 20),
+            DetectorImage(fixture.Raster),
             source.Token));
 
         Assert.AreEqual(0, detector.CallCount);
@@ -137,6 +141,7 @@ public sealed class ProductionOcrAdapterTests
                 fixture.Request,
                 fixture.Raster,
                 new OcrRectangle(4, 4, 24, 20),
+                DetectorImage(fixture.Raster),
                 CancellationToken.None));
 
         Assert.AreEqual(
@@ -161,6 +166,7 @@ public sealed class ProductionOcrAdapterTests
                 fixture.Request,
                 fixture.Raster,
                 new OcrRectangle(4, 4, 24, 20),
+                DetectorImage(fixture.Raster),
                 CancellationToken.None));
 
         Assert.AreEqual(
@@ -188,6 +194,13 @@ public sealed class ProductionOcrAdapterTests
                 "recognizer.onnx"),
             InferenceProvider.Cpu,
             isApproved);
+
+    private static OcrDetectorImage DetectorImage(ProductionDecodedRaster raster)
+    {
+        OcrImage image = raster.CreateOcrImage();
+        string sha256 = Convert.ToHexStringLower(SHA256.HashData(image.Pixels.Span));
+        return new OcrDetectorImage(image, sha256);
+    }
 
     private static Fixture CreateFixture(Guid? projectId = null)
     {

@@ -27,9 +27,12 @@ ONNX SHA-256 is
 `7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743`
 with maximum difference `2.205371856689453e-06`. The ignored conversion report
 SHA-256 is `8c6c8aa522663c0594894f0b526c9fcc0055139217d8d1b6bac968ed1c4d9d15`.
-This is conversion-only evidence. No role, text-mask, public, or sealed OCR
-benchmark has passed, no notice bundle or approved production manifest exists,
-and no payload entered the production model store or packaging.
+The later once-only public and sealed OCR benchmark ran and failed every
+accuracy, role, detection, and exclusion threshold. No independent composed
+marker-stage evidence exists, no approved production manifest exists, and no
+payload entered the production model store or packaging. A reviewed Apache-2.0
+license and ONNX change-notice bundle now exists under `LICENSES/`, but it is
+not yet bound through the model store or either package.
 
 ## Pinned official source
 
@@ -164,14 +167,14 @@ byte-identical to all six BOS payload members. Current executable result:
 | Gate | Status | Direct reason |
 |---|---|---|
 | Artifact redistribution | PASS for conversion source | Exact official model-repository revisions scope Apache-2.0 to byte-identical BOS payloads |
-| Notices | BLOCKED | No artifact notice exists to package |
+| Notices | PASS for tracked source bundle; package binding BLOCKED | Canonical Apache-2.0 text SHA-256 `c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4` and reviewed model/change notice SHA-256 `8d81f5d0c58547cce471c24f82efe768a9d907d06764f67e90cc680c6d777729` are tracked; model-store and package checksums remain absent |
 | Paddle-to-ONNX conversion provenance | PASS for conversion only | Exact source, toolchain, selected wheel hashes, installed RECORD files, command, logs, opset, and two byte-identical output hashes are bound |
 | ONNX parity | PASS for conversion only | 16 deterministic CPU raw-tensor cases per model passed `1e-4` across four detector shapes and five recognizer widths; maxima were `1.349323213162279e-07` and `2.205371856689453e-06` |
 | CPU execution | PASS for conversion only | Both checked ONNX files executed through CPU-only ONNX Runtime sessions |
-| Frozen public/sealed OCR accuracy | BLOCKED | No converted candidate has run the fixed public gates |
-| Role accuracy | BLOCKED | No converted candidate has run the role gate |
-| Text masks and no marker creation | BLOCKED | No converted detector has run the exclusion gate |
-| Model manifest | BLOCKED | Public and sealed benchmarks, reviewed notice, production approval, model-store discovery, and packaging discovery are unresolved |
+| Frozen public/sealed OCR accuracy | FAIL | The once-only frozen 220-case evaluation produced validation and sealed exact match `0.0`, CER `1.0`, role accuracy `0.03` and `0.02`, and detection exact count `18/220` |
+| Role accuracy | FAIL | Validation role accuracy was `0.03`; sealed-test role accuracy was `0.02` |
+| Text masks and no marker creation | FAIL and BLOCKED | The detector produced 195 false regions across text cases and false regions on 7 of 20 exclusions; no independent composed marker-stage evidence was supplied |
+| Model manifest | BLOCKED | Public and sealed benchmarks, production approval, model-store discovery, and packaging discovery are unresolved |
 
 No private graph or Chandler data was read, tuned, or evaluated. Downloaded
 archives, extracted payloads, and audit JSON remain ignored under
@@ -179,10 +182,12 @@ archives, extracted payloads, and audit JSON remain ignored under
 
 ## Required next evidence
 
-Freeze the public-synthetic validation and inference-locked sealed split, then
-run the converted pair through exact detection, recognition, role, exclusion,
-and marker-creation gates without Chandler or private input. Create and review
-the Apache-2.0 license and attribution notice bundle before any manifest becomes
-approved or any payload enters packaging. Production composition must remain
-unavailable until both OCR tasks pass every model-store and packaging
-requirement together.
+Do not rerun or tune against the exposed frozen split. The official pair needs
+a newly preregistered upstream graph-text crop or masking contract and a new
+sealed split before it can be reconsidered. Any future candidate must run exact
+detection, recognition, role, exclusion, and independently composed
+marker-creation gates without Chandler or private input. It must then bind the
+reviewed Apache-2.0 license and ONNX change-notice bundle through both model
+manifests, the production model store, and both package forms. Production
+composition remains unavailable until both OCR tasks pass every model-store and
+packaging requirement together.

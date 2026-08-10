@@ -273,9 +273,21 @@ public sealed class ProductionAutomaticDetectionAdapterTests
             ProductionWorkflowDetectionRequest request,
             ProductionDecodedRaster originalRaster,
             OcrRectangle plotBounds,
+            OcrDetectorImage detectorImage,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            Assert.AreEqual(100, detectorImage.Image.Width);
+            Assert.AreEqual(100, detectorImage.Image.Height);
+            Assert.AreEqual(byte.MaxValue, detectorImage.Image.Pixels.Span[(50 * 100) + 10]);
+            Assert.AreEqual(byte.MaxValue, detectorImage.Image.Pixels.Span[(50 * 100) + 50]);
+            Assert.AreEqual(byte.MaxValue, detectorImage.Image.Pixels.Span[(90 * 100) + 20]);
+            Assert.AreEqual(0, detectorImage.Image.Pixels.Span[(30 * 100) + 30]);
+            Assert.AreEqual(
+                detectorImage.PixelSha256,
+                Convert.ToHexStringLower(SHA256.HashData(detectorImage.Image.Pixels.Span)));
+            Assert.IsTrue(originalRaster.CreateOcrImage().Pixels.Span.ToArray()
+                .All(static pixel => pixel == 0));
             OcrRegion[] regions =
             [
                 Region("x1", 18, 92, "1", OcrTextRole.XTick),

@@ -128,8 +128,16 @@ public sealed class ProductionAutomaticDetectionAdapter : IProductionWorkflowDet
             chain.Append(axis.Envelope);
 
             OcrRectangle plotBounds = ToOcrBounds(axis.Geometry.PlotPolygon);
+            OcrDetectorImage detectorImage = raster.CreateOcrDetectorImage(
+                axis.Geometry,
+                cancellationToken);
             ProductionOcrEvidence ocr = await ocrAdapter
-                .RecognizeAsync(request, raster, plotBounds, cancellationToken)
+                .RecognizeAsync(
+                    request,
+                    raster,
+                    plotBounds,
+                    detectorImage,
+                    cancellationToken)
                 .ConfigureAwait(false);
             foreach (ProductionOcrModelEvidence evidence in ocr.ModelEvidence
                 .OrderBy(static evidence => evidence.Task, StringComparer.Ordinal))

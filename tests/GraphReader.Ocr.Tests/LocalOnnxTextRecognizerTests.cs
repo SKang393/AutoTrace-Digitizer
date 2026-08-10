@@ -206,6 +206,12 @@ public sealed class LocalOnnxTextRecognizerTests
                 runtime,
                 new LocalOnnxTextRecognizerOptions(identity, "01")
                 {
+                    OutputActivation = (OcrRecognitionOutputActivation)999,
+                }));
+            Assert.Throws<ArgumentException>(() => new LocalOnnxTextRecognizer(
+                runtime,
+                new LocalOnnxTextRecognizerOptions(identity, "01")
+                {
                     AllowedProviders = [InferenceProvider.Cpu, (InferenceProvider)999],
                 }));
         }

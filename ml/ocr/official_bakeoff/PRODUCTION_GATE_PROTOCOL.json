@@ -1,0 +1,85 @@
+{
+  "schema": "graphreader.ocr-production-gate-protocol.v1",
+  "profile": "graphreader-ocr-public-gate-v1",
+  "status": "frozen_before_inference",
+  "scope": "public_synthetic",
+  "private_data": false,
+  "chandler_used": false,
+  "selection_locked_before_inference": true,
+  "renderer_seed": 20260809,
+  "image": {
+    "width": 384,
+    "height": 192,
+    "font_size": 30,
+    "font_files": [
+      "arial.ttf",
+      "times.ttf"
+    ]
+  },
+  "partitions": {
+    "validation": {
+      "text_cases": 100,
+      "exclusion_cases": 10
+    },
+    "sealed_test": {
+      "text_cases": 100,
+      "exclusion_cases": 10
+    }
+  },
+  "families": [
+    "integer",
+    "decimal",
+    "negative",
+    "percentage",
+    "ambiguity"
+  ],
+  "roles": [
+    "x_tick",
+    "y_tick",
+    "phase_header",
+    "annotation",
+    "participant"
+  ],
+  "renderer_families": [
+    "windows_sans",
+    "windows_serif"
+  ],
+  "degradation_families": [
+    "clean",
+    "soft_blur",
+    "downsample_restore",
+    "jpeg_roundtrip"
+  ],
+  "ambiguity_policy": {
+    "display_text_is_rendered": true,
+    "truth_text_is_normalized_numeric": true,
+    "pairs": [
+      ["O", "0"],
+      ["l", "1"],
+      ["I", "1"],
+      ["O.O", "0.0"],
+      ["lOO%", "100%"],
+      ["-O", "-0"],
+      ["-l", "-1"],
+      ["IO", "10"],
+      ["Ol", "01"],
+      ["O%", "0%"]
+    ]
+  },
+  "thresholds": {
+    "validation_exact_match_minimum": 0.9,
+    "validation_cer_maximum": 0.05,
+    "validation_role_accuracy_minimum": 0.9,
+    "sealed_test_exact_match_minimum": 0.9,
+    "sealed_test_cer_maximum": 0.05,
+    "sealed_test_role_accuracy_minimum": 0.9,
+    "detection_exact_rate": 1.0,
+    "onnx_parity_maximum_absolute_error": 0.0001,
+    "marker_creation_count": 0
+  },
+  "experiment_budget": {
+    "official_model_evaluations": 1,
+    "split_regeneration_after_inference": 0,
+    "threshold_changes_after_inference": 0
+  }
+}
