@@ -101,7 +101,7 @@ def test_preregistration_binds_source_split_and_canonical_gate_schema() -> None:
     seal = json.loads(seal_path.read_text(encoding="utf-8"))
     gate = json.loads(gate_path.read_text(encoding="utf-8"))
     config = json.loads(config_path.read_text(encoding="utf-8"))
-    assert protocol["status"] == "candidate_3_public_gate_authorized"
+    assert protocol["status"] == "exhausted_failed_public_gate"
     assert protocol["currently_preregistered_candidate"] is None
     assert protocol["consumed_candidates"] == ["P1", "P2", "P3"]
     assert protocol["prior_candidate_bytes_reused"] is False
@@ -119,7 +119,7 @@ def test_preregistration_binds_source_split_and_canonical_gate_schema() -> None:
     assert protocol["p3_result"]["false_positives"] == 0
     assert protocol["p3_result"]["false_negatives"] == 0
     assert protocol["p3_result"]["sealed_public_archive_opened"] is False
-    assert protocol["public_gate_authorized"] is True
+    assert protocol["public_gate_authorized"] is False
     assert protocol["public_gate_authorized_candidate_id"] == "P3"
     assert protocol["public_gate_authorized_onnx_sha256"] == protocol["p3_result"]["onnx_sha256"]
     assert (
@@ -142,17 +142,17 @@ def test_preregistration_binds_source_split_and_canonical_gate_schema() -> None:
     assert gate["release_eligible"] is False
 
 
-def test_canonical_budget_authorizes_only_selected_p3_for_public_gate() -> None:
+def test_canonical_budget_records_exhausted_failed_public_gate() -> None:
     config_path = REPO_ROOT / "ml/markers/center/radial_feature_v1/training/p3.json"
     config = json.loads(config_path.read_text(encoding="utf-8"))
     ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-radial-feature-v1")
-    assert entry["status"] == "candidate_3_public_gate_authorized"
+    assert entry["status"] == "exhausted_failed_public_gate"
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized"] is False
     assert entry["public_gate_authorized_candidate_id"] == "P3"
     assert entry["public_gate_authorized_onnx_sha256"] == entry["p3_onnx_sha256"]
     assert entry["public_gate_authorized_training_report_sha256"] == entry["p3_training_report_sha256"]
@@ -195,6 +195,26 @@ def test_canonical_budget_authorizes_only_selected_p3_for_public_gate() -> None:
     assert entry["expected_public_evaluator_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, EVALUATOR_SOURCE_PATHS
     )
-    assert entry["public_gate_evaluations"] == 0
+    report_path = REPO_ROOT / entry["public_gate_report_path"]
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_budget_consumed"] is True
+    assert entry["public_gate_archive_opened"] is True
+    assert entry["public_gate_status"] == "fail"
+    assert entry["public_gate_report_sha256"] == sha256_file(report_path)
+    assert report["status"] == "fail"
+    assert report["metrics"]["exact_scene_count"] == 11
+    assert report["metrics"]["scene_count"] == 16
+    assert report["metrics"]["true_positives"] == 109
+    assert report["metrics"]["false_positives"] == 0
+    assert report["metrics"]["false_negatives"] == 7
+    assert report["metrics"]["duplicate_count"] == 0
+    assert report["metrics"]["prohibited_structure_hits"] == 0
+    assert entry["public_gate_opened_seal_sha256"] == sha256_file(
+        REPO_ROOT / entry["public_gate_opened_seal_path"]
+    )
+    assert entry["public_gate_result_seal_sha256"] == sha256_file(
+        REPO_ROOT / entry["public_gate_result_seal_path"]
+    )
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False

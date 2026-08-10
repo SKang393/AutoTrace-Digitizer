@@ -1,0 +1,32 @@
+{
+  "binding": {
+    "candidate_hash_key_schema": [
+      "onnx_sha256"
+    ],
+    "candidate_hashes": {
+      "onnx_sha256": "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "5121b373ca314a934b88c1ea611880d7c4f743b22cd4cad5d16c7993fd1e27e7",
+    "evaluator_source_bundle_sha256": "84460dd183b950682f330752d5bb6ce154e5d387ac94263499e698ebdc868f27",
+    "evaluator_source_paths": [
+      "ml/markers/center/line_aware_v1/pipeline.py",
+      "ml/markers/center/radial_feature_v1/dataset.py",
+      "ml/markers/center/radial_feature_v1/model.py",
+      "ml/markers/center/radial_feature_v1/sealed_gate.py"
+    ],
+    "gate_config_sha256": "20ff5161cd9f0bcb9050e9045d749a7ae4e03457a956936b1bc379b3e22fa0a9",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "marker-center-radial-feature-public-v1",
+    "split_config_path": "ml/markers/center/radial_feature_v1/gates/sealed-public-v1.json",
+    "split_config_sha256": "3c24ba6f47b42bf853e5748248388fd59458174ef0bac41143acb05f336ddd8f",
+    "task": "marker-center"
+  },
+  "evaluation_count": 1,
+  "key": "b953b50647310b2d575bf3b8fa514763489a3a06f47a10faeeb9bb44cf78877e",
+  "opened_utc": "2026-08-10T23:49:44.512450+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

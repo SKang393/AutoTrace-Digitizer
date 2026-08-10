@@ -1,0 +1,246 @@
+{
+  "candidate_onnx_path": "ml/markers/center/artifacts/radial-feature-v1/P3-run/marker-center-radial-feature-p3.onnx",
+  "candidate_onnx_sha256": "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b",
+  "canonical_seal_key": "b953b50647310b2d575bf3b8fa514763489a3a06f47a10faeeb9bb44cf78877e",
+  "elapsed_ms": 1029.167,
+  "evaluation_count": 1,
+  "fixture_archive_sha256": "4b03a4ba48ccd323ef91cfc4779078f2ffdc6d78a013cc03fe465e1eaac510f1",
+  "gate_requirements": {
+    "matching_tolerance_pixels": 5.0,
+    "provider": "CPUExecutionProvider",
+    "required_duplicates": 0,
+    "required_exact_scene_fraction": 1.0,
+    "required_false_negatives": 0,
+    "required_false_positives": 0,
+    "required_prohibited_structure_hits": 0,
+    "threshold_source": "selected candidate training report"
+  },
+  "metrics": {
+    "duplicate_count": 0,
+    "exact_scene_count": 11,
+    "f1": 0.9688888888888889,
+    "false_negatives": 7,
+    "false_positives": 0,
+    "per_scene": [
+      {
+        "duplicate_count": 0,
+        "exact": true,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "prediction_count": 8,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-staggered_echo_public-0",
+        "true_positives": 8,
+        "truth_count": 8
+      },
+      {
+        "duplicate_count": 0,
+        "exact": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "prediction_count": 7,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-staggered_echo_public-1",
+        "true_positives": 7,
+        "truth_count": 8
+      },
+      {
+        "duplicate_count": 0,
+        "exact": true,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "prediction_count": 8,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-staggered_echo_public-2",
+        "true_positives": 8,
+        "truth_count": 8
+      },
+      {
+        "duplicate_count": 0,
+        "exact": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "prediction_count": 6,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-staggered_echo_public-3",
+        "true_positives": 6,
+        "truth_count": 8
+      },
+      {
+        "duplicate_count": 0,
+        "exact": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "prediction_count": 6,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-reverse_fan_public-0",
+        "true_positives": 6,
+        "truth_count": 7
+      },
+      {
+        "duplicate_count": 0,
+        "exact": true,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "prediction_count": 7,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-reverse_fan_public-1",
+        "true_positives": 7,
+        "truth_count": 7
+      },
+      {
+        "duplicate_count": 0,
+        "exact": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "prediction_count": 6,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-reverse_fan_public-2",
+        "true_positives": 6,
+        "truth_count": 7
+      },
+      {
+        "duplicate_count": 0,
+        "exact": true,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "prediction_count": 7,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-reverse_fan_public-3",
+        "true_positives": 7,
+        "truth_count": 7
+      },
+      {
+        "duplicate_count": 0,
+        "exact": true,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "prediction_count": 7,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-broken_ladder_public-0",
+        "true_positives": 7,
+        "truth_count": 7
+      },
+      {
+        "duplicate_count": 0,
+        "exact": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "prediction_count": 5,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-broken_ladder_public-1",
+        "true_positives": 5,
+        "truth_count": 7
+      },
+      {
+        "duplicate_count": 0,
+        "exact": true,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "prediction_count": 7,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-broken_ladder_public-2",
+        "true_positives": 7,
+        "truth_count": 7
+      },
+      {
+        "duplicate_count": 0,
+        "exact": true,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "prediction_count": 7,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-broken_ladder_public-3",
+        "true_positives": 7,
+        "truth_count": 7
+      },
+      {
+        "duplicate_count": 0,
+        "exact": true,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "prediction_count": 7,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-late_probe_public-0",
+        "true_positives": 7,
+        "truth_count": 7
+      },
+      {
+        "duplicate_count": 0,
+        "exact": true,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "prediction_count": 7,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-late_probe_public-1",
+        "true_positives": 7,
+        "truth_count": 7
+      },
+      {
+        "duplicate_count": 0,
+        "exact": true,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "prediction_count": 7,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-late_probe_public-2",
+        "true_positives": 7,
+        "truth_count": 7
+      },
+      {
+        "duplicate_count": 0,
+        "exact": true,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "prediction_count": 7,
+        "prohibited_hits": {},
+        "scene_id": "sealed_public-late_probe_public-3",
+        "true_positives": 7,
+        "truth_count": 7
+      }
+    ],
+    "precision": 1.0,
+    "prohibited_hits_by_kind": {},
+    "prohibited_structure_hits": 0,
+    "recall": 0.9396551724137931,
+    "scene_count": 16,
+    "true_positives": 109
+  },
+  "private_manifest_sha256": "5121b373ca314a934b88c1ea611880d7c4f743b22cd4cad5d16c7993fd1e27e7",
+  "production_approval": false,
+  "provider": "CPUExecutionProvider",
+  "release_eligible": false,
+  "revision": "marker-center-radial-feature-public-v1",
+  "schema": "graphreader.marker-center-radial-feature-public-gate.v1",
+  "seal_binding": {
+    "candidate_hash_key_schema": [
+      "onnx_sha256"
+    ],
+    "candidate_hashes": {
+      "onnx_sha256": "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "5121b373ca314a934b88c1ea611880d7c4f743b22cd4cad5d16c7993fd1e27e7",
+    "evaluator_source_bundle_sha256": "84460dd183b950682f330752d5bb6ce154e5d387ac94263499e698ebdc868f27",
+    "evaluator_source_paths": [
+      "ml/markers/center/line_aware_v1/pipeline.py",
+      "ml/markers/center/radial_feature_v1/dataset.py",
+      "ml/markers/center/radial_feature_v1/model.py",
+      "ml/markers/center/radial_feature_v1/sealed_gate.py"
+    ],
+    "gate_config_sha256": "20ff5161cd9f0bcb9050e9045d749a7ae4e03457a956936b1bc379b3e22fa0a9",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "marker-center-radial-feature-public-v1",
+    "split_config_path": "ml/markers/center/radial_feature_v1/gates/sealed-public-v1.json",
+    "split_config_sha256": "3c24ba6f47b42bf853e5748248388fd59458174ef0bac41143acb05f336ddd8f",
+    "task": "marker-center"
+  },
+  "sealed_public_test_seal_sha256": "ae8a5a1dd95a5cb51733d31685d736391a5b5014ad16241f6370e81a5a745e9a",
+  "status": "fail",
+  "task": "marker-center",
+  "threshold": 0.3,
+  "training_report_path": "ml/markers/center/artifacts/radial-feature-v1/P3-run/candidate-report.json",
+  "training_report_sha256": "67b5ea3b28973f0bd24ae0f755713af1c70b6fe6a9b2437268be5975b9f14af3"
+}
