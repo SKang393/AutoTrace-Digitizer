@@ -16,8 +16,12 @@ from the future training runner. Chandler, `Generalization`, private and article
 images, external datasets, pretrained weights, downloaded data, and exposed
 predecessor fixture bytes are excluded.
 
-The split-freeze checkpoint itself authorized no optimizer execution. P1 now
-has a separately checksum-bound small export-safe CNN runner and configuration;
-the canonical budget authorizes that exact committed pair only. Nothing here
-creates a production manifest, enters the model store, packages weights,
-changes release readiness, or approves version 1.0.1.
+P1 ran exactly once from its committed checksum-bound configuration and runner.
+It passed all 48 validation scenes with 144/144 text regions, zero false
+regions, misses, duplicates, or prohibited-structure hits at threshold `0.65`.
+The exact CPU ONNX parity error was `2.86102294921875e-06`. P1 is consumed and
+the only next authorized action is the once-only sealed public gate. The
+candidate has not evaluated the sealed archive. No production manifest,
+model-store entry, package
+payload, production approval, release eligibility, or version 1.0.1 promotion
+exists.

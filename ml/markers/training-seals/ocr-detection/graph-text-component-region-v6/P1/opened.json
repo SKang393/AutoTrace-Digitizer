@@ -1,0 +1,24 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/component_region_detector_v6/training/p1.json",
+    "candidate_config_sha256": "73b10fc736c0a2dd1fddca198bb64f02066c7a76a96b66da73cc0eb2cfcaa883",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "graph-text-component-region-v6",
+    "runner_source_bundle_sha256": "8216cf682bdd5ff6f18c36c0002864d65230307ae8f35c7bbd1328443c92f62b",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/component_region_detector_v6/dataset.py",
+      "ml/ocr/component_region_detector_v6/model.py",
+      "ml/ocr/component_region_detector_v6/pipeline.py",
+      "ml/ocr/component_region_detector_v6/protocol.py",
+      "ml/ocr/component_region_detector_v6/train_p1.py"
+    ],
+    "task": "ocr-detection",
+    "training_budget_ledger_sha256": "a82c837fe4e6d7947c6406c2b83919323c9fe496f9ba20018aeacee872e3392e"
+  },
+  "opened_utc": "2026-08-11T20:26:16.336112+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

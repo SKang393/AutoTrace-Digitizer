@@ -1787,7 +1787,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-component-region-v6",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_1_selected_public_gate_pending",
       "defect_class": "deterministic connected-component line proposals require a learned text-region decision without DB probability-map geometry",
       "prior_revision": "graph-text-db-objective-v5",
       "prior_revision_reuse": false,
@@ -1795,7 +1795,9 @@
       "preregistered_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
+      "consumed_candidate_ids": [
+        "P1"
+      ],
       "remaining_unregistered_candidate_ids": [
         "P2",
         "P3"
@@ -1805,6 +1807,12 @@
       },
       "candidate_config_sha256": {
         "P1": "73b10fc736c0a2dd1fddca198bb64f02066c7a76a96b66da73cc0eb2cfcaa883"
+      },
+      "candidate_checkpoint_sha256": {
+        "P1": "dd22204562e87f1e7aedd990802bb7f088dbdde8e72fb6a604af540ccfa1f46b"
+      },
+      "candidate_onnx_sha256": {
+        "P1": "9aa4206ab91f4123d6c7bb38b4090d8e9e3257a9eb823bf8e355373e8352ee97"
       },
       "trigger_evidence_path": "ml/ocr/combined_component_v5/DETECTOR_DIAGNOSTIC_RESULT.json",
       "trigger_evidence_sha256": "7254378817098b45142bc3fa703491c3d8aa67638936acfd5a2e8e707387b90c",
@@ -1830,11 +1838,26 @@
       "public_gate_config_sha256": "ec538d19a2be34d66593dd66807e686c6e627c0ac900cf1e0002ff22c8819725",
       "expected_evaluator_source_bundle_sha256": "26298f60bc504e120c1fe95e1adcf4631aebb60a605551a606dd608b007c3da9",
       "expected_runner_source_bundle_sha256": "8216cf682bdd5ff6f18c36c0002864d65230307ae8f35c7bbd1328443c92f62b",
-      "execution_authorized": true,
-      "authorized_candidate_id": "P1",
-      "execution_blocker": null,
-      "public_gate_authorized": false,
-      "public_gate_authorized_candidate_id": null,
+      "p1_result_path": "ml/ocr/component_region_detector_v6/P1_RESULT.json",
+      "p1_result_sha256": "3af4a4c9828f05c76c36f1e715d07aa8c684fb01009b739f718f847711a05bf3",
+      "p1_training_report_sha256": "bbfdb6fa4da7e9181eead315a5f76e60b9928666b8faa467cbc633686c253cee",
+      "p1_training_opened_seal_sha256": "d3b881008be8c545c74ac2c17f159910334126114d51598fea2bc66f88c81647",
+      "p1_training_result_seal_sha256": "73a4c38afc168eaa35c0f8af3e0d7dad9380a5bfcaf9eea10397d74a5e833426",
+      "selection_threshold": 0.65,
+      "selection_scene_count": 48,
+      "selection_exact_scene_count": 48,
+      "selection_true_positives": 144,
+      "selection_false_positives": 0,
+      "selection_false_negatives": 0,
+      "selection_duplicates": 0,
+      "selection_prohibited_structure_hits": 0,
+      "onnx_parity_maximum_absolute_error": 2.86102294921875e-06,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1 is consumed and selected; no further optimizer execution is authorized before the once-only public gate.",
+      "public_gate_authorized": true,
+      "public_gate_authorized_candidate_id": "P1",
+      "public_gate_authorized_on_selection_pass": true,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
       "manifest_created": false,

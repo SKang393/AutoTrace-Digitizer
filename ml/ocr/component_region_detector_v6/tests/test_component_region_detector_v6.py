@@ -82,25 +82,55 @@ def test_frozen_split_and_gate_hashes_are_directly_bound() -> None:
     assert gate["expected_gate_config_sha256"] == sha256_bytes(canonical_json_bytes(GATE_CONFIG))
 
 
-def test_budget_preregisters_only_checksum_bound_p1_training() -> None:
+def test_budget_records_consumed_p1_and_authorizes_only_public_gate() -> None:
     ledger = json.loads(LEDGER.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["task"] == TASK and item["revision"] == REVISION)
-    assert entry["status"] == "candidate_1_preregistered"
+    result_path = ROOT / "P1_RESULT.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    output = ROOT / "artifacts/P1-run"
+    seal_root = REPO_ROOT / "ml/markers/training-seals/ocr-detection/graph-text-component-region-v6/P1"
+    assert entry["status"] == "candidate_1_selected_public_gate_pending"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_candidate_id"] == "P1"
+    assert entry["public_gate_authorized_on_selection_pass"] is True
+    assert entry["public_gate_evaluations"] == 0
+    assert entry["public_gate_archive_opened"] is False
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(REPO_ROOT / CONFIG_PATH)
+    assert entry["candidate_checkpoint_sha256"]["P1"] == result["checkpoint_sha256"]
+    assert entry["candidate_onnx_sha256"]["P1"] == result["onnx_sha256"]
+    assert entry["p1_result_sha256"] == sha256_file(result_path)
+    assert entry["p1_training_report_sha256"] == sha256_file(output / "candidate-report.json")
+    assert entry["p1_training_opened_seal_sha256"] == sha256_file(seal_root / "opened.json")
+    assert entry["p1_training_result_seal_sha256"] == sha256_file(seal_root / "result.json")
     config = json.loads((REPO_ROOT / CONFIG_PATH).read_text(encoding="utf-8"))
     assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
     assert entry["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
     assert entry["selection_manifest_sha256"] == sha256_file(ROOT / "SELECTION_MANIFEST.json")
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert entry["public_gate_config_sha256"] == sha256_file(ROOT / "gates/sealed-public-v1.json")
+    assert result["status"] == "selected_public_gate_pending"
+    assert result["selected_threshold"] == 0.65
+    assert result["selection_exact_scene_count"] == result["selection_scene_count"] == 48
+    assert result["selection_true_positives"] == 144
+    assert result["selection_false_positives"] == 0
+    assert result["selection_false_negatives"] == 0
+    assert result["selection_duplicate_region_count"] == 0
+    assert result["selection_prohibited_structure_hits"] == 0
+    assert result["onnx_parity_passed"] is True
+    assert sha256_file(output / "graph-text-component-region-v6-p1.onnx") == result["onnx_sha256"]
+    assert sha256_file(output / "graph-text-component-region-v6-p1.pt") == result["checkpoint_sha256"]
+    assert result["sealed_public_archive_opened_by_training"] is False
+    assert result["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
 
 
 def test_p1_model_exports_dynamic_cpu_onnx_before_training(tmp_path: Path) -> None:
