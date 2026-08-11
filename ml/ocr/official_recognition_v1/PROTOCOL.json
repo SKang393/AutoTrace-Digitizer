@@ -1,0 +1,63 @@
+{
+  "schema": "graphreader.ocr-official-recognition-protocol.v1",
+  "task": "ocr-recognition",
+  "revision": "official-ppocrv5-recognition-only-v1",
+  "status": "p1_preregistered_before_inference",
+  "defect_class": "independent crop-level accuracy and role evidence for the exact official recognizer after the consumed pair gate stopped at detector inference",
+  "experiment_budget": 1,
+  "currently_preregistered_candidate": "P1",
+  "consumed_candidates": [],
+  "optimizer_steps": 0,
+  "weights_changed": false,
+  "model_id": "en_PP-OCRv5_mobile_rec",
+  "model_onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+  "inference_yaml_sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
+  "conversion_report_sha256": "8c6c8aa522663c0594894f0b526c9fcc0055139217d8d1b6bac968ed1c4d9d15",
+  "runner_source_bundle_sha256": "88180d3ae21752b99360a2bb8202a00146774d7018ed354cbcfa991f433cb80d",
+  "selection": {
+    "seal_path": "ml/ocr/official_recognition_v1/SELECTION_SEAL.json",
+    "seal_sha256": "7570bf60a0a013c29baf3ebb97185cd00a714a97891a35fa9721cc6ef6127d26",
+    "case_count": 192,
+    "fixture_archive_sha256": "a684b9b4aec2b1a69ab47f62eedba5c123217c445a2fe404862878b13fd4230b",
+    "private_manifest_sha256": "a7d1240254707c2522874d668a83967973f7a960d27cbf6f94e5cbf4710bc0d6"
+  },
+  "public_gate": {
+    "seal_path": "ml/ocr/official_recognition_v1/SEALED_PUBLIC_TEST_SEAL.json",
+    "seal_sha256": "aab87e8d5f1932e60964bba0bae7589e7148e4ad56e0c9d6c0c516926b33bb76",
+    "gate_config_path": "ml/ocr/official_recognition_v1/gates/sealed-public-p1.json",
+    "gate_config_sha256": "d82ccccee71ccdad7f038daa4f4e5b390b4fe0b6773200310bfa967cfe69f187",
+    "case_count": 256,
+    "fixture_archive_sha256": "e285407ed007f1140eb000d5fca0b9223a13dda6632b111525b9d2d2f8fbee85",
+    "private_manifest_sha256": "3835f77fdd8e652cd896319b9de5a63df54b8a7a3cd61ac74c5de95d4033ab15",
+    "archive_opened": false,
+    "evaluations": 0
+  },
+  "prior_exposed_pair_splits_forbidden": [
+    {
+      "profile": "official-production-gate-v1",
+      "split_sha256": "1fc3b2e72f89cbfb0d8854ec8701368e7ae764cbd5c6fef17b7e497d06ec9f09",
+      "fixture_archive_sha256": "69eeeff73f4cfd2dd6580ad9538f1a89527f8e5b320ce6a9cd7155d2bd22ea99"
+    },
+    {
+      "profile": "official-structure-consensus-v1",
+      "split_sha256": "f57d984268910430c5baed97cbdbfaed64e008fa7ca31fdf8b0562d927240593",
+      "fixture_archive_sha256": "5fab765fc931a5182fdef2b35b34f4a08101c460540333a9c0522218427d6bd4"
+    }
+  ],
+  "gates": {
+    "exact_match_minimum": 0.9,
+    "character_error_rate_maximum": 0.05,
+    "role_accuracy_minimum": 0.9,
+    "numeric_exact_match_minimum": 0.9,
+    "word_exact_match_minimum": 0.9,
+    "ambiguity_exact_match_minimum": 0.9,
+    "conversion_parity_maximum_absolute_error": 0.0001,
+    "provider": "CPUExecutionProvider"
+  },
+  "marker_creation_evaluated": false,
+  "paired_detector_rerun": false,
+  "manifest_created": false,
+  "model_store_promoted": false,
+  "production_approval": false,
+  "release_eligible": false
+}
