@@ -1,0 +1,30 @@
+{
+  "chandler_used": false,
+  "decision": "Do not open a combined production gate with the official detector. Preregister a distinct project-trained graph text-region detector without changing DB thresholds.",
+  "detector_onnx_sha256": "d4aa24d408cd70b8b9f66cc758e20f397fc31a9c69d8477cf8887fc53bd5fceb",
+  "diagnostic_report_path": "ml/ocr/combined_component_v5/runs/detector-diagnostic-v1/report.json",
+  "diagnostic_report_sha256": "f72ae64dde88201849f72a3193d332ed6d7c7cde52e472b843165648827e7899",
+  "metrics": {
+    "case_count": 72,
+    "composition_exact_rate": 0.4861111111111111,
+    "exclusion_exact_rate": 1.0,
+    "false_region_count": 9,
+    "maximum_overflow": 0.0,
+    "maximum_underflow": 0.0,
+    "nonfinite_output_count": 0,
+    "raw_maximum": 1.0,
+    "raw_minimum": 0.0,
+    "shape_failure_count": 0,
+    "strict_probability_violation_count": 0,
+    "text_detection_exact_rate": 0.22916666666666666,
+    "total_duration_ms": 3625.4433000067365
+  },
+  "model_manifest_created": false,
+  "model_store_promoted": false,
+  "private_data": false,
+  "production_approval": false,
+  "provider": "CPUExecutionProvider",
+  "release_eligible": false,
+  "schema": "graphreader.ocr-combined-v5-detector-diagnostic-result.v1",
+  "status": "official_detector_rejected_for_combined_component_composition"
+}

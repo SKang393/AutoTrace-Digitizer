@@ -1,0 +1,18 @@
+{
+  "chandler_included": false,
+  "diagnostic_fixture_reused": false,
+  "diagnostic_report_sha256": "f72ae64dde88201849f72a3193d332ed6d7c7cde52e472b843165648827e7899",
+  "generalization_label_included": false,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-region-detector-v1",
+  "schema": "graphreader.ocr-graph-text-detector-selection.v1",
+  "sealed_public_truth_available_to_training": false,
+  "synthetic_only": true,
+  "task": "ocr-detection",
+  "train_sample_count": 512,
+  "train_split_fingerprint": "5eb322cf09e7e58216b037c55c411189b8b9dfbc02e5207b95dea2c002b48de4",
+  "validation_sample_count": 96,
+  "validation_split_fingerprint": "97b5fd9078c8d109cf354d157fc2bf44997242388d060a73a387d0b3c7a171f9"
+}

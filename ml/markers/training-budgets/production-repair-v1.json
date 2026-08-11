@@ -830,6 +830,49 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "ocr-detection",
+      "revision": "graph-text-region-detector-v1",
+      "status": "candidate_1_preregistered",
+      "defect_class": "official detector emits valid probabilities but fails graph text-region exactness",
+      "prior_revision_reuse": false,
+      "prior_revision": "PP-OCRv5_mobile_det-d4aa24d408cd70b8b9f66cc758e20f397fc31a9c69d8477cf8887fc53bd5fceb",
+      "trigger_evidence_path": "ml/ocr/combined_component_v5/DETECTOR_DIAGNOSTIC_RESULT.json",
+      "trigger_evidence_sha256": "7254378817098b45142bc3fa703491c3d8aa67638936acfd5a2e8e707387b90c",
+      "trigger_evidence": "The one frozen official-detector diagnostic had valid probability outputs but only 0.22916666666666666 text detection exact, 0.4861111111111111 composition exact, and nine false regions.",
+      "isolated_change": "replace only detector weights and architecture with an export-safe project-trained strided encoder-decoder; retain exact BGR normalization and frozen DB postprocessing thresholds",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "candidate_config_paths": {
+        "P1": "ml/ocr/graph_text_detector_v1/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "9b7062345c25b03fb4031d828825d508e4fcb029da5b10a74c4aa329e1dae769"
+      },
+      "expected_runner_source_bundle_sha256": "e06d5918ddef766df62cc0e193f5b08677dd9a5006683f13fe8d25c302939754",
+      "protocol_path": "ml/ocr/graph_text_detector_v1/PROTOCOL.json",
+      "protocol_sha256": "65ecac53effd87e5e5425a06430b3ede5a8e3c1c9e6b497e0da57e82613335ae",
+      "selection_manifest_path": "ml/ocr/graph_text_detector_v1/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "fe557acb42f2765d3548c1ae80d8e49fa06c2e82c8cb9389364e2871cd62742a",
+      "sealed_public_test_seal_path": "ml/ocr/graph_text_detector_v1/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "89f914418efffb6439c56c17db1ac017dd3740c850052667b450c1af17102c4c",
+      "sealed_public_fixture_archive_sha256": "67c78bcffded5cdeed68ce9416bec398239014f0cf8dc71fe65775d71a9ad199",
+      "sealed_public_private_manifest_sha256": "01c1dbcd275e71832959c840f499a1cce7425c1a19688d9107d9c53fdb788f39",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "public_gate_authorized": false,
+      "public_gate_evaluations": 0,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
     }
   ]
 }

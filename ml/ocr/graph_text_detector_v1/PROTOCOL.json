@@ -1,0 +1,121 @@
+{
+  "architecture": "tiny-strided-encoder-decoder-probability-map-v1",
+  "candidate_ids": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "currently_preregistered_candidate": "P1",
+  "data_scope": "procedurally rendered generic graph labels and exclusion structures only; no Chandler, Generalization, private images, article images, external datasets, pretrained weights, or exposed diagnostic fixtures",
+  "experiment_budget": 3,
+  "fixed_experiment_policy": {
+    "candidate_architecture_changes": "require_next_candidate_id",
+    "sealed_public_evaluations_before_selection": 0,
+    "threshold_sweeps": 0,
+    "validation_regeneration_after_training": 0
+  },
+  "input": [
+    "batch",
+    3,
+    "H",
+    "W"
+  ],
+  "license": "Apache-2.0",
+  "output": [
+    "batch",
+    1,
+    "H",
+    "W"
+  ],
+  "postprocessing": {
+    "algorithm": "db_postprocess_v1",
+    "box_confidence_threshold": 0.6,
+    "maximum_regions": 1000,
+    "minimum_side_length": 3,
+    "probability_threshold": 0.3,
+    "score_mode": "fast",
+    "unclip_ratio": 1.5
+  },
+  "preprocessing": {
+    "channel_means": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "channel_order": "BGR",
+    "channel_scales": [
+      4.366812227074235,
+      4.464285714285714,
+      4.444444444444445
+    ],
+    "dimension_multiple": 128,
+    "maximum_side_length": 960
+  },
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-region-detector-v1",
+  "schema": "graphreader.ocr-graph-text-detector-protocol.v1",
+  "selection_gates": {
+    "duplicate_region_count": 0,
+    "exact_region_count_every_fixture": true,
+    "exclusion_false_region_count": 0,
+    "false_region_count": 0,
+    "onnx_parity_maximum_absolute_error": 0.0001,
+    "provider": "CPUExecutionProvider",
+    "truth_match_iou_minimum": 0.5
+  },
+  "split_generator_source_bundle_sha256": "95f05cfd72bca2738f4fb102cccfe82f8c6a4f192213d091ea552a1482bc7f53",
+  "split_generator_source_paths": [
+    "ml/ocr/graph_text_detector_v1/dataset.py",
+    "ml/ocr/graph_text_detector_v1/sealed_dataset.py",
+    "ml/ocr/graph_text_detector_v1/prepare_split.py",
+    "ml/ocr/graph_text_detector_v1/protocol.py"
+  ],
+  "splits": [
+    {
+      "degradation_family": "train-ink-bleed-speckle-resample-v1",
+      "exclusion_count": 128,
+      "renderer_family": "tensor-space-mixed-label-patches-v1",
+      "seed_offset": 11000,
+      "selection_visible": true,
+      "split": "train",
+      "text_count": 384
+    },
+    {
+      "degradation_family": "validation-fax-gamma-banding-v1",
+      "exclusion_count": 24,
+      "renderer_family": "asymmetric-panel-frame-v1",
+      "seed_offset": 23000,
+      "selection_visible": true,
+      "split": "validation",
+      "text_count": 72
+    },
+    {
+      "degradation_family": "sealed-public-perspective-dropout-v1",
+      "exclusion_count": 32,
+      "renderer_family": "border-offset-multipanel-frame-v1",
+      "seed_offset": 37000,
+      "selection_visible": false,
+      "split": "sealed_public",
+      "text_count": 96
+    }
+  ],
+  "state": "preregistered_before_training",
+  "task": "ocr-detection",
+  "training": {
+    "batch_size": 8,
+    "epochs": 24,
+    "learning_rate": 0.002,
+    "patch_height": 128,
+    "patch_width": 256,
+    "seed": 20260901,
+    "weight_decay": 0.0001
+  },
+  "trigger": {
+    "diagnostic_report_sha256": "f72ae64dde88201849f72a3193d332ed6d7c7cde52e472b843165648827e7899",
+    "official_detector_composition_exact_rate": 0.4861111111111111,
+    "official_detector_false_region_count": 9,
+    "official_detector_text_detection_exact_rate": 0.22916666666666666,
+    "strict_probability_violation_count": 0
+  }
+}
