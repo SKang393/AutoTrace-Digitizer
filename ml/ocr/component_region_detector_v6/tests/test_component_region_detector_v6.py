@@ -7,12 +7,15 @@ import json
 from pathlib import Path
 
 import numpy as np
+import onnxruntime as ort
+import torch
 
 from ml.markers.gate_seal import canonical_json_bytes, sha256_bytes, sha256_file, source_bundle_sha256
 from ml.ocr.component_region_detector_v6.dataset import (
     build_split,
     encode_proposal,
     load_sealed_public_archive,
+    proposal_examples,
     proposal_labels,
     proposal_summary,
     proposals,
@@ -21,6 +24,8 @@ from ml.ocr.component_region_detector_v6.dataset import (
 from ml.ocr.component_region_detector_v6.prepare_split import SPLIT_SOURCE_PATHS
 from ml.ocr.component_region_detector_v6.protocol import ENCODED_WIDTH, REVISION, TASK, protocol_configuration
 from ml.ocr.component_region_detector_v6.sealed_gate import EVALUATOR_SOURCE_PATHS, GATE_CONFIG
+from ml.ocr.component_region_detector_v6.train_p1 import CONFIG_PATH, RUNNER_SOURCE_PATHS, _export
+from ml.ocr.component_region_detector_v6.model import ComponentRegionNet
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -77,19 +82,39 @@ def test_frozen_split_and_gate_hashes_are_directly_bound() -> None:
     assert gate["expected_gate_config_sha256"] == sha256_bytes(canonical_json_bytes(GATE_CONFIG))
 
 
-def test_budget_records_split_freeze_without_training_authorization() -> None:
+def test_budget_preregisters_only_checksum_bound_p1_training() -> None:
     ledger = json.loads(LEDGER.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["task"] == TASK and item["revision"] == REVISION)
-    assert entry["status"] == "available"
+    assert entry["status"] == "candidate_1_preregistered"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
-    assert entry["remaining_unregistered_candidate_ids"] == ["P1", "P2", "P3"]
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["candidate_config_sha256"]["P1"] == sha256_file(REPO_ROOT / CONFIG_PATH)
+    config = json.loads((REPO_ROOT / CONFIG_PATH).read_text(encoding="utf-8"))
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
     assert entry["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
     assert entry["selection_manifest_sha256"] == sha256_file(ROOT / "SELECTION_MANIFEST.json")
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert entry["public_gate_config_sha256"] == sha256_file(ROOT / "gates/sealed-public-v1.json")
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
+
+
+def test_p1_model_exports_dynamic_cpu_onnx_before_training(tmp_path: Path) -> None:
+    values, _ = proposal_examples(build_split("validation"))
+    model = ComponentRegionNet().eval()
+    source = torch.from_numpy(values[:8])
+    with torch.inference_mode():
+        expected = model(source).numpy()
+    assert expected.shape == (8, 2)
+    path = tmp_path / "component-region-preflight.onnx"
+    _export(model, source, path)
+    session = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
+    actual = np.asarray(session.run(None, {"region_proposals": values[:8]})[0], dtype=np.float32)
+    assert actual.shape == expected.shape
+    assert float(np.max(np.abs(actual - expected))) <= 1e-5
+    dynamic = np.asarray(session.run(None, {"region_proposals": values[:3]})[0], dtype=np.float32)
+    assert dynamic.shape == (3, 2)

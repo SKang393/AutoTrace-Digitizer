@@ -1787,18 +1787,25 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-component-region-v6",
-      "status": "available",
+      "status": "candidate_1_preregistered",
       "defect_class": "deterministic connected-component line proposals require a learned text-region decision without DB probability-map geometry",
       "prior_revision": "graph-text-db-objective-v5",
       "prior_revision_reuse": false,
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
       "consumed_candidate_ids": [],
       "remaining_unregistered_candidate_ids": [
-        "P1",
         "P2",
         "P3"
       ],
+      "candidate_config_paths": {
+        "P1": "ml/ocr/component_region_detector_v6/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "73b10fc736c0a2dd1fddca198bb64f02066c7a76a96b66da73cc0eb2cfcaa883"
+      },
       "trigger_evidence_path": "ml/ocr/combined_component_v5/DETECTOR_DIAGNOSTIC_RESULT.json",
       "trigger_evidence_sha256": "7254378817098b45142bc3fa703491c3d8aa67638936acfd5a2e8e707387b90c",
       "trigger_evidence": "The exact official detector passed probability and CPU execution checks but reached only 11 of 48 exact text-region scenes and cannot enter the combined component composition.",
@@ -1822,9 +1829,10 @@
       "public_gate_config_path": "ml/ocr/component_region_detector_v6/gates/sealed-public-v1.json",
       "public_gate_config_sha256": "ec538d19a2be34d66593dd66807e686c6e627c0ac900cf1e0002ff22c8819725",
       "expected_evaluator_source_bundle_sha256": "26298f60bc504e120c1fe95e1adcf4631aebb60a605551a606dd608b007c3da9",
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "The split and public archive are frozen, but no P1 runner or candidate configuration is committed. Optimizer execution is not authorized.",
+      "expected_runner_source_bundle_sha256": "8216cf682bdd5ff6f18c36c0002864d65230307ae8f35c7bbd1328443c92f62b",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,

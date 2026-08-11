@@ -16,9 +16,8 @@ from the future training runner. Chandler, `Generalization`, private and article
 images, external datasets, pretrained weights, downloaded data, and exposed
 predecessor fixture bytes are excluded.
 
-This split-freeze checkpoint authorizes no optimizer execution. A future P1
-runner and configuration must be committed and bound in the canonical training
-budget before training. Nothing here creates a production manifest, enters the
-model store, packages weights, changes release readiness, or approves version
-1.0.1.
-
+The split-freeze checkpoint itself authorized no optimizer execution. P1 now
+has a separately checksum-bound small export-safe CNN runner and configuration;
+the canonical budget authorizes that exact committed pair only. Nothing here
+creates a production manifest, enters the model store, packages weights,
+changes release readiness, or approves version 1.0.1.
