@@ -8,9 +8,11 @@ from pathlib import Path
 
 import numpy as np
 import onnxruntime as ort
+import pytest
 import torch
 
 from ml.markers.gate_seal import canonical_json_bytes, sha256_bytes, sha256_file, source_bundle_sha256
+from ml.ocr.component_region_detector_v6 import sealed_gate as public_gate
 from ml.ocr.component_region_detector_v6.dataset import (
     build_split,
     encode_proposal,
@@ -131,6 +133,25 @@ def test_budget_records_consumed_p1_and_authorizes_only_public_gate() -> None:
     assert entry["release_eligible"] is False
     assert result["production_approval"] is False
     assert result["release_eligible"] is False
+
+
+def test_public_gate_refuses_nonselected_report_before_opening_seal(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(public_gate, "require_committed_sources", lambda *_args, **_kwargs: None)
+    source = ROOT / "artifacts/P1-run/candidate-report.json"
+    tampered = json.loads(source.read_text(encoding="utf-8"))
+    tampered["selected_threshold"] = 0.55
+    report_path = tmp_path / "tampered-selection.json"
+    report_path.write_text(json.dumps(tampered), encoding="utf-8")
+    output_path = tmp_path / "public-report.json"
+    with pytest.raises(RuntimeError, match="not authorized by the canonical ledger"):
+        public_gate.evaluate_candidate(
+            onnx_path=ROOT / "artifacts/P1-run/graph-text-component-region-v6-p1.onnx",
+            selection_report_path=report_path,
+            output_path=output_path,
+        )
+    assert not output_path.exists()
 
 
 def test_p1_model_exports_dynamic_cpu_onnx_before_training(tmp_path: Path) -> None:
