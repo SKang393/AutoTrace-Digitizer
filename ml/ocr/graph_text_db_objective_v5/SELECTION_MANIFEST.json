@@ -1,0 +1,23 @@
+{
+  "best_prior_result_path": "ml/ocr/graph_text_stride4_v4/P2_RESULT.json",
+  "best_prior_result_sha256": "7e9053717af8a47e5170dafc3b88669a2ab24e010e6226db9d770cdafe9cf80f",
+  "chandler_included": false,
+  "generalization_label_included": false,
+  "prior_sealed_fixture_reused": false,
+  "prior_selection_fixture_reused": false,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-db-objective-v5",
+  "schema": "graphreader.ocr-graph-text-db-objective-selection.v1",
+  "sealed_public_truth_available_to_training": false,
+  "synthetic_only": true,
+  "task": "ocr-detection",
+  "training_sample_count": 1920,
+  "training_source_count": 640,
+  "training_split_fingerprint": "dde78f9955edecacf6773d1959807210e911de54f1fb756218e8b937400a8f9f",
+  "trigger_result_path": "ml/ocr/graph_text_stride4_v4/P3_RESULT.json",
+  "trigger_result_sha256": "eba985a812d08788230622adb1623e5f1e50e556c85e123512e1cac05e26d410",
+  "validation_sample_count": 136,
+  "validation_split_fingerprint": "6589781268606b9700d191ae638144c2175f23e8a65b677436d1b4550108cbae"
+}

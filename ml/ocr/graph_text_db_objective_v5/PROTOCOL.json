@@ -1,0 +1,147 @@
+{
+  "architecture": "dual-head-db-stride4-v1",
+  "candidate_ids": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "currently_preregistered_candidate": "P1",
+  "data_scope": "new procedural generic graph labels and exclusion structures only; no V1, V2, V3, or V4 selection or sealed fixtures, Chandler, Generalization, private images, article images, external datasets, pretrained weights, or downloaded training data",
+  "experiment_budget": 3,
+  "fixed_experiment_policy": {
+    "candidate_changes": "one preregistered isolated change per subsequent candidate",
+    "sealed_public_evaluations_before_selection": 0,
+    "threshold_sweeps": 0,
+    "validation_regeneration_after_training": 0
+  },
+  "inference_output": [
+    "batch",
+    1,
+    "H",
+    "W"
+  ],
+  "input": [
+    "batch",
+    3,
+    "H",
+    "W"
+  ],
+  "license": "Apache-2.0",
+  "postprocessing": {
+    "algorithm": "db_postprocess_v1",
+    "box_confidence_threshold": 0.6,
+    "maximum_regions": 1000,
+    "minimum_side_length": 3,
+    "probability_threshold": 0.3,
+    "score_mode": "fast",
+    "unclip_ratio": 1.5
+  },
+  "preprocessing": {
+    "channel_means": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "channel_order": "BGR",
+    "channel_scales": [
+      4.366812227074235,
+      4.464285714285714,
+      4.444444444444445
+    ],
+    "dimension_multiple": 128,
+    "maximum_side_length": 960
+  },
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-db-objective-v5",
+  "schema": "graphreader.ocr-graph-text-db-objective-protocol.v1",
+  "selection_gates": {
+    "duplicate_region_count": 0,
+    "exact_region_count_every_fixture": true,
+    "exclusion_false_region_count": 0,
+    "false_region_count": 0,
+    "onnx_parity_maximum_absolute_error": 0.0001,
+    "provider": "CPUExecutionProvider",
+    "truth_match_iou_minimum": 0.5
+  },
+  "split_generator_source_bundle_sha256": "e9c5702ed7cf3f1383c58705d91e494f95a2cf3461f8e1d989234043dc852304",
+  "split_generator_source_paths": [
+    "ml/ocr/graph_text_db_objective_v5/dataset.py",
+    "ml/ocr/graph_text_db_objective_v5/prepare_split.py",
+    "ml/ocr/graph_text_db_objective_v5/protocol.py",
+    "ml/ocr/graph_text_db_objective_v5/sealed_dataset.py"
+  ],
+  "splits": [
+    {
+      "degradation_family": "train-halftone-bloom-resample-v5",
+      "exclusion_count": 160,
+      "renderer_family": "cantilever-label-stair-v5",
+      "seed_offset": 171000,
+      "selection_visible": true,
+      "split": "train",
+      "text_count": 480
+    },
+    {
+      "degradation_family": "validation-ringing-defocus-channel-v5",
+      "exclusion_count": 40,
+      "renderer_family": "nested-capsule-crossbar-v5",
+      "seed_offset": 193000,
+      "selection_visible": true,
+      "split": "validation",
+      "text_count": 96
+    },
+    {
+      "degradation_family": "sealed-quantize-speckle-pulse-v5",
+      "exclusion_count": 48,
+      "renderer_family": "offset-rail-kite-grid-v5",
+      "seed_offset": 227000,
+      "selection_visible": false,
+      "split": "sealed_public",
+      "text_count": 128
+    }
+  ],
+  "state": "preregistered_before_training",
+  "task": "ocr-detection",
+  "training": {
+    "batch_size": 8,
+    "binary_loss_weight": 1.0,
+    "db_binarization_k": 50.0,
+    "db_shrink_ratio": 0.4,
+    "epochs": 12,
+    "ignore_band_expansion_pixels": 1,
+    "learning_rate": 0.001,
+    "patch_height": 192,
+    "patch_width": 512,
+    "sample_count": 1920,
+    "seed": 20261017,
+    "shrink_loss_weight": 5.0,
+    "source_count": 640,
+    "threshold_loss_weight": 10.0,
+    "threshold_map_range": [
+      0.3,
+      0.7
+    ],
+    "tiles_per_source": 3,
+    "weight_decay": 5e-05
+  },
+  "training_outputs": [
+    "shrink_map",
+    "threshold_map",
+    "differentiable_binary_map"
+  ],
+  "trigger": {
+    "best_prior_candidate": "P2",
+    "best_prior_exact_fixture_count": 108,
+    "best_prior_false_region_count": 15,
+    "best_prior_fixture_count": 136,
+    "best_prior_multi_region_fixture_count": 3,
+    "best_prior_result_path": "ml/ocr/graph_text_stride4_v4/P2_RESULT.json",
+    "best_prior_result_sha256": "7e9053717af8a47e5170dafc3b88669a2ab24e010e6226db9d770cdafe9cf80f",
+    "best_prior_text_missed_fixture_count": 24,
+    "defect_class": "A single shrink-probability head trained without a learned threshold map cannot jointly stabilize DB contour continuity and tight region geometry at the frozen production thresholds",
+    "prior_candidate": "P3",
+    "prior_result_path": "ml/ocr/graph_text_stride4_v4/P3_RESULT.json",
+    "prior_result_sha256": "eba985a812d08788230622adb1623e5f1e50e556c85e123512e1cac05e26d410",
+    "prior_revision": "graph-text-stride4-v4"
+  }
+}

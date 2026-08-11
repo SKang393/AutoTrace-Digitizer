@@ -1,0 +1,169 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sungwoo Kang
+"""Fail-closed checks for the preregistered DB-objective detector."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import numpy as np
+import pytest
+import torch
+
+from ml.markers.gate_seal import sha256_file, source_bundle_sha256
+from ml.ocr.graph_text_db_objective_v5.dataset import (
+    GENERIC_TEXT,
+    _db_supervision,
+    build_validation_split,
+    render_training_tiles,
+    split_fingerprint,
+    training_split_fingerprint,
+)
+from ml.ocr.graph_text_db_objective_v5.losses import db_objective_loss
+from ml.ocr.graph_text_db_objective_v5.model import DbObjectiveTextRegionNet
+from ml.ocr.graph_text_db_objective_v5.prepare_split import SPLIT_SOURCE_PATHS
+from ml.ocr.graph_text_db_objective_v5.protocol import (
+    BATCH_SIZE,
+    EPOCHS,
+    EXPERIMENT_BUDGET,
+    REVISION,
+    SPLITS,
+    TRAIN_SAMPLE_COUNT,
+    protocol_configuration,
+)
+from ml.ocr.graph_text_db_objective_v5.train_p1 import RUNNER_SOURCE_PATHS
+
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+REVISION_ROOT = REPO_ROOT / "ml/ocr/graph_text_db_objective_v5"
+
+
+def test_protocol_is_distinct_fixed_and_fail_closed() -> None:
+    protocol = protocol_configuration()
+    assert protocol["revision"] == REVISION == "graph-text-db-objective-v5"
+    assert protocol["architecture"] == "dual-head-db-stride4-v1"
+    assert protocol["experiment_budget"] == EXPERIMENT_BUDGET == 3
+    assert protocol["currently_preregistered_candidate"] == "P1"
+    assert protocol["training"]["db_binarization_k"] == 50.0
+    assert protocol["training"]["shrink_loss_weight"] == 5.0
+    assert protocol["training"]["threshold_loss_weight"] == 10.0
+    assert protocol["training"]["binary_loss_weight"] == 1.0
+    assert protocol["postprocessing"]["probability_threshold"] == 0.30
+    assert protocol["postprocessing"]["box_confidence_threshold"] == 0.60
+    assert protocol["production_approval"] is False
+    assert protocol["release_eligible"] is False
+
+
+def test_split_families_are_unique_and_forbidden_sources_are_absent() -> None:
+    current = {item.renderer_family for item in SPLITS} | {item.degradation_family for item in SPLITS}
+    prior: set[str] = set()
+    for directory in ("graph_text_detector_v1", "graph_text_balanced_v2", "graph_text_ignore_band_v3", "graph_text_stride4_v4"):
+        protocol = json.loads((REPO_ROOT / "ml/ocr" / directory / "PROTOCOL.json").read_text(encoding="utf-8"))
+        for split in protocol["splits"]:
+            prior.add(split["renderer_family"])
+            prior.add(split["degradation_family"])
+    assert current.isdisjoint(prior)
+    joined = " ".join(GENERIC_TEXT).casefold()
+    assert "generalization" not in joined
+    assert "chandler" not in joined
+
+
+def test_training_tiles_are_deterministic_and_bind_all_db_maps() -> None:
+    first = render_training_tiles(0)
+    repeated = render_training_tiles(0)
+    exclusion = render_training_tiles(639)
+    assert len(first) == len(repeated) == len(exclusion) == 3
+    for left, right in zip(first, repeated, strict=True):
+        assert left.tile_id == right.tile_id
+        assert np.array_equal(left.bgr, right.bgr)
+        assert np.array_equal(left.shrink_target, right.shrink_target)
+        assert np.array_equal(left.threshold_target, right.threshold_target)
+        assert left.bgr.shape == (192, 512, 3)
+        assert left.shrink_target.shape == left.shrink_mask.shape == (192, 512)
+        assert left.threshold_target.shape == left.threshold_mask.shape == (192, 512)
+    assert any(np.any(tile.shrink_target) for tile in first)
+    assert any(np.any(tile.threshold_mask) for tile in first)
+    assert all(not np.any(tile.shrink_target) for tile in exclusion)
+    assert all(not np.any(tile.threshold_mask) for tile in exclusion)
+
+
+def test_db_supervision_has_fixed_range_and_boundary_peak() -> None:
+    target = np.zeros((64, 128), dtype=np.uint8)
+    target[20:44, 30:98] = 255
+    shrink, shrink_mask, threshold, threshold_mask = _db_supervision(target)
+    assert np.any(shrink)
+    assert np.any(shrink_mask == 0)
+    assert np.any(threshold_mask)
+    values = threshold[threshold_mask > 0]
+    assert float(values.min()) >= 0.30
+    assert float(values.max()) == pytest.approx(0.70, abs=1e-6)
+
+
+def test_model_training_maps_and_export_map_are_probabilities() -> None:
+    model = DbObjectiveTextRegionNet()
+    value = torch.zeros((1, 3, 32, 64), dtype=torch.float32)
+    inference = model(value)
+    shrink, threshold, binary = model.forward_training(value)
+    assert inference.shape == shrink.shape == threshold.shape == binary.shape == (1, 1, 32, 64)
+    assert torch.equal(inference, shrink)
+    for output in (inference, threshold, binary):
+        assert torch.isfinite(output).all()
+        assert float(output.detach().min()) >= 0.0
+        assert float(output.detach().max()) <= 1.0
+
+
+def test_db_loss_is_finite_and_reaches_both_heads() -> None:
+    model = DbObjectiveTextRegionNet()
+    value = torch.zeros((2, 3, 32, 64), dtype=torch.float32)
+    outputs = model.forward_training(value)
+    shrink_target = torch.zeros_like(outputs[0])
+    shrink_target[:, :, 10:18, 20:44] = 1.0
+    shrink_mask = torch.ones_like(outputs[0])
+    threshold_target = torch.full_like(outputs[0], 0.3)
+    threshold_mask = torch.zeros_like(outputs[0])
+    threshold_mask[:, :, 7:21, 17:47] = 1.0
+    losses = db_objective_loss(outputs, shrink_target, shrink_mask, threshold_target, threshold_mask)
+    assert all(torch.isfinite(value) for value in losses)
+    losses[0].backward()
+    assert model.shrink_head.weight.grad is not None
+    assert model.threshold_head.weight.grad is not None
+
+
+def test_frozen_evidence_and_source_hashes_are_exact() -> None:
+    paths = {
+        name: REVISION_ROOT / name
+        for name in ("PROTOCOL.json", "SELECTION_MANIFEST.json", "SEALED_PUBLIC_TEST_SEAL.json", "P1_PREREGISTRATION.json", "training/p1.json")
+    }
+    if not all(path.is_file() for path in paths.values()):
+        pytest.skip("Split has not been frozen yet")
+    protocol = json.loads(paths["PROTOCOL.json"].read_text(encoding="utf-8"))
+    selection = json.loads(paths["SELECTION_MANIFEST.json"].read_text(encoding="utf-8"))
+    seal = json.loads(paths["SEALED_PUBLIC_TEST_SEAL.json"].read_text(encoding="utf-8"))
+    preregistration = json.loads(paths["P1_PREREGISTRATION.json"].read_text(encoding="utf-8"))
+    training = json.loads(paths["training/p1.json"].read_text(encoding="utf-8"))
+    assert protocol["split_generator_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, SPLIT_SOURCE_PATHS)
+    assert training["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
+    assert selection["training_split_fingerprint"] == training_split_fingerprint()
+    validation = build_validation_split()
+    assert selection["validation_split_fingerprint"] == split_fingerprint(validation)
+    assert training["expected_optimizer_steps"] == EPOCHS * (TRAIN_SAMPLE_COUNT // BATCH_SIZE) == 2880
+    assert preregistration["candidate_config_sha256"] == sha256_file(paths["training/p1.json"])
+    assert preregistration["sealed_public_test_seal_sha256"] == sha256_file(paths["SEALED_PUBLIC_TEST_SEAL.json"])
+    assert seal["truth_hidden_from_training_runner"] is True
+    assert seal["public_release_eligible"] is False
+
+
+def test_canonical_budget_authorizes_only_unused_p1_and_keeps_public_closed() -> None:
+    ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
+    entry = next(item for item in ledger["revisions"] if item["task"] == "ocr-detection" and item["revision"] == REVISION)
+    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P1"]
+    assert entry["consumed_candidate_ids"] == []
+    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_evaluations"] == 0
+    assert entry["production_approval"] is False
+    assert entry["release_eligible"] is False

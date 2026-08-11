@@ -1281,6 +1281,61 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "ocr-detection",
+      "revision": "graph-text-db-objective-v5",
+      "status": "candidate_1_preregistered",
+      "defect_class": "a single shrink-probability head trained without a learned threshold map cannot jointly stabilize DB contour continuity and tight region geometry at the frozen production thresholds",
+      "prior_revision_reuse": false,
+      "prior_revision": "graph-text-stride4-v4",
+      "trigger_evidence_path": "ml/ocr/graph_text_stride4_v4/P3_RESULT.json",
+      "trigger_evidence_sha256": "eba985a812d08788230622adb1623e5f1e50e556c85e123512e1cac05e26d410",
+      "best_prior_evidence_path": "ml/ocr/graph_text_stride4_v4/P2_RESULT.json",
+      "best_prior_evidence_sha256": "7e9053717af8a47e5170dafc3b88669a2ab24e010e6226db9d770cdafe9cf80f",
+      "trigger_evidence": "Stride-4 V4 exhausted P1 through P3. Best candidate P2 passed probability and CPU parity but left 24 misses, 15 false regions, three multi-region text fixtures, and one exclusion false region across 136 frozen selection fixtures.",
+      "isolated_change": "replace V4's single shrink-probability objective with a dual shrink/threshold head and differentiable binary-map supervision using fixed DB weights 5:10:1 and k=50, while retaining stride-4 inference, 2880 optimizer steps, production DB thresholds, and fail-closed gates on new disjoint procedural families",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "candidate_config_paths": {
+        "P1": "ml/ocr/graph_text_db_objective_v5/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "5d14a4c00ba0d0af251018edfef3d10fe3c30dac2dd1d2f728a6fcc64f31e9bf"
+      },
+      "p1_expected_runner_source_bundle_sha256": "e968324a9bc5e7a98ace65f2f9d6b68aa125594d2f2ea41315ffa5b668577d2c",
+      "protocol_path": "ml/ocr/graph_text_db_objective_v5/PROTOCOL.json",
+      "protocol_sha256": "47c65eb22c07b91f25bbb2ee039f7c0a30e49543c11cd3d0ea887a1ba9f9cabe",
+      "selection_manifest_path": "ml/ocr/graph_text_db_objective_v5/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "9bb8b0fa4248a85c6cda53344ddd5def88cb683d5f6ff3620f485b438db1e0a0",
+      "sealed_public_test_seal_path": "ml/ocr/graph_text_db_objective_v5/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "07604fccefee9861cb240eab1cefd7587b71ad5b612df8371b4b7614f58de2ce",
+      "sealed_public_fixture_archive_sha256": "3d19f21f0aad9b4da8ca7b1fc7610589f22ac20ab31873bd769c7e1c84478853",
+      "sealed_public_private_manifest_sha256": "30d77b4f15225164526e1e5ad06a96dcdda7c79337c01515a337218b5b1e9e6d",
+      "p1_preregistration_path": "ml/ocr/graph_text_db_objective_v5/P1_PREREGISTRATION.json",
+      "p1_preregistration_sha256": "104521ded00e1b31d0983bdcf7b88652d0f7aa739199a051456c429531067ce4",
+      "p1_training_split_fingerprint": "dde78f9955edecacf6773d1959807210e911de54f1fb756218e8b937400a8f9f",
+      "p1_validation_split_fingerprint": "6589781268606b9700d191ae638144c2175f23e8a65b677436d1b4550108cbae",
+      "p1_expected_optimizer_steps": 2880,
+      "p1_maximum_downsampling_factor": 4,
+      "p1_db_binarization_k": 50.0,
+      "p1_shrink_loss_weight": 5.0,
+      "p1_threshold_loss_weight": 10.0,
+      "p1_binary_loss_weight": 1.0,
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "public_gate_authorized": false,
+      "public_gate_evaluations": 0,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
     }
   ]
 }
