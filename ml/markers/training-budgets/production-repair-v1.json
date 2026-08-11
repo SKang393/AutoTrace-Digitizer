@@ -753,6 +753,52 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "ocr-recognition",
+      "revision": "graph-numeric-component-ensemble-v5",
+      "status": "candidate_1_preregistered",
+      "defect_class": "multi-renderer transfer for decimal-bearing graph-numeric glyph recognition",
+      "prior_revision_reuse": false,
+      "prior_revision": "graph-numeric-component-structural-filter-v1",
+      "trigger_evidence_path": "ml/ocr/component_structural_filter_v1/PUBLIC_GATE_REPORT.json",
+      "trigger_evidence_sha256": "a8cd15bf2a3228209ff24d7db77b458decd9e060bb5c15e2acfc35ab111363b4",
+      "trigger_evidence": "The exhausted structural-filter revision passed public role and exclusion gates but failed exact match at 0.87890625 and CER at 0.15327695560253699.",
+      "isolated_change": "train one per-glyph fixed-feature ensemble across all reviewed Noto weights and new renderer families; add multiscale pooling, edge profiles, darkness, and aspect evidence while retaining the preregistered structural rejection rule",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "candidate_config_paths": {
+        "P1": "ml/ocr/component_ensemble_v5/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "73001b4261d8675c6ad502ee4a444fc2633e88408f31a852c1ee3d9acfc2f54d"
+      },
+      "expected_runner_source_bundle_sha256": "eb26126206b4e31b52f1f7848936e8502a2a7f8fcbc589ca9c321ecaa2fb0ea8",
+      "protocol_path": "ml/ocr/component_ensemble_v5/PROTOCOL.json",
+      "protocol_sha256": "3c4a169eb1b51e6895152c00e0ef2ff664e8154abc911a21cbcba17e0346adfa",
+      "selection_manifest_path": "ml/ocr/component_ensemble_v5/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "e32d021b385f0afc68ded0bfe389d3faf6aae5aee816eb1ddfb6f22edbac097b",
+      "sealed_public_test_seal_path": "ml/ocr/component_ensemble_v5/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "e0fecab50109e3716e7a7d37e7accc75d0248e78bb7c94a913b7db0c1d0e9f3f",
+      "sealed_public_fixture_archive_sha256": "3c54da8a410d5aba45bfa131d7a35c8b6d394270c9699212d2159a110865a240",
+      "sealed_public_private_manifest_sha256": "995a76d521bd3210c0c1f07e17fea23a380663a568684de06ffd6d652a3a080d",
+      "public_gate_config_path": "ml/ocr/component_ensemble_v5/gates/sealed-public-v1.json",
+      "public_gate_config_sha256": "ec199c47225f372c352fbb898c3f67442a6ec4cb6d1e27c29e5d27df1f639521",
+      "public_gate_archive_opened": false,
+      "public_gate_evaluations": 0,
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "public_gate_authorized": false,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
     }
   ]
 }

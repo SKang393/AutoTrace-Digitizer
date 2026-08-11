@@ -1,0 +1,128 @@
+{
+  "alphabet": "0123456789.-%",
+  "architecture": "multi-renderer-fixed-feature-ensemble-mlp-v1",
+  "candidate_ids": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "currently_preregistered_candidate": "P1",
+  "data_scope": "procedurally rendered graph-numeric labels and exclusion shapes only; no Chandler, private article images, external datasets, or pretrained weights",
+  "distinct_from": [
+    "compact-graph-numeric-ctc-v1",
+    "spatial-alignment-supervised-sequence-v2",
+    "canonical-slot-convolutional-v3",
+    "component-geometric-projection-mlp-v4"
+  ],
+  "experiment_budget": 3,
+  "exposed_predecessor_cases_used_for_selection": false,
+  "font_notice_path": "LICENSES/NotoSans-OFL-1.1.txt",
+  "font_notice_sha256": "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a",
+  "gates": {
+    "marker_exclusion_accuracy_minimum": 1.0,
+    "onnx_parity_maximum_absolute_error": 0.0001,
+    "provider": "CPUExecutionProvider",
+    "sealed_cer_maximum": 0.05,
+    "sealed_exact_match_minimum": 0.9,
+    "sealed_role_accuracy_minimum": 0.9,
+    "validation_exact_match_minimum": 0.9,
+    "validation_role_accuracy_minimum": 0.9
+  },
+  "input": [
+    "glyph_count",
+    1,
+    24,
+    26
+  ],
+  "output": [
+    "glyph_count",
+    14
+  ],
+  "production_approval": false,
+  "reject_class_index": 13,
+  "release_eligible": false,
+  "revision": "graph-numeric-component-ensemble-v5",
+  "schema": "graphreader.ocr-component-ensemble-protocol.v1",
+  "seed": 20260820,
+  "split_generator_source_bundle_sha256": "bd16e61637df85147aa66d31a5dbbefdf3d2014b3409db69131cd2dad6235fce",
+  "split_generator_source_paths": [
+    "ml/ocr/component_ensemble_v5/dataset.py",
+    "ml/ocr/component_ensemble_v5/prepare_split.py",
+    "ml/ocr/component_ensemble_v5/protocol.py",
+    "ml/ocr/component_geometric_v4/dataset.py"
+  ],
+  "splits": [
+    {
+      "degradation_family": "train-multiscale-resample-fade-and-speckle-v2",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "font_sha256": [
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0"
+      ],
+      "negative_count": 1024,
+      "positive_count": 6144,
+      "renderer_family": "noto-mixed-subpixel-cells-v5-train",
+      "seed_offset": 51000,
+      "split": "train",
+      "supersample": 2
+    },
+    {
+      "degradation_family": "validation-downsample-scanline-and-contrast-v2",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "font_sha256": [
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      ],
+      "negative_count": 160,
+      "positive_count": 512,
+      "renderer_family": "noto-mixed-threefold-baseline-jitter-v5-validation",
+      "seed_offset": 62000,
+      "split": "validation",
+      "supersample": 3
+    },
+    {
+      "degradation_family": "sealed-shear-fade-and-block-dropout-v2",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf"
+      ],
+      "font_sha256": [
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb"
+      ],
+      "negative_count": 160,
+      "positive_count": 512,
+      "renderer_family": "noto-mixed-fourfold-sheared-cells-v5-public",
+      "seed_offset": 73000,
+      "split": "sealed_public",
+      "supersample": 4
+    }
+  ],
+  "state": "preregistered_before_training",
+  "structural_reject_minimum_height_ratio": 0.75,
+  "task": "ocr-recognition",
+  "thresholds": [
+    0.35,
+    0.45,
+    0.55,
+    0.65
+  ],
+  "training": {
+    "batch_size": 512,
+    "epochs": 32,
+    "learning_rate": 0.0015,
+    "weight_decay": 0.0001
+  }
+}
