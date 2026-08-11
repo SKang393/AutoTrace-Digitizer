@@ -39,3 +39,21 @@ No candidate is approved by selection or a public metric alone. Manifest,
 model-store, detector composition, marker-creation evidence, provider discovery,
 notices, packaging, private validation, and the full release audit remain
 mandatory.
+
+## C# runtime boundary
+
+`LocalOnnxComponentTextRecognizer` now implements the V5 per-glyph runtime
+shape `[glyph_count,1,24,26] -> [glyph_count,14]`, fixed component isolation,
+six source-geometry features, softmax confidence rejection, the `0.75`
+structural-height rule, numeric grammar, bounded scheduling, cancellation,
+provider evidence, and checksum-bound cache identity. The exact ignored P1
+ONNX executed through this recognizer on CPU in `5.9915` ms for a deterministic
+two-component probe and returned `11`; the payload SHA-256 remained
+`9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84`.
+
+This is runtime-compatibility evidence only. The source-sealed official-pair
+production adapter remains byte-identical to its consumed failed gate, and no
+V5 manifest or production-store entry exists. Exact C# preprocessing parity,
+a newly preregistered detector composition, independent marker-stage evidence,
+private validation, and packaging discovery are still required before the V5
+recognizer can be approved or selected by normal Auto Detect.
