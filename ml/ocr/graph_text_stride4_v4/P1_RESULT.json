@@ -1,0 +1,75 @@
+{
+  "candidate_id": "P1",
+  "checkpoint_sha256": "c8a71511a7aa2a64c02316dd8a9cc18d45ab2aa2483a7db25e46589ab4c1c3d0",
+  "diagnosis": {
+    "all_no_prediction_cases_had_probability_above_threshold": true,
+    "exact_prediction_height_ratio_median": 1.3846153846153846,
+    "exact_prediction_width_ratio_median": 1.0857142857142856,
+    "failure_mode": "The fourfold encoder retained strong activation, but the transposed-convolution decoder produced either no DB-eligible region or vertically expanded boxes. This is consistent with discontinuous or low-box-score maps plus decoder geometry, not provider drift, exclusion leakage, or missing probability activation.",
+    "failed_prediction_height_ratio_median": 1.8452380952380953,
+    "failed_prediction_iou_median": 0.45080266955266957,
+    "failed_prediction_width_ratio_median": 1.2157692307692307,
+    "no_prediction_case_count": 21,
+    "no_prediction_maximum_probability_minimum": 0.982559859752655,
+    "no_prediction_pixels_above_threshold_median": 3935.0,
+    "predicted_below_iou_gate_case_count": 14,
+    "structure_and_degradation_groups": {
+      "chevron_grid_validation_dropout": {
+        "text_exact_fixture_count": 12,
+        "text_fixture_count": 24,
+        "text_no_prediction_count": 10,
+        "text_prediction_below_iou_gate_count": 2
+      },
+      "crossing_fan_validation_channel": {
+        "text_exact_fixture_count": 13,
+        "text_fixture_count": 24,
+        "text_no_prediction_count": 6,
+        "text_prediction_below_iou_gate_count": 5
+      },
+      "double_brace_validation_defocus": {
+        "text_exact_fixture_count": 17,
+        "text_fixture_count": 24,
+        "text_no_prediction_count": 4,
+        "text_prediction_below_iou_gate_count": 3
+      },
+      "legend_rail_validation_ringing": {
+        "text_exact_fixture_count": 19,
+        "text_fixture_count": 24,
+        "text_no_prediction_count": 1,
+        "text_prediction_below_iou_gate_count": 4
+      }
+    },
+    "threshold_sweeps": 0,
+    "visible_selection_diagnostic_runs": 1
+  },
+  "elapsed_ms": 537404.827,
+  "onnx_parity_maximum_absolute_error": 1.3113021850585938e-06,
+  "onnx_parity_passed": true,
+  "onnx_sha256": "beaeca43382f960bb9278cae7d5b8ec95cdbd46d3d31afd05221f2a9c74eadac",
+  "production_approval": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-stride4-v4",
+  "schema": "graphreader.ocr-graph-text-stride4-result.v1",
+  "sealed_public_archive_opened": false,
+  "selection_gate_passed": false,
+  "selection_metrics": {
+    "duplicate_region_count": 0,
+    "exact_fixture_count": 101,
+    "exclusion_exact_fixture_count": 40,
+    "exclusion_false_region_count": 0,
+    "false_region_count": 14,
+    "fixture_count": 136,
+    "text_exact_fixture_count": 61,
+    "text_false_region_count": 14,
+    "text_fixture_count": 96,
+    "text_missed_fixture_count": 35,
+    "text_multi_region_fixture_count": 0
+  },
+  "selection_report_path": "ml/ocr/graph_text_stride4_v4/artifacts/P1-run/candidate-report.json",
+  "selection_report_sha256": "0390c78e06f54f0808495da9202f7cb558e4184493dd8f0d568cc645fe15948d",
+  "status": "failed_selection",
+  "task": "ocr-detection",
+  "training_opened_seal_sha256": "4989ba4f59cef392dcfe241e6ce64e03433debcce7b345e26b982412629169ab",
+  "training_result_seal_sha256": "85d168e09f6e58ab7551c4f02d3310efb762bad42ccf673bed7a3a5de8a42644"
+}

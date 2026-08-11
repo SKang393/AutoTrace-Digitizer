@@ -23,6 +23,7 @@ from ml.ocr.graph_text_stride4_v4.dataset import (
     training_split_fingerprint,
 )
 from ml.ocr.graph_text_stride4_v4.model import Stride4TextRegionNet
+from ml.ocr.graph_text_stride4_v4.model_p2 import Stride4ResizeConvTextRegionNet
 from ml.ocr.graph_text_stride4_v4.prepare_split import SPLIT_SOURCE_PATHS, freeze_split
 from ml.ocr.graph_text_stride4_v4.protocol import (
     BOUNDARY_MARGIN_LOSS_WEIGHT,
@@ -37,8 +38,8 @@ from ml.ocr.graph_text_stride4_v4.protocol import (
     VALIDATION_TEXT_COUNT,
     protocol_configuration,
 )
-from ml.ocr.graph_text_stride4_v4.train_p1 import _p3_loss
-from ml.ocr.graph_text_stride4_v4.train_p1 import RUNNER_SOURCE_PATHS
+from ml.ocr.graph_text_stride4_v4.train_p1 import RUNNER_SOURCE_PATHS as P1_RUNNER_SOURCE_PATHS, _p3_loss
+from ml.ocr.graph_text_stride4_v4.train_p2 import RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -130,6 +131,28 @@ def test_model_preserves_full_probability_map_with_fourfold_bottleneck() -> None
         model(torch.zeros((1, 3, 63, 128)))
 
 
+def test_p2_changes_only_to_resize_convolution_upsampling() -> None:
+    model = Stride4ResizeConvTextRegionNet().eval()
+    values = torch.zeros((2, 3, 64, 128), dtype=torch.float32)
+    with torch.inference_mode():
+        output = model(values)
+        level1 = model.encoder1(values)
+        level2 = model.encoder2(level1)
+    assert output.shape == (2, 1, 64, 128)
+    assert level1.shape[-2:] == (32, 64)
+    assert level2.shape[-2:] == (16, 32)
+    assert isinstance(model.decoder, torch.nn.Conv2d)
+    assert isinstance(model.output, torch.nn.Conv2d)
+    assert not any(isinstance(module, torch.nn.ConvTranspose2d) for module in model.modules())
+    assert torch.isfinite(output).all()
+    assert float(output.min()) >= 0.0
+    assert float(output.max()) <= 1.0
+    with pytest.raises(ValueError, match=r"\[batch,3,H,W\]"):
+        model(torch.zeros((1, 1, 64, 128)))
+    with pytest.raises(ValueError, match="divisible by four"):
+        model(torch.zeros((1, 3, 63, 128)))
+
+
 def test_retained_p3_margin_is_one_sided_and_boundary_only() -> None:
     target = torch.zeros((1, 1, 8, 8), dtype=torch.float32)
     target[:, :, 3:5, 3:5] = 1.0
@@ -159,20 +182,25 @@ def test_retained_p3_margin_is_one_sided_and_boundary_only() -> None:
     assert torch.equal(losses[1][1], losses[2][1])
 
 
-def test_frozen_hashes_and_ledger_authorize_only_unused_p1() -> None:
+def test_frozen_hashes_and_ledger_record_failed_p1_and_authorize_only_unused_p2() -> None:
     expected_hashes = {
         "PROTOCOL.json": "8e205a7f6cfc2252294948cfb576b6045421f338580dc0532165cc97371b0bd0",
         "SELECTION_MANIFEST.json": "2b839e9775082aa04eac6a4d34fcf9532b2013f7d107e5f1c18501e375886aeb",
         "SEALED_PUBLIC_TEST_SEAL.json": "83771a24f66740ef201550a7bb7a74ed9b8710ba42a4678f4c178311f0cb295b",
         "P1_PREREGISTRATION.json": "ab42cedac1bb1292fc71749837f459227e2ed66a8f673cccc16317fb3ce5c803",
+        "P1_RESULT.json": "545211c5dcc62d1e9590e7c54c084c67750c30eb8077f1054fdf24089edbdf50",
+        "P2_PREREGISTRATION.json": "8027a7ab0a131577c23cc5eafa9cf97d1176ac1a9255b6857055bfe732a32138",
         "training/p1.json": "71eabe488cbbfb0b605986feb944017a8fd37e9abbab71b221a026d00c5d479e",
+        "training/p2.json": "7f0d93326ff57078cc0ca1442ed8b335542cd30e4e3d30da22feb22cf2f492f5",
     }
     for name, expected in expected_hashes.items():
         assert _sha256(REVISION_ROOT / name) == expected
     protocol = _json(REVISION_ROOT / "PROTOCOL.json")
     assert source_bundle_sha256(REPO_ROOT, SPLIT_SOURCE_PATHS) == protocol["split_generator_source_bundle_sha256"]
-    config = _json(REVISION_ROOT / "training/p1.json")
-    assert source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
+    p1_config = _json(REVISION_ROOT / "training/p1.json")
+    p2_config = _json(REVISION_ROOT / "training/p2.json")
+    assert source_bundle_sha256(REPO_ROOT, P1_RUNNER_SOURCE_PATHS) == p1_config["expected_runner_source_bundle_sha256"]
+    assert source_bundle_sha256(REPO_ROOT, P2_RUNNER_SOURCE_PATHS) == p2_config["expected_runner_source_bundle_sha256"]
     seal = _json(REVISION_ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert seal["truth_hidden_from_training_runner"] is True
     assert seal["public_release_eligible"] is False
@@ -181,13 +209,20 @@ def test_frozen_hashes_and_ledger_authorize_only_unused_p1() -> None:
     entries = [entry for entry in ledger["revisions"] if entry["revision"] == REVISION]
     assert len(entries) == 1
     entry = entries[0]
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["authorized_candidate_id"] == "P2"
     assert entry["candidate_config_sha256"]["P1"] == expected_hashes["training/p1.json"]
+    assert entry["candidate_config_sha256"]["P2"] == expected_hashes["training/p2.json"]
+    assert entry["p1_training_report_sha256"] == "0390c78e06f54f0808495da9202f7cb558e4184493dd8f0d568cc645fe15948d"
+    assert entry["p1_selection_exact_fixture_count"] == 101
+    assert entry["p1_selection_false_region_count"] == 14
+    assert entry["p1_selection_exclusion_false_region_count"] == 0
+    assert entry["p1_text_missed_fixture_count"] == 35
+    assert entry["p1_selection_gate_passed"] is False
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False

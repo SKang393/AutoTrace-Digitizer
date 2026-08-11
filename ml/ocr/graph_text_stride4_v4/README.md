@@ -15,9 +15,11 @@ prior sealed fixture, or `Generalization` label. The public archive may not be
 opened unless a committed candidate passes every selection fixture with zero
 false regions, duplicates, and prohibited exclusion hits plus CPU ONNX parity.
 
-Candidate P1 is not a production model. It remains ineligible for a manifest,
-model-store discovery, packaging, production approval, and release approval
-until all later direct-evidence gates pass. The deterministic axis, tick, and
-divider masking used by these procedural detector inputs also does not prove
-that an approved production artifact-mask provider exists. That production
-workflow blocker remains mandatory and fail closed.
+Candidate P1 ran exactly once and failed the visible selection gate. P2 is
+preregistered to replace only its transposed-convolution upsampling with
+bilinear resize-convolution. Neither candidate is a production model. Both
+remain ineligible for a manifest, model-store discovery, packaging, production
+approval, and release approval until all later direct-evidence gates pass. The
+deterministic axis, tick, and divider masking used by these procedural detector
+inputs also does not prove that an approved production artifact-mask provider
+exists. That production workflow blocker remains mandatory and fail closed.
