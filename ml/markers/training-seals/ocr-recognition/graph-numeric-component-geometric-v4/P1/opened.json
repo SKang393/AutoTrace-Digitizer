@@ -1,0 +1,24 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/component_geometric_v4/training/p1.json",
+    "candidate_config_sha256": "d173b77f4c23ef15eadb253ff691e30938dc299d3f0e7aa3b6a8c88caf25b9fa",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "graph-numeric-component-geometric-v4",
+    "runner_source_bundle_sha256": "5d165ee179f3fa1986f88c73870e9cc72d81f47c399baaf15a14d6f0a6bbb3c2",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/component_geometric_v4/dataset.py",
+      "ml/ocr/component_geometric_v4/model.py",
+      "ml/ocr/component_geometric_v4/pipeline.py",
+      "ml/ocr/component_geometric_v4/protocol.py",
+      "ml/ocr/component_geometric_v4/train_p1.py"
+    ],
+    "task": "ocr-recognition",
+    "training_budget_ledger_sha256": "cabb4aa193a3fbc727661384ffcfd7fe8cdbdf9ca500f7947d476e04731fade5"
+  },
+  "opened_utc": "2026-08-11T00:41:08.863231+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

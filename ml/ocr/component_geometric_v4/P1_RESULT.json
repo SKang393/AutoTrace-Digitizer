@@ -1,0 +1,32 @@
+{
+  "candidate_id": "P1",
+  "checkpoint_sha256": "8343bf743a85735e2a7be9528de9bcf5e3b4f4f1a6ebbc3bf9a769d56b575ae3",
+  "elapsed_ms": 10653.541,
+  "experiment_ordinal": 1,
+  "failure": "P1 passed CPU ONNX parity but failed every frozen validation quality gate. It cannot open the sealed-public gate or be rerun.",
+  "onnx_parity_maximum_absolute_error": 0.00000476837158203125,
+  "onnx_parity_passed": true,
+  "onnx_sha256": "8fca893638dc0853be484ce224b4195ec8559a4a0b3ee807a34c473629756964",
+  "private_or_article_images": false,
+  "production_approval": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "report_path": "ml/ocr/component_geometric_v4/artifacts/P1-run/candidate-report.json",
+  "report_sha256": "474b8e46ed68e063de919cb101e56a6f8aca98d5dbd7d6ae3e6f165747380b01",
+  "revision": "graph-numeric-component-geometric-v4",
+  "schema": "graphreader.ocr-component-geometric-candidate-result.v1",
+  "sealed_public_archive_opened": false,
+  "selected_threshold": 0.55,
+  "selection_gate_passed": false,
+  "status": "failed_selection",
+  "synthetic_only": true,
+  "task": "ocr-recognition",
+  "training_opened_seal_sha256": "e2cfe21b76b6fc6b5e9ce523e203035892e5376cc36511928b5bf06ccd10baf7",
+  "training_result_seal_sha256": "46c95c13038730aa358d791b4c3d680a43f9daa962d0e4bf121eae06940855e8",
+  "validation_metrics": {
+    "character_error_rate": 0.18483904465212878,
+    "exact_match": 0.8515625,
+    "marker_exclusion_accuracy": 0.890625,
+    "role_accuracy": 0.8645833333333334
+  }
+}

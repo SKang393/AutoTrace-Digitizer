@@ -1,0 +1,19 @@
+{
+  "candidate_id": "P2",
+  "data_scope": "the unchanged frozen synthetic train, validation, and still-unopened sealed-public splits; no Chandler, private article images, external datasets, or pretrained weights",
+  "experiment_budget": 3,
+  "experiment_ordinal": 2,
+  "isolated_change": "replace only P1 glyph max-fit normalization with absolute-scale full-label-height encoding so decimal points retain small lower-position geometry and full-height dividers cannot collapse into digit-one geometry",
+  "p1_result_path": "ml/ocr/component_geometric_v4/P1_RESULT.json",
+  "p1_result_sha256": "47fe3553055f1f19cc6a330055a3b3fa8b16339c6d44a693562ac3c9d6e745da",
+  "private_or_article_images": false,
+  "production_approval": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-numeric-component-geometric-v4",
+  "schema": "graphreader.ocr-component-geometric-candidate-preregistration.v1",
+  "sealed_public_archive_opened": false,
+  "status": "candidate_2_preregistered",
+  "task": "ocr-recognition",
+  "trigger": "P1 validation confused 31 of 111 decimal points with reject and all 14 low-threshold exclusion false positives were full-height dividers classified as digit one because max-fit normalization discarded absolute component scale and vertical position."
+}

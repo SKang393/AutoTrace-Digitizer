@@ -19,6 +19,8 @@ from ml.ocr.component_geometric_v4.dataset import (
     split_fingerprint,
 )
 from ml.ocr.component_geometric_v4.model import ComponentGeometricGlyphNet
+from ml.ocr.component_geometric_v4.p2_dataset import isolate_glyphs_absolute_scale
+from ml.ocr.component_geometric_v4.p2_pipeline import glyph_training_examples as p2_glyph_training_examples
 from ml.ocr.component_geometric_v4.pipeline import glyph_training_examples
 from ml.ocr.component_geometric_v4.prepare_split import freeze_split
 from ml.ocr.component_geometric_v4.protocol import (
@@ -29,6 +31,7 @@ from ml.ocr.component_geometric_v4.protocol import (
 )
 from ml.ocr.component_geometric_v4.sealed_gate import EVALUATOR_SOURCE_PATHS
 from ml.ocr.component_geometric_v4.train_p1 import RUNNER_SOURCE_PATHS
+from ml.ocr.component_geometric_v4.train_p2 import RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS
 
 
 REPOSITORY = Path(__file__).resolve().parents[4]
@@ -59,6 +62,26 @@ def test_exclusion_shapes_are_labeled_only_as_reject_class() -> None:
     _, labels = glyph_training_examples(samples)
     assert len(labels) > 0
     assert np.unique(labels).tolist() == [CLASS_COUNT - 1]
+
+
+def test_p2_preserves_absolute_vertical_scale_without_changing_isolation_counts() -> None:
+    for split in ("train", "validation"):
+        positives = [sample for sample in build_split(split) if sample.target_text]
+        assert all(
+            len(isolate_glyphs_absolute_scale(sample.raster)) == len(sample.target_text)
+            for sample in positives
+        )
+    validation = build_split("validation")
+    decimal = next(sample for sample in validation if "." in sample.target_text)
+    divider = next(sample for sample in validation if sample.exclusion_kind == "divider")
+    decimal_glyphs = isolate_glyphs_absolute_scale(decimal.raster)
+    divider_glyphs = isolate_glyphs_absolute_scale(divider.raster)
+    dot_index = decimal.target_text.index(".")
+    assert np.count_nonzero(decimal_glyphs[dot_index] > 0.25) < np.count_nonzero(divider_glyphs[0] > 0.25)
+    _, exclusion_labels = p2_glyph_training_examples(
+        sample for sample in validation if sample.exclusion_kind is not None
+    )
+    assert np.unique(exclusion_labels).tolist() == [CLASS_COUNT - 1]
 
 
 def test_sealed_archive_is_byte_deterministic_and_round_trips(tmp_path: Path) -> None:
@@ -102,9 +125,14 @@ def test_temp_freeze_binds_sources_and_keeps_public_gate_closed(tmp_path: Path) 
     assert protocol_configuration()["state"] == "preregistered_before_training"
 
 
-def test_canonical_preregistration_has_no_candidate_output_or_opened_public_gate() -> None:
-    output = REPOSITORY / "ml/ocr/component_geometric_v4/artifacts/P1-run"
-    assert not output.exists()
+def test_canonical_preregistration_records_p1_failure_and_keeps_p2_and_public_gate_closed() -> None:
+    p1_result = json.loads(
+        (REPOSITORY / "ml/ocr/component_geometric_v4/P1_RESULT.json").read_text(encoding="utf-8")
+    )
+    assert p1_result["status"] == "failed_selection"
+    assert p1_result["sealed_public_archive_opened"] is False
+    assert p1_result["public_gate_evaluations"] == 0
+    assert not (REPOSITORY / "ml/ocr/component_geometric_v4/artifacts/P2-run").exists()
     tracked = {
         path.relative_to(REPOSITORY).as_posix()
         for path in REPOSITORY.glob("ml/ocr/component_geometric_v4/**/*.json")
@@ -112,4 +140,16 @@ def test_canonical_preregistration_has_no_candidate_output_or_opened_public_gate
     }
     assert "ml/ocr/component_geometric_v4/PROTOCOL.json" in tracked
     assert "ml/ocr/component_geometric_v4/training/p1.json" in tracked
+    assert "ml/ocr/component_geometric_v4/training/p2.json" in tracked
     assert not any("PUBLIC_GATE_REPORT" in path for path in tracked)
+
+
+def test_p2_runner_source_bundle_matches_preregistration() -> None:
+    training = json.loads(
+        (REPOSITORY / "ml/ocr/component_geometric_v4/training/p2.json").read_text(encoding="utf-8")
+    )
+    assert training["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPOSITORY, P2_RUNNER_SOURCE_PATHS
+    )
+    assert training["candidate_id"] == "P2"
+    assert training["public_gate_evaluations"] == 0

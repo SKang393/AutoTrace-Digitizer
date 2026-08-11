@@ -570,23 +570,26 @@
     {
       "task": "ocr-recognition",
       "revision": "graph-numeric-component-geometric-v4",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_2_preregistered",
       "defect_class": "component-isolated graph-numeric glyph recognition using fixed geometric projections",
       "prior_revision_reuse": false,
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
+        "P2"
+      ],
+      "consumed_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "candidate_config_paths": {
-        "P1": "ml/ocr/component_geometric_v4/training/p1.json"
+        "P1": "ml/ocr/component_geometric_v4/training/p1.json",
+        "P2": "ml/ocr/component_geometric_v4/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "d173b77f4c23ef15eadb253ff691e30938dc299d3f0e7aa3b6a8c88caf25b9fa"
+        "P1": "d173b77f4c23ef15eadb253ff691e30938dc299d3f0e7aa3b6a8c88caf25b9fa",
+        "P2": "cfae74ffe3d359d4c298dc241eb1d02a373d6ea2695eff31edbf59f07ccbe81a"
       },
       "trigger_evidence": "All prior project CTC, spatial V2, canonical-slot V3, and numeric V1 recognition candidates exhausted their fixed experiments without satisfying the production OCR gates.",
       "isolated_change": "classify deterministically isolated glyph components with fixed grid, row, column, and radial projections plus a non-convolutional MLP",
@@ -598,8 +601,28 @@
       "sealed_public_test_seal_sha256": "4ec62df2c14195abda1a519a7c66356132e9238831ecc9621ab94171e2b1ef0d",
       "sealed_public_fixture_archive_sha256": "7845bc0628740fb24b95e0367bceab8b5b6d186adacc5f58c5c6c3bdcc97dc76",
       "sealed_public_private_manifest_sha256": "e40ce059ddda1d3acaf72a620781f6399b5df49961aeef4094d05c86667754d1",
+      "p1_result_path": "ml/ocr/component_geometric_v4/P1_RESULT.json",
+      "p1_result_sha256": "47fe3553055f1f19cc6a330055a3b3fa8b16339c6d44a693562ac3c9d6e745da",
+      "p1_training_report_path": "ml/ocr/component_geometric_v4/artifacts/P1-run/candidate-report.json",
+      "p1_training_report_sha256": "474b8e46ed68e063de919cb101e56a6f8aca98d5dbd7d6ae3e6f165747380b01",
+      "p1_training_opened_seal_sha256": "e2cfe21b76b6fc6b5e9ce523e203035892e5376cc36511928b5bf06ccd10baf7",
+      "p1_training_result_seal_sha256": "46c95c13038730aa358d791b4c3d680a43f9daa962d0e4bf121eae06940855e8",
+      "p1_checkpoint_sha256": "8343bf743a85735e2a7be9528de9bcf5e3b4f4f1a6ebbc3bf9a769d56b575ae3",
+      "p1_onnx_sha256": "8fca893638dc0853be484ce224b4195ec8559a4a0b3ee807a34c473629756964",
+      "p1_selected_threshold": 0.55,
+      "p1_validation_exact_match": 0.8515625,
+      "p1_validation_character_error_rate": 0.18483904465212878,
+      "p1_validation_role_accuracy": 0.8645833333333334,
+      "p1_validation_marker_exclusion_accuracy": 0.890625,
+      "p1_onnx_parity_maximum_absolute_error": 0.00000476837158203125,
+      "p1_public_gate_evaluations": 0,
+      "p1_failure": "P1 passed CPU ONNX parity but failed every validation quality gate. Max-fit normalization mapped 31 of 111 validation decimal points to reject and 14 divider exclusions to digit one.",
+      "p2_preregistration_path": "ml/ocr/component_geometric_v4/P2_PREREGISTRATION.json",
+      "p2_preregistration_sha256": "a96b3c23f8b4b2a0da2789a7cba29f1bb7d78fc81380b4b9dff3eea7f511d1a0",
+      "p2_isolated_change": "replace only P1 glyph max-fit normalization with absolute-scale full-label-height encoding; retain the frozen rasters, model, loss, optimizer, epochs, thresholds, and gates",
+      "p2_expected_runner_source_bundle_sha256": "d7a3925a1dcc8db40419476d56b7b7bfaa1ac4858d03a2e4a5a49449981eee8f",
       "execution_authorized": true,
-      "authorized_candidate_id": "P1",
+      "authorized_candidate_id": "P2",
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "production_approval": false,

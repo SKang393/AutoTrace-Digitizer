@@ -1,0 +1,32 @@
+{
+  "architecture": "component-geometric-projection-mlp-v1-with-absolute-scale-glyphs",
+  "batch_size": 256,
+  "candidate_id": "P2",
+  "chandler_included": false,
+  "epochs": 24,
+  "expected_runner_source_bundle_sha256": "d7a3925a1dcc8db40419476d56b7b7bfaa1ac4858d03a2e4a5a49449981eee8f",
+  "experiment_budget": 3,
+  "experiment_ordinal": 2,
+  "isolated_change": "replace only P1 glyph max-fit normalization with absolute-scale full-label-height encoding; retain the frozen rasters, model, loss, optimizer, epochs, thresholds, and gates",
+  "learning_rate": 0.002,
+  "onnx_parity_tolerance": 0.0001,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-numeric-component-geometric-v4",
+  "sealed_public_test_seal_path": "ml/ocr/component_geometric_v4/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "4ec62df2c14195abda1a519a7c66356132e9238831ecc9621ab94171e2b1ef0d",
+  "seed": 20260811,
+  "selection_manifest_path": "ml/ocr/component_geometric_v4/SELECTION_MANIFEST.json",
+  "selection_manifest_sha256": "7cda51b6aa6cf9cccd63f9eab09b909ff9ac71fb1dc82490b528a59a68cf7207",
+  "selection_thresholds": [
+    0.55,
+    0.65,
+    0.75,
+    0.85
+  ],
+  "task": "ocr-recognition",
+  "trigger": "P1 validation confused 31 of 111 decimal points with reject and all 14 low-threshold exclusion false positives were full-height dividers classified as digit one because max-fit normalization discarded absolute scale.",
+  "weight_decay": 0.0001
+}
