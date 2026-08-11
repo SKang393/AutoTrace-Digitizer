@@ -1693,6 +1693,64 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "marker-center",
+      "revision": "marker-center-normalized-training-v4",
+      "status": "candidate_1_preregistered",
+      "defect_class": "the unchanged radial marker-center weights were not trained or calibrated for median-normalized proposal patches",
+      "prior_revision": "marker-center-background-invariant-v3",
+      "prior_exposed_fixture_bytes_reused": false,
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "candidate_config_paths": {
+        "P1": "ml/markers/center/normalized_training_v4/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "8fd0f1d080314f15160350dc14105153813046168d147a7a3d0089ef6bc013f5"
+      },
+      "protocol_path": "ml/markers/center/normalized_training_v4/PROTOCOL.json",
+      "protocol_sha256": "751610de5f72f87d79f0d00d590d222ea67c0405a4e4491ee4379f9e96b3314a",
+      "selection_manifest_path": "ml/markers/center/normalized_training_v4/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "de288db53a89c3d31d278ab544011e9bf547e82989d8c3e59669e262ee840af5",
+      "selection_scene_count": 46,
+      "selection_train_scene_count": 30,
+      "selection_validation_scene_count": 16,
+      "sealed_public_test_seal_path": "ml/markers/center/normalized_training_v4/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "66822ae392156e19f93b9afadbdb33935b7759cff1179e9560b38826d1c069f4",
+      "sealed_public_fixture_archive_sha256": "20e0bdf3bafceba2e72d0c595fe7e7b945d8232a436e0ea3ed90e5b4111378b7",
+      "sealed_public_private_manifest_sha256": "084816b5ea4e625add62d01b98c0cfc8d44ed147140279b1cee9863f8978c224",
+      "sealed_public_scene_count": 20,
+      "public_gate_config_path": "ml/markers/center/normalized_training_v4/gates/sealed-public-p1.json",
+      "public_gate_config_sha256": "0220229dcbdc64d7105d7d85a5cdfd9ef1c31b6c74ae81a43f7818acff360870",
+      "expected_runner_source_bundle_sha256": "8d0c238863ae809dd3769f3aa7093fa677911704dd552b15a34ce6a90333085e",
+      "expected_evaluator_source_bundle_sha256": "526dddf71087cb7d839f4a9406c57a840075ceb15f08ef119119f00004869894",
+      "isolated_change": "train new radial-topology MLP head weights from a new seed on fresh smooth-background procedural families after applying the exact median-normalized ink preprocessing; retain proposal eligibility, masks, geometry refinement, duplicate suppression, and public gates",
+      "architecture": "radial-topology-projection-mlp-v1",
+      "preprocess_revision": "patch-ink-median-background-subtraction-v1",
+      "postprocess_revision": "radial-local-consensus-calibration-v2",
+      "seed": 20261107,
+      "epochs": 80,
+      "weights_changed": true,
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "public_gate_authorized": true,
+      "public_gate_authorized_candidate_id": "P1",
+      "public_gate_authorized_on_selection_pass": true,
+      "public_gate_evaluations": 0,
+      "public_gate_archive_opened": false,
+      "manifest_created": false,
+      "model_store_promoted": false,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": false
     }
   ]
 }
