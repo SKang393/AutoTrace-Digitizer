@@ -1,0 +1,27 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/markers/center/runtime_consistency_v2/training/p1.json",
+    "candidate_config_sha256": "412a12e59440e7fc501089a84739aee17ceba8a3b327c0ecd777db078a777608",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "marker-center-runtime-consistency-v2",
+    "runner_source_bundle_sha256": "3d2a7fa51589bff017dc92ba3851c918d2576d2dbdfc4ba7d303b52074e2ba46",
+    "runner_source_paths": [
+      "ml/markers/center/line_aware_v1/model.py",
+      "ml/markers/center/line_aware_v1/pipeline.py",
+      "ml/markers/center/radial_feature_v1/model.py",
+      "ml/markers/center/radial_feature_v1/pipeline_p3.py",
+      "ml/markers/center/runtime_consistency_v2/candidate_runner.py",
+      "ml/markers/center/runtime_consistency_v2/dataset.py",
+      "ml/markers/center/runtime_consistency_v2/pipeline.py",
+      "ml/markers/center/runtime_consistency_v2/public_gate.py",
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py"
+    ],
+    "task": "marker-center",
+    "training_budget_ledger_sha256": "1d0bf84517e37b823b2aa3e52ec3d106270aaa2391a5684194b20ed9e39ac809"
+  },
+  "opened_utc": "2026-08-11T15:11:50.566746+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

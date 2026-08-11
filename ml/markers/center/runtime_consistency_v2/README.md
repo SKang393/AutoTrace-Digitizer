@@ -26,10 +26,16 @@ new renderer families and three new degradation families. Its SHA-256 is
 The archive contains only procedural graphs. Chandler, private images, article
 images, downloaded data, and prior public fixtures are excluded.
 
-P1 may execute once after this preregistration is committed. It may open the
-new public archive only if all 12 validation scenes have exact counts with zero
-false positives, false negatives, duplicates, or prohibited hits and CPU ONNX
-parity is at most `1e-5`. The public gate also requires exact counts in all 20
-scenes and the same zero-error exclusions. A public pass remains insufficient
-for production approval until artifact-mask composition, manifest, model-store,
-notice, packaging, clean-machine, and end-to-end workflow evidence pass.
+P1 executed once from the committed preregistration and is consumed. It passed
+CPU ONNX parity with maximum absolute error `2.384185791015625e-06`, but only
+8 of 12 validation scenes were exact. The run retained 95 of 96 markers with
+three false positives, one false negative, two duplicate detections, and zero
+prohibited-structure hits. Candidate report SHA-256 is
+`f53ceba950a5603f3bbbad39ad8718b01784d599e59e59df2320cb6327c4c4a1`.
+
+Because exact selection was mandatory, the truth-hidden public archive was not
+opened and the public evaluator did not run. P1 cannot rerun. P2 and P3 remain
+unregistered and require a separately frozen isolated change before either can
+be authorized. Production approval, artifact-mask composition, manifest,
+model-store, notice, packaging, clean-machine, and end-to-end workflow evidence
+all remain absent.

@@ -2,13 +2,13 @@
   "schema": "graphreader.marker-center-runtime-consistency-protocol.v2",
   "task": "marker-center",
   "revision": "marker-center-runtime-consistency-v2",
-  "status": "candidate_1_preregistered",
+  "status": "candidate_1_failed_selection",
   "defect_class": "selection and public evaluation used different postprocess implementations for the exact radial-feature P3 payload",
   "prior_revision": "marker-center-radial-feature-v1",
   "prior_candidate_bytes_reused": true,
   "experiment_budget": 3,
-  "currently_preregistered_candidate": "P1",
-  "consumed_candidates": [],
+  "currently_preregistered_candidate": null,
+  "consumed_candidates": ["P1"],
   "remaining_unregistered_candidates": ["P2", "P3"],
   "isolated_change": "reuse the exact radial-feature P3 checkpoint and ONNX with zero optimizer steps and validate its already selected radial-local-consensus-refinement-v1 postprocessor consistently on new disjoint selection and truth-hidden public families",
   "trigger_evidence": {
@@ -32,6 +32,24 @@
     "selected_threshold": 0.3,
     "runner_source_bundle_sha256": "3d2a7fa51589bff017dc92ba3851c918d2576d2dbdfc4ba7d303b52074e2ba46"
   },
+  "candidate_result": {
+    "result_path": "ml/markers/center/runtime_consistency_v2/P1_RESULT.json",
+    "result_sha256": "466937d8739401359106f01d709b559c3e036db91fd6b1fbd8670d3a53ac5b5b",
+    "candidate_report_sha256": "f53ceba950a5603f3bbbad39ad8718b01784d599e59e59df2320cb6327c4c4a1",
+    "opened_seal_sha256": "2fcc1f588d9a876642f41c3f7c74b6d0de12b73a6a3c07a20ff29f9cff9a9e1c",
+    "result_seal_sha256": "c354b80cfc6747a3dc9ddab1a6b74ba26a1a8bfcfffba03d2413210df5698f3e",
+    "selection_gate_passed": false,
+    "selection_exact_scene_count": 8,
+    "selection_scene_count": 12,
+    "selection_true_positives": 95,
+    "selection_false_positives": 3,
+    "selection_false_negatives": 1,
+    "selection_duplicates": 2,
+    "selection_prohibited_structure_hits": 0,
+    "onnx_parity_passed": true,
+    "onnx_parity_maximum_absolute_error": 0.000002384185791015625,
+    "public_gate_executed": false
+  },
   "selection": {
     "manifest_path": "ml/markers/center/runtime_consistency_v2/SELECTION_MANIFEST.json",
     "manifest_sha256": "e0f11c15a6ec2e268d9871d1fff993c39f1c88eb7daa3ce3009f01ef75a5af66",
@@ -45,7 +63,7 @@
     "provider": "CPUExecutionProvider"
   },
   "public_gate": {
-    "conditional_authorization": "P1 may open once only after passing every selection and parity requirement",
+    "conditional_authorization": "consumed without opening because P1 failed the required exact selection gate",
     "evaluation_limit": 1,
     "gate_config_path": "ml/markers/center/runtime_consistency_v2/gates/sealed-public-v2.json",
     "gate_config_sha256": "8037f9ce662b39c76f52834a974e0604fba4d28039751469504430716535c340",
@@ -58,6 +76,9 @@
     "archive_opened": false,
     "evaluations": 0
   },
+  "execution_authorized": false,
+  "authorized_candidate": null,
+  "failure": "P1 passed CPU ONNX parity but only 8 of 12 validation scenes were exact, with three false positives, one false negative, and two duplicates. P1 is consumed, cannot rerun, and did not open the truth-hidden public archive.",
   "synthetic_only": true,
   "private_or_article_images": false,
   "chandler_included": false,

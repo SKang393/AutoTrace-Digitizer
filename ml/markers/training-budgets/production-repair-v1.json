@@ -1423,7 +1423,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-runtime-consistency-v2",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_1_failed_selection",
       "defect_class": "selection and public evaluation used different postprocess implementations for the exact radial-feature P3 payload",
       "prior_revision": "marker-center-radial-feature-v1",
       "prior_candidate_bytes_reused": true,
@@ -1439,7 +1439,9 @@
       "preregistered_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
+      "consumed_candidate_ids": [
+        "P1"
+      ],
       "remaining_unregistered_candidate_ids": [
         "P2",
         "P3"
@@ -1451,7 +1453,7 @@
         "P1": "412a12e59440e7fc501089a84739aee17ceba8a3b327c0ecd777db078a777608"
       },
       "protocol_path": "ml/markers/center/runtime_consistency_v2/PROTOCOL.json",
-      "protocol_sha256": "9c27c363415467c42885beb31465ff69fcaf69d4881fe9dd57527a4378662a3e",
+      "protocol_sha256": "7e052387fd07b3683230268f5d3aa2d133251a34badb6e8157f38087acbcd38a",
       "selection_manifest_path": "ml/markers/center/runtime_consistency_v2/SELECTION_MANIFEST.json",
       "selection_manifest_sha256": "e0f11c15a6ec2e268d9871d1fff993c39f1c88eb7daa3ce3009f01ef75a5af66",
       "selection_validation_scene_count": 12,
@@ -1472,13 +1474,34 @@
       "p1_weights_changed": false,
       "p1_postprocess_revision": "radial-local-consensus-refinement-v1",
       "p1_selected_threshold": 0.3,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P1",
+      "p1_result_path": "ml/markers/center/runtime_consistency_v2/P1_RESULT.json",
+      "p1_result_sha256": "466937d8739401359106f01d709b559c3e036db91fd6b1fbd8670d3a53ac5b5b",
+      "p1_training_report_path": "ml/markers/center/artifacts/runtime-consistency-v2/P1-run/candidate-report.json",
+      "p1_training_report_sha256": "f53ceba950a5603f3bbbad39ad8718b01784d599e59e59df2320cb6327c4c4a1",
+      "p1_opened_seal_path": "ml/markers/training-seals/marker-center/marker-center-runtime-consistency-v2/P1/opened.json",
+      "p1_opened_seal_sha256": "2fcc1f588d9a876642f41c3f7c74b6d0de12b73a6a3c07a20ff29f9cff9a9e1c",
+      "p1_result_seal_path": "ml/markers/training-seals/marker-center/marker-center-runtime-consistency-v2/P1/result.json",
+      "p1_result_seal_sha256": "c354b80cfc6747a3dc9ddab1a6b74ba26a1a8bfcfffba03d2413210df5698f3e",
+      "p1_selection_exact_scene_count": 8,
+      "p1_selection_scene_count": 12,
+      "p1_selection_true_positives": 95,
+      "p1_selection_false_positives": 3,
+      "p1_selection_false_negatives": 1,
+      "p1_selection_duplicate_count": 2,
+      "p1_selection_prohibited_structure_hits": 0,
+      "p1_selection_f1": 0.9793814432989691,
+      "p1_onnx_parity_maximum_absolute_error": 0.000002384185791015625,
+      "p1_onnx_parity_passed": true,
+      "p1_selection_gate_passed": false,
+      "p1_failure": "P1 passed CPU ONNX parity but only 8/12 validation scenes were exact, with three false positives, one false negative, two duplicates, and zero prohibited-structure hits. P1 is consumed and cannot rerun; the truth-hidden public archive remained unopened.",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": "P1",
-      "public_gate_authorized_on_selection_pass": true,
+      "public_gate_authorized_on_selection_pass": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
+      "execution_blocker": "P1 failed the exact selection gate and is consumed. P2 and P3 are unregistered and require a separately preregistered isolated change before execution.",
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true

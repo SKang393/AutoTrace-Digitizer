@@ -176,7 +176,7 @@ def test_public_gate_binds_runtime_consistent_sources_and_single_execution() -> 
     assert GATE_CONFIG["required_false_negatives"] == 0
 
 
-def test_canonical_budget_authorizes_only_unused_p1_and_keeps_release_closed() -> None:
+def test_canonical_budget_consumes_failed_p1_without_opening_public_gate() -> None:
     ledger = _json(
         REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
     )
@@ -185,19 +185,43 @@ def test_canonical_budget_authorizes_only_unused_p1_and_keeps_release_closed() -
         for item in ledger["revisions"]
         if item["task"] == "marker-center" and item["revision"] == REVISION
     )
-    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["status"] == "candidate_1_failed_selection"
     assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(
         REVISION_ROOT / "training/p1.json"
     )
     assert entry["protocol_sha256"] == sha256_file(REVISION_ROOT / "PROTOCOL.json")
     assert entry["public_gate_authorized"] is False
-    assert entry["public_gate_authorized_on_selection_pass"] is True
+    assert entry["public_gate_authorized_on_selection_pass"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
+    result_path = REVISION_ROOT / "P1_RESULT.json"
+    result = _json(result_path)
+    assert entry["p1_result_sha256"] == sha256_file(result_path)
+    protocol = _json(REVISION_ROOT / "PROTOCOL.json")
+    assert protocol["status"] == "candidate_1_failed_selection"
+    assert protocol["consumed_candidates"] == ["P1"]
+    assert protocol["execution_authorized"] is False
+    assert protocol["candidate_result"]["result_sha256"] == sha256_file(result_path)
+    assert result["status"] == "failed_selection"
+    assert result["selection_exact_scene_count"] == 8
+    assert result["selection_scene_count"] == 12
+    assert result["selection_false_positives"] == 3
+    assert result["selection_false_negatives"] == 1
+    assert result["selection_duplicate_count"] == 2
+    assert result["selection_prohibited_structure_hits"] == 0
+    assert result["onnx_parity_passed"] is True
+    assert result["sealed_public_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert result["opened_seal_sha256"] == sha256_file(
+        REPO_ROOT / result["opened_seal_path"]
+    )
+    assert result["result_seal_sha256"] == sha256_file(
+        REPO_ROOT / result["result_seal_path"]
+    )
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
