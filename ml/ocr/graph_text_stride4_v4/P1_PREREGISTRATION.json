@@ -1,0 +1,22 @@
+{
+  "candidate_config_path": "ml/ocr/graph_text_stride4_v4/training/p1.json",
+  "candidate_config_sha256": "71eabe488cbbfb0b605986feb944017a8fd37e9abbab71b221a026d00c5d479e",
+  "candidate_id": "P1",
+  "expected_runner_source_bundle_sha256": "6f1f3f4f2d7ab3bc8a594f96df61ab71bf7bba7de8701acb2bfc3f40e5956a58",
+  "experiment_budget": 3,
+  "experiment_ordinal": 1,
+  "isolated_change": "replace the eightfold bottleneck with a fourfold bottleneck, fine-detail shallow skip, and dilated context stack while retaining P3's whole-frame composition, ignored-boundary objective, optimizer-step budget, production DB thresholds, and fail-closed gates on new disjoint families",
+  "production_approval": false,
+  "public_gate_authorized": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-stride4-v4",
+  "schema": "graphreader.ocr-graph-text-stride4-preregistration.v1",
+  "sealed_public_archive_opened": false,
+  "sealed_public_test_seal_sha256": "83771a24f66740ef201550a7bb7a74ed9b8710ba42a4678f4c178311f0cb295b",
+  "task": "ocr-detection",
+  "training_split_fingerprint": "325ead235c7e15971e57721e89554f7f2568127ca947a5eb6a0c714a6a156134",
+  "trigger_result_path": "ml/ocr/graph_text_ignore_band_v3/P3_RESULT.json",
+  "trigger_result_sha256": "4528e615371d8491302f6947a70b6f4109a68f51a6a8856702422a0d067a778d",
+  "validation_split_fingerprint": "b660c9720f9393b277c54840d0b28fa0ac2c0ca73622d67174cfecf41aae829c"
+}

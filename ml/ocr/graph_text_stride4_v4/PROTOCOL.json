@@ -1,0 +1,134 @@
+{
+  "architecture": "fine-skip-stride4-probability-map-v1",
+  "candidate_ids": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "currently_preregistered_candidate": "P1",
+  "data_scope": "new procedural generic graph labels and exclusion structures only; no V1, V2, or V3 selection or sealed fixtures, Chandler, Generalization, private images, article images, external datasets, pretrained weights, or downloaded training data",
+  "experiment_budget": 3,
+  "fixed_experiment_policy": {
+    "candidate_changes": "one preregistered isolated change per subsequent candidate",
+    "sealed_public_evaluations_before_selection": 0,
+    "threshold_sweeps": 0,
+    "validation_regeneration_after_training": 0
+  },
+  "input": [
+    "batch",
+    3,
+    "H",
+    "W"
+  ],
+  "license": "Apache-2.0",
+  "output": [
+    "batch",
+    1,
+    "H",
+    "W"
+  ],
+  "postprocessing": {
+    "algorithm": "db_postprocess_v1",
+    "box_confidence_threshold": 0.6,
+    "maximum_regions": 1000,
+    "minimum_side_length": 3,
+    "probability_threshold": 0.3,
+    "score_mode": "fast",
+    "unclip_ratio": 1.5
+  },
+  "preprocessing": {
+    "channel_means": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "channel_order": "BGR",
+    "channel_scales": [
+      4.366812227074235,
+      4.464285714285714,
+      4.444444444444445
+    ],
+    "dimension_multiple": 128,
+    "maximum_side_length": 960
+  },
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-stride4-v4",
+  "schema": "graphreader.ocr-graph-text-stride4-protocol.v1",
+  "selection_gates": {
+    "duplicate_region_count": 0,
+    "exact_region_count_every_fixture": true,
+    "exclusion_false_region_count": 0,
+    "false_region_count": 0,
+    "onnx_parity_maximum_absolute_error": 0.0001,
+    "provider": "CPUExecutionProvider",
+    "truth_match_iou_minimum": 0.5
+  },
+  "split_generator_source_bundle_sha256": "7b3ae79d221a718bd5681b07886fad24b1c0c8720f9b70209c58d8e5eca127a4",
+  "split_generator_source_paths": [
+    "ml/ocr/graph_text_stride4_v4/dataset.py",
+    "ml/ocr/graph_text_stride4_v4/prepare_split.py",
+    "ml/ocr/graph_text_stride4_v4/protocol.py",
+    "ml/ocr/graph_text_stride4_v4/sealed_dataset.py",
+    "ml/ocr/graph_text_ignore_band_v3/dataset.py"
+  ],
+  "splits": [
+    {
+      "degradation_family": "train-contrast-blockdrop-resample-v4",
+      "exclusion_count": 160,
+      "renderer_family": "staggered-rail-callout-v4",
+      "seed_offset": 111000,
+      "selection_visible": true,
+      "split": "train",
+      "text_count": 480
+    },
+    {
+      "degradation_family": "validation-defocus-ringing-channel-v4",
+      "exclusion_count": 40,
+      "renderer_family": "split-legend-chevron-grid-v4",
+      "seed_offset": 127000,
+      "selection_visible": true,
+      "split": "validation",
+      "text_count": 96
+    },
+    {
+      "degradation_family": "sealed-speckle-median-poster-v4",
+      "exclusion_count": 48,
+      "renderer_family": "offset-capsule-fan-grid-v4",
+      "seed_offset": 149000,
+      "selection_visible": false,
+      "split": "sealed_public",
+      "text_count": 128
+    }
+  ],
+  "state": "preregistered_before_training",
+  "task": "ocr-detection",
+  "training": {
+    "batch_size": 8,
+    "boundary_margin_loss_weight": 1.0,
+    "boundary_probability_ceiling": 0.25,
+    "db_shrink_ratio": 0.4,
+    "epochs": 12,
+    "ignore_band_expansion_pixels": 1,
+    "learning_rate": 0.001,
+    "patch_height": 192,
+    "patch_width": 512,
+    "sample_count": 1920,
+    "seed": 20260911,
+    "source_count": 640,
+    "tiles_per_source": 3,
+    "weight_decay": 0.0001
+  },
+  "trigger": {
+    "defect_class": "Eightfold spatial downsampling suppresses thin or low-contrast text cores before the high-precision ignored-boundary objective can retain them",
+    "prior_candidate": "P3",
+    "prior_exact_fixture_count": 92,
+    "prior_exclusion_false_region_count": 0,
+    "prior_false_region_count": 2,
+    "prior_fixture_count": 112,
+    "prior_result_path": "ml/ocr/graph_text_ignore_band_v3/P3_RESULT.json",
+    "prior_result_sha256": "4528e615371d8491302f6947a70b6f4109a68f51a6a8856702422a0d067a778d",
+    "prior_revision": "graph-text-ignore-band-v3",
+    "prior_text_missed_fixture_count": 19
+  }
+}

@@ -1155,6 +1155,58 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "ocr-detection",
+      "revision": "graph-text-stride4-v4",
+      "status": "candidate_1_preregistered",
+      "defect_class": "eightfold spatial downsampling suppresses thin or low-contrast text cores before the high-precision ignored-boundary objective can retain them",
+      "prior_revision_reuse": false,
+      "prior_revision": "graph-text-ignore-band-v3",
+      "trigger_evidence_path": "ml/ocr/graph_text_ignore_band_v3/P3_RESULT.json",
+      "trigger_evidence_sha256": "4528e615371d8491302f6947a70b6f4109a68f51a6a8856702422a0d067a778d",
+      "trigger_evidence": "Ignore-band V3 exhausted three candidates. Final P3 passed probability and CPU parity and removed every exclusion false positive, but left 19 text misses, two text false regions, and one multi-region text fixture across 112 selection fixtures.",
+      "isolated_change": "replace the eightfold bottleneck with a fourfold bottleneck, fine-detail shallow skip, and dilated context stack while retaining P3's whole-frame composition, ignored-boundary objective, optimizer-step budget, production DB thresholds, and fail-closed gates on new disjoint families",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "candidate_config_paths": {
+        "P1": "ml/ocr/graph_text_stride4_v4/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "71eabe488cbbfb0b605986feb944017a8fd37e9abbab71b221a026d00c5d479e"
+      },
+      "expected_runner_source_bundle_sha256": "6f1f3f4f2d7ab3bc8a594f96df61ab71bf7bba7de8701acb2bfc3f40e5956a58",
+      "protocol_path": "ml/ocr/graph_text_stride4_v4/PROTOCOL.json",
+      "protocol_sha256": "8e205a7f6cfc2252294948cfb576b6045421f338580dc0532165cc97371b0bd0",
+      "selection_manifest_path": "ml/ocr/graph_text_stride4_v4/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "2b839e9775082aa04eac6a4d34fcf9532b2013f7d107e5f1c18501e375886aeb",
+      "sealed_public_test_seal_path": "ml/ocr/graph_text_stride4_v4/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "83771a24f66740ef201550a7bb7a74ed9b8710ba42a4678f4c178311f0cb295b",
+      "sealed_public_fixture_archive_sha256": "b6498f2b37bfce66878c2fcba1da1764ec07323022e6d173f215d1ed039edd1b",
+      "sealed_public_private_manifest_sha256": "7857c79279894b3e78b5978b7d1b389077be4c6775d804e5648371b3b2a9c2db",
+      "p1_preregistration_path": "ml/ocr/graph_text_stride4_v4/P1_PREREGISTRATION.json",
+      "p1_preregistration_sha256": "ab42cedac1bb1292fc71749837f459227e2ed66a8f673cccc16317fb3ce5c803",
+      "p1_training_split_fingerprint": "325ead235c7e15971e57721e89554f7f2568127ca947a5eb6a0c714a6a156134",
+      "p1_validation_split_fingerprint": "b660c9720f9393b277c54840d0b28fa0ac2c0ca73622d67174cfecf41aae829c",
+      "p1_expected_optimizer_steps": 2880,
+      "p1_boundary_probability_ceiling": 0.25,
+      "p1_boundary_margin_loss_weight": 1.0,
+      "p1_maximum_downsampling_factor": 4,
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "execution_blocker": null,
+      "public_gate_authorized": false,
+      "public_gate_evaluations": 0,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
     }
   ]
 }
