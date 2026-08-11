@@ -1,0 +1,33 @@
+{
+  "binding": {
+    "candidate_hash_key_schema": [
+      "onnx_sha256"
+    ],
+    "candidate_hashes": {
+      "onnx_sha256": "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "ca1892bbe7f54845f07eaf6fd426231c99858ee5781d0c433ca28461f8929e02",
+    "evaluator_source_bundle_sha256": "1f727928205aa42878e12f1446ae5620e525e27cd8afad3f8495a19d6a66f945",
+    "evaluator_source_paths": [
+      "ml/markers/center/line_aware_v1/pipeline.py",
+      "ml/markers/center/radial_feature_v1/pipeline_p3.py",
+      "ml/markers/center/runtime_consistency_v2/dataset.py",
+      "ml/markers/center/runtime_consistency_v2/pipeline_p2.py",
+      "ml/markers/center/runtime_consistency_v2/public_gate_p2.py"
+    ],
+    "gate_config_sha256": "c29f0e7dfdb448d19e0584388ebef5d9df47bdc9079a464089b7ebc5acc058c6",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "marker-center-runtime-consistency-public-v2-p2",
+    "split_config_path": "ml/markers/center/runtime_consistency_v2/gates/sealed-public-p2.json",
+    "split_config_sha256": "4d2d20361ed5f17a52986db52d0e7c0e3f169c00958e9dfa18da69cef08b4ff0",
+    "task": "marker-center"
+  },
+  "evaluation_count": 1,
+  "key": "ee8dd10948c03124448ce0b853179f58413ea4eb228e6587d3b079fb999141c7",
+  "opened_utc": "2026-08-11T15:47:49.142917+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

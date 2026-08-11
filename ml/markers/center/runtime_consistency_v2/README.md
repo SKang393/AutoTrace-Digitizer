@@ -49,9 +49,18 @@ and 96/96 markers with zero errors in the one diagnostic sweep. Diagnosis
 SHA-256 is
 `9163904d698e38ca360bc9b7714636e7cbda54c6ce1202f0d07a991fee86a3d1`.
 
-P2 is preregistered but unexecuted. It may run once only after this exact source,
-configuration, protocol, and ledger are committed. The same truth-hidden public
-archive may open once only if P2 passes all visible selection requirements and
-CPU parity. P3 remains unregistered. Production approval, artifact-mask
-composition, manifest, model-store, notice, packaging, clean-machine, and
-end-to-end workflow evidence all remain absent.
+P2 executed once from that committed preregistration. It passed all 12 visible
+selection scenes and 96/96 markers with zero false positives, misses,
+duplicates, or prohibited hits. CPU ONNX parity passed at
+`2.384185791015625e-06`. P2 then opened the truth-hidden archive exactly once
+and failed the public gate: 13/20 scenes were exact, with 164 true positives,
+three false positives, four false negatives, zero duplicates, and zero
+prohibited-structure hits. Public report SHA-256 is
+`9013f187982c6f8e492d6cfbbbd28214f116f21e268ca35ad07526ca014ba5dd`.
+
+The public archive is now exposed and cannot rerun or support tuning. P2 is
+consumed, and P3 is retired under this revision rather than being adjusted
+against public results. Any future marker-center work requires a distinct
+preregistered defect class and a fresh sealed split. Production approval,
+artifact-mask composition, manifest, model-store, notice, packaging,
+clean-machine, and end-to-end workflow evidence all remain absent.

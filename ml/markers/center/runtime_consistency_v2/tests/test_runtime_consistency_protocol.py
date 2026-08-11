@@ -229,7 +229,7 @@ def test_p2_diagnosis_and_config_bind_one_selection_only_calibration() -> None:
     )
 
 
-def test_p2_public_gate_binds_same_unopened_archive_and_calibrated_sources() -> None:
+def test_p2_public_gate_binds_consumed_archive_and_calibrated_sources() -> None:
     config_path = REVISION_ROOT / "gates/sealed-public-p2.json"
     config = _json(config_path)
     seal_path = REPO_ROOT / config["sealed_public_test_seal_path"]
@@ -246,11 +246,15 @@ def test_p2_public_gate_binds_same_unopened_archive_and_calibrated_sources() -> 
     assert P2_GATE_CONFIG["minimum_center_separation"] == 6.5
     assert P2_GATE_CONFIG["postprocess_revision"] == pipeline_p2.POSTPROCESS_REVISION
     protocol = _json(REVISION_ROOT / "PROTOCOL.json")
-    assert protocol["public_gate"]["archive_opened"] is False
-    assert protocol["public_gate"]["evaluations"] == 0
+    assert protocol["public_gate"]["archive_opened"] is True
+    assert protocol["public_gate"]["evaluations"] == 1
+    assert protocol["public_gate"]["status"] == "fail"
+    assert protocol["public_gate"]["report_sha256"] == (
+        "9013f187982c6f8e492d6cfbbbd28214f116f21e268ca35ad07526ca014ba5dd"
+    )
 
 
-def test_canonical_budget_consumes_p1_and_authorizes_only_unopened_p2() -> None:
+def test_canonical_budget_records_exhausted_p2_public_failure() -> None:
     ledger = _json(
         REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
     )
@@ -259,29 +263,32 @@ def test_canonical_budget_consumes_p1_and_authorizes_only_unopened_p2() -> None:
         for item in ledger["revisions"]
         if item["task"] == "marker-center" and item["revision"] == REVISION
     )
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["status"] == "exhausted_failed_public_gate"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
+    assert entry["retired_unregistered_candidate_ids"] == ["P3"]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["candidate_config_sha256"]["P2"] == sha256_file(
         REVISION_ROOT / "training/p2.json"
     )
     assert entry["protocol_sha256"] == sha256_file(REVISION_ROOT / "PROTOCOL.json")
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_authorized_candidate_id"] == "P2"
-    assert entry["public_gate_authorized_on_selection_pass"] is True
-    assert entry["public_gate_evaluations"] == 0
-    assert entry["public_gate_archive_opened"] is False
+    assert entry["public_gate_authorized_on_selection_pass"] is False
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_archive_opened"] is True
     result_path = REVISION_ROOT / "P1_RESULT.json"
     result = _json(result_path)
     assert entry["p1_result_sha256"] == sha256_file(result_path)
     protocol = _json(REVISION_ROOT / "PROTOCOL.json")
-    assert protocol["status"] == "candidate_2_preregistered"
-    assert protocol["consumed_candidates"] == ["P1"]
-    assert protocol["execution_authorized"] is True
-    assert protocol["authorized_candidate"] == "P2"
+    assert protocol["status"] == "exhausted_failed_public_gate"
+    assert protocol["consumed_candidates"] == ["P1", "P2"]
+    assert protocol["remaining_unregistered_candidates"] == []
+    assert protocol["retired_unregistered_candidates"] == ["P3"]
+    assert protocol["execution_authorized"] is False
+    assert protocol["authorized_candidate"] is None
     assert protocol["candidate_result"]["result_sha256"] == sha256_file(result_path)
     assert result["status"] == "failed_selection"
     assert result["selection_exact_scene_count"] == 8
@@ -299,5 +306,42 @@ def test_canonical_budget_consumes_p1_and_authorizes_only_unopened_p2() -> None:
     assert result["result_seal_sha256"] == sha256_file(
         REPO_ROOT / result["result_seal_path"]
     )
+    p2_result_path = REVISION_ROOT / "P2_RESULT.json"
+    p2_result = _json(p2_result_path)
+    assert entry["p2_result_sha256"] == sha256_file(p2_result_path)
+    assert protocol["p2_result"]["result_sha256"] == sha256_file(p2_result_path)
+    assert p2_result["status"] == "failed_public_gate"
+    assert p2_result["selection_exact_scene_count"] == 12
+    assert p2_result["selection_scene_count"] == 12
+    assert p2_result["selection_true_positives"] == 96
+    assert p2_result["selection_false_positives"] == 0
+    assert p2_result["selection_false_negatives"] == 0
+    assert p2_result["selection_duplicate_count"] == 0
+    assert p2_result["selection_prohibited_structure_hits"] == 0
+    assert p2_result["onnx_parity_passed"] is True
+    assert p2_result["public_gate_evaluations"] == 1
+    assert p2_result["public_archive_opened"] is True
+    assert p2_result["public_gate_passed"] is False
+    assert p2_result["public_exact_scene_count"] == 13
+    assert p2_result["public_scene_count"] == 20
+    assert p2_result["public_true_positives"] == 164
+    assert p2_result["public_false_positives"] == 3
+    assert p2_result["public_false_negatives"] == 4
+    assert p2_result["public_duplicate_count"] == 0
+    assert p2_result["public_prohibited_structure_hits"] == 0
+    assert p2_result["public_gate_report_sha256"] == (
+        "9013f187982c6f8e492d6cfbbbd28214f116f21e268ca35ad07526ca014ba5dd"
+    )
+    for path_key, hash_key in (
+        ("training_opened_seal_path", "training_opened_seal_sha256"),
+        ("training_result_seal_path", "training_result_seal_sha256"),
+        ("public_opened_seal_path", "public_opened_seal_sha256"),
+        ("public_result_seal_path", "public_result_seal_sha256"),
+    ):
+        assert p2_result[hash_key] == sha256_file(REPO_ROOT / p2_result[path_key])
+    assert p2_result["rerun_allowed"] is False
+    assert p2_result["same_revision_p3_allowed"] is False
+    assert p2_result["production_approval"] is False
+    assert p2_result["release_eligible"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
