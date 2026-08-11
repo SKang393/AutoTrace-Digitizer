@@ -24,6 +24,7 @@ from ml.ocr.graph_text_stride4_v4.dataset import (
 )
 from ml.ocr.graph_text_stride4_v4.model import Stride4TextRegionNet
 from ml.ocr.graph_text_stride4_v4.model_p2 import Stride4ResizeConvTextRegionNet
+from ml.ocr.graph_text_stride4_v4.model_p3 import Stride4FullResolutionRefinementNet
 from ml.ocr.graph_text_stride4_v4.prepare_split import SPLIT_SOURCE_PATHS, freeze_split
 from ml.ocr.graph_text_stride4_v4.protocol import (
     BOUNDARY_MARGIN_LOSS_WEIGHT,
@@ -40,6 +41,7 @@ from ml.ocr.graph_text_stride4_v4.protocol import (
 )
 from ml.ocr.graph_text_stride4_v4.train_p1 import RUNNER_SOURCE_PATHS as P1_RUNNER_SOURCE_PATHS, _p3_loss
 from ml.ocr.graph_text_stride4_v4.train_p2 import RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS
+from ml.ocr.graph_text_stride4_v4.train_p3 import RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -153,6 +155,31 @@ def test_p2_changes_only_to_resize_convolution_upsampling() -> None:
         model(torch.zeros((1, 3, 63, 128)))
 
 
+def test_p3_adds_only_full_resolution_input_detail_fusion() -> None:
+    model = Stride4FullResolutionRefinementNet().eval()
+    values = torch.zeros((2, 3, 64, 128), dtype=torch.float32)
+    with torch.inference_mode():
+        output = model(values)
+        level1 = model.encoder1(values)
+        level2 = model.encoder2(level1)
+        input_detail = model.input_detail(values)
+    assert output.shape == (2, 1, 64, 128)
+    assert level1.shape[-2:] == (32, 64)
+    assert level2.shape[-2:] == (16, 32)
+    assert input_detail.shape == (2, 8, 64, 128)
+    assert model.fusion.in_channels == 20
+    assert isinstance(model.decoder, torch.nn.Conv2d)
+    assert isinstance(model.output, torch.nn.Conv2d)
+    assert not any(isinstance(module, torch.nn.ConvTranspose2d) for module in model.modules())
+    assert torch.isfinite(output).all()
+    assert float(output.min()) >= 0.0
+    assert float(output.max()) <= 1.0
+    with pytest.raises(ValueError, match=r"\[batch,3,H,W\]"):
+        model(torch.zeros((1, 1, 64, 128)))
+    with pytest.raises(ValueError, match="divisible by four"):
+        model(torch.zeros((1, 3, 63, 128)))
+
+
 def test_retained_p3_margin_is_one_sided_and_boundary_only() -> None:
     target = torch.zeros((1, 1, 8, 8), dtype=torch.float32)
     target[:, :, 3:5, 3:5] = 1.0
@@ -182,7 +209,7 @@ def test_retained_p3_margin_is_one_sided_and_boundary_only() -> None:
     assert torch.equal(losses[1][1], losses[2][1])
 
 
-def test_frozen_hashes_and_ledger_record_failed_p1_and_authorize_only_unused_p2() -> None:
+def test_frozen_hashes_and_ledger_record_failed_p2_and_authorize_only_unused_p3() -> None:
     expected_hashes = {
         "PROTOCOL.json": "8e205a7f6cfc2252294948cfb576b6045421f338580dc0532165cc97371b0bd0",
         "SELECTION_MANIFEST.json": "2b839e9775082aa04eac6a4d34fcf9532b2013f7d107e5f1c18501e375886aeb",
@@ -190,8 +217,11 @@ def test_frozen_hashes_and_ledger_record_failed_p1_and_authorize_only_unused_p2(
         "P1_PREREGISTRATION.json": "ab42cedac1bb1292fc71749837f459227e2ed66a8f673cccc16317fb3ce5c803",
         "P1_RESULT.json": "545211c5dcc62d1e9590e7c54c084c67750c30eb8077f1054fdf24089edbdf50",
         "P2_PREREGISTRATION.json": "8027a7ab0a131577c23cc5eafa9cf97d1176ac1a9255b6857055bfe732a32138",
+        "P2_RESULT.json": "7e9053717af8a47e5170dafc3b88669a2ab24e010e6226db9d770cdafe9cf80f",
+        "P3_PREREGISTRATION.json": "c5c8fb1d0b0181c86fa375e78a58f48efae09abf60f9e1fe5c25d7e6605eb21f",
         "training/p1.json": "71eabe488cbbfb0b605986feb944017a8fd37e9abbab71b221a026d00c5d479e",
         "training/p2.json": "7f0d93326ff57078cc0ca1442ed8b335542cd30e4e3d30da22feb22cf2f492f5",
+        "training/p3.json": "7392076bd4c51683ec8ac3544fc30e8a43531c41d43c6e1fccf8e610341619e6",
     }
     for name, expected in expected_hashes.items():
         assert _sha256(REVISION_ROOT / name) == expected
@@ -199,8 +229,26 @@ def test_frozen_hashes_and_ledger_record_failed_p1_and_authorize_only_unused_p2(
     assert source_bundle_sha256(REPO_ROOT, SPLIT_SOURCE_PATHS) == protocol["split_generator_source_bundle_sha256"]
     p1_config = _json(REVISION_ROOT / "training/p1.json")
     p2_config = _json(REVISION_ROOT / "training/p2.json")
+    p3_config = _json(REVISION_ROOT / "training/p3.json")
     assert source_bundle_sha256(REPO_ROOT, P1_RUNNER_SOURCE_PATHS) == p1_config["expected_runner_source_bundle_sha256"]
     assert source_bundle_sha256(REPO_ROOT, P2_RUNNER_SOURCE_PATHS) == p2_config["expected_runner_source_bundle_sha256"]
+    assert source_bundle_sha256(REPO_ROOT, P3_RUNNER_SOURCE_PATHS) == p3_config["expected_runner_source_bundle_sha256"]
+    p2_result = _json(REVISION_ROOT / "P2_RESULT.json")
+    assert p2_result["selection_report_sha256"] == "04a4c6aa6f541dcba1f95c1aac2e02ad07dde3d90e2b742a5f842f11322359f4"
+    assert p2_result["diagnosis_sha256"] == "7f1609ae8d38e27f4eb44f5057d6e346dc8a9919eaec4a71c69f263289a21cfc"
+    assert p2_result["diagnosis"]["diagnostic_runs"] == 1
+    assert p2_result["diagnosis"]["threshold_sweeps"] == 0
+    assert p2_result["sealed_public_archive_opened"] is False
+    assert p2_result["public_gate_evaluations"] == 0
+    assert p2_result["production_approval"] is False
+    p2_seal_root = REPO_ROOT / "ml/markers/training-seals/ocr-detection/graph-text-stride4-v4/P2"
+    assert _sha256(p2_seal_root / "opened.json") == "24661d855572e9d998131e017b49d15a95a32575937e4e1800660c2e58b91b01"
+    assert _sha256(p2_seal_root / "result.json") == "3bda7660218eff7903d21374c8edf39c20acfe5b74264c14d5decdb2e28f5fe8"
+    p3_preregistration = _json(REVISION_ROOT / "P3_PREREGISTRATION.json")
+    assert p3_preregistration["p2_result_sha256"] == expected_hashes["P2_RESULT.json"]
+    assert p3_preregistration["p2_diagnosis_sha256"] == p2_result["diagnosis_sha256"]
+    assert p3_preregistration["public_gate_authorized"] is False
+    assert p3_preregistration["sealed_public_archive_opened"] is False
     seal = _json(REVISION_ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert seal["truth_hidden_from_training_runner"] is True
     assert seal["public_release_eligible"] is False
@@ -209,20 +257,30 @@ def test_frozen_hashes_and_ledger_record_failed_p1_and_authorize_only_unused_p2(
     entries = [entry for entry in ledger["revisions"] if entry["revision"] == REVISION]
     assert len(entries) == 1
     entry = entries[0]
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["candidate_config_sha256"]["P1"] == expected_hashes["training/p1.json"]
     assert entry["candidate_config_sha256"]["P2"] == expected_hashes["training/p2.json"]
+    assert entry["candidate_config_sha256"]["P3"] == expected_hashes["training/p3.json"]
     assert entry["p1_training_report_sha256"] == "0390c78e06f54f0808495da9202f7cb558e4184493dd8f0d568cc645fe15948d"
     assert entry["p1_selection_exact_fixture_count"] == 101
     assert entry["p1_selection_false_region_count"] == 14
     assert entry["p1_selection_exclusion_false_region_count"] == 0
     assert entry["p1_text_missed_fixture_count"] == 35
     assert entry["p1_selection_gate_passed"] is False
+    assert entry["p2_training_report_sha256"] == "04a4c6aa6f541dcba1f95c1aac2e02ad07dde3d90e2b742a5f842f11322359f4"
+    assert entry["p2_selection_exact_fixture_count"] == 108
+    assert entry["p2_selection_false_region_count"] == 15
+    assert entry["p2_selection_exclusion_false_region_count"] == 1
+    assert entry["p2_text_missed_fixture_count"] == 24
+    assert entry["p2_text_multi_region_fixture_count"] == 3
+    assert entry["p2_diagnostic_runs"] == 1
+    assert entry["p2_threshold_sweeps"] == 0
+    assert entry["p2_selection_gate_passed"] is False
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False

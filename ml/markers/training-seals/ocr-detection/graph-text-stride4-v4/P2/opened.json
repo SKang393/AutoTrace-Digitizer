@@ -1,0 +1,28 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/graph_text_stride4_v4/training/p2.json",
+    "candidate_config_sha256": "7f0d93326ff57078cc0ca1442ed8b335542cd30e4e3d30da22feb22cf2f492f5",
+    "candidate_id": "P2",
+    "committed_source_enforcement": true,
+    "revision": "graph-text-stride4-v4",
+    "runner_source_bundle_sha256": "7ae9354860be5c7822a97e0ca0af89dd5212d12b68cb0809bafccad0f0b0492c",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/graph_text_ignore_band_v3/dataset.py",
+      "ml/ocr/graph_text_ignore_band_v3/train_p1.py",
+      "ml/ocr/graph_text_ignore_band_v3/train_p3.py",
+      "ml/ocr/graph_text_stride4_v4/candidate_runner.py",
+      "ml/ocr/graph_text_stride4_v4/dataset.py",
+      "ml/ocr/graph_text_stride4_v4/model_p2.py",
+      "ml/ocr/graph_text_stride4_v4/protocol.py",
+      "ml/ocr/graph_text_stride4_v4/train_p2.py",
+      "ml/ocr/official_bakeoff/structure_consensus_evaluate.py"
+    ],
+    "task": "ocr-detection",
+    "training_budget_ledger_sha256": "29ff3f20594a08f69df2ee926311a30d5eff77589952fa8e61b4cdef8d5d7ab4"
+  },
+  "opened_utc": "2026-08-11T10:27:01.793355+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

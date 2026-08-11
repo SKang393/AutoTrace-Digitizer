@@ -1159,7 +1159,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-stride4-v4",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_3_preregistered",
       "defect_class": "eightfold spatial downsampling suppresses thin or low-contrast text cores before the high-precision ignored-boundary objective can retain them",
       "prior_revision_reuse": false,
       "prior_revision": "graph-text-ignore-band-v3",
@@ -1169,24 +1169,26 @@
       "isolated_change": "replace the eightfold bottleneck with a fourfold bottleneck, fine-detail shallow skip, and dilated context stack while retaining P3's whole-frame composition, ignored-boundary objective, optimizer-step budget, production DB thresholds, and fail-closed gates on new disjoint families",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P2"
-      ],
-      "consumed_candidate_ids": [
-        "P1"
-      ],
-      "remaining_unregistered_candidate_ids": [
         "P3"
       ],
+      "consumed_candidate_ids": [
+        "P1",
+        "P2"
+      ],
+      "remaining_unregistered_candidate_ids": [],
       "candidate_config_paths": {
         "P1": "ml/ocr/graph_text_stride4_v4/training/p1.json",
-        "P2": "ml/ocr/graph_text_stride4_v4/training/p2.json"
+        "P2": "ml/ocr/graph_text_stride4_v4/training/p2.json",
+        "P3": "ml/ocr/graph_text_stride4_v4/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "71eabe488cbbfb0b605986feb944017a8fd37e9abbab71b221a026d00c5d479e",
-        "P2": "7f0d93326ff57078cc0ca1442ed8b335542cd30e4e3d30da22feb22cf2f492f5"
+        "P2": "7f0d93326ff57078cc0ca1442ed8b335542cd30e4e3d30da22feb22cf2f492f5",
+        "P3": "7392076bd4c51683ec8ac3544fc30e8a43531c41d43c6e1fccf8e610341619e6"
       },
       "p1_expected_runner_source_bundle_sha256": "6f1f3f4f2d7ab3bc8a594f96df61ab71bf7bba7de8701acb2bfc3f40e5956a58",
       "p2_expected_runner_source_bundle_sha256": "7ae9354860be5c7822a97e0ca0af89dd5212d12b68cb0809bafccad0f0b0492c",
+      "p3_expected_runner_source_bundle_sha256": "1530909896a333b427f3df19e1f258b132b30c8fc09ff5002a2a954bfd309fe4",
       "protocol_path": "ml/ocr/graph_text_stride4_v4/PROTOCOL.json",
       "protocol_sha256": "8e205a7f6cfc2252294948cfb576b6045421f338580dc0532165cc97371b0bd0",
       "selection_manifest_path": "ml/ocr/graph_text_stride4_v4/SELECTION_MANIFEST.json",
@@ -1225,8 +1227,35 @@
       "p2_preregistration_path": "ml/ocr/graph_text_stride4_v4/P2_PREREGISTRATION.json",
       "p2_preregistration_sha256": "8027a7ab0a131577c23cc5eafa9cf97d1176ac1a9255b6857055bfe732a32138",
       "p2_isolated_change": "replace only P1's two transposed-convolution upsampling layers with fixed bilinear resize followed by 3x3 convolution, retaining the fourfold encoder bottleneck, shallow fine-detail skip, dilated context, frozen data, P3 objective, optimizer, seed, 2880 steps, production DB thresholds, and unopened public archive",
+      "p2_result_path": "ml/ocr/graph_text_stride4_v4/P2_RESULT.json",
+      "p2_result_sha256": "7e9053717af8a47e5170dafc3b88669a2ab24e010e6226db9d770cdafe9cf80f",
+      "p2_training_report_path": "ml/ocr/graph_text_stride4_v4/artifacts/P2-run/candidate-report.json",
+      "p2_training_report_sha256": "04a4c6aa6f541dcba1f95c1aac2e02ad07dde3d90e2b742a5f842f11322359f4",
+      "p2_training_opened_seal_sha256": "24661d855572e9d998131e017b49d15a95a32575937e4e1800660c2e58b91b01",
+      "p2_training_result_seal_sha256": "3bda7660218eff7903d21374c8edf39c20acfe5b74264c14d5decdb2e28f5fe8",
+      "p2_checkpoint_sha256": "88e6f02b158ff3c3bed7e9057771a2aa950534829acd2e5351ed96709c9f730a",
+      "p2_onnx_sha256": "4fea761e5d905b9c081cbe1a2b4d2f9a535657342a34c85b0ed572a47d6bc8f1",
+      "p2_optimizer_steps": 2880,
+      "p2_selection_fixture_count": 136,
+      "p2_selection_exact_fixture_count": 108,
+      "p2_selection_false_region_count": 15,
+      "p2_selection_exclusion_false_region_count": 1,
+      "p2_selection_duplicate_region_count": 0,
+      "p2_text_missed_fixture_count": 24,
+      "p2_text_multi_region_fixture_count": 3,
+      "p2_onnx_parity_maximum_absolute_error": 0.00000095367431640625,
+      "p2_probability_contract_passed": true,
+      "p2_selection_gate_passed": false,
+      "p2_diagnosis_path": "ml/ocr/graph_text_stride4_v4/artifacts/P2-run/selection-diagnosis.json",
+      "p2_diagnosis_sha256": "7f1609ae8d38e27f4eb44f5057d6e346dc8a9919eaec4a71c69f263289a21cfc",
+      "p2_diagnostic_runs": 1,
+      "p2_threshold_sweeps": 0,
+      "p2_failure": "P2 passed probability and CPU parity and improved exactness to 108/136, but one exclusion false region, 24 missed text fixtures, 15 false regions, and three multi-region text fixtures kept selection closed. The full-split diagnosis found thirteen no-region cases with strong probability mass and eleven centered but vertically expanded boxes.",
+      "p3_preregistration_path": "ml/ocr/graph_text_stride4_v4/P3_PREREGISTRATION.json",
+      "p3_preregistration_sha256": "c5c8fb1d0b0181c86fa375e78a58f48efae09abf60f9e1fe5c25d7e6605eb21f",
+      "p3_isolated_change": "add only an eight-channel 3x3 full-resolution input-detail branch and one 3x3 fusion layer after P2's fixed bilinear decoder, retaining the fourfold encoder, shallow half-resolution skip, dilated context, frozen data, ignored-boundary objective, optimizer, seed, 2880 steps, production DB thresholds, and unopened public archive",
       "execution_authorized": true,
-      "authorized_candidate_id": "P2",
+      "authorized_candidate_id": "P3",
       "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
