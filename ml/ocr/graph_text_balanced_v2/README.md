@@ -36,11 +36,15 @@ exact. It produced 41 false regions, including eight on exclusions, and missed
 glyph pixels outside the shrunken DB target. The sealed public archive remained
 unopened.
 
-P3 retains the exact P2 model, data, thresholds, optimizer, seed, schedule, and
-hard-negative constants. Its only change is to apply the hard-negative term to
-empty-target exclusion patches. Text patches continue to use only the P1
-weighted BCE and Dice objective. P1 and P2 are consumed and P3 is the only
-authorized candidate.
+P3 retained the exact P2 model, data, thresholds, optimizer, seed, schedule,
+and hard-negative constants. Its only change was to apply the hard-negative
+term to empty-target exclusion patches. It ran exactly once and failed
+selection. Probability and parity passed, but only 30/96 fixtures were exact.
+It produced 82 false regions, including 20 on exclusions, and missed 13 text
+fixtures. The sealed public archive remained unopened.
+
+P1 through P3 are consumed. This defect class is exhausted and cannot rerun,
+tune, open its public gate, manifest, store, package, or approve any payload.
 
 No result in this folder can create a production manifest, populate the model
 store, package weights, approve the combined OCR pair, change release readiness,

@@ -197,7 +197,7 @@ def test_p3_limits_hard_negative_loss_to_empty_target_exclusions() -> None:
     ]
 
 
-def test_preregistration_hashes_and_ledger_authorize_only_p3() -> None:
+def test_result_hashes_and_ledger_exhaust_failed_p3() -> None:
     expected_hashes = {
         "PROTOCOL.json": "2ca2e0cc41cb77ef2f551e27b7006ae15c4494296a0571c1f28edb908c39c02c",
         "SELECTION_MANIFEST.json": "58ec2800591431eaaa98ccbd07d7359afe2c4b01251f197cf443fcb079c5aec9",
@@ -207,6 +207,7 @@ def test_preregistration_hashes_and_ledger_authorize_only_p3() -> None:
         "P2_PREREGISTRATION.json": "846f0840ee17d463f97aeb76f4e1cf81f8991957d677d8f280bfcfdafe9794fd",
         "P2_RESULT.json": "d45cdb04914014081da272964b7e74fce7514ab35baf06982df63ed1fe97d58f",
         "P3_PREREGISTRATION.json": "e8ac1d307b7e9e807150d4d00bfea31bbc58ca569c93e7e7915e011df51a5db4",
+        "P3_RESULT.json": "2d21585f703384db014ae9d2c45f15b3ff3fb1ef2cdc2aaf02918e560001e288",
         "training/p1.json": "84aebf97f9879a1556077b6b97d4592b4d0abcc49fcaaed1fa2ba4c8fccfdfa3",
         "training/p2.json": "17c5669b4276c1986209331b77c6c4bb1f6893dea8456b88794fc7c4f1606bbe",
         "training/p3.json": "f663bd2fb9cbf3e0ea1f4a4119213f4885b7d6637020022cbe3eb0ccbe0746c7",
@@ -240,17 +241,23 @@ def test_preregistration_hashes_and_ledger_authorize_only_p3() -> None:
     assert p3_preregistration["p2_consumed"] is True
     assert p3_preregistration["sealed_public_archive_opened"] is False
     assert p3_preregistration["public_gate_authorized"] is False
+    p3_result = _json(REVISION_ROOT / "P3_RESULT.json")
+    assert p3_result["status"] == "failed_selection"
+    assert p3_result["selection_metrics"]["exact_fixture_count"] == 30
+    assert p3_result["selection_metrics"]["false_region_count"] == 82
+    assert p3_result["selection_metrics"]["exclusion_false_region_count"] == 20
+    assert p3_result["sealed_public_archive_opened"] is False
 
     ledger = _json(LEDGER_PATH)
     entries = [entry for entry in ledger["revisions"] if entry["revision"] == REVISION]
     assert len(entries) == 1
     entry = entries[0]
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["status"] == "exhausted_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
@@ -266,3 +273,4 @@ def test_preregistration_hashes_and_ledger_authorize_only_p3() -> None:
     assert entry["p2_preregistration_sha256"] == expected_hashes["P2_PREREGISTRATION.json"]
     assert entry["p2_result_sha256"] == expected_hashes["P2_RESULT.json"]
     assert entry["p3_preregistration_sha256"] == expected_hashes["P3_PREREGISTRATION.json"]
+    assert entry["p3_result_sha256"] == expected_hashes["P3_RESULT.json"]

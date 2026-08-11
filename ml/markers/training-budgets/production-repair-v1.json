@@ -934,7 +934,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-balanced-recall-v2",
-      "status": "candidate_3_preregistered",
+      "status": "exhausted_failed_selection",
       "defect_class": "sparse positive recall collapses while graph-structure exclusions remain exact",
       "prior_revision_reuse": false,
       "prior_revision": "graph-text-region-detector-v1",
@@ -943,12 +943,11 @@
       "trigger_evidence": "The exhausted V1 P3 detector passed probability, parity, and all 24 exclusions, but only 39 of 72 text fixtures were exact; 29 text fixtures had no matched region and ten false regions remained.",
       "isolated_change": "replace the exhausted tiny strided network and unweighted sparse-pixel loss with a skip-connected encoder-decoder, fixed 8.0 positive BCE weight, and fixed 2.0 Dice weight on new disjoint renderer and degradation families; retain BGR normalization, DB shrink ratio 0.40, and every DB threshold",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [
-        "P3"
-      ],
+      "preregistered_candidate_ids": [],
       "consumed_candidate_ids": [
         "P1",
-        "P2"
+        "P2",
+        "P3"
       ],
       "remaining_unregistered_candidate_ids": [],
       "candidate_config_paths": {
@@ -1016,8 +1015,25 @@
       "p3_preregistration_path": "ml/ocr/graph_text_balanced_v2/P3_PREREGISTRATION.json",
       "p3_preregistration_sha256": "e8ac1d307b7e9e807150d4d00bfea31bbc58ca569c93e7e7915e011df51a5db4",
       "p3_isolated_change": "apply the unchanged P2 hard-negative term only to empty-target exclusion patches while retaining the exact model, data, thresholds, optimizer, seed, schedule, and hard-negative constants",
-      "execution_authorized": true,
-      "authorized_candidate_id": "P3",
+      "p3_result_path": "ml/ocr/graph_text_balanced_v2/P3_RESULT.json",
+      "p3_result_sha256": "2d21585f703384db014ae9d2c45f15b3ff3fb1ef2cdc2aaf02918e560001e288",
+      "p3_training_report_path": "ml/ocr/graph_text_balanced_v2/artifacts/P3-run/candidate-report.json",
+      "p3_training_report_sha256": "42a3c317e1b5dbaa516cd4740f09c67c9d45af191908dea5581d7f39202a4bbb",
+      "p3_training_opened_seal_sha256": "b2ddd26dd308adfb3f104f10192a64e407c00b8dbe213acf2c546a0b6d341dfa",
+      "p3_training_result_seal_sha256": "18a28251cf8317f5b5e7bd3ba1faf0606684c4546809f228c1cf5052b4c5ab63",
+      "p3_checkpoint_sha256": "0658f484ccc5e39bd840ba256897d1ee0a9b4962bd32730791e19f7a4200bb4b",
+      "p3_onnx_sha256": "239f62602487100bb70060952c87c81f3982b3d1bfa2ac9a58fb1d9e453bcec3",
+      "p3_selection_exact_fixture_count": 30,
+      "p3_selection_fixture_count": 96,
+      "p3_selection_false_region_count": 82,
+      "p3_selection_exclusion_false_region_count": 20,
+      "p3_selection_duplicate_region_count": 0,
+      "p3_onnx_parity_maximum_absolute_error": 0.000004649162292480469,
+      "p3_probability_contract_passed": true,
+      "p3_selection_gate_passed": false,
+      "p3_failure": "P3 passed probability and parity but only 30/96 selection fixtures were exact. It produced 82 false regions including 20 on exclusions and missed 13 text fixtures. The full three-candidate budget is exhausted without opening the public gate.",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "production_approval": false,
