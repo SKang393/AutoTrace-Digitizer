@@ -1619,6 +1619,65 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "marker-center",
+      "revision": "marker-center-background-invariant-v3",
+      "status": "candidate_1_preregistered",
+      "defect_class": "marker-center confidence instability under smooth low-frequency graph background drift",
+      "prior_revision": "marker-center-runtime-consistency-v2",
+      "prior_exposed_fixture_bytes_reused": false,
+      "experiment_budget": 1,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [],
+      "candidate_config_paths": {
+        "P1": "ml/markers/center/background_invariant_v3/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "2416cb00114c555e53674d0c82cd58f06f75ca9a98ca853b43b1132b36bfb687"
+      },
+      "protocol_path": "ml/markers/center/background_invariant_v3/PROTOCOL.json",
+      "protocol_sha256": "e56af730fc82b29cfefaa5d3120480fa0ad539fffe8dee265d413a733ed2521a",
+      "selection_manifest_path": "ml/markers/center/background_invariant_v3/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "554c0f6fb70fe16332c95bc7a91b6394d27e990d09239f15255a8a55d2983ce8",
+      "selection_scene_count": 16,
+      "sealed_public_test_seal_path": "ml/markers/center/background_invariant_v3/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "d4b3b5f3988316f4715b20495a37712f1cd3eebb2ff18439bfc6bb171107855f",
+      "sealed_public_fixture_archive_sha256": "1c1ecb73812a7aaaf954ee1507a2a8e992df76037feffa5064843be11555549f",
+      "sealed_public_private_manifest_sha256": "2187d1670f8dfebe90db8a62c634e3eefb1284255b29e8c2ba7b65e354061e4e",
+      "sealed_public_scene_count": 20,
+      "public_gate_config_path": "ml/markers/center/background_invariant_v3/gates/sealed-public-p1.json",
+      "public_gate_config_sha256": "f425ac74111f27afd4a40a441195f2deb0bda5e13b926c066a7ae24bb13fa7ef",
+      "expected_runner_source_bundle_sha256": "c42fd0fec4ca78803345dc94efae89f980b86295af2d40f6285408cfafba6fcf",
+      "source_result_path": "ml/markers/center/runtime_consistency_v2/P2_RESULT.json",
+      "source_result_sha256": "451909449574a0d0e02fe5e0460667f806c41963f88f14c05de11a9cfbaff999",
+      "source_public_report_sha256": "9013f187982c6f8e492d6cfbbbd28214f116f21e268ca35ad07526ca014ba5dd",
+      "source_public_failed_scene_count": 7,
+      "source_public_failed_background_ramp_scene_count": 5,
+      "source_onnx_sha256": "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b",
+      "source_checkpoint_sha256": "6b670a6f29454d7f63527f57210aa918540a817fca156a71b96872ff09aa2787",
+      "optimizer_steps": 0,
+      "weights_changed": false,
+      "isolated_change": "subtract the lower-middle median from only the ink channel of each 33 by 33 proposal patch before the exact unchanged ONNX; retain masks, proposal eligibility, threshold, geometry refinement, duplicate suppression, payload bytes, and all gates",
+      "preprocess_revision": "patch-ink-median-background-subtraction-v1",
+      "postprocess_revision": "radial-local-consensus-calibration-v2",
+      "selected_threshold": 0.25,
+      "minimum_center_separation": 6.5,
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "public_gate_authorized": true,
+      "public_gate_authorized_candidate_id": "P1",
+      "public_gate_authorized_on_selection_pass": true,
+      "public_gate_evaluations": 0,
+      "public_gate_archive_opened": false,
+      "manifest_created": false,
+      "model_store_promoted": false,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
     }
   ]
 }

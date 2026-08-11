@@ -1,0 +1,38 @@
+{
+  "chandler_included": false,
+  "dataset_revision": "marker-center-background-invariant-procedural-v3",
+  "degradation_ids": [
+    "dual_axis_curve_public",
+    "offcenter_vignette_public",
+    "sinusoidal_field_public"
+  ],
+  "family_ids": [
+    "counter_slope_public",
+    "offset_cycle_public",
+    "delayed_rebound_public",
+    "split_plateau_public",
+    "wide_fall_public"
+  ],
+  "fixture_archive_path": "ml/markers/center/artifacts/background-invariant-v3/split-freeze/sealed-public-fixtures.npz",
+  "fixture_archive_sha256": "1c1ecb73812a7aaaf954ee1507a2a8e992df76037feffa5064843be11555549f",
+  "frozen_utc": "2026-08-11T17:16:31.339759+00:00",
+  "prior_exposed_fixture_bytes_reused": false,
+  "private_manifest_path": "ml/markers/center/artifacts/background-invariant-v3/split-freeze/sealed-public-private-manifest.json",
+  "private_manifest_sha256": "2187d1670f8dfebe90db8a62c634e3eefb1284255b29e8c2ba7b65e354061e4e",
+  "private_or_article_images": false,
+  "private_seed_sha256": "bcabcbea1ab08bcbd83e906235c9f790b6107250ea51a96a021a324ff5ac1c1e",
+  "public_release_eligible": false,
+  "revision": "marker-center-background-invariant-v3",
+  "scene_count": 20,
+  "schema": "graphreader.marker-center-background-invariant-sealed-test-seal.v3",
+  "selection_manifest_path": "ml/markers/center/background_invariant_v3/SELECTION_MANIFEST.json",
+  "selection_manifest_sha256": "554c0f6fb70fe16332c95bc7a91b6394d27e990d09239f15255a8a55d2983ce8",
+  "split_generator_source_bundle_sha256": "e963f890a6af88d15c50ae66e725387e2cc828f7cfc1ce5347284fd1fe9a52d9",
+  "split_generator_source_paths": [
+    "ml/markers/center/background_invariant_v3/dataset.py",
+    "ml/markers/center/background_invariant_v3/prepare_split.py"
+  ],
+  "synthetic_only": true,
+  "task": "marker-center",
+  "truth_hidden_from_candidate_until_selection_pass": true
+}
