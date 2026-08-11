@@ -1,0 +1,37 @@
+{
+  "chandler_included": false,
+  "dataset_revision": "marker-center-runtime-consistency-procedural-v2",
+  "degradation_ids": [
+    "mixed_focus_public",
+    "background_ramp_public",
+    "anisotropic_scan_public"
+  ],
+  "family_ids": [
+    "double_rebound_public",
+    "descending_echo_public",
+    "interleaved_plateau_public",
+    "late_surge_public",
+    "wide_cycle_public"
+  ],
+  "fixture_archive_path": "ml/markers/center/artifacts/runtime-consistency-v2/split-freeze/sealed-public-fixtures.npz",
+  "fixture_archive_sha256": "668d8274e3544945d1b6384bdd259cdee81942fd5c9cb36daa25c476574427b7",
+  "frozen_utc": "2026-08-11T14:55:11.111632+00:00",
+  "private_manifest_path": "ml/markers/center/artifacts/runtime-consistency-v2/split-freeze/sealed-public-private-manifest.json",
+  "private_manifest_sha256": "ca1892bbe7f54845f07eaf6fd426231c99858ee5781d0c433ca28461f8929e02",
+  "private_or_article_images": false,
+  "private_seed_sha256": "241c7bc4a4a17f00e40c1942302616f38a38d8df284b54e6b16581b59d780eee",
+  "public_release_eligible": false,
+  "revision": "marker-center-runtime-consistency-v2",
+  "scene_count": 20,
+  "schema": "graphreader.marker-center-runtime-consistency-sealed-test-seal.v2",
+  "selection_manifest_path": "ml/markers/center/runtime_consistency_v2/SELECTION_MANIFEST.json",
+  "selection_manifest_sha256": "e0f11c15a6ec2e268d9871d1fff993c39f1c88eb7daa3ce3009f01ef75a5af66",
+  "split_generator_source_bundle_sha256": "faa68eb963d40b6fe14616fe013fc1cf159025594c1e0e63bd65c755cc5788b3",
+  "split_generator_source_paths": [
+    "ml/markers/center/runtime_consistency_v2/dataset.py",
+    "ml/markers/center/runtime_consistency_v2/prepare_split.py"
+  ],
+  "synthetic_only": true,
+  "task": "marker-center",
+  "truth_hidden_from_candidate_until_selection_pass": true
+}
