@@ -25,7 +25,7 @@
     "seal_path": "ml/ocr/official_recognition_v1/SEALED_PUBLIC_TEST_SEAL.json",
     "seal_sha256": "aab87e8d5f1932e60964bba0bae7589e7148e4ad56e0c9d6c0c516926b33bb76",
     "gate_config_path": "ml/ocr/official_recognition_v1/gates/sealed-public-p1.json",
-    "gate_config_sha256": "d82ccccee71ccdad7f038daa4f4e5b390b4fe0b6773200310bfa967cfe69f187",
+    "gate_config_sha256": "63768bc2803aac8ae15def9d99d1188809c44a5087521020a57eaa4654d4bdd2",
     "case_count": 256,
     "fixture_archive_sha256": "e285407ed007f1140eb000d5fca0b9223a13dda6632b111525b9d2d2f8fbee85",
     "private_manifest_sha256": "3835f77fdd8e652cd896319b9de5a63df54b8a7a3cd61ac74c5de95d4033ab15",

@@ -8,6 +8,12 @@
   "fixture_archive_sha256": "e285407ed007f1140eb000d5fca0b9223a13dda6632b111525b9d2d2f8fbee85",
   "private_manifest_sha256": "3835f77fdd8e652cd896319b9de5a63df54b8a7a3cd61ac74c5de95d4033ab15",
   "expected_evaluator_source_bundle_sha256": "88180d3ae21752b99360a2bb8202a00146774d7018ed354cbcfa991f433cb80d",
+  "expected_candidate_hash_keys": [
+    "onnx_sha256",
+    "selection_report_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "3835f77fdd8e652cd896319b9de5a63df54b8a7a3cd61ac74c5de95d4033ab15",
+  "expected_gate_config_sha256": "a73c7bddcc357aa47027764f812e719b9d924416882a673a4ba51024f7f13e5d",
   "evaluation_limit": 1,
   "exact_match_minimum": 0.9,
   "character_error_rate_maximum": 0.05,

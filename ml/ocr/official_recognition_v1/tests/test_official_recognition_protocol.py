@@ -58,6 +58,12 @@ def test_preregistration_binds_exact_model_sources_splits_and_budget() -> None:
     assert config["selection_seal_sha256"] == sha256_file(ROOT / "SELECTION_SEAL.json")
     assert config["sealed_public_test_seal_sha256"] == sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert config["public_gate_config_sha256"] == sha256_file(gate_path)
+    gate = load(gate_path)
+    assert gate["expected_candidate_hash_keys"] == ["onnx_sha256", "selection_report_sha256"]
+    assert gate["expected_dataset_manifest_sha256"] == gate["private_manifest_sha256"]
+    assert gate["expected_gate_config_sha256"] == evaluate._hash_bytes(
+        evaluate.canonical_json_bytes(dict(evaluate.PUBLIC_GATE_CONFIG))
+    )
     expected_bundle = source_bundle_sha256(REPO_ROOT, evaluate.RUNNER_SOURCE_PATHS)
     assert config["expected_runner_source_bundle_sha256"] == expected_bundle
     assert protocol["runner_source_bundle_sha256"] == expected_bundle

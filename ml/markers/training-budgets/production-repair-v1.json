@@ -1562,10 +1562,10 @@
         "P1": "ml/ocr/official_recognition_v1/training/p1.json"
       },
       "candidate_config_sha256": {
-        "P1": "860978b0cc2a8a2783031203a3f68ed9f7f0465b1dad911fedb607d8d2fe51e5"
+        "P1": "e6c6d670e9c3329b0e2d6c0a36d47a14336205fc68f17a184c50539f3cd242f3"
       },
       "protocol_path": "ml/ocr/official_recognition_v1/PROTOCOL.json",
-      "protocol_sha256": "d43167d868cf32c23e7e6a39d6d64893bc29e23fc149ca3ae0b14ec77a91b023",
+      "protocol_sha256": "f2ce32eee2404e6bdf25cf9f3de0e941115ab475de3191108440df97b858f333",
       "selection_seal_path": "ml/ocr/official_recognition_v1/SELECTION_SEAL.json",
       "selection_seal_sha256": "7570bf60a0a013c29baf3ebb97185cd00a714a97891a35fa9721cc6ef6127d26",
       "selection_fixture_archive_sha256": "a684b9b4aec2b1a69ab47f62eedba5c123217c445a2fe404862878b13fd4230b",
@@ -1575,7 +1575,7 @@
       "sealed_public_fixture_archive_sha256": "e285407ed007f1140eb000d5fca0b9223a13dda6632b111525b9d2d2f8fbee85",
       "sealed_public_private_manifest_sha256": "3835f77fdd8e652cd896319b9de5a63df54b8a7a3cd61ac74c5de95d4033ab15",
       "public_gate_config_path": "ml/ocr/official_recognition_v1/gates/sealed-public-p1.json",
-      "public_gate_config_sha256": "d82ccccee71ccdad7f038daa4f4e5b390b4fe0b6773200310bfa967cfe69f187",
+      "public_gate_config_sha256": "63768bc2803aac8ae15def9d99d1188809c44a5087521020a57eaa4654d4bdd2",
       "expected_runner_source_bundle_sha256": "88180d3ae21752b99360a2bb8202a00146774d7018ed354cbcfa991f433cb80d",
       "model_id": "en_PP-OCRv5_mobile_rec",
       "model_onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
