@@ -16,17 +16,19 @@
     "weights_changed": false
   },
   "chandler_included": false,
-  "consumed_candidates": [],
-  "currently_preregistered_candidate": "P1",
+  "consumed_candidates": [
+    "P1"
+  ],
+  "currently_preregistered_candidate": null,
   "defect_class": "marker-center confidence instability under smooth low-frequency graph background drift",
-  "execution_authorized": true,
+  "execution_authorized": false,
   "experiment_budget": 1,
   "isolated_change": "subtract the lower-middle median from only the ink channel of each 33 by 33 proposal patch before the exact unchanged ONNX; retain masks, proposal eligibility, threshold, geometry refinement, duplicate suppression, payload bytes, and all gates",
   "private_or_article_images": false,
   "production_approval": false,
   "public_gate": {
-    "authorized_candidate": "P1",
-    "authorized_on_selection_pass": true,
+    "authorized_candidate": null,
+    "authorized_on_selection_pass": false,
     "evaluations": 0,
     "fixture_archive_opened": false,
     "fixture_archive_sha256": "1c1ecb73812a7aaaf954ee1507a2a8e992df76037feffa5064843be11555549f",
@@ -64,7 +66,26 @@
     "source_result_sha256": "451909449574a0d0e02fe5e0460667f806c41963f88f14c05de11a9cfbaff999",
     "use": "trigger evidence only"
   },
-  "status": "candidate_1_preregistered",
+  "result": {
+    "path": "ml/markers/center/background_invariant_v3/P1_RESULT.json",
+    "sha256": "c37aad98d7cc404662e0478acb19b1cf50a3d450603f3d8631cab206cadb0fcc",
+    "candidate_report_sha256": "8f0116e137300b211ec0adab80907106a776b3ea1e5f2c17018316826372dbc9",
+    "training_opened_seal_sha256": "d2bba7d71c7e1a939c6df1f2f3eded402b6b58b626ad86eebb93ca821c8a7b42",
+    "training_result_seal_sha256": "6e44b076c74151126b04722bd3ded74aeba7f416b563b0923bf93e8839b665fb",
+    "selection_scene_count": 16,
+    "selection_exact_scene_count": 8,
+    "selection_true_positives": 125,
+    "selection_false_positives": 5,
+    "selection_false_negatives": 3,
+    "selection_duplicate_count": 3,
+    "selection_prohibited_structure_hits": 0,
+    "selection_gate_passed": false,
+    "onnx_parity_maximum_absolute_error": 1.430511474609375e-06,
+    "onnx_parity_passed": true,
+    "public_gate_executed": false
+  },
+  "failure": "P1 passed CPU ONNX parity but only 8 of 16 selection scenes were exact, with five false positives, three false negatives, and three duplicates. P1 is consumed, cannot rerun, and did not execute the truth-hidden public gate.",
+  "status": "exhausted_failed_selection",
   "synthetic_only": true,
   "task": "marker-center"
 }

@@ -1,0 +1,29 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/markers/center/background_invariant_v3/training/p1.json",
+    "candidate_config_sha256": "2416cb00114c555e53674d0c82cd58f06f75ca9a98ca853b43b1132b36bfb687",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "marker-center-background-invariant-v3",
+    "runner_source_bundle_sha256": "c42fd0fec4ca78803345dc94efae89f980b86295af2d40f6285408cfafba6fcf",
+    "runner_source_paths": [
+      "ml/markers/center/background_invariant_v3/candidate_runner.py",
+      "ml/markers/center/background_invariant_v3/dataset.py",
+      "ml/markers/center/background_invariant_v3/pipeline.py",
+      "ml/markers/center/background_invariant_v3/public_gate.py",
+      "ml/markers/center/line_aware_v1/model.py",
+      "ml/markers/center/line_aware_v1/pipeline.py",
+      "ml/markers/center/radial_feature_v1/model.py",
+      "ml/markers/center/radial_feature_v1/pipeline_p3.py",
+      "ml/markers/center/runtime_consistency_v2/candidate_runner.py",
+      "ml/markers/center/runtime_consistency_v2/pipeline_p2.py",
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py"
+    ],
+    "task": "marker-center",
+    "training_budget_ledger_sha256": "90f0f94821a5356a9ad5029e9a3aae07fab19543a9c82aa291ec6d6783ce033a"
+  },
+  "opened_utc": "2026-08-11T17:35:03.832356+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

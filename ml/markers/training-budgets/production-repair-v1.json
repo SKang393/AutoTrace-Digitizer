@@ -1623,7 +1623,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-background-invariant-v3",
-      "status": "candidate_1_preregistered",
+      "status": "exhausted_failed_selection",
       "defect_class": "marker-center confidence instability under smooth low-frequency graph background drift",
       "prior_revision": "marker-center-runtime-consistency-v2",
       "prior_exposed_fixture_bytes_reused": false,
@@ -1631,7 +1631,9 @@
       "preregistered_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
+      "consumed_candidate_ids": [
+        "P1"
+      ],
       "remaining_unregistered_candidate_ids": [],
       "candidate_config_paths": {
         "P1": "ml/markers/center/background_invariant_v3/training/p1.json"
@@ -1640,7 +1642,7 @@
         "P1": "2416cb00114c555e53674d0c82cd58f06f75ca9a98ca853b43b1132b36bfb687"
       },
       "protocol_path": "ml/markers/center/background_invariant_v3/PROTOCOL.json",
-      "protocol_sha256": "e56af730fc82b29cfefaa5d3120480fa0ad539fffe8dee265d413a733ed2521a",
+      "protocol_sha256": "286838ee982386e317874c0aa8c3fe3ec28274c27ab14e4dae76a441178ca806",
       "selection_manifest_path": "ml/markers/center/background_invariant_v3/SELECTION_MANIFEST.json",
       "selection_manifest_sha256": "554c0f6fb70fe16332c95bc7a91b6394d27e990d09239f15255a8a55d2983ce8",
       "selection_scene_count": 16,
@@ -1666,11 +1668,24 @@
       "postprocess_revision": "radial-local-consensus-calibration-v2",
       "selected_threshold": 0.25,
       "minimum_center_separation": 6.5,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P1",
-      "public_gate_authorized": true,
-      "public_gate_authorized_candidate_id": "P1",
-      "public_gate_authorized_on_selection_pass": true,
+      "p1_result_path": "ml/markers/center/background_invariant_v3/P1_RESULT.json",
+      "p1_result_sha256": "c37aad98d7cc404662e0478acb19b1cf50a3d450603f3d8631cab206cadb0fcc",
+      "p1_candidate_report_sha256": "8f0116e137300b211ec0adab80907106a776b3ea1e5f2c17018316826372dbc9",
+      "p1_training_opened_seal_sha256": "d2bba7d71c7e1a939c6df1f2f3eded402b6b58b626ad86eebb93ca821c8a7b42",
+      "p1_training_result_seal_sha256": "6e44b076c74151126b04722bd3ded74aeba7f416b563b0923bf93e8839b665fb",
+      "p1_selection_exact_scene_count": 8,
+      "p1_selection_true_positives": 125,
+      "p1_selection_false_positives": 5,
+      "p1_selection_false_negatives": 3,
+      "p1_selection_duplicate_count": 3,
+      "p1_selection_prohibited_structure_hits": 0,
+      "p1_onnx_parity_maximum_absolute_error": 1.430511474609375e-06,
+      "p1_failure": "P1 passed CPU ONNX parity but only 8 of 16 selection scenes were exact. Five false positives, three false negatives, and three duplicates consumed the only candidate before the public gate.",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "public_gate_authorized": false,
+      "public_gate_authorized_candidate_id": null,
+      "public_gate_authorized_on_selection_pass": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
       "manifest_created": false,

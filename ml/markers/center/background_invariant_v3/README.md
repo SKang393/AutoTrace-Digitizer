@@ -19,3 +19,12 @@ Passing this scientific gate cannot create a manifest or approve production.
 Production still requires checksum-bound preprocessing parity in C#, an
 approved mask provider, model-store discovery, packaging, private Chandler
 validation, and clean-machine evidence.
+
+## Consumed P1 result
+
+P1 ran once from committed source with zero optimizer steps. CPU ONNX parity
+passed at `1.430511474609375e-06`, but selection passed only 8 of 16 scenes.
+It retained 125 true markers with five false positives, three false negatives,
+three duplicates, and zero prohibited-structure hits. The public gate did not
+execute. P1 is consumed and may not be rerun, tuned, manifested, stored,
+packaged, or approved.
