@@ -37,11 +37,13 @@ def test_frozen_fixture_bytes_reproduce_without_private_or_chandler_data() -> No
         assert all(case["chandler_image"] is False for case in parsed["cases"])
 
 
-def test_preregistration_binds_exact_model_sources_splits_and_budget() -> None:
+def test_preregistration_and_consumed_result_bind_exact_model_sources_splits_and_budget() -> None:
     protocol = load(ROOT / "PROTOCOL.json")
     config_path = ROOT / "training/p1.json"
     config = load(config_path)
     gate_path = ROOT / "gates/sealed-public-p1.json"
+    result_path = ROOT / "P1_RESULT.json"
+    result = load(result_path)
     ledger = load(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(
         item
@@ -67,18 +69,66 @@ def test_preregistration_binds_exact_model_sources_splits_and_budget() -> None:
     expected_bundle = source_bundle_sha256(REPO_ROOT, evaluate.RUNNER_SOURCE_PATHS)
     assert config["expected_runner_source_bundle_sha256"] == expected_bundle
     assert protocol["runner_source_bundle_sha256"] == expected_bundle
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["status"] == "exhausted_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(config_path)
     assert entry["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
-    assert entry["public_gate_authorized"] is True
+    assert entry["p1_result_sha256"] == sha256_file(result_path)
+    assert entry["p1_selection_report_sha256"] == result["selection_report_sha256"]
+    assert entry["p1_training_opened_seal_sha256"] == result["training_opened_seal_sha256"]
+    assert entry["p1_training_result_seal_sha256"] == result["training_result_seal_sha256"]
+    assert entry["p1_selection_exact_matches"] == 190
+    assert entry["p1_selection_case_count"] == 192
+    assert entry["p1_selection_ambiguity_exact_match"] == 0.0
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized_candidate_id"] is None
+    assert entry["public_gate_authorized_on_selection_pass"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
+
+
+def test_failed_selection_result_is_directly_bound_and_fail_closed() -> None:
+    result = load(ROOT / "P1_RESULT.json")
+    opened_path = REPO_ROOT / result["training_opened_seal_path"]
+    completed_path = REPO_ROOT / result["training_result_seal_path"]
+    completed = load(completed_path)
+    assert result["status"] == "failed_selection"
+    assert result["selection_metrics"] == {
+        "ambiguity_exact_match": 0.0,
+        "case_count": 192,
+        "character_error_rate": 0.008086253369272238,
+        "elapsed_ms": 4278.342,
+        "exact_match": 0.9895833333333334,
+        "exact_matches": 190,
+        "inference_calls": 192,
+        "input_tensor_stream_sha256": "ce019ce6ed2849059a4774d0edfa651959176a66e16baa12cbcc3c40b43f2644",
+        "numeric_exact_match": 1.0,
+        "output_tensor_stream_sha256": "cacb5dcb3951ac5956dfef3de2977c34d2898698f049615394a169aec069f75b",
+        "passed": False,
+        "role_accuracy": 0.9895833333333334,
+        "word_exact_match": 0.9583333333333334,
+    }
+    assert [failure["case_id"] for failure in result["selection_failures"]] == [
+        "selection-recognition-0067",
+        "selection-recognition-0135",
+    ]
+    assert all(failure["truth_text"] == "O o l I" for failure in result["selection_failures"])
+    assert all(failure["prediction"] == "OolI" for failure in result["selection_failures"])
+    assert result["public_gate_evaluations"] == 0
+    assert result["public_gate_archive_opened"] is False
+    assert result["marker_creation_evaluated"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
+    assert result["rerun_allowed"] is False
+    assert sha256_file(opened_path) == result["training_opened_seal_sha256"]
+    assert sha256_file(completed_path) == result["training_result_seal_sha256"]
+    assert completed["opened_sha256"] == result["training_opened_seal_sha256"]
+    assert completed["report_sha256"] == result["report_sha256"]
 
 
 def test_truth_hidden_public_archive_is_ignored_and_unopened() -> None:
@@ -95,7 +145,10 @@ def test_truth_hidden_public_archive_is_ignored_and_unopened() -> None:
         text=True,
     )
     assert tracked.stdout.strip() == ""
-    assert not (ROOT / "artifacts/P1-run").exists()
+    result = load(ROOT / "P1_RESULT.json")
+    assert result["public_gate_evaluations"] == 0
+    assert result["public_gate_archive_opened"] is False
+    assert not (ROOT / "artifacts/P1-run/public-report.json").exists()
 
 
 def test_runner_is_recognition_only_and_cannot_approve_by_itself() -> None:

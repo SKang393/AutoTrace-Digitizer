@@ -1,0 +1,22 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/official_recognition_v1/training/p1.json",
+    "candidate_config_sha256": "e6c6d670e9c3329b0e2d6c0a36d47a14336205fc68f17a184c50539f3cd242f3",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "official-ppocrv5-recognition-only-v1",
+    "runner_source_bundle_sha256": "88180d3ae21752b99360a2bb8202a00146774d7018ed354cbcfa991f433cb80d",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/official_bakeoff/production_evaluate.py",
+      "ml/ocr/official_recognition_v1/evaluate.py",
+      "ml/ocr/official_recognition_v1/prepare_split.py"
+    ],
+    "task": "ocr-recognition",
+    "training_budget_ledger_sha256": "85ac97db561e22d4dfa776fff1d968b1434b49d1de9d70e0f78779a2c052006f"
+  },
+  "opened_utc": "2026-08-11T16:54:34.642996+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

@@ -1,0 +1,70 @@
+{
+  "candidate_id": "P1",
+  "conversion_parity": {
+    "case_count": 16,
+    "conversion_report_sha256": "8c6c8aa522663c0594894f0b526c9fcc0055139217d8d1b6bac968ed1c4d9d15",
+    "maximum_absolute_difference": 2.205371856689453e-06,
+    "maximum_allowed": 0.0001,
+    "passed": true
+  },
+  "experiment_ordinal": 1,
+  "failure": "P1 passed the aggregate exact-match, character-error-rate, role, numeric, word, and CPU conversion-parity thresholds, but failed the mandatory ambiguity-family exact-match threshold. Both O/o/l/I fixtures lost their spaces, so the truth-hidden public gate remained unopened and P1 cannot rerun.",
+  "marker_creation_evaluated": false,
+  "model_id": "en_PP-OCRv5_mobile_rec",
+  "model_onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+  "optimizer_steps": 0,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "report_path": "ml/ocr/official_recognition_v1/artifacts/P1-run/report.json",
+  "report_sha256": "f51b32ecf46cca0ae58c69074a6e8438287003315eca681670cde3565a60c85e",
+  "rerun_allowed": false,
+  "revision": "official-ppocrv5-recognition-only-v1",
+  "schema": "graphreader.ocr-official-recognition-candidate-result.v1",
+  "selection_failures": [
+    {
+      "case_id": "selection-recognition-0067",
+      "predicted_role": "other",
+      "prediction": "OolI",
+      "source_sha256": "78a0a820747b3a41e4aca9a010b4048e40d0c5e36eca3b6f1cf56a146e716996",
+      "truth_role": "annotation",
+      "truth_text": "O o l I"
+    },
+    {
+      "case_id": "selection-recognition-0135",
+      "predicted_role": "other",
+      "prediction": "OolI",
+      "source_sha256": "02b5f62dd0729b86e6674f7e30f53c28acd0349c4ce55be8d0f21e598509432e",
+      "truth_role": "annotation",
+      "truth_text": "O o l I"
+    }
+  ],
+  "selection_metrics": {
+    "ambiguity_exact_match": 0.0,
+    "case_count": 192,
+    "character_error_rate": 0.008086253369272238,
+    "elapsed_ms": 4278.342,
+    "exact_match": 0.9895833333333334,
+    "exact_matches": 190,
+    "inference_calls": 192,
+    "input_tensor_stream_sha256": "ce019ce6ed2849059a4774d0edfa651959176a66e16baa12cbcc3c40b43f2644",
+    "numeric_exact_match": 1.0,
+    "output_tensor_stream_sha256": "cacb5dcb3951ac5956dfef3de2977c34d2898698f049615394a169aec069f75b",
+    "passed": false,
+    "role_accuracy": 0.9895833333333334,
+    "word_exact_match": 0.9583333333333334
+  },
+  "selection_report_path": "ml/ocr/official_recognition_v1/artifacts/P1-run/selection-report.json",
+  "selection_report_sha256": "31b334269c5d29fd5e13546f9f4cea0011323b75ebc6c5f2862885c69b178b54",
+  "status": "failed_selection",
+  "synthetic_only": true,
+  "task": "ocr-recognition",
+  "total_elapsed_ms": 4870.222,
+  "training_opened_seal_path": "ml/markers/training-seals/ocr-recognition/official-ppocrv5-recognition-only-v1/P1/opened.json",
+  "training_opened_seal_sha256": "b024d21664a91b9ebccd9ebf1079e1bb9c2ccf86e7564f149bc6b875c8af97fc",
+  "training_result_seal_path": "ml/markers/training-seals/ocr-recognition/official-ppocrv5-recognition-only-v1/P1/result.json",
+  "training_result_seal_sha256": "ddbd08c5fdef0d1c7cff2c6bbf2d8437403f915e10233b8d4e72c38cbb463e16",
+  "weights_changed": false
+}
