@@ -1883,6 +1883,72 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "ocr-detection",
+      "revision": "graph-text-component-context-v7",
+      "status": "candidate_1_preregistered",
+      "defect_class": "component-line proposal decisions lacked expanded scene context for rejecting graph structures that resemble isolated text",
+      "prior_revision": "graph-text-component-region-v6",
+      "prior_exposed_fixture_bytes_reused": false,
+      "prior_public_sample_or_pixel_inspection_used": false,
+      "trigger_evidence_path": "ml/ocr/component_region_detector_v6/PUBLIC_GATE_RESULT.json",
+      "trigger_evidence_sha256": "3e39d3fbfafc9f61bce28e171ecf4e3a810893fc151764f886e1823cb23d4248",
+      "trigger_public_scene_count": 64,
+      "trigger_public_false_regions": 7,
+      "trigger_public_missed_regions": 0,
+      "isolated_change": "train a dual-context export-safe CNN from a new seed on fresh component-proposal, expanded scene-context, geometry, and structure tensors without inspecting predecessor public samples or pixels",
+      "architecture": "dual-context-component-proposal-cnn-v1",
+      "proposal_algorithm": "adaptive-gray-baseline-bounded-line-grouping-v2",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "retired_unregistered_candidate_ids": [],
+      "candidate_config_paths": {
+        "P1": "ml/ocr/component_context_detector_v7/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "3e94ac8d819e0a673c22b0e6ad89192f11c439bcf03af8d1e53f10c496393731"
+      },
+      "protocol_path": "ml/ocr/component_context_detector_v7/PROTOCOL.json",
+      "protocol_sha256": "cbfd42d89e110423beeb4e31eff5930b702dd3fb45232f387607ae73d695eb4c",
+      "selection_manifest_path": "ml/ocr/component_context_detector_v7/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "ff529c9501aac13b503cc15a7e31533be7104c97c2a1ce2939ae82638cbcdab7",
+      "selection_train_scene_count": 256,
+      "selection_validation_scene_count": 64,
+      "selection_train_proposal_count": 5704,
+      "selection_validation_proposal_count": 795,
+      "sealed_public_test_seal_path": "ml/ocr/component_context_detector_v7/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "6b2c5a9a9fad529809d04279496aa3c175c60cde1873f1e7f058ca3fddcc98af",
+      "sealed_public_fixture_archive_sha256": "ac9883cfec1ad78c184d9bc48d1a29fe94d08f3e72cd855d5410f5bc93da0744",
+      "sealed_public_private_manifest_sha256": "e026dba9d7a978aeb63026146b45c7a74348025338401f499e627a71cbc86c86",
+      "sealed_public_scene_count": 80,
+      "sealed_public_proposal_count": 1985,
+      "split_generator_source_bundle_sha256": "f3871e4ed458dee8a50bc3016094cb2c07d931768582a1756572f915eb50069f",
+      "public_gate_config_path": "ml/ocr/component_context_detector_v7/gates/sealed-public-v1.json",
+      "public_gate_config_sha256": "756c7bd8260b8349be25df2a17c59ea9aa03a91f7b4359a42f5ad6373dafd2ea",
+      "expected_public_evaluator_source_bundle_sha256": "63fa382cf6a09634c7a51696fa1d333e20734fbd1a94a00f6e28ec3d5f26932a",
+      "expected_runner_source_bundle_sha256": "1bc5972bbf2662bc092fed4841a1a6959cbcbe47e1d6dbb705eed0867bd06353",
+      "seed": 20261112,
+      "epochs": 36,
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "public_gate_authorized": false,
+      "public_gate_authorized_candidate_id": null,
+      "public_gate_authorized_on_selection_pass": true,
+      "public_gate_evaluations": 0,
+      "public_gate_archive_opened": false,
+      "manifest_created": false,
+      "model_store_promoted": false,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": false
     }
   ]
 }

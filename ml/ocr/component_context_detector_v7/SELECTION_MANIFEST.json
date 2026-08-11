@@ -1,0 +1,30 @@
+{
+  "chandler_included": false,
+  "generalization_label_included": false,
+  "predecessor_public_cases_used_for_selection": false,
+  "prior_public_sample_or_pixel_inspection_used": false,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-component-context-v7",
+  "schema": "graphreader.ocr-component-context-selection.v1",
+  "sealed_public_truth_available_to_training": false,
+  "synthetic_only": true,
+  "task": "ocr-detection",
+  "train": {
+    "negative_proposal_count": 4680,
+    "positive_proposal_count": 1024,
+    "proposal_count": 5704,
+    "scene_count": 256,
+    "split_fingerprint": "e469f551154359abef750b9d7a045602ce6e62c962af87df15bf9285f4dedf11",
+    "truth_region_count": 1024
+  },
+  "validation": {
+    "negative_proposal_count": 539,
+    "positive_proposal_count": 256,
+    "proposal_count": 795,
+    "scene_count": 64,
+    "split_fingerprint": "52b9f3825173af6209adc182d104b3238afdefea1c02fda4d5446149c48fbbb8",
+    "truth_region_count": 256
+  }
+}
