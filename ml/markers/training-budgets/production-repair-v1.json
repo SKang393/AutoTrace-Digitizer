@@ -944,7 +944,6 @@
       "isolated_change": "replace the exhausted tiny strided network and unweighted sparse-pixel loss with a skip-connected encoder-decoder, fixed 8.0 positive BCE weight, and fixed 2.0 Dice weight on new disjoint renderer and degradation families; retain BGR normalization, DB shrink ratio 0.40, and every DB threshold",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P1",
         "P2"
       ],
       "consumed_candidate_ids": [

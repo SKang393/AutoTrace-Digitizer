@@ -189,6 +189,7 @@ def test_preregistration_hashes_and_ledger_authorize_only_p2() -> None:
     assert len(entries) == 1
     entry = entries[0]
     assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["execution_authorized"] is True
