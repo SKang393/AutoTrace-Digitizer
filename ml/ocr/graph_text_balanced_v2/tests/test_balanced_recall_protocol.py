@@ -12,6 +12,7 @@ import numpy as np
 import pytest
 import torch
 
+from ml.markers.gate_seal import source_bundle_sha256
 from ml.ocr.graph_text_balanced_v2.dataset import (
     GENERIC_TEXT,
     build_validation_split,
@@ -30,7 +31,13 @@ from ml.ocr.graph_text_balanced_v2.protocol import (
     VALIDATION_TEXT_COUNT,
     protocol_configuration,
 )
-from ml.ocr.graph_text_balanced_v2.train_p1 import _loss
+from ml.ocr.graph_text_balanced_v2.train_p1 import _loss as p1_loss
+from ml.ocr.graph_text_balanced_v2.train_p2 import (
+    HARD_NEGATIVE_LOSS_WEIGHT,
+    HARD_NEGATIVE_TOPK_FRACTION,
+    RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
+    _loss as p2_loss,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -114,7 +121,7 @@ def test_weighted_loss_is_finite_for_positive_and_empty_targets() -> None:
     targets = torch.zeros_like(probabilities)
     targets[0, :, 4:12, 5:11] = 1.0
 
-    total, weighted_binary, dice = _loss(probabilities, targets)
+    total, weighted_binary, dice = p1_loss(probabilities, targets)
 
     assert torch.isfinite(total)
     assert torch.isfinite(weighted_binary)
@@ -123,13 +130,40 @@ def test_weighted_loss_is_finite_for_positive_and_empty_targets() -> None:
     assert float(dice) > 0.0
 
 
-def test_preregistration_hashes_and_ledger_authorize_only_p1() -> None:
+def test_p2_adds_only_frozen_hard_negative_loss_and_binds_runner_source() -> None:
+    probabilities = torch.full((2, 1, 16, 16), 0.25, dtype=torch.float32)
+    targets = torch.zeros_like(probabilities)
+    targets[0, :, 4:12, 5:11] = 1.0
+
+    p1_total, p1_binary, p1_dice = p1_loss(probabilities, targets)
+    p2_total, p2_binary, p2_dice, hard_negative = p2_loss(probabilities, targets)
+
+    assert HARD_NEGATIVE_TOPK_FRACTION == 0.02
+    assert HARD_NEGATIVE_LOSS_WEIGHT == 2.0
+    assert torch.equal(p1_binary, p2_binary)
+    assert torch.equal(p1_dice, p2_dice)
+    assert torch.isfinite(hard_negative)
+    assert float(hard_negative) > 0.0
+    assert torch.allclose(
+        p2_total,
+        p1_total + (HARD_NEGATIVE_LOSS_WEIGHT * hard_negative),
+    )
+    config = _json(REVISION_ROOT / "training/p2.json")
+    assert source_bundle_sha256(REPO_ROOT, P2_RUNNER_SOURCE_PATHS) == config[
+        "expected_runner_source_bundle_sha256"
+    ]
+
+
+def test_preregistration_hashes_and_ledger_authorize_only_p2() -> None:
     expected_hashes = {
         "PROTOCOL.json": "2ca2e0cc41cb77ef2f551e27b7006ae15c4494296a0571c1f28edb908c39c02c",
         "SELECTION_MANIFEST.json": "58ec2800591431eaaa98ccbd07d7359afe2c4b01251f197cf443fcb079c5aec9",
         "SEALED_PUBLIC_TEST_SEAL.json": "4cfb3e06a6d859661ea9df6244212aefb0b7b238f4a2434cedb525cf7bc5f0c0",
         "P1_PREREGISTRATION.json": "62880c6a75b9d11fce44c52a9af93f263affd1d744ca2b9c50db895ca4b5cf7b",
+        "P1_RESULT.json": "8bca5784b358d958f4936db7886d3a68c7ad53c964924efc9dcb18c30703884f",
+        "P2_PREREGISTRATION.json": "846f0840ee17d463f97aeb76f4e1cf81f8991957d677d8f280bfcfdafe9794fd",
         "training/p1.json": "84aebf97f9879a1556077b6b97d4592b4d0abcc49fcaaed1fa2ba4c8fccfdfa3",
+        "training/p2.json": "17c5669b4276c1986209331b77c6c4bb1f6893dea8456b88794fc7c4f1606bbe",
     }
     for relative_path, expected_hash in expected_hashes.items():
         assert _sha256(REVISION_ROOT / relative_path) == expected_hash
@@ -139,20 +173,34 @@ def test_preregistration_hashes_and_ledger_authorize_only_p1() -> None:
     assert preregistration["public_gate_authorized"] is False
     assert preregistration["public_gate_evaluations"] == 0
     assert preregistration["production_approval"] is False
+    p1_result = _json(REVISION_ROOT / "P1_RESULT.json")
+    assert p1_result["status"] == "failed_selection"
+    assert p1_result["selection_metrics"]["exact_fixture_count"] == 52
+    assert p1_result["selection_metrics"]["false_region_count"] == 38
+    assert p1_result["selection_metrics"]["exclusion_false_region_count"] == 9
+    assert p1_result["sealed_public_archive_opened"] is False
+    p2_preregistration = _json(REVISION_ROOT / "P2_PREREGISTRATION.json")
+    assert p2_preregistration["p1_consumed"] is True
+    assert p2_preregistration["sealed_public_archive_opened"] is False
+    assert p2_preregistration["public_gate_authorized"] is False
 
     ledger = _json(LEDGER_PATH)
     entries = [entry for entry in ledger["revisions"] if entry["revision"] == REVISION]
     assert len(entries) == 1
     entry = entries[0]
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["consumed_candidate_ids"] == []
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["authorized_candidate_id"] == "P2"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
     assert entry["trigger_evidence_sha256"] == "b9628f2fea238977f982e43d30210c434b0628bce1f52b555f7744746a905f7b"
-    assert entry["expected_runner_source_bundle_sha256"] == "ae223519a32642f5dba246f00c8cd6a559c72717e8056367fc51afbcc9c2d85c"
+    assert entry["p1_expected_runner_source_bundle_sha256"] == "ae223519a32642f5dba246f00c8cd6a559c72717e8056367fc51afbcc9c2d85c"
+    assert entry["p2_expected_runner_source_bundle_sha256"] == "3c91e9ac38f682c6713c7927ab08d6d8410decc3a85e2f10d17dcf675e716c79"
     assert entry["candidate_config_sha256"]["P1"] == expected_hashes["training/p1.json"]
+    assert entry["candidate_config_sha256"]["P2"] == expected_hashes["training/p2.json"]
+    assert entry["p1_result_sha256"] == expected_hashes["P1_RESULT.json"]
+    assert entry["p2_preregistration_sha256"] == expected_hashes["P2_PREREGISTRATION.json"]

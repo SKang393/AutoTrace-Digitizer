@@ -19,8 +19,20 @@ not contain Chandler, Generalization, private images, article images, external
 datasets, pretrained weights, or downloaded training data.
 
 Selection requires all 96 fixtures exact, zero false regions, zero duplicates,
-zero exclusion regions, CPU execution, and ONNX parity at most `1e-4`. P1 is
-the only authorized candidate. The sealed public archive remains unopened.
+zero exclusion regions, CPU execution, and ONNX parity at most `1e-4`.
+
+P1 ran exactly once and failed selection. It passed the probability contract
+and CPU parity at `3.4570693969726562e-06`, but only 52/96 fixtures were exact.
+It produced 38 false regions, including nine on exclusions, and still missed
+nine text fixtures. Rail/legend and nested-bracket families each contributed
+17 false regions. The sealed public archive remained unopened.
+
+P2 retains the exact P1 architecture, data, thresholds, optimizer, seed, and
+28-epoch schedule. Its only change is a fixed weight-`2.0` loss on the highest
+loss two percent of background pixels in each sample. This targets the observed
+high-confidence structure false positives without threshold tuning. P1 is
+consumed and P2 is the only authorized candidate.
+
 No result in this folder can create a production manifest, populate the model
 store, package weights, approve the combined OCR pair, change release readiness,
 or authorize version `1.0.1` by itself.

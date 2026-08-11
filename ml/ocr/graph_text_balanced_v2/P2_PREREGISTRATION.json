@@ -1,0 +1,23 @@
+{
+  "candidate_config_path": "ml/ocr/graph_text_balanced_v2/training/p2.json",
+  "candidate_config_sha256": "17c5669b4276c1986209331b77c6c4bb1f6893dea8456b88794fc7c4f1606bbe",
+  "candidate_id": "P2",
+  "expected_runner_source_bundle_sha256": "3c91e9ac38f682c6713c7927ab08d6d8410decc3a85e2f10d17dcf675e716c79",
+  "experiment_budget": 3,
+  "experiment_ordinal": 2,
+  "isolated_change": "add only a weight-2.0 top-2-percent hard-negative background loss while retaining the exact P1 architecture, data, DB thresholds, optimizer, seed, and schedule",
+  "p1_consumed": true,
+  "production_approval": false,
+  "public_gate_authorized": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-balanced-recall-v2",
+  "schema": "graphreader.ocr-graph-text-balanced-recall-preregistration.v1",
+  "sealed_public_archive_opened": false,
+  "sealed_public_test_seal_sha256": "4cfb3e06a6d859661ea9df6244212aefb0b7b238f4a2434cedb525cf7bc5f0c0",
+  "task": "ocr-detection",
+  "training_split_fingerprint": "1ae1a1929764e755fde18db75b995340687f6cdd2c3ced1ed39def4f191e0365",
+  "trigger_result_path": "ml/ocr/graph_text_balanced_v2/P1_RESULT.json",
+  "trigger_result_sha256": "8bca5784b358d958f4936db7886d3a68c7ad53c964924efc9dcb18c30703884f",
+  "validation_split_fingerprint": "f71d59016d380e8fc83037951ff1c2e4bb1fe238c7183dd82d98bd9a4fe442a6"
+}

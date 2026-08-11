@@ -1,0 +1,60 @@
+{
+  "candidate_id": "P1",
+  "checkpoint_sha256": "583f7ebda41424949b74acfc304ddf6f7844eaa2800930f0456457b3021752b8",
+  "elapsed_ms": 240362.643,
+  "onnx_parity_maximum_absolute_error": 3.4570693969726562e-06,
+  "onnx_parity_passed": true,
+  "onnx_sha256": "a607f7b91ab035d41e63a2cfe0deab520a08db57a8fceb56217207e8aeb97c15",
+  "production_approval": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-balanced-recall-v2",
+  "schema": "graphreader.ocr-graph-text-balanced-recall-result.v1",
+  "sealed_public_archive_opened": false,
+  "selection_gate_passed": false,
+  "selection_metrics": {
+    "duplicate_region_count": 0,
+    "exact_fixture_count": 52,
+    "exclusion_exact_fixture_count": 15,
+    "exclusion_false_region_count": 9,
+    "false_region_count": 38,
+    "fixture_count": 96,
+    "text_exact_fixture_count": 37,
+    "text_false_region_count": 29,
+    "text_fixture_count": 72,
+    "text_missed_fixture_count": 9,
+    "text_multi_region_fixture_count": 26
+  },
+  "selection_report_path": "ml/ocr/graph_text_balanced_v2/artifacts/P1-run/candidate-report.json",
+  "selection_report_sha256": "b29fab3b41860d0dd9b02cb2552a8c38f39395c7f0ecedd62eccd199d262e133",
+  "status": "failed_selection",
+  "structure_diagnosis": {
+    "dual_series_compact_markers": {
+      "exact_fixture_count": 21,
+      "false_region_count": 2,
+      "fixture_count": 24,
+      "text_missed_fixture_count": 1
+    },
+    "fan_intersections_with_arrow": {
+      "exact_fixture_count": 15,
+      "false_region_count": 2,
+      "fixture_count": 24,
+      "text_missed_fixture_count": 8
+    },
+    "nested_bracket_with_ticks": {
+      "exact_fixture_count": 8,
+      "false_region_count": 17,
+      "fixture_count": 24,
+      "text_missed_fixture_count": 0
+    },
+    "rail_legend_with_open_marker": {
+      "exact_fixture_count": 8,
+      "false_region_count": 17,
+      "fixture_count": 24,
+      "text_missed_fixture_count": 0
+    }
+  },
+  "task": "ocr-detection",
+  "training_opened_seal_sha256": "3dad65b2d752fe0ec3bd4ea70a6bd38f1a5f6993b977c04a0dc5f5fe769ba8bf",
+  "training_result_seal_sha256": "ed4ce7bca359a3d7458df669c24b8b442f7d9d2f2a7667d4d4b156cb28761d39"
+}

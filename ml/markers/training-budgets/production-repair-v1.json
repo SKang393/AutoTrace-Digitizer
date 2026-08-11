@@ -934,7 +934,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-balanced-recall-v2",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_2_preregistered",
       "defect_class": "sparse positive recall collapses while graph-structure exclusions remain exact",
       "prior_revision_reuse": false,
       "prior_revision": "graph-text-region-detector-v1",
@@ -944,20 +944,25 @@
       "isolated_change": "replace the exhausted tiny strided network and unweighted sparse-pixel loss with a skip-connected encoder-decoder, fixed 8.0 positive BCE weight, and fixed 2.0 Dice weight on new disjoint renderer and degradation families; retain BGR normalization, DB shrink ratio 0.40, and every DB threshold",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
+        "P1",
+        "P2"
+      ],
+      "consumed_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "candidate_config_paths": {
-        "P1": "ml/ocr/graph_text_balanced_v2/training/p1.json"
+        "P1": "ml/ocr/graph_text_balanced_v2/training/p1.json",
+        "P2": "ml/ocr/graph_text_balanced_v2/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "84aebf97f9879a1556077b6b97d4592b4d0abcc49fcaaed1fa2ba4c8fccfdfa3"
+        "P1": "84aebf97f9879a1556077b6b97d4592b4d0abcc49fcaaed1fa2ba4c8fccfdfa3",
+        "P2": "17c5669b4276c1986209331b77c6c4bb1f6893dea8456b88794fc7c4f1606bbe"
       },
-      "expected_runner_source_bundle_sha256": "ae223519a32642f5dba246f00c8cd6a559c72717e8056367fc51afbcc9c2d85c",
+      "p1_expected_runner_source_bundle_sha256": "ae223519a32642f5dba246f00c8cd6a559c72717e8056367fc51afbcc9c2d85c",
+      "p2_expected_runner_source_bundle_sha256": "3c91e9ac38f682c6713c7927ab08d6d8410decc3a85e2f10d17dcf675e716c79",
       "protocol_path": "ml/ocr/graph_text_balanced_v2/PROTOCOL.json",
       "protocol_sha256": "2ca2e0cc41cb77ef2f551e27b7006ae15c4494296a0571c1f28edb908c39c02c",
       "selection_manifest_path": "ml/ocr/graph_text_balanced_v2/SELECTION_MANIFEST.json",
@@ -970,8 +975,28 @@
       "p1_preregistration_sha256": "62880c6a75b9d11fce44c52a9af93f263affd1d744ca2b9c50db895ca4b5cf7b",
       "p1_training_split_fingerprint": "1ae1a1929764e755fde18db75b995340687f6cdd2c3ced1ed39def4f191e0365",
       "p1_validation_split_fingerprint": "f71d59016d380e8fc83037951ff1c2e4bb1fe238c7183dd82d98bd9a4fe442a6",
+      "p1_result_path": "ml/ocr/graph_text_balanced_v2/P1_RESULT.json",
+      "p1_result_sha256": "8bca5784b358d958f4936db7886d3a68c7ad53c964924efc9dcb18c30703884f",
+      "p1_training_report_path": "ml/ocr/graph_text_balanced_v2/artifacts/P1-run/candidate-report.json",
+      "p1_training_report_sha256": "b29fab3b41860d0dd9b02cb2552a8c38f39395c7f0ecedd62eccd199d262e133",
+      "p1_training_opened_seal_sha256": "3dad65b2d752fe0ec3bd4ea70a6bd38f1a5f6993b977c04a0dc5f5fe769ba8bf",
+      "p1_training_result_seal_sha256": "ed4ce7bca359a3d7458df669c24b8b442f7d9d2f2a7667d4d4b156cb28761d39",
+      "p1_checkpoint_sha256": "583f7ebda41424949b74acfc304ddf6f7844eaa2800930f0456457b3021752b8",
+      "p1_onnx_sha256": "a607f7b91ab035d41e63a2cfe0deab520a08db57a8fceb56217207e8aeb97c15",
+      "p1_selection_exact_fixture_count": 52,
+      "p1_selection_fixture_count": 96,
+      "p1_selection_false_region_count": 38,
+      "p1_selection_exclusion_false_region_count": 9,
+      "p1_selection_duplicate_region_count": 0,
+      "p1_onnx_parity_maximum_absolute_error": 0.0000034570693969726562,
+      "p1_probability_contract_passed": true,
+      "p1_selection_gate_passed": false,
+      "p1_failure": "P1 improved recall over exhausted V1 but overfit high-confidence graph structure: only 52/96 selection fixtures were exact, with 38 false regions including nine on exclusions. Rail/legend and nested-bracket families each contributed 17 false regions; nine text fixtures were still missed.",
+      "p2_preregistration_path": "ml/ocr/graph_text_balanced_v2/P2_PREREGISTRATION.json",
+      "p2_preregistration_sha256": "846f0840ee17d463f97aeb76f4e1cf81f8991957d677d8f280bfcfdafe9794fd",
+      "p2_isolated_change": "add only a weight-2.0 top-2-percent hard-negative background loss while retaining the exact P1 architecture, data, DB thresholds, optimizer, seed, and schedule",
       "execution_authorized": true,
-      "authorized_candidate_id": "P1",
+      "authorized_candidate_id": "P2",
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "production_approval": false,
