@@ -570,16 +570,15 @@
     {
       "task": "ocr-recognition",
       "revision": "graph-numeric-component-geometric-v4",
-      "status": "candidate_3_preregistered",
+      "status": "exhausted_failed_selection",
       "defect_class": "component-isolated graph-numeric glyph recognition using fixed geometric projections",
       "prior_revision_reuse": false,
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [
-        "P3"
-      ],
+      "preregistered_candidate_ids": [],
       "consumed_candidate_ids": [
         "P1",
-        "P2"
+        "P2",
+        "P3"
       ],
       "remaining_unregistered_candidate_ids": [],
       "candidate_config_paths": {
@@ -642,10 +641,27 @@
       "p3_preregistration_sha256": "67ac0e61a8c9a082e26f225bd8ee027b3ba82fac0c134ac7bed404b0e4333588",
       "p3_isolated_change": "replace P2 absolute-canvas-only glyphs with P1 max-fit normalized shape plus four explicit source-geometry scalars; retain the frozen rasters, classifier depth, loss, optimizer, epochs, thresholds, and gates",
       "p3_expected_runner_source_bundle_sha256": "2a57a268d745482e8694631b3eb2e05ef98da9a2e3ea2090567f3e7ef6472932",
-      "execution_authorized": true,
-      "authorized_candidate_id": "P3",
+      "p3_result_path": "ml/ocr/component_geometric_v4/P3_RESULT.json",
+      "p3_result_sha256": "1bd0d230de4df761b307a3b9dd9c3b22d2c90729985ed8f21e8880976df9e065",
+      "p3_training_report_path": "ml/ocr/component_geometric_v4/artifacts/P3-run/candidate-report.json",
+      "p3_training_report_sha256": "807db11ffe147f9eadf025bede7403469d064161bb4ffd26349e857eee7588ca",
+      "p3_training_opened_seal_sha256": "009260586fef63d12e36204f3f81dc1cf91212f27bf05521f261cc57236e32f3",
+      "p3_training_result_seal_sha256": "0cb942f6f2dcc97ca7eeb5226d3fe13e8ad44728d939386a4e8a751789dd9430",
+      "p3_checkpoint_sha256": "955edefd1a8e2bf713f8627cf88af4aa2977c1afdfdda86b5d0d86ae2911ed7e",
+      "p3_onnx_sha256": "941b19a8f700484a039335d25ecc47f41de1976b3b2016653c6beb2a4eb51894",
+      "p3_selected_threshold": 0.55,
+      "p3_validation_exact_match": 0.9609375,
+      "p3_validation_character_error_rate": 0.04361370716510903,
+      "p3_validation_role_accuracy": 0.9713541666666666,
+      "p3_validation_marker_exclusion_accuracy": 0.9921875,
+      "p3_onnx_parity_maximum_absolute_error": 0.00000476837158203125,
+      "p3_public_gate_evaluations": 0,
+      "p3_failure": "P3 passed validation exact match, CER, role accuracy, and CPU ONNX parity, but one of 128 divider exclusions was classified as digit one at every frozen confidence threshold. Mandatory exclusion accuracy is 1.0.",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
+      "execution_blocker": "P1 through P3 are consumed. P3 failed the mandatory 1.0 marker-exclusion validation gate, so the sealed-public archive cannot open and this defect class cannot rerun, tune, manifest, store, package, or approve a payload.",
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true

@@ -30,13 +30,19 @@ exclusion accuracy `0.9609375`. Absolute-canvas-only encoding rejected 40 of
 256 positive labels and introduced cross-font zero/eight, minus/decimal, and
 eight/one confusions. Its sealed-public archive remains unopened.
 
-P3 is the final preregistered candidate. It replaces only the P2
-absolute-canvas-only representation with the P1 max-fit normalized shape plus
-four explicit source-geometry scalars: component height ratio, width ratio,
-vertical centroid, and foreground density. The frozen rasters, classifier
-depth, loss, optimizer, epochs, thresholds, gates, and still-hidden public
-split are unchanged. P3 may run only after its exact sources, configuration,
-P2 result trigger, and canonical budget authorization are committed.
+P3 ran exactly once with the P1 max-fit normalized shape plus four explicit
+source-geometry scalars. It passed CPU ONNX parity at
+`4.76837158203125e-06`, validation exact match at `0.9609375`, CER at
+`0.04361370716510903`, and role accuracy at `0.9713541666666666`. It failed
+closed because one of 128 divider exclusions was classified as digit one at
+every frozen threshold, leaving exclusion accuracy at `0.9921875` instead of
+the mandatory `1.0`.
+
+P1 through P3 are consumed. The sealed-public archive remains unopened. This
+defect class cannot rerun, tune, manifest, enter the production model store, or
+authorize packaging. A future attempt requires a separately preregistered
+defect class with a new budget and cannot reuse the exposed validation result as
+public evidence.
 
 Passing validation selects a research candidate only. Passing the public gate
 would still not create a production manifest, approve a model-store payload,

@@ -168,7 +168,7 @@ def test_temp_freeze_binds_sources_and_keeps_public_gate_closed(tmp_path: Path) 
     assert protocol_configuration()["state"] == "preregistered_before_training"
 
 
-def test_canonical_preregistration_records_p1_and_p2_failures_and_keeps_p3_public_gate_closed() -> None:
+def test_canonical_results_record_all_three_failures_and_keep_public_gate_closed() -> None:
     p1_result = json.loads(
         (REPOSITORY / "ml/ocr/component_geometric_v4/P1_RESULT.json").read_text(encoding="utf-8")
     )
@@ -181,7 +181,14 @@ def test_canonical_preregistration_records_p1_and_p2_failures_and_keeps_p3_publi
     assert p2_result["status"] == "failed_selection"
     assert p2_result["sealed_public_archive_opened"] is False
     assert p2_result["public_gate_evaluations"] == 0
-    assert not (REPOSITORY / "ml/ocr/component_geometric_v4/artifacts/P3-run").exists()
+    p3_result = json.loads(
+        (REPOSITORY / "ml/ocr/component_geometric_v4/P3_RESULT.json").read_text(encoding="utf-8")
+    )
+    assert p3_result["status"] == "failed_selection"
+    assert p3_result["validation_exact_match"] >= 0.90
+    assert p3_result["validation_marker_exclusion_accuracy"] < 1.0
+    assert p3_result["sealed_public_archive_opened"] is False
+    assert p3_result["public_gate_evaluations"] == 0
     tracked = {
         path.relative_to(REPOSITORY).as_posix()
         for path in REPOSITORY.glob("ml/ocr/component_geometric_v4/**/*.json")
