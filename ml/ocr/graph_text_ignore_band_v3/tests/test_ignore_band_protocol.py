@@ -211,7 +211,7 @@ def test_p2_whole_frame_composition_is_frozen_and_source_complete() -> None:
     assert p2_composition_fingerprint() == "b517be748c5446bc082ccd9ea7e3b233e670c36c7ad254360e01e17e74468887"
 
 
-def test_frozen_hashes_and_ledger_record_p1_p2_and_authorize_only_p3() -> None:
+def test_frozen_hashes_and_ledger_record_all_three_failed_candidates() -> None:
     expected_hashes = {
         "PROTOCOL.json": "257f791a8e125aa81ea6d6096644f27582aeea7a7153300075a5853dc3a4c421",
         "SELECTION_MANIFEST.json": "2c18959408cf7dc797287aa836c37d7020919c9a1a481800a125c26e160ae505",
@@ -221,6 +221,7 @@ def test_frozen_hashes_and_ledger_record_p1_p2_and_authorize_only_p3() -> None:
         "P2_PREREGISTRATION.json": "40784a3c14c8875bfd6d076dabb7e3d9ed2795b30c8355eea9b6abe3930eb395",
         "P2_RESULT.json": "0eeef4a6a8ce07e58f04db81102e3ca2e0e26e0c0758b032863cf1c7e519f3dc",
         "P3_PREREGISTRATION.json": "975f24d1bd3ad4e097ddb5b8e3ebcfef42ba1cbb66e96c9932eedda1b6a4ce53",
+        "P3_RESULT.json": "4528e615371d8491302f6947a70b6f4109a68f51a6a8856702422a0d067a778d",
         "training/p1.json": "29f58aca0d700b93bc7979c3c5f28ba8e7b50decafafdb54c6c2128121437fe1",
         "training/p2.json": "51110d75207a84afa1e31cd3e2ea9892649e57937046757554a88a9bcdafd888",
         "training/p3.json": "1d8b8bcb304fb308b3cfeb74081d7667f595d9d0d136f849e83094f5d839923e",
@@ -239,6 +240,9 @@ def test_frozen_hashes_and_ledger_record_p1_p2_and_authorize_only_p3() -> None:
     p2_seal_root = REPO_ROOT / "ml/markers/training-seals/ocr-detection/graph-text-ignore-band-v3/P2"
     assert _sha256(p2_seal_root / "opened.json") == "1ce21dcae07d8f05726b7c23c6a46bf06c339ddbbc23ab9ffee39267f291a42d"
     assert _sha256(p2_seal_root / "result.json") == "0b9ad35c803d9d607921ff8248f14dfd7bb2058cd78112552563761ad461fb1d"
+    p3_seal_root = REPO_ROOT / "ml/markers/training-seals/ocr-detection/graph-text-ignore-band-v3/P3"
+    assert _sha256(p3_seal_root / "opened.json") == "69b8a86d46b3267d19b00eecc0158342f8ebd37a280061523f4bcff74b826dbe"
+    assert _sha256(p3_seal_root / "result.json") == "526b63279114bcd9bf14ad54118a376c8216c92f98ce98a776e03df99ec9bbc9"
     seal = _json(REVISION_ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     archive = REPO_ROOT / str(seal["fixture_archive_path"])
     assert _sha256(archive) == seal["fixture_archive_sha256"] == "1b23558516d72b2241501cd24ac0019ace01ba117e725aa9ad030c5e78e59a95"
@@ -246,12 +250,12 @@ def test_frozen_hashes_and_ledger_record_p1_p2_and_authorize_only_p3() -> None:
     entries = [entry for entry in ledger["revisions"] if entry["revision"] == REVISION]
     assert len(entries) == 1
     entry = entries[0]
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["status"] == "exhausted_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["p1_selection_exact_fixture_count"] == 8
     assert entry["p1_selection_false_region_count"] == 210
     assert entry["p1_selection_exclusion_false_region_count"] == 36
@@ -261,7 +265,13 @@ def test_frozen_hashes_and_ledger_record_p1_p2_and_authorize_only_p3() -> None:
     assert entry["p2_training_composition_fingerprint"] == p2_config["p2_training_composition_fingerprint"]
     assert entry["p3_boundary_probability_ceiling"] == p3_config["boundary_probability_ceiling"] == 0.25
     assert entry["p3_boundary_margin_loss_weight"] == p3_config["boundary_margin_loss_weight"] == 1.0
+    assert entry["p3_selection_exact_fixture_count"] == 92
+    assert entry["p3_selection_false_region_count"] == 2
+    assert entry["p3_selection_exclusion_false_region_count"] == 0
+    assert entry["p3_text_missed_fixture_count"] == 19
+    assert entry["p3_selection_gate_passed"] is False
     assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
 

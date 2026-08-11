@@ -1,0 +1,26 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/graph_text_ignore_band_v3/training/p3.json",
+    "candidate_config_sha256": "1d8b8bcb304fb308b3cfeb74081d7667f595d9d0d136f849e83094f5d839923e",
+    "candidate_id": "P3",
+    "committed_source_enforcement": true,
+    "revision": "graph-text-ignore-band-v3",
+    "runner_source_bundle_sha256": "343d29c0cdd535b04daf5f73da33bbb2fa57000839d32995c4cbb8d2da7b266c",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/graph_text_ignore_band_v3/dataset.py",
+      "ml/ocr/graph_text_ignore_band_v3/model.py",
+      "ml/ocr/graph_text_ignore_band_v3/p2_composition.py",
+      "ml/ocr/graph_text_ignore_band_v3/protocol.py",
+      "ml/ocr/graph_text_ignore_band_v3/train_p1.py",
+      "ml/ocr/graph_text_ignore_band_v3/train_p3.py",
+      "ml/ocr/official_bakeoff/structure_consensus_evaluate.py"
+    ],
+    "task": "ocr-detection",
+    "training_budget_ledger_sha256": "55de54ad1a7b50d270f10d17db7fb91450b428b002189682c31eb514ec754893"
+  },
+  "opened_utc": "2026-08-11T09:05:39.611998+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

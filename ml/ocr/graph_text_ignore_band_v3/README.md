@@ -40,15 +40,19 @@ showed that detections stayed centered but the mandatory 1.5 DB unclip produced
 a median 1.94 times truth height and 1.28 times truth width. The ignored band
 was unconstrained above the 0.30 production threshold.
 
-P3 is the final preregistered candidate. It adds a one-sided squared margin only
+P3 was the final preregistered candidate. It added a one-sided squared margin only
 inside the existing ignored boundary band. Probabilities at or below 0.25 have
 zero margin loss, preserving a low-confidence glyph response while keeping the
 band below the fixed 0.30 DB contour threshold. The exact P2 model, whole-frame
 tile composition, base loss, optimizer, seed, total 2,880 optimizer steps, DB
 thresholds, selection split, and unopened public archive remain unchanged.
 
-P3 must pass every frozen selection fixture exactly, with zero false regions,
-duplicates, and exclusion hits, plus the probability and CPU ONNX parity gates,
-before the single sealed-public run can be authorized. No result in this folder
-can create a manifest, populate the production model store, enter a package,
-approve OCR, change release readiness, or authorize a release by itself.
+P3 ran once and passed the probability contract and CPU ONNX parity at
+`1.5497207641601562e-06`. It improved selection to 92/112 exact and removed
+every exclusion false positive, but 19 text fixtures had no matched region, two
+text false regions remained, and one text fixture produced multiple regions. A
+single broad diagnosis found failures across all four held-out structure and
+degradation groups. The three-candidate V3 budget is exhausted, and the public
+archive remains unopened. No result in this folder can create a manifest,
+populate the production model store, enter a package, approve OCR, change
+release readiness, or authorize a release by itself.

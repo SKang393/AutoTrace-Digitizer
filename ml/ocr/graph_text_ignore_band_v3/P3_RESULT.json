@@ -1,0 +1,48 @@
+{
+  "candidate_id": "P3",
+  "checkpoint_sha256": "afc7f6886980f6709dde6ecbf5ea646196ab2d73d91b85b221d0707cac07ce6b",
+  "elapsed_ms": 409572.558,
+  "onnx_parity_maximum_absolute_error": 1.5497207641601562e-06,
+  "onnx_parity_passed": true,
+  "onnx_sha256": "912e3e58363079e505bdc52b56b51d984bfee8c5b5f75fbd4674fffb2355e141",
+  "production_approval": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-ignore-band-v3",
+  "schema": "graphreader.ocr-graph-text-ignore-band-result.v1",
+  "sealed_public_archive_opened": false,
+  "selection_gate_passed": false,
+  "selection_metrics": {
+    "duplicate_region_count": 0,
+    "exact_fixture_count": 92,
+    "exclusion_exact_fixture_count": 32,
+    "exclusion_false_region_count": 0,
+    "false_region_count": 2,
+    "fixture_count": 112,
+    "text_exact_fixture_count": 60,
+    "text_false_region_count": 2,
+    "text_fixture_count": 80,
+    "text_missed_fixture_count": 19,
+    "text_multi_region_fixture_count": 1
+  },
+  "selection_report_path": "ml/ocr/graph_text_ignore_band_v3/artifacts/P3-run/candidate-report.json",
+  "selection_report_sha256": "a89fda186be1443bff819aff2026baaecfd22956ef8480946534b553b2e53fbe",
+  "status": "failed_selection",
+  "structure_diagnosis": {
+    "arrow_crosshatch": {
+      "failed_fixture_count": 8
+    },
+    "boxed_square_key": {
+      "failed_fixture_count": 3
+    },
+    "double_hook_bracket": {
+      "failed_fixture_count": 5
+    },
+    "open_diamond_polyline": {
+      "failed_fixture_count": 4
+    }
+  },
+  "task": "ocr-detection",
+  "training_opened_seal_sha256": "69b8a86d46b3267d19b00eecc0158342f8ebd37a280061523f4bcff74b826dbe",
+  "training_result_seal_sha256": "526b63279114bcd9bf14ad54118a376c8216c92f98ce98a776e03df99ec9bbc9"
+}
