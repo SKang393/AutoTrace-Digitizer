@@ -1887,7 +1887,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-component-context-v7",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_3_preregistered",
       "defect_class": "component-line proposal decisions lacked expanded scene context for rejecting graph structures that resemble isolated text",
       "prior_revision": "graph-text-component-region-v6",
       "prior_exposed_fixture_bytes_reused": false,
@@ -1897,33 +1897,36 @@
       "trigger_public_scene_count": 64,
       "trigger_public_false_regions": 7,
       "trigger_public_missed_regions": 0,
-      "isolated_change": "continue from the exact failed-selection P1 checkpoint for twelve epochs while replacing inverse-frequency weighted cross entropy with unweighted cross entropy; retain architecture, preprocessing, proposal algorithm, split bytes, and public gate",
+      "isolated_change": "restart from the exact failed-selection P1 checkpoint and replace P2 unweighted cross entropy with unweighted cross entropy using 0.05 label smoothing; retain architecture, preprocessing, proposal algorithm, split bytes, optimizer settings, epochs, seed, thresholds, and public gate",
       "architecture": "dual-context-component-proposal-cnn-v1",
       "proposal_algorithm": "adaptive-gray-baseline-bounded-line-grouping-v2",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P2"
-      ],
-      "consumed_candidate_ids": [
-        "P1"
-      ],
-      "remaining_unregistered_candidate_ids": [
         "P3"
       ],
+      "consumed_candidate_ids": [
+        "P1",
+        "P2"
+      ],
+      "remaining_unregistered_candidate_ids": [],
       "retired_unregistered_candidate_ids": [],
       "candidate_config_paths": {
         "P1": "ml/ocr/component_context_detector_v7/training/p1.json",
-        "P2": "ml/ocr/component_context_detector_v7/training/p2.json"
+        "P2": "ml/ocr/component_context_detector_v7/training/p2.json",
+        "P3": "ml/ocr/component_context_detector_v7/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "3e94ac8d819e0a673c22b0e6ad89192f11c439bcf03af8d1e53f10c496393731",
-        "P2": "231667001784d8a4c40d4e9a2b66cf1fceca919904b7c9947e2a0a38f060434f"
+        "P2": "231667001784d8a4c40d4e9a2b66cf1fceca919904b7c9947e2a0a38f060434f",
+        "P3": "b90f7905f085efe5150d1b4210e888cfc76091d09c2518be8739add0cf14b666"
       },
       "candidate_checkpoint_sha256": {
-        "P1": "c1bf01a26fd015f6c06d68696c0f7135a32d03296db468be5339735b2e0f18c1"
+        "P1": "c1bf01a26fd015f6c06d68696c0f7135a32d03296db468be5339735b2e0f18c1",
+        "P2": "0376bea38003247fa21ce96f3b321373bbfb89860a4d533443044ff1a71b7164"
       },
       "candidate_onnx_sha256": {
-        "P1": "4aeae1f67a2b421f02897bd39f04479db1b412fee2519342bc5261c810524c70"
+        "P1": "4aeae1f67a2b421f02897bd39f04479db1b412fee2519342bc5261c810524c70",
+        "P2": "98922d3697cffbde846f7fbfb82e7738367006eaac13b190185fd2733dccd6dc"
       },
       "protocol_path": "ml/ocr/component_context_detector_v7/PROTOCOL.json",
       "protocol_sha256": "cbfd42d89e110423beeb4e31eff5930b702dd3fb45232f387607ae73d695eb4c",
@@ -1965,8 +1968,30 @@
       "p2_loss_revision": "unweighted-cross-entropy-finetune-v1",
       "p2_seed": 20261113,
       "p2_epochs": 12,
+      "p2_result_path": "ml/ocr/component_context_detector_v7/P2_RESULT.json",
+      "p2_result_sha256": "935cdd4219ac9252a11543aec3177960b3cd690d2915c0bff39a9aec32563fc1",
+      "p2_training_report_sha256": "9f320e761fccaa6b3199e2e403faa51aab0512854ef672385e37a1d1625f1c6a",
+      "p2_training_opened_seal_sha256": "db0eaea66c6ab1b61a26036ecd2ed520618aaaa2acdaa201c5a3e7ea52b58f8e",
+      "p2_training_result_seal_sha256": "8428b98fd3b8a8514de4056ce239cb55b31e653465897190a0a47a5b9edd04ce",
+      "p2_selection_exact_scene_count": 63,
+      "p2_selection_scene_count": 64,
+      "p2_selection_true_positives": 256,
+      "p2_selection_false_positives": 1,
+      "p2_selection_false_negatives": 0,
+      "p2_selection_duplicate_region_count": 0,
+      "p2_selection_prohibited_structure_hits": 1,
+      "p2_onnx_parity_maximum_absolute_error": 0.00000762939453125,
+      "p2_onnx_parity_passed": true,
+      "p2_optimizer_steps": 276,
+      "p2_failure": "P2 passed CPU ONNX parity and retained all 256 validation truth regions, but accepted one compact triangle structure at every threshold from 0.85 through 0.95.",
+      "p3_expected_runner_source_bundle_sha256": "5c67aac2d81af920db97b2d9f9e7300f65141a9e19e0969dab2410747a7eba4d",
+      "p3_source_checkpoint_sha256": "c1bf01a26fd015f6c06d68696c0f7135a32d03296db468be5339735b2e0f18c1",
+      "p3_loss_revision": "label-smoothed-cross-entropy-finetune-v1",
+      "p3_label_smoothing": 0.05,
+      "p3_seed": 20261113,
+      "p3_epochs": 12,
       "execution_authorized": true,
-      "authorized_candidate_id": "P2",
+      "authorized_candidate_id": "P3",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_authorized_on_selection_pass": true,

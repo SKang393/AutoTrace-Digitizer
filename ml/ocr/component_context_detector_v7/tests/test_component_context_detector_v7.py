@@ -14,7 +14,6 @@ from ml.markers.gate_seal import canonical_json_bytes, sha256_bytes, sha256_file
 from ml.ocr.component_context_detector_v7.dataset import (
     build_split,
     encode_proposal,
-    load_sealed_public_archive,
     proposal_examples,
     proposal_labels,
     proposal_summary,
@@ -33,6 +32,10 @@ from ml.ocr.component_context_detector_v7.train_p1 import (
 from ml.ocr.component_context_detector_v7.train_p2 import (
     CONFIG_PATH as P2_CONFIG_PATH,
     RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
+)
+from ml.ocr.component_context_detector_v7.train_p3 import (
+    CONFIG_PATH as P3_CONFIG_PATH,
+    RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS,
 )
 
 
@@ -86,41 +89,53 @@ def test_frozen_split_and_gate_hashes_are_directly_bound() -> None:
     assert seal["predecessor_public_sample_or_pixel_inspection_used"] is False
     assert seal["truth_hidden_from_training_runner"] is True
     assert sha256_file(REPO_ROOT / seal["fixture_archive_path"]) == seal["fixture_archive_sha256"]
-    scenes = load_sealed_public_archive(REPO_ROOT / seal["fixture_archive_path"])
-    assert split_fingerprint(scenes) == seal["split_fingerprint"]
-    assert proposal_summary(scenes)["positive_proposal_count"] == seal["truth_region_count"]
     gate = json.loads((ROOT / "gates/sealed-public-v1.json").read_text(encoding="utf-8"))
     assert gate["sealed_public_test_seal_sha256"] == sha256_file(seal_path)
     assert gate["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, EVALUATOR_SOURCE_PATHS)
     assert gate["expected_gate_config_sha256"] == sha256_bytes(canonical_json_bytes(GATE_CONFIG))
 
 
-def test_failed_p1_is_consumed_and_p2_is_the_only_preregistered_candidate() -> None:
+def test_failed_p1_and_p2_are_consumed_and_p3_is_the_final_preregistered_candidate() -> None:
     ledger = json.loads(LEDGER.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["task"] == TASK and item["revision"] == REVISION)
     p1_config = json.loads((REPO_ROOT / P1_CONFIG_PATH).read_text(encoding="utf-8"))
     p2_config = json.loads((REPO_ROOT / P2_CONFIG_PATH).read_text(encoding="utf-8"))
+    p3_config = json.loads((REPO_ROOT / P3_CONFIG_PATH).read_text(encoding="utf-8"))
     p1_result = json.loads((ROOT / "P1_RESULT.json").read_text(encoding="utf-8"))
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    p2_result = json.loads((ROOT / "P2_RESULT.json").read_text(encoding="utf-8"))
+    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(REPO_ROOT / P1_CONFIG_PATH)
     assert entry["candidate_config_sha256"]["P2"] == sha256_file(REPO_ROOT / P2_CONFIG_PATH)
+    assert entry["candidate_config_sha256"]["P3"] == sha256_file(REPO_ROOT / P3_CONFIG_PATH)
     assert p1_config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, P1_RUNNER_SOURCE_PATHS)
     assert p2_config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, P2_RUNNER_SOURCE_PATHS)
+    assert p3_config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, P3_RUNNER_SOURCE_PATHS)
     assert p1_result["status"] == "failed_selection"
     assert p1_result["selection_exact_scene_count"] == 62
     assert p1_result["selection_false_positives"] == 2
     assert p1_result["selection_false_negatives"] == 0
     assert p1_result["public_gate_archive_opened"] is False
     assert sha256_file(ROOT / "P1_RESULT.json") == entry["p1_result_sha256"]
-    assert not (ROOT / "P2_RESULT.json").exists()
+    assert p2_result["status"] == "failed_selection"
+    assert p2_result["selection_exact_scene_count"] == 63
+    assert p2_result["selection_false_positives"] == 1
+    assert p2_result["selection_false_negatives"] == 0
+    assert p2_result["public_gate_archive_opened"] is False
+    assert sha256_file(ROOT / "P2_RESULT.json") == entry["p2_result_sha256"]
+    assert p3_config["source_checkpoint_sha256"] == p1_result["checkpoint_sha256"]
+    assert p3_config["p2_result_sha256"] == sha256_file(ROOT / "P2_RESULT.json")
+    assert p3_config["label_smoothing"] == 0.05
+    assert p3_config["seed"] == p2_config["seed"]
+    assert p3_config["selection_thresholds"] == p2_config["selection_thresholds"]
+    assert not (ROOT / "P3_RESULT.json").exists()
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
 

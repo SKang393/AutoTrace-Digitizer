@@ -14,12 +14,20 @@ weights, downloaded training data, and predecessor public fixture bytes are
 excluded.
 
 P1 trained once and passed CPU ONNX parity, but two compact triangle structures
-left only 62 of 64 validation scenes exact. The public archive stayed unopened.
-No threshold separated every negative from every positive. P2 is therefore the
-only currently preregistered candidate. It retains the exact architecture,
-preprocessing, split bytes, and P1 checkpoint, and changes only the training
-loss from inverse-frequency weighting to unweighted cross entropy for twelve
-additional epochs. P3 remains unregistered. The public archive may be opened
-once only if P2 passes every validation scene and CPU ONNX parity.
+left only 62 of 64 validation scenes exact. P2 changed only the loss from
+inverse-frequency weighting to unweighted cross entropy and improved the fixed
+validation set to 63 of 64 exact scenes while retaining all 256 truths. One
+compact triangle still passed every evaluated threshold from 0.85 through 0.95,
+so the sealed public archive remains unopened.
+
+P3 is the final preregistered candidate. Its direct trigger is the P2 report:
+the final training loss reached 2.69520371547386e-7 while the remaining
+validation false structure persisted. P3 restarts from the exact P1 checkpoint
+and changes only P2's unweighted cross entropy to 0.05 label-smoothed cross
+entropy. Architecture, preprocessing, proposal algorithm, frozen split bytes,
+optimizer settings, epochs, seed, thresholds, and public gate remain unchanged.
+The public archive may be opened once only if P3 passes all 64 validation scenes
+with zero false, missed, duplicate, or prohibited regions and passes CPU ONNX
+parity. P1 and P2 cannot be rerun, and no candidate remains after P3.
 Nothing in this revision is production-approved, release-eligible, manifest,
 stored, packaged, or authorized for a 1.0.1 promotion.
