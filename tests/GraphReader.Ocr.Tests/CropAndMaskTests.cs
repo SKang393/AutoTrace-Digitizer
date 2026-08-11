@@ -149,6 +149,47 @@ public sealed class CropAndMaskTests
     }
 
     [TestMethod]
+    public void RelativeVerticalPaddingKeepsTightGlyphBelowStructuralHeightAndUsesWhitePadding()
+    {
+        var pixels = Enumerable.Repeat((byte)255, 24 * 24).ToArray();
+        for (var y = 6; y < 18; y++)
+        {
+            for (var x = 8; x < 12; x++)
+            {
+                pixels[(y * 24) + x] = 0;
+            }
+        }
+
+        var image = new OcrImage(
+            24,
+            24,
+            24,
+            pixels,
+            OcrSourceImage.Original,
+            OcrFrameTransform.Identity);
+        OcrDetectedRegion region = OcrTestFixtures.Region("tight-glyph", 8, 6, 4, 12);
+
+        OcrCrop crop = OcrCropBatcher.CreateBatches(
+            image,
+            [region],
+            new OcrCropBatcherOptions
+            {
+                TargetWidth = 128,
+                TargetHeight = 32,
+                PaddingPixels = 1,
+                VerticalContentPaddingRatio = 0.25,
+                PaddingValue = 1f,
+            })[0][0];
+
+        int foregroundRows = Enumerable.Range(0, crop.Height)
+            .Count(y => crop.Pixels.Span.Slice(y * crop.Width, crop.Width)
+                .ToArray()
+                .Any(static value => value < 0.5f));
+        Assert.IsLessThan(24, foregroundRows);
+        Assert.IsTrue(crop.Pixels.Span.ToArray().TakeLast(64).All(static value => value == 1f));
+    }
+
+    [TestMethod]
     public void EnhancedCropMapsOriginalPolygonThroughDeclaredTransform()
     {
         OcrDetectedRegion region = OcrTestFixtures.Region("scaled", 20, 30, 12, 8);

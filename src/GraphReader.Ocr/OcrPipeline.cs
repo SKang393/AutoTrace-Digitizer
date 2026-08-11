@@ -17,6 +17,13 @@ public sealed record OcrPipelineOptions
 
     public double CropPaddingPixels { get; init; } = 1;
 
+    public double CropVerticalContentPaddingRatio { get; init; }
+
+    public OcrCropResizeMode CropResizeMode { get; init; } =
+        OcrCropResizeMode.PreserveAspectRatioPad;
+
+    public float CropPaddingValue { get; init; } = 0.5f;
+
     public double MaskPaddingPixels { get; init; } = 1;
 
     public double MinimumMaskRecognitionConfidence { get; init; } = 0.55;
@@ -51,7 +58,13 @@ public sealed class OcrPipeline
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         _options = options ?? throw new ArgumentNullException(nameof(options));
         if (_options.BatchSize <= 0 || _options.CropWidth <= 0 || _options.CropHeight <= 0 ||
-            _options.CropPaddingPixels < 0 || _options.MaskPaddingPixels < 0 ||
+            _options.CropPaddingPixels < 0 ||
+            !double.IsFinite(_options.CropVerticalContentPaddingRatio) ||
+            _options.CropVerticalContentPaddingRatio < 0 ||
+            !Enum.IsDefined(_options.CropResizeMode) ||
+            !float.IsFinite(_options.CropPaddingValue) ||
+            _options.CropPaddingValue is < 0 or > 1 ||
+            _options.MaskPaddingPixels < 0 ||
             _options.MinimumMaskRecognitionConfidence is < 0 or > 1 ||
             _options.MaximumTickCombinationEvaluations <= 0 ||
             string.IsNullOrWhiteSpace(_options.StageVersion))
@@ -151,6 +164,9 @@ public sealed class OcrPipeline
             TargetHeight = _options.CropHeight,
             BatchSize = _options.BatchSize,
             PaddingPixels = _options.CropPaddingPixels,
+            VerticalContentPaddingRatio = _options.CropVerticalContentPaddingRatio,
+            ResizeMode = _options.CropResizeMode,
+            PaddingValue = _options.CropPaddingValue,
         };
 
         IReadOnlyList<IReadOnlyList<OcrCrop>> originalBatches;

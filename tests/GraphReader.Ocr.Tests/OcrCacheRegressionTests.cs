@@ -173,6 +173,27 @@ public sealed class OcrCacheRegressionTests
         Assert.AreNotEqual(firstKey, secondKey);
     }
 
+    [TestMethod]
+    public void ComponentCropCompositionInvalidatesRequestAlias()
+    {
+        var recognizer = new StubTextRecognizer(
+            new Dictionary<(string RegionId, OcrSourceImage Source), IReadOnlyList<OcrRecognitionAlternative>>());
+        OcrRequest request = OcrTestFixtures.Request();
+        var baseline = new OcrPipelineOptions();
+        var component = baseline with
+        {
+            CropVerticalContentPaddingRatio = 0.25,
+            CropPaddingValue = 1f,
+        };
+
+        string baselineKey = OcrCacheKeyDeriver.CreateRequestAlias(
+            request, recognizer, baseline, "component-detector-v1");
+        string componentKey = OcrCacheKeyDeriver.CreateRequestAlias(
+            request, recognizer, component, "component-detector-v1");
+
+        Assert.AreNotEqual(baselineKey, componentKey);
+    }
+
     private static OcrDetectorImage DetectorImage(OcrImage image) => new(
         image,
         Convert.ToHexStringLower(SHA256.HashData(image.Pixels.Span)));

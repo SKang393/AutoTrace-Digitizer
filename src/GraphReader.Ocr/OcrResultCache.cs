@@ -100,7 +100,7 @@ public static class OcrCacheKeyDeriver
         yield return detectorConfigurationFingerprint;
         yield return options.StageVersion;
         yield return FormattableString.Invariant(
-            $"{options.BatchSize},{options.CropWidth},{options.CropHeight},{options.CropPaddingPixels:R},{options.MaskPaddingPixels:R},{options.MinimumMaskRecognitionConfidence:R},{options.MaximumTickCombinationEvaluations}");
+            $"{options.BatchSize},{options.CropWidth},{options.CropHeight},{options.CropPaddingPixels:R},{options.CropVerticalContentPaddingRatio:R},{options.CropResizeMode},{options.CropPaddingValue:R},{options.MaskPaddingPixels:R},{options.MinimumMaskRecognitionConfidence:R},{options.MaximumTickCombinationEvaluations}");
         yield return RectangleMaterial(request.PlotBounds);
         yield return ImageMaterial(request.OriginalImage);
         yield return request.EnhancedImage is null ? "no_enhanced_image" : ImageMaterial(request.EnhancedImage);

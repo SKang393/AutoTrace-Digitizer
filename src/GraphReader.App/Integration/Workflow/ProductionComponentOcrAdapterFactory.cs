@@ -185,6 +185,26 @@ internal static class ProductionComponentOcrAdapterFactory
             "resampling",
             "half_pixel_bilinear_v1",
             "OCR recognition preprocessing");
+        RequireString(
+            preprocessing,
+            "crop_resize_mode",
+            "preserve_aspect_ratio_pad",
+            "OCR recognition preprocessing");
+        double cropPaddingPixels = RequiredReviewedDouble(
+            preprocessing,
+            "crop_padding_pixels",
+            1d,
+            "OCR recognition preprocessing");
+        double cropVerticalContentPaddingRatio = RequiredReviewedDouble(
+            preprocessing,
+            "crop_vertical_content_padding_ratio",
+            0.25d,
+            "OCR recognition preprocessing");
+        float cropPaddingValue = RequiredReviewedSingle(
+            preprocessing,
+            "crop_padding_value",
+            1f,
+            "OCR recognition preprocessing");
         RequireStringArray(
             preprocessing,
             "geometry_features",
@@ -242,6 +262,10 @@ internal static class ProductionComponentOcrAdapterFactory
                 StageVersion = identity.Version,
                 CropWidth = canvasWidth,
                 CropHeight = canvasHeight,
+                CropPaddingPixels = cropPaddingPixels,
+                CropVerticalContentPaddingRatio = cropVerticalContentPaddingRatio,
+                CropResizeMode = OcrCropResizeMode.PreserveAspectRatioPad,
+                CropPaddingValue = cropPaddingValue,
             });
     }
 

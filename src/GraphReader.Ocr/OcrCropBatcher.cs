@@ -23,6 +23,14 @@ public sealed record OcrCropBatcherOptions
     public double PaddingPixels { get; init; } = 1;
 
     /// <summary>
+    /// Adds padding on each side of the crop's oriented vertical content axis.
+    /// A value of 0.25 maps a tight glyph to at most two thirds of the output
+    /// height before interpolation, which is required by component recognizers
+    /// that reserve taller components for graph-structure rejection.
+    /// </summary>
+    public double VerticalContentPaddingRatio { get; init; }
+
+    /// <summary>
     /// Controls how a detected text region is mapped into the recognition tensor.
     /// PP-OCR recognition preserves the source aspect ratio and pads the remaining
     /// width instead of stretching every crop to the model's maximum width.
@@ -78,13 +86,24 @@ public static class OcrCropBatcher
             throw new ArgumentException("OCR regions must use original_pixels.", nameof(region));
         }
 
-        var bounds = region.Polygon.Bounds;
-        var padded = new OcrRectangle(
-            bounds.X - options.PaddingPixels,
-            bounds.Y - options.PaddingPixels,
-            bounds.Width + (2 * options.PaddingPixels),
-            bounds.Height + (2 * options.PaddingPixels));
         var orientation = GraphTextRoleClassifier.GetOrientation(region.OrientationDegrees);
+        var bounds = region.Polygon.Bounds;
+        double horizontalPadding = options.PaddingPixels;
+        double verticalPadding = options.PaddingPixels;
+        if (orientation is OcrOrientation.RotatedClockwise or OcrOrientation.RotatedCounterClockwise)
+        {
+            horizontalPadding += bounds.Width * options.VerticalContentPaddingRatio;
+        }
+        else
+        {
+            verticalPadding += bounds.Height * options.VerticalContentPaddingRatio;
+        }
+
+        var padded = new OcrRectangle(
+            bounds.X - horizontalPadding,
+            bounds.Y - verticalPadding,
+            bounds.Width + (2 * horizontalPadding),
+            bounds.Height + (2 * verticalPadding));
         int contentWidth = ContentWidth(padded, orientation, options);
         var output = Enumerable.Repeat(
                 options.PaddingValue,
@@ -265,6 +284,8 @@ public static class OcrCropBatcher
 
         if (options.TargetWidth <= 0 || options.TargetHeight <= 0 || options.BatchSize <= 0 ||
             !double.IsFinite(options.PaddingPixels) || options.PaddingPixels < 0 ||
+            !double.IsFinite(options.VerticalContentPaddingRatio) ||
+            options.VerticalContentPaddingRatio < 0 ||
             !Enum.IsDefined(options.ResizeMode) ||
             !float.IsFinite(options.PaddingValue) || options.PaddingValue is < 0 or > 1)
         {

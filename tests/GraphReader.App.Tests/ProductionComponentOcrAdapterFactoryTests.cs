@@ -47,6 +47,10 @@ public sealed class ProductionComponentOcrAdapterFactoryTests
                 recognizer.AllowedProviders!.ToArray());
             Assert.AreEqual(128, pipeline.CropWidth);
             Assert.AreEqual(32, pipeline.CropHeight);
+            Assert.AreEqual(1d, pipeline.CropPaddingPixels);
+            Assert.AreEqual(0.25d, pipeline.CropVerticalContentPaddingRatio);
+            Assert.AreEqual(OcrCropResizeMode.PreserveAspectRatioPad, pipeline.CropResizeMode);
+            Assert.AreEqual(1f, pipeline.CropPaddingValue);
             Assert.IsTrue(
                 ProductionComponentOcrAdapterFactory.UsesComponentEnsembleManifest(manifestPath));
         }
@@ -75,6 +79,32 @@ public sealed class ProductionComponentOcrAdapterFactoryTests
                 ProductionComponentOcrAdapterFactory.ReadRecognitionOptions(identity, manifestPath));
 
             StringAssert.Contains(exception.Message, "confidence_threshold");
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public void ComponentManifestRejectsChangedCompositionPadding()
+    {
+        string root = CreateTemporaryDirectory();
+        try
+        {
+            string modelPath = Path.Combine(root, "component.onnx");
+            File.WriteAllBytes(modelPath, [0x01]);
+            string manifestPath = WriteManifest(root, cropVerticalContentPaddingRatio: 0.20d);
+            var identity = new ModelIdentity(
+                "graph-numeric-component-ensemble-v5",
+                "0.0.21-p1",
+                new string('a', 64),
+                modelPath);
+
+            InvalidDataException exception = Assert.ThrowsExactly<InvalidDataException>(() =>
+                ProductionComponentOcrAdapterFactory.ReadRecognitionOptions(identity, manifestPath));
+
+            StringAssert.Contains(exception.Message, "crop_vertical_content_padding_ratio");
         }
         finally
         {
@@ -172,7 +202,10 @@ public sealed class ProductionComponentOcrAdapterFactoryTests
         }
     }
 
-    private static string WriteManifest(string root, float confidenceThreshold = 0.65f)
+    private static string WriteManifest(
+        string root,
+        float confidenceThreshold = 0.65f,
+        double cropVerticalContentPaddingRatio = 0.25d)
     {
         var manifest = new Dictionary<string, object?>
         {
@@ -208,6 +241,10 @@ public sealed class ProductionComponentOcrAdapterFactoryTests
                 ["glyph_height"] = 24,
                 ["geometry_feature_count"] = 6,
                 ["resampling"] = "half_pixel_bilinear_v1",
+                ["crop_resize_mode"] = "preserve_aspect_ratio_pad",
+                ["crop_padding_pixels"] = 1d,
+                ["crop_vertical_content_padding_ratio"] = cropVerticalContentPaddingRatio,
+                ["crop_padding_value"] = 1f,
                 ["geometry_features"] = new[]
                 {
                     "height_over_canvas_height",
