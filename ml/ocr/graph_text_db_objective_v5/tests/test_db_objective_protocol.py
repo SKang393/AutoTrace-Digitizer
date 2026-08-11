@@ -312,15 +312,15 @@ def test_p3_preregistration_is_checksum_bound_and_public_closed() -> None:
     assert preregistration["sealed_public_archive_opened"] is False
 
 
-def test_canonical_budget_authorizes_only_unused_p3_and_keeps_public_closed() -> None:
+def test_canonical_budget_records_exhausted_p3_and_keeps_public_closed() -> None:
     ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["task"] == "ocr-detection" and item["revision"] == REVISION)
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["status"] == "exhausted_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["p1_selection_exact_fixture_count"] == 47
     assert entry["p1_diagnostic_runs"] == 1
     assert entry["p2_boundary_probability_ceiling"] == 0.25
@@ -339,7 +339,37 @@ def test_canonical_budget_authorizes_only_unused_p3_and_keeps_public_closed() ->
     assert entry["p3_preregistration_sha256"] == sha256_file(
         REVISION_ROOT / "P3_PREREGISTRATION.json"
     )
+    assert entry["p3_result_sha256"] == sha256_file(REVISION_ROOT / "P3_RESULT.json")
+    assert entry["p3_training_report_sha256"] == sha256_file(
+        REVISION_ROOT / "artifacts/P3-run/candidate-report.json"
+    )
+    assert entry["p3_selection_exact_fixture_count"] == 113
+    assert entry["p3_selection_false_region_count"] == 3
+    assert entry["p3_selection_exclusion_false_region_count"] == 0
+    assert entry["p3_selection_gate_passed"] is False
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
+
+
+def test_p3_result_is_bound_to_the_consumed_payload_and_seals() -> None:
+    result = json.loads((REVISION_ROOT / "P3_RESULT.json").read_text(encoding="utf-8"))
+    assert result["status"] == "failed_selection"
+    assert result["checkpoint_sha256"] == "23dfbffc3a827a7e4d6257c6405a9be515de4f05831d888d5b814db2d695767d"
+    assert result["onnx_sha256"] == "6e64510f923a57588f5703e740723d7561e59da46a541f5309d2bedd5e7ca362"
+    assert result["selection_report_sha256"] == sha256_file(
+        REVISION_ROOT / "artifacts/P3-run/candidate-report.json"
+    )
+    assert result["training_opened_seal_sha256"] == sha256_file(
+        REPO_ROOT / "ml/markers/training-seals/ocr-detection/graph-text-db-objective-v5/P3/opened.json"
+    )
+    assert result["training_result_seal_sha256"] == sha256_file(
+        REPO_ROOT / "ml/markers/training-seals/ocr-detection/graph-text-db-objective-v5/P3/result.json"
+    )
+    assert result["selection_metrics"]["exact_fixture_count"] == 113
+    assert result["selection_metrics"]["exclusion_false_region_count"] == 0
+    assert result["selection_metrics"]["text_missed_fixture_count"] == 22
+    assert result["sealed_public_archive_opened"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False

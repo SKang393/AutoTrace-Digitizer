@@ -46,9 +46,16 @@ height 1.834 and width 1.186 times truth, versus only seven no-region cases.
 All exclusions remained clean. This isolates the remaining defect to uncertain
 shrink-map supervision inside the already-defined ignored boundary.
 
-P3 is preregistered as the final candidate. It replaces only P2's squared
-ceiling margin with explicit negative binary cross-entropy supervision inside
-that same boundary at weight `1.0`. The dual heads, base DB weights, model,
-frozen data, optimizer, seed, 2,880 steps, production thresholds, and unopened
-public archive remain unchanged. P2 may not rerun, and P3 may run only once
-after this preregistration is committed.
+P3 consumed its one authorized run. It replaced only P2's squared ceiling
+margin with explicit negative binary cross-entropy supervision inside that same
+boundary at weight `1.0`. It passed the probability contract and CPU ONNX
+parity at `9.5367431640625e-07`, retained zero exclusion false regions, and
+improved exact fixtures to 113 of 136. It still missed 22 text fixtures,
+produced three text false regions, and split one text fixture into multiple
+regions at the unchanged production thresholds, so it failed selection.
+
+P1 through P3 are consumed and this revision's experiment budget is exhausted.
+No candidate may rerun. The truth-hidden public archive remains unopened at
+SHA-256 `3d19f21f0aad9b4da8ca7b1fc7610589f22ac20ab31873bd769c7e1c84478853`,
+public evaluation remains unauthorized, and no manifest, production model-store
+entry, package payload, production approval, or release eligibility exists.
