@@ -39,11 +39,17 @@ its full-box training target was expanded again by DB postprocessing. No text
 fixture reached the fixed IoU gate, and two compact-legend gamma exclusions
 produced regions. The median predicted height was 3.14 times truth height.
 
-P3 is the final preregistered candidate. It retains the P2 source renderer,
-network, optimizer, epochs, learning rate, explicit clip, validation split, and
-postprocessing. It changes supervision to a fixed DB shrink map with ratio
-`0.40` and places exclusion crops over every registered graph-structure family.
-P3 starts from random initialization and does not reuse P2 weights.
+P3 is consumed. It retained the P2 source renderer, network, optimizer, epochs,
+learning rate, explicit clip, validation split, and postprocessing. It changed
+supervision to a fixed DB shrink map with ratio `0.40` and placed exclusion
+crops over every registered graph-structure family. P3 passed CPU ONNX parity,
+the strict probability contract, and all 24 exclusion fixtures, but only 39 of
+72 text fixtures were exact. Twenty-nine text fixtures had no matched region
+and ten false regions remained.
+
+P1 through P3 and the fixed three-candidate budget are exhausted. The sealed
+public archive remains unopened. This revision must not be rerun, tuned,
+manifested, placed in the production model store, packaged, or approved.
 
 No result in this folder alone can create a model manifest, promote the local
 model store, package weights, approve the combined OCR pair, change release

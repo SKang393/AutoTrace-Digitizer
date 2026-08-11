@@ -834,7 +834,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-region-detector-v1",
-      "status": "candidate_3_preregistered",
+      "status": "exhausted",
       "defect_class": "official detector emits valid probabilities but fails graph text-region exactness",
       "prior_revision_reuse": false,
       "prior_revision": "PP-OCRv5_mobile_det-d4aa24d408cd70b8b9f66cc758e20f397fc31a9c69d8477cf8887fc53bd5fceb",
@@ -843,12 +843,11 @@
       "trigger_evidence": "The one frozen official-detector diagnostic had valid probability outputs but only 0.22916666666666666 text detection exact, 0.4861111111111111 composition exact, and nine false regions.",
       "isolated_change": "replace P2 full-box supervision with the fixed DB 0.40 shrink-map target and deterministically place exclusion crops over each registered graph-structure family; retain the P2 source renderer, network, explicit clip, optimizer, epochs, learning rate, validation split, and DB postprocessing",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [
-        "P3"
-      ],
+      "preregistered_candidate_ids": [],
       "consumed_candidate_ids": [
         "P1",
-        "P2"
+        "P2",
+        "P3"
       ],
       "remaining_unregistered_candidate_ids": [],
       "candidate_config_paths": {
@@ -907,8 +906,25 @@
       "p3_preregistration_path": "ml/ocr/graph_text_detector_v1/P3_PREREGISTRATION.json",
       "p3_preregistration_sha256": "ce353cbc3f1ae57cf218b9f32ed54df9ba6e67fcbc829807c0b784d09818b63a",
       "p3_training_split_fingerprint": "dc86239c906fe30bb55555e46a9fb66535a42736901bd13fe0be4426e0747991",
-      "execution_authorized": true,
-      "authorized_candidate_id": "P3",
+      "p3_result_path": "ml/ocr/graph_text_detector_v1/P3_RESULT.json",
+      "p3_result_sha256": "b9628f2fea238977f982e43d30210c434b0628bce1f52b555f7744746a905f7b",
+      "p3_training_report_path": "ml/ocr/graph_text_detector_v1/artifacts/P3-run/candidate-report.json",
+      "p3_training_report_sha256": "aec6ab3ccffd0b175e5275eea282f843c8eaa3eed67c75fea8cd56a98754be80",
+      "p3_training_opened_seal_sha256": "3f9f3aca5f0a61c586a5166eb1f06cc3938a4a25dc8acd161c2371f41498ddb4",
+      "p3_training_result_seal_sha256": "ce20f1732534215415de640da6e5f3078bd6c6ae3091e9234920ae871ff9f239",
+      "p3_checkpoint_sha256": "cb3b8da3c854573e2a3a1136ae4ee62f3c35c59f62920bf0f6f81c9ab05f0837",
+      "p3_onnx_sha256": "7c9450a01b9ec3f37d609bf1894f5763ef9a6ebccbe2916ea0450b96cc81fb1f",
+      "p3_optimizer_steps": 1536,
+      "p3_probability_contract_passed": true,
+      "p3_onnx_parity_maximum_absolute_error": 0.00000268220901489258,
+      "p3_validation_exact_rate": 0.65625,
+      "p3_validation_text_exact_fixture_count": 39,
+      "p3_validation_false_region_count": 10,
+      "p3_validation_exclusion_false_region_count": 0,
+      "p3_public_gate_evaluations": 0,
+      "p3_failure": "P3 passed CPU parity, the probability contract, and all 24 exclusion fixtures, but only 39 of 72 text fixtures were exact; 29 text fixtures had no matched region and ten false regions remained.",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "production_approval": false,

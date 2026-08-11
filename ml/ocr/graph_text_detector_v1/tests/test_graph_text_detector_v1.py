@@ -147,7 +147,31 @@ def test_p3_uses_db_shrink_targets_and_targeted_hard_negatives() -> None:
     assert dataset_p3.P3_SHRINK_RATIO == 0.40
 
 
-def test_canonical_budget_authorizes_only_the_frozen_p3_candidate() -> None:
+def test_p3_result_exhausts_canonical_detector_budget() -> None:
+    result_path = ROOT / "ml/ocr/graph_text_detector_v1/P3_RESULT.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert result["status"] == "failed_selection"
+    assert result["optimizer_steps"] == 1536
+    assert result["selection_metrics"]["exact_fixture_count"] == 63
+    assert result["selection_metrics"]["text_exact_fixture_count"] == 39
+    assert result["selection_metrics"]["text_missed_fixture_count"] == 29
+    assert result["selection_metrics"]["false_region_count"] == 10
+    assert result["selection_metrics"]["exclusion_false_region_count"] == 0
+    assert result["probability_contract_passed"] is True
+    assert result["onnx_parity_passed"] is True
+    assert result["public_gate_evaluations"] == 0
+    assert result["sealed_public_archive_opened"] is False
+    assert result["production_approval"] is False
+    seal_directory = ROOT / "ml/markers/training-seals/ocr-detection/graph-text-region-detector-v1/P3"
+    opened_path = seal_directory / "opened.json"
+    training_result_path = seal_directory / "result.json"
+    training_result = json.loads(training_result_path.read_text(encoding="utf-8"))
+    assert sha256_file(opened_path) == result["training_opened_seal_sha256"]
+    assert sha256_file(training_result_path) == result["training_result_seal_sha256"]
+    assert training_result["opened_sha256"] == result["training_opened_seal_sha256"]
+    assert training_result["report_sha256"] == result["training_report_sha256"]
+    assert training_result["status"] == "failed_selection"
+
     ledger = json.loads(
         (ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
@@ -158,17 +182,16 @@ def test_canonical_budget_authorizes_only_the_frozen_p3_candidate() -> None:
     ]
     assert len(entries) == 1
     entry = entries[0]
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
-    assert entry["authorized_candidate_id"] == "P3"
-    assert entry["execution_authorized"] is True
+    assert entry["status"] == "exhausted"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
+    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is False
     assert entry["public_gate_authorized"] is False
-    config_path = Path(entry["candidate_config_paths"]["P3"])
-    assert sha256_file(ROOT / config_path) == entry["candidate_config_sha256"]["P3"]
     assert source_bundle_sha256(ROOT, P3_RUNNER_SOURCE_PATHS) == entry["expected_runner_source_bundle_sha256"]
     assert sha256_file(ROOT / entry["trigger_evidence_path"]) == entry["trigger_evidence_sha256"]
     assert sha256_file(ROOT / entry["p1_result_path"]) == entry["p1_result_sha256"]
     assert sha256_file(ROOT / entry["p2_preregistration_path"]) == entry["p2_preregistration_sha256"]
     assert sha256_file(ROOT / entry["p2_result_path"]) == entry["p2_result_sha256"]
     assert sha256_file(ROOT / entry["p3_preregistration_path"]) == entry["p3_preregistration_sha256"]
+    assert sha256_file(result_path) == entry["p3_result_sha256"]
