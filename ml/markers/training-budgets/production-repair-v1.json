@@ -934,7 +934,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-balanced-recall-v2",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_3_preregistered",
       "defect_class": "sparse positive recall collapses while graph-structure exclusions remain exact",
       "prior_revision_reuse": false,
       "prior_revision": "graph-text-region-detector-v1",
@@ -944,24 +944,26 @@
       "isolated_change": "replace the exhausted tiny strided network and unweighted sparse-pixel loss with a skip-connected encoder-decoder, fixed 8.0 positive BCE weight, and fixed 2.0 Dice weight on new disjoint renderer and degradation families; retain BGR normalization, DB shrink ratio 0.40, and every DB threshold",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P2"
-      ],
-      "consumed_candidate_ids": [
-        "P1"
-      ],
-      "remaining_unregistered_candidate_ids": [
         "P3"
       ],
+      "consumed_candidate_ids": [
+        "P1",
+        "P2"
+      ],
+      "remaining_unregistered_candidate_ids": [],
       "candidate_config_paths": {
         "P1": "ml/ocr/graph_text_balanced_v2/training/p1.json",
-        "P2": "ml/ocr/graph_text_balanced_v2/training/p2.json"
+        "P2": "ml/ocr/graph_text_balanced_v2/training/p2.json",
+        "P3": "ml/ocr/graph_text_balanced_v2/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "84aebf97f9879a1556077b6b97d4592b4d0abcc49fcaaed1fa2ba4c8fccfdfa3",
-        "P2": "17c5669b4276c1986209331b77c6c4bb1f6893dea8456b88794fc7c4f1606bbe"
+        "P2": "17c5669b4276c1986209331b77c6c4bb1f6893dea8456b88794fc7c4f1606bbe",
+        "P3": "f663bd2fb9cbf3e0ea1f4a4119213f4885b7d6637020022cbe3eb0ccbe0746c7"
       },
       "p1_expected_runner_source_bundle_sha256": "ae223519a32642f5dba246f00c8cd6a559c72717e8056367fc51afbcc9c2d85c",
       "p2_expected_runner_source_bundle_sha256": "3c91e9ac38f682c6713c7927ab08d6d8410decc3a85e2f10d17dcf675e716c79",
+      "p3_expected_runner_source_bundle_sha256": "6e4a4c34bbbda4890770c7e8008a56f4320f044aaea8e50ee9f75bfb6a9e536d",
       "protocol_path": "ml/ocr/graph_text_balanced_v2/PROTOCOL.json",
       "protocol_sha256": "2ca2e0cc41cb77ef2f551e27b7006ae15c4494296a0571c1f28edb908c39c02c",
       "selection_manifest_path": "ml/ocr/graph_text_balanced_v2/SELECTION_MANIFEST.json",
@@ -994,8 +996,28 @@
       "p2_preregistration_path": "ml/ocr/graph_text_balanced_v2/P2_PREREGISTRATION.json",
       "p2_preregistration_sha256": "846f0840ee17d463f97aeb76f4e1cf81f8991957d677d8f280bfcfdafe9794fd",
       "p2_isolated_change": "add only a weight-2.0 top-2-percent hard-negative background loss while retaining the exact P1 architecture, data, DB thresholds, optimizer, seed, and schedule",
+      "p2_result_path": "ml/ocr/graph_text_balanced_v2/P2_RESULT.json",
+      "p2_result_sha256": "d45cdb04914014081da272964b7e74fce7514ab35baf06982df63ed1fe97d58f",
+      "p2_training_report_path": "ml/ocr/graph_text_balanced_v2/artifacts/P2-run/candidate-report.json",
+      "p2_training_report_sha256": "223f58ce5cb610ccda954f15cd7c45dcdafc85e0842fef5068b5029de1b03541",
+      "p2_training_opened_seal_sha256": "5f99f4f7947548c8774a9296bb6507fe14c78ea832629e85ecaeb01df4020451",
+      "p2_training_result_seal_sha256": "397085dc5302754d59259d37b243eba0cebf52a6dae92e1377645f4cc26865ff",
+      "p2_checkpoint_sha256": "5a1b004a657e235d43aa9e30eb955640d4e9de26997a167ed0ef8771f4a3f60a",
+      "p2_onnx_sha256": "00dad2b0bf870cafb1d273d8d5cf1402e38ac73fc9a446ff4491d051b5ec2781",
+      "p2_selection_exact_fixture_count": 56,
+      "p2_selection_fixture_count": 96,
+      "p2_selection_false_region_count": 41,
+      "p2_selection_exclusion_false_region_count": 8,
+      "p2_selection_duplicate_region_count": 0,
+      "p2_onnx_parity_maximum_absolute_error": 0.0000020265579223632812,
+      "p2_probability_contract_passed": true,
+      "p2_selection_gate_passed": false,
+      "p2_failure": "P2 passed probability and parity but only 56/96 selection fixtures were exact. It produced 41 false regions including eight on exclusions and missed 20 text fixtures, showing that hard-negative mining on text patches penalized glyph pixels outside the shrunken DB target.",
+      "p3_preregistration_path": "ml/ocr/graph_text_balanced_v2/P3_PREREGISTRATION.json",
+      "p3_preregistration_sha256": "e8ac1d307b7e9e807150d4d00bfea31bbc58ca569c93e7e7915e011df51a5db4",
+      "p3_isolated_change": "apply the unchanged P2 hard-negative term only to empty-target exclusion patches while retaining the exact model, data, thresholds, optimizer, seed, schedule, and hard-negative constants",
       "execution_authorized": true,
-      "authorized_candidate_id": "P2",
+      "authorized_candidate_id": "P3",
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "production_approval": false,

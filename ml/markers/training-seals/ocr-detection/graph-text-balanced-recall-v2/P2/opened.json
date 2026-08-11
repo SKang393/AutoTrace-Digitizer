@@ -1,0 +1,25 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/graph_text_balanced_v2/training/p2.json",
+    "candidate_config_sha256": "17c5669b4276c1986209331b77c6c4bb1f6893dea8456b88794fc7c4f1606bbe",
+    "candidate_id": "P2",
+    "committed_source_enforcement": true,
+    "revision": "graph-text-balanced-recall-v2",
+    "runner_source_bundle_sha256": "3c91e9ac38f682c6713c7927ab08d6d8410decc3a85e2f10d17dcf675e716c79",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/graph_text_balanced_v2/dataset.py",
+      "ml/ocr/graph_text_balanced_v2/model.py",
+      "ml/ocr/graph_text_balanced_v2/protocol.py",
+      "ml/ocr/graph_text_balanced_v2/train_p1.py",
+      "ml/ocr/graph_text_balanced_v2/train_p2.py",
+      "ml/ocr/official_bakeoff/structure_consensus_evaluate.py"
+    ],
+    "task": "ocr-detection",
+    "training_budget_ledger_sha256": "404b23c864c800c277a023921905f8c8b833758eae7d3ca1c92e0685b30c1b3d"
+  },
+  "opened_utc": "2026-08-11T07:04:02.244712+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

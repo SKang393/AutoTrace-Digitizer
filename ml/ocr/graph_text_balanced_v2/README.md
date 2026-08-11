@@ -27,11 +27,20 @@ It produced 38 false regions, including nine on exclusions, and still missed
 nine text fixtures. Rail/legend and nested-bracket families each contributed
 17 false regions. The sealed public archive remained unopened.
 
-P2 retains the exact P1 architecture, data, thresholds, optimizer, seed, and
-28-epoch schedule. Its only change is a fixed weight-`2.0` loss on the highest
-loss two percent of background pixels in each sample. This targets the observed
-high-confidence structure false positives without threshold tuning. P1 is
-consumed and P2 is the only authorized candidate.
+P2 retained the exact P1 architecture, data, thresholds, optimizer, seed, and
+28-epoch schedule. Its only change was a fixed weight-`2.0` loss on the highest
+loss two percent of background pixels in each sample. It ran exactly once and
+failed selection. Probability and parity passed, but only 56/96 fixtures were
+exact. It produced 41 false regions, including eight on exclusions, and missed
+20 text fixtures. Applying hard-negative mining to text samples penalized real
+glyph pixels outside the shrunken DB target. The sealed public archive remained
+unopened.
+
+P3 retains the exact P2 model, data, thresholds, optimizer, seed, schedule, and
+hard-negative constants. Its only change is to apply the hard-negative term to
+empty-target exclusion patches. Text patches continue to use only the P1
+weighted BCE and Dice objective. P1 and P2 are consumed and P3 is the only
+authorized candidate.
 
 No result in this folder can create a production manifest, populate the model
 store, package weights, approve the combined OCR pair, change release readiness,
