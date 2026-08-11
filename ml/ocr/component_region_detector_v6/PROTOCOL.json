@@ -1,0 +1,132 @@
+{
+  "architecture": "component-line-proposal-binary-cnn-v1",
+  "candidate_ids": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "currently_preregistered_candidate": null,
+  "data_scope": "new procedural numeric and generic-word graph scenes only; no Chandler, Generalization, private or article images, external datasets, pretrained weights, downloaded training data, or exposed predecessor fixture bytes",
+  "distinct_from": [
+    "tiny-strided-encoder-decoder-probability-map-v1",
+    "skip-connected-balanced-probability-map-v1",
+    "stride-four-high-resolution-db-map-v1",
+    "db-two-head-differentiable-binarization-v1"
+  ],
+  "experiment_budget": 3,
+  "font_notice_path": "LICENSES/NotoSans-OFL-1.1.txt",
+  "font_notice_sha256": "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a",
+  "input": [
+    "proposal_count",
+    1,
+    32,
+    136
+  ],
+  "license": "Apache-2.0",
+  "output": [
+    "proposal_count",
+    2
+  ],
+  "preprocessing": {
+    "crop_height": 32,
+    "crop_resize_mode": "preserve_aspect_ratio_pad",
+    "crop_width": 128,
+    "geometry_feature_count": 8,
+    "horizontal_padding_pixels": 1.0,
+    "image_encoding": "1-gray/255",
+    "padding_value": 255,
+    "source": "immutable original-pixel Gray8 raster",
+    "vertical_padding_ratio": 0.25
+  },
+  "production_approval": false,
+  "proposal_algorithm": {
+    "algorithm": "adaptive-gray-four-connected-line-grouping-v1",
+    "connectivity": 4,
+    "foreground_threshold": "clamp(round(mean_gray*0.8),32,224)",
+    "maximum_component_height_ratio": 0.2,
+    "maximum_component_width_ratio": 0.15,
+    "maximum_horizontal_gap_height_ratio": 2.5,
+    "minimum_component_area": 2,
+    "minimum_vertical_overlap_ratio": 0.35,
+    "ordering": "top,left,bottom,right"
+  },
+  "release_eligible": false,
+  "revision": "graph-text-component-region-v6",
+  "schema": "graphreader.ocr-component-region-protocol.v1",
+  "selection_gates": {
+    "duplicate_region_count": 0,
+    "exact_region_count_every_fixture": true,
+    "false_region_count": 0,
+    "missed_region_count": 0,
+    "onnx_parity_maximum_absolute_error": 1e-05,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "truth_match_iou_minimum": 0.5
+  },
+  "selection_thresholds": [
+    0.45,
+    0.55,
+    0.65
+  ],
+  "split_generator_source_bundle_sha256": "bc2593a3fb6442880468f27e70eee1f00d68b3779e03b341ba39089f617cfead",
+  "split_generator_source_paths": [
+    "ml/ocr/component_region_detector_v6/dataset.py",
+    "ml/ocr/component_region_detector_v6/prepare_split.py",
+    "ml/ocr/component_region_detector_v6/protocol.py"
+  ],
+  "splits": [
+    {
+      "degradation_family": "train-gradient-blur-speckle-v6",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "font_sha256": [
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0"
+      ],
+      "renderer_family": "offset-margin-mixed-label-scenes-v6-train",
+      "scene_count": 192,
+      "seed_offset": 81000,
+      "split": "train"
+    },
+    {
+      "degradation_family": "validation-resample-scanline-fade-v6",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "font_sha256": [
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      ],
+      "renderer_family": "corner-swapped-mixed-label-scenes-v6-validation",
+      "scene_count": 48,
+      "seed_offset": 92000,
+      "split": "validation"
+    },
+    {
+      "degradation_family": "sealed-ramp-dropout-quantization-v6",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf"
+      ],
+      "font_sha256": [
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb"
+      ],
+      "renderer_family": "asymmetric-margin-mixed-label-scenes-v6-public",
+      "scene_count": 64,
+      "seed_offset": 103000,
+      "split": "sealed_public"
+    }
+  ],
+  "state": "split_frozen_before_training",
+  "task": "ocr-detection"
+}

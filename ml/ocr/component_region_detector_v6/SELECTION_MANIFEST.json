@@ -1,0 +1,29 @@
+{
+  "chandler_included": false,
+  "exposed_predecessor_cases_used_for_selection": false,
+  "generalization_label_included": false,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-component-region-v6",
+  "schema": "graphreader.ocr-component-region-selection.v1",
+  "sealed_public_truth_available_to_training": false,
+  "synthetic_only": true,
+  "task": "ocr-detection",
+  "train": {
+    "negative_proposal_count": 768,
+    "positive_proposal_count": 576,
+    "proposal_count": 1344,
+    "scene_count": 192,
+    "split_fingerprint": "279bec34711fb6ee7ac9a2556f3627d5b3d13fdb80be1ed671a1800f8676933a",
+    "truth_region_count": 576
+  },
+  "validation": {
+    "negative_proposal_count": 168,
+    "positive_proposal_count": 144,
+    "proposal_count": 312,
+    "scene_count": 48,
+    "split_fingerprint": "45aeb6b8adf679f1b48fd81313af47f600bec1951629942fea874e6b63dd8eb8",
+    "truth_region_count": 144
+  }
+}

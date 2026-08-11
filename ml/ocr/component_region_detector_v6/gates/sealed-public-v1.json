@@ -1,0 +1,17 @@
+{
+  "evaluation_limit": 1,
+  "expected_candidate_hash_keys": [
+    "onnx_sha256",
+    "selection_report_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "182dadfb30a6a5e2c8038cdeea0827d3ec8c1741d5cd70b3503df904ddac4b19",
+  "expected_evaluator_source_bundle_sha256": "26298f60bc504e120c1fe95e1adcf4631aebb60a605551a606dd608b007c3da9",
+  "expected_gate_config_sha256": "079fad8c1b90835d51b15b1e4b27e5cfa634dd0f66196a8f208a0e0830d7d51a",
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-component-region-v6-public-v1",
+  "schema": "graphreader.ocr-component-region-gate-config.v1",
+  "sealed_public_test_seal_path": "ml/ocr/component_region_detector_v6/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "1c416712c15c9f9a6728521201c4d7836a530a15d8c4553fbb4a5a63dd57950f",
+  "task": "ocr-detection"
+}
