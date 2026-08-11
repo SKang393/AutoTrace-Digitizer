@@ -1,0 +1,24 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/component_structural_filter_v1/training/p1.json",
+    "candidate_config_sha256": "a4cda0b85f53baebdddd507c92175b73fcfa85100ec8ea8db60db2c6d5477677",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "graph-numeric-component-structural-filter-v1",
+    "runner_source_bundle_sha256": "9a4b13abd1c6f1954b87a83fcd00e245f71b7ff43e1f6b3190152b17145928ae",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/component_geometric_v4/dataset.py",
+      "ml/ocr/component_geometric_v4/p3_dataset.py",
+      "ml/ocr/component_structural_filter_v1/pipeline.py",
+      "ml/ocr/component_structural_filter_v1/protocol.py",
+      "ml/ocr/component_structural_filter_v1/selection.py"
+    ],
+    "task": "ocr-recognition",
+    "training_budget_ledger_sha256": "b4b03673f63cf1b70cb0bae596271f46efe60c1f4793c8f7215502a4734ad94a"
+  },
+  "opened_utc": "2026-08-11T01:56:02.465557+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

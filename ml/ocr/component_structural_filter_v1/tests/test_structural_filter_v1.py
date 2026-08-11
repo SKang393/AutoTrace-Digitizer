@@ -88,22 +88,46 @@ def test_inherited_public_archive_remains_bound_and_unopened() -> None:
     assert not (ROOT / "PUBLIC_GATE_REPORT.json").exists()
 
 
-def test_canonical_budget_authorizes_only_p1_selection() -> None:
+def test_canonical_budget_records_selection_and_exact_public_authorization() -> None:
     ledger = json.loads(LEDGER.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["task"] == TASK and item["revision"] == REVISION)
-    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["status"] == "selection_passed_public_preregistered"
     assert entry["experiment_budget"] == 1
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(REPO_ROOT / CONFIG_PATH)
     assert entry["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
     assert entry["public_gate_config_sha256"] == sha256_file(ROOT / "gates/sealed-public-v1.json")
-    assert entry["public_gate_authorized"] is False
+    result_path = ROOT / "P1_RESULT.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert entry["p1_result_sha256"] == sha256_file(result_path)
+    assert result["status"] == "selected"
+    assert result["selection_gate_passed"] is True
+    assert result["optimizer_steps"] == 0
+    assert result["weights_changed"] is False
+    assert result["sealed_public_archive_opened"] is False
+    assert result["validation_marker_exclusion_accuracy"] == 1.0
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_onnx_sha256"] == result["source_onnx_sha256"]
+    assert entry["public_gate_authorized_selection_report_sha256"] == result["report_sha256"]
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
+
+
+def test_tracked_training_seals_bind_the_selected_report() -> None:
+    result = json.loads((ROOT / "P1_RESULT.json").read_text(encoding="utf-8"))
+    seal_root = REPO_ROOT / "ml/markers/training-seals/ocr-recognition" / REVISION / "P1"
+    opened_path = seal_root / "opened.json"
+    completed_path = seal_root / "result.json"
+    completed = json.loads(completed_path.read_text(encoding="utf-8"))
+    assert result["training_opened_seal_sha256"] == sha256_file(opened_path)
+    assert result["training_result_seal_sha256"] == sha256_file(completed_path)
+    assert completed["opened_sha256"] == result["training_opened_seal_sha256"]
+    assert completed["report_sha256"] == result["report_sha256"]
+    assert completed["status"] == "selected"
 
 
 def test_no_tracked_approval_manifest_exists_for_structural_filter() -> None:

@@ -11,11 +11,14 @@ false exclusion was a full-height divider classified as digit `1`, while the
 numeric digit `1` components remained below the frozen rule. No threshold sweep
 is permitted.
 
-P1 may execute once after its protocol, source bindings, evaluator, public gate,
-and canonical budget entry are committed. It uses the unchanged OCR V4
-validation split for selection. The inherited public fixture archive remains
-checksum-bound and unopened until P1 passes every validation gate and a second
-committed checkpoint authorizes the exact ONNX and selection-report hashes.
+P1 executed exactly once after its protocol, source bindings, evaluator, public
+gate, and canonical budget entry were committed. It used the unchanged OCR V4
+validation split and passed exact match `0.9609375`, CER
+`0.04361370716510903`, role accuracy `0.9739583333333334`, and marker exclusion
+accuracy `1.0`. The rule structurally rejected all 14 validation dividers,
+changed no weights, used zero optimizer steps, and left the inherited public
+archive unopened. The exact selection report and ONNX hashes are now the only
+candidate pair eligible for one separately committed public-gate execution.
 
 Even a passing public gate cannot approve, manifest, store, package, or release
 the model. Direct detector composition, marker-creation exclusion evidence,
