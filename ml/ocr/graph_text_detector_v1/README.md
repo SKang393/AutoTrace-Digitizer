@@ -22,6 +22,18 @@ zero duplicates, zero exclusion regions, CPU execution, and ONNX parity at most
 `1.5`, minimum side `3`, and maximum regions `1000` are not tuned. A failed P1
 is consumed and any repair requires P2 or P3 preregistration.
 
+P1 is consumed. It completed 1,536 optimizer steps, then failed closed because
+one CPU ONNX output reached `1.0000001192092896`. A fixed, non-approval clip
+diagnostic still produced zero exact validation fixtures, 409 false regions,
+and 78 exclusion false regions. P1 cannot be rerun or promoted.
+
+P2 is preregistered against the same validation and unopened sealed archive.
+It retains the P1 network layers, optimizer, epochs, learning rate, and fixed DB
+values. The isolated quality repair renders at source scale, applies the exact
+production 960/128 resize, and samples deterministic context crops. An explicit
+output clip enforces the unchanged strict probability contract. P2 starts from
+random initialization and does not reuse P1 weights.
+
 No result in this folder alone can create a model manifest, promote the local
 model store, package weights, approve the combined OCR pair, change release
 readiness, or authorize version `1.0.1`.

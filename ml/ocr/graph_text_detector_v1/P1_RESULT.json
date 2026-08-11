@@ -1,0 +1,39 @@
+{
+  "candidate_id": "P1",
+  "checkpoint_path": "ml/ocr/graph_text_detector_v1/artifacts/P1-run/graph-text-region-detector-v1-p1.pt",
+  "checkpoint_sha256": "0b60d6bb772d9d525822e91a2587e38d0d9fbb38e37d191fc3420495004662b8",
+  "clipped_output_diagnostic": {
+    "duplicate_region_count": 0,
+    "exact_fixture_count": 0,
+    "exact_rate": 0.0,
+    "exclusion_false_region_count": 78,
+    "false_region_count": 409,
+    "fixture_count": 96,
+    "purpose": "characterize the already-produced P1 payload only; not approval, threshold selection, or a candidate rerun"
+  },
+  "failure": "The CPU ONNX output reached 1.0000001192092896 on validation text case 0057 and violated the strict probability contract. Clipping that output only for diagnosis left zero exact fixtures, 409 false regions, and 78 exclusion false regions.",
+  "generalization_label_included": false,
+  "onnx_path": "ml/ocr/graph_text_detector_v1/artifacts/P1-run/graph-text-region-detector-v1-p1.onnx",
+  "onnx_raw_maximum": 1.0000001192092896,
+  "onnx_raw_minimum": 0.0,
+  "onnx_sha256": "c1b5b0a4648f28a3edd444acfd8cb131a07298fe5f1bc62bdc2ed5ccacf55ae2",
+  "optimizer_steps": 1536,
+  "private_or_article_images": false,
+  "probability_violation_case_ids": [
+    "graph-text-detector-v1-validation-text-0057"
+  ],
+  "probability_violation_count": 1,
+  "production_approval": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-region-detector-v1",
+  "schema": "graphreader.ocr-graph-text-detector-candidate-result.v1",
+  "sealed_public_archive_opened": false,
+  "status": "failed_runner_and_selection_diagnostic",
+  "synthetic_only": true,
+  "task": "ocr-detection",
+  "training_opened_seal_sha256": "38037db4359191dfda0c1c01401715330dc3c3c3cbad1ab3905765af0da16d02",
+  "training_report_path": "ml/ocr/graph_text_detector_v1/artifacts/P1-run/candidate-report.json",
+  "training_report_sha256": "0ae26fd1d34905e62af6a78116190dc1aefc40e352b4419600ff7004819c4294",
+  "training_result_seal_sha256": "c4c929c7a179450aa1feff0e298e3302ed4e5c08b1259e0db4221c443348c055"
+}

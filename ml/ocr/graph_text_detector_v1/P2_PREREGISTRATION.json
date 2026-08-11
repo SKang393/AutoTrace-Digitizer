@@ -1,0 +1,32 @@
+{
+  "candidate_config_path": "ml/ocr/graph_text_detector_v1/training/p2.json",
+  "candidate_config_sha256": "da7acbb5a1f47ed6b5097a966325f355361db4e2f588be3da84d89992dfe1ddb",
+  "candidate_id": "P2",
+  "experiment_budget": 3,
+  "experiment_ordinal": 2,
+  "expected_runner_source_bundle_sha256": "ead91a5b9aa9b72323513d6b859958ec590d3ce1cb0e8be137d6725549350b96",
+  "fixed_db_postprocessing": {
+    "box_confidence_threshold": 0.6,
+    "maximum_regions": 1000,
+    "minimum_side_length": 3,
+    "probability_threshold": 0.3,
+    "unclip_ratio": 1.5
+  },
+  "isolated_change": "replace P1 tensor-space patch rendering with exact production-resize context crops and enforce the existing strict probability contract with an explicit output clip; retain the network layers, optimizer, epochs, learning rate, validation split, and DB thresholds",
+  "p1_checkpoint_reused": false,
+  "p1_result_path": "ml/ocr/graph_text_detector_v1/P1_RESULT.json",
+  "p1_result_sha256": "fe56ec6e27283b6e40a799683f4bd71f5cd45eafa0a715277076ee047e0242b6",
+  "p1_status": "failed_runner_and_selection_diagnostic",
+  "private_or_article_images": false,
+  "production_approval": false,
+  "public_gate_authorized": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-region-detector-v1",
+  "schema": "graphreader.ocr-graph-text-detector-preregistration.v1",
+  "sealed_public_archive_opened": false,
+  "sealed_public_test_seal_sha256": "89f914418efffb6439c56c17db1ac017dd3740c850052667b450c1af17102c4c",
+  "selection_manifest_sha256": "fe557acb42f2765d3548c1ae80d8e49fa06c2e82c8cb9389364e2871cd62742a",
+  "task": "ocr-detection",
+  "training_split_fingerprint": "599ffe9fdd515998334a38579663bea624e0340cce622b0c327a8e65989dff64"
+}

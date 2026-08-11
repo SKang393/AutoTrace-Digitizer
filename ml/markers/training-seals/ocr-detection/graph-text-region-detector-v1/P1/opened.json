@@ -1,0 +1,24 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/graph_text_detector_v1/training/p1.json",
+    "candidate_config_sha256": "9b7062345c25b03fb4031d828825d508e4fcb029da5b10a74c4aa329e1dae769",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "graph-text-region-detector-v1",
+    "runner_source_bundle_sha256": "e06d5918ddef766df62cc0e193f5b08677dd9a5006683f13fe8d25c302939754",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/graph_text_detector_v1/dataset.py",
+      "ml/ocr/graph_text_detector_v1/model.py",
+      "ml/ocr/graph_text_detector_v1/protocol.py",
+      "ml/ocr/graph_text_detector_v1/train_p1.py",
+      "ml/ocr/official_bakeoff/structure_consensus_evaluate.py"
+    ],
+    "task": "ocr-detection",
+    "training_budget_ledger_sha256": "bec429775b023483a99b074b2dee33170f79c199a811b8c0effbc4d683164d4b"
+  },
+  "opened_utc": "2026-08-11T04:54:07.580000+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

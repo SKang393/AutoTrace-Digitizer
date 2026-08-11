@@ -11,9 +11,10 @@ import pytest
 import torch
 
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
-from ml.ocr.graph_text_detector_v1 import dataset, protocol
+from ml.ocr.graph_text_detector_v1 import dataset, dataset_p2, protocol
 from ml.ocr.graph_text_detector_v1.model import GraphTextRegionNet
-from ml.ocr.graph_text_detector_v1.train_p1 import RUNNER_SOURCE_PATHS
+from ml.ocr.graph_text_detector_v1.model_p2 import GraphTextRegionNetP2
+from ml.ocr.graph_text_detector_v1.train_p2 import RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS
 
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -86,7 +87,42 @@ def test_frozen_metadata_remains_unapproved_when_present() -> None:
             assert value.get("production_approval", value.get("public_release_eligible")) is False
 
 
-def test_canonical_budget_authorizes_only_the_frozen_p1_candidate() -> None:
+def test_p1_result_is_consumed_and_remains_unapproved() -> None:
+    value = json.loads((ROOT / "ml/ocr/graph_text_detector_v1/P1_RESULT.json").read_text(encoding="utf-8"))
+    assert value["status"] == "failed_runner_and_selection_diagnostic"
+    assert value["optimizer_steps"] == 1536
+    assert value["probability_violation_count"] == 1
+    assert value["clipped_output_diagnostic"]["exact_fixture_count"] == 0
+    assert value["clipped_output_diagnostic"]["false_region_count"] == 409
+    assert value["clipped_output_diagnostic"]["exclusion_false_region_count"] == 78
+    assert value["public_gate_evaluations"] == 0
+    assert value["sealed_public_archive_opened"] is False
+    assert value["production_approval"] is False
+
+
+def test_p2_training_renderer_is_deterministic_and_production_scaled() -> None:
+    first = dataset_p2.render_production_scale_patch(17)
+    repeated = dataset_p2.render_production_scale_patch(17)
+    exclusion = dataset_p2.render_production_scale_patch(protocol.TRAIN_SAMPLE_COUNT * 3 // 4)
+    assert np.array_equal(first.bgr, repeated.bgr)
+    assert np.array_equal(first.target, repeated.target)
+    assert first.bgr.shape == (dataset_p2.P2_PATCH_HEIGHT, dataset_p2.P2_PATCH_WIDTH, 3)
+    assert first.target.shape == (dataset_p2.P2_PATCH_HEIGHT, dataset_p2.P2_PATCH_WIDTH)
+    assert np.count_nonzero(first.target) > 0
+    assert np.count_nonzero(exclusion.target) == 0
+    assert first.renderer_family == "production-scale-context-crops-v2"
+
+
+def test_p2_model_enforces_strict_probability_range() -> None:
+    model = GraphTextRegionNetP2().eval()
+    with torch.inference_mode():
+        output = model(torch.randn((1, 3, 192, 512), dtype=torch.float32) * 100.0)
+    assert output.shape == (1, 1, 192, 512)
+    assert torch.isfinite(output).all()
+    assert torch.all((output >= 0) & (output <= 1))
+
+
+def test_canonical_budget_authorizes_only_the_frozen_p2_candidate() -> None:
     ledger = json.loads(
         (ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
@@ -97,13 +133,15 @@ def test_canonical_budget_authorizes_only_the_frozen_p1_candidate() -> None:
     ]
     assert len(entries) == 1
     entry = entries[0]
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["authorized_candidate_id"] == "P2"
     assert entry["execution_authorized"] is True
     assert entry["public_gate_authorized"] is False
-    config_path = Path(entry["candidate_config_paths"]["P1"])
-    assert sha256_file(ROOT / config_path) == entry["candidate_config_sha256"]["P1"]
-    assert source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS) == entry["expected_runner_source_bundle_sha256"]
+    config_path = Path(entry["candidate_config_paths"]["P2"])
+    assert sha256_file(ROOT / config_path) == entry["candidate_config_sha256"]["P2"]
+    assert source_bundle_sha256(ROOT, P2_RUNNER_SOURCE_PATHS) == entry["expected_runner_source_bundle_sha256"]
     assert sha256_file(ROOT / entry["trigger_evidence_path"]) == entry["trigger_evidence_sha256"]
+    assert sha256_file(ROOT / entry["p1_result_path"]) == entry["p1_result_sha256"]
+    assert sha256_file(ROOT / entry["p2_preregistration_path"]) == entry["p2_preregistration_sha256"]

@@ -834,30 +834,33 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-region-detector-v1",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_2_preregistered",
       "defect_class": "official detector emits valid probabilities but fails graph text-region exactness",
       "prior_revision_reuse": false,
       "prior_revision": "PP-OCRv5_mobile_det-d4aa24d408cd70b8b9f66cc758e20f397fc31a9c69d8477cf8887fc53bd5fceb",
       "trigger_evidence_path": "ml/ocr/combined_component_v5/DETECTOR_DIAGNOSTIC_RESULT.json",
       "trigger_evidence_sha256": "7254378817098b45142bc3fa703491c3d8aa67638936acfd5a2e8e707387b90c",
       "trigger_evidence": "The one frozen official-detector diagnostic had valid probability outputs but only 0.22916666666666666 text detection exact, 0.4861111111111111 composition exact, and nine false regions.",
-      "isolated_change": "replace only detector weights and architecture with an export-safe project-trained strided encoder-decoder; retain exact BGR normalization and frozen DB postprocessing thresholds",
+      "isolated_change": "replace P1 tensor-space patch rendering with exact production-resize context crops and enforce the existing strict probability contract with an explicit output clip; retain the network layers, optimizer, epochs, learning rate, validation split, and DB thresholds",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
+        "P2"
+      ],
+      "consumed_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "candidate_config_paths": {
-        "P1": "ml/ocr/graph_text_detector_v1/training/p1.json"
+        "P1": "ml/ocr/graph_text_detector_v1/training/p1.json",
+        "P2": "ml/ocr/graph_text_detector_v1/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "9b7062345c25b03fb4031d828825d508e4fcb029da5b10a74c4aa329e1dae769"
+        "P1": "9b7062345c25b03fb4031d828825d508e4fcb029da5b10a74c4aa329e1dae769",
+        "P2": "da7acbb5a1f47ed6b5097a966325f355361db4e2f588be3da84d89992dfe1ddb"
       },
-      "expected_runner_source_bundle_sha256": "e06d5918ddef766df62cc0e193f5b08677dd9a5006683f13fe8d25c302939754",
+      "expected_runner_source_bundle_sha256": "ead91a5b9aa9b72323513d6b859958ec590d3ce1cb0e8be137d6725549350b96",
       "protocol_path": "ml/ocr/graph_text_detector_v1/PROTOCOL.json",
       "protocol_sha256": "65ecac53effd87e5e5425a06430b3ede5a8e3c1c9e6b497e0da57e82613335ae",
       "selection_manifest_path": "ml/ocr/graph_text_detector_v1/SELECTION_MANIFEST.json",
@@ -866,8 +869,26 @@
       "sealed_public_test_seal_sha256": "89f914418efffb6439c56c17db1ac017dd3740c850052667b450c1af17102c4c",
       "sealed_public_fixture_archive_sha256": "67c78bcffded5cdeed68ce9416bec398239014f0cf8dc71fe65775d71a9ad199",
       "sealed_public_private_manifest_sha256": "01c1dbcd275e71832959c840f499a1cce7425c1a19688d9107d9c53fdb788f39",
+      "p1_result_path": "ml/ocr/graph_text_detector_v1/P1_RESULT.json",
+      "p1_result_sha256": "fe56ec6e27283b6e40a799683f4bd71f5cd45eafa0a715277076ee047e0242b6",
+      "p1_training_report_path": "ml/ocr/graph_text_detector_v1/artifacts/P1-run/candidate-report.json",
+      "p1_training_report_sha256": "0ae26fd1d34905e62af6a78116190dc1aefc40e352b4419600ff7004819c4294",
+      "p1_training_opened_seal_sha256": "38037db4359191dfda0c1c01401715330dc3c3c3cbad1ab3905765af0da16d02",
+      "p1_training_result_seal_sha256": "c4c929c7a179450aa1feff0e298e3302ed4e5c08b1259e0db4221c443348c055",
+      "p1_checkpoint_sha256": "0b60d6bb772d9d525822e91a2587e38d0d9fbb38e37d191fc3420495004662b8",
+      "p1_onnx_sha256": "c1b5b0a4648f28a3edd444acfd8cb131a07298fe5f1bc62bdc2ed5ccacf55ae2",
+      "p1_optimizer_steps": 1536,
+      "p1_probability_violation_count": 1,
+      "p1_clipped_diagnostic_exact_rate": 0.0,
+      "p1_clipped_diagnostic_false_region_count": 409,
+      "p1_clipped_diagnostic_exclusion_false_region_count": 78,
+      "p1_public_gate_evaluations": 0,
+      "p1_failure": "P1 violated the strict probability output contract on one case. A non-approval clipped-output diagnostic still produced zero exact validation fixtures and severe graph-structure false positives.",
+      "p2_preregistration_path": "ml/ocr/graph_text_detector_v1/P2_PREREGISTRATION.json",
+      "p2_preregistration_sha256": "5778c23e75cc7bf6f0e3360408aea5c2d626c861a7d9a54fb156abd09005e386",
+      "p2_training_split_fingerprint": "599ffe9fdd515998334a38579663bea624e0340cce622b0c327a8e65989dff64",
       "execution_authorized": true,
-      "authorized_candidate_id": "P1",
+      "authorized_candidate_id": "P2",
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "production_approval": false,
