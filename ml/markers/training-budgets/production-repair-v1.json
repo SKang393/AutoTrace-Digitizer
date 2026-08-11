@@ -1297,7 +1297,6 @@
       "isolated_change": "replace V4's single shrink-probability objective with a dual shrink/threshold head and differentiable binary-map supervision using fixed DB weights 5:10:1 and k=50, while retaining stride-4 inference, 2880 optimizer steps, production DB thresholds, and fail-closed gates on new disjoint procedural families",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P1",
         "P2"
       ],
       "consumed_candidate_ids": [
