@@ -11,10 +11,10 @@ import pytest
 import torch
 
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
-from ml.ocr.graph_text_detector_v1 import dataset, dataset_p2, protocol
+from ml.ocr.graph_text_detector_v1 import dataset, dataset_p2, dataset_p3, protocol
 from ml.ocr.graph_text_detector_v1.model import GraphTextRegionNet
 from ml.ocr.graph_text_detector_v1.model_p2 import GraphTextRegionNetP2
-from ml.ocr.graph_text_detector_v1.train_p2 import RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS
+from ml.ocr.graph_text_detector_v1.train_p3 import RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS
 
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -122,7 +122,32 @@ def test_p2_model_enforces_strict_probability_range() -> None:
     assert torch.all((output >= 0) & (output <= 1))
 
 
-def test_canonical_budget_authorizes_only_the_frozen_p2_candidate() -> None:
+def test_p2_result_is_consumed_and_remains_unapproved() -> None:
+    value = json.loads((ROOT / "ml/ocr/graph_text_detector_v1/P2_RESULT.json").read_text(encoding="utf-8"))
+    assert value["status"] == "failed_selection"
+    assert value["optimizer_steps"] == 1536
+    assert value["selection_metrics"]["text_exact_fixture_count"] == 0
+    assert value["selection_metrics"]["exclusion_exact_fixture_count"] == 22
+    assert value["predicted_box_diagnostic"]["median_height_ratio"] == 3.142156862745098
+    assert value["probability_contract_passed"] is True
+    assert value["onnx_parity_passed"] is True
+    assert value["public_gate_evaluations"] == 0
+    assert value["sealed_public_archive_opened"] is False
+    assert value["production_approval"] is False
+
+
+def test_p3_uses_db_shrink_targets_and_targeted_hard_negatives() -> None:
+    p2_text = dataset_p2.render_production_scale_patch(17)
+    p3_text = dataset_p3.render_db_shrink_patch(17)
+    p3_legend = dataset_p3.render_db_shrink_patch(386)
+    assert np.array_equal(p2_text.bgr, p3_text.bgr)
+    assert 0 < np.count_nonzero(p3_text.target) < np.count_nonzero(p2_text.target)
+    assert np.count_nonzero(p3_legend.target) == 0
+    assert "compact_legend_and_arrow:validation_gamma" in p3_legend.degradation_family
+    assert dataset_p3.P3_SHRINK_RATIO == 0.40
+
+
+def test_canonical_budget_authorizes_only_the_frozen_p3_candidate() -> None:
     ledger = json.loads(
         (ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
@@ -133,15 +158,17 @@ def test_canonical_budget_authorizes_only_the_frozen_p2_candidate() -> None:
     ]
     assert len(entries) == 1
     entry = entries[0]
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["execution_authorized"] is True
     assert entry["public_gate_authorized"] is False
-    config_path = Path(entry["candidate_config_paths"]["P2"])
-    assert sha256_file(ROOT / config_path) == entry["candidate_config_sha256"]["P2"]
-    assert source_bundle_sha256(ROOT, P2_RUNNER_SOURCE_PATHS) == entry["expected_runner_source_bundle_sha256"]
+    config_path = Path(entry["candidate_config_paths"]["P3"])
+    assert sha256_file(ROOT / config_path) == entry["candidate_config_sha256"]["P3"]
+    assert source_bundle_sha256(ROOT, P3_RUNNER_SOURCE_PATHS) == entry["expected_runner_source_bundle_sha256"]
     assert sha256_file(ROOT / entry["trigger_evidence_path"]) == entry["trigger_evidence_sha256"]
     assert sha256_file(ROOT / entry["p1_result_path"]) == entry["p1_result_sha256"]
     assert sha256_file(ROOT / entry["p2_preregistration_path"]) == entry["p2_preregistration_sha256"]
+    assert sha256_file(ROOT / entry["p2_result_path"]) == entry["p2_result_sha256"]
+    assert sha256_file(ROOT / entry["p3_preregistration_path"]) == entry["p3_preregistration_sha256"]

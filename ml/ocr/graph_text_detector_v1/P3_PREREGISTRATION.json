@@ -1,0 +1,33 @@
+{
+  "candidate_config_path": "ml/ocr/graph_text_detector_v1/training/p3.json",
+  "candidate_config_sha256": "750f305ee22c80574a4e1462acbcd9eade5375f2f072a494a6d08b297ec78e02",
+  "candidate_id": "P3",
+  "db_shrink_ratio": 0.4,
+  "experiment_budget": 3,
+  "experiment_ordinal": 3,
+  "expected_runner_source_bundle_sha256": "6e1cff12672c0d91e019d07ff7dc5dbcd60c2566d8c289a991aeea9e52e73f2e",
+  "fixed_db_postprocessing": {
+    "box_confidence_threshold": 0.6,
+    "maximum_regions": 1000,
+    "minimum_side_length": 3,
+    "probability_threshold": 0.3,
+    "unclip_ratio": 1.5
+  },
+  "isolated_change": "replace P2 full-box supervision with the fixed DB 0.40 shrink-map target and deterministically place exclusion crops over each registered graph-structure family; retain the P2 source renderer, network, explicit clip, optimizer, epochs, learning rate, validation split, and DB postprocessing",
+  "p2_checkpoint_reused": false,
+  "p2_result_path": "ml/ocr/graph_text_detector_v1/P2_RESULT.json",
+  "p2_result_sha256": "1f642de4728fda22d44e85b7caa366674b2b73c71afb73aa9c5751361ba0b92e",
+  "p2_status": "failed_selection",
+  "private_or_article_images": false,
+  "production_approval": false,
+  "public_gate_authorized": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-region-detector-v1",
+  "schema": "graphreader.ocr-graph-text-detector-preregistration.v1",
+  "sealed_public_archive_opened": false,
+  "sealed_public_test_seal_sha256": "89f914418efffb6439c56c17db1ac017dd3740c850052667b450c1af17102c4c",
+  "selection_manifest_sha256": "fe557acb42f2765d3548c1ae80d8e49fa06c2e82c8cb9389364e2871cd62742a",
+  "task": "ocr-detection",
+  "training_split_fingerprint": "dc86239c906fe30bb55555e46a9fb66535a42736901bd13fe0be4426e0747991"
+}

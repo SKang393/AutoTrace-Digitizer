@@ -34,6 +34,17 @@ production 960/128 resize, and samples deterministic context crops. An explicit
 output clip enforces the unchanged strict probability contract. P2 starts from
 random initialization and does not reuse P1 weights.
 
+P2 is consumed. It passed CPU parity and the strict probability contract, but
+its full-box training target was expanded again by DB postprocessing. No text
+fixture reached the fixed IoU gate, and two compact-legend gamma exclusions
+produced regions. The median predicted height was 3.14 times truth height.
+
+P3 is the final preregistered candidate. It retains the P2 source renderer,
+network, optimizer, epochs, learning rate, explicit clip, validation split, and
+postprocessing. It changes supervision to a fixed DB shrink map with ratio
+`0.40` and places exclusion crops over every registered graph-structure family.
+P3 starts from random initialization and does not reuse P2 weights.
+
 No result in this folder alone can create a model manifest, promote the local
 model store, package weights, approve the combined OCR pair, change release
 readiness, or authorize version `1.0.1`.
