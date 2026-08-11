@@ -1,0 +1,98 @@
+{
+  "alphabet": "0123456789.-%",
+  "architecture": "component-geometric-projection-mlp-v1",
+  "candidate_ids": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "currently_preregistered_candidate": "P1",
+  "data_scope": "procedurally rendered graph-numeric labels and exclusion shapes only; no Chandler, private article images, external datasets, or pretrained weights",
+  "distinct_from": [
+    "compact-graph-numeric-ctc-v1",
+    "spatial-alignment-supervised-sequence-v2",
+    "canonical-slot-convolutional-v3",
+    "whole-crop-semantic-query-v1"
+  ],
+  "experiment_budget": 3,
+  "font_notice_path": "LICENSES/NotoSans-OFL-1.1.txt",
+  "font_notice_sha256": "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a",
+  "gates": {
+    "marker_exclusion_accuracy_minimum": 1.0,
+    "onnx_parity_maximum_absolute_error": 0.0001,
+    "provider": "CPUExecutionProvider",
+    "sealed_cer_maximum": 0.05,
+    "sealed_exact_match_minimum": 0.9,
+    "sealed_role_accuracy_minimum": 0.9,
+    "validation_exact_match_minimum": 0.9,
+    "validation_role_accuracy_minimum": 0.9
+  },
+  "input": [
+    "glyph_count",
+    1,
+    24,
+    20
+  ],
+  "output": [
+    "glyph_count",
+    14
+  ],
+  "production_approval": false,
+  "reject_class_index": 13,
+  "release_eligible": false,
+  "revision": "graph-numeric-component-geometric-v4",
+  "schema": "graphreader.ocr-component-geometric-protocol.v1",
+  "seed": 20260810,
+  "split_generator_source_bundle_sha256": "ee4e971b820853e5e31861bf91ec07079c86429dbe13d53d3d3fa045249afa81",
+  "split_generator_source_paths": [
+    "ml/ocr/component_geometric_v4/dataset.py",
+    "ml/ocr/component_geometric_v4/prepare_split.py",
+    "ml/ocr/component_geometric_v4/protocol.py"
+  ],
+  "splits": [
+    {
+      "degradation_family": "train-contrast-blur-and-speckle-v1",
+      "font_path": "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+      "font_sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+      "negative_count": 512,
+      "positive_count": 2048,
+      "renderer_family": "noto-sans-regular-explicit-cells-v1",
+      "seed_offset": 11000,
+      "split": "train"
+    },
+    {
+      "degradation_family": "validation-pixel-scale-and-scanline-v1",
+      "font_path": "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+      "font_sha256": "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+      "negative_count": 128,
+      "positive_count": 256,
+      "renderer_family": "noto-sans-medium-explicit-cells-v1",
+      "seed_offset": 22000,
+      "split": "validation"
+    },
+    {
+      "degradation_family": "sealed-offset-dropout-and-fade-v1",
+      "font_path": "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+      "font_sha256": "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+      "negative_count": 128,
+      "positive_count": 256,
+      "renderer_family": "noto-sans-semibold-explicit-cells-v1",
+      "seed_offset": 33000,
+      "split": "sealed_public"
+    }
+  ],
+  "state": "preregistered_before_training",
+  "task": "ocr-recognition",
+  "thresholds": [
+    0.55,
+    0.65,
+    0.75,
+    0.85
+  ],
+  "training": {
+    "batch_size": 256,
+    "epochs": 24,
+    "learning_rate": 0.002,
+    "weight_decay": 0.0001
+  }
+}

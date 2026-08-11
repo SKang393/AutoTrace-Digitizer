@@ -1,0 +1,23 @@
+{
+  "chandler_included": false,
+  "exclusion_count": 128,
+  "fixture_archive_path": "ml/ocr/component_geometric_v4/artifacts/split-freeze/sealed-public-fixtures.npz",
+  "fixture_archive_sha256": "7845bc0628740fb24b95e0367bceab8b5b6d186adacc5f58c5c6c3bdcc97dc76",
+  "frozen_utc": "2026-08-11T00:18:07.813369+00:00",
+  "positive_count": 256,
+  "private_manifest_path": "ml/ocr/component_geometric_v4/artifacts/split-freeze/sealed-public-private-manifest.json",
+  "private_manifest_sha256": "e40ce059ddda1d3acaf72a620781f6399b5df49961aeef4094d05c86667754d1",
+  "private_or_article_images": false,
+  "protocol_path": "ml/ocr/component_geometric_v4/PROTOCOL.json",
+  "protocol_sha256": "15643db8d3778c58983a3c1ba8559e14638cc4b3b59123e3603d493ff0ee18dc",
+  "public_release_eligible": false,
+  "revision": "graph-numeric-component-geometric-v4",
+  "sample_count": 384,
+  "schema": "graphreader.ocr-component-geometric-sealed-test-seal.v1",
+  "selection_manifest_path": "ml/ocr/component_geometric_v4/SELECTION_MANIFEST.json",
+  "selection_manifest_sha256": "7cda51b6aa6cf9cccd63f9eab09b909ff9ac71fb1dc82490b528a59a68cf7207",
+  "split_fingerprint": "5594f1e0b81dc166d17a0929acf29939243f30226948855f8d80e5d49a7d3643",
+  "synthetic_only": true,
+  "task": "ocr-recognition",
+  "truth_hidden_from_training_runner": true
+}

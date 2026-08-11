@@ -1,0 +1,16 @@
+{
+  "alphabet": "0123456789.-%",
+  "chandler_included": false,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-numeric-component-geometric-v4",
+  "schema": "graphreader.ocr-component-geometric-selection.v1",
+  "sealed_public_truth_available_to_training": false,
+  "synthetic_only": true,
+  "task": "ocr-recognition",
+  "train_sample_count": 2560,
+  "train_split_fingerprint": "40a6106e8ff1096ce4a020e5f283a8b735b9620658083a407fb0c411e2a54175",
+  "validation_sample_count": 384,
+  "validation_split_fingerprint": "cd3671c3d9f6a3a38b976100b3d38da1c8bb58e518d0052de0412d156cb05740"
+}

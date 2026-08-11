@@ -1,0 +1,16 @@
+{
+  "evaluation_limit": 1,
+  "expected_candidate_hash_keys": [
+    "onnx_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "e40ce059ddda1d3acaf72a620781f6399b5df49961aeef4094d05c86667754d1",
+  "expected_evaluator_source_bundle_sha256": "766b038cb20a97506b29e50c42f6cac059c61ed668a36812b9ce49c2e5b2584a",
+  "expected_gate_config_sha256": "53506016e690fcc72471c99fb513dff167dbeeadade18e4ac36e3ea0333c0128",
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-numeric-component-geometric-v4-public-v1",
+  "schema": "graphreader.ocr-component-geometric-gate-config.v1",
+  "sealed_public_test_seal_path": "ml/ocr/component_geometric_v4/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "4ec62df2c14195abda1a519a7c66356132e9238831ecc9621ab94171e2b1ef0d",
+  "task": "ocr-recognition"
+}

@@ -1,0 +1,33 @@
+{
+  "architecture": "component-geometric-projection-mlp-v1",
+  "batch_size": 256,
+  "candidate_id": "P1",
+  "chandler_included": false,
+  "epochs": 24,
+  "expected_runner_source_bundle_sha256": "5d165ee179f3fa1986f88c73870e9cc72d81f47c399baaf15a14d6f0a6bbb3c2",
+  "experiment_budget": 3,
+  "experiment_ordinal": 1,
+  "isolated_change": "classify deterministically isolated glyph components with fixed grid, row, column, and radial projections plus a non-convolutional MLP",
+  "learning_rate": 0.002,
+  "onnx_parity_tolerance": 0.0001,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-numeric-component-geometric-v4",
+  "schema": "graphreader.ocr-component-geometric-training.v1",
+  "sealed_public_test_seal_path": "ml/ocr/component_geometric_v4/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "4ec62df2c14195abda1a519a7c66356132e9238831ecc9621ab94171e2b1ef0d",
+  "seed": 20260810,
+  "selection_manifest_path": "ml/ocr/component_geometric_v4/SELECTION_MANIFEST.json",
+  "selection_manifest_sha256": "7cda51b6aa6cf9cccd63f9eab09b909ff9ac71fb1dc82490b528a59a68cf7207",
+  "selection_thresholds": [
+    0.55,
+    0.65,
+    0.75,
+    0.85
+  ],
+  "task": "ocr-recognition",
+  "trigger": "All prior project CTC, spatial V2, canonical-slot V3, and numeric V1 recognition candidates exhausted their fixed experiments without satisfying the production OCR gates.",
+  "weight_decay": 0.0001
+}

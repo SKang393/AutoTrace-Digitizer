@@ -566,6 +566,45 @@
       "cpu_directml_maximum_absolute_difference": 0.00000035762786865234375,
       "integration_blocker": "The classifier is approved for production discovery and packaging. Marker-center, OCR, workflow, distribution, and clean-machine release gates remain mandatory.",
       "refusal_required_before_output": true
+    },
+    {
+      "task": "ocr-recognition",
+      "revision": "graph-numeric-component-geometric-v4",
+      "status": "candidate_1_preregistered",
+      "defect_class": "component-isolated graph-numeric glyph recognition using fixed geometric projections",
+      "prior_revision_reuse": false,
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "candidate_config_paths": {
+        "P1": "ml/ocr/component_geometric_v4/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "d173b77f4c23ef15eadb253ff691e30938dc299d3f0e7aa3b6a8c88caf25b9fa"
+      },
+      "trigger_evidence": "All prior project CTC, spatial V2, canonical-slot V3, and numeric V1 recognition candidates exhausted their fixed experiments without satisfying the production OCR gates.",
+      "isolated_change": "classify deterministically isolated glyph components with fixed grid, row, column, and radial projections plus a non-convolutional MLP",
+      "protocol_path": "ml/ocr/component_geometric_v4/PROTOCOL.json",
+      "protocol_sha256": "15643db8d3778c58983a3c1ba8559e14638cc4b3b59123e3603d493ff0ee18dc",
+      "selection_manifest_path": "ml/ocr/component_geometric_v4/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "7cda51b6aa6cf9cccd63f9eab09b909ff9ac71fb1dc82490b528a59a68cf7207",
+      "sealed_public_test_seal_path": "ml/ocr/component_geometric_v4/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "4ec62df2c14195abda1a519a7c66356132e9238831ecc9621ab94171e2b1ef0d",
+      "sealed_public_fixture_archive_sha256": "7845bc0628740fb24b95e0367bceab8b5b6d186adacc5f58c5c6c3bdcc97dc76",
+      "sealed_public_private_manifest_sha256": "e40ce059ddda1d3acaf72a620781f6399b5df49961aeef4094d05c86667754d1",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "public_gate_authorized": false,
+      "public_gate_evaluations": 0,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
     }
   ]
 }
