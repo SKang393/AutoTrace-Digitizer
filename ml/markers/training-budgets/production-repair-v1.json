@@ -930,6 +930,53 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "ocr-detection",
+      "revision": "graph-text-balanced-recall-v2",
+      "status": "candidate_1_preregistered",
+      "defect_class": "sparse positive recall collapses while graph-structure exclusions remain exact",
+      "prior_revision_reuse": false,
+      "prior_revision": "graph-text-region-detector-v1",
+      "trigger_evidence_path": "ml/ocr/graph_text_detector_v1/P3_RESULT.json",
+      "trigger_evidence_sha256": "b9628f2fea238977f982e43d30210c434b0628bce1f52b555f7744746a905f7b",
+      "trigger_evidence": "The exhausted V1 P3 detector passed probability, parity, and all 24 exclusions, but only 39 of 72 text fixtures were exact; 29 text fixtures had no matched region and ten false regions remained.",
+      "isolated_change": "replace the exhausted tiny strided network and unweighted sparse-pixel loss with a skip-connected encoder-decoder, fixed 8.0 positive BCE weight, and fixed 2.0 Dice weight on new disjoint renderer and degradation families; retain BGR normalization, DB shrink ratio 0.40, and every DB threshold",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "candidate_config_paths": {
+        "P1": "ml/ocr/graph_text_balanced_v2/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "84aebf97f9879a1556077b6b97d4592b4d0abcc49fcaaed1fa2ba4c8fccfdfa3"
+      },
+      "expected_runner_source_bundle_sha256": "ae223519a32642f5dba246f00c8cd6a559c72717e8056367fc51afbcc9c2d85c",
+      "protocol_path": "ml/ocr/graph_text_balanced_v2/PROTOCOL.json",
+      "protocol_sha256": "2ca2e0cc41cb77ef2f551e27b7006ae15c4494296a0571c1f28edb908c39c02c",
+      "selection_manifest_path": "ml/ocr/graph_text_balanced_v2/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "58ec2800591431eaaa98ccbd07d7359afe2c4b01251f197cf443fcb079c5aec9",
+      "sealed_public_test_seal_path": "ml/ocr/graph_text_balanced_v2/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "4cfb3e06a6d859661ea9df6244212aefb0b7b238f4a2434cedb525cf7bc5f0c0",
+      "sealed_public_fixture_archive_sha256": "531bbb930ac616e89368a62c1d0fdbf4e3a7f7a715e96468bf9def7aa5b61fea",
+      "sealed_public_private_manifest_sha256": "9d80632364116765339d23b2c5beeeabbf92f856cd1778ea9bfc8a9cba08974b",
+      "p1_preregistration_path": "ml/ocr/graph_text_balanced_v2/P1_PREREGISTRATION.json",
+      "p1_preregistration_sha256": "62880c6a75b9d11fce44c52a9af93f263affd1d744ca2b9c50db895ca4b5cf7b",
+      "p1_training_split_fingerprint": "1ae1a1929764e755fde18db75b995340687f6cdd2c3ced1ed39def4f191e0365",
+      "p1_validation_split_fingerprint": "f71d59016d380e8fc83037951ff1c2e4bb1fe238c7183dd82d98bd9a4fe442a6",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "public_gate_authorized": false,
+      "public_gate_evaluations": 0,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
     }
   ]
 }

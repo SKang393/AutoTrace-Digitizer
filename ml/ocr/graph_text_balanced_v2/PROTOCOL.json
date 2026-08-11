@@ -1,0 +1,131 @@
+{
+  "architecture": "skip-connected-balanced-probability-map-v1",
+  "candidate_ids": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "currently_preregistered_candidate": "P1",
+  "data_scope": "new procedurally rendered generic graph labels and exclusion structures only; no V1 selection or sealed fixtures, Chandler, Generalization, private images, article images, external datasets, pretrained weights, or downloaded training data",
+  "experiment_budget": 3,
+  "fixed_experiment_policy": {
+    "candidate_architecture_changes": "require_next_candidate_id",
+    "sealed_public_evaluations_before_selection": 0,
+    "threshold_sweeps": 0,
+    "validation_regeneration_after_training": 0
+  },
+  "input": [
+    "batch",
+    3,
+    "H",
+    "W"
+  ],
+  "license": "Apache-2.0",
+  "output": [
+    "batch",
+    1,
+    "H",
+    "W"
+  ],
+  "postprocessing": {
+    "algorithm": "db_postprocess_v1",
+    "box_confidence_threshold": 0.6,
+    "maximum_regions": 1000,
+    "minimum_side_length": 3,
+    "probability_threshold": 0.3,
+    "score_mode": "fast",
+    "unclip_ratio": 1.5
+  },
+  "preprocessing": {
+    "channel_means": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "channel_order": "BGR",
+    "channel_scales": [
+      4.366812227074235,
+      4.464285714285714,
+      4.444444444444445
+    ],
+    "dimension_multiple": 128,
+    "maximum_side_length": 960
+  },
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-balanced-recall-v2",
+  "schema": "graphreader.ocr-graph-text-balanced-recall-protocol.v1",
+  "selection_gates": {
+    "duplicate_region_count": 0,
+    "exact_region_count_every_fixture": true,
+    "exclusion_false_region_count": 0,
+    "false_region_count": 0,
+    "onnx_parity_maximum_absolute_error": 0.0001,
+    "provider": "CPUExecutionProvider",
+    "truth_match_iou_minimum": 0.5
+  },
+  "split_generator_source_bundle_sha256": "79df109fbd944cf7600d0239de2fd3176b3503d87ce7ec7df5ab63245c5e6e0f",
+  "split_generator_source_paths": [
+    "ml/ocr/graph_text_balanced_v2/dataset.py",
+    "ml/ocr/graph_text_balanced_v2/prepare_split.py",
+    "ml/ocr/graph_text_balanced_v2/protocol.py",
+    "ml/ocr/graph_text_balanced_v2/sealed_dataset.py"
+  ],
+  "splits": [
+    {
+      "degradation_family": "train-low-contrast-ringing-streak-v2",
+      "exclusion_count": 160,
+      "renderer_family": "staggered-rail-label-frame-v2",
+      "seed_offset": 41000,
+      "selection_visible": true,
+      "split": "train",
+      "text_count": 480
+    },
+    {
+      "degradation_family": "validation-quantized-haze-raster-v2",
+      "exclusion_count": 24,
+      "renderer_family": "mirrored-margin-crossbar-frame-v2",
+      "seed_offset": 53000,
+      "selection_visible": true,
+      "split": "validation",
+      "text_count": 72
+    },
+    {
+      "degradation_family": "sealed-public-sharpen-dropout-chroma-v2",
+      "exclusion_count": 32,
+      "renderer_family": "stepped-header-fan-frame-v2",
+      "seed_offset": 67000,
+      "selection_visible": false,
+      "split": "sealed_public",
+      "text_count": 96
+    }
+  ],
+  "state": "preregistered_before_training",
+  "task": "ocr-detection",
+  "training": {
+    "batch_size": 8,
+    "db_shrink_ratio": 0.4,
+    "dice_loss_weight": 2.0,
+    "epochs": 28,
+    "learning_rate": 0.0015,
+    "patch_height": 192,
+    "patch_width": 512,
+    "positive_bce_weight": 8.0,
+    "seed": 20260904,
+    "weight_decay": 0.0001
+  },
+  "trigger": {
+    "defect_class": "sparse positive recall collapses while exclusions remain exact",
+    "prior_candidate": "P3",
+    "prior_exact_fixture_count": 63,
+    "prior_exclusion_false_region_count": 0,
+    "prior_false_region_count": 10,
+    "prior_fixture_count": 96,
+    "prior_result_path": "ml/ocr/graph_text_detector_v1/P3_RESULT.json",
+    "prior_result_sha256": "b9628f2fea238977f982e43d30210c434b0628bce1f52b555f7744746a905f7b",
+    "prior_revision": "graph-text-region-detector-v1",
+    "prior_text_exact_fixture_count": 39,
+    "prior_text_fixture_count": 72,
+    "prior_text_missed_fixture_count": 29
+  }
+}

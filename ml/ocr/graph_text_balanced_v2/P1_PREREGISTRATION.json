@@ -1,0 +1,21 @@
+{
+  "candidate_config_path": "ml/ocr/graph_text_balanced_v2/training/p1.json",
+  "candidate_config_sha256": "84aebf97f9879a1556077b6b97d4592b4d0abcc49fcaaed1fa2ba4c8fccfdfa3",
+  "candidate_id": "P1",
+  "expected_runner_source_bundle_sha256": "ae223519a32642f5dba246f00c8cd6a559c72717e8056367fc51afbcc9c2d85c",
+  "experiment_budget": 3,
+  "experiment_ordinal": 1,
+  "production_approval": false,
+  "public_gate_authorized": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-balanced-recall-v2",
+  "schema": "graphreader.ocr-graph-text-balanced-recall-preregistration.v1",
+  "sealed_public_archive_opened": false,
+  "sealed_public_test_seal_sha256": "4cfb3e06a6d859661ea9df6244212aefb0b7b238f4a2434cedb525cf7bc5f0c0",
+  "task": "ocr-detection",
+  "training_split_fingerprint": "1ae1a1929764e755fde18db75b995340687f6cdd2c3ced1ed39def4f191e0365",
+  "trigger_result_path": "ml/ocr/graph_text_detector_v1/P3_RESULT.json",
+  "trigger_result_sha256": "b9628f2fea238977f982e43d30210c434b0628bce1f52b555f7744746a905f7b",
+  "validation_split_fingerprint": "f71d59016d380e8fc83037951ff1c2e4bb1fe238c7183dd82d98bd9a4fe442a6"
+}

@@ -1,0 +1,20 @@
+{
+  "chandler_included": false,
+  "generalization_label_included": false,
+  "prior_sealed_fixture_reused": false,
+  "prior_selection_fixture_reused": false,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-balanced-recall-v2",
+  "schema": "graphreader.ocr-graph-text-balanced-recall-selection.v1",
+  "sealed_public_truth_available_to_training": false,
+  "synthetic_only": true,
+  "task": "ocr-detection",
+  "train_sample_count": 640,
+  "train_split_fingerprint": "1ae1a1929764e755fde18db75b995340687f6cdd2c3ced1ed39def4f191e0365",
+  "trigger_result_path": "ml/ocr/graph_text_detector_v1/P3_RESULT.json",
+  "trigger_result_sha256": "b9628f2fea238977f982e43d30210c434b0628bce1f52b555f7744746a905f7b",
+  "validation_sample_count": 96,
+  "validation_split_fingerprint": "f71d59016d380e8fc83037951ff1c2e4bb1fe238c7183dd82d98bd9a4fe442a6"
+}
