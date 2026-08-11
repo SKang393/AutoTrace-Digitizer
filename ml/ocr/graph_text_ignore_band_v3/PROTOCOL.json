@@ -1,0 +1,132 @@
+{
+  "architecture": "skip-connected-probability-map-v2",
+  "candidate_ids": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "currently_preregistered_candidate": "P1",
+  "data_scope": "new procedurally rendered generic graph labels and exclusion structures only; no V1 or V2 selection or sealed fixtures, Chandler, Generalization, private images, article images, external datasets, pretrained weights, or downloaded training data",
+  "experiment_budget": 3,
+  "fixed_experiment_policy": {
+    "candidate_changes": "one preregistered isolated change per subsequent candidate",
+    "sealed_public_evaluations_before_selection": 0,
+    "threshold_sweeps": 0,
+    "validation_regeneration_after_training": 0
+  },
+  "input": [
+    "batch",
+    3,
+    "H",
+    "W"
+  ],
+  "license": "Apache-2.0",
+  "output": [
+    "batch",
+    1,
+    "H",
+    "W"
+  ],
+  "postprocessing": {
+    "algorithm": "db_postprocess_v1",
+    "box_confidence_threshold": 0.6,
+    "maximum_regions": 1000,
+    "minimum_side_length": 3,
+    "probability_threshold": 0.3,
+    "score_mode": "fast",
+    "unclip_ratio": 1.5
+  },
+  "preprocessing": {
+    "channel_means": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "channel_order": "BGR",
+    "channel_scales": [
+      4.366812227074235,
+      4.464285714285714,
+      4.444444444444445
+    ],
+    "dimension_multiple": 128,
+    "maximum_side_length": 960
+  },
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-ignore-band-v3",
+  "schema": "graphreader.ocr-graph-text-ignore-band-protocol.v1",
+  "selection_gates": {
+    "duplicate_region_count": 0,
+    "exact_region_count_every_fixture": true,
+    "exclusion_false_region_count": 0,
+    "false_region_count": 0,
+    "onnx_parity_maximum_absolute_error": 0.0001,
+    "provider": "CPUExecutionProvider",
+    "truth_match_iou_minimum": 0.5
+  },
+  "split_generator_source_bundle_sha256": "94b4bf7cc193539883fc7aa2c588b9544bd3a075da31452bc0483d3bcf2d89ab",
+  "split_generator_source_paths": [
+    "ml/ocr/graph_text_ignore_band_v3/dataset.py",
+    "ml/ocr/graph_text_ignore_band_v3/prepare_split.py",
+    "ml/ocr/graph_text_ignore_band_v3/protocol.py",
+    "ml/ocr/graph_text_ignore_band_v3/sealed_dataset.py"
+  ],
+  "splits": [
+    {
+      "degradation_family": "train-gamma-jpeg-anisotropic-v3",
+      "exclusion_count": 160,
+      "renderer_family": "offset-key-hook-frame-v3",
+      "seed_offset": 71000,
+      "selection_visible": true,
+      "split": "train",
+      "text_count": 480
+    },
+    {
+      "degradation_family": "validation-channel-shift-soft-raster-v3",
+      "exclusion_count": 32,
+      "renderer_family": "notched-margin-crosshatch-frame-v3",
+      "seed_offset": 83000,
+      "selection_visible": true,
+      "split": "validation",
+      "text_count": 80
+    },
+    {
+      "degradation_family": "sealed-public-posterize-dropout-median-v3",
+      "exclusion_count": 40,
+      "renderer_family": "stepped-capsule-diamond-frame-v3",
+      "seed_offset": 97000,
+      "selection_visible": false,
+      "split": "sealed_public",
+      "text_count": 112
+    }
+  ],
+  "state": "preregistered_before_training",
+  "task": "ocr-detection",
+  "training": {
+    "batch_size": 8,
+    "db_shrink_ratio": 0.4,
+    "dice_loss_weight": 1.0,
+    "empty_target_negative_pixels": 4096,
+    "epochs": 36,
+    "ignore_band_expansion_pixels": 1,
+    "learning_rate": 0.001,
+    "minimum_negative_pixels": 1024,
+    "negative_to_positive_ratio": 3,
+    "patch_height": 192,
+    "patch_width": 512,
+    "seed": 20260907,
+    "weight_decay": 0.0001
+  },
+  "trigger": {
+    "defect_class": "DB core supervision labels visible glyph and antialias pixels outside the shrunken positive core as background, coupling recall failure to false-region suppression",
+    "prior_candidate": "P3",
+    "prior_exact_fixture_count": 30,
+    "prior_exclusion_false_region_count": 20,
+    "prior_false_region_count": 82,
+    "prior_fixture_count": 96,
+    "prior_result_path": "ml/ocr/graph_text_balanced_v2/P3_RESULT.json",
+    "prior_result_sha256": "2d21585f703384db014ae9d2c45f15b3ff3fb1ef2cdc2aaf02918e560001e288",
+    "prior_revision": "graph-text-balanced-recall-v2",
+    "prior_text_missed_fixture_count": 13
+  }
+}
