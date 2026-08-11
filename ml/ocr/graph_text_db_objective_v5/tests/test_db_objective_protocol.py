@@ -23,6 +23,11 @@ from ml.ocr.graph_text_db_objective_v5.dataset import (
 from ml.ocr.graph_text_db_objective_v5.losses import db_objective_loss
 from ml.ocr.graph_text_db_objective_v5.losses_p2 import db_objective_loss_with_boundary_margin
 from ml.ocr.graph_text_db_objective_v5.model import DbObjectiveTextRegionNet
+from ml.ocr.graph_text_db_objective_v5.diagnose_p2 import (
+    EXPECTED_ONNX_SHA256 as P2_DIAGNOSIS_ONNX_SHA256,
+    EXPECTED_REPORT_SHA256 as P2_DIAGNOSIS_REPORT_SHA256,
+    OUTPUT_PATH as P2_DIAGNOSIS_OUTPUT_PATH,
+)
 from ml.ocr.graph_text_db_objective_v5.prepare_split import SPLIT_SOURCE_PATHS
 from ml.ocr.graph_text_db_objective_v5.protocol import (
     BATCH_SIZE,
@@ -239,6 +244,15 @@ def test_p2_result_is_checksum_bound_and_failed_closed() -> None:
     assert result["public_gate_evaluations"] == 0
     assert result["production_approval"] is False
     assert result["release_eligible"] is False
+
+
+def test_p2_diagnosis_is_bound_to_the_consumed_payload_and_single_output() -> None:
+    result = json.loads((REVISION_ROOT / "P2_RESULT.json").read_text(encoding="utf-8"))
+    assert P2_DIAGNOSIS_REPORT_SHA256 == result["selection_report_sha256"]
+    assert P2_DIAGNOSIS_ONNX_SHA256 == result["onnx_sha256"]
+    assert P2_DIAGNOSIS_OUTPUT_PATH.as_posix() == (
+        "ml/ocr/graph_text_db_objective_v5/artifacts/P2-run/selection-diagnosis.json"
+    )
 
 
 def test_canonical_budget_consumes_failed_p2_and_keeps_p3_unregistered() -> None:
