@@ -52,8 +52,13 @@ two-component probe and returned `11`; the payload SHA-256 remained
 `9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84`.
 
 This is runtime-compatibility evidence only. The source-sealed official-pair
-production adapter remains byte-identical to its consumed failed gate, and no
-V5 manifest or production-store entry exists. Exact C# preprocessing parity,
-a newly preregistered detector composition, independent marker-stage evidence,
-private validation, and packaging discovery are still required before the V5
-recognizer can be approved or selected by normal Auto Detect.
+production adapter remains byte-identical to its consumed failed gate. A
+separate fail-closed factory now selects `component_ensemble_numeric_v1`,
+validates the exact detector and V5 tensor, preprocessing, threshold, grammar,
+and CPU-provider contracts, and performs cache-bypassed executable probes of
+both payloads before composition. Five focused manifest-contract tests pass.
+No V5 manifest or production-store entry exists, so the factory cannot be
+selected by normal Auto Detect. Exact C# preprocessing parity, a newly
+preregistered detector composition whose source seal includes this factory and
+recognizer, independent marker-stage evidence, private validation, and
+packaging discovery are still required before approval.

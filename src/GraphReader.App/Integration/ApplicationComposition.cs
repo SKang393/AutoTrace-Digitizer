@@ -94,7 +94,7 @@ public static class ApplicationComposition
                 inference?.Value,
                 async () =>
                 {
-                    (ProductionOcrAdapter? Adapter, DomainError? Error) ocr =
+                    (IProductionOcrAdapter? Adapter, DomainError? Error) ocr =
                         await CreateApprovedOcrAdapterAsync(
                                 modelAvailability,
                                 inference?.Value,
@@ -146,7 +146,7 @@ public static class ApplicationComposition
         Func<CancellationToken, Task<RealEsrganBackendResolution>>? enhancementResolver,
         RealEsrganBackendResolution? enhancementResolution,
         DomainResult<ProductionInferenceRuntimeHost>? precreatedInference,
-        (ProductionOcrAdapter? Adapter, DomainError? Error)? precreatedOcr)
+        (IProductionOcrAdapter? Adapter, DomainError? Error)? precreatedOcr)
     {
         (IPdfImportService PdfImporter, bool ReviewedRendererConfigured, DomainError? Error) pdf =
             CreateReviewedPdfImporter(applicationRoot);
@@ -167,9 +167,9 @@ public static class ApplicationComposition
         var detectionMaskComposer = new ProductionDetectionMaskComposer(artifactMask.Adapter);
         (ProductionMarkerClassificationAdapter? Adapter, DomainError? Error) markerClassifier =
             CreateApprovedMarkerClassifierAdapter(modelAvailability, inference?.Value);
-        (ProductionOcrAdapter? Adapter, DomainError? Error) ocr =
+        (IProductionOcrAdapter? Adapter, DomainError? Error) ocr =
             precreatedOcr ?? (null, null);
-        ProductionOcrAdapter? ocrAdapter = ocr.Adapter;
+        IProductionOcrAdapter? ocrAdapter = ocr.Adapter;
         var legendAdapter = new ProductionLegendReasoningAdapter();
         var phaseAdapter = new ProductionPhaseReasoningAdapter();
         bool completeDetectionAdapterAvailable =
@@ -412,7 +412,7 @@ public static class ApplicationComposition
         }
     }
 
-    private static async Task<(ProductionOcrAdapter? Adapter, DomainError? Error)>
+    private static async Task<(IProductionOcrAdapter? Adapter, DomainError? Error)>
         CreateApprovedOcrAdapterAsync(
             ProductionModelAvailabilitySnapshot? modelAvailability,
             ProductionInferenceRuntimeHost? runtimeHost,
@@ -446,13 +446,22 @@ public static class ApplicationComposition
 
         try
         {
-            ProductionOcrAdapter adapter = await ProductionOcrAdapter.CreateAsync(
-                    detectionModel,
-                    recognitionModel,
-                    runtimeHost,
-                    runtimeAvailability.RuntimeSha256,
-                    cancellationToken)
-                .ConfigureAwait(false);
+            IProductionOcrAdapter adapter =
+                ProductionComponentOcrAdapterFactory.UsesComponentEnsemble(recognitionModel)
+                    ? await ProductionComponentOcrAdapterFactory.CreateAsync(
+                            detectionModel,
+                            recognitionModel,
+                            runtimeHost,
+                            runtimeAvailability.RuntimeSha256,
+                            cancellationToken)
+                        .ConfigureAwait(false)
+                    : await ProductionOcrAdapter.CreateAsync(
+                            detectionModel,
+                            recognitionModel,
+                            runtimeHost,
+                            runtimeAvailability.RuntimeSha256,
+                            cancellationToken)
+                        .ConfigureAwait(false);
             return (adapter, null);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
