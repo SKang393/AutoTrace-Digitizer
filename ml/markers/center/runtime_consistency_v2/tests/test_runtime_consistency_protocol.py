@@ -11,14 +11,21 @@ import pytest
 
 from ml.markers.center.radial_feature_v1 import dataset as radial_dataset
 from ml.markers.center.radial_feature_v1 import pipeline_p3
-from ml.markers.center.runtime_consistency_v2 import dataset, pipeline
+from ml.markers.center.runtime_consistency_v2 import dataset, pipeline, pipeline_p2
 from ml.markers.center.runtime_consistency_v2.candidate_runner import (
     REPO_ROOT,
     RUNNER_SOURCE_PATHS,
 )
+from ml.markers.center.runtime_consistency_v2.candidate_runner_p2 import (
+    RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
+)
 from ml.markers.center.runtime_consistency_v2.public_gate import (
     EVALUATOR_SOURCE_PATHS,
     GATE_CONFIG,
+)
+from ml.markers.center.runtime_consistency_v2.public_gate_p2 import (
+    EVALUATOR_SOURCE_PATHS as P2_EVALUATOR_SOURCE_PATHS,
+    GATE_CONFIG as P2_GATE_CONFIG,
 )
 from ml.markers.gate_seal import (
     canonical_json_bytes,
@@ -176,7 +183,74 @@ def test_public_gate_binds_runtime_consistent_sources_and_single_execution() -> 
     assert GATE_CONFIG["required_false_negatives"] == 0
 
 
-def test_canonical_budget_consumes_failed_p1_without_opening_public_gate() -> None:
+def test_p2_diagnosis_and_config_bind_one_selection_only_calibration() -> None:
+    diagnosis_path = REVISION_ROOT / "P2_DIAGNOSIS.json"
+    diagnosis = _json(diagnosis_path)
+    config_path = REVISION_ROOT / "training/p2.json"
+    config = _json(config_path)
+    assert diagnosis["scope"] == "visible validation selection only"
+    assert diagnosis["sweep_count"] == 1
+    assert diagnosis["public_archive_opened"] is False
+    assert diagnosis["chandler_included"] is False
+    assert diagnosis["private_or_article_images"] is False
+    assert diagnosis["observed_failure"]["exact_scene_count"] == 8
+    assert diagnosis["observed_failure"]["scene_count"] == 12
+    assert len(diagnosis["bounded_grid"]) == 9
+    selected = next(
+        item
+        for item in diagnosis["bounded_grid"]
+        if item["threshold"] == 0.25
+        and item["minimum_center_separation"] == 6.5
+    )
+    assert selected == {
+        "threshold": 0.25,
+        "minimum_center_separation": 6.5,
+        "exact_scenes": 12,
+        "true_positives": 96,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "duplicates": 0,
+    }
+    assert config["diagnosis_sha256"] == sha256_file(diagnosis_path)
+    assert config["optimizer_steps"] == 0
+    assert config["weights_changed"] is False
+    assert config["selected_threshold"] == 0.25
+    assert config["minimum_center_separation"] == 6.5
+    assert config["postprocess_revision"] == pipeline_p2.POSTPROCESS_REVISION
+    assert pipeline_p2.MINIMUM_CENTER_SEPARATION == 6.5
+    assert config["source_checkpoint_sha256"] == (
+        "6b670a6f29454d7f63527f57210aa918540a817fca156a71b96872ff09aa2787"
+    )
+    assert config["source_onnx_sha256"] == (
+        "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b"
+    )
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, P2_RUNNER_SOURCE_PATHS
+    )
+
+
+def test_p2_public_gate_binds_same_unopened_archive_and_calibrated_sources() -> None:
+    config_path = REVISION_ROOT / "gates/sealed-public-p2.json"
+    config = _json(config_path)
+    seal_path = REPO_ROOT / config["sealed_public_test_seal_path"]
+    assert config["evaluation_limit"] == 1
+    assert config["expected_candidate_hash_keys"] == ["onnx_sha256"]
+    assert config["sealed_public_test_seal_sha256"] == sha256_file(seal_path)
+    assert config["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, P2_EVALUATOR_SOURCE_PATHS
+    )
+    assert config["expected_gate_config_sha256"] == sha256_bytes(
+        canonical_json_bytes(P2_GATE_CONFIG)
+    )
+    assert P2_GATE_CONFIG["threshold"] == 0.25
+    assert P2_GATE_CONFIG["minimum_center_separation"] == 6.5
+    assert P2_GATE_CONFIG["postprocess_revision"] == pipeline_p2.POSTPROCESS_REVISION
+    protocol = _json(REVISION_ROOT / "PROTOCOL.json")
+    assert protocol["public_gate"]["archive_opened"] is False
+    assert protocol["public_gate"]["evaluations"] == 0
+
+
+def test_canonical_budget_consumes_p1_and_authorizes_only_unopened_p2() -> None:
     ledger = _json(
         REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
     )
@@ -185,27 +259,29 @@ def test_canonical_budget_consumes_failed_p1_without_opening_public_gate() -> No
         for item in ledger["revisions"]
         if item["task"] == "marker-center" and item["revision"] == REVISION
     )
-    assert entry["status"] == "candidate_1_failed_selection"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
-    assert entry["candidate_config_sha256"]["P1"] == sha256_file(
-        REVISION_ROOT / "training/p1.json"
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["candidate_config_sha256"]["P2"] == sha256_file(
+        REVISION_ROOT / "training/p2.json"
     )
     assert entry["protocol_sha256"] == sha256_file(REVISION_ROOT / "PROTOCOL.json")
     assert entry["public_gate_authorized"] is False
-    assert entry["public_gate_authorized_on_selection_pass"] is False
+    assert entry["public_gate_authorized_candidate_id"] == "P2"
+    assert entry["public_gate_authorized_on_selection_pass"] is True
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
     result_path = REVISION_ROOT / "P1_RESULT.json"
     result = _json(result_path)
     assert entry["p1_result_sha256"] == sha256_file(result_path)
     protocol = _json(REVISION_ROOT / "PROTOCOL.json")
-    assert protocol["status"] == "candidate_1_failed_selection"
+    assert protocol["status"] == "candidate_2_preregistered"
     assert protocol["consumed_candidates"] == ["P1"]
-    assert protocol["execution_authorized"] is False
+    assert protocol["execution_authorized"] is True
+    assert protocol["authorized_candidate"] == "P2"
     assert protocol["candidate_result"]["result_sha256"] == sha256_file(result_path)
     assert result["status"] == "failed_selection"
     assert result["selection_exact_scene_count"] == 8

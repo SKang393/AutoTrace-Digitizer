@@ -1423,7 +1423,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-runtime-consistency-v2",
-      "status": "candidate_1_failed_selection",
+      "status": "candidate_2_preregistered",
       "defect_class": "selection and public evaluation used different postprocess implementations for the exact radial-feature P3 payload",
       "prior_revision": "marker-center-radial-feature-v1",
       "prior_candidate_bytes_reused": true,
@@ -1437,23 +1437,24 @@
       "isolated_change": "reuse the exact radial-feature P3 checkpoint and ONNX with zero optimizer steps and validate its already selected radial-local-consensus-refinement-v1 postprocessor consistently on new disjoint selection and truth-hidden public families",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P1"
+        "P2"
       ],
       "consumed_candidate_ids": [
         "P1"
       ],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "candidate_config_paths": {
-        "P1": "ml/markers/center/runtime_consistency_v2/training/p1.json"
+        "P1": "ml/markers/center/runtime_consistency_v2/training/p1.json",
+        "P2": "ml/markers/center/runtime_consistency_v2/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "412a12e59440e7fc501089a84739aee17ceba8a3b327c0ecd777db078a777608"
+        "P1": "412a12e59440e7fc501089a84739aee17ceba8a3b327c0ecd777db078a777608",
+        "P2": "2f4969fe76164cdb609b8e755f59de896ad966a44311b760532abf3cd11f69df"
       },
       "protocol_path": "ml/markers/center/runtime_consistency_v2/PROTOCOL.json",
-      "protocol_sha256": "7e052387fd07b3683230268f5d3aa2d133251a34badb6e8157f38087acbcd38a",
+      "protocol_sha256": "267dbc3d779d077e62c87329b35bf0b4f1a8f1be2148d2dd8fa5eb274e5a4fda",
       "selection_manifest_path": "ml/markers/center/runtime_consistency_v2/SELECTION_MANIFEST.json",
       "selection_manifest_sha256": "e0f11c15a6ec2e268d9871d1fff993c39f1c88eb7daa3ce3009f01ef75a5af66",
       "selection_validation_scene_count": 12,
@@ -1462,9 +1463,9 @@
       "sealed_public_fixture_archive_sha256": "668d8274e3544945d1b6384bdd259cdee81942fd5c9cb36daa25c476574427b7",
       "sealed_public_private_manifest_sha256": "ca1892bbe7f54845f07eaf6fd426231c99858ee5781d0c433ca28461f8929e02",
       "split_generator_source_bundle_sha256": "faa68eb963d40b6fe14616fe013fc1cf159025594c1e0e63bd65c755cc5788b3",
-      "public_gate_config_path": "ml/markers/center/runtime_consistency_v2/gates/sealed-public-v2.json",
-      "public_gate_config_sha256": "8037f9ce662b39c76f52834a974e0604fba4d28039751469504430716535c340",
-      "expected_public_evaluator_source_bundle_sha256": "7ac51ebf7885071e6112228cf5368c0174b2d659d0a6a23e273a0440af7fd5c6",
+      "public_gate_config_path": "ml/markers/center/runtime_consistency_v2/gates/sealed-public-p2.json",
+      "public_gate_config_sha256": "4d2d20361ed5f17a52986db52d0e7c0e3f169c00958e9dfa18da69cef08b4ff0",
+      "expected_public_evaluator_source_bundle_sha256": "1f727928205aa42878e12f1446ae5620e525e27cd8afad3f8495a19d6a66f945",
       "p1_expected_runner_source_bundle_sha256": "3d2a7fa51589bff017dc92ba3851c918d2576d2dbdfc4ba7d303b52074e2ba46",
       "p1_source_training_report_path": "ml/markers/center/artifacts/radial-feature-v1/P3-run/candidate-report.json",
       "p1_source_training_report_sha256": "67b5ea3b28973f0bd24ae0f755713af1c70b6fe6a9b2437268be5975b9f14af3",
@@ -1494,14 +1495,23 @@
       "p1_onnx_parity_passed": true,
       "p1_selection_gate_passed": false,
       "p1_failure": "P1 passed CPU ONNX parity but only 8/12 validation scenes were exact, with three false positives, one false negative, two duplicates, and zero prohibited-structure hits. P1 is consumed and cannot rerun; the truth-hidden public archive remained unopened.",
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
+      "p2_diagnosis_path": "ml/markers/center/runtime_consistency_v2/P2_DIAGNOSIS.json",
+      "p2_diagnosis_sha256": "9163904d698e38ca360bc9b7714636e7cbda54c6ce1202f0d07a991fee86a3d1",
+      "p2_expected_runner_source_bundle_sha256": "13256766d58199373096b37f4e3244cf42de74bf78c7669f14f42dc810be91fe",
+      "p2_optimizer_steps": 0,
+      "p2_weights_changed": false,
+      "p2_postprocess_revision": "radial-local-consensus-calibration-v2",
+      "p2_selected_threshold": 0.25,
+      "p2_minimum_center_separation": 6.5,
+      "p2_isolated_change": "retain the exact P1 model bytes, geometry refinement, masks, matching contract, and 1.25-times-radius suppression; lower only the frozen confidence threshold from 0.3 to 0.25 and raise only the minimum duplicate-center separation from 5.0 to 6.5 pixels",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P2",
       "public_gate_authorized": false,
-      "public_gate_authorized_candidate_id": "P1",
-      "public_gate_authorized_on_selection_pass": false,
+      "public_gate_authorized_candidate_id": "P2",
+      "public_gate_authorized_on_selection_pass": true,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
-      "execution_blocker": "P1 failed the exact selection gate and is consumed. P2 and P3 are unregistered and require a separately preregistered isolated change before execution.",
+      "execution_blocker": null,
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true

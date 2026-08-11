@@ -1,0 +1,16 @@
+{
+  "evaluation_limit": 1,
+  "expected_candidate_hash_keys": [
+    "onnx_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "ca1892bbe7f54845f07eaf6fd426231c99858ee5781d0c433ca28461f8929e02",
+  "expected_evaluator_source_bundle_sha256": "1f727928205aa42878e12f1446ae5620e525e27cd8afad3f8495a19d6a66f945",
+  "expected_gate_config_sha256": "c29f0e7dfdb448d19e0584388ebef5d9df47bdc9079a464089b7ebc5acc058c6",
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "marker-center-runtime-consistency-public-v2-p2",
+  "schema": "graphreader.marker-center-runtime-consistency-gate-config-p2.v2",
+  "sealed_public_test_seal_path": "ml/markers/center/runtime_consistency_v2/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "6fc9bb7ba3e59e5beac4fd52e45e7f3e2ed0e2ce8f37885f8ec39ffe82461d24",
+  "task": "marker-center"
+}

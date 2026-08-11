@@ -34,8 +34,24 @@ prohibited-structure hits. Candidate report SHA-256 is
 `f53ceba950a5603f3bbbad39ad8718b01784d599e59e59df2320cb6327c4c4a1`.
 
 Because exact selection was mandatory, the truth-hidden public archive was not
-opened and the public evaluator did not run. P1 cannot rerun. P2 and P3 remain
-unregistered and require a separately frozen isolated change before either can
-be authorized. Production approval, artifact-mask composition, manifest,
-model-store, notice, packaging, clean-machine, and end-to-end workflow evidence
-all remain absent.
+opened and the public evaluator did not run. P1 cannot rerun.
+
+A single bounded sweep on the visible validation split then isolated the P1
+miss and duplicate behavior without opening public data. The missed marker's
+best proposal confidence was `0.25655674934387207`, while all three extra
+centers were between `6.1597` and `6.3263` pixels from an accepted center. P2
+therefore retains the exact checkpoint and ONNX, performs zero optimizer steps,
+keeps the masks, local geometry refinement, matching tolerance, and
+radius-relative suppression unchanged, and changes only the confidence
+threshold from `0.3` to `0.25` plus the minimum duplicate separation from `5.0`
+to `6.5` pixels. That frozen combination produced 12/12 exact visible scenes
+and 96/96 markers with zero errors in the one diagnostic sweep. Diagnosis
+SHA-256 is
+`9163904d698e38ca360bc9b7714636e7cbda54c6ce1202f0d07a991fee86a3d1`.
+
+P2 is preregistered but unexecuted. It may run once only after this exact source,
+configuration, protocol, and ledger are committed. The same truth-hidden public
+archive may open once only if P2 passes all visible selection requirements and
+CPU parity. P3 remains unregistered. Production approval, artifact-mask
+composition, manifest, model-store, notice, packaging, clean-machine, and
+end-to-end workflow evidence all remain absent.

@@ -1,0 +1,45 @@
+{
+  "schema": "graphreader.marker-center-runtime-consistency-diagnosis.v2",
+  "task": "marker-center",
+  "revision": "marker-center-runtime-consistency-v2",
+  "source_candidate_id": "P1",
+  "source_candidate_report_sha256": "f53ceba950a5603f3bbbad39ad8718b01784d599e59e59df2320cb6327c4c4a1",
+  "source_onnx_sha256": "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b",
+  "selection_manifest_sha256": "e0f11c15a6ec2e268d9871d1fff993c39f1c88eb7daa3ce3009f01ef75a5af66",
+  "scope": "visible validation selection only",
+  "sweep_count": 1,
+  "public_archive_opened": false,
+  "chandler_included": false,
+  "private_or_article_images": false,
+  "synthetic_only": true,
+  "observed_failure": {
+    "exact_scene_count": 8,
+    "scene_count": 12,
+    "true_positives": 95,
+    "false_positives": 3,
+    "false_negatives": 1,
+    "duplicate_count": 2,
+    "prohibited_structure_hits": 0,
+    "highest_missed_true_proposal_confidence": 0.25655674934387207,
+    "duplicate_or_extra_center_separations": [
+      6.3201528681436,
+      6.15978226506501,
+      6.32627610955344
+    ]
+  },
+  "bounded_grid": [
+    {"threshold": 0.25, "minimum_center_separation": 6.0, "exact_scenes": 9, "true_positives": 96, "false_positives": 3, "false_negatives": 0, "duplicates": 2},
+    {"threshold": 0.25, "minimum_center_separation": 6.5, "exact_scenes": 12, "true_positives": 96, "false_positives": 0, "false_negatives": 0, "duplicates": 0},
+    {"threshold": 0.25, "minimum_center_separation": 7.0, "exact_scenes": 12, "true_positives": 96, "false_positives": 0, "false_negatives": 0, "duplicates": 0},
+    {"threshold": 0.275, "minimum_center_separation": 6.0, "exact_scenes": 8, "true_positives": 95, "false_positives": 3, "false_negatives": 1, "duplicates": 2},
+    {"threshold": 0.275, "minimum_center_separation": 6.5, "exact_scenes": 11, "true_positives": 95, "false_positives": 0, "false_negatives": 1, "duplicates": 0},
+    {"threshold": 0.275, "minimum_center_separation": 7.0, "exact_scenes": 11, "true_positives": 95, "false_positives": 0, "false_negatives": 1, "duplicates": 0},
+    {"threshold": 0.3, "minimum_center_separation": 6.0, "exact_scenes": 8, "true_positives": 95, "false_positives": 3, "false_negatives": 1, "duplicates": 2},
+    {"threshold": 0.3, "minimum_center_separation": 6.5, "exact_scenes": 11, "true_positives": 95, "false_positives": 0, "false_negatives": 1, "duplicates": 0},
+    {"threshold": 0.3, "minimum_center_separation": 7.0, "exact_scenes": 11, "true_positives": 95, "false_positives": 0, "false_negatives": 1, "duplicates": 0}
+  ],
+  "selected_isolated_change": "retain the exact P1 model bytes, geometry refinement, masks, matching contract, and 1.25-times-radius suppression; lower only the frozen confidence threshold from 0.3 to 0.25 and raise only the minimum duplicate-center separation from 5.0 to 6.5 pixels",
+  "selection_only_result": "12/12 scenes and 96/96 markers with zero false positives, false negatives, duplicates, or prohibited-structure hits",
+  "production_approval": false,
+  "release_eligible": false
+}
