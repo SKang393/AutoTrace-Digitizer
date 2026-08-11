@@ -1,0 +1,19 @@
+{
+  "candidate_id": "P3",
+  "data_scope": "the unchanged frozen synthetic train, validation, and still-unopened sealed-public splits; no Chandler, private article images, external datasets, or pretrained weights",
+  "experiment_budget": 3,
+  "experiment_ordinal": 3,
+  "isolated_change": "replace P2 absolute-canvas-only glyphs with P1 max-fit normalized shape plus four explicit source-geometry scalars: component height ratio, width ratio, vertical centroid, and foreground density; retain the frozen rasters, classifier depth, loss, optimizer, epochs, thresholds, and gates",
+  "p2_result_path": "ml/ocr/component_geometric_v4/P2_RESULT.json",
+  "p2_result_sha256": "dfe8ad81aca43b2567392cb34630a35625866a24623fe16cc7803607ad8ad3ff",
+  "private_or_article_images": false,
+  "production_approval": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-numeric-component-geometric-v4",
+  "schema": "graphreader.ocr-component-geometric-candidate-preregistration.v1",
+  "sealed_public_archive_opened": false,
+  "status": "candidate_3_preregistered",
+  "task": "ocr-recognition",
+  "trigger": "P1 max-fit shape features generalized better but discarded scale, while P2 absolute-canvas features preserved scale and degraded cross-font shape recognition. The validation-only defect is representation loss, not a threshold or data-family defect."
+}

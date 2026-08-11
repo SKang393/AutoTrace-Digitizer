@@ -21,6 +21,12 @@ from ml.ocr.component_geometric_v4.dataset import (
 from ml.ocr.component_geometric_v4.model import ComponentGeometricGlyphNet
 from ml.ocr.component_geometric_v4.p2_dataset import isolate_glyphs_absolute_scale
 from ml.ocr.component_geometric_v4.p2_pipeline import glyph_training_examples as p2_glyph_training_examples
+from ml.ocr.component_geometric_v4.p3_dataset import (
+    ENCODED_GLYPH_WIDTH,
+    isolate_glyphs_shape_and_geometry,
+)
+from ml.ocr.component_geometric_v4.p3_model import ScaleAwareComponentGeometricGlyphNet
+from ml.ocr.component_geometric_v4.p3_pipeline import glyph_training_examples as p3_glyph_training_examples
 from ml.ocr.component_geometric_v4.pipeline import glyph_training_examples
 from ml.ocr.component_geometric_v4.prepare_split import freeze_split
 from ml.ocr.component_geometric_v4.protocol import (
@@ -32,6 +38,7 @@ from ml.ocr.component_geometric_v4.protocol import (
 from ml.ocr.component_geometric_v4.sealed_gate import EVALUATOR_SOURCE_PATHS
 from ml.ocr.component_geometric_v4.train_p1 import RUNNER_SOURCE_PATHS
 from ml.ocr.component_geometric_v4.train_p2 import RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS
+from ml.ocr.component_geometric_v4.train_p3 import RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS
 
 
 REPOSITORY = Path(__file__).resolve().parents[4]
@@ -84,6 +91,42 @@ def test_p2_preserves_absolute_vertical_scale_without_changing_isolation_counts(
     assert np.unique(exclusion_labels).tolist() == [CLASS_COUNT - 1]
 
 
+def test_p3_retains_p1_shape_and_adds_explicit_component_geometry() -> None:
+    for split in ("train", "validation"):
+        positives = [sample for sample in build_split(split) if sample.target_text]
+        assert all(
+            len(isolate_glyphs_shape_and_geometry(sample.raster)) == len(sample.target_text)
+            for sample in positives
+        )
+    validation = build_split("validation")
+    decimal = next(sample for sample in validation if "." in sample.target_text)
+    divider = next(sample for sample in validation if sample.exclusion_kind == "divider")
+    p1_decimal = isolate_glyphs(decimal.raster)
+    p3_decimal = isolate_glyphs_shape_and_geometry(decimal.raster)
+    assert all(
+        np.array_equal(p1, p3[:, :, :20])
+        for p1, p3 in zip(p1_decimal, p3_decimal, strict=True)
+    )
+    dot_index = decimal.target_text.index(".")
+    dot_geometry = p3_decimal[dot_index][:, :, 20:].mean(axis=(0, 1))
+    divider_geometry = isolate_glyphs_shape_and_geometry(divider.raster)[0][:, :, 20:].mean(axis=(0, 1))
+    assert dot_geometry[0] < divider_geometry[0]
+    assert dot_geometry[2] > divider_geometry[2]
+    _, exclusion_labels = p3_glyph_training_examples(
+        sample for sample in validation if sample.exclusion_kind is not None
+    )
+    assert np.unique(exclusion_labels).tolist() == [CLASS_COUNT - 1]
+
+
+def test_p3_model_is_non_convolutional_and_accepts_dynamic_glyph_counts() -> None:
+    model = ScaleAwareComponentGeometricGlyphNet().eval()
+    assert not any(isinstance(module, nn.Conv2d) for module in model.modules())
+    for count in (1, 7, 19):
+        output = model(torch.zeros(count, 1, 24, ENCODED_GLYPH_WIDTH))
+        assert output.shape == (count, CLASS_COUNT)
+        assert torch.isfinite(output).all()
+
+
 def test_sealed_archive_is_byte_deterministic_and_round_trips(tmp_path: Path) -> None:
     samples = build_split("sealed_public")
     left = tmp_path / "left.npz"
@@ -125,14 +168,20 @@ def test_temp_freeze_binds_sources_and_keeps_public_gate_closed(tmp_path: Path) 
     assert protocol_configuration()["state"] == "preregistered_before_training"
 
 
-def test_canonical_preregistration_records_p1_failure_and_keeps_p2_and_public_gate_closed() -> None:
+def test_canonical_preregistration_records_p1_and_p2_failures_and_keeps_p3_public_gate_closed() -> None:
     p1_result = json.loads(
         (REPOSITORY / "ml/ocr/component_geometric_v4/P1_RESULT.json").read_text(encoding="utf-8")
     )
     assert p1_result["status"] == "failed_selection"
     assert p1_result["sealed_public_archive_opened"] is False
     assert p1_result["public_gate_evaluations"] == 0
-    assert not (REPOSITORY / "ml/ocr/component_geometric_v4/artifacts/P2-run").exists()
+    p2_result = json.loads(
+        (REPOSITORY / "ml/ocr/component_geometric_v4/P2_RESULT.json").read_text(encoding="utf-8")
+    )
+    assert p2_result["status"] == "failed_selection"
+    assert p2_result["sealed_public_archive_opened"] is False
+    assert p2_result["public_gate_evaluations"] == 0
+    assert not (REPOSITORY / "ml/ocr/component_geometric_v4/artifacts/P3-run").exists()
     tracked = {
         path.relative_to(REPOSITORY).as_posix()
         for path in REPOSITORY.glob("ml/ocr/component_geometric_v4/**/*.json")
@@ -141,6 +190,7 @@ def test_canonical_preregistration_records_p1_failure_and_keeps_p2_and_public_ga
     assert "ml/ocr/component_geometric_v4/PROTOCOL.json" in tracked
     assert "ml/ocr/component_geometric_v4/training/p1.json" in tracked
     assert "ml/ocr/component_geometric_v4/training/p2.json" in tracked
+    assert "ml/ocr/component_geometric_v4/training/p3.json" in tracked
     assert not any("PUBLIC_GATE_REPORT" in path for path in tracked)
 
 
@@ -152,4 +202,15 @@ def test_p2_runner_source_bundle_matches_preregistration() -> None:
         REPOSITORY, P2_RUNNER_SOURCE_PATHS
     )
     assert training["candidate_id"] == "P2"
+    assert training["public_gate_evaluations"] == 0
+
+
+def test_p3_runner_source_bundle_matches_preregistration() -> None:
+    training = json.loads(
+        (REPOSITORY / "ml/ocr/component_geometric_v4/training/p3.json").read_text(encoding="utf-8")
+    )
+    assert training["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPOSITORY, P3_RUNNER_SOURCE_PATHS
+    )
+    assert training["candidate_id"] == "P3"
     assert training["public_gate_evaluations"] == 0
