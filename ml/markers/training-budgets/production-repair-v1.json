@@ -665,6 +665,57 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "ocr-recognition",
+      "revision": "graph-numeric-component-structural-filter-v1",
+      "status": "candidate_1_preregistered",
+      "defect_class": "structurally tall non-text components accepted as numeric glyphs",
+      "prior_revision_reuse": true,
+      "source_revision": "graph-numeric-component-geometric-v4",
+      "source_candidate_id": "P3",
+      "source_result_path": "ml/ocr/component_geometric_v4/P3_RESULT.json",
+      "source_result_sha256": "1bd0d230de4df761b307a3b9dd9c3b22d2c90729985ed8f21e8880976df9e065",
+      "source_training_report_path": "ml/ocr/component_geometric_v4/artifacts/P3-run/candidate-report.json",
+      "source_training_report_sha256": "807db11ffe147f9eadf025bede7403469d064161bb4ffd26349e857eee7588ca",
+      "source_checkpoint_sha256": "955edefd1a8e2bf713f8627cf88af4aa2977c1afdfdda86b5d0d86ae2911ed7e",
+      "source_onnx_sha256": "941b19a8f700484a039335d25ecc47f41de1976b3b2016653c6beb2a4eb51894",
+      "source_confidence_threshold": 0.55,
+      "experiment_budget": 1,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [],
+      "candidate_config_paths": {
+        "P1": "ml/ocr/component_structural_filter_v1/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "a4cda0b85f53baebdddd507c92175b73fcfa85100ec8ea8db60db2c6d5477677"
+      },
+      "expected_runner_source_bundle_sha256": "9a4b13abd1c6f1954b87a83fcd00e245f71b7ff43e1f6b3190152b17145928ae",
+      "trigger_evidence": "OCR V4 P3 passed exact-match, CER, role, and CPU parity validation but classified one full-height divider as digit one at all frozen confidence thresholds.",
+      "isolated_change": "reject components with height ratio at least 0.75 before the unchanged checksum-bound P3 classifier; no training, threshold sweep, or weight change",
+      "protocol_path": "ml/ocr/component_structural_filter_v1/PROTOCOL.json",
+      "protocol_sha256": "9913924eb968082e7a0649b359558ffca9455474cd971b08ee111f853af5ce08",
+      "source_selection_manifest_path": "ml/ocr/component_geometric_v4/SELECTION_MANIFEST.json",
+      "source_selection_manifest_sha256": "7cda51b6aa6cf9cccd63f9eab09b909ff9ac71fb1dc82490b528a59a68cf7207",
+      "sealed_public_test_seal_path": "ml/ocr/component_structural_filter_v1/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "a7af8c548dbec7df34b6e660da6b87e86daacf1d1a83bf53690f89a74a8dfc7e",
+      "sealed_public_fixture_archive_sha256": "7845bc0628740fb24b95e0367bceab8b5b6d186adacc5f58c5c6c3bdcc97dc76",
+      "sealed_public_private_manifest_sha256": "e40ce059ddda1d3acaf72a620781f6399b5df49961aeef4094d05c86667754d1",
+      "public_gate_config_path": "ml/ocr/component_structural_filter_v1/gates/sealed-public-v1.json",
+      "public_gate_config_sha256": "6891ef0502dc37ec7b72d76a4b03195108e64c51ae77e815cdc28be78934ebdc",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "optimizer_steps": 0,
+      "weights_changed": false,
+      "public_gate_authorized": false,
+      "public_gate_evaluations": 0,
+      "execution_blocker": "The exact committed P1 selection runner may execute once. The sealed-public archive must remain unopened until a passing selection report is committed and the ledger authorizes its exact report and ONNX hashes.",
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
     }
   ]
 }

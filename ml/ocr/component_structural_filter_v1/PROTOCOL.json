@@ -1,0 +1,45 @@
+{
+  "candidate_ids": [
+    "P1"
+  ],
+  "candidate_kind": "deterministic_postprocessor",
+  "currently_preregistered_candidate": "P1",
+  "data_scope": "the frozen OCR V4 validation split and still-unopened sealed-public split only; no Chandler, private article images, external datasets, pretrained weights, or new training",
+  "defect_class": "structurally tall non-text components accepted as numeric glyphs",
+  "experiment_budget": 1,
+  "gates": {
+    "marker_exclusion_accuracy_minimum": 1.0,
+    "onnx_parity_maximum_absolute_error": 0.0001,
+    "provider": "CPUExecutionProvider",
+    "sealed_cer_maximum": 0.05,
+    "sealed_exact_match_minimum": 0.9,
+    "sealed_role_accuracy_minimum": 0.9,
+    "validation_cer_maximum": 0.05,
+    "validation_exact_match_minimum": 0.9,
+    "validation_role_accuracy_minimum": 0.9
+  },
+  "isolated_change": "reject any crop containing a component whose foreground height is at least 0.75 of the 32-pixel canonical label height before invoking the unchanged checksum-bound P3 classifier",
+  "optimizer_steps": 0,
+  "production_approval": false,
+  "public_gate_budget": 1,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-numeric-component-structural-filter-v1",
+  "rule": {
+    "field": "component_height_ratio",
+    "operator": ">=",
+    "position": "before_classifier",
+    "reject_minimum": 0.75
+  },
+  "schema": "graphreader.ocr-component-structural-filter-protocol.v1",
+  "source_candidate_id": "P3",
+  "source_checkpoint_sha256": "955edefd1a8e2bf713f8627cf88af4aa2977c1afdfdda86b5d0d86ae2911ed7e",
+  "source_confidence_threshold": 0.55,
+  "source_onnx_sha256": "941b19a8f700484a039335d25ecc47f41de1976b3b2016653c6beb2a4eb51894",
+  "source_report_sha256": "807db11ffe147f9eadf025bede7403469d064161bb4ffd26349e857eee7588ca",
+  "source_revision": "graph-numeric-component-geometric-v4",
+  "state": "candidate_1_preregistered_before_execution",
+  "synthetic_only": true,
+  "task": "ocr-recognition",
+  "weights_changed": false
+}

@@ -1,0 +1,21 @@
+{
+  "chandler_included": false,
+  "exclusion_count": 128,
+  "fixture_archive_path": "ml/ocr/component_geometric_v4/artifacts/split-freeze/sealed-public-fixtures.npz",
+  "fixture_archive_sha256": "7845bc0628740fb24b95e0367bceab8b5b6d186adacc5f58c5c6c3bdcc97dc76",
+  "positive_count": 256,
+  "private_manifest_path": "ml/ocr/component_geometric_v4/artifacts/split-freeze/sealed-public-private-manifest.json",
+  "private_manifest_sha256": "e40ce059ddda1d3acaf72a620781f6399b5df49961aeef4094d05c86667754d1",
+  "private_or_article_images": false,
+  "protocol_path": "ml/ocr/component_structural_filter_v1/PROTOCOL.json",
+  "protocol_sha256": "9913924eb968082e7a0649b359558ffca9455474cd971b08ee111f853af5ce08",
+  "public_release_eligible": false,
+  "revision": "graph-numeric-component-structural-filter-v1",
+  "sample_count": 384,
+  "schema": "graphreader.ocr-component-structural-filter-sealed-test-seal.v1",
+  "source_sealed_public_test_seal_path": "ml/ocr/component_geometric_v4/SEALED_PUBLIC_TEST_SEAL.json",
+  "source_sealed_public_test_seal_sha256": "4ec62df2c14195abda1a519a7c66356132e9238831ecc9621ab94171e2b1ef0d",
+  "synthetic_only": true,
+  "task": "ocr-recognition",
+  "truth_hidden_from_selection_runner": true
+}
