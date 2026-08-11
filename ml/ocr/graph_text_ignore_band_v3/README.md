@@ -32,7 +32,22 @@ text tiles, 763 negative-context tiles from text sources, and 480 exclusion
 tiles. The model, loss, optimizer, seed, total 2,880 optimizer steps, DB
 thresholds, selection split, and unopened public archive remain unchanged.
 
-P2 must pass every frozen selection fixture exactly, with zero false regions,
+P2 ran once and passed probability and CPU parity at
+`4.708766937255859e-06`, but failed selection at 27/112 exact. It produced
+115 false regions, including 15 exclusion false regions, missed text in 76
+fixtures, and had only three exact text fixtures. A single broad diagnostic
+showed that detections stayed centered but the mandatory 1.5 DB unclip produced
+a median 1.94 times truth height and 1.28 times truth width. The ignored band
+was unconstrained above the 0.30 production threshold.
+
+P3 is the final preregistered candidate. It adds a one-sided squared margin only
+inside the existing ignored boundary band. Probabilities at or below 0.25 have
+zero margin loss, preserving a low-confidence glyph response while keeping the
+band below the fixed 0.30 DB contour threshold. The exact P2 model, whole-frame
+tile composition, base loss, optimizer, seed, total 2,880 optimizer steps, DB
+thresholds, selection split, and unopened public archive remain unchanged.
+
+P3 must pass every frozen selection fixture exactly, with zero false regions,
 duplicates, and exclusion hits, plus the probability and CPU ONNX parity gates,
 before the single sealed-public run can be authorized. No result in this folder
 can create a manifest, populate the production model store, enter a package,

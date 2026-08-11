@@ -1043,7 +1043,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-ignore-band-v3",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_3_preregistered",
       "defect_class": "DB core supervision labels visible glyph and antialias pixels outside the shrunken positive core as background, coupling recall failure to false-region suppression",
       "prior_revision_reuse": false,
       "prior_revision": "graph-text-balanced-recall-v2",
@@ -1053,24 +1053,26 @@
       "isolated_change": "retain the V2 export-safe topology and production DB thresholds, but replace contradictory full-background supervision with a one-source-pixel dilated ignore band around each text polygon, masked Dice, and frozen 3:1 online hard-negative mining on new disjoint renderer and degradation families",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P2"
-      ],
-      "consumed_candidate_ids": [
-        "P1"
-      ],
-      "remaining_unregistered_candidate_ids": [
         "P3"
       ],
+      "consumed_candidate_ids": [
+        "P1",
+        "P2"
+      ],
+      "remaining_unregistered_candidate_ids": [],
       "candidate_config_paths": {
         "P1": "ml/ocr/graph_text_ignore_band_v3/training/p1.json",
-        "P2": "ml/ocr/graph_text_ignore_band_v3/training/p2.json"
+        "P2": "ml/ocr/graph_text_ignore_band_v3/training/p2.json",
+        "P3": "ml/ocr/graph_text_ignore_band_v3/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "29f58aca0d700b93bc7979c3c5f28ba8e7b50decafafdb54c6c2128121437fe1",
-        "P2": "51110d75207a84afa1e31cd3e2ea9892649e57937046757554a88a9bcdafd888"
+        "P2": "51110d75207a84afa1e31cd3e2ea9892649e57937046757554a88a9bcdafd888",
+        "P3": "1d8b8bcb304fb308b3cfeb74081d7667f595d9d0d136f849e83094f5d839923e"
       },
       "p1_expected_runner_source_bundle_sha256": "1130b496a60d307dd7b9f981f30e50e99ea7f60a399c440ea029529299f96ab4",
       "p2_expected_runner_source_bundle_sha256": "77fe4658003cd43e4647eff498a717ea4eb778ac22b11ac5b0702c54c321fdf0",
+      "p3_expected_runner_source_bundle_sha256": "343d29c0cdd535b04daf5f73da33bbb2fa57000839d32995c4cbb8d2da7b266c",
       "protocol_path": "ml/ocr/graph_text_ignore_band_v3/PROTOCOL.json",
       "protocol_sha256": "257f791a8e125aa81ea6d6096644f27582aeea7a7153300075a5853dc3a4c421",
       "selection_manifest_path": "ml/ocr/graph_text_ignore_band_v3/SELECTION_MANIFEST.json",
@@ -1104,8 +1106,30 @@
       "p2_preregistration_sha256": "40784a3c14c8875bfd6d076dabb7e3d9ed2795b30c8355eea9b6abe3930eb395",
       "p2_isolated_change": "replace the single focused crop per frozen source with three deterministic whole-frame tiles from the exact same frozen source bytes, retaining the P1 model, loss, optimizer, total 2880 optimizer steps, production DB thresholds, selection split, and unopened public archive",
       "p2_training_composition_fingerprint": "b517be748c5446bc082ccd9ea7e3b233e670c36c7ad254360e01e17e74468887",
+      "p2_result_path": "ml/ocr/graph_text_ignore_band_v3/P2_RESULT.json",
+      "p2_result_sha256": "0eeef4a6a8ce07e58f04db81102e3ca2e0e26e0c0758b032863cf1c7e519f3dc",
+      "p2_training_report_path": "ml/ocr/graph_text_ignore_band_v3/artifacts/P2-run/candidate-report.json",
+      "p2_training_report_sha256": "29da8eec33f19809bcdf8383b495ed57252ee531a035c1a5faad75519f9176c6",
+      "p2_training_opened_seal_sha256": "1ce21dcae07d8f05726b7c23c6a46bf06c339ddbbc23ab9ffee39267f291a42d",
+      "p2_training_result_seal_sha256": "0b9ad35c803d9d607921ff8248f14dfd7bb2058cd78112552563761ad461fb1d",
+      "p2_checkpoint_sha256": "c00f52cea194dc7c8fdd06cfcbf06b6259c9397e9aafb810dd3eac29b67ce2c1",
+      "p2_onnx_sha256": "796c1870a97de2eed4d869f8ed8aa1bfac2ea1d1319e7cb592019a85a57e3886",
+      "p2_selection_exact_fixture_count": 27,
+      "p2_selection_fixture_count": 112,
+      "p2_selection_false_region_count": 115,
+      "p2_selection_exclusion_false_region_count": 15,
+      "p2_selection_duplicate_region_count": 0,
+      "p2_onnx_parity_maximum_absolute_error": 0.000004708766937255859,
+      "p2_probability_contract_passed": true,
+      "p2_selection_gate_passed": false,
+      "p2_failure": "P2 passed probability and parity but only 27/112 selection fixtures were exact. It produced 115 false regions, 15 exclusion false regions, 76 text misses, and only three exact text fixtures. A single broad diagnostic found centered predictions but median post-unclip size of 1.94 times truth height and 1.28 times truth width, binding P3 to the unconstrained ignored boundary rather than provider or threshold drift.",
+      "p3_preregistration_path": "ml/ocr/graph_text_ignore_band_v3/P3_PREREGISTRATION.json",
+      "p3_preregistration_sha256": "975f24d1bd3ad4e097ddb5b8e3ebcfef42ba1cbb66e96c9932eedda1b6a4ce53",
+      "p3_isolated_change": "add a one-sided squared margin only inside the existing ignored text-boundary band, requiring probability at or below 0.25 while retaining the exact P2 model, whole-frame tile composition, base loss, optimizer, seed, total 2880 optimizer steps, production DB thresholds, selection split, and unopened public archive",
+      "p3_boundary_probability_ceiling": 0.25,
+      "p3_boundary_margin_loss_weight": 1.0,
       "execution_authorized": true,
-      "authorized_candidate_id": "P2",
+      "authorized_candidate_id": "P3",
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "production_approval": false,

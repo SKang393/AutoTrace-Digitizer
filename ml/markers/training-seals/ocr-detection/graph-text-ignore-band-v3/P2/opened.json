@@ -1,0 +1,26 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/graph_text_ignore_band_v3/training/p2.json",
+    "candidate_config_sha256": "51110d75207a84afa1e31cd3e2ea9892649e57937046757554a88a9bcdafd888",
+    "candidate_id": "P2",
+    "committed_source_enforcement": true,
+    "revision": "graph-text-ignore-band-v3",
+    "runner_source_bundle_sha256": "77fe4658003cd43e4647eff498a717ea4eb778ac22b11ac5b0702c54c321fdf0",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/graph_text_ignore_band_v3/dataset.py",
+      "ml/ocr/graph_text_ignore_band_v3/model.py",
+      "ml/ocr/graph_text_ignore_band_v3/p2_composition.py",
+      "ml/ocr/graph_text_ignore_band_v3/protocol.py",
+      "ml/ocr/graph_text_ignore_band_v3/train_p1.py",
+      "ml/ocr/graph_text_ignore_band_v3/train_p2.py",
+      "ml/ocr/official_bakeoff/structure_consensus_evaluate.py"
+    ],
+    "task": "ocr-detection",
+    "training_budget_ledger_sha256": "d3a6e1b18a847f1735580302d969c0d0efcb46cfa61b926920e14a0ec857c79a"
+  },
+  "opened_utc": "2026-08-11T08:39:54.363965+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

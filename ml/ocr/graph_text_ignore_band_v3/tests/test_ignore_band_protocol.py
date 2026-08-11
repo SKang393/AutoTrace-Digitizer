@@ -41,6 +41,7 @@ from ml.ocr.graph_text_ignore_band_v3.protocol import (
 )
 from ml.ocr.graph_text_ignore_band_v3.train_p1 import RUNNER_SOURCE_PATHS as P1_RUNNER_SOURCE_PATHS, _loss
 from ml.ocr.graph_text_ignore_band_v3.train_p2 import RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS
+from ml.ocr.graph_text_ignore_band_v3.train_p3 import RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS, _p3_loss
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -140,6 +141,48 @@ def test_model_preserves_probability_map_shape_and_input_contract() -> None:
         model(torch.zeros((1, 3, 63, 128)))
 
 
+def test_p3_margin_is_one_sided_and_confined_to_ignored_boundary() -> None:
+    target = torch.zeros((1, 1, 8, 8), dtype=torch.float32)
+    target[:, :, 3:5, 3:5] = 1.0
+    supervision = torch.ones_like(target)
+    supervision[:, :, 2:6, 2:6] = 0.0
+    supervision[target > 0.5] = 1.0
+    below = torch.full_like(target, 0.20)
+    below[target > 0.5] = 0.80
+    at_ceiling = below.clone()
+    at_ceiling[supervision <= 0.5] = 0.25
+    above = below.clone()
+    above[supervision <= 0.5] = 0.35
+    below_loss = _p3_loss(
+        below,
+        target,
+        supervision,
+        boundary_probability_ceiling=0.25,
+        boundary_margin_loss_weight=1.0,
+    )
+    ceiling_loss = _p3_loss(
+        at_ceiling,
+        target,
+        supervision,
+        boundary_probability_ceiling=0.25,
+        boundary_margin_loss_weight=1.0,
+    )
+    above_loss = _p3_loss(
+        above,
+        target,
+        supervision,
+        boundary_probability_ceiling=0.25,
+        boundary_margin_loss_weight=1.0,
+    )
+    assert float(below_loss[3]) == 0.0
+    assert float(ceiling_loss[3]) == 0.0
+    assert float(above_loss[3]) > 0.0
+    assert torch.equal(below_loss[1], ceiling_loss[1])
+    assert torch.equal(ceiling_loss[1], above_loss[1])
+    assert torch.equal(below_loss[2], ceiling_loss[2])
+    assert torch.equal(ceiling_loss[2], above_loss[2])
+
+
 def test_p2_whole_frame_composition_is_frozen_and_source_complete() -> None:
     tile_count = 0
     source_count = 0
@@ -168,7 +211,7 @@ def test_p2_whole_frame_composition_is_frozen_and_source_complete() -> None:
     assert p2_composition_fingerprint() == "b517be748c5446bc082ccd9ea7e3b233e670c36c7ad254360e01e17e74468887"
 
 
-def test_frozen_hashes_and_ledger_record_p1_and_authorize_only_p2() -> None:
+def test_frozen_hashes_and_ledger_record_p1_p2_and_authorize_only_p3() -> None:
     expected_hashes = {
         "PROTOCOL.json": "257f791a8e125aa81ea6d6096644f27582aeea7a7153300075a5853dc3a4c421",
         "SELECTION_MANIFEST.json": "2c18959408cf7dc797287aa836c37d7020919c9a1a481800a125c26e160ae505",
@@ -176,18 +219,26 @@ def test_frozen_hashes_and_ledger_record_p1_and_authorize_only_p2() -> None:
         "P1_PREREGISTRATION.json": "493239e1323c45ce6b9e075722d465ab612618a3b036f65a2d877e975d5370a9",
         "P1_RESULT.json": "e2eec6724aa7018ed0bc9119f999fb49f81bb195a24c1656ec5f98de7a2e89a7",
         "P2_PREREGISTRATION.json": "40784a3c14c8875bfd6d076dabb7e3d9ed2795b30c8355eea9b6abe3930eb395",
+        "P2_RESULT.json": "0eeef4a6a8ce07e58f04db81102e3ca2e0e26e0c0758b032863cf1c7e519f3dc",
+        "P3_PREREGISTRATION.json": "975f24d1bd3ad4e097ddb5b8e3ebcfef42ba1cbb66e96c9932eedda1b6a4ce53",
         "training/p1.json": "29f58aca0d700b93bc7979c3c5f28ba8e7b50decafafdb54c6c2128121437fe1",
         "training/p2.json": "51110d75207a84afa1e31cd3e2ea9892649e57937046757554a88a9bcdafd888",
+        "training/p3.json": "1d8b8bcb304fb308b3cfeb74081d7667f595d9d0d136f849e83094f5d839923e",
     }
     for name, expected in expected_hashes.items():
         assert _sha256(REVISION_ROOT / name) == expected
     p1_config = _json(REVISION_ROOT / "training/p1.json")
     p2_config = _json(REVISION_ROOT / "training/p2.json")
+    p3_config = _json(REVISION_ROOT / "training/p3.json")
     assert source_bundle_sha256(REPO_ROOT, P1_RUNNER_SOURCE_PATHS) == p1_config["expected_runner_source_bundle_sha256"]
     assert source_bundle_sha256(REPO_ROOT, P2_RUNNER_SOURCE_PATHS) == p2_config["expected_runner_source_bundle_sha256"]
+    assert source_bundle_sha256(REPO_ROOT, P3_RUNNER_SOURCE_PATHS) == p3_config["expected_runner_source_bundle_sha256"]
     p1_seal_root = REPO_ROOT / "ml/markers/training-seals/ocr-detection/graph-text-ignore-band-v3/P1"
     assert _sha256(p1_seal_root / "opened.json") == "b19142cd843b95780fb0e8cfd10390777d28f4b6a73ca356f5b6309e7c24ca34"
     assert _sha256(p1_seal_root / "result.json") == "4dd0c58505f652298593160c8c344b9aa833f8d1af69e2e01eb0124843031fcd"
+    p2_seal_root = REPO_ROOT / "ml/markers/training-seals/ocr-detection/graph-text-ignore-band-v3/P2"
+    assert _sha256(p2_seal_root / "opened.json") == "1ce21dcae07d8f05726b7c23c6a46bf06c339ddbbc23ab9ffee39267f291a42d"
+    assert _sha256(p2_seal_root / "result.json") == "0b9ad35c803d9d607921ff8248f14dfd7bb2058cd78112552563761ad461fb1d"
     seal = _json(REVISION_ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     archive = REPO_ROOT / str(seal["fixture_archive_path"])
     assert _sha256(archive) == seal["fixture_archive_sha256"] == "1b23558516d72b2241501cd24ac0019ace01ba117e725aa9ad030c5e78e59a95"
@@ -195,16 +246,21 @@ def test_frozen_hashes_and_ledger_record_p1_and_authorize_only_p2() -> None:
     entries = [entry for entry in ledger["revisions"] if entry["revision"] == REVISION]
     assert len(entries) == 1
     entry = entries[0]
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["p1_selection_exact_fixture_count"] == 8
     assert entry["p1_selection_false_region_count"] == 210
     assert entry["p1_selection_exclusion_false_region_count"] == 36
+    assert entry["p2_selection_exact_fixture_count"] == 27
+    assert entry["p2_selection_false_region_count"] == 115
+    assert entry["p2_selection_exclusion_false_region_count"] == 15
     assert entry["p2_training_composition_fingerprint"] == p2_config["p2_training_composition_fingerprint"]
+    assert entry["p3_boundary_probability_ceiling"] == p3_config["boundary_probability_ceiling"] == 0.25
+    assert entry["p3_boundary_margin_loss_weight"] == p3_config["boundary_margin_loss_weight"] == 1.0
     assert entry["public_gate_authorized"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False

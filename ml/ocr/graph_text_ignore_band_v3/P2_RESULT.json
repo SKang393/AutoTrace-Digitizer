@@ -1,0 +1,60 @@
+{
+  "candidate_id": "P2",
+  "checkpoint_sha256": "c00f52cea194dc7c8fdd06cfcbf06b6259c9397e9aafb810dd3eac29b67ce2c1",
+  "elapsed_ms": 397237.956,
+  "onnx_parity_maximum_absolute_error": 4.708766937255859e-06,
+  "onnx_parity_passed": true,
+  "onnx_sha256": "796c1870a97de2eed4d869f8ed8aa1bfac2ea1d1319e7cb592019a85a57e3886",
+  "production_approval": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-ignore-band-v3",
+  "schema": "graphreader.ocr-graph-text-ignore-band-result.v1",
+  "sealed_public_archive_opened": false,
+  "selection_gate_passed": false,
+  "selection_metrics": {
+    "duplicate_region_count": 0,
+    "exact_fixture_count": 27,
+    "exclusion_exact_fixture_count": 24,
+    "exclusion_false_region_count": 15,
+    "false_region_count": 115,
+    "fixture_count": 112,
+    "text_exact_fixture_count": 3,
+    "text_false_region_count": 100,
+    "text_fixture_count": 80,
+    "text_missed_fixture_count": 76,
+    "text_multi_region_fixture_count": 18
+  },
+  "selection_report_path": "ml/ocr/graph_text_ignore_band_v3/artifacts/P2-run/candidate-report.json",
+  "selection_report_sha256": "29da8eec33f19809bcdf8383b495ed57252ee531a035c1a5faad75519f9176c6",
+  "status": "failed_selection",
+  "structure_diagnosis": {
+    "arrow_crosshatch": {
+      "exact_fixture_count": 8,
+      "false_region_count": 20,
+      "fixture_count": 28,
+      "text_missed_fixture_count": 20
+    },
+    "boxed_square_key": {
+      "exact_fixture_count": 0,
+      "false_region_count": 60,
+      "fixture_count": 28,
+      "text_missed_fixture_count": 19
+    },
+    "double_hook_bracket": {
+      "exact_fixture_count": 9,
+      "false_region_count": 19,
+      "fixture_count": 28,
+      "text_missed_fixture_count": 19
+    },
+    "open_diamond_polyline": {
+      "exact_fixture_count": 10,
+      "false_region_count": 16,
+      "fixture_count": 28,
+      "text_missed_fixture_count": 18
+    }
+  },
+  "task": "ocr-detection",
+  "training_opened_seal_sha256": "1ce21dcae07d8f05726b7c23c6a46bf06c339ddbbc23ab9ffee39267f291a42d",
+  "training_result_seal_sha256": "0b9ad35c803d9d607921ff8248f14dfd7bb2058cd78112552563761ad461fb1d"
+}
