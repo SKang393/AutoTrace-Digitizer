@@ -1,0 +1,25 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/component_ensemble_v5/training/p1.json",
+    "candidate_config_sha256": "73001b4261d8675c6ad502ee4a444fc2633e88408f31a852c1ee3d9acfc2f54d",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "graph-numeric-component-ensemble-v5",
+    "runner_source_bundle_sha256": "eb26126206b4e31b52f1f7848936e8502a2a7f8fcbc589ca9c321ecaa2fb0ea8",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/component_ensemble_v5/dataset.py",
+      "ml/ocr/component_ensemble_v5/model.py",
+      "ml/ocr/component_ensemble_v5/pipeline.py",
+      "ml/ocr/component_ensemble_v5/protocol.py",
+      "ml/ocr/component_ensemble_v5/train_p1.py",
+      "ml/ocr/component_geometric_v4/dataset.py"
+    ],
+    "task": "ocr-recognition",
+    "training_budget_ledger_sha256": "1395d77bb0d2181078a92882f6c49c8dbdc35c263bba6de523aa20e97265e979"
+  },
+  "opened_utc": "2026-08-11T02:48:05.284082+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

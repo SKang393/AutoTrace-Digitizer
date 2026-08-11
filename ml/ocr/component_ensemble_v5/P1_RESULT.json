@@ -1,0 +1,33 @@
+{
+  "candidate_id": "P1",
+  "checkpoint_sha256": "f15f1a282f110b5a32ec112a2fddcc917330806d4e8e8eb4452544e0f69545bd",
+  "elapsed_ms": 41037.127,
+  "experiment_ordinal": 1,
+  "onnx_parity_maximum_absolute_error": 0.000009298324584960938,
+  "onnx_parity_passed": true,
+  "onnx_provider": "CPUExecutionProvider",
+  "onnx_sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+  "private_or_article_images": false,
+  "production_approval": false,
+  "public_gate_authorized": true,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "report_path": "ml/ocr/component_ensemble_v5/artifacts/P1-run/candidate-report.json",
+  "report_sha256": "e5095b63221b7a745e48ead61011a7794e5da54e0fc24fd641d785bc09257260",
+  "revision": "graph-numeric-component-ensemble-v5",
+  "schema": "graphreader.ocr-component-ensemble-candidate-result.v1",
+  "sealed_public_archive_opened": false,
+  "selected_threshold": 0.65,
+  "selection_gate_passed": true,
+  "status": "selection_passed_public_preregistered",
+  "synthetic_only": true,
+  "task": "ocr-recognition",
+  "training_opened_seal_sha256": "38fac49edcdca401d912ec451249d73b7649942f58de7e35473aeae794940086",
+  "training_result_seal_sha256": "fae93888e4ca27e8e3e5aa0842b6e7aac4007746401728b141a41a596a29b9e8",
+  "validation_metrics": {
+    "character_error_rate": 0.04443282801881861,
+    "exact_match": 0.96484375,
+    "marker_exclusion_accuracy": 1.0,
+    "role_accuracy": 0.9732142857142857
+  }
+}

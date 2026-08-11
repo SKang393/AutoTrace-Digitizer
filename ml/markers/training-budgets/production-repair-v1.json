@@ -757,7 +757,7 @@
     {
       "task": "ocr-recognition",
       "revision": "graph-numeric-component-ensemble-v5",
-      "status": "candidate_1_preregistered",
+      "status": "selection_passed_public_preregistered",
       "defect_class": "multi-renderer transfer for decimal-bearing graph-numeric glyph recognition",
       "prior_revision_reuse": false,
       "prior_revision": "graph-numeric-component-structural-filter-v1",
@@ -769,7 +769,9 @@
       "preregistered_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
+      "consumed_candidate_ids": [
+        "P1"
+      ],
       "remaining_unregistered_candidate_ids": [
         "P2",
         "P3"
@@ -780,6 +782,22 @@
       "candidate_config_sha256": {
         "P1": "73001b4261d8675c6ad502ee4a444fc2633e88408f31a852c1ee3d9acfc2f54d"
       },
+      "candidate_checkpoint_sha256": {
+        "P1": "f15f1a282f110b5a32ec112a2fddcc917330806d4e8e8eb4452544e0f69545bd"
+      },
+      "candidate_onnx_sha256": {
+        "P1": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84"
+      },
+      "p1_training_report_path": "ml/ocr/component_ensemble_v5/artifacts/P1-run/candidate-report.json",
+      "p1_training_report_sha256": "e5095b63221b7a745e48ead61011a7794e5da54e0fc24fd641d785bc09257260",
+      "p1_training_opened_seal_sha256": "38fac49edcdca401d912ec451249d73b7649942f58de7e35473aeae794940086",
+      "p1_training_result_seal_sha256": "fae93888e4ca27e8e3e5aa0842b6e7aac4007746401728b141a41a596a29b9e8",
+      "p1_selected_threshold": 0.65,
+      "p1_validation_exact_match": 0.96484375,
+      "p1_validation_character_error_rate": 0.04443282801881861,
+      "p1_validation_role_accuracy": 0.9732142857142857,
+      "p1_validation_marker_exclusion_accuracy": 1.0,
+      "p1_onnx_parity_maximum_absolute_error": 0.000009298324584960938,
       "expected_runner_source_bundle_sha256": "eb26126206b4e31b52f1f7848936e8502a2a7f8fcbc589ca9c321ecaa2fb0ea8",
       "protocol_path": "ml/ocr/component_ensemble_v5/PROTOCOL.json",
       "protocol_sha256": "3c4a169eb1b51e6895152c00e0ef2ff664e8154abc911a21cbcba17e0346adfa",
@@ -793,9 +811,11 @@
       "public_gate_config_sha256": "ec199c47225f372c352fbb898c3f67442a6ec4cb6d1e27c29e5d27df1f639521",
       "public_gate_archive_opened": false,
       "public_gate_evaluations": 0,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P1",
-      "public_gate_authorized": false,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "public_gate_authorized": true,
+      "public_gate_authorized_onnx_sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+      "public_gate_authorized_selection_report_sha256": "e5095b63221b7a745e48ead61011a7794e5da54e0fc24fd641d785bc09257260",
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true

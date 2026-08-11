@@ -100,24 +100,39 @@ def test_source_bundles_and_new_public_seal_are_exactly_bound() -> None:
     assert not (ROOT / "PUBLIC_GATE_REPORT.json").exists()
 
 
-def test_canonical_budget_authorizes_only_unconsumed_p1() -> None:
+def test_canonical_budget_records_selected_p1_and_authorizes_only_public_gate() -> None:
     ledger = json.loads(LEDGER.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["task"] == TASK and item["revision"] == REVISION)
-    assert entry["status"] == "candidate_1_preregistered"
+    result = json.loads((ROOT / "P1_RESULT.json").read_text(encoding="utf-8"))
+    assert entry["status"] == "selection_passed_public_preregistered"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(REPO_ROOT / CONFIG_PATH)
+    assert entry["candidate_checkpoint_sha256"]["P1"] == result["checkpoint_sha256"]
+    assert entry["candidate_onnx_sha256"]["P1"] == result["onnx_sha256"]
+    assert entry["p1_training_report_sha256"] == result["report_sha256"]
+    assert entry["p1_training_opened_seal_sha256"] == result["training_opened_seal_sha256"]
+    assert entry["p1_training_result_seal_sha256"] == result["training_result_seal_sha256"]
+    seal_root = REPO_ROOT / "ml/markers/training-seals/ocr-recognition/graph-numeric-component-ensemble-v5/P1"
+    assert sha256_file(seal_root / "opened.json") == result["training_opened_seal_sha256"]
+    assert sha256_file(seal_root / "result.json") == result["training_result_seal_sha256"]
     assert entry["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
     assert entry["selection_manifest_sha256"] == sha256_file(ROOT / "SELECTION_MANIFEST.json")
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert entry["public_gate_config_sha256"] == sha256_file(ROOT / "gates/sealed-public-v1.json")
     assert entry["public_gate_archive_opened"] is False
     assert entry["public_gate_evaluations"] == 0
-    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_onnx_sha256"] == result["onnx_sha256"]
+    assert entry["public_gate_authorized_selection_report_sha256"] == result["report_sha256"]
+    assert result["selection_gate_passed"] is True
+    assert result["sealed_public_archive_opened"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
 
