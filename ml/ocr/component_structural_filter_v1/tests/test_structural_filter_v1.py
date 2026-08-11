@@ -79,19 +79,34 @@ def test_candidate_and_public_source_bundles_are_frozen() -> None:
     assert public["sealed_public_test_seal_sha256"] == sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
 
 
-def test_inherited_public_archive_remains_bound_and_unopened() -> None:
+def test_inherited_public_archive_and_once_only_failure_remain_bound() -> None:
     seal = json.loads((ROOT / "SEALED_PUBLIC_TEST_SEAL.json").read_text(encoding="utf-8"))
     assert seal["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
     assert seal["fixture_archive_sha256"] == "7845bc0628740fb24b95e0367bceab8b5b6d186adacc5f58c5c6c3bdcc97dc76"
     assert seal["truth_hidden_from_selection_runner"] is True
     assert seal["chandler_included"] is False
-    assert not (ROOT / "PUBLIC_GATE_REPORT.json").exists()
+    report_path = ROOT / "PUBLIC_GATE_REPORT.json"
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    gate_root = REPO_ROOT / "ml/markers/gate-seals/ocr-recognition" / report["canonical_seal_key"]
+    opened_path = gate_root / "opened.json"
+    result_path = gate_root / "result.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert report["status"] == "fail"
+    assert report["evaluation_count"] == 1
+    assert report["fixture_archive_sha256"] == seal["fixture_archive_sha256"]
+    assert report["metrics"]["exact_match"] == 0.87890625
+    assert report["metrics"]["character_error_rate"] == 0.15327695560253699
+    assert report["production_approval"] is False
+    assert report["release_eligible"] is False
+    assert result["opened_sha256"] == sha256_file(opened_path)
+    assert result["report_sha256"] == sha256_file(report_path)
+    assert result["status"] == "fail"
 
 
-def test_canonical_budget_records_selection_and_exact_public_authorization() -> None:
+def test_canonical_budget_records_exhausted_failed_public_gate() -> None:
     ledger = json.loads(LEDGER.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["task"] == TASK and item["revision"] == REVISION)
-    assert entry["status"] == "selection_passed_public_preregistered"
+    assert entry["status"] == "exhausted_failed_public_gate"
     assert entry["experiment_budget"] == 1
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1"]
@@ -103,16 +118,27 @@ def test_canonical_budget_records_selection_and_exact_public_authorization() -> 
     result_path = ROOT / "P1_RESULT.json"
     result = json.loads(result_path.read_text(encoding="utf-8"))
     assert entry["p1_result_sha256"] == sha256_file(result_path)
-    assert result["status"] == "selected"
+    assert result["status"] == "exhausted_failed_public_gate"
     assert result["selection_gate_passed"] is True
     assert result["optimizer_steps"] == 0
     assert result["weights_changed"] is False
-    assert result["sealed_public_archive_opened"] is False
+    assert result["sealed_public_archive_opened"] is True
     assert result["validation_marker_exclusion_accuracy"] == 1.0
-    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized"] is False
     assert entry["public_gate_authorized_onnx_sha256"] == result["source_onnx_sha256"]
     assert entry["public_gate_authorized_selection_report_sha256"] == result["report_sha256"]
-    assert entry["public_gate_evaluations"] == 0
+    assert entry["public_gate_budget_consumed"] is True
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_status"] == "fail"
+    assert entry["public_gate_report_sha256"] == sha256_file(ROOT / "PUBLIC_GATE_REPORT.json")
+    assert entry["public_gate_opened_seal_sha256"] == sha256_file(
+        REPO_ROOT / entry["public_gate_opened_seal_path"]
+    )
+    assert entry["public_gate_result_seal_sha256"] == sha256_file(
+        REPO_ROOT / entry["public_gate_result_seal_path"]
+    )
+    assert entry["public_gate_sealed_exact_match"] < 0.9
+    assert entry["public_gate_sealed_character_error_rate"] > 0.05
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
 

@@ -1,0 +1,37 @@
+{
+  "binding": {
+    "candidate_hash_key_schema": [
+      "source_onnx_sha256",
+      "selection_report_sha256"
+    ],
+    "candidate_hashes": {
+      "selection_report_sha256": "cfbf1d0fa6deef7e5b5d6b8a5a1b044c362fe5ae81cd2f5c06ef16d7869ed8f4",
+      "source_onnx_sha256": "941b19a8f700484a039335d25ecc47f41de1976b3b2016653c6beb2a4eb51894"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "e40ce059ddda1d3acaf72a620781f6399b5df49961aeef4094d05c86667754d1",
+    "evaluator_source_bundle_sha256": "463ba64602bfc94540680c7a9b59cb56ca260d4a48467d269b0203aa06166f68",
+    "evaluator_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/component_geometric_v4/dataset.py",
+      "ml/ocr/component_geometric_v4/p3_dataset.py",
+      "ml/ocr/component_structural_filter_v1/pipeline.py",
+      "ml/ocr/component_structural_filter_v1/protocol.py",
+      "ml/ocr/component_structural_filter_v1/sealed_gate.py"
+    ],
+    "gate_config_sha256": "fc4e061f454db7c64776a67e0919df7bb01c476ebf373874ace1e43f0416bb10",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "graph-numeric-component-structural-filter-v1-public-v1",
+    "split_config_path": "ml/ocr/component_structural_filter_v1/gates/sealed-public-v1.json",
+    "split_config_sha256": "6891ef0502dc37ec7b72d76a4b03195108e64c51ae77e815cdc28be78934ebdc",
+    "task": "ocr-recognition"
+  },
+  "evaluation_count": 1,
+  "key": "2ad4437a510986787a6b2973780155bc20f07d111e583595aaa2f78a13cc0182",
+  "opened_utc": "2026-08-11T02:06:05.388360+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

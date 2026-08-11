@@ -1,0 +1,5008 @@
+{
+  "canonical_seal_key": "2ad4437a510986787a6b2973780155bc20f07d111e583595aaa2f78a13cc0182",
+  "direct_execution": {
+    "inference_calls": 370,
+    "input_tensor_stream_sha256": "25073985e9160415381ab660e6c36807996d96aee328fee20b6cb0b6461e2817",
+    "output_tensor_stream_sha256": "b28cbddf08462e02a6c3993cadab55c58e0a5681310d05c9ea69688dc6f43a0a"
+  },
+  "elapsed_ms": 466.053,
+  "evaluation_count": 1,
+  "fixture_archive_sha256": "7845bc0628740fb24b95e0367bceab8b5b6d186adacc5f58c5c6c3bdcc97dc76",
+  "gate_requirements": {
+    "confidence_threshold": 0.55,
+    "marker_exclusion_accuracy_minimum": 1.0,
+    "provider": "CPUExecutionProvider",
+    "sealed_cer_maximum": 0.05,
+    "sealed_exact_match_minimum": 0.9,
+    "sealed_role_accuracy_minimum": 0.9,
+    "structural_operator": ">=",
+    "structural_position": "before_classifier",
+    "structural_reject_minimum_height_ratio": 0.75
+  },
+  "metrics": {
+    "case_exact_match": {
+      "decimal": 0.78125,
+      "decimal_percentage": 0.46875,
+      "integer": 1.0,
+      "l_one_ambiguity": 1.0,
+      "negative": 1.0,
+      "negative_decimal": 0.875,
+      "o_zero_ambiguity": 0.90625,
+      "percentage": 1.0
+    },
+    "character_error_rate": 0.15327695560253699,
+    "confidence_threshold": 0.55,
+    "exact_match": 0.87890625,
+    "exclusion_count": 128,
+    "marker_exclusion_accuracy": 1.0,
+    "positive_count": 256,
+    "predictions": [
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "908",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00000",
+        "structural_rejected": false,
+        "target_text": "908"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "255.4",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00001",
+        "structural_rejected": false,
+        "target_text": "255.4"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-194",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00002",
+        "structural_rejected": false,
+        "target_text": "-194"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "19%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00003",
+        "structural_rejected": false,
+        "target_text": "19%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.375,
+          0.375,
+          0.0625,
+          0.375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-15.9",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00004",
+        "structural_rejected": false,
+        "target_text": "-15.9"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "67.8%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00005",
+        "structural_rejected": false,
+        "target_text": "67.8%"
+      },
+      {
+        "component_height_ratios": [
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "0",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00006",
+        "structural_rejected": false,
+        "target_text": "0"
+      },
+      {
+        "component_height_ratios": [
+          0.5625,
+          0.53125,
+          0.5625
+        ],
+        "exclusion_kind": null,
+        "prediction": "101",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00007",
+        "structural_rejected": false,
+        "target_text": "101"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "5624",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00008",
+        "structural_rejected": false,
+        "target_text": "5624"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00009",
+        "structural_rejected": false,
+        "target_text": "627.8"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-659",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00010",
+        "structural_rejected": false,
+        "target_text": "-659"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "87%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00011",
+        "structural_rejected": false,
+        "target_text": "87%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-5.4",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00012",
+        "structural_rejected": false,
+        "target_text": "-5.4"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "50.1%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00013",
+        "structural_rejected": false,
+        "target_text": "50.1%"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00014",
+        "structural_rejected": false,
+        "target_text": "10"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00015",
+        "structural_rejected": false,
+        "target_text": "21"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "9702",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00016",
+        "structural_rejected": false,
+        "target_text": "9702"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00017",
+        "structural_rejected": false,
+        "target_text": "904.9"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-291",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00018",
+        "structural_rejected": false,
+        "target_text": "-291"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "32%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00019",
+        "structural_rejected": false,
+        "target_text": "32%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-38.2",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00020",
+        "structural_rejected": false,
+        "target_text": "-38.2"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "43.5%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00021",
+        "structural_rejected": false,
+        "target_text": "43.5%"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00022",
+        "structural_rejected": false,
+        "target_text": "100"
+      },
+      {
+        "component_height_ratios": [
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "1",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00023",
+        "structural_rejected": false,
+        "target_text": "1"
+      },
+      {
+        "component_height_ratios": [
+          0.53125,
+          0.53125,
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "4211",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00024",
+        "structural_rejected": false,
+        "target_text": "4211"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "68.1",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00025",
+        "structural_rejected": false,
+        "target_text": "68.1"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "-691",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00026",
+        "structural_rejected": false,
+        "target_text": "-691"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "46%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00027",
+        "structural_rejected": false,
+        "target_text": "46%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.375,
+          0.375,
+          0.0625,
+          0.375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-76.7",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00028",
+        "structural_rejected": false,
+        "target_text": "-76.7"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "85.9%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00029",
+        "structural_rejected": false,
+        "target_text": "85.9%"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00030",
+        "structural_rejected": false,
+        "target_text": "50"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.46875
+        ],
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00031",
+        "structural_rejected": false,
+        "target_text": "21"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "233",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00032",
+        "structural_rejected": false,
+        "target_text": "233"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "573.5",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00033",
+        "structural_rejected": false,
+        "target_text": "573.5"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "-746",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00034",
+        "structural_rejected": false,
+        "target_text": "-746"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "3%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00035",
+        "structural_rejected": false,
+        "target_text": "3%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.375,
+          0.375,
+          0.0625,
+          0.375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-32.2",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00036",
+        "structural_rejected": false,
+        "target_text": "-32.2"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00037",
+        "structural_rejected": false,
+        "target_text": "76.8%"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00038",
+        "structural_rejected": false,
+        "target_text": "100"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00039",
+        "structural_rejected": false,
+        "target_text": "10"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "3518",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00040",
+        "structural_rejected": false,
+        "target_text": "3518"
+      },
+      {
+        "component_height_ratios": [
+          0.375,
+          0.375,
+          0.375,
+          0.0625,
+          0.375
+        ],
+        "exclusion_kind": null,
+        "prediction": "662.8",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00041",
+        "structural_rejected": false,
+        "target_text": "662.8"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-433",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00042",
+        "structural_rejected": false,
+        "target_text": "-433"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "64%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00043",
+        "structural_rejected": false,
+        "target_text": "64%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00044",
+        "structural_rejected": false,
+        "target_text": "-39.7"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00045",
+        "structural_rejected": false,
+        "target_text": "18.9%"
+      },
+      {
+        "component_height_ratios": [
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00046",
+        "structural_rejected": false,
+        "target_text": "10"
+      },
+      {
+        "component_height_ratios": [
+          0.46875,
+          0.46875
+        ],
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00047",
+        "structural_rejected": false,
+        "target_text": "11"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "5035",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00048",
+        "structural_rejected": false,
+        "target_text": "5035"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "892.1",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00049",
+        "structural_rejected": false,
+        "target_text": "892.1"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-279",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00050",
+        "structural_rejected": false,
+        "target_text": "-279"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "94%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00051",
+        "structural_rejected": false,
+        "target_text": "94%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-17.6",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00052",
+        "structural_rejected": false,
+        "target_text": "-17.6"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "65.1%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00053",
+        "structural_rejected": false,
+        "target_text": "65.1%"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00054",
+        "structural_rejected": false,
+        "target_text": "100"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00055",
+        "structural_rejected": false,
+        "target_text": "21"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "4833",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00056",
+        "structural_rejected": false,
+        "target_text": "4833"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "94.5",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00057",
+        "structural_rejected": false,
+        "target_text": "94.5"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "-949",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00058",
+        "structural_rejected": false,
+        "target_text": "-949"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "21%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00059",
+        "structural_rejected": false,
+        "target_text": "21%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.5,
+          0.09375,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "-6.0",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00060",
+        "structural_rejected": false,
+        "target_text": "-6.0"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00061",
+        "structural_rejected": false,
+        "target_text": "93.3%"
+      },
+      {
+        "component_height_ratios": [
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00062",
+        "structural_rejected": false,
+        "target_text": "10"
+      },
+      {
+        "component_height_ratios": [
+          0.46875,
+          0.09375,
+          0.46875
+        ],
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00063",
+        "structural_rejected": false,
+        "target_text": "1.1"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "8027",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00064",
+        "structural_rejected": false,
+        "target_text": "8027"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "118.8",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00065",
+        "structural_rejected": false,
+        "target_text": "118.8"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-559",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00066",
+        "structural_rejected": false,
+        "target_text": "-559"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "53%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00067",
+        "structural_rejected": false,
+        "target_text": "53%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-41.8",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00068",
+        "structural_rejected": false,
+        "target_text": "-41.8"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00069",
+        "structural_rejected": false,
+        "target_text": "54.9%"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00070",
+        "structural_rejected": false,
+        "target_text": "10"
+      },
+      {
+        "component_height_ratios": [
+          0.5625,
+          0.53125,
+          0.5625
+        ],
+        "exclusion_kind": null,
+        "prediction": "101",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00071",
+        "structural_rejected": false,
+        "target_text": "101"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "338",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00072",
+        "structural_rejected": false,
+        "target_text": "338"
+      },
+      {
+        "component_height_ratios": [
+          0.375,
+          0.375,
+          0.375,
+          0.0625,
+          0.375
+        ],
+        "exclusion_kind": null,
+        "prediction": "430.7",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00073",
+        "structural_rejected": false,
+        "target_text": "430.7"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-117",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00074",
+        "structural_rejected": false,
+        "target_text": "-117"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "38%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00075",
+        "structural_rejected": false,
+        "target_text": "38%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00076",
+        "structural_rejected": false,
+        "target_text": "-66.2"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "73.6%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00077",
+        "structural_rejected": false,
+        "target_text": "73.6%"
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "0",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00078",
+        "structural_rejected": false,
+        "target_text": "0"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00079",
+        "structural_rejected": false,
+        "target_text": "21"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "459",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00080",
+        "structural_rejected": false,
+        "target_text": "459"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "698.3",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00081",
+        "structural_rejected": false,
+        "target_text": "698.3"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "-246",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00082",
+        "structural_rejected": false,
+        "target_text": "-246"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "37%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00083",
+        "structural_rejected": false,
+        "target_text": "37%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-57.3",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00084",
+        "structural_rejected": false,
+        "target_text": "-57.3"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00085",
+        "structural_rejected": false,
+        "target_text": "87.0%"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00086",
+        "structural_rejected": false,
+        "target_text": "50"
+      },
+      {
+        "component_height_ratios": [
+          0.5625,
+          0.125,
+          0.5625
+        ],
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00087",
+        "structural_rejected": false,
+        "target_text": "1.1"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "4348",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00088",
+        "structural_rejected": false,
+        "target_text": "4348"
+      },
+      {
+        "component_height_ratios": [
+          0.375,
+          0.375,
+          0.375,
+          0.0625,
+          0.375
+        ],
+        "exclusion_kind": null,
+        "prediction": "635.4",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00089",
+        "structural_rejected": false,
+        "target_text": "635.4"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-844",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00090",
+        "structural_rejected": false,
+        "target_text": "-844"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "78%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00091",
+        "structural_rejected": false,
+        "target_text": "78%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-48.7",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00092",
+        "structural_rejected": false,
+        "target_text": "-48.7"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00093",
+        "structural_rejected": false,
+        "target_text": "39.1%"
+      },
+      {
+        "component_height_ratios": [
+          0.53125,
+          0.125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "0.0",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00094",
+        "structural_rejected": false,
+        "target_text": "0.0"
+      },
+      {
+        "component_height_ratios": [
+          0.46875,
+          0.4375,
+          0.46875
+        ],
+        "exclusion_kind": null,
+        "prediction": "101",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00095",
+        "structural_rejected": false,
+        "target_text": "101"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "833",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00096",
+        "structural_rejected": false,
+        "target_text": "833"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "467.7",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00097",
+        "structural_rejected": false,
+        "target_text": "467.7"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-472",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00098",
+        "structural_rejected": false,
+        "target_text": "-472"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "66%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00099",
+        "structural_rejected": false,
+        "target_text": "66%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-10.6",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00100",
+        "structural_rejected": false,
+        "target_text": "-10.6"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00101",
+        "structural_rejected": false,
+        "target_text": "23.5%"
+      },
+      {
+        "component_height_ratios": [
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "0",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00102",
+        "structural_rejected": false,
+        "target_text": "0"
+      },
+      {
+        "component_height_ratios": [
+          0.5625,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00103",
+        "structural_rejected": false,
+        "target_text": "10"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "8252",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00104",
+        "structural_rejected": false,
+        "target_text": "8252"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "323.0",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00105",
+        "structural_rejected": false,
+        "target_text": "323.0"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-160",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00106",
+        "structural_rejected": false,
+        "target_text": "-160"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "56%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00107",
+        "structural_rejected": false,
+        "target_text": "56%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-23.7",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00108",
+        "structural_rejected": false,
+        "target_text": "-23.7"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00109",
+        "structural_rejected": false,
+        "target_text": "98.2%"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "20",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00110",
+        "structural_rejected": false,
+        "target_text": "20"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "101",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00111",
+        "structural_rejected": false,
+        "target_text": "101"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "4466",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00112",
+        "structural_rejected": false,
+        "target_text": "4466"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "984.8",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00113",
+        "structural_rejected": false,
+        "target_text": "984.8"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "-763",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00114",
+        "structural_rejected": false,
+        "target_text": "-763"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "42%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00115",
+        "structural_rejected": false,
+        "target_text": "42%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.375,
+          0.375,
+          0.0625,
+          0.375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-80.5",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00116",
+        "structural_rejected": false,
+        "target_text": "-80.5"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "60.9%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00117",
+        "structural_rejected": false,
+        "target_text": "60.9%"
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "0",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00118",
+        "structural_rejected": false,
+        "target_text": "0"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.09375,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00119",
+        "structural_rejected": false,
+        "target_text": "1.1"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "4701",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00120",
+        "structural_rejected": false,
+        "target_text": "4701"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00121",
+        "structural_rejected": false,
+        "target_text": "498.1"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "-250",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00122",
+        "structural_rejected": false,
+        "target_text": "-250"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "18%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00123",
+        "structural_rejected": false,
+        "target_text": "18%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.375,
+          0.375,
+          0.0625,
+          0.375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-33.8",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00124",
+        "structural_rejected": false,
+        "target_text": "-33.8"
+      },
+      {
+        "component_height_ratios": [
+          0.53125,
+          0.125,
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "1.1%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00125",
+        "structural_rejected": false,
+        "target_text": "1.1%"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00126",
+        "structural_rejected": false,
+        "target_text": "100"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00127",
+        "structural_rejected": false,
+        "target_text": "10"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "2164",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00128",
+        "structural_rejected": false,
+        "target_text": "2164"
+      },
+      {
+        "component_height_ratios": [
+          0.375,
+          0.375,
+          0.375,
+          0.0625,
+          0.375
+        ],
+        "exclusion_kind": null,
+        "prediction": "167.3",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00129",
+        "structural_rejected": false,
+        "target_text": "167.3"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-284",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00130",
+        "structural_rejected": false,
+        "target_text": "-284"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "39%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00131",
+        "structural_rejected": false,
+        "target_text": "39%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-19.6",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00132",
+        "structural_rejected": false,
+        "target_text": "-19.6"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "9.9%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00133",
+        "structural_rejected": false,
+        "target_text": "9.9%"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00134",
+        "structural_rejected": false,
+        "target_text": "10"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00135",
+        "structural_rejected": false,
+        "target_text": "10"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "3273",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00136",
+        "structural_rejected": false,
+        "target_text": "3273"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "844.4",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00137",
+        "structural_rejected": false,
+        "target_text": "844.4"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-662",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00138",
+        "structural_rejected": false,
+        "target_text": "-662"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "18%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00139",
+        "structural_rejected": false,
+        "target_text": "18%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-77.1",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00140",
+        "structural_rejected": false,
+        "target_text": "-77.1"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "61.5%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00141",
+        "structural_rejected": false,
+        "target_text": "61.5%"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.09375,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "0.0",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00142",
+        "structural_rejected": false,
+        "target_text": "0.0"
+      },
+      {
+        "component_height_ratios": [
+          0.53125,
+          0.5625
+        ],
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00143",
+        "structural_rejected": false,
+        "target_text": "21"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "1362",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00144",
+        "structural_rejected": false,
+        "target_text": "1362"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.09375,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "86.9",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00145",
+        "structural_rejected": false,
+        "target_text": "86.9"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-367",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00146",
+        "structural_rejected": false,
+        "target_text": "-367"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "44%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00147",
+        "structural_rejected": false,
+        "target_text": "44%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-47.2",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00148",
+        "structural_rejected": false,
+        "target_text": "-47.2"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00149",
+        "structural_rejected": false,
+        "target_text": "54.5%"
+      },
+      {
+        "component_height_ratios": [
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "50",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00150",
+        "structural_rejected": false,
+        "target_text": "50"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00151",
+        "structural_rejected": false,
+        "target_text": "21"
+      },
+      {
+        "component_height_ratios": [
+          0.53125,
+          0.53125,
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "6694",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00152",
+        "structural_rejected": false,
+        "target_text": "6694"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "972.3",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00153",
+        "structural_rejected": false,
+        "target_text": "972.3"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-573",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00154",
+        "structural_rejected": false,
+        "target_text": "-573"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "86%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00155",
+        "structural_rejected": false,
+        "target_text": "86%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-22.2",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00156",
+        "structural_rejected": false,
+        "target_text": "-22.2"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "7.4%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00157",
+        "structural_rejected": false,
+        "target_text": "7.4%"
+      },
+      {
+        "component_height_ratios": [
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "0",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00158",
+        "structural_rejected": false,
+        "target_text": "0"
+      },
+      {
+        "component_height_ratios": [
+          0.46875
+        ],
+        "exclusion_kind": null,
+        "prediction": "1",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00159",
+        "structural_rejected": false,
+        "target_text": "1"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "4656",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00160",
+        "structural_rejected": false,
+        "target_text": "4656"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "580.9",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00161",
+        "structural_rejected": false,
+        "target_text": "580.9"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-761",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00162",
+        "structural_rejected": false,
+        "target_text": "-761"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "82%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00163",
+        "structural_rejected": false,
+        "target_text": "82%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-84.3",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00164",
+        "structural_rejected": false,
+        "target_text": "-84.3"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00165",
+        "structural_rejected": false,
+        "target_text": "89.9%"
+      },
+      {
+        "component_height_ratios": [
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "50",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00166",
+        "structural_rejected": false,
+        "target_text": "50"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00167",
+        "structural_rejected": false,
+        "target_text": "21"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "7553",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00168",
+        "structural_rejected": false,
+        "target_text": "7553"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "700.5",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00169",
+        "structural_rejected": false,
+        "target_text": "700.5"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "-36",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00170",
+        "structural_rejected": false,
+        "target_text": "-36"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "89%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00171",
+        "structural_rejected": false,
+        "target_text": "89%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.5,
+          0.09375,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "-1.7",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00172",
+        "structural_rejected": false,
+        "target_text": "-1.7"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "32.3%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00173",
+        "structural_rejected": false,
+        "target_text": "32.3%"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "50",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00174",
+        "structural_rejected": false,
+        "target_text": "50"
+      },
+      {
+        "component_height_ratios": [
+          0.46875,
+          0.09375,
+          0.46875
+        ],
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00175",
+        "structural_rejected": false,
+        "target_text": "1.1"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "9134",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00176",
+        "structural_rejected": false,
+        "target_text": "9134"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "309.0",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00177",
+        "structural_rejected": false,
+        "target_text": "309.0"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-83",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00178",
+        "structural_rejected": false,
+        "target_text": "-83"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "76%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00179",
+        "structural_rejected": false,
+        "target_text": "76%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.53125,
+          0.125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "-4.3",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00180",
+        "structural_rejected": false,
+        "target_text": "-4.3"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00181",
+        "structural_rejected": false,
+        "target_text": "49.5%"
+      },
+      {
+        "component_height_ratios": [
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "20",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00182",
+        "structural_rejected": false,
+        "target_text": "20"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.09375,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00183",
+        "structural_rejected": false,
+        "target_text": "1.1"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "4644",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00184",
+        "structural_rejected": false,
+        "target_text": "4644"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00185",
+        "structural_rejected": false,
+        "target_text": "233.9"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "-80",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00186",
+        "structural_rejected": false,
+        "target_text": "-80"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "98%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00187",
+        "structural_rejected": false,
+        "target_text": "98%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-33.2",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00188",
+        "structural_rejected": false,
+        "target_text": "-33.2"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00189",
+        "structural_rejected": false,
+        "target_text": "30.1%"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "50",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00190",
+        "structural_rejected": false,
+        "target_text": "50"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "101",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00191",
+        "structural_rejected": false,
+        "target_text": "101"
+      },
+      {
+        "component_height_ratios": [
+          0.53125,
+          0.53125,
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "7721",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00192",
+        "structural_rejected": false,
+        "target_text": "7721"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "74.4",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00193",
+        "structural_rejected": false,
+        "target_text": "74.4"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.53125,
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "-257",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00194",
+        "structural_rejected": false,
+        "target_text": "-257"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "26%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00195",
+        "structural_rejected": false,
+        "target_text": "26%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-7.9",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00196",
+        "structural_rejected": false,
+        "target_text": "-7.9"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "71.4%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00197",
+        "structural_rejected": false,
+        "target_text": "71.4%"
+      },
+      {
+        "component_height_ratios": [
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "0",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00198",
+        "structural_rejected": false,
+        "target_text": "0"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00199",
+        "structural_rejected": false,
+        "target_text": "21"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "1854",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00200",
+        "structural_rejected": false,
+        "target_text": "1854"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00201",
+        "structural_rejected": false,
+        "target_text": "850.7"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.53125,
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "-236",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00202",
+        "structural_rejected": false,
+        "target_text": "-236"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "0%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00203",
+        "structural_rejected": false,
+        "target_text": "0%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-20.7",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00204",
+        "structural_rejected": false,
+        "target_text": "-20.7"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00205",
+        "structural_rejected": false,
+        "target_text": "39.4%"
+      },
+      {
+        "component_height_ratios": [
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00206",
+        "structural_rejected": false,
+        "target_text": "0"
+      },
+      {
+        "component_height_ratios": [
+          0.46875,
+          0.4375,
+          0.46875
+        ],
+        "exclusion_kind": null,
+        "prediction": "101",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00207",
+        "structural_rejected": false,
+        "target_text": "101"
+      },
+      {
+        "component_height_ratios": [
+          0.53125,
+          0.53125,
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "6177",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00208",
+        "structural_rejected": false,
+        "target_text": "6177"
+      },
+      {
+        "component_height_ratios": [
+          0.375,
+          0.375,
+          0.375,
+          0.0625,
+          0.375
+        ],
+        "exclusion_kind": null,
+        "prediction": "734.4",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00209",
+        "structural_rejected": false,
+        "target_text": "734.4"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.53125,
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "-210",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00210",
+        "structural_rejected": false,
+        "target_text": "-210"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "11%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00211",
+        "structural_rejected": false,
+        "target_text": "11%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00212",
+        "structural_rejected": false,
+        "target_text": "-45.1"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "22.8%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00213",
+        "structural_rejected": false,
+        "target_text": "22.8%"
+      },
+      {
+        "component_height_ratios": [
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "20",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00214",
+        "structural_rejected": false,
+        "target_text": "20"
+      },
+      {
+        "component_height_ratios": [
+          0.5625,
+          0.5625
+        ],
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00215",
+        "structural_rejected": false,
+        "target_text": "11"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "5641",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00216",
+        "structural_rejected": false,
+        "target_text": "5641"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "803.1",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00217",
+        "structural_rejected": false,
+        "target_text": "803.1"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "-903",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00218",
+        "structural_rejected": false,
+        "target_text": "-903"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "76%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00219",
+        "structural_rejected": false,
+        "target_text": "76%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-32.7",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00220",
+        "structural_rejected": false,
+        "target_text": "-32.7"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00221",
+        "structural_rejected": false,
+        "target_text": "94.0%"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "50",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00222",
+        "structural_rejected": false,
+        "target_text": "50"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00223",
+        "structural_rejected": false,
+        "target_text": "10"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "9917",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00224",
+        "structural_rejected": false,
+        "target_text": "9917"
+      },
+      {
+        "component_height_ratios": [
+          0.375,
+          0.375,
+          0.375,
+          0.0625,
+          0.375
+        ],
+        "exclusion_kind": null,
+        "prediction": "868.3",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00225",
+        "structural_rejected": false,
+        "target_text": "868.3"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "-285",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00226",
+        "structural_rejected": false,
+        "target_text": "-285"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "72%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00227",
+        "structural_rejected": false,
+        "target_text": "72%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-10.1",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00228",
+        "structural_rejected": false,
+        "target_text": "-10.1"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00229",
+        "structural_rejected": false,
+        "target_text": "21.5%"
+      },
+      {
+        "component_height_ratios": [
+          0.53125,
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00230",
+        "structural_rejected": false,
+        "target_text": "100"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00231",
+        "structural_rejected": false,
+        "target_text": "10"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "2937",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00232",
+        "structural_rejected": false,
+        "target_text": "2937"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00233",
+        "structural_rejected": false,
+        "target_text": "369.2"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-538",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00234",
+        "structural_rejected": false,
+        "target_text": "-538"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "2%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00235",
+        "structural_rejected": false,
+        "target_text": "2%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.4375,
+          0.09375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "-1.2",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00236",
+        "structural_rejected": false,
+        "target_text": "-1.2"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00237",
+        "structural_rejected": false,
+        "target_text": "58.3%"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00238",
+        "structural_rejected": false,
+        "target_text": "10"
+      },
+      {
+        "component_height_ratios": [
+          0.46875
+        ],
+        "exclusion_kind": null,
+        "prediction": "1",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00239",
+        "structural_rejected": false,
+        "target_text": "1"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "9790",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00240",
+        "structural_rejected": false,
+        "target_text": "9790"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00241",
+        "structural_rejected": false,
+        "target_text": "903.5"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "-643",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00242",
+        "structural_rejected": false,
+        "target_text": "-643"
+      },
+      {
+        "component_height_ratios": [
+          0.53125,
+          0.53125,
+          0.53125,
+          0.53125
+        ],
+        "exclusion_kind": null,
+        "prediction": "100%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00243",
+        "structural_rejected": false,
+        "target_text": "100%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "-26.8",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00244",
+        "structural_rejected": false,
+        "target_text": "-26.8"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00245",
+        "structural_rejected": false,
+        "target_text": "24.6%"
+      },
+      {
+        "component_height_ratios": [
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "0",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00246",
+        "structural_rejected": false,
+        "target_text": "0"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.46875
+        ],
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00247",
+        "structural_rejected": false,
+        "target_text": "21"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "1490",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00248",
+        "structural_rejected": false,
+        "target_text": "1490"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "611.0",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00249",
+        "structural_rejected": false,
+        "target_text": "611.0"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "-195",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00250",
+        "structural_rejected": false,
+        "target_text": "-195"
+      },
+      {
+        "component_height_ratios": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "exclusion_kind": null,
+        "prediction": "62%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00251",
+        "structural_rejected": false,
+        "target_text": "62%"
+      },
+      {
+        "component_height_ratios": [
+          0.0625,
+          0.40625,
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-text-00252",
+        "structural_rejected": false,
+        "target_text": "-57.5"
+      },
+      {
+        "component_height_ratios": [
+          0.4375,
+          0.4375,
+          0.09375,
+          0.4375,
+          0.4375
+        ],
+        "exclusion_kind": null,
+        "prediction": "77.7%",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00253",
+        "structural_rejected": false,
+        "target_text": "77.7%"
+      },
+      {
+        "component_height_ratios": [
+          0.40625,
+          0.09375,
+          0.40625
+        ],
+        "exclusion_kind": null,
+        "prediction": "0.0",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00254",
+        "structural_rejected": false,
+        "target_text": "0.0"
+      },
+      {
+        "component_height_ratios": [
+          0.46875,
+          0.09375,
+          0.46875
+        ],
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-geometric-v4-sealed_public-text-00255",
+        "structural_rejected": false,
+        "target_text": "1.1"
+      },
+      {
+        "component_height_ratios": [
+          0.28125
+        ],
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00000",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.34375
+        ],
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00001",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.03125,
+          0.40625,
+          0.03125
+        ],
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00002",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.875
+        ],
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00003",
+        "structural_rejected": true,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00004",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.5
+        ],
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00005",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.71875
+        ],
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00006",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.65625
+        ],
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00007",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00008",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00009",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.34375
+        ],
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00010",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00011",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.875
+        ],
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00012",
+        "structural_rejected": true,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00013",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.5
+        ],
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00014",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.71875
+        ],
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00015",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00016",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00017",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.34375
+        ],
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00018",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.34375
+        ],
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00019",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00020",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.875
+        ],
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00021",
+        "structural_rejected": true,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00022",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.46875
+        ],
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00023",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.71875
+        ],
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00024",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00025",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00026",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.28125
+        ],
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00027",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.34375
+        ],
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00028",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00029",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.875
+        ],
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00030",
+        "structural_rejected": true,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00031",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.5
+        ],
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00032",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.71875
+        ],
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00033",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.65625
+        ],
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00034",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00035",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.46875
+        ],
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00036",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.28125
+        ],
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00037",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00038",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.875
+        ],
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00039",
+        "structural_rejected": true,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.65625
+        ],
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00040",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.46875
+        ],
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00041",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.71875
+        ],
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00042",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.65625
+        ],
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00043",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00044",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.46875
+        ],
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00045",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.34375
+        ],
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00046",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00047",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.875
+        ],
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00048",
+        "structural_rejected": true,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00049",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.03125,
+          0.4375
+        ],
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00050",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.71875
+        ],
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00051",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00052",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00053",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.46875
+        ],
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00054",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.34375
+        ],
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00055",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00056",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.875
+        ],
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00057",
+        "structural_rejected": true,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00058",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.03125,
+          0.46875
+        ],
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00059",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.71875
+        ],
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00060",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00061",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00062",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.28125
+        ],
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00063",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00064",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00065",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.875
+        ],
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00066",
+        "structural_rejected": true,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.65625
+        ],
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00067",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.5
+        ],
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00068",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.71875
+        ],
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00069",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00070",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00071",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.46875
+        ],
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00072",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.46875
+        ],
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00073",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00074",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.875
+        ],
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00075",
+        "structural_rejected": true,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00076",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00077",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.71875
+        ],
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00078",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00079",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00080",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.28125
+        ],
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00081",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.28125
+        ],
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00082",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00083",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.875
+        ],
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00084",
+        "structural_rejected": true,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.65625
+        ],
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00085",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.5
+        ],
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00086",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.71875
+        ],
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00087",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00088",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00089",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00090",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.34375
+        ],
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00091",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00092",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.875
+        ],
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00093",
+        "structural_rejected": true,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00094",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.03125,
+          0.46875
+        ],
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00095",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.71875
+        ],
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00096",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.65625
+        ],
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00097",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00098",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00099",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.46875
+        ],
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00100",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00101",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.875
+        ],
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00102",
+        "structural_rejected": true,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00103",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.46875
+        ],
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00104",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.71875
+        ],
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00105",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.65625,
+          0.65625
+        ],
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00106",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00107",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.28125
+        ],
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00108",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00109",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00110",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.875
+        ],
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00111",
+        "structural_rejected": true,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.65625
+        ],
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00112",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.46875
+        ],
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00113",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.71875
+        ],
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00114",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.65625
+        ],
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00115",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00116",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00117",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00118",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00119",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.875
+        ],
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00120",
+        "structural_rejected": true,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.6875
+        ],
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00121",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.46875
+        ],
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00122",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.71875
+        ],
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00123",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.65625
+        ],
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00124",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00125",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.40625
+        ],
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00126",
+        "structural_rejected": false,
+        "target_text": ""
+      },
+      {
+        "component_height_ratios": [
+          0.28125
+        ],
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-geometric-v4-sealed_public-exclusion-00127",
+        "structural_rejected": false,
+        "target_text": ""
+      }
+    ],
+    "role_accuracy": 0.9192708333333334,
+    "structural_reject_minimum_height_ratio": 0.75,
+    "structural_rejection_count": 14
+  },
+  "private_manifest_sha256": "e40ce059ddda1d3acaf72a620781f6399b5df49961aeef4094d05c86667754d1",
+  "production_approval": false,
+  "provider": "CPUExecutionProvider",
+  "release_eligible": false,
+  "revision": "graph-numeric-component-structural-filter-v1-public-v1",
+  "schema": "graphreader.ocr-component-structural-filter-public-gate.v1",
+  "seal_binding": {
+    "candidate_hash_key_schema": [
+      "source_onnx_sha256",
+      "selection_report_sha256"
+    ],
+    "candidate_hashes": {
+      "selection_report_sha256": "cfbf1d0fa6deef7e5b5d6b8a5a1b044c362fe5ae81cd2f5c06ef16d7869ed8f4",
+      "source_onnx_sha256": "941b19a8f700484a039335d25ecc47f41de1976b3b2016653c6beb2a4eb51894"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "e40ce059ddda1d3acaf72a620781f6399b5df49961aeef4094d05c86667754d1",
+    "evaluator_source_bundle_sha256": "463ba64602bfc94540680c7a9b59cb56ca260d4a48467d269b0203aa06166f68",
+    "evaluator_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/component_geometric_v4/dataset.py",
+      "ml/ocr/component_geometric_v4/p3_dataset.py",
+      "ml/ocr/component_structural_filter_v1/pipeline.py",
+      "ml/ocr/component_structural_filter_v1/protocol.py",
+      "ml/ocr/component_structural_filter_v1/sealed_gate.py"
+    ],
+    "gate_config_sha256": "fc4e061f454db7c64776a67e0919df7bb01c476ebf373874ace1e43f0416bb10",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "graph-numeric-component-structural-filter-v1-public-v1",
+    "split_config_path": "ml/ocr/component_structural_filter_v1/gates/sealed-public-v1.json",
+    "split_config_sha256": "6891ef0502dc37ec7b72d76a4b03195108e64c51ae77e815cdc28be78934ebdc",
+    "task": "ocr-recognition"
+  },
+  "sealed_public_test_seal_sha256": "a7af8c548dbec7df34b6e660da6b87e86daacf1d1a83bf53690f89a74a8dfc7e",
+  "selection_report_path": "ml/ocr/component_structural_filter_v1/artifacts/P1-run/candidate-report.json",
+  "selection_report_sha256": "cfbf1d0fa6deef7e5b5d6b8a5a1b044c362fe5ae81cd2f5c06ef16d7869ed8f4",
+  "source_onnx_path": "ml/ocr/component_geometric_v4/artifacts/P3-run/graph-numeric-component-geometric-v4-p3.onnx",
+  "source_onnx_sha256": "941b19a8f700484a039335d25ecc47f41de1976b3b2016653c6beb2a4eb51894",
+  "status": "fail",
+  "task": "ocr-recognition"
+}

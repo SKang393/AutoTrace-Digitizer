@@ -16,11 +16,17 @@ gate, and canonical budget entry were committed. It used the unchanged OCR V4
 validation split and passed exact match `0.9609375`, CER
 `0.04361370716510903`, role accuracy `0.9739583333333334`, and marker exclusion
 accuracy `1.0`. The rule structurally rejected all 14 validation dividers,
-changed no weights, used zero optimizer steps, and left the inherited public
-archive unopened. The exact selection report and ONNX hashes are now the only
-candidate pair eligible for one separately committed public-gate execution.
+changed no weights, and used zero optimizer steps.
 
-Even a passing public gate cannot approve, manifest, store, package, or release
-the model. Direct detector composition, marker-creation exclusion evidence,
-provider discovery, notices, model-store validation, packaging, and the full
-release audit remain mandatory and fail closed.
+The one authorized public evaluation then opened the inherited 384-case archive
+and failed. Exact match was `0.87890625`, below the required `0.9`, and CER was
+`0.15327695560253699`, above the allowed `0.05`. Role accuracy
+`0.9192708333333334` and marker exclusion accuracy `1.0` passed, but they cannot
+waive either failed text-quality gate. The direct CPU run made 370 inference
+calls and is bound by report SHA-256
+`a8cd15bf2a3228209ff24d7db77b458decd9e060bb5c15e2acfc35ab111363b4`.
+
+The candidate and public-gate budgets are exhausted. The exposed archive cannot
+be rerun, repaired, tuned against, or reused for selection. This revision must
+not be manifested, stored, packaged, approved, or released. A future recognition
+defect class requires a separate preregistration and a new unexposed sealed split.
