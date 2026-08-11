@@ -1,0 +1,47 @@
+{
+  "schema": "graphreader.ocr-combined-v5-detector-diagnostic-protocol.v1",
+  "profile": "graphreader-ocr-combined-v5-detector-diagnostic-v1",
+  "status": "frozen_before_diagnostic_inference",
+  "purpose": "non_approval_detector_defect_characterization",
+  "production_approval": false,
+  "release_eligible": false,
+  "private_data": false,
+  "chandler_used": false,
+  "detector_onnx_sha256": "d4aa24d408cd70b8b9f66cc758e20f397fc31a9c69d8477cf8887fc53bd5fceb",
+  "execution_workflow_sha256": "314771f7b3aced1c2eb6b23d666fbc26b96aa4eb49df269c38d44505acfb5325",
+  "case_count": 72,
+  "renderer": {
+    "family": "offset-lattice-graph-diagnostic-v1",
+    "seed": 20260831,
+    "width": 384,
+    "height": 192,
+    "text_cases": 48,
+    "exclusion_cases": 24
+  },
+  "prior_exposed_splits_forbidden": [
+    {
+      "split_sha256": "1fc3b2e72f89cbfb0d8854ec8701368e7ae764cbd5c6fef17b7e497d06ec9f09",
+      "fixture_archive_sha256": "69eeeff73f4cfd2dd6580ad9538f1a89527f8e5b320ce6a9cd7155d2bd22ea99"
+    },
+    {
+      "split_sha256": "8685b059e48c1a06046d316a504126e47077a7c87c381e2648a9b83e2ce11789",
+      "fixture_archive_sha256": "6bd42b83e17d2fdb162c114cd792cfe21cfe67f2b5f34436daf912138f780b08"
+    }
+  ],
+  "reviewed_source_sha256": {
+    "ml/ocr/combined_component_v5/diagnose_detector.py": "314771f7b3aced1c2eb6b23d666fbc26b96aa4eb49df269c38d44505acfb5325",
+    "ml/ocr/official_bakeoff/structure_consensus_evaluate.py": "65de1c76288c2cd9646386afb941bf641a1a87c5abfec5d76b6cb0f7a818c992",
+    "src/GraphReader.Ocr/LocalOnnxTextRegionDetector.cs": "c17cbd77bc646f7646f2f3f60b2120be735201b79c0b32a48318a30464b0aa38"
+  },
+  "experiment_budget": {
+    "fixture_freezes": 1,
+    "detector_diagnostic_runs": 1,
+    "post_inference_threshold_changes": 0,
+    "promotion_decisions": 0
+  },
+  "failure_policy": {
+    "manifest_created": false,
+    "model_store_promoted": false,
+    "release_gate": "unchanged_and_blocked"
+  }
+}
