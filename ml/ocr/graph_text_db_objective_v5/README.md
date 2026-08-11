@@ -20,9 +20,18 @@ generic labels and graph-like exclusions. They contain no Chandler image,
 `Generalization` label, private or article image, external dataset, downloaded
 training data, pretrained weight, or public-test truth visible to the runner.
 
-P1 has one authorized run after the preregistration commit. It retains 2,880
-optimizer steps, the exact production DB thresholds, CPU execution, ONNX parity
-at `1e-4`, and the all-fixtures-exact selection gate. No threshold sweep or
-public evaluation is authorized. P2 and P3 remain unregistered unless a P1
-failure supports one isolated preregistered change.
+P1 consumed its one authorized run. It passed the probability contract and CPU
+ONNX parity at `1.6392e-6`, but failed selection with only 47 of 136 fixtures
+exact. It produced 95 false regions, including three exclusion false regions,
+and only ten text fixtures were exact. The single checksum-bound visible-split
+diagnostic found 83 centered below-IoU text boxes whose post-unclip dimensions
+were median 1.824 times truth height and 1.237 times truth width. The public
+archive remains unopened.
 
+That diagnosis exposed a bounded omission in P1's isolated change. P1 replaced
+V4's shrink objective but did not retain V4's one-sided constraint inside the
+ignored shrink-to-source boundary. P2 restores only that squared margin at the
+fixed `0.25` ceiling while retaining the dual heads, DB weights, model, frozen
+data, optimizer, seed, 2,880 steps, production thresholds, and unopened public
+archive. P2 is preregistered but must not run until its evidence checkpoint is
+committed. P3 remains unregistered.

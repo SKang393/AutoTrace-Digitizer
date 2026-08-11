@@ -1,0 +1,24 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/graph_text_db_objective_v5/training/p1.json",
+    "candidate_config_sha256": "5d14a4c00ba0d0af251018edfef3d10fe3c30dac2dd1d2f728a6fcc64f31e9bf",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "graph-text-db-objective-v5",
+    "runner_source_bundle_sha256": "e968324a9bc5e7a98ace65f2f9d6b68aa125594d2f2ea41315ffa5b668577d2c",
+    "runner_source_paths": [
+      "ml/ocr/graph_text_db_objective_v5/candidate_runner.py",
+      "ml/ocr/graph_text_db_objective_v5/dataset.py",
+      "ml/ocr/graph_text_db_objective_v5/losses.py",
+      "ml/ocr/graph_text_db_objective_v5/model.py",
+      "ml/ocr/graph_text_db_objective_v5/protocol.py",
+      "ml/ocr/graph_text_db_objective_v5/train_p1.py",
+      "ml/ocr/graph_text_ignore_band_v3/train_p1.py"
+    ],
+    "task": "ocr-detection",
+    "training_budget_ledger_sha256": "1a3138a535324acce78dd00e2cb1044899dafd0355d8c7086c1300691e9f2a33"
+  },
+  "opened_utc": "2026-08-11T12:01:59.205340+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

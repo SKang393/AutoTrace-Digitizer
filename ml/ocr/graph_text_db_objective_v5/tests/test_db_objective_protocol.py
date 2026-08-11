@@ -21,6 +21,7 @@ from ml.ocr.graph_text_db_objective_v5.dataset import (
     training_split_fingerprint,
 )
 from ml.ocr.graph_text_db_objective_v5.losses import db_objective_loss
+from ml.ocr.graph_text_db_objective_v5.losses_p2 import db_objective_loss_with_boundary_margin
 from ml.ocr.graph_text_db_objective_v5.model import DbObjectiveTextRegionNet
 from ml.ocr.graph_text_db_objective_v5.prepare_split import SPLIT_SOURCE_PATHS
 from ml.ocr.graph_text_db_objective_v5.protocol import (
@@ -33,6 +34,7 @@ from ml.ocr.graph_text_db_objective_v5.protocol import (
     protocol_configuration,
 )
 from ml.ocr.graph_text_db_objective_v5.train_p1 import RUNNER_SOURCE_PATHS
+from ml.ocr.graph_text_db_objective_v5.train_p2 import RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -130,6 +132,47 @@ def test_db_loss_is_finite_and_reaches_both_heads() -> None:
     assert model.threshold_head.weight.grad is not None
 
 
+def test_p2_boundary_margin_is_one_sided_and_confined_to_ignored_band() -> None:
+    shrink = torch.full((1, 1, 8, 12), 0.1, dtype=torch.float32)
+    threshold = torch.full_like(shrink, 0.5)
+    binary = torch.sigmoid(50.0 * (shrink - threshold))
+    target = torch.zeros_like(shrink)
+    target[:, :, 3:5, 4:8] = 1.0
+    mask = torch.ones_like(shrink)
+    mask[:, :, 2:6, 3:9] = 0.0
+    mask[target > 0.5] = 1.0
+    threshold_target = torch.full_like(shrink, 0.3)
+    threshold_mask = torch.zeros_like(shrink)
+    threshold_mask[:, :, 1:7, 2:10] = 1.0
+
+    below = db_objective_loss_with_boundary_margin(
+        (shrink, threshold, binary),
+        target,
+        mask,
+        threshold_target,
+        threshold_mask,
+        boundary_probability_ceiling=0.25,
+        boundary_margin_loss_weight=1.0,
+    )
+    changed = shrink.clone()
+    changed[:, :, 2:6, 3:9] = 0.5
+    changed[target > 0.5] = 0.1
+    above = db_objective_loss_with_boundary_margin(
+        (changed, threshold, binary),
+        target,
+        mask,
+        threshold_target,
+        threshold_mask,
+        boundary_probability_ceiling=0.25,
+        boundary_margin_loss_weight=1.0,
+    )
+    assert float(below[4]) == 0.0
+    assert float(above[4]) > 0.0
+    assert torch.equal(below[1], above[1])
+    assert torch.equal(below[2], above[2])
+    assert torch.equal(below[3], above[3])
+
+
 def test_frozen_evidence_and_source_hashes_are_exact() -> None:
     paths = {
         name: REVISION_ROOT / name
@@ -154,15 +197,40 @@ def test_frozen_evidence_and_source_hashes_are_exact() -> None:
     assert seal["public_release_eligible"] is False
 
 
-def test_canonical_budget_authorizes_only_unused_p1_and_keeps_public_closed() -> None:
+def test_p1_result_and_p2_preregistration_are_checksum_bound_and_public_closed() -> None:
+    result_path = REVISION_ROOT / "P1_RESULT.json"
+    preregistration_path = REVISION_ROOT / "P2_PREREGISTRATION.json"
+    config_path = REVISION_ROOT / "training/p2.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    preregistration = json.loads(preregistration_path.read_text(encoding="utf-8"))
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    assert result["status"] == "failed_selection"
+    assert result["selection_metrics"]["exact_fixture_count"] == 47
+    assert result["selection_metrics"]["false_region_count"] == 95
+    assert result["diagnosis"]["diagnostic_runs"] == 1
+    assert result["diagnosis"]["threshold_sweeps"] == 0
+    assert preregistration["p1_result_sha256"] == sha256_file(result_path)
+    assert preregistration["candidate_config_sha256"] == sha256_file(config_path)
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, P2_RUNNER_SOURCE_PATHS)
+    assert config["boundary_probability_ceiling"] == 0.25
+    assert config["boundary_margin_loss_weight"] == 1.0
+    assert preregistration["public_gate_authorized"] is False
+    assert preregistration["sealed_public_archive_opened"] is False
+
+
+def test_canonical_budget_authorizes_only_unused_p2_and_keeps_public_closed() -> None:
     ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["task"] == "ocr-detection" and item["revision"] == REVISION)
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P1", "P2"]
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["p1_selection_exact_fixture_count"] == 47
+    assert entry["p1_diagnostic_runs"] == 1
+    assert entry["p2_boundary_probability_ceiling"] == 0.25
+    assert entry["p2_boundary_margin_loss_weight"] == 1.0
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False

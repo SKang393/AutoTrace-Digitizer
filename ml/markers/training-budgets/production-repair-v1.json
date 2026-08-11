@@ -1285,7 +1285,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-db-objective-v5",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_2_preregistered",
       "defect_class": "a single shrink-probability head trained without a learned threshold map cannot jointly stabilize DB contour continuity and tight region geometry at the frozen production thresholds",
       "prior_revision_reuse": false,
       "prior_revision": "graph-text-stride4-v4",
@@ -1297,18 +1297,22 @@
       "isolated_change": "replace V4's single shrink-probability objective with a dual shrink/threshold head and differentiable binary-map supervision using fixed DB weights 5:10:1 and k=50, while retaining stride-4 inference, 2880 optimizer steps, production DB thresholds, and fail-closed gates on new disjoint procedural families",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
+        "P1",
+        "P2"
+      ],
+      "consumed_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "candidate_config_paths": {
-        "P1": "ml/ocr/graph_text_db_objective_v5/training/p1.json"
+        "P1": "ml/ocr/graph_text_db_objective_v5/training/p1.json",
+        "P2": "ml/ocr/graph_text_db_objective_v5/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "5d14a4c00ba0d0af251018edfef3d10fe3c30dac2dd1d2f728a6fcc64f31e9bf"
+        "P1": "5d14a4c00ba0d0af251018edfef3d10fe3c30dac2dd1d2f728a6fcc64f31e9bf",
+        "P2": "286ebc7448f5e84ed64e513d10b35d731edaa2537036a5a20dc472940c97e833"
       },
       "p1_expected_runner_source_bundle_sha256": "e968324a9bc5e7a98ace65f2f9d6b68aa125594d2f2ea41315ffa5b668577d2c",
       "protocol_path": "ml/ocr/graph_text_db_objective_v5/PROTOCOL.json",
@@ -1329,8 +1333,38 @@
       "p1_shrink_loss_weight": 5.0,
       "p1_threshold_loss_weight": 10.0,
       "p1_binary_loss_weight": 1.0,
+      "p1_result_path": "ml/ocr/graph_text_db_objective_v5/P1_RESULT.json",
+      "p1_result_sha256": "2563fa805effa27df0bf16445628038ec38c936cc564bf78957bec33399d34da",
+      "p1_training_report_path": "ml/ocr/graph_text_db_objective_v5/artifacts/P1-run/candidate-report.json",
+      "p1_training_report_sha256": "21bcd008f62c3b5f223b57768a84bd53356f1c9317bbf0e12e09055a12651d10",
+      "p1_training_opened_seal_sha256": "f0b2aa421a8f219f61fc84b25c7fe2eeabbee1d1b1b745a10f7abe78b28366cc",
+      "p1_training_result_seal_sha256": "10cfc2adad9f74e37f7387cfb67db597167057c66258d609ba3b8155c1caf146",
+      "p1_checkpoint_sha256": "9273eaeeea44c6cf0f8954abee8ca6eb04328889e672ca22811fc1b2e3455eb5",
+      "p1_onnx_sha256": "9119e3031d2dbc16324b15d27acc4f0f8dc44ae658f9b3449cf63bd7aa3bd327",
+      "p1_optimizer_steps": 2880,
+      "p1_selection_fixture_count": 136,
+      "p1_selection_exact_fixture_count": 47,
+      "p1_selection_false_region_count": 95,
+      "p1_selection_exclusion_false_region_count": 3,
+      "p1_selection_duplicate_region_count": 0,
+      "p1_text_missed_fixture_count": 85,
+      "p1_text_multi_region_fixture_count": 8,
+      "p1_onnx_parity_maximum_absolute_error": 0.0000016391277313232422,
+      "p1_probability_contract_passed": true,
+      "p1_selection_gate_passed": false,
+      "p1_diagnosis_path": "ml/ocr/graph_text_db_objective_v5/artifacts/P1-run/selection-diagnosis.json",
+      "p1_diagnosis_sha256": "720c1e3a3559b0f129d9c060a8acb6ba04f7edfc433ef15d252f8fcfa6fed03c",
+      "p1_diagnostic_runs": 1,
+      "p1_threshold_sweeps": 0,
+      "p1_failure": "P1 passed probability and CPU parity but only 47/136 fixtures were exact. The single visible-split diagnosis found 83 centered below-IoU text boxes with median post-unclip height 1.824 and width 1.237 times truth, two no-region text cases with strong activation, and three exclusion false regions.",
+      "p2_preregistration_path": "ml/ocr/graph_text_db_objective_v5/P2_PREREGISTRATION.json",
+      "p2_preregistration_sha256": "71ff7b8ecc8905db2c5b52b3f6889926d2995f2b830b873df10922d1d69af8b6",
+      "p2_expected_runner_source_bundle_sha256": "030f6e5ff2f73b70a641caec50dd849281c6d99f45312eccef652a6cdd224af3",
+      "p2_isolated_change": "restore only V4's one-sided squared margin inside the existing ignored shrink-to-source boundary, requiring exported shrink probability at or below 0.25, while retaining P1's dual shrink/threshold heads, DB weights 5:10:1, model, frozen data, optimizer, seed, 2880 steps, production DB thresholds, and unopened public archive",
+      "p2_boundary_probability_ceiling": 0.25,
+      "p2_boundary_margin_loss_weight": 1.0,
       "execution_authorized": true,
-      "authorized_candidate_id": "P1",
+      "authorized_candidate_id": "P2",
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "production_approval": false,
