@@ -1697,7 +1697,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-normalized-training-v4",
-      "status": "candidate_1_preregistered",
+      "status": "synthetic_gate_passed_production_blocked",
       "defect_class": "the unchanged radial marker-center weights were not trained or calibrated for median-normalized proposal patches",
       "prior_revision": "marker-center-background-invariant-v3",
       "prior_exposed_fixture_bytes_reused": false,
@@ -1705,8 +1705,11 @@
       "preregistered_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
-      "remaining_unregistered_candidate_ids": [
+      "consumed_candidate_ids": [
+        "P1"
+      ],
+      "remaining_unregistered_candidate_ids": [],
+      "retired_unregistered_candidate_ids": [
         "P2",
         "P3"
       ],
@@ -1717,7 +1720,7 @@
         "P1": "8fd0f1d080314f15160350dc14105153813046168d147a7a3d0089ef6bc013f5"
       },
       "protocol_path": "ml/markers/center/normalized_training_v4/PROTOCOL.json",
-      "protocol_sha256": "751610de5f72f87d79f0d00d590d222ea67c0405a4e4491ee4379f9e96b3314a",
+      "protocol_sha256": "0a149ad42e923990c45b7a876852d30225c8b075cd6d149176cb3da72a332f34",
       "selection_manifest_path": "ml/markers/center/normalized_training_v4/SELECTION_MANIFEST.json",
       "selection_manifest_sha256": "de288db53a89c3d31d278ab544011e9bf547e82989d8c3e59669e262ee840af5",
       "selection_scene_count": 46,
@@ -1739,18 +1742,47 @@
       "seed": 20261107,
       "epochs": 80,
       "weights_changed": true,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P1",
-      "public_gate_authorized": true,
+      "p1_result_path": "ml/markers/center/normalized_training_v4/P1_RESULT.json",
+      "p1_result_sha256": "7f203ae5a7182c76a7d5210334695a0742634d97f2d0e9e5bd80a296c00d9ef3",
+      "p1_candidate_report_sha256": "7bdcb834a0b3f51dc748c32d6fb713461b0d213719e2b1768997332e705648e8",
+      "p1_checkpoint_sha256": "3bd3fc6ca70c4983bbdac36e1ad6b51576707e765d14fdcf4d88ad1cc7df7e97",
+      "p1_onnx_sha256": "017fca04fa3817596ce3088d73f51003dd3658bc56ec3130e25c92252e6bf739",
+      "p1_selected_threshold": 0.6,
+      "p1_selection_exact_scene_count": 16,
+      "p1_selection_scene_count": 16,
+      "p1_selection_true_positives": 128,
+      "p1_selection_false_positives": 0,
+      "p1_selection_false_negatives": 0,
+      "p1_selection_duplicate_count": 0,
+      "p1_selection_prohibited_structure_hits": 0,
+      "p1_onnx_parity_maximum_absolute_error": 0.00000146031379699707,
+      "p1_public_gate_report_sha256": "f8c22631103825eb6fb2e09b2e209304951a10d62adefb5a10b2d823667051e1",
+      "p1_public_gate_canonical_seal_key": "10a721892f12295bde836fb6b26e47dc2192be252859c37837def43d66593d87",
+      "p1_public_gate_opened_seal_sha256": "d473c5fa6cd582af468b9a1fe157a76c779fa2ef335f6a6e4077828e18778bf6",
+      "p1_public_gate_result_seal_sha256": "da0f4093be906cd70eb5f72acdf04ed18a53d5461c159800dee490b51de61571",
+      "p1_public_exact_scene_count": 20,
+      "p1_public_scene_count": 20,
+      "p1_public_true_positives": 168,
+      "p1_public_false_positives": 0,
+      "p1_public_false_negatives": 0,
+      "p1_public_duplicate_count": 0,
+      "p1_public_prohibited_structure_hits": 0,
+      "p1_training_opened_seal_sha256": "39c07793081b83480ee19b35fbec5a739cdbc9580abe7436da294b99748879b3",
+      "p1_training_result_seal_sha256": "8099a64ca43bbff760c29a4ad769214ec569dda99b8c3415d5924c2b99d289a1",
+      "p1_failure": null,
+      "p1_production_blocker": "Synthetic selection and public gates pass, but exact C# preprocessing parity, an approved checksum-bound mask provider, production model-store discovery, packaging, private Chandler validation, and clean-machine CPU evidence remain absent.",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": "P1",
-      "public_gate_authorized_on_selection_pass": true,
-      "public_gate_evaluations": 0,
-      "public_gate_archive_opened": false,
+      "public_gate_authorized_on_selection_pass": false,
+      "public_gate_evaluations": 1,
+      "public_gate_archive_opened": true,
       "manifest_created": false,
       "model_store_promoted": false,
       "production_approval": false,
       "release_eligible": false,
-      "refusal_required_before_output": false
+      "refusal_required_before_output": true
     }
   ]
 }

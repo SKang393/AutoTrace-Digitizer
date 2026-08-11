@@ -93,7 +93,7 @@ def test_truth_hidden_public_split_is_bound_and_untracked() -> None:
     assert tracked.stdout.strip() == ""
 
 
-def test_p1_preregistration_binds_code_budget_and_single_public_gate() -> None:
+def test_consumed_p1_binds_code_budget_and_single_public_gate() -> None:
     protocol = load(ROOT / "PROTOCOL.json")
     config_path = ROOT / "training/p1.json"
     config = load(config_path)
@@ -105,10 +105,10 @@ def test_p1_preregistration_binds_code_budget_and_single_public_gate() -> None:
         for item in ledger["revisions"]
         if item["task"] == candidate_runner.TASK and item["revision"] == candidate_runner.REVISION
     )
-    assert protocol["status"] == "candidate_1_preregistered"
+    assert protocol["status"] == "synthetic_gate_passed_production_blocked"
     assert protocol["experiment_budget"] == 3
-    assert protocol["consumed_candidates"] == []
-    assert protocol["currently_preregistered_candidate"] == "P1"
+    assert protocol["consumed_candidates"] == ["P1"]
+    assert protocol["currently_preregistered_candidate"] is None
     assert protocol["production_approval"] is False
     assert protocol["release_eligible"] is False
     assert config["weights_changed"] is True
@@ -120,25 +120,53 @@ def test_p1_preregistration_binds_code_budget_and_single_public_gate() -> None:
     assert prepare_split.RUNNER_SOURCE_PATHS == candidate_runner.RUNNER_SOURCE_PATHS
     assert gate["expected_candidate_hash_keys"] == ["onnx_sha256", "selection_report_sha256"]
     assert gate["expected_gate_config_sha256"] == sha256_bytes(canonical_json_bytes(GATE_CONFIG))
-    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["status"] == "synthetic_gate_passed_production_blocked"
     assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(config_path)
     assert entry["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
-    assert entry["public_gate_authorized_on_selection_pass"] is True
-    assert entry["public_gate_evaluations"] == 0
-    assert entry["public_gate_archive_opened"] is False
+    assert entry["p1_result_sha256"] == sha256_file(ROOT / "P1_RESULT.json")
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["public_gate_authorized_on_selection_pass"] is False
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_archive_opened"] is True
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
 
 
-def test_preregistered_candidate_has_not_executed() -> None:
+def test_consumed_candidate_and_public_gate_evidence_are_exactly_bound() -> None:
     output = REPO_ROOT / "ml/markers/center/artifacts/normalized-training-v4/P1-run"
     seal_root = REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-normalized-training-v4/P1"
-    assert not output.exists()
-    assert not seal_root.exists()
-    assert not (ROOT / "P1_RESULT.json").exists()
+    result = load(ROOT / "P1_RESULT.json")
+    candidate_report = output / "candidate-report.json"
+    public_report = output / "public-gate-report.json"
+    public = load(public_report)
+    gate_root = REPO_ROOT / "ml/markers/gate-seals/marker-center" / result["public_gate_canonical_seal_key"]
+    assert sha256_file(candidate_report) == result["candidate_report_sha256"]
+    assert sha256_file(public_report) == result["public_gate_report_sha256"]
+    assert sha256_file(seal_root / "opened.json") == result["training_opened_seal_sha256"]
+    assert sha256_file(seal_root / "result.json") == result["training_result_seal_sha256"]
+    assert sha256_file(gate_root / "opened.json") == result["public_gate_opened_seal_sha256"]
+    assert sha256_file(gate_root / "result.json") == result["public_gate_result_seal_sha256"]
+    assert result["status"] == "synthetic_gate_passed_production_blocked"
+    assert load(ROOT / "PROTOCOL.json")["result"]["sha256"] == sha256_file(ROOT / "P1_RESULT.json")
+    assert result["selection_exact_scene_count"] == result["selection_scene_count"] == 16
+    assert result["selection_true_positives"] == 128
+    assert result["selection_false_positives"] == 0
+    assert result["selection_false_negatives"] == 0
+    assert result["selection_duplicate_count"] == 0
+    assert result["selection_prohibited_structure_hits"] == 0
+    assert result["onnx_parity_passed"] is True
+    assert result["public_exact_scene_count"] == result["public_scene_count"] == 20
+    assert result["public_true_positives"] == 168
+    assert result["public_false_positives"] == 0
+    assert result["public_false_negatives"] == 0
+    assert result["public_duplicate_count"] == 0
+    assert result["public_prohibited_structure_hits"] == 0
+    assert public["status"] == "pass"
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
+    assert result["rerun_allowed"] is False
     assert '"production_approval": False' in (ROOT / "candidate_runner.py").read_text(encoding="utf-8")
     assert '"release_eligible": False' in (ROOT / "candidate_runner.py").read_text(encoding="utf-8")

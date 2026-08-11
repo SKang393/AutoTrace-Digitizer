@@ -27,3 +27,19 @@ blocked until the exact preprocessing exists with C# parity, a checksum-bound
 approved text and artifact mask provider is composed, the payload passes the
 model-store and packaging contracts, Chandler passes once without tuning, and
 clean-machine CPU evidence is complete.
+
+## Consumed P1 result
+
+P1 ran once from committed source. It trained on 7,310 examples for 80 epochs
+and 4,640 optimizer steps. Threshold `0.6` passed all 16 selection scenes with
+128 of 128 markers, and CPU ONNX parity passed at
+`1.46031379699707e-06`. The single truth-hidden gate then passed all 20 scenes
+with 168 of 168 markers and zero false positives, misses, duplicates, or
+prohibited-structure hits.
+
+The ignored ONNX SHA-256 is
+`017fca04fa3817596ce3088d73f51003dd3658bc56ec3130e25c92252e6bf739`.
+It remains a synthetic-gate candidate only. P1 is consumed and cannot rerun.
+P2 and P3 are retired without execution because the public gate is exposed.
+No manifest, production-model-store promotion, packaging, or production
+approval is permitted from this evidence alone.

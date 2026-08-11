@@ -1,0 +1,36 @@
+{
+  "binding": {
+    "candidate_hash_key_schema": [
+      "onnx_sha256",
+      "selection_report_sha256"
+    ],
+    "candidate_hashes": {
+      "onnx_sha256": "017fca04fa3817596ce3088d73f51003dd3658bc56ec3130e25c92252e6bf739",
+      "selection_report_sha256": "7bdcb834a0b3f51dc748c32d6fb713461b0d213719e2b1768997332e705648e8"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "084816b5ea4e625add62d01b98c0cfc8d44ed147140279b1cee9863f8978c224",
+    "evaluator_source_bundle_sha256": "526dddf71087cb7d839f4a9406c57a840075ceb15f08ef119119f00004869894",
+    "evaluator_source_paths": [
+      "ml/markers/center/background_invariant_v3/pipeline.py",
+      "ml/markers/center/line_aware_v1/pipeline.py",
+      "ml/markers/center/normalized_training_v4/dataset.py",
+      "ml/markers/center/normalized_training_v4/public_gate.py",
+      "ml/markers/center/radial_feature_v1/pipeline_p3.py",
+      "ml/markers/center/runtime_consistency_v2/pipeline_p2.py"
+    ],
+    "gate_config_sha256": "062807624e36fc45f8cea749dc013da601285792413b77f45c102e8d4856d991",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "marker-center-normalized-training-public-v4-p1",
+    "split_config_path": "ml/markers/center/normalized_training_v4/gates/sealed-public-p1.json",
+    "split_config_sha256": "0220229dcbdc64d7105d7d85a5cdfd9ef1c31b6c74ae81a43f7818acff360870",
+    "task": "marker-center"
+  },
+  "evaluation_count": 1,
+  "key": "10a721892f12295bde836fb6b26e47dc2192be252859c37837def43d66593d87",
+  "opened_utc": "2026-08-11T18:09:56.408530+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

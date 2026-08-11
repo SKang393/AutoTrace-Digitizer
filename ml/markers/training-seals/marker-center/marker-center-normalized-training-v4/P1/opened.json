@@ -1,0 +1,28 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/markers/center/normalized_training_v4/training/p1.json",
+    "candidate_config_sha256": "8fd0f1d080314f15160350dc14105153813046168d147a7a3d0089ef6bc013f5",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "marker-center-normalized-training-v4",
+    "runner_source_bundle_sha256": "8d0c238863ae809dd3769f3aa7093fa677911704dd552b15a34ce6a90333085e",
+    "runner_source_paths": [
+      "ml/markers/center/background_invariant_v3/pipeline.py",
+      "ml/markers/center/line_aware_v1/model.py",
+      "ml/markers/center/line_aware_v1/pipeline.py",
+      "ml/markers/center/normalized_training_v4/candidate_runner.py",
+      "ml/markers/center/normalized_training_v4/dataset.py",
+      "ml/markers/center/normalized_training_v4/public_gate.py",
+      "ml/markers/center/radial_feature_v1/model.py",
+      "ml/markers/center/radial_feature_v1/pipeline_p3.py",
+      "ml/markers/center/runtime_consistency_v2/pipeline_p2.py",
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py"
+    ],
+    "task": "marker-center",
+    "training_budget_ledger_sha256": "bc197e334a3856caee4c0b249700cfb224a0ca51de31e931058e7810973f3a98"
+  },
+  "opened_utc": "2026-08-11T18:09:29.045242+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}
