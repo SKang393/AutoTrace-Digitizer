@@ -19,9 +19,10 @@ predecessor fixture bytes are excluded.
 P1 ran exactly once from its committed checksum-bound configuration and runner.
 It passed all 48 validation scenes with 144/144 text regions, zero false
 regions, misses, duplicates, or prohibited-structure hits at threshold `0.65`.
-The exact CPU ONNX parity error was `2.86102294921875e-06`. P1 is consumed and
-the only next authorized action is the once-only sealed public gate. The
-candidate has not evaluated the sealed archive. No production manifest,
-model-store entry, package
-payload, production approval, release eligibility, or version 1.0.1 promotion
-exists.
+The exact CPU ONNX parity error was `2.86102294921875e-06`. P1 then consumed the
+single public evaluation. It retained all 192 truth regions with zero misses or
+duplicates, but seven false regions left only 57/64 scenes exact. The gate
+failed. P1 cannot rerun, and P2/P3 are retired because the public split is now
+exposed and the gate budget is consumed. No production manifest, model-store
+entry, package payload, production approval, release eligibility, or version
+1.0.1 promotion exists.

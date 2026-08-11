@@ -84,25 +84,30 @@ def test_frozen_split_and_gate_hashes_are_directly_bound() -> None:
     assert gate["expected_gate_config_sha256"] == sha256_bytes(canonical_json_bytes(GATE_CONFIG))
 
 
-def test_budget_records_consumed_p1_and_authorizes_only_public_gate() -> None:
+def test_budget_records_consumed_p1_and_failed_public_gate() -> None:
     ledger = json.loads(LEDGER.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["task"] == TASK and item["revision"] == REVISION)
     result_path = ROOT / "P1_RESULT.json"
     result = json.loads(result_path.read_text(encoding="utf-8"))
     output = ROOT / "artifacts/P1-run"
     seal_root = REPO_ROOT / "ml/markers/training-seals/ocr-detection/graph-text-component-region-v6/P1"
-    assert entry["status"] == "candidate_1_selected_public_gate_pending"
+    public_result_path = ROOT / "PUBLIC_GATE_RESULT.json"
+    public_result = json.loads(public_result_path.read_text(encoding="utf-8"))
+    public_report = json.loads((output / "public-gate-report.json").read_text(encoding="utf-8"))
+    gate_seal_root = REPO_ROOT / "ml/markers/gate-seals/ocr-detection" / public_result["canonical_seal_key"]
+    assert entry["status"] == "public_gate_failed_exhausted"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
+    assert entry["retired_unregistered_candidate_ids"] == ["P2", "P3"]
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert entry["public_gate_authorized"] is True
-    assert entry["public_gate_authorized_candidate_id"] == "P1"
-    assert entry["public_gate_authorized_on_selection_pass"] is True
-    assert entry["public_gate_evaluations"] == 0
-    assert entry["public_gate_archive_opened"] is False
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized_candidate_id"] is None
+    assert entry["public_gate_authorized_on_selection_pass"] is False
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_archive_opened"] is True
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(REPO_ROOT / CONFIG_PATH)
     assert entry["candidate_checkpoint_sha256"]["P1"] == result["checkpoint_sha256"]
     assert entry["candidate_onnx_sha256"]["P1"] == result["onnx_sha256"]
@@ -110,13 +115,17 @@ def test_budget_records_consumed_p1_and_authorizes_only_public_gate() -> None:
     assert entry["p1_training_report_sha256"] == sha256_file(output / "candidate-report.json")
     assert entry["p1_training_opened_seal_sha256"] == sha256_file(seal_root / "opened.json")
     assert entry["p1_training_result_seal_sha256"] == sha256_file(seal_root / "result.json")
+    assert entry["public_gate_result_sha256"] == sha256_file(public_result_path)
+    assert entry["public_gate_report_sha256"] == sha256_file(output / "public-gate-report.json")
+    assert entry["public_gate_opened_seal_sha256"] == sha256_file(gate_seal_root / "opened.json")
+    assert entry["public_gate_result_seal_sha256"] == sha256_file(gate_seal_root / "result.json")
     config = json.loads((REPO_ROOT / CONFIG_PATH).read_text(encoding="utf-8"))
     assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
     assert entry["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
     assert entry["selection_manifest_sha256"] == sha256_file(ROOT / "SELECTION_MANIFEST.json")
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert entry["public_gate_config_sha256"] == sha256_file(ROOT / "gates/sealed-public-v1.json")
-    assert result["status"] == "selected_public_gate_pending"
+    assert result["status"] == "public_gate_failed_exhausted"
     assert result["selected_threshold"] == 0.65
     assert result["selection_exact_scene_count"] == result["selection_scene_count"] == 48
     assert result["selection_true_positives"] == 144
@@ -128,7 +137,19 @@ def test_budget_records_consumed_p1_and_authorizes_only_public_gate() -> None:
     assert sha256_file(output / "graph-text-component-region-v6-p1.onnx") == result["onnx_sha256"]
     assert sha256_file(output / "graph-text-component-region-v6-p1.pt") == result["checkpoint_sha256"]
     assert result["sealed_public_archive_opened_by_training"] is False
-    assert result["public_gate_evaluations"] == 0
+    assert result["public_gate_evaluations"] == 1
+    assert result["public_gate_archive_opened"] is True
+    assert result["rerun_allowed"] is False
+    assert result["remaining_candidates_retired"] == ["P2", "P3"]
+    assert public_result["status"] == public_report["status"] == "fail"
+    assert public_result["public_exact_scene_count"] == public_report["metrics"]["exact_scene_count"] == 57
+    assert public_result["public_true_positives"] == public_report["metrics"]["true_positives"] == 192
+    assert public_result["public_false_positives"] == public_report["metrics"]["false_positives"] == 7
+    assert public_result["public_false_negatives"] == public_report["metrics"]["false_negatives"] == 0
+    assert public_result["public_duplicate_region_count"] == 0
+    assert public_result["public_prohibited_structure_hits"] == 7
+    assert public_result["direct_execution_inference_calls"] == 64
+    assert public_result["rerun_allowed"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
     assert result["production_approval"] is False
