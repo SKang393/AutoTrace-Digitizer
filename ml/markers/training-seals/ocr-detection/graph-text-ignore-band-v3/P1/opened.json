@@ -1,0 +1,24 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/graph_text_ignore_band_v3/training/p1.json",
+    "candidate_config_sha256": "29f58aca0d700b93bc7979c3c5f28ba8e7b50decafafdb54c6c2128121437fe1",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "graph-text-ignore-band-v3",
+    "runner_source_bundle_sha256": "1130b496a60d307dd7b9f981f30e50e99ea7f60a399c440ea029529299f96ab4",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/graph_text_ignore_band_v3/dataset.py",
+      "ml/ocr/graph_text_ignore_band_v3/model.py",
+      "ml/ocr/graph_text_ignore_band_v3/protocol.py",
+      "ml/ocr/graph_text_ignore_band_v3/train_p1.py",
+      "ml/ocr/official_bakeoff/structure_consensus_evaluate.py"
+    ],
+    "task": "ocr-detection",
+    "training_budget_ledger_sha256": "2fae59fca8e8eefc7f98a6f8b1167b50c82b161576efd26ede87f598449a9d7a"
+  },
+  "opened_utc": "2026-08-11T08:09:57.902785+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

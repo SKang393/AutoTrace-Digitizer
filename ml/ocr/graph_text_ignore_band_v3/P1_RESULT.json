@@ -1,0 +1,60 @@
+{
+  "candidate_id": "P1",
+  "checkpoint_sha256": "edefc616468ff187f66200ae34bfd38993a005e556289e2599d27bd2e3bc9afc",
+  "elapsed_ms": 390385.054,
+  "onnx_parity_maximum_absolute_error": 7.748603820800781e-06,
+  "onnx_parity_passed": true,
+  "onnx_sha256": "d2c6d664db5f609d8dac6c2ef5503b87e1aba2a2a98d2345d77270f9579952bc",
+  "production_approval": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-ignore-band-v3",
+  "schema": "graphreader.ocr-graph-text-ignore-band-result.v1",
+  "sealed_public_archive_opened": false,
+  "selection_gate_passed": false,
+  "selection_metrics": {
+    "duplicate_region_count": 0,
+    "exact_fixture_count": 8,
+    "exclusion_exact_fixture_count": 8,
+    "exclusion_false_region_count": 36,
+    "false_region_count": 210,
+    "fixture_count": 112,
+    "text_exact_fixture_count": 0,
+    "text_false_region_count": 174,
+    "text_fixture_count": 80,
+    "text_missed_fixture_count": 75,
+    "text_multi_region_fixture_count": 63
+  },
+  "selection_report_path": "ml/ocr/graph_text_ignore_band_v3/artifacts/P1-run/candidate-report.json",
+  "selection_report_sha256": "a277bcf277fe37df88479a7fe33d787d61b22c2efdb6cc043e302182bd89b622",
+  "status": "failed_selection",
+  "structure_diagnosis": {
+    "arrow_crosshatch": {
+      "exact_fixture_count": 7,
+      "false_region_count": 26,
+      "fixture_count": 28,
+      "text_missed_fixture_count": 19
+    },
+    "boxed_square_key": {
+      "exact_fixture_count": 0,
+      "false_region_count": 83,
+      "fixture_count": 28,
+      "text_missed_fixture_count": 18
+    },
+    "double_hook_bracket": {
+      "exact_fixture_count": 0,
+      "false_region_count": 56,
+      "fixture_count": 28,
+      "text_missed_fixture_count": 19
+    },
+    "open_diamond_polyline": {
+      "exact_fixture_count": 1,
+      "false_region_count": 45,
+      "fixture_count": 28,
+      "text_missed_fixture_count": 19
+    }
+  },
+  "task": "ocr-detection",
+  "training_opened_seal_sha256": "b19142cd843b95780fb0e8cfd10390777d28f4b6a73ca356f5b6309e7c24ca34",
+  "training_result_seal_sha256": "4dd0c58505f652298593160c8c344b9aa833f8d1af69e2e01eb0124843031fcd"
+}
