@@ -1,0 +1,4796 @@
+{
+  "canonical_seal_key": "3d2c5ee1761c1c19a5956ab771077b8a8f4ae1a225050ea4669caa2438fc8526",
+  "direct_execution": {
+    "inference_calls": 654,
+    "input_tensor_stream_sha256": "41c40f742841c9ce695e57b44c973b346d7fdc4114e37268ebeb0c8a1061e5c1",
+    "output_tensor_stream_sha256": "602931efd922910fc051ec6f4afcc3c41e6141dbfeb029c9493fdb909e527150"
+  },
+  "elapsed_ms": 1034.327,
+  "evaluation_count": 1,
+  "fixture_archive_sha256": "3c54da8a410d5aba45bfa131d7a35c8b6d394270c9699212d2159a110865a240",
+  "gate_requirements": {
+    "allowed_confidence_thresholds": [
+      0.35,
+      0.45,
+      0.55,
+      0.65
+    ],
+    "marker_exclusion_accuracy_minimum": 1.0,
+    "provider": "CPUExecutionProvider",
+    "sealed_cer_maximum": 0.05,
+    "sealed_exact_match_minimum": 0.9,
+    "sealed_role_accuracy_minimum": 0.9,
+    "structural_operator": ">=",
+    "structural_position": "before_classifier",
+    "structural_reject_minimum_height_ratio": 0.75
+  },
+  "metrics": {
+    "case_exact_match": {
+      "decimal": 1.0,
+      "decimal_percentage": 0.96875,
+      "integer": 1.0,
+      "l_one_ambiguity": 1.0,
+      "negative": 1.0,
+      "negative_decimal": 0.984375,
+      "o_zero_ambiguity": 1.0,
+      "percentage": 1.0
+    },
+    "character_error_rate": 0.005759162303664921,
+    "exact_match": 0.994140625,
+    "exclusion_count": 160,
+    "marker_exclusion_accuracy": 1.0,
+    "positive_count": 512,
+    "predictions": [
+      {
+        "exclusion_kind": null,
+        "prediction": "4382",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00000",
+        "target_text": "4382"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "70.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00001",
+        "target_text": "70.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-721",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00002",
+        "target_text": "-721"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "58%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00003",
+        "target_text": "58%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-20.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00004",
+        "target_text": "-20.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "36.8%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00005",
+        "target_text": "36.8%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00006",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00007",
+        "target_text": "1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "4028",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00008",
+        "target_text": "4028"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "25.3",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00009",
+        "target_text": "25.3"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-208",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00010",
+        "target_text": "-208"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "54%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00011",
+        "target_text": "54%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-64.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00012",
+        "target_text": "-64.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "69.7%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00013",
+        "target_text": "69.7%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00014",
+        "target_text": "100"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00015",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "9881",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00016",
+        "target_text": "9881"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "906.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00017",
+        "target_text": "906.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-382",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00018",
+        "target_text": "-382"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "39%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00019",
+        "target_text": "39%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-74.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00020",
+        "target_text": "-74.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "26.5%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00021",
+        "target_text": "26.5%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00022",
+        "target_text": "0.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00023",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "2243",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00024",
+        "target_text": "2243"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "71.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00025",
+        "target_text": "71.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-858",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00026",
+        "target_text": "-858"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "50%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00027",
+        "target_text": "50%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-90.7",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00028",
+        "target_text": "-90.7"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "87.8%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00029",
+        "target_text": "87.8%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00030",
+        "target_text": "100"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00031",
+        "target_text": "11"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "7392",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00032",
+        "target_text": "7392"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "817.4",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00033",
+        "target_text": "817.4"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-112",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00034",
+        "target_text": "-112"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00035",
+        "target_text": "11%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-30.4",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00036",
+        "target_text": "-30.4"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "46.6%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00037",
+        "target_text": "46.6%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00038",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00039",
+        "target_text": "11"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "5171",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00040",
+        "target_text": "5171"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "706.3",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00041",
+        "target_text": "706.3"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00042",
+        "target_text": "-0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "15%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00043",
+        "target_text": "15%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-80.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00044",
+        "target_text": "-80.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "78.2%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00045",
+        "target_text": "78.2%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00046",
+        "target_text": "100"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00047",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "8684",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00048",
+        "target_text": "8684"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "470.3",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00049",
+        "target_text": "470.3"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-363",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00050",
+        "target_text": "-363"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "18%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00051",
+        "target_text": "18%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-56.4",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00052",
+        "target_text": "-56.4"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "50.5%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00053",
+        "target_text": "50.5%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00054",
+        "target_text": "0.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "101",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00055",
+        "target_text": "101"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "7942",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00056",
+        "target_text": "7942"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "933.6",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00057",
+        "target_text": "933.6"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-702",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00058",
+        "target_text": "-702"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "37%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00059",
+        "target_text": "37%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-5.5",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00060",
+        "target_text": "-5.5"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "45.1%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00061",
+        "target_text": "45.1%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "20",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00062",
+        "target_text": "20"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00063",
+        "target_text": "1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "8238",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00064",
+        "target_text": "8238"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "971.3",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00065",
+        "target_text": "971.3"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-942",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00066",
+        "target_text": "-942"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "49%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00067",
+        "target_text": "49%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-69.3",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00068",
+        "target_text": "-69.3"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100.6%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00069",
+        "target_text": "100.6%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00070",
+        "target_text": "100"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00071",
+        "target_text": "1.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "4282",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00072",
+        "target_text": "4282"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "704.2",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00073",
+        "target_text": "704.2"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-800",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00074",
+        "target_text": "-800"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "36%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00075",
+        "target_text": "36%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-2.6",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00076",
+        "target_text": "-2.6"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "84.4%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00077",
+        "target_text": "84.4%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00078",
+        "target_text": "0.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00079",
+        "target_text": "1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "7080",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00080",
+        "target_text": "7080"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "473.7",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00081",
+        "target_text": "473.7"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-848",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00082",
+        "target_text": "-848"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "62%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00083",
+        "target_text": "62%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-63.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00084",
+        "target_text": "-63.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "99.1%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00085",
+        "target_text": "99.1%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00086",
+        "target_text": "100"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "101",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00087",
+        "target_text": "101"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "6695",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00088",
+        "target_text": "6695"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "684.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00089",
+        "target_text": "684.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-926",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00090",
+        "target_text": "-926"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "5%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00091",
+        "target_text": "5%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-28.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00092",
+        "target_text": "-28.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "57.5%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00093",
+        "target_text": "57.5%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00094",
+        "target_text": "100"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00095",
+        "target_text": "1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "3323",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00096",
+        "target_text": "3323"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "638.3",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00097",
+        "target_text": "638.3"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-288",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00098",
+        "target_text": "-288"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "29%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00099",
+        "target_text": "29%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-95.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00100",
+        "target_text": "-95.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "44.0%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00101",
+        "target_text": "44.0%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "50",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00102",
+        "target_text": "50"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00103",
+        "target_text": "11"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "6415",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00104",
+        "target_text": "6415"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "300.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00105",
+        "target_text": "300.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-618",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00106",
+        "target_text": "-618"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "36%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00107",
+        "target_text": "36%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-86.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00108",
+        "target_text": "-86.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "67.7%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00109",
+        "target_text": "67.7%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00110",
+        "target_text": "0.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00111",
+        "target_text": "11"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1336",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00112",
+        "target_text": "1336"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "731.5",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00113",
+        "target_text": "731.5"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-199",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00114",
+        "target_text": "-199"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "68%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00115",
+        "target_text": "68%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-37.5",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00116",
+        "target_text": "-37.5"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "53.6%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00117",
+        "target_text": "53.6%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "20",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00118",
+        "target_text": "20"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00119",
+        "target_text": "1.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "6504",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00120",
+        "target_text": "6504"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "118.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00121",
+        "target_text": "118.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-89",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00122",
+        "target_text": "-89"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "66%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00123",
+        "target_text": "66%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-51.4",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00124",
+        "target_text": "-51.4"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "23.5%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00125",
+        "target_text": "23.5%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00126",
+        "target_text": "100"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00127",
+        "target_text": "1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "7350",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00128",
+        "target_text": "7350"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "416.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00129",
+        "target_text": "416.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-855",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00130",
+        "target_text": "-855"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "99%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00131",
+        "target_text": "99%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-15.4",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00132",
+        "target_text": "-15.4"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "18.1%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00133",
+        "target_text": "18.1%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00134",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00135",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "6302",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00136",
+        "target_text": "6302"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "110.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00137",
+        "target_text": "110.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-69",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00138",
+        "target_text": "-69"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "87%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00139",
+        "target_text": "87%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-99.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00140",
+        "target_text": "-99.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "44.7%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00141",
+        "target_text": "44.7%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00142",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00143",
+        "target_text": "11"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1265",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00144",
+        "target_text": "1265"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "12.7",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00145",
+        "target_text": "12.7"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-583",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00146",
+        "target_text": "-583"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "61%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00147",
+        "target_text": "61%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-90.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00148",
+        "target_text": "-90.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "42.2%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00149",
+        "target_text": "42.2%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00150",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00151",
+        "target_text": "11"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "4875",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00152",
+        "target_text": "4875"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "386.2",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00153",
+        "target_text": "386.2"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-124",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00154",
+        "target_text": "-124"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "57%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00155",
+        "target_text": "57%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-75.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00156",
+        "target_text": "-75.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "51.2%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00157",
+        "target_text": "51.2%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00158",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00159",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "5011",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00160",
+        "target_text": "5011"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "515.7",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00161",
+        "target_text": "515.7"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-982",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00162",
+        "target_text": "-982"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00163",
+        "target_text": "21%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-28.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00164",
+        "target_text": "-28.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "27.7%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00165",
+        "target_text": "27.7%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "20",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00166",
+        "target_text": "20"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "101",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00167",
+        "target_text": "101"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "3572",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00168",
+        "target_text": "3572"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "28.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00169",
+        "target_text": "28.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-723",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00170",
+        "target_text": "-723"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "34%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00171",
+        "target_text": "34%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-38.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00172",
+        "target_text": "-38.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "41.0%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00173",
+        "target_text": "41.0%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "20",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00174",
+        "target_text": "20"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00175",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "4396",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00176",
+        "target_text": "4396"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "305.6",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00177",
+        "target_text": "305.6"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-260",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00178",
+        "target_text": "-260"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "69%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00179",
+        "target_text": "69%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-55.6",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00180",
+        "target_text": "-55.6"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "40.3%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00181",
+        "target_text": "40.3%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00182",
+        "target_text": "0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00183",
+        "target_text": "11"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "3637",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00184",
+        "target_text": "3637"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "874.5",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00185",
+        "target_text": "874.5"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-552",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00186",
+        "target_text": "-552"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "17%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00187",
+        "target_text": "17%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-19.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00188",
+        "target_text": "-19.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "72.8%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00189",
+        "target_text": "72.8%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00190",
+        "target_text": "0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00191",
+        "target_text": "1.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "4108",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00192",
+        "target_text": "4108"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "886.3",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00193",
+        "target_text": "886.3"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-357",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00194",
+        "target_text": "-357"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "79%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00195",
+        "target_text": "79%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-88.3",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00196",
+        "target_text": "-88.3"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "12.3%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00197",
+        "target_text": "12.3%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00198",
+        "target_text": "0.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "101",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00199",
+        "target_text": "101"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "9623",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00200",
+        "target_text": "9623"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "512.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00201",
+        "target_text": "512.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00202",
+        "target_text": "-0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "13%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00203",
+        "target_text": "13%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-94.5",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00204",
+        "target_text": "-94.5"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10.6%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00205",
+        "target_text": "10.6%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00206",
+        "target_text": "0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00207",
+        "target_text": "1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "7725",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00208",
+        "target_text": "7725"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "942.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00209",
+        "target_text": "942.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-74",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00210",
+        "target_text": "-74"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "74%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00211",
+        "target_text": "74%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-54.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00212",
+        "target_text": "-54.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "49.8%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00213",
+        "target_text": "49.8%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00214",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00215",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "9769",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00216",
+        "target_text": "9769"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "53.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00217",
+        "target_text": "53.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-782",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00218",
+        "target_text": "-782"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00219",
+        "target_text": "11%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-6.6",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00220",
+        "target_text": "-6.6"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10.9%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00221",
+        "target_text": "10.9%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00222",
+        "target_text": "0.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00223",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1500",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00224",
+        "target_text": "1500"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "412.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00225",
+        "target_text": "412.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-830",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00226",
+        "target_text": "-830"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "22%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00227",
+        "target_text": "22%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-23.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00228",
+        "target_text": "-23.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "26.6%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00229",
+        "target_text": "26.6%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00230",
+        "target_text": "0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00231",
+        "target_text": "11"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "3404",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00232",
+        "target_text": "3404"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "465.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00233",
+        "target_text": "465.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-533",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00234",
+        "target_text": "-533"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "6%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00235",
+        "target_text": "6%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-96.2",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00236",
+        "target_text": "-96.2"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "83.2%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00237",
+        "target_text": "83.2%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00238",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00239",
+        "target_text": "1.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "982",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00240",
+        "target_text": "982"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "43.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00241",
+        "target_text": "43.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-338",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00242",
+        "target_text": "-338"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "22%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00243",
+        "target_text": "22%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-46.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00244",
+        "target_text": "-46.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "53.7%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00245",
+        "target_text": "53.7%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00246",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00247",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "8768",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00248",
+        "target_text": "8768"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "646.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00249",
+        "target_text": "646.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-624",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00250",
+        "target_text": "-624"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "12%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00251",
+        "target_text": "12%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-0.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00252",
+        "target_text": "-0.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "84.0%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00253",
+        "target_text": "84.0%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00254",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00255",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "3501",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00256",
+        "target_text": "3501"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "251.5",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00257",
+        "target_text": "251.5"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-91",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00258",
+        "target_text": "-91"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "90%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00259",
+        "target_text": "90%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-42.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00260",
+        "target_text": "-42.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "83.1%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00261",
+        "target_text": "83.1%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00262",
+        "target_text": "100"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00263",
+        "target_text": "11"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "7139",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00264",
+        "target_text": "7139"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "162.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00265",
+        "target_text": "162.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-502",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00266",
+        "target_text": "-502"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "13%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00267",
+        "target_text": "13%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-22.4",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00268",
+        "target_text": "-22.4"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "79.2%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00269",
+        "target_text": "79.2%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00270",
+        "target_text": "100"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00271",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "4353",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00272",
+        "target_text": "4353"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "15.6",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00273",
+        "target_text": "15.6"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-303",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00274",
+        "target_text": "-303"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "34%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00275",
+        "target_text": "34%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-66.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00276",
+        "target_text": "-66.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "89.8%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00277",
+        "target_text": "89.8%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00278",
+        "target_text": "100"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "101",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00279",
+        "target_text": "101"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "454",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00280",
+        "target_text": "454"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "175.7",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00281",
+        "target_text": "175.7"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-297",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00282",
+        "target_text": "-297"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "93%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00283",
+        "target_text": "93%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-42.4",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00284",
+        "target_text": "-42.4"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100.2%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00285",
+        "target_text": "100.2%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00286",
+        "target_text": "100"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "101",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00287",
+        "target_text": "101"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "5770",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00288",
+        "target_text": "5770"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "792.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00289",
+        "target_text": "792.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-190",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00290",
+        "target_text": "-190"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "70%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00291",
+        "target_text": "70%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-23.4",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00292",
+        "target_text": "-23.4"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1.4%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00293",
+        "target_text": "1.4%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00294",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00295",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "7632",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00296",
+        "target_text": "7632"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "434.3",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00297",
+        "target_text": "434.3"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-641",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00298",
+        "target_text": "-641"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "90%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00299",
+        "target_text": "90%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-88.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00300",
+        "target_text": "-88.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "14.7%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00301",
+        "target_text": "14.7%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00302",
+        "target_text": "100"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00303",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "3434",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00304",
+        "target_text": "3434"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "803.5",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00305",
+        "target_text": "803.5"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-294",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00306",
+        "target_text": "-294"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "81%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00307",
+        "target_text": "81%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-60.6",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00308",
+        "target_text": "-60.6"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "51.6%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00309",
+        "target_text": "51.6%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00310",
+        "target_text": "0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00311",
+        "target_text": "1.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "9660",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00312",
+        "target_text": "9660"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "913.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00313",
+        "target_text": "913.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-585",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00314",
+        "target_text": "-585"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "67%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00315",
+        "target_text": "67%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-44.4",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00316",
+        "target_text": "-44.4"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "59.2%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00317",
+        "target_text": "59.2%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "50",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00318",
+        "target_text": "50"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00319",
+        "target_text": "11"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "8468",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00320",
+        "target_text": "8468"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "889.2",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00321",
+        "target_text": "889.2"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-480",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00322",
+        "target_text": "-480"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "30%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00323",
+        "target_text": "30%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-26.4",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00324",
+        "target_text": "-26.4"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "34.5%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00325",
+        "target_text": "34.5%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "20",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00326",
+        "target_text": "20"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00327",
+        "target_text": "1.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "7707",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00328",
+        "target_text": "7707"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "402.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00329",
+        "target_text": "402.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-732",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00330",
+        "target_text": "-732"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00331",
+        "target_text": "100%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-73.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00332",
+        "target_text": "-73.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "37.6%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00333",
+        "target_text": "37.6%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00334",
+        "target_text": "0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00335",
+        "target_text": "1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "8374",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00336",
+        "target_text": "8374"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "311.2",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00337",
+        "target_text": "311.2"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-690",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00338",
+        "target_text": "-690"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "63%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00339",
+        "target_text": "63%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-55.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00340",
+        "target_text": "-55.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "93.7%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00341",
+        "target_text": "93.7%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00342",
+        "target_text": "0.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00343",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1679",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00344",
+        "target_text": "1679"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "791.4",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00345",
+        "target_text": "791.4"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-492",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00346",
+        "target_text": "-492"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "86%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00347",
+        "target_text": "86%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-28.7",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00348",
+        "target_text": "-28.7"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "27.3%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00349",
+        "target_text": "27.3%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00350",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00351",
+        "target_text": "1.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "4204",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00352",
+        "target_text": "4204"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "238.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00353",
+        "target_text": "238.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-886",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00354",
+        "target_text": "-886"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "54%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00355",
+        "target_text": "54%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-84.2",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00356",
+        "target_text": "-84.2"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "87.0%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00357",
+        "target_text": "87.0%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00358",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00359",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "6105",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00360",
+        "target_text": "6105"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "665.3",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00361",
+        "target_text": "665.3"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-816",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00362",
+        "target_text": "-816"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "90%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00363",
+        "target_text": "90%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-14.5",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00364",
+        "target_text": "-14.5"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "98.6%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00365",
+        "target_text": "98.6%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "50",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00366",
+        "target_text": "50"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00367",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "4020",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00368",
+        "target_text": "4020"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "337.3",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00369",
+        "target_text": "337.3"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-320",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00370",
+        "target_text": "-320"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "17%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00371",
+        "target_text": "17%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-43.6",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00372",
+        "target_text": "-43.6"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "41.6%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00373",
+        "target_text": "41.6%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00374",
+        "target_text": "0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00375",
+        "target_text": "1.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "2617",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00376",
+        "target_text": "2617"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "702.7",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00377",
+        "target_text": "702.7"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-533",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00378",
+        "target_text": "-533"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "80%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00379",
+        "target_text": "80%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-8.5",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00380",
+        "target_text": "-8.5"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "64.8%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00381",
+        "target_text": "64.8%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "50",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00382",
+        "target_text": "50"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00383",
+        "target_text": "1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "5048",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00384",
+        "target_text": "5048"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "874.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00385",
+        "target_text": "874.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-155",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00386",
+        "target_text": "-155"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "45%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00387",
+        "target_text": "45%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-57.7",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00388",
+        "target_text": "-57.7"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "14.7%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00389",
+        "target_text": "14.7%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "50",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00390",
+        "target_text": "50"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00391",
+        "target_text": "11"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "7126",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00392",
+        "target_text": "7126"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "794.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00393",
+        "target_text": "794.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-530",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00394",
+        "target_text": "-530"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "80%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00395",
+        "target_text": "80%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-5.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00396",
+        "target_text": "-5.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00397",
+        "target_text": "67.4%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00398",
+        "target_text": "100"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00399",
+        "target_text": "1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "4603",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00400",
+        "target_text": "4603"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "860.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00401",
+        "target_text": "860.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-121",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00402",
+        "target_text": "-121"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "68%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00403",
+        "target_text": "68%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-99.7",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00404",
+        "target_text": "-99.7"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "53.8%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00405",
+        "target_text": "53.8%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00406",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00407",
+        "target_text": "11"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1173",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00408",
+        "target_text": "1173"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "215.2",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00409",
+        "target_text": "215.2"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-12",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00410",
+        "target_text": "-12"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "70%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00411",
+        "target_text": "70%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-40.6",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00412",
+        "target_text": "-40.6"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "95.6%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00413",
+        "target_text": "95.6%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00414",
+        "target_text": "0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00415",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "2094",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00416",
+        "target_text": "2094"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "604.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00417",
+        "target_text": "604.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-710",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00418",
+        "target_text": "-710"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "42%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00419",
+        "target_text": "42%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-17.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00420",
+        "target_text": "-17.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "30.5%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00421",
+        "target_text": "30.5%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00422",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00423",
+        "target_text": "1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "6740",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00424",
+        "target_text": "6740"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "474.5",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00425",
+        "target_text": "474.5"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-644",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00426",
+        "target_text": "-644"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "15%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00427",
+        "target_text": "15%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-16.5",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00428",
+        "target_text": "-16.5"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "38.6%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00429",
+        "target_text": "38.6%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "20",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00430",
+        "target_text": "20"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00431",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "4740",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00432",
+        "target_text": "4740"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "967.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00433",
+        "target_text": "967.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-540",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00434",
+        "target_text": "-540"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "91%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00435",
+        "target_text": "91%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00436",
+        "target_text": "-31.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "57.6%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00437",
+        "target_text": "57.6%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "20",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00438",
+        "target_text": "20"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00439",
+        "target_text": "1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "2695",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00440",
+        "target_text": "2695"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "469.7",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00441",
+        "target_text": "469.7"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-429",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00442",
+        "target_text": "-429"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "85%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00443",
+        "target_text": "85%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-96.2",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00444",
+        "target_text": "-96.2"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "82.8%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00445",
+        "target_text": "82.8%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00446",
+        "target_text": "100"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00447",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "144",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00448",
+        "target_text": "144"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "686.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00449",
+        "target_text": "686.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-664",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00450",
+        "target_text": "-664"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "47%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00451",
+        "target_text": "47%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-12.7",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00452",
+        "target_text": "-12.7"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "43.1%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00453",
+        "target_text": "43.1%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "100",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00454",
+        "target_text": "100"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00455",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "5065",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00456",
+        "target_text": "5065"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "303.7",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00457",
+        "target_text": "303.7"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-750",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00458",
+        "target_text": "-750"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "45%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00459",
+        "target_text": "45%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-33.5",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00460",
+        "target_text": "-33.5"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "34.7%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00461",
+        "target_text": "34.7%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "20",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00462",
+        "target_text": "20"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00463",
+        "target_text": "1.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "3247",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00464",
+        "target_text": "3247"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "192.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00465",
+        "target_text": "192.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-754",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00466",
+        "target_text": "-754"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "93%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00467",
+        "target_text": "93%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-37.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00468",
+        "target_text": "-37.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "268%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00469",
+        "target_text": "26.8%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "50",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00470",
+        "target_text": "50"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "1.1",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00471",
+        "target_text": "1.1"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "9089",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00472",
+        "target_text": "9089"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "941.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00473",
+        "target_text": "941.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-188",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00474",
+        "target_text": "-188"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "48%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00475",
+        "target_text": "48%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-24.5",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00476",
+        "target_text": "-24.5"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "8.3%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00477",
+        "target_text": "8.3%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "0.0",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00478",
+        "target_text": "0.0"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00479",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "7311",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00480",
+        "target_text": "7311"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "909.7",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00481",
+        "target_text": "909.7"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-573",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00482",
+        "target_text": "-573"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "55%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00483",
+        "target_text": "55%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-69.6",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00484",
+        "target_text": "-69.6"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "7.4%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00485",
+        "target_text": "7.4%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "50",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00486",
+        "target_text": "50"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00487",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "3473",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00488",
+        "target_text": "3473"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "119.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00489",
+        "target_text": "119.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-225",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00490",
+        "target_text": "-225"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "81%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00491",
+        "target_text": "81%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-7.7",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00492",
+        "target_text": "-7.7"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "9.2%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00493",
+        "target_text": "9.2%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "50",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00494",
+        "target_text": "50"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00495",
+        "target_text": "11"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "2582",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00496",
+        "target_text": "2582"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "793.9",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00497",
+        "target_text": "793.9"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-465",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00498",
+        "target_text": "-465"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "48%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00499",
+        "target_text": "48%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-85.6",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00500",
+        "target_text": "-85.6"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "54.5%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00501",
+        "target_text": "54.5%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "10",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00502",
+        "target_text": "10"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "21",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00503",
+        "target_text": "21"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "5769",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00504",
+        "target_text": "5769"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "745.8",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00505",
+        "target_text": "745.8"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-154",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00506",
+        "target_text": "-154"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "16%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00507",
+        "target_text": "16%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "-56.5",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00508",
+        "target_text": "-56.5"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "79.1%",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00509",
+        "target_text": "79.1%"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "50",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00510",
+        "target_text": "50"
+      },
+      {
+        "exclusion_kind": null,
+        "prediction": "11",
+        "role": "numeric_text",
+        "sample_id": "component-ensemble-v5-sealed_public-text-00511",
+        "target_text": "11"
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00000",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00001",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00002",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00003",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00004",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00005",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00006",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00007",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00008",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00009",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00010",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00011",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00012",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00013",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00014",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00015",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00016",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00017",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00018",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00019",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00020",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00021",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00022",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00023",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00024",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00025",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00026",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00027",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00028",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00029",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00030",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00031",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00032",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00033",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00034",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00035",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00036",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00037",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00038",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00039",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00040",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00041",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00042",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00043",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00044",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00045",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00046",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00047",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00048",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00049",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00050",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00051",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00052",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00053",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00054",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00055",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00056",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00057",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00058",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00059",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00060",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00061",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00062",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00063",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00064",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00065",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00066",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00067",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00068",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00069",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00070",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00071",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00072",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00073",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00074",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00075",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00076",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00077",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00078",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00079",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00080",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00081",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00082",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00083",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00084",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00085",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00086",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00087",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00088",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00089",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00090",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00091",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00092",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00093",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00094",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00095",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00096",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00097",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00098",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00099",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00100",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00101",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00102",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00103",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00104",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00105",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00106",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00107",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00108",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00109",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00110",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00111",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00112",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00113",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00114",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00115",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00116",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00117",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00118",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00119",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00120",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00121",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00122",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00123",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00124",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00125",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00126",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00127",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00128",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00129",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00130",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00131",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00132",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00133",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00134",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00135",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00136",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00137",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00138",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00139",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00140",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00141",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00142",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00143",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00144",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00145",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00146",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00147",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00148",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00149",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00150",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "line_intersection",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00151",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_square",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00152",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "filled_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00153",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "open_circle",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00154",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "axis_or_tick",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00155",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "divider",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00156",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "bracket",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00157",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "arrow",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00158",
+        "target_text": ""
+      },
+      {
+        "exclusion_kind": "legend_box",
+        "prediction": "",
+        "role": "non_numeric",
+        "sample_id": "component-ensemble-v5-sealed_public-exclusion-00159",
+        "target_text": ""
+      }
+    ],
+    "role_accuracy": 0.9970238095238095,
+    "threshold": 0.65
+  },
+  "onnx_path": "ml/ocr/component_ensemble_v5/artifacts/P1-run/graph-numeric-component-ensemble-v5-p1.onnx",
+  "onnx_sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+  "private_manifest_sha256": "995a76d521bd3210c0c1f07e17fea23a380663a568684de06ffd6d652a3a080d",
+  "production_approval": false,
+  "provider": "CPUExecutionProvider",
+  "release_eligible": false,
+  "revision": "graph-numeric-component-ensemble-v5-public-v1",
+  "schema": "graphreader.ocr-component-ensemble-public-gate.v1",
+  "seal_binding": {
+    "candidate_hash_key_schema": [
+      "onnx_sha256",
+      "selection_report_sha256"
+    ],
+    "candidate_hashes": {
+      "onnx_sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+      "selection_report_sha256": "e5095b63221b7a745e48ead61011a7794e5da54e0fc24fd641d785bc09257260"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "995a76d521bd3210c0c1f07e17fea23a380663a568684de06ffd6d652a3a080d",
+    "evaluator_source_bundle_sha256": "db8e81462fd1c617fd98a459a173a8ae560f991a0a01995e79f8eed0e6a082a9",
+    "evaluator_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/component_ensemble_v5/dataset.py",
+      "ml/ocr/component_ensemble_v5/pipeline.py",
+      "ml/ocr/component_ensemble_v5/protocol.py",
+      "ml/ocr/component_ensemble_v5/sealed_gate.py",
+      "ml/ocr/component_geometric_v4/dataset.py"
+    ],
+    "gate_config_sha256": "7414ce58ae65e678d64bbe9514e630ca33ec74e6ed60a174157d1cfae8d9c3b5",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "graph-numeric-component-ensemble-v5-public-v1",
+    "split_config_path": "ml/ocr/component_ensemble_v5/gates/sealed-public-v1.json",
+    "split_config_sha256": "ec199c47225f372c352fbb898c3f67442a6ec4cb6d1e27c29e5d27df1f639521",
+    "task": "ocr-recognition"
+  },
+  "sealed_public_test_seal_sha256": "e0fecab50109e3716e7a7d37e7accc75d0248e78bb7c94a913b7db0c1d0e9f3f",
+  "selected_threshold": 0.65,
+  "selection_report_path": "ml/ocr/component_ensemble_v5/artifacts/P1-run/candidate-report.json",
+  "selection_report_sha256": "e5095b63221b7a745e48ead61011a7794e5da54e0fc24fd641d785bc09257260",
+  "status": "pass",
+  "task": "ocr-recognition"
+}
