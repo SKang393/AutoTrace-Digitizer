@@ -1,6 +1,22 @@
 {
   "candidate_id": "P2",
   "checkpoint_sha256": "b79f26dbd6b1ef50606ca72cae9261731a74cff3c0aecbd6e5153f4bab19a10c",
+  "diagnosis": {
+    "below_iou_case_count": 44,
+    "below_iou_center_offset_pixels_median": 1.118033988749895,
+    "below_iou_confidence_median": 0.690372109413147,
+    "below_iou_height_ratio_median": 1.834096109839817,
+    "below_iou_median": 0.45832909374576036,
+    "below_iou_width_ratio_median": 1.186431623931624,
+    "diagnosis_path": "ml/ocr/graph_text_db_objective_v5/artifacts/P2-run/selection-diagnosis.json",
+    "diagnosis_sha256": "3cb1f9cdce23c47b4e01e79e17d5f2996e089d2fc90cfe831c7eb29404a7a07f",
+    "diagnostic_runs": 1,
+    "failure_mode": "P2 removed every exclusion false region, but 44 text fixtures retained centered post-unclip boxes below the fixed IoU gate with median height 1.834 and width 1.186 times truth. Only seven text fixtures had no region. The remaining defect is uncertain shrink-map supervision inside the ignored shrink-to-source boundary, not provider drift, thresholds, hard-negative coverage, or center localization.",
+    "no_region_case_count": 7,
+    "no_region_maximum_probability_minimum": 0.06681150197982788,
+    "no_region_pixels_above_0_3_median": 1047.0,
+    "threshold_sweeps": 0
+  },
   "elapsed_ms": 1180520.849,
   "failure": "P2 passed the probability contract and CPU ONNX parity and removed every exclusion false region, but only 84 of 136 validation fixtures were exact. Fifty-one text fixtures were missed, four text fixtures produced multiple regions, and 48 text false regions remained at the unchanged production DB thresholds.",
   "onnx_bytes": 296128,

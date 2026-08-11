@@ -40,6 +40,15 @@ produced 48 text false regions, and split four text fixtures into multiple
 regions. P2 is consumed, unapproved, and may not rerun.
 
 The public archive remains unopened and the public gate remains unauthorized.
-P3 remains unregistered. It may be preregistered only if one bounded analysis
-of the already-produced visible-split P2 records supports a new isolated
-defect; no threshold sweep, public evaluation, or P2 rerun is permitted.
+One checksum-bound P2 visible-split diagnosis ran with zero threshold sweeps.
+It found 44 centered predictions below the IoU gate with median post-unclip
+height 1.834 and width 1.186 times truth, versus only seven no-region cases.
+All exclusions remained clean. This isolates the remaining defect to uncertain
+shrink-map supervision inside the already-defined ignored boundary.
+
+P3 is preregistered as the final candidate. It replaces only P2's squared
+ceiling margin with explicit negative binary cross-entropy supervision inside
+that same boundary at weight `1.0`. The dual heads, base DB weights, model,
+frozen data, optimizer, seed, 2,880 steps, production thresholds, and unopened
+public archive remain unchanged. P2 may not rerun, and P3 may run only once
+after this preregistration is committed.

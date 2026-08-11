@@ -1285,7 +1285,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-db-objective-v5",
-      "status": "candidate_2_failed_selection",
+      "status": "candidate_3_preregistered",
       "defect_class": "a single shrink-probability head trained without a learned threshold map cannot jointly stabilize DB contour continuity and tight region geometry at the frozen production thresholds",
       "prior_revision_reuse": false,
       "prior_revision": "graph-text-stride4-v4",
@@ -1296,21 +1296,23 @@
       "trigger_evidence": "Stride-4 V4 exhausted P1 through P3. Best candidate P2 passed probability and CPU parity but left 24 misses, 15 false regions, three multi-region text fixtures, and one exclusion false region across 136 frozen selection fixtures.",
       "isolated_change": "replace V4's single shrink-probability objective with a dual shrink/threshold head and differentiable binary-map supervision using fixed DB weights 5:10:1 and k=50, while retaining stride-4 inference, 2880 optimizer steps, production DB thresholds, and fail-closed gates on new disjoint procedural families",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": [
+        "P3"
+      ],
       "consumed_candidate_ids": [
         "P1",
         "P2"
       ],
-      "remaining_unregistered_candidate_ids": [
-        "P3"
-      ],
+      "remaining_unregistered_candidate_ids": [],
       "candidate_config_paths": {
         "P1": "ml/ocr/graph_text_db_objective_v5/training/p1.json",
-        "P2": "ml/ocr/graph_text_db_objective_v5/training/p2.json"
+        "P2": "ml/ocr/graph_text_db_objective_v5/training/p2.json",
+        "P3": "ml/ocr/graph_text_db_objective_v5/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "5d14a4c00ba0d0af251018edfef3d10fe3c30dac2dd1d2f728a6fcc64f31e9bf",
-        "P2": "286ebc7448f5e84ed64e513d10b35d731edaa2537036a5a20dc472940c97e833"
+        "P2": "286ebc7448f5e84ed64e513d10b35d731edaa2537036a5a20dc472940c97e833",
+        "P3": "dac061b3fc1a66096209279a9315096511f394e7d588a28a2a9e6e42cb74f433"
       },
       "p1_expected_runner_source_bundle_sha256": "e968324a9bc5e7a98ace65f2f9d6b68aa125594d2f2ea41315ffa5b668577d2c",
       "protocol_path": "ml/ocr/graph_text_db_objective_v5/PROTOCOL.json",
@@ -1362,7 +1364,7 @@
       "p2_boundary_probability_ceiling": 0.25,
       "p2_boundary_margin_loss_weight": 1.0,
       "p2_result_path": "ml/ocr/graph_text_db_objective_v5/P2_RESULT.json",
-      "p2_result_sha256": "05d89e87421060c476bb0369b5fdc3efdf5ab6eb5f2b278f6db6b35b3335a490",
+      "p2_result_sha256": "f4c13ca0c2f8842da14a5c6bd4b9c390204651b180d467a2a70db76d70b3d0a2",
       "p2_training_report_path": "ml/ocr/graph_text_db_objective_v5/artifacts/P2-run/candidate-report.json",
       "p2_training_report_sha256": "308529719b824374d9a59abee3bc89b6655df7a2a039500658f4be4fb13052b1",
       "p2_training_opened_seal_sha256": "0ca415a9c568e4ef7d8bdbc67d78c8499cffd6bbb3c378c734b2b542f04ca061",
@@ -1380,10 +1382,18 @@
       "p2_onnx_parity_maximum_absolute_error": 0.00000083446502685546875,
       "p2_probability_contract_passed": true,
       "p2_selection_gate_passed": false,
+      "p2_diagnosis_path": "ml/ocr/graph_text_db_objective_v5/artifacts/P2-run/selection-diagnosis.json",
+      "p2_diagnosis_sha256": "3cb1f9cdce23c47b4e01e79e17d5f2996e089d2fc90cfe831c7eb29404a7a07f",
+      "p2_diagnostic_runs": 1,
+      "p2_threshold_sweeps": 0,
       "p2_failure": "P2 passed probability and CPU parity and eliminated all exclusion false regions, but only 84/136 fixtures were exact, with 51 text misses, 48 text false regions, and four multi-region text fixtures at the unchanged production DB thresholds.",
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "P2 is consumed after failing selection. P3 remains unregistered and may be authorized only by a separate committed preregistration supported by a bounded visible-split defect analysis.",
+      "p3_preregistration_path": "ml/ocr/graph_text_db_objective_v5/P3_PREREGISTRATION.json",
+      "p3_preregistration_sha256": "14f08e5c2b13a5f6c33bbf12bdf933aa4f0a05e1d64ad6638dcb530be948a7f6",
+      "p3_expected_runner_source_bundle_sha256": "80c37759e4ad68d3787986fe9e8c3269af634a260db0ef6d86784e1ac8c52060",
+      "p3_isolated_change": "replace only P2's one-sided squared ceiling margin in the existing ignored shrink-to-source boundary with explicit negative binary cross-entropy supervision at weight 1.0, while retaining P2's dual heads, DB weights 5:10:1, model, frozen data, optimizer, seed, 2880 steps, production DB thresholds, and unopened public archive",
+      "p3_boundary_negative_loss_weight": 1.0,
+      "execution_authorized": true,
+      "authorized_candidate_id": "P3",
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "production_approval": false,
