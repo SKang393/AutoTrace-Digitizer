@@ -218,19 +218,50 @@ def test_p1_result_and_p2_preregistration_are_checksum_bound_and_public_closed()
     assert preregistration["sealed_public_archive_opened"] is False
 
 
-def test_canonical_budget_authorizes_only_unused_p2_and_keeps_public_closed() -> None:
+def test_p2_result_is_checksum_bound_and_failed_closed() -> None:
+    result_path = REVISION_ROOT / "P2_RESULT.json"
+    report_path = REVISION_ROOT / "artifacts/P2-run/candidate-report.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert result["status"] == "failed_selection"
+    assert result["selection_gate_passed"] is False
+    assert result["probability_contract_passed"] is True
+    assert result["onnx_parity_passed"] is True
+    assert result["selection_metrics"]["exact_fixture_count"] == 84
+    assert result["selection_metrics"]["false_region_count"] == 48
+    assert result["selection_metrics"]["exclusion_false_region_count"] == 0
+    assert result["selection_metrics"]["text_missed_fixture_count"] == 51
+    assert result["selection_report_sha256"] == sha256_file(report_path)
+    assert result["selection_metrics"] == {
+        key: value for key, value in report["selection_metrics"].items() if key != "records"
+    }
+    assert result["sealed_public_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
+
+
+def test_canonical_budget_consumes_failed_p2_and_keeps_p3_unregistered() -> None:
     ledger = json.loads((REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["task"] == "ocr-detection" and item["revision"] == REVISION)
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["status"] == "candidate_2_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["p1_selection_exact_fixture_count"] == 47
     assert entry["p1_diagnostic_runs"] == 1
     assert entry["p2_boundary_probability_ceiling"] == 0.25
     assert entry["p2_boundary_margin_loss_weight"] == 1.0
+    assert entry["p2_result_sha256"] == sha256_file(REVISION_ROOT / "P2_RESULT.json")
+    assert entry["p2_training_report_sha256"] == sha256_file(
+        REVISION_ROOT / "artifacts/P2-run/candidate-report.json"
+    )
+    assert entry["p2_selection_exact_fixture_count"] == 84
+    assert entry["p2_selection_false_region_count"] == 48
+    assert entry["p2_selection_exclusion_false_region_count"] == 0
+    assert entry["p2_selection_gate_passed"] is False
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False

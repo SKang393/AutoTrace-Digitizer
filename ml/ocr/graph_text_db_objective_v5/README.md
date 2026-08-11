@@ -30,8 +30,16 @@ archive remains unopened.
 
 That diagnosis exposed a bounded omission in P1's isolated change. P1 replaced
 V4's shrink objective but did not retain V4's one-sided constraint inside the
-ignored shrink-to-source boundary. P2 restores only that squared margin at the
+ignored shrink-to-source boundary. P2 restored only that squared margin at the
 fixed `0.25` ceiling while retaining the dual heads, DB weights, model, frozen
 data, optimizer, seed, 2,880 steps, production thresholds, and unopened public
-archive. P2 is preregistered but must not run until its evidence checkpoint is
-committed. P3 remains unregistered.
+archive. Its one authorized run passed the probability contract and CPU ONNX
+parity at `8.3447e-7`. It eliminated all exclusion false regions and improved
+exact fixtures from 47 to 84 of 136, but still missed 51 text fixtures,
+produced 48 text false regions, and split four text fixtures into multiple
+regions. P2 is consumed, unapproved, and may not rerun.
+
+The public archive remains unopened and the public gate remains unauthorized.
+P3 remains unregistered. It may be preregistered only if one bounded analysis
+of the already-produced visible-split P2 records supports a new isolated
+defect; no threshold sweep, public evaluation, or P2 rerun is permitted.

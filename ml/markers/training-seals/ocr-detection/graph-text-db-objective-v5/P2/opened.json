@@ -1,0 +1,28 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/graph_text_db_objective_v5/training/p2.json",
+    "candidate_config_sha256": "286ebc7448f5e84ed64e513d10b35d731edaa2537036a5a20dc472940c97e833",
+    "candidate_id": "P2",
+    "committed_source_enforcement": true,
+    "revision": "graph-text-db-objective-v5",
+    "runner_source_bundle_sha256": "030f6e5ff2f73b70a641caec50dd849281c6d99f45312eccef652a6cdd224af3",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/graph_text_db_objective_v5/candidate_runner_p2.py",
+      "ml/ocr/graph_text_db_objective_v5/dataset.py",
+      "ml/ocr/graph_text_db_objective_v5/losses.py",
+      "ml/ocr/graph_text_db_objective_v5/losses_p2.py",
+      "ml/ocr/graph_text_db_objective_v5/model.py",
+      "ml/ocr/graph_text_db_objective_v5/protocol.py",
+      "ml/ocr/graph_text_db_objective_v5/train_p2.py",
+      "ml/ocr/graph_text_ignore_band_v3/train_p1.py",
+      "ml/ocr/official_bakeoff/structure_consensus_evaluate.py"
+    ],
+    "task": "ocr-detection",
+    "training_budget_ledger_sha256": "3c52078365af4db30a275106c5d504b3947a7bccfe43df3749159df6b495157d"
+  },
+  "opened_utc": "2026-08-11T13:05:39.950678+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}
