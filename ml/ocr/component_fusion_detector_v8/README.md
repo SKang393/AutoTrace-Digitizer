@@ -30,10 +30,18 @@ pooling from 4 by 16 to 4 by 8 and updates the following linear width. All data,
 proposal, encoding, branch, sampling, optimizer, epoch, seed, threshold, and
 public-gate contracts remain fixed.
 
-P2 must pass every validation scene with zero false regions, misses,
-duplicates, or prohibited-structure hits and CPU ONNX parity no worse than
-`1e-5`. Only then may the single truth-hidden public gate run. A pass remains
-synthetic evidence only and cannot create a production manifest, model-store
-entry, package, or release approval without detector and V5 recognition
-composition, independent marker-stage evidence, private validation, provider
-discovery, notices, packaging, and clean-machine proof.
+P2 executed exactly once from its committed preregistration. It passed all 72
+validation scenes with 288 of 288 truth regions, zero false regions, misses,
+duplicates, or prohibited-structure hits. The selected threshold is `0.95`,
+and CPU ONNX parity passed at `5.7220458984375e-06` against the `1e-5` limit.
+The training and selection run used 1,216 optimizer steps and did not open the
+truth-hidden public archive.
+
+The exact selected ONNX SHA-256 is
+`e0254920b26784a87369aa25cc4ec387c6544db30bda4f9542b7ce9a8712e431`.
+It is authorized for the single truth-hidden public gate only after this
+selection result, evaluator identity, and canonical ledger are committed. A
+public pass remains synthetic evidence only and cannot create a production
+manifest, model-store entry, package, or release approval without detector and
+V5 recognition composition, independent marker-stage evidence, private
+validation, provider discovery, notices, packaging, and clean-machine proof.

@@ -2024,7 +2024,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-component-fusion-v8",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_2_selected_public_gate_pending",
       "defect_class": "V7 mixed repeated geometry columns with image content in one flattening CNN and overfit a compact structure while threshold-only calibration could not separate it",
       "prior_revision": "graph-text-component-context-v7",
       "prior_exposed_fixture_bytes_reused": false,
@@ -2038,11 +2038,10 @@
       "architecture": "separated-visual-geometry-component-fusion-cnn-fixed-pool-v1",
       "proposal_algorithm": "adaptive-gray-baseline-bounded-line-grouping-v2",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [
-        "P2"
-      ],
+      "preregistered_candidate_ids": [],
       "consumed_candidate_ids": [
-        "P1"
+        "P1",
+        "P2"
       ],
       "remaining_unregistered_candidate_ids": [
         "P3"
@@ -2072,8 +2071,8 @@
       "sealed_public_proposal_count": 5104,
       "split_generator_source_bundle_sha256": "197c1abc93cb7bf90a278c07441e59646cf2bcddace99da4e4ecd94c0815193d",
       "public_gate_config_path": "ml/ocr/component_fusion_detector_v8/gates/sealed-public-v1.json",
-      "public_gate_config_sha256": "0f237af83cd9a6286c8e378825a6e3ff0fc14cf10db5d2bb6c52de499a232e28",
-      "expected_public_evaluator_source_bundle_sha256": "96aefb9706291c94c3b499cf0882a71db2f2f5aa41541efde22cd6b4d737a0a2",
+      "public_gate_config_sha256": "2235391f0003f3186bb960484768fc4102c49ec5d502c261b68a35bd7e3d08db",
+      "expected_public_evaluator_source_bundle_sha256": "f94165d06acb60a3b574799d09bbfc6346a5ec8742a6aa6f5cb4caf09b2902dc",
       "p1_expected_runner_source_bundle_sha256": "0275bd7e2cbaa82f75d6840f705b161d021702e646d67667eeab26c7d12fadad",
       "p1_result_path": "ml/ocr/component_fusion_detector_v8/P1_RESULT.json",
       "p1_result_sha256": "44ce0050101179958305f122c9cc58563e8c5e63c10e64e6b9b9f9f4636c641c",
@@ -2084,11 +2083,32 @@
       "p1_failure_phase": "onnx_preflight",
       "p1_failure": "P1 failed closed before training because the legacy PyTorch ONNX exporter rejects adaptive average pooling from 4 by 16 to 4 by 12.",
       "p2_expected_runner_source_bundle_sha256": "e1b4ff8595ee620fa54f43723db4aea9140a0f1e7786f014fcc5702cc9da7c99",
-      "execution_authorized": true,
-      "authorized_candidate_id": "P2",
-      "execution_blocker": null,
-      "public_gate_authorized": false,
-      "public_gate_authorized_candidate_id": null,
+      "p2_result_path": "ml/ocr/component_fusion_detector_v8/P2_RESULT.json",
+      "p2_result_sha256": "c5a52decbbcfbe6cbc151836140dc63f76c85fe5f903997d8ed91c5bfb92a0cb",
+      "p2_training_report_path": "ml/ocr/component_fusion_detector_v8/artifacts/P2-run/candidate-report.json",
+      "p2_training_report_sha256": "af97a598a5f20a2732ca22af6302357164b26e22938e8db2ab3ad3a70c191120",
+      "p2_training_opened_seal_sha256": "64703218db840d0fa49994717a6a75ee579f214d53342f877210af3da9ad96c5",
+      "p2_training_result_seal_sha256": "02073d949e7c7c919df54050123d9139d46b10746b9a2d96313d4760ea92a155",
+      "p2_optimizer_steps": 1216,
+      "p2_checkpoint_sha256": "190a513b50a08f43fe36dce1123daa7f03a9441c66bb82c9bd209a8baad5875d",
+      "candidate_onnx_sha256": {
+        "P2": "e0254920b26784a87369aa25cc4ec387c6544db30bda4f9542b7ce9a8712e431"
+      },
+      "p2_onnx_parity_maximum_absolute_error": 0.0000057220458984375,
+      "p2_selected_threshold": 0.95,
+      "p2_selection_scene_count": 72,
+      "p2_selection_exact_scene_count": 72,
+      "p2_selection_true_positives": 288,
+      "p2_selection_false_positives": 0,
+      "p2_selection_false_negatives": 0,
+      "p2_selection_duplicate_region_count": 0,
+      "p2_selection_prohibited_structure_hits": 0,
+      "p2_public_gate_evaluations": 0,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P2 is consumed after one execution and selected for the single checksum-bound public gate; no training rerun is authorized.",
+      "public_gate_authorized": true,
+      "public_gate_authorized_candidate_id": "P2",
       "public_gate_authorized_on_selection_pass": true,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,

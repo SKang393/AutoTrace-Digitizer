@@ -28,7 +28,7 @@ from .protocol import PUBLIC_REVISION, REVISION, TASK, THRESHOLDS
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 LEDGER_PATH = Path("ml/markers/training-budgets/production-repair-v1.json")
-RESULT_PATH = Path("ml/ocr/component_fusion_detector_v8/P1_RESULT.json")
+RESULT_PATH = Path("ml/ocr/component_fusion_detector_v8/P2_RESULT.json")
 SPLIT_CONFIG_PATH = Path("ml/ocr/component_fusion_detector_v8/gates/sealed-public-v1.json")
 EVALUATOR_SOURCE_PATHS = (
     Path("ml/ocr/component_fusion_detector_v8/dataset.py"),
