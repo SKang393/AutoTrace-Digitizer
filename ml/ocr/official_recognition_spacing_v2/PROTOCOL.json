@@ -1,9 +1,10 @@
 {
   "chandler_included": false,
   "consumed_candidates": [
-    "P1"
+    "P1",
+    "P2"
   ],
-  "currently_preregistered_candidate": "P2",
+  "currently_preregistered_candidate": null,
   "defect_class": "the exact official recognizer preserved O/o/l/I glyph identities but removed visible inter-glyph whitespace in both exposed ambiguity failures",
   "experiment_budget": 3,
   "gates": {
@@ -35,6 +36,19 @@
     "public_archive_opened": false,
     "report_sha256": "d056b848c6aa376a1f59b4b82096b49af76f20b05cb9ece717ab2c4b60ee4c58",
     "result_path": "ml/ocr/official_recognition_spacing_v2/P1_RESULT.json",
+    "spacing_changed_nonspace_truth_count": 0,
+    "word_exact_match": 1.0
+  },
+  "p2_selection_evidence": {
+    "ambiguity_exact_match": 1.0,
+    "character_error_rate": 0.0,
+    "exact_match": 1.0,
+    "inference_calls": 224,
+    "numeric_exact_match": 1.0,
+    "public_archive_opened": false,
+    "report_sha256": "1dfe29e25ea42acfabc327e64e1d872f8e38f9ef1f7f2de22ebd48a2734e09f7",
+    "result_path": "ml/ocr/official_recognition_spacing_v2/P2_RESULT.json",
+    "role_accuracy": 1.0,
     "spacing_changed_nonspace_truth_count": 0,
     "word_exact_match": 1.0
   },
@@ -98,7 +112,7 @@
       "seed": 20261117
     }
   },
-  "status": "p1_failed_selection_p2_preregistered_before_inference",
+  "status": "p2_selected_public_gate_pending",
   "synthetic_only": true,
   "task": "ocr-recognition",
   "weights_changed": false

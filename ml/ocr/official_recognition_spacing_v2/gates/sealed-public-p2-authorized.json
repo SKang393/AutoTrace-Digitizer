@@ -1,0 +1,21 @@
+{
+  "schema": "graphreader.ocr-official-recognition-spacing-public-gate-config.v1",
+  "task": "ocr-recognition",
+  "revision": "official-ppocrv5-image-spacing-v2-public-v1",
+  "candidate_id": "P2",
+  "sealed_public_test_seal_path": "ml/ocr/official_recognition_spacing_v2/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "1c50eba9d9b7479b91d553d57a48749d778d4aca024bcbaa3100aaf49e0785ab",
+  "fixture_archive_sha256": "ab0d8a36884b5840754492554f8377aa046df317f918f6b26b5ec34ac620c157",
+  "private_manifest_sha256": "4183b3143b0036a76861dccec286128c7e1d3fce16ac9c98b1f0b8706424ba82",
+  "expected_evaluator_source_bundle_sha256": "fc716334d1788b6501e1fdd7cb4ab18d7fc7684289e511e7d4db4120110345f7",
+  "expected_candidate_hash_keys": [
+    "onnx_sha256",
+    "spacing_source_sha256",
+    "selection_report_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "4183b3143b0036a76861dccec286128c7e1d3fce16ac9c98b1f0b8706424ba82",
+  "expected_gate_config_sha256": "d52c8c3ec979126f850a333b84f664c134fd3bc903d733121a2712b54c11a24e",
+  "evaluation_limit": 1,
+  "production_approval": false,
+  "release_eligible": false
+}

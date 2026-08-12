@@ -82,13 +82,14 @@ def test_preregistration_binds_exact_weights_sources_and_unopened_public_gate() 
     config = _load(ROOT / "training/p2.json")
     selection = _load(ROOT / "SELECTION_SEAL.json")
     public = _load(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
-    gate = _load(ROOT / "gates/sealed-public-p2.json")
+    gate = _load(ROOT / "gates/sealed-public-p2-authorized.json")
     ledger = _load(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
     assert protocol["runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, evaluate.RUNNER_SOURCE_PATHS)
     assert config["expected_runner_source_bundle_sha256"] == protocol["runner_source_bundle_sha256"]
     assert config["model_sha256"] == MODEL_SHA256 == sha256_file(REPO_ROOT / evaluate.MODEL_PATH)
-    assert config["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
+    assert config["protocol_sha256"] == "e2970d4e372bd9fb1299b5367187b658e96b2a0cbc8c716bdb2ae3ba031cf213"
+    assert entry["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
     assert config["p1_result_sha256"] == sha256_file(ROOT / "P1_RESULT.json")
     assert config["selection_seal_sha256"] == sha256_file(ROOT / "SELECTION_SEAL.json")
     assert config["sealed_public_test_seal_sha256"] == sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
@@ -97,10 +98,11 @@ def test_preregistration_binds_exact_weights_sources_and_unopened_public_gate() 
     assert public["truth_hidden_from_model_execution_until_gate"] is True
     assert public["public_gate_evaluations"] == 0
     assert CANDIDATE_ID == "P2"
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["execution_authorized"] is True
-    assert entry["public_gate_authorized"] is False
+    assert entry["status"] == "candidate_2_selected_public_gate_pending"
+    assert entry["execution_authorized"] is False
+    assert entry["public_gate_authorized"] is True
     assert entry["public_gate_archive_opened"] is False
+    assert entry["p2_result_sha256"] == sha256_file(ROOT / "P2_RESULT.json")
     assert protocol["gates"] == GATES
     assert protocol["production_approval"] is False
     assert protocol["release_eligible"] is False

@@ -37,14 +37,14 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
         "schema": "graphreader.ocr-official-recognition-spacing-protocol.v1",
         "task": TASK,
         "revision": REVISION,
-        "status": "p1_failed_selection_p2_preregistered_before_inference",
+        "status": "p2_selected_public_gate_pending",
         "defect_class": (
             "the exact official recognizer preserved O/o/l/I glyph identities but removed visible inter-glyph "
             "whitespace in both exposed ambiguity failures"
         ),
         "experiment_budget": EXPERIMENT_BUDGET,
-        "currently_preregistered_candidate": CANDIDATE_ID,
-        "consumed_candidates": ["P1"],
+        "currently_preregistered_candidate": None,
+        "consumed_candidates": ["P1", "P2"],
         "isolated_change": (
             "retain P1 source-evidenced spacing, exact official ONNX weights, and CTC decoder; add only a "
             "source-pixel top-and-bottom serif test to distinguish a capital I from a lowercase l after source "
@@ -85,6 +85,19 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
             "spacing_changed_nonspace_truth_count": 0,
             "failed_case_count": 5,
             "failure_signature": "source groups were restored but the final capital I was decoded as lowercase l",
+            "public_archive_opened": False,
+        },
+        "p2_selection_evidence": {
+            "result_path": "ml/ocr/official_recognition_spacing_v2/P2_RESULT.json",
+            "report_sha256": "1dfe29e25ea42acfabc327e64e1d872f8e38f9ef1f7f2de22ebd48a2734e09f7",
+            "exact_match": 1.0,
+            "character_error_rate": 0.0,
+            "role_accuracy": 1.0,
+            "numeric_exact_match": 1.0,
+            "word_exact_match": 1.0,
+            "ambiguity_exact_match": 1.0,
+            "spacing_changed_nonspace_truth_count": 0,
+            "inference_calls": 224,
             "public_archive_opened": False,
         },
         "splits": {

@@ -16,7 +16,7 @@ from ml.markers.gate_seal import (
 from ml.markers.training_budget import CANONICAL_LEDGER_PATH
 from ml.ocr.official_bakeoff.production_evaluate import _cpu_session, read_character_alphabet
 from .evaluate import (
-    INFERENCE_YAML_PATH, MODEL_PATH, PUBLIC_GATE_CONFIG_PATH, PUBLIC_SEAL_PATH,
+    INFERENCE_YAML_PATH, MODEL_PATH, PUBLIC_SEAL_PATH,
     _load, _load_partition, evaluate_partition,
 )
 from .protocol import CANDIDATE_ID, GATES, MODEL_SHA256, PUBLIC_GATE_CONFIG, REVISION, TASK
@@ -25,6 +25,7 @@ from .protocol import CANDIDATE_ID, GATES, MODEL_SHA256, PUBLIC_GATE_CONFIG, REV
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ROOT = Path("ml/ocr/official_recognition_spacing_v2")
 RESULT_PATH = ROOT / "P2_RESULT.json"
+AUTHORIZED_PUBLIC_GATE_CONFIG_PATH = ROOT / "gates/sealed-public-p2-authorized.json"
 EVALUATOR_SOURCE_PATHS = (
     ROOT / "prepare_split.py", ROOT / "spacing.py", ROOT / "protocol.py", ROOT / "evaluate.py",
     ROOT / "sealed_gate.py", Path("ml/ocr/official_bakeoff/production_evaluate.py"),
@@ -53,8 +54,8 @@ def evaluate_public(*, output_path: Path) -> dict[str, object]:
         or result.get("spacing_source_sha256") != spacing_source_sha256
         or result.get("public_gate_evaluations") != 0
         or result.get("public_gate_archive_opened") is not False
-        or entry.get("status") != "candidate_1_selected_public_gate_pending"
-        or entry.get("consumed_candidate_ids") != [CANDIDATE_ID]
+        or entry.get("status") != "candidate_2_selected_public_gate_pending"
+        or entry.get("consumed_candidate_ids") != ["P1", CANDIDATE_ID]
         or entry.get("execution_authorized") is not False
         or entry.get("public_gate_authorized") is not True
         or entry.get("public_gate_authorized_candidate_id") != CANDIDATE_ID
@@ -78,7 +79,7 @@ def evaluate_public(*, output_path: Path) -> dict[str, object]:
             "selection_report_sha256": selection_report_sha256,
         },
         dataset_manifest_sha256=str(seal["private_manifest_sha256"]),
-        split_config_path=PUBLIC_GATE_CONFIG_PATH,
+        split_config_path=AUTHORIZED_PUBLIC_GATE_CONFIG_PATH,
         evaluator_source_paths=EVALUATOR_SOURCE_PATHS,
         gate_config=PUBLIC_GATE_CONFIG,
     )

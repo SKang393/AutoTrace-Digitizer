@@ -27,3 +27,8 @@ labels, and all word labels, but five of 28 ambiguity crops retained a lowercase
 `l` where the immutable source pixels showed the top and bottom bars of a
 capital `I`. P2 is preregistered to add only that source-shape distinction after
 P1 spacing. It does not receive truth, role, graph position, or a label list.
+
+P2 then ran once from committed source and passed all 224 selection crops with
+exact match, role, numeric, word, and ambiguity accuracy `1.0`, CER `0.0`, and
+zero changes to truths without spaces. The public archive remains unopened and
+may be evaluated only once from the separately committed authorization.
