@@ -21,12 +21,13 @@ from ml.ocr.component_recall_detector_v9.dataset import (
 )
 from ml.ocr.component_recall_detector_v9.dataset_p2 import p2_proposal_examples
 from ml.ocr.component_recall_detector_v9.model import ComponentRecallNet
+from ml.ocr.component_recall_detector_v9.model_p3 import OUTPUT_LOGIT_SCALE, ScaledComponentRecallNet
 from ml.ocr.component_recall_detector_v9.pipeline import evaluate_scenes
 from ml.ocr.component_recall_detector_v9.pipeline_p2 import evaluate_thresholds
 from ml.ocr.component_recall_detector_v9.protocol import REVISION, SPLITS, protocol_configuration
 from ml.ocr.component_recall_detector_v9.sealed_gate import EVALUATOR_SOURCE_PATHS, SPLIT_CONFIG_PATH
 from ml.ocr.component_recall_detector_v9.train_p1 import _export
-from ml.ocr.component_recall_detector_v9.train_p2 import CONFIG_PATH, RUNNER_SOURCE_PATHS
+from ml.ocr.component_recall_detector_v9.train_p3 import CONFIG_PATH, RUNNER_SOURCE_PATHS
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -72,7 +73,7 @@ def test_v9_retains_exact_proposal_tensor_and_v8_architecture_contract(tmp_path:
     assert output.shape == (2, 2)
 
 
-def test_p2_is_the_only_checksum_bound_authorized_candidate_after_p1_failure() -> None:
+def test_p3_is_the_only_checksum_bound_authorized_candidate_after_p2_parity_failure() -> None:
     protocol = _load(ROOT / "PROTOCOL.json")
     expected = json.loads(json.dumps(protocol_configuration()))
     expected["split_generator_source_paths"] = protocol["split_generator_source_paths"]
@@ -81,17 +82,36 @@ def test_p2_is_the_only_checksum_bound_authorized_candidate_after_p1_failure() -
     config = _load(REPO_ROOT / CONFIG_PATH)
     ledger = _load(LEDGER_PATH)
     entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
-    assert entry["candidate_config_sha256"]["P2"] == sha256_file(REPO_ROOT / CONFIG_PATH)
+    assert entry["candidate_config_sha256"]["P3"] == sha256_file(REPO_ROOT / CONFIG_PATH)
     assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
+
+
+def test_p3_scales_exact_p2_logits_without_changing_class_decisions() -> None:
+    base = ComponentRecallNet().eval()
+    scaled = ScaledComponentRecallNet(base).eval()
+    values = torch.linspace(-1.0, 1.0, steps=4 * 2 * 32 * 140, dtype=torch.float32).reshape(4, 2, 32, 140)
+    with torch.inference_mode():
+        original = base(values)
+        actual = scaled(values)
+    assert OUTPUT_LOGIT_SCALE == 0.5
+    assert torch.equal(actual, original * OUTPUT_LOGIT_SCALE)
+    assert torch.equal(actual.argmax(dim=1), original.argmax(dim=1))
+    config = _load(REPO_ROOT / CONFIG_PATH)
+    p2_result = _load(ROOT / "P2_RESULT.json")
+    assert config["optimizer_steps"] == 0
+    assert config["p2_result_sha256"] == sha256_file(ROOT / "P2_RESULT.json")
+    assert p2_result["checkpoint_sha256"] == sha256_file(REPO_ROOT / p2_result["checkpoint_path"])
+    assert p2_result["selection_gate_passed"] is True
+    assert p2_result["onnx_parity_passed"] is False
 
 
 def test_p2_adds_only_training_derived_scale_hard_negatives() -> None:
@@ -132,4 +152,5 @@ def test_public_gate_is_frozen_hidden_and_unapproved() -> None:
         REPO_ROOT, EVALUATOR_SOURCE_PATHS
     )
     assert _load(ROOT / "P1_RESULT.json")["status"] == "failed_selection"
+    assert _load(ROOT / "P2_RESULT.json")["status"] == "failed_parity"
     assert not any(REPO_ROOT.glob("models/manifest/ocr/*component*recall*v9*.json"))

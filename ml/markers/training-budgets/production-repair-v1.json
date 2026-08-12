@@ -2137,7 +2137,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-component-recall-v9",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_3_preregistered",
       "defect_class": "V8 production composition missed 113 of 320 regions while recognition was exact on every retained region, with the largest recall gap in legend text",
       "prior_revision": "graph-text-component-fusion-v8",
       "prior_exposed_fixture_bytes_reused": false,
@@ -2149,27 +2149,28 @@
       "trigger_true_positives": 207,
       "trigger_false_negatives": 113,
       "trigger_false_positives": 0,
-      "isolated_change": "add only deterministic box-downsample, bicubic-upsample, row-fade hard-negative proposals derived from the frozen training scenes; retain the exact V9 model, proposal algorithm, tensor encoding, loss, balanced sampler, optimizer, epochs, seed, thresholds, validation split, and sealed public gate",
+      "isolated_change": "load the exact checksum-bound P2 checkpoint and multiply both output logits by 0.5 before ONNX export; perform zero optimizer steps and retain the exact model weights, proposal algorithm, tensor encoding, validation split, thresholds, and sealed public gate",
       "architecture": "separated-visual-geometry-component-fusion-cnn-fixed-pool-v1",
       "proposal_algorithm": "adaptive-gray-baseline-bounded-line-grouping-v2",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P2"
-      ],
-      "consumed_candidate_ids": [
-        "P1"
-      ],
-      "remaining_unregistered_candidate_ids": [
         "P3"
       ],
+      "consumed_candidate_ids": [
+        "P1",
+        "P2"
+      ],
+      "remaining_unregistered_candidate_ids": [],
       "retired_unregistered_candidate_ids": [],
       "candidate_config_paths": {
         "P1": "ml/ocr/component_recall_detector_v9/training/p1.json",
-        "P2": "ml/ocr/component_recall_detector_v9/training/p2.json"
+        "P2": "ml/ocr/component_recall_detector_v9/training/p2.json",
+        "P3": "ml/ocr/component_recall_detector_v9/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "3a23a1eebfcd3edeb4f2f58d396b06285fd227042a1492d6e85d0dee00ae0f46",
-        "P2": "137d2892b3bd710cbe1ed66abaf80e0b2ee8a35b855671ce133e7e6560e3fc52"
+        "P2": "137d2892b3bd710cbe1ed66abaf80e0b2ee8a35b855671ce133e7e6560e3fc52",
+        "P3": "bb745ec665cbcc2b8747495e893364cce7bfa9d1819ad0588bbfb7f120c08482"
       },
       "protocol_path": "ml/ocr/component_recall_detector_v9/PROTOCOL.json",
       "protocol_sha256": "f329e6d58354adbd20afadc837820e579230aa4b58129a2fc02142ddd7fb4961",
@@ -2214,8 +2215,31 @@
       "p2_training_proposal_count": 16013,
       "p2_training_positive_proposal_count": 1600,
       "p2_training_negative_proposal_count": 14413,
+      "p2_result_path": "ml/ocr/component_recall_detector_v9/P2_RESULT.json",
+      "p2_result_sha256": "ed5be63b0cdbfd9e3a869d61f4015663dd2191f4805bf938356f0f7d627385d4",
+      "p2_training_report_path": "ml/ocr/component_recall_detector_v9/artifacts/P2-run/candidate-report.json",
+      "p2_training_report_sha256": "41c06fc71bd6b709f666d8119031e43788e93aece23f7078a1dc114ae8d624bb",
+      "p2_training_opened_seal_sha256": "7922f927d38455c9a3f6df6e07ab7c77508fbb83fdffbaf5e3f3586606b4a096",
+      "p2_training_result_seal_sha256": "7968c7fddd75fec39b435c28fbe7faaf94b76e74e1082a904c33e283905467cd",
+      "p2_optimizer_steps": 3616,
+      "p2_checkpoint_sha256": "bf897f49e9ac092578f7546ff206dc523f536080d5fbfa960590357795746f85",
+      "p2_onnx_sha256": "49792ce0812b540117bd7d4768c0e9e86abf388e2eadc1000544b815ab5a00fb",
+      "p2_selected_threshold": 0.95,
+      "p2_selection_scene_count": 80,
+      "p2_selection_exact_scene_count": 80,
+      "p2_selection_true_positives": 400,
+      "p2_selection_false_positives": 0,
+      "p2_selection_false_negatives": 0,
+      "p2_selection_duplicate_region_count": 0,
+      "p2_selection_prohibited_structure_hits": 0,
+      "p2_onnx_parity_maximum_absolute_error": 0.000011444091796875,
+      "p2_onnx_parity_passed": false,
+      "p2_public_gate_evaluations": 0,
+      "p3_output_logit_scale": 0.5,
+      "p3_optimizer_steps": 0,
+      "p3_expected_runner_source_bundle_sha256": "beeef171547dc50570f62b76b409040397f5b633f8faae53347b7be598593baa",
       "execution_authorized": true,
-      "authorized_candidate_id": "P2",
+      "authorized_candidate_id": "P3",
       "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,

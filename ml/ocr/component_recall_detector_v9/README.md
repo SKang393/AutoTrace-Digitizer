@@ -21,12 +21,19 @@ Seven false accepts were one repeated scale-degraded line grouping and four
 were compact marker-like shapes. Their scores overlap true text, so threshold
 calibration cannot pass.
 
-Only P2 is now authorized. It adds deterministic scale-degraded hard-negative
-proposals derived from the frozen training scenes and changes no model, loss,
-optimizer, epoch, seed, threshold, validation, or public-gate variable. P3
-remains unregistered. The truth-hidden public archive has zero evaluations and
-cannot open until a candidate passes every visible validation scene with zero
-false regions, misses, duplicates, or prohibited hits plus CPU ONNX parity.
+P2 ran once and solved the detection defect at every frozen threshold: 80/80
+validation scenes were exact with 400 true regions and zero false regions,
+misses, duplicates, or prohibited hits. It still failed closed because its CPU
+ONNX parity error was `1.1444091796875e-05`, above the fixed `1e-05` limit.
+Report SHA-256 is
+`41c06fc71bd6b709f666d8119031e43788e93aece23f7078a1dc114ae8d624bb`.
+
+Only final P3 is now authorized. It loads the exact checksum-bound P2
+checkpoint, multiplies both output logits by `0.5`, performs zero optimizer
+steps, and executes all 80 validation scenes through the exported ONNX on CPU.
+No weights, data, proposals, thresholds, validation, or public-gate variables
+change. The truth-hidden public archive has zero evaluations and cannot open
+until P3 passes both detection and the original parity limit.
 
 No Chandler, Generalization, private or article image, external dataset,
 pretrained weight, downloaded training sample, or predecessor fixture byte is
