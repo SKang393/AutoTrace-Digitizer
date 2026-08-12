@@ -1,0 +1,22 @@
+{
+  "candidate_id": "P1",
+  "candidate_report_path": "ml/ocr/component_fusion_detector_v8/artifacts/P1-run/candidate-report.json",
+  "candidate_report_sha256": "e3aa6b5b54dc7ecd82fd7496b484c74ec8deb7e0644951ed30359c23f2af7837",
+  "elapsed_ms": 525775.897,
+  "exception_type": "SymbolicValueError",
+  "failure_phase": "onnx_preflight",
+  "failure_summary": "The legacy PyTorch ONNX exporter rejects adaptive_avg_pool2d from 4 by 16 to 4 by 12 because the requested output size is not a factor of the input size.",
+  "optimizer_steps": 0,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "public_gate_archive_opened": false,
+  "public_gate_authorized": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-component-fusion-v8",
+  "schema": "graphreader.ocr-component-fusion-result.v1",
+  "status": "failed_runner",
+  "task": "ocr-detection",
+  "training_opened_seal_sha256": "54aa82540cb5aae127d25a0ce7fd2355d378f4f3deab221d2b517ab5906cc7a2",
+  "training_result_seal_sha256": "d60de2c8a9f7e47468492b7d353412943e7a8d4b9d4618e1357deaa7defaa4a8"
+}

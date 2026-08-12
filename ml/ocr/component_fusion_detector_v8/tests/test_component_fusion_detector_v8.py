@@ -19,8 +19,10 @@ from ml.ocr.component_fusion_detector_v8.dataset import (
     split_fingerprint,
 )
 from ml.ocr.component_fusion_detector_v8.model import ComponentFusionNet
+from ml.ocr.component_fusion_detector_v8.model_p2 import ComponentFusionP2Net
 from ml.ocr.component_fusion_detector_v8.protocol import REVISION, SPLITS, protocol_configuration
-from ml.ocr.component_fusion_detector_v8.train_p1 import CONFIG_PATH, RUNNER_SOURCE_PATHS, _balanced_order
+from ml.ocr.component_fusion_detector_v8.train_p1 import _balanced_order
+from ml.ocr.component_fusion_detector_v8.train_p2 import CONFIG_PATH, RUNNER_SOURCE_PATHS, _export
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -77,6 +79,17 @@ def test_balanced_sampler_is_deterministic_and_retains_both_classes() -> None:
     assert set(first.tolist()) >= set(range(len(labels)))
 
 
+def test_p2_fixed_pool_exports_dynamic_cpu_onnx(tmp_path: Path) -> None:
+    model = ComponentFusionP2Net().eval()
+    path = tmp_path / "p2-preflight.onnx"
+    _export(model, torch.zeros((8, 2, 32, 140), dtype=torch.float32), path)
+    import onnxruntime as ort
+
+    session = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
+    output = session.run(None, {"region_proposals": np.zeros((3, 2, 32, 140), dtype=np.float32)})[0]
+    assert output.shape == (3, 2)
+
+
 def test_preregistered_hashes_bind_runner_splits_and_single_candidate() -> None:
     protocol = _load(ROOT / "PROTOCOL.json")
     selection = _load(ROOT / "SELECTION_MANIFEST.json")
@@ -92,16 +105,20 @@ def test_preregistered_hashes_bind_runner_splits_and_single_candidate() -> None:
     assert seal["truth_hidden_from_training_runner"] is True
     assert sha256_file(REPO_ROOT / seal["fixture_archive_path"]) == seal["fixture_archive_sha256"]
     assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
+    assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["execution_authorized"] is True
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_archive_opened"] is False
 
 
 def test_preregistration_cannot_be_discovered_as_a_production_model() -> None:
-    assert not (ROOT / "P1_RESULT.json").exists()
+    p1 = _load(ROOT / "P1_RESULT.json")
+    assert p1["status"] == "failed_runner"
+    assert p1["optimizer_steps"] == 0
+    assert p1["public_gate_archive_opened"] is False
+    assert not (ROOT / "P2_RESULT.json").exists()
     assert not any(REPO_ROOT.glob("models/manifest/ocr/*component*fusion*v8*.json"))
     index = _load(REPO_ROOT / "artifacts/production-model-store/production-model-index.json")
     serialized = json.dumps(index, sort_keys=True)

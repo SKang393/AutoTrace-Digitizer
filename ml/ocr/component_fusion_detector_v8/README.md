@@ -22,10 +22,18 @@ ticks, dividers, connectors, and intersections. Chandler, `Generalization`,
 private and article images, external datasets, pretrained weights, downloads,
 and predecessor fixture bytes are prohibited.
 
-P1 is the only authorized candidate. It must pass every validation scene with
-zero false regions, misses, duplicates, or prohibited-structure hits and CPU
-ONNX parity no worse than `1e-5`. Only then may the single truth-hidden public
-gate run. A pass remains synthetic evidence only and cannot create a production
-manifest, model-store entry, package, or release approval without detector and
-V5 recognition composition, independent marker-stage evidence, private
-validation, provider discovery, notices, packaging, and clean-machine proof.
+P1 was consumed without training. Its committed ONNX preflight failed because
+the legacy PyTorch exporter cannot represent the adaptive pool from 4 by 16 to
+4 by 12. It ran zero optimizer steps and did not open the public archive. P2 is
+now the only authorized candidate. It replaces that pool with fixed average
+pooling from 4 by 16 to 4 by 8 and updates the following linear width. All data,
+proposal, encoding, branch, sampling, optimizer, epoch, seed, threshold, and
+public-gate contracts remain fixed.
+
+P2 must pass every validation scene with zero false regions, misses,
+duplicates, or prohibited-structure hits and CPU ONNX parity no worse than
+`1e-5`. Only then may the single truth-hidden public gate run. A pass remains
+synthetic evidence only and cannot create a production manifest, model-store
+entry, package, or release approval without detector and V5 recognition
+composition, independent marker-stage evidence, private validation, provider
+discovery, notices, packaging, and clean-machine proof.

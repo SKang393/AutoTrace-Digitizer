@@ -2024,7 +2024,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-component-fusion-v8",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_2_preregistered",
       "defect_class": "V7 mixed repeated geometry columns with image content in one flattening CNN and overfit a compact structure while threshold-only calibration could not separate it",
       "prior_revision": "graph-text-component-context-v7",
       "prior_exposed_fixture_bytes_reused": false,
@@ -2034,24 +2034,27 @@
       "trigger_selection_scene_count": 64,
       "trigger_selection_false_regions": 1,
       "trigger_selection_missed_regions": 0,
-      "isolated_change": "replace the exhausted V7 flattening classifier with separate visual and scalar-geometry branches, deterministic class-balanced batches, and fresh structure-rich procedural families while retaining the exact proposal and encoding contract",
-      "architecture": "separated-visual-geometry-component-fusion-cnn-v1",
+      "isolated_change": "replace only the P1 adaptive average pool from 4 by 16 to 4 by 12 with fixed average pooling from 4 by 16 to 4 by 8 and update the following linear width; retain separate visual and geometry branches, data, proposals, encoding, balanced sampling, optimizer, epochs, seed, thresholds, and public gate",
+      "architecture": "separated-visual-geometry-component-fusion-cnn-fixed-pool-v1",
       "proposal_algorithm": "adaptive-gray-baseline-bounded-line-grouping-v2",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
+        "P2"
+      ],
+      "consumed_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "retired_unregistered_candidate_ids": [],
       "candidate_config_paths": {
-        "P1": "ml/ocr/component_fusion_detector_v8/training/p1.json"
+        "P1": "ml/ocr/component_fusion_detector_v8/training/p1.json",
+        "P2": "ml/ocr/component_fusion_detector_v8/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "ca40d2be063e3fc8204ddaaa703a5fa790e6765ce6c5aa7bd165d89037d0558a"
+        "P1": "ca40d2be063e3fc8204ddaaa703a5fa790e6765ce6c5aa7bd165d89037d0558a",
+        "P2": "593d0288839a0493b4a6a5155b91fb7948cd7749655e57f8b0fe5e646fdd6913"
       },
       "protocol_path": "ml/ocr/component_fusion_detector_v8/PROTOCOL.json",
       "protocol_sha256": "0b04d250cfda13407721d0803b5a2a766ed332397353378c665fb01b71c6f07f",
@@ -2072,8 +2075,17 @@
       "public_gate_config_sha256": "0f237af83cd9a6286c8e378825a6e3ff0fc14cf10db5d2bb6c52de499a232e28",
       "expected_public_evaluator_source_bundle_sha256": "96aefb9706291c94c3b499cf0882a71db2f2f5aa41541efde22cd6b4d737a0a2",
       "p1_expected_runner_source_bundle_sha256": "0275bd7e2cbaa82f75d6840f705b161d021702e646d67667eeab26c7d12fadad",
+      "p1_result_path": "ml/ocr/component_fusion_detector_v8/P1_RESULT.json",
+      "p1_result_sha256": "44ce0050101179958305f122c9cc58563e8c5e63c10e64e6b9b9f9f4636c641c",
+      "p1_training_report_sha256": "e3aa6b5b54dc7ecd82fd7496b484c74ec8deb7e0644951ed30359c23f2af7837",
+      "p1_training_opened_seal_sha256": "54aa82540cb5aae127d25a0ce7fd2355d378f4f3deab221d2b517ab5906cc7a2",
+      "p1_training_result_seal_sha256": "d60de2c8a9f7e47468492b7d353412943e7a8d4b9d4618e1357deaa7defaa4a8",
+      "p1_optimizer_steps": 0,
+      "p1_failure_phase": "onnx_preflight",
+      "p1_failure": "P1 failed closed before training because the legacy PyTorch ONNX exporter rejects adaptive average pooling from 4 by 16 to 4 by 12.",
+      "p2_expected_runner_source_bundle_sha256": "e1b4ff8595ee620fa54f43723db4aea9140a0f1e7786f014fcc5702cc9da7c99",
       "execution_authorized": true,
-      "authorized_candidate_id": "P1",
+      "authorized_candidate_id": "P2",
       "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
