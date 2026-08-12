@@ -1,0 +1,39 @@
+{
+  "binding": {
+    "candidate_hash_key_schema": [
+      "onnx_sha256",
+      "selection_report_sha256"
+    ],
+    "candidate_hashes": {
+      "onnx_sha256": "2d35ce2f55cee8317dfe1faf0281a6e87693cca485dbdaf39e4039ced5b97d9c",
+      "selection_report_sha256": "ffb2950fc727c77a2376bce57f71c4977cba204d24236ccc4934f6077e36bdc2"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "aecfdca65eb8e20932a486dd139fd9046ed192d9cfc69968195f02f9fc33c1b7",
+    "evaluator_source_bundle_sha256": "e0ea8b29bfe94d9c3829c94519de34ec0f56355d7c14c019c1caf7ea9b18bef7",
+    "evaluator_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/ocr/component_context_detector_v7/dataset.py",
+      "ml/ocr/component_fusion_detector_v8/dataset.py",
+      "ml/ocr/component_fusion_detector_v8/pipeline.py",
+      "ml/ocr/component_recall_detector_v9/dataset.py",
+      "ml/ocr/component_recall_detector_v9/pipeline.py",
+      "ml/ocr/component_recall_detector_v9/protocol.py",
+      "ml/ocr/component_recall_detector_v9/sealed_gate.py",
+      "ml/ocr/component_region_detector_v6/dataset.py"
+    ],
+    "gate_config_sha256": "079fad8c1b90835d51b15b1e4b27e5cfa634dd0f66196a8f208a0e0830d7d51a",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "graph-text-component-recall-v9-public-v1",
+    "split_config_path": "ml/ocr/component_recall_detector_v9/gates/sealed-public-v1.json",
+    "split_config_sha256": "2be8460a31194607a1e55dc41a480d3655d1c042ef49f024a889e2224d9da12b",
+    "task": "ocr-detection"
+  },
+  "evaluation_count": 1,
+  "key": "ecaec9c3b402c1fab10f95cd0a53c797ee2b1c52373f5326a9448fdac08087fe",
+  "opened_utc": "2026-08-12T22:56:56.654914+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}
