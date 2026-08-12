@@ -2133,6 +2133,71 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "ocr-detection",
+      "revision": "graph-text-component-recall-v9",
+      "status": "candidate_1_preregistered",
+      "defect_class": "V8 production composition missed 113 of 320 regions while recognition was exact on every retained region, with the largest recall gap in legend text",
+      "prior_revision": "graph-text-component-fusion-v8",
+      "prior_exposed_fixture_bytes_reused": false,
+      "prior_public_sample_or_pixel_inspection_used": false,
+      "trigger_evidence_path": "ml/ocr/production_composition_v1/VALIDATION_REPORT.json",
+      "trigger_evidence_sha256": "a3d851c043993bdc5546c68dfa26be837c88495600f7cbd214c55ee107ef330f",
+      "trigger_validation_scene_count": 64,
+      "trigger_truth_region_count": 320,
+      "trigger_true_positives": 207,
+      "trigger_false_negatives": 113,
+      "trigger_false_positives": 0,
+      "isolated_change": "replace only the V8 training and selection families with new five-role-balanced production-composition recall families; retain the exact proposal, encoding, architecture, loss, optimizer, epochs, and inference contract",
+      "architecture": "separated-visual-geometry-component-fusion-cnn-fixed-pool-v1",
+      "proposal_algorithm": "adaptive-gray-baseline-bounded-line-grouping-v2",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "retired_unregistered_candidate_ids": [],
+      "candidate_config_paths": {
+        "P1": "ml/ocr/component_recall_detector_v9/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "3a23a1eebfcd3edeb4f2f58d396b06285fd227042a1492d6e85d0dee00ae0f46"
+      },
+      "protocol_path": "ml/ocr/component_recall_detector_v9/PROTOCOL.json",
+      "protocol_sha256": "f329e6d58354adbd20afadc837820e579230aa4b58129a2fc02142ddd7fb4961",
+      "selection_manifest_path": "ml/ocr/component_recall_detector_v9/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "d1d4106726294212afd433a44c15f4f60fc92b81eb668db45d8dcd7601feddf1",
+      "selection_train_scene_count": 320,
+      "selection_validation_scene_count": 80,
+      "selection_train_proposal_count": 17627,
+      "selection_validation_proposal_count": 2571,
+      "sealed_public_test_seal_path": "ml/ocr/component_recall_detector_v9/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "a3361997b8fd5b2e23ed986bac6f264f5a1ba07effd4af71649031f7c7b92bb9",
+      "sealed_public_fixture_archive_sha256": "e72e2e3000e627a77d2e7320a4d6c0b0e0d99b37659001978dfa79c404081abd",
+      "sealed_public_private_manifest_sha256": "aecfdca65eb8e20932a486dd139fd9046ed192d9cfc69968195f02f9fc33c1b7",
+      "sealed_public_scene_count": 112,
+      "sealed_public_proposal_count": 8278,
+      "public_gate_config_path": "ml/ocr/component_recall_detector_v9/gates/sealed-public-v1.json",
+      "public_gate_config_sha256": "a29625e53c8a78ae7d1c5eb4b737264c3c01a265a021639823641e4a8f677dc6",
+      "p1_expected_runner_source_bundle_sha256": "6ccb4c1df1da50a920635cac89a8135e09db173949d9f7c7ba453a76552b6339",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "execution_blocker": null,
+      "public_gate_authorized": false,
+      "public_gate_authorized_candidate_id": null,
+      "public_gate_authorized_on_selection_pass": true,
+      "public_gate_evaluations": 0,
+      "public_gate_archive_opened": false,
+      "manifest_created": false,
+      "model_store_promoted": false,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
     }
   ]
 }

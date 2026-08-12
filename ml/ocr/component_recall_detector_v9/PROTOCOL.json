@@ -1,0 +1,153 @@
+{
+  "architecture": "separated-visual-geometry-component-fusion-cnn-v1",
+  "candidate_ids": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "currently_preregistered_candidate": "P1",
+  "data_scope": "fresh procedural five-role graph scenes with new seed, renderer, degradation, layout, and label-family registrations; no Chandler, Generalization, private/article images, external datasets, pretrained weights, downloaded training data, predecessor fixture bytes, or consumed V8-composition pixels",
+  "experiment_budget": 3,
+  "font_notice_path": "LICENSES/NotoSans-OFL-1.1.txt",
+  "font_notice_sha256": "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a",
+  "input": [
+    "proposal_count",
+    2,
+    32,
+    140
+  ],
+  "isolated_change": "new training and selection families explicitly balance all five production graph-text roles while retaining the exact V8 proposal, encoding, architecture, loss, and inference contract",
+  "license": "Apache-2.0",
+  "output": [
+    "proposal_count",
+    2
+  ],
+  "preprocessing": {
+    "channels": [
+      "tight_proposal_ink",
+      "expanded_scene_context_ink"
+    ],
+    "crop_height": 32,
+    "crop_width": 128,
+    "geometry_feature_count": 12,
+    "source": "immutable original-pixel Gray8 raster",
+    "source_revision": "graph-text-component-context-v7-encoding-v1"
+  },
+  "production_approval": false,
+  "proposal_algorithm": {
+    "algorithm": "adaptive-gray-baseline-bounded-line-grouping-v2",
+    "ordering": "top,left,bottom,right",
+    "source": "ml/ocr/component_context_detector_v7/dataset.py"
+  },
+  "release_eligible": false,
+  "revision": "graph-text-component-recall-v9",
+  "schema": "graphreader.ocr-component-recall-protocol.v1",
+  "selection_gates": {
+    "duplicate_region_count": 0,
+    "exact_region_count_every_fixture": true,
+    "false_region_count": 0,
+    "missed_region_count": 0,
+    "onnx_parity_maximum_absolute_error": 1e-05,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "truth_match_iou_minimum": 0.5
+  },
+  "selection_thresholds": [
+    0.45,
+    0.55,
+    0.65,
+    0.75,
+    0.85,
+    0.9,
+    0.925,
+    0.95
+  ],
+  "split_generator_source_bundle_sha256": "869abe80f3379925ac71c5940dfea981bb18a908a3d798ab5a88801130104aed",
+  "split_generator_source_paths": [
+    "ml/ocr/component_recall_detector_v9/dataset.py",
+    "ml/ocr/component_recall_detector_v9/prepare_split.py",
+    "ml/ocr/component_recall_detector_v9/protocol.py",
+    "ml/ocr/component_context_detector_v7/dataset.py",
+    "ml/ocr/component_region_detector_v6/dataset.py"
+  ],
+  "splits": [
+    {
+      "degradation_family": "median-tone-local-fade-v9-train",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "font_sha256": [
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      ],
+      "renderer_family": "five-role-shifted-legend-scenes-v9-train",
+      "scene_count": 320,
+      "seed_offset": 409000,
+      "split": "train"
+    },
+    {
+      "degradation_family": "area-resample-row-fade-v9-validation",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "font_sha256": [
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0"
+      ],
+      "renderer_family": "five-role-reflected-tick-scenes-v9-validation",
+      "scene_count": 80,
+      "seed_offset": 431000,
+      "split": "validation"
+    },
+    {
+      "degradation_family": "gamma-quantization-speckle-v9-public",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf"
+      ],
+      "font_sha256": [
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb"
+      ],
+      "renderer_family": "five-role-offset-annotation-scenes-v9-public",
+      "scene_count": 112,
+      "seed_offset": 457000,
+      "split": "sealed_public"
+    }
+  ],
+  "state": "split_frozen_before_training",
+  "task": "ocr-detection",
+  "training": {
+    "loss": "unweighted cross entropy",
+    "negative_proposal_cap_per_training_scene": 32,
+    "positive_role_balance": "exactly one y tick, x tick, phase heading, annotation, and legend label per scene",
+    "sampler": "deterministic class-balanced batches"
+  },
+  "trigger_evidence": {
+    "composition_report_sha256": "a3d851c043993bdc5546c68dfa26be837c88495600f7cbd214c55ee107ef330f",
+    "detected_numeric_exact_match": 1.0,
+    "detected_word_exact_match": 1.0,
+    "false_negatives": 113,
+    "false_positives": 0,
+    "misses_by_role": {
+      "annotation": 11,
+      "legend_text": 56,
+      "x_tick": 25,
+      "y_tick": 21
+    },
+    "prior_public_composition_archive_opened": false,
+    "prior_revision": "graph-text-component-fusion-v8",
+    "prior_validation_pixels_used": false,
+    "true_positives": 207,
+    "truth_region_count": 320,
+    "validation_scene_count": 64
+  }
+}
