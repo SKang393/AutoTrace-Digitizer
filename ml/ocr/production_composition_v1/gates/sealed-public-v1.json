@@ -7,13 +7,13 @@
     "validation_report_sha256"
   ],
   "expected_dataset_manifest_sha256": "19ee77d93c0f5cca612b0cd03dc52470c524e2910b020e7d87e104bcd52fa43d",
-  "expected_evaluator_source_bundle_sha256": "1cd9cc6aee9659a69056b627d8fc35840a8a874db97cfea98239ae1eb7f98635",
+  "expected_evaluator_source_bundle_sha256": "cb4086577c5cafd55d732fd82de111f8bdd4158a89009fbb12da00fd0d8cac7c",
   "expected_gate_config_sha256": "a63091497539bd16291bcfcfb0e6a33a178e2794873f31414b183bf75efa5a17",
   "production_approval": false,
   "release_eligible": false,
   "revision": "graphreader-v8-official-english-v5-numeric-composition-v1-public-v1",
   "schema": "graphreader.ocr-production-composition-gate-config.v1",
   "sealed_public_test_seal_path": "ml/ocr/production_composition_v1/SEALED_PUBLIC_TEST_SEAL.json",
-  "sealed_public_test_seal_sha256": "f4371ae92e0c606544e75c1314d0710b7af7fb8c807324f035a1a94f620df146",
+  "sealed_public_test_seal_sha256": "d7a6b3e806824768fa39eeefd60219a634eb3856034afcab35d8aeb7ed8e14bc",
   "task": "ocr-production-composition"
 }

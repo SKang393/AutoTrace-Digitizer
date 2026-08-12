@@ -102,7 +102,7 @@ def _crop(
     horizontal_padding: float,
     vertical_padding: float,
     vertical_content_padding_ratio: float,
-    padding_value: int,
+    padding_value: float,
 ) -> np.ndarray:
     effective_vertical_padding = vertical_padding + box.height * vertical_content_padding_ratio
     left = box.left - horizontal_padding
@@ -115,8 +115,8 @@ def _crop(
         source_y = top + ((target_y + 0.5) / target_height) * height - 0.5
         for target_x in range(content_width):
             source_x = left + ((target_x + 0.5) / content_width) * width - 0.5
-            output[target_y, target_x] = _sample_bilinear(gray, source_x, source_y)
-    return np.rint(output).clip(0, 255).astype(np.uint8)
+            output[target_y, target_x] = _sample_bilinear(gray, source_x, source_y) / 255.0
+    return output
 
 
 def _decode_ctc(output: np.ndarray, alphabet: str) -> tuple[str, float]:
@@ -150,9 +150,9 @@ def _official_recognize(gray: np.ndarray, box: Any, runner: DirectRunner, alphab
         horizontal_padding=8.0,
         vertical_padding=2.0,
         vertical_content_padding_ratio=0.0,
-        padding_value=128,
+        padding_value=0.5,
     )
-    normalized = (crop.astype(np.float32) / 255.0 - 0.5) * 2.0
+    normalized = (crop - 0.5) * 2.0
     tensor = np.ascontiguousarray(np.broadcast_to(normalized, (3, 48, 320))[None, :, :, :])
     return _decode_ctc(runner.run(tensor), alphabet)
 
@@ -166,9 +166,10 @@ def _numeric_recognize(gray: np.ndarray, box: Any, runner: DirectRunner) -> tupl
         horizontal_padding=12.0,
         vertical_padding=1.0,
         vertical_content_padding_ratio=0.25,
-        padding_value=255,
+        padding_value=1.0,
     )
-    glyphs = isolate_glyphs(crop)
+    quantized = np.rint(crop * 255.0).clip(0, 255).astype(np.uint8)
+    glyphs = isolate_glyphs(quantized)
     if not glyphs or len(glyphs) > 8:
         return "", 0.0
     values = np.stack(glyphs).astype(np.float32)

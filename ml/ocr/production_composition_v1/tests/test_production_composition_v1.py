@@ -7,6 +7,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import numpy as np
+
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 from ml.ocr.production_composition_v1.dataset import (
     build_split,
@@ -18,6 +20,7 @@ from ml.ocr.production_composition_v1.protocol import (
     SPLITS,
     protocol_configuration,
 )
+from ml.ocr.production_composition_v1.pipeline import _crop
 from ml.ocr.production_composition_v1.sealed_gate import (
     EVALUATOR_SOURCE_PATHS,
     SPLIT_CONFIG_PATH,
@@ -92,3 +95,25 @@ def test_composition_cannot_be_promoted_by_preregistration() -> None:
     assert not any(REPO_ROOT.glob("models/manifest/ocr/*production*composition*.json"))
     model_index = _load(REPO_ROOT / "artifacts/production-model-store/production-model-index.json")
     assert REVISION not in json.dumps(model_index, sort_keys=True)
+
+
+def test_float_crop_preserves_runtime_padding_and_sampling_domain() -> None:
+    class Box:
+        left = 0.0
+        top = 0.0
+        width = 1.0
+        height = 1.0
+
+    crop = _crop(
+        np.asarray([[255]], dtype=np.uint8),
+        Box(),
+        target_width=3,
+        target_height=1,
+        horizontal_padding=0.0,
+        vertical_padding=0.0,
+        vertical_content_padding_ratio=0.0,
+        padding_value=0.5,
+    )
+    assert crop.dtype == np.float32
+    assert crop.tolist() == [[1.0, 0.5, 0.5]]
+    assert ((crop - 0.5) * 2.0).tolist() == [[1.0, 0.0, 0.0]]

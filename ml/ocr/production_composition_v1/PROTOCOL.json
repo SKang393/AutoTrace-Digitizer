@@ -70,7 +70,7 @@
     "participant_phase_legend_annotation_numeric_substitution_forbidden": true
   },
   "schema": "graphreader.ocr-production-composition-protocol.v1",
-  "split_generator_source_bundle_sha256": "d6fc5527f162702f117afbf17329246138d481feddb5ca9e9b825554acbbba51",
+  "split_generator_source_bundle_sha256": "036b6ef9ce7edf9fd682407165b8242f88edf0b2cfae5c062f375a91c99c389a",
   "split_generator_source_paths": [
     "ml/ocr/production_composition_v1/dataset.py",
     "ml/ocr/production_composition_v1/prepare_split.py",

@@ -21,7 +21,7 @@ from .validation_gate import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_PRIVATE_ROOT = Path("ml/ocr/production_composition_v1/artifacts/composition-v1-final-freeze")
+DEFAULT_PRIVATE_ROOT = Path("ml/ocr/production_composition_v1/artifacts/composition-v1-exact-execution-freeze")
 DEFAULT_PROTOCOL = Path("ml/ocr/production_composition_v1/PROTOCOL.json")
 DEFAULT_SELECTION = Path("ml/ocr/production_composition_v1/VALIDATION_SEAL.json")
 DEFAULT_SEAL = Path("ml/ocr/production_composition_v1/SEALED_PUBLIC_TEST_SEAL.json")
