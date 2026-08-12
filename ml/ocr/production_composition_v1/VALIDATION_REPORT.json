@@ -1,0 +1,6247 @@
+{
+  "canonical_seal_key": "18e1e9db194912dad5ab6a0b43b4997c99edc871f3eb1b2a5f4e93de30cd1ae4",
+  "direct_execution": {
+    "detector": {
+      "calls": 64,
+      "input_tensor_stream_sha256": "b49c0b8f9f4ae2764bd2a5ae888c6b25d91e6ee891d1bdd19d58b0476271bcaf",
+      "output_tensor_stream_sha256": "d01ea50acc4632c15e508f018d84295287c0af8a2c70aaf65523d45ec840c8a9"
+    },
+    "numeric_recognizer": {
+      "calls": 176,
+      "input_tensor_stream_sha256": "f8ceabe3bcf09286ba3870d68833c4554291442f6689019463848493e7a64806",
+      "output_tensor_stream_sha256": "3d86d62126f0f24ed9412daff8e61a6a7016d28bcbd6efc1e7125bac75bd3d77"
+    },
+    "official_recognizer": {
+      "calls": 207,
+      "input_tensor_stream_sha256": "d9f2e8c489f54a3007460330d0a73fd76d544c7db1a9207b0abfd2a04f1eb3ee",
+      "output_tensor_stream_sha256": "0eda0328088178b3f614c24b2d5f23fb42d77698bf47bdaae40769163e3256cd"
+    }
+  },
+  "elapsed_ms": 184448.414,
+  "evaluation_count": 1,
+  "fixture_archive_sha256": "7d39f3cd8c2c2d0feb4b14cefc7258de6cd47ff6ba58e93dc4c1a7893414ea0f",
+  "gate_requirements": {
+    "character_error_rate_maximum": 0.05,
+    "direct_fixture_byte_execution_required": true,
+    "duplicate_region_count": 0,
+    "evaluation_limit": 1,
+    "exact_region_count_every_fixture": true,
+    "false_region_count": 0,
+    "forbidden_numeric_route_count": 0,
+    "missed_region_count": 0,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "recognition_exact_match_minimum": 0.9,
+    "role_accuracy_minimum": 0.9
+  },
+  "metrics": {
+    "cases": [
+      {
+        "accepted_region_count": 5,
+        "duplicate_region_count": 0,
+        "exact_detection": true,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Treatment",
+            "exact": true,
+            "numeric_confidence": 0.8394017219543457,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999344216452705,
+            "official_prediction": "Treatment",
+            "predicted_role": "phase_heading",
+            "prediction": "Treatment",
+            "proposal_bbox": [
+              134,
+              13,
+              215,
+              25
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              134,
+              13,
+              216,
+              25
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Treatment"
+          },
+          {
+            "display_text": "5",
+            "exact": true,
+            "numeric_confidence": 0.9994943141937256,
+            "numeric_prediction": "5",
+            "official_confidence": 0.9998766183853149,
+            "official_prediction": "5",
+            "predicted_role": "y_tick",
+            "prediction": "5",
+            "proposal_bbox": [
+              18,
+              78,
+              28,
+              92
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              18,
+              78,
+              28,
+              92
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "5"
+          },
+          {
+            "display_text": "Transfer",
+            "exact": true,
+            "numeric_confidence": 0.7341294288635254,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999799132347107,
+            "official_prediction": "Transfer",
+            "predicted_role": "annotation",
+            "prediction": "Transfer",
+            "proposal_bbox": [
+              356,
+              110,
+              433,
+              125
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              356,
+              110,
+              433,
+              125
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Transfer"
+          },
+          {
+            "display_text": "Rate",
+            "exact": true,
+            "numeric_confidence": 0.8451182842254639,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999412000179291,
+            "official_prediction": "Rate",
+            "predicted_role": "legend_text",
+            "prediction": "Rate",
+            "proposal_bbox": [
+              584,
+              184,
+              625,
+              198
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              583,
+              184,
+              625,
+              198
+            ],
+            "truth_role": "legend_text",
+            "truth_text": "Rate"
+          },
+          {
+            "display_text": "50",
+            "exact": true,
+            "numeric_confidence": 0.9988066554069519,
+            "numeric_prediction": "50",
+            "official_confidence": 0.9998482465744019,
+            "official_prediction": "50",
+            "predicted_role": "x_tick",
+            "prediction": "50",
+            "proposal_bbox": [
+              171,
+              288,
+              188,
+              300
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              170,
+              288,
+              188,
+              300
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "50"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 38,
+        "scene_id": "ocr-production-composition-v1-validation-00000",
+        "source_raster_sha256": "c2167a5fa7fe1f1590bf55917ba92529308050cbaae8d87df8126e6a99a27de5",
+        "true_positives": 5,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Intervention",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999721348285675,
+            "official_prediction": "Intervention",
+            "predicted_role": "phase_heading",
+            "prediction": "Intervention",
+            "proposal_bbox": [
+              172,
+              14,
+              271,
+              26
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              171,
+              14,
+              271,
+              26
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Intervention"
+          },
+          {
+            "display_text": "50",
+            "exact": true,
+            "numeric_confidence": 0.9998008608818054,
+            "numeric_prediction": "50",
+            "official_confidence": 0.9997286796569824,
+            "official_prediction": "50",
+            "predicted_role": "y_tick",
+            "prediction": "50",
+            "proposal_bbox": [
+              18,
+              96,
+              38,
+              110
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              18,
+              96,
+              38,
+              110
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "50"
+          },
+          {
+            "display_text": "Review",
+            "exact": true,
+            "numeric_confidence": 0.7830613255500793,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999555150667826,
+            "official_prediction": "Review",
+            "predicted_role": "annotation",
+            "prediction": "Review",
+            "proposal_bbox": [
+              386,
+              128,
+              444,
+              140
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              386,
+              128,
+              444,
+              140
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Review"
+          },
+          {
+            "display_text": "0",
+            "exact": true,
+            "numeric_confidence": 0.9999403953552246,
+            "numeric_prediction": "0",
+            "official_confidence": 0.999381422996521,
+            "official_prediction": "0",
+            "predicted_role": "x_tick",
+            "prediction": "0",
+            "proposal_bbox": [
+              202,
+              290,
+              212,
+              304
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              201,
+              290,
+              212,
+              304
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "0"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 15,
+        "scene_id": "ocr-production-composition-v1-validation-00001",
+        "source_raster_sha256": "c7317b13ea6f9a5616eb148f65574acceef7a2510e0db3d9f7178d85eda2a3de",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Baseline",
+            "exact": true,
+            "numeric_confidence": 0.8352178335189819,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999668300151825,
+            "official_prediction": "Baseline",
+            "predicted_role": "phase_heading",
+            "prediction": "Baseline",
+            "proposal_bbox": [
+              209,
+              14,
+              287,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              209,
+              14,
+              287,
+              29
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Baseline"
+          },
+          {
+            "display_text": "2.5",
+            "exact": true,
+            "numeric_confidence": 0.9997379779815674,
+            "numeric_prediction": "2.5",
+            "official_confidence": 0.999165932337443,
+            "official_prediction": "2.5",
+            "predicted_role": "y_tick",
+            "prediction": "2.5",
+            "proposal_bbox": [
+              18,
+              115,
+              43,
+              130
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              115,
+              43,
+              129
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "2.5"
+          },
+          {
+            "display_text": "8O",
+            "exact": true,
+            "numeric_confidence": 0.9995522499084473,
+            "numeric_prediction": "80",
+            "official_confidence": 0.9962945580482483,
+            "official_prediction": "80",
+            "predicted_role": "x_tick",
+            "prediction": "80",
+            "proposal_bbox": [
+              232,
+              288,
+              255,
+              301
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              232,
+              289,
+              255,
+              301
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "80"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 33,
+        "scene_id": "ocr-production-composition-v1-validation-00002",
+        "source_raster_sha256": "19b0e9ee9e347495af7889105763722afcce06d1ff0db39f24053c8b45274b93",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Followup",
+            "exact": true,
+            "numeric_confidence": 0.9195938110351562,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999636113643646,
+            "official_prediction": "Followup",
+            "predicted_role": "other",
+            "prediction": "Followup",
+            "proposal_bbox": [
+              246,
+              14,
+              334,
+              34
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              246,
+              14,
+              334,
+              34
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Followup"
+          },
+          {
+            "display_text": "Prompt",
+            "exact": true,
+            "numeric_confidence": 0.7660899758338928,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999217291673025,
+            "official_prediction": "Prompt",
+            "predicted_role": "annotation",
+            "prediction": "Prompt",
+            "proposal_bbox": [
+              444,
+              119,
+              506,
+              136
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              444,
+              119,
+              507,
+              136
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Prompt"
+          },
+          {
+            "display_text": "5",
+            "exact": true,
+            "numeric_confidence": 0.9998923540115356,
+            "numeric_prediction": "5",
+            "official_confidence": 0.9998712539672852,
+            "official_prediction": "5",
+            "predicted_role": "x_tick",
+            "prediction": "5",
+            "proposal_bbox": [
+              264,
+              288,
+              274,
+              305
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              264,
+              289,
+              274,
+              305
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "5"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 17,
+        "scene_id": "ocr-production-composition-v1-validation-00003",
+        "source_raster_sha256": "92b7ea56a4983e8be4cf74302f4ef08c66052229761c4944b19d367338a18b17",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 2,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase B",
+            "exact": true,
+            "numeric_confidence": 0.692880392074585,
+            "numeric_prediction": "",
+            "official_confidence": 0.9998068468911308,
+            "official_prediction": "Phase B",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase B",
+            "proposal_bbox": [
+              284,
+              14,
+              355,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              283,
+              14,
+              355,
+              29
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase B"
+          },
+          {
+            "display_text": "-2",
+            "exact": true,
+            "numeric_confidence": 0.9998470544815063,
+            "numeric_prediction": "-2",
+            "official_confidence": 0.9999046325683594,
+            "official_prediction": "-2",
+            "predicted_role": "x_tick",
+            "prediction": "-2",
+            "proposal_bbox": [
+              302,
+              289,
+              313,
+              305
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              294,
+              289,
+              313,
+              305
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "-2"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 29,
+        "scene_id": "ocr-production-composition-v1-validation-00004",
+        "source_raster_sha256": "23567b2ba6c61832a895b4eda32dd43f6b5e448f101ff71a06405b9153f01f48",
+        "true_positives": 2,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Maintenance",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999555891210382,
+            "official_prediction": "Maintenance",
+            "predicted_role": "phase_heading",
+            "prediction": "Maintenance",
+            "proposal_bbox": [
+              321,
+              14,
+              436,
+              28
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              320,
+              13,
+              436,
+              28
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Maintenance"
+          },
+          {
+            "display_text": "Probe",
+            "exact": true,
+            "numeric_confidence": 0.7954784631729126,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999680042266845,
+            "official_prediction": "Probe",
+            "predicted_role": "annotation",
+            "prediction": "Probe",
+            "proposal_bbox": [
+              398,
+              153,
+              456,
+              169
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              397,
+              153,
+              456,
+              169
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Probe"
+          },
+          {
+            "display_text": "-2",
+            "exact": true,
+            "numeric_confidence": 0.9997210502624512,
+            "numeric_prediction": "-2",
+            "official_confidence": 0.9998920261859894,
+            "official_prediction": "-2",
+            "predicted_role": "y_tick",
+            "prediction": "-2",
+            "proposal_bbox": [
+              24,
+              172,
+              33,
+              185
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              172,
+              33,
+              185
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "-2"
+          },
+          {
+            "display_text": "2O",
+            "exact": true,
+            "numeric_confidence": 0.9986884593963623,
+            "numeric_prediction": "20",
+            "official_confidence": 0.9996553957462311,
+            "official_prediction": "20",
+            "predicted_role": "x_tick",
+            "prediction": "20",
+            "proposal_bbox": [
+              325,
+              288,
+              346,
+              300
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              325,
+              288,
+              346,
+              300
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "20"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 22,
+        "scene_id": "ocr-production-composition-v1-validation-00005",
+        "source_raster_sha256": "e2f8de73b61ef221d4dcb5be89234ce45819b7e2d9479c61895bd9bc711c698e",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase A",
+            "exact": true,
+            "numeric_confidence": 0.7320141196250916,
+            "numeric_prediction": "",
+            "official_confidence": 0.9987929718835014,
+            "official_prediction": "Phase A",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase A",
+            "proposal_bbox": [
+              167,
+              13,
+              236,
+              27
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              167,
+              13,
+              237,
+              27
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase A"
+          },
+          {
+            "display_text": "0",
+            "exact": true,
+            "numeric_confidence": 0.9999306201934814,
+            "numeric_prediction": "0",
+            "official_confidence": 0.9930570125579834,
+            "official_prediction": "0",
+            "predicted_role": "y_tick",
+            "prediction": "0",
+            "proposal_bbox": [
+              18,
+              83,
+              27,
+              96
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              83,
+              27,
+              96
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "0"
+          },
+          {
+            "display_text": "Criterion",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999593363867866,
+            "official_prediction": "Criterion",
+            "predicted_role": "annotation",
+            "prediction": "Criterion",
+            "proposal_bbox": [
+              426,
+              127,
+              504,
+              141
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              426,
+              126,
+              504,
+              141
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Criterion"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 41,
+        "scene_id": "ocr-production-composition-v1-validation-00006",
+        "source_raster_sha256": "0eec02fc5a20375403b4c9a55433fa3bf2f180dcdae8b44804be1c92bc65c348",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Treatment",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999531375037299,
+            "official_prediction": "Treatment",
+            "predicted_role": "phase_heading",
+            "prediction": "Treatment",
+            "proposal_bbox": [
+              203,
+              13,
+              283,
+              25
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              203,
+              13,
+              283,
+              25
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Treatment"
+          },
+          {
+            "display_text": "25",
+            "exact": true,
+            "numeric_confidence": 0.9997046589851379,
+            "numeric_prediction": "25",
+            "official_confidence": 0.9999760389328003,
+            "official_prediction": "25",
+            "predicted_role": "y_tick",
+            "prediction": "25",
+            "proposal_bbox": [
+              18,
+              102,
+              40,
+              118
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              102,
+              40,
+              118
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "25"
+          },
+          {
+            "display_text": "Transfer",
+            "exact": true,
+            "numeric_confidence": 0.8404022455215454,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999730885028839,
+            "official_prediction": "Transfer",
+            "predicted_role": "annotation",
+            "prediction": "Transfer",
+            "proposal_bbox": [
+              454,
+              143,
+              519,
+              155
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              454,
+              143,
+              519,
+              155
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Transfer"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 16,
+        "scene_id": "ocr-production-composition-v1-validation-00007",
+        "source_raster_sha256": "7e57f5dffa8b58bb71cc135609140105a50653e18a4e31eecd2eb925ccc95a82",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 2,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Intervention",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999692340691885,
+            "official_prediction": "Intervention",
+            "predicted_role": "phase_heading",
+            "prediction": "Intervention",
+            "proposal_bbox": [
+              241,
+              13,
+              353,
+              29
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              240,
+              13,
+              353,
+              28
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Intervention"
+          },
+          {
+            "display_text": "Review",
+            "exact": true,
+            "numeric_confidence": 0.8934803605079651,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999583959579468,
+            "official_prediction": "Review",
+            "predicted_role": "annotation",
+            "prediction": "Review",
+            "proposal_bbox": [
+              379,
+              117,
+              437,
+              131
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              379,
+              116,
+              437,
+              130
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Review"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 25,
+        "scene_id": "ocr-production-composition-v1-validation-00008",
+        "source_raster_sha256": "95f139f2864cdf5c8ec4be0d35ec241620b0d118a0d9804ba361b0d6eeab0c13",
+        "true_positives": 2,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Baseline",
+            "exact": true,
+            "numeric_confidence": 0.8219717741012573,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999633282423019,
+            "official_prediction": "Baseline",
+            "predicted_role": "phase_heading",
+            "prediction": "Baseline",
+            "proposal_bbox": [
+              278,
+              13,
+              351,
+              27
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              278,
+              13,
+              351,
+              27
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Baseline"
+          },
+          {
+            "display_text": "l.5",
+            "exact": true,
+            "numeric_confidence": 0.9969983696937561,
+            "numeric_prediction": "1.5",
+            "official_confidence": 0.6920220255851746,
+            "official_prediction": "I.5",
+            "predicted_role": "y_tick",
+            "prediction": "1.5",
+            "proposal_bbox": [
+              18,
+              140,
+              38,
+              155
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              18,
+              140,
+              38,
+              155
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "1.5"
+          },
+          {
+            "display_text": "Rate",
+            "exact": true,
+            "numeric_confidence": 0.8422983288764954,
+            "numeric_prediction": "",
+            "official_confidence": 0.999930813908577,
+            "official_prediction": "Rate",
+            "predicted_role": "legend_text",
+            "prediction": "Rate",
+            "proposal_bbox": [
+              584,
+              189,
+              625,
+              203
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              583,
+              189,
+              625,
+              203
+            ],
+            "truth_role": "legend_text",
+            "truth_text": "Rate"
+          },
+          {
+            "display_text": "75",
+            "exact": true,
+            "numeric_confidence": 0.9997941851615906,
+            "numeric_prediction": "75",
+            "official_confidence": 0.9999912977218628,
+            "official_prediction": "75",
+            "predicted_role": "x_tick",
+            "prediction": "75",
+            "proposal_bbox": [
+              218,
+              289,
+              240,
+              305
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              217,
+              289,
+              240,
+              305
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "75"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 16,
+        "scene_id": "ocr-production-composition-v1-validation-00009",
+        "source_raster_sha256": "eff6c0c4faa7f8e0e992180b5486797135a5f51a5d4745aad769957de2c09315",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Followup",
+            "exact": true,
+            "numeric_confidence": 0.8527119159698486,
+            "numeric_prediction": "",
+            "official_confidence": 0.999977245926857,
+            "official_prediction": "Followup",
+            "predicted_role": "other",
+            "prediction": "Followup",
+            "proposal_bbox": [
+              316,
+              13,
+              403,
+              35
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              316,
+              14,
+              403,
+              35
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Followup"
+          },
+          {
+            "display_text": "Prompt",
+            "exact": true,
+            "numeric_confidence": 0.930115282535553,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999418258666992,
+            "official_prediction": "Prompt",
+            "predicted_role": "annotation",
+            "prediction": "Prompt",
+            "proposal_bbox": [
+              438,
+              151,
+              512,
+              173
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              437,
+              152,
+              512,
+              173
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Prompt"
+          },
+          {
+            "display_text": "2O",
+            "exact": true,
+            "numeric_confidence": 0.9995791912078857,
+            "numeric_prediction": "20",
+            "official_confidence": 0.9995383620262146,
+            "official_prediction": "20",
+            "predicted_role": "y_tick",
+            "prediction": "20",
+            "proposal_bbox": [
+              18,
+              159,
+              40,
+              172
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              159,
+              40,
+              171
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "20"
+          },
+          {
+            "display_text": "Rate",
+            "exact": true,
+            "numeric_confidence": 0.8144091963768005,
+            "numeric_prediction": "",
+            "official_confidence": 0.9998723119497299,
+            "official_prediction": "Rate",
+            "predicted_role": "legend_text",
+            "prediction": "Rate",
+            "proposal_bbox": [
+              583,
+              185,
+              622,
+              198
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              583,
+              185,
+              622,
+              198
+            ],
+            "truth_role": "legend_text",
+            "truth_text": "Rate"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 29,
+        "scene_id": "ocr-production-composition-v1-validation-00010",
+        "source_raster_sha256": "dd44662f5a7845679714abe7570c505b9fca3b7b27c6a60e2ae3dbc81bb50617",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase B",
+            "exact": true,
+            "numeric_confidence": 0.8294994235038757,
+            "numeric_prediction": "",
+            "official_confidence": 0.9987942235810416,
+            "official_prediction": "Phase B",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase B",
+            "proposal_bbox": [
+              163,
+              14,
+              239,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              162,
+              14,
+              239,
+              30
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase B"
+          },
+          {
+            "display_text": "Change",
+            "exact": true,
+            "numeric_confidence": 0.7875411510467529,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999197423458099,
+            "official_prediction": "Change",
+            "predicted_role": "annotation",
+            "prediction": "Change",
+            "proposal_bbox": [
+              361,
+              125,
+              418,
+              141
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              360,
+              125,
+              418,
+              141
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Change"
+          },
+          {
+            "display_text": "8O",
+            "exact": true,
+            "numeric_confidence": 0.9915988445281982,
+            "numeric_prediction": "80",
+            "official_confidence": 0.998842179775238,
+            "official_prediction": "80",
+            "predicted_role": "y_tick",
+            "prediction": "80",
+            "proposal_bbox": [
+              18,
+              178,
+              42,
+              192
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              178,
+              42,
+              192
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "80"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 15,
+        "scene_id": "ocr-production-composition-v1-validation-00011",
+        "source_raster_sha256": "dc4fb28e1d70f23e578cc475a145a7d215bd62d6c569a4920f76cd301a7669f5",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Maintenance",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999576265161688,
+            "official_prediction": "Maintenance",
+            "predicted_role": "phase_heading",
+            "prediction": "Maintenance",
+            "proposal_bbox": [
+              200,
+              14,
+              331,
+              31
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              199,
+              14,
+              331,
+              30
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Maintenance"
+          },
+          {
+            "display_text": "Probe",
+            "exact": true,
+            "numeric_confidence": 0.665412962436676,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999549150466919,
+            "official_prediction": "Probe",
+            "predicted_role": "annotation",
+            "prediction": "Probe",
+            "proposal_bbox": [
+              390,
+              143,
+              435,
+              155
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              390,
+              143,
+              435,
+              155
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Probe"
+          },
+          {
+            "display_text": "10",
+            "exact": true,
+            "numeric_confidence": 0.9998652935028076,
+            "numeric_prediction": "10",
+            "official_confidence": 0.9998557269573212,
+            "official_prediction": "10",
+            "predicted_role": "x_tick",
+            "prediction": "10",
+            "proposal_bbox": [
+              311,
+              287,
+              328,
+              300
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              311,
+              288,
+              328,
+              300
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "10"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 21,
+        "scene_id": "ocr-production-composition-v1-validation-00012",
+        "source_raster_sha256": "d9e4e96469fd61cc2d2ec0b451c27704f58b34cd8e988d51ce2ed79f1782ab5d",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 5,
+        "duplicate_region_count": 0,
+        "exact_detection": true,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase A",
+            "exact": true,
+            "numeric_confidence": 0.7796757221221924,
+            "numeric_prediction": "",
+            "official_confidence": 0.999467270714896,
+            "official_prediction": "Phase A",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase A",
+            "proposal_bbox": [
+              237,
+              14,
+              309,
+              29
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              236,
+              14,
+              309,
+              29
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase A"
+          },
+          {
+            "display_text": "10",
+            "exact": true,
+            "numeric_confidence": 0.9999403357505798,
+            "numeric_prediction": "10",
+            "official_confidence": 0.9999105334281921,
+            "official_prediction": "10",
+            "predicted_role": "y_tick",
+            "prediction": "10",
+            "proposal_bbox": [
+              19,
+              109,
+              39,
+              123
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              18,
+              109,
+              39,
+              123
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "10"
+          },
+          {
+            "display_text": "Criterion",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.999978674782647,
+            "official_prediction": "Criterion",
+            "predicted_role": "annotation",
+            "prediction": "Criterion",
+            "proposal_bbox": [
+              419,
+              117,
+              493,
+              130
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              419,
+              116,
+              493,
+              130
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Criterion"
+          },
+          {
+            "display_text": "Rate",
+            "exact": true,
+            "numeric_confidence": 0.8528958559036255,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999474883079529,
+            "official_prediction": "Rate",
+            "predicted_role": "legend_text",
+            "prediction": "Rate",
+            "proposal_bbox": [
+              583,
+              185,
+              626,
+              199
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              583,
+              185,
+              626,
+              199
+            ],
+            "truth_role": "legend_text",
+            "truth_text": "Rate"
+          },
+          {
+            "display_text": "2.5",
+            "exact": true,
+            "numeric_confidence": 0.99956876039505,
+            "numeric_prediction": "2.5",
+            "official_confidence": 0.9996605118115743,
+            "official_prediction": "2.5",
+            "predicted_role": "x_tick",
+            "prediction": "2.5",
+            "proposal_bbox": [
+              342,
+              289,
+              367,
+              303
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              341,
+              289,
+              367,
+              303
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "2.5"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 22,
+        "scene_id": "ocr-production-composition-v1-validation-00013",
+        "source_raster_sha256": "efabf44cdd9c64d2e9990e145c170c50c2cde209ee73d34c27b18516146b84f2",
+        "true_positives": 5,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Treatment",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999554422166612,
+            "official_prediction": "Treatment",
+            "predicted_role": "phase_heading",
+            "prediction": "Treatment",
+            "proposal_bbox": [
+              272,
+              14,
+              378,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              272,
+              14,
+              378,
+              30
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Treatment"
+          },
+          {
+            "display_text": "75",
+            "exact": true,
+            "numeric_confidence": 0.9993057250976562,
+            "numeric_prediction": "75",
+            "official_confidence": 0.999931275844574,
+            "official_prediction": "75",
+            "predicted_role": "y_tick",
+            "prediction": "75",
+            "proposal_bbox": [
+              17,
+              127,
+              37,
+              140
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              127,
+              37,
+              140
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "75"
+          },
+          {
+            "display_text": "Transfer",
+            "exact": true,
+            "numeric_confidence": 0.6740487813949585,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999798238277435,
+            "official_prediction": "Transfer",
+            "predicted_role": "annotation",
+            "prediction": "Transfer",
+            "proposal_bbox": [
+              447,
+              133,
+              522,
+              147
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              447,
+              133,
+              522,
+              147
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Transfer"
+          },
+          {
+            "display_text": "25",
+            "exact": true,
+            "numeric_confidence": 0.9996752142906189,
+            "numeric_prediction": "25",
+            "official_confidence": 0.9999865889549255,
+            "official_prediction": "25",
+            "predicted_role": "x_tick",
+            "prediction": "25",
+            "proposal_bbox": [
+              373,
+              289,
+              395,
+              305
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              373,
+              289,
+              395,
+              305
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "25"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 35,
+        "scene_id": "ocr-production-composition-v1-validation-00014",
+        "source_raster_sha256": "01d7fced4972c4bdcfb7e83f2113f4118fa4865ea0a1af5afe34107352c3120f",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 2,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Intervention",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999645153681437,
+            "official_prediction": "Intervention",
+            "predicted_role": "phase_heading",
+            "prediction": "Intervention",
+            "proposal_bbox": [
+              309,
+              15,
+              432,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              309,
+              14,
+              432,
+              29
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Intervention"
+          },
+          {
+            "display_text": "Review",
+            "exact": true,
+            "numeric_confidence": 0.6466852426528931,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999582171440125,
+            "official_prediction": "Review",
+            "predicted_role": "annotation",
+            "prediction": "Review",
+            "proposal_bbox": [
+              372,
+              150,
+              428,
+              163
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              372,
+              151,
+              429,
+              163
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Review"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 15,
+        "scene_id": "ocr-production-composition-v1-validation-00015",
+        "source_raster_sha256": "325209f5b116a02e15d3e80c9e65062f5ecf18af27dc3a2ccb3bd583af52904f",
+        "true_positives": 2,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Baseline",
+            "exact": true,
+            "numeric_confidence": 0.8427548408508301,
+            "numeric_prediction": "",
+            "official_confidence": 0.9422537013888359,
+            "official_prediction": "Baseline",
+            "predicted_role": "phase_heading",
+            "prediction": "Baseline",
+            "proposal_bbox": [
+              158,
+              13,
+              231,
+              28
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              157,
+              13,
+              231,
+              28
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Baseline"
+          },
+          {
+            "display_text": "Level",
+            "exact": true,
+            "numeric_confidence": 0.7279805541038513,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999393105506897,
+            "official_prediction": "Level",
+            "predicted_role": "annotation",
+            "prediction": "Level",
+            "proposal_bbox": [
+              401,
+              124,
+              443,
+              138
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              401,
+              124,
+              443,
+              138
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Level"
+          },
+          {
+            "display_text": "5",
+            "exact": true,
+            "numeric_confidence": 0.9996918439865112,
+            "numeric_prediction": "5",
+            "official_confidence": 0.9998379945755005,
+            "official_prediction": "5",
+            "predicted_role": "y_tick",
+            "prediction": "5",
+            "proposal_bbox": [
+              18,
+              165,
+              28,
+              181
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              18,
+              165,
+              28,
+              181
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "5"
+          },
+          {
+            "display_text": "50",
+            "exact": true,
+            "numeric_confidence": 0.9985659122467041,
+            "numeric_prediction": "50",
+            "official_confidence": 0.9998196661472321,
+            "official_prediction": "50",
+            "predicted_role": "x_tick",
+            "prediction": "50",
+            "proposal_bbox": [
+              203,
+              288,
+              220,
+              300
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              202,
+              288,
+              220,
+              300
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "50"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 42,
+        "scene_id": "ocr-production-composition-v1-validation-00016",
+        "source_raster_sha256": "bdf68103623c3d259bf0d7945f7e645dffda2de12e567d7157cbc40691f69607",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Followup",
+            "exact": true,
+            "numeric_confidence": 0.7994175553321838,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999618679285049,
+            "official_prediction": "Followup",
+            "predicted_role": "other",
+            "prediction": "Followup",
+            "proposal_bbox": [
+              194,
+              14,
+              267,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              194,
+              14,
+              267,
+              30
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Followup"
+          },
+          {
+            "display_text": "Prompt",
+            "exact": true,
+            "numeric_confidence": 0.8426303863525391,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999332328637441,
+            "official_prediction": "Prompt",
+            "predicted_role": "annotation",
+            "prediction": "Prompt",
+            "proposal_bbox": [
+              430,
+              143,
+              502,
+              162
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              430,
+              143,
+              502,
+              162
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Prompt"
+          },
+          {
+            "display_text": "50",
+            "exact": true,
+            "numeric_confidence": 0.9966480731964111,
+            "numeric_prediction": "50",
+            "official_confidence": 0.9998978972434998,
+            "official_prediction": "50",
+            "predicted_role": "y_tick",
+            "prediction": "50",
+            "proposal_bbox": [
+              18,
+              183,
+              36,
+              196
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              183,
+              37,
+              196
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "50"
+          },
+          {
+            "display_text": "0",
+            "exact": true,
+            "numeric_confidence": 0.9999045133590698,
+            "numeric_prediction": "0",
+            "official_confidence": 0.967606782913208,
+            "official_prediction": "0",
+            "predicted_role": "x_tick",
+            "prediction": "0",
+            "proposal_bbox": [
+              234,
+              290,
+              244,
+              304
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              234,
+              290,
+              244,
+              304
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "0"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 17,
+        "scene_id": "ocr-production-composition-v1-validation-00017",
+        "source_raster_sha256": "a837259d8ae65bc45989709c06e23a491210f89cbdab19ddbc5b94d7fc9760f9",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase B",
+            "exact": true,
+            "numeric_confidence": 0.765981137752533,
+            "numeric_prediction": "",
+            "official_confidence": 0.9992469889777047,
+            "official_prediction": "Phase B",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase B",
+            "proposal_bbox": [
+              231,
+              14,
+              306,
+              29
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              231,
+              14,
+              307,
+              29
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase B"
+          },
+          {
+            "display_text": "2.5",
+            "exact": true,
+            "numeric_confidence": 0.999000072479248,
+            "numeric_prediction": "2.5",
+            "official_confidence": 0.9989968538284302,
+            "official_prediction": "2.5",
+            "predicted_role": "y_tick",
+            "prediction": "2.5",
+            "proposal_bbox": [
+              18,
+              95,
+              41,
+              108
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              95,
+              42,
+              108
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "2.5"
+          },
+          {
+            "display_text": "8O",
+            "exact": true,
+            "numeric_confidence": 0.9979084134101868,
+            "numeric_prediction": "80",
+            "official_confidence": 0.9986627995967865,
+            "official_prediction": "80",
+            "predicted_role": "x_tick",
+            "prediction": "80",
+            "proposal_bbox": [
+              265,
+              289,
+              292,
+              305
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              264,
+              289,
+              292,
+              305
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "80"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 59,
+        "scene_id": "ocr-production-composition-v1-validation-00018",
+        "source_raster_sha256": "aee12f4f155737e9f4387b8cbb54b6b6537567a1c9efbdce4d4e0175585989fd",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Maintenance",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.999952879819003,
+            "official_prediction": "Maintenance",
+            "predicted_role": "phase_heading",
+            "prediction": "Maintenance",
+            "proposal_bbox": [
+              268,
+              14,
+              372,
+              26
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              268,
+              14,
+              372,
+              26
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Maintenance"
+          },
+          {
+            "display_text": "Probe",
+            "exact": true,
+            "numeric_confidence": 0.6353708505630493,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999205470085144,
+            "official_prediction": "Probe",
+            "predicted_role": "annotation",
+            "prediction": "Probe",
+            "proposal_bbox": [
+              383,
+              132,
+              428,
+              144
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              383,
+              132,
+              428,
+              144
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Probe"
+          },
+          {
+            "display_text": "5",
+            "exact": true,
+            "numeric_confidence": 0.9997323155403137,
+            "numeric_prediction": "5",
+            "official_confidence": 0.9998838901519775,
+            "official_prediction": "5",
+            "predicted_role": "x_tick",
+            "prediction": "5",
+            "proposal_bbox": [
+              296,
+              289,
+              306,
+              305
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              296,
+              289,
+              306,
+              305
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "5"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 16,
+        "scene_id": "ocr-production-composition-v1-validation-00019",
+        "source_raster_sha256": "d060154bcbf0d746896d0aa250100ebf69557aa76e4bc620f9daa0cedc1ba00a",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase A",
+            "exact": true,
+            "numeric_confidence": 0.7266831994056702,
+            "numeric_prediction": "",
+            "official_confidence": 0.9977725914546421,
+            "official_prediction": "Phase A",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase A",
+            "proposal_bbox": [
+              305,
+              14,
+              368,
+              26
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              305,
+              14,
+              369,
+              26
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase A"
+          },
+          {
+            "display_text": "Criterion",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.999938428401947,
+            "official_prediction": "Criterion",
+            "predicted_role": "annotation",
+            "prediction": "Criterion",
+            "proposal_bbox": [
+              412,
+              150,
+              498,
+              165
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              412,
+              150,
+              498,
+              165
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Criterion"
+          },
+          {
+            "display_text": "-2",
+            "exact": true,
+            "numeric_confidence": 0.9993864297866821,
+            "numeric_prediction": "-2",
+            "official_confidence": 0.9997471868991852,
+            "official_prediction": "-2",
+            "predicted_role": "x_tick",
+            "prediction": "-2",
+            "proposal_bbox": [
+              331,
+              287,
+              340,
+              300
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              326,
+              288,
+              340,
+              300
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "-2"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 28,
+        "scene_id": "ocr-production-composition-v1-validation-00020",
+        "source_raster_sha256": "93a022d4bf4d7cfa19db9f1e89a954b20418823b316cdc3559f195bcf8622362",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Treatment",
+            "exact": true,
+            "numeric_confidence": 0.8604039549827576,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999619325002035,
+            "official_prediction": "Treatment",
+            "predicted_role": "phase_heading",
+            "prediction": "Treatment",
+            "proposal_bbox": [
+              151,
+              14,
+              258,
+              31
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              151,
+              14,
+              258,
+              30
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Treatment"
+          },
+          {
+            "display_text": "Transfer",
+            "exact": true,
+            "numeric_confidence": 0.8238229751586914,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999773651361465,
+            "official_prediction": "Transfer",
+            "predicted_role": "annotation",
+            "prediction": "Transfer",
+            "proposal_bbox": [
+              440,
+              124,
+              523,
+              140
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              440,
+              124,
+              524,
+              140
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Transfer"
+          },
+          {
+            "display_text": "-2",
+            "exact": true,
+            "numeric_confidence": 0.9938692450523376,
+            "numeric_prediction": "-2",
+            "official_confidence": 0.9999409317970276,
+            "official_prediction": "-2",
+            "predicted_role": "y_tick",
+            "prediction": "-2",
+            "proposal_bbox": [
+              23,
+              151,
+              31,
+              164
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              152,
+              31,
+              164
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "-2"
+          },
+          {
+            "display_text": "2O",
+            "exact": true,
+            "numeric_confidence": 0.9996309280395508,
+            "numeric_prediction": "20",
+            "official_confidence": 0.9993572533130646,
+            "official_prediction": "20",
+            "predicted_role": "x_tick",
+            "prediction": "20",
+            "proposal_bbox": [
+              357,
+              288,
+              380,
+              301
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              357,
+              289,
+              380,
+              301
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "20"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 15,
+        "scene_id": "ocr-production-composition-v1-validation-00021",
+        "source_raster_sha256": "3c6d40586957bda63e1bb3bac187309a61d03237e38fe56d9cf4901d807558d2",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Intervention",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999415824810663,
+            "official_prediction": "Intervention",
+            "predicted_role": "phase_heading",
+            "prediction": "Intervention",
+            "proposal_bbox": [
+              189,
+              14,
+              292,
+              27
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              188,
+              13,
+              292,
+              27
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Intervention"
+          },
+          {
+            "display_text": "Review",
+            "exact": true,
+            "numeric_confidence": 0.8060891628265381,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999551971753439,
+            "official_prediction": "Review",
+            "predicted_role": "annotation",
+            "prediction": "Review",
+            "proposal_bbox": [
+              365,
+              141,
+              423,
+              153
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              365,
+              141,
+              423,
+              153
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Review"
+          },
+          {
+            "display_text": "0",
+            "exact": true,
+            "numeric_confidence": 0.9998947381973267,
+            "numeric_prediction": "0",
+            "official_confidence": 0.9878627061843872,
+            "official_prediction": "0",
+            "predicted_role": "y_tick",
+            "prediction": "0",
+            "proposal_bbox": [
+              18,
+              171,
+              28,
+              187
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              171,
+              29,
+              187
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "0"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 45,
+        "scene_id": "ocr-production-composition-v1-validation-00022",
+        "source_raster_sha256": "97f1a304613cfcd801a8ac6b06d93304cb8e807d09d6977da9b025bf1911707d",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 2,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Baseline",
+            "exact": true,
+            "numeric_confidence": 0.8224741220474243,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999605119228363,
+            "official_prediction": "Baseline",
+            "predicted_role": "phase_heading",
+            "prediction": "Baseline",
+            "proposal_bbox": [
+              226,
+              13,
+              288,
+              25
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              226,
+              13,
+              288,
+              25
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Baseline"
+          },
+          {
+            "display_text": "25",
+            "exact": true,
+            "numeric_confidence": 0.998144268989563,
+            "numeric_prediction": "25",
+            "official_confidence": 0.9999805688858032,
+            "official_prediction": "25",
+            "predicted_role": "y_tick",
+            "prediction": "25",
+            "proposal_bbox": [
+              18,
+              81,
+              36,
+              94
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              81,
+              36,
+              94
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "25"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 21,
+        "scene_id": "ocr-production-composition-v1-validation-00023",
+        "source_raster_sha256": "e06ce943d9d28998bf57f640ce962c578567579bead158ea0edbb1d0693f0b80",
+        "true_positives": 2,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 2,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Followup",
+            "exact": true,
+            "numeric_confidence": 0.8870628476142883,
+            "numeric_prediction": "",
+            "official_confidence": 0.999963790178299,
+            "official_prediction": "Followup",
+            "predicted_role": "other",
+            "prediction": "Followup",
+            "proposal_bbox": [
+              264,
+              14,
+              353,
+              35
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              263,
+              14,
+              354,
+              35
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Followup"
+          },
+          {
+            "display_text": "Prompt",
+            "exact": true,
+            "numeric_confidence": 0.8192028999328613,
+            "numeric_prediction": "",
+            "official_confidence": 0.9613651235898336,
+            "official_prediction": "Prompt",
+            "predicted_role": "annotation",
+            "prediction": "Prompt",
+            "proposal_bbox": [
+              424,
+              131,
+              497,
+              153
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              424,
+              132,
+              498,
+              153
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Prompt"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 40,
+        "scene_id": "ocr-production-composition-v1-validation-00024",
+        "source_raster_sha256": "bb4047ae5adcf74c77fa818f23f5710ec7a96348d62b2cc4b942ed775a981339",
+        "true_positives": 2,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase B",
+            "exact": true,
+            "numeric_confidence": 0.7327883839607239,
+            "numeric_prediction": "",
+            "official_confidence": 0.9600360223225185,
+            "official_prediction": "Phase B",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase B",
+            "proposal_bbox": [
+              301,
+              13,
+              371,
+              29
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              300,
+              13,
+              371,
+              28
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase B"
+          },
+          {
+            "display_text": "Change",
+            "exact": true,
+            "numeric_confidence": 0.7952368259429932,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999448855717977,
+            "official_prediction": "Change",
+            "predicted_role": "annotation",
+            "prediction": "Change",
+            "proposal_bbox": [
+              452,
+              148,
+              514,
+              165
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              452,
+              149,
+              514,
+              165
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Change"
+          },
+          {
+            "display_text": "75",
+            "exact": true,
+            "numeric_confidence": 0.9996663928031921,
+            "numeric_prediction": "75",
+            "official_confidence": 0.9999932646751404,
+            "official_prediction": "75",
+            "predicted_role": "x_tick",
+            "prediction": "75",
+            "proposal_bbox": [
+              249,
+              289,
+              271,
+              304
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              249,
+              290,
+              271,
+              304
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "75"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 17,
+        "scene_id": "ocr-production-composition-v1-validation-00025",
+        "source_raster_sha256": "b284e61a45ecf4e836a400f662549c8e4a910d6fa63932ab4ecff7db9d258992",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Maintenance",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999586777253584,
+            "official_prediction": "Maintenance",
+            "predicted_role": "phase_heading",
+            "prediction": "Maintenance",
+            "proposal_bbox": [
+              147,
+              14,
+              263,
+              28
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              147,
+              13,
+              263,
+              28
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Maintenance"
+          },
+          {
+            "display_text": "Probe",
+            "exact": true,
+            "numeric_confidence": 0.7834629416465759,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999702930450439,
+            "official_prediction": "Probe",
+            "predicted_role": "annotation",
+            "prediction": "Probe",
+            "proposal_bbox": [
+              377,
+              123,
+              435,
+              139
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              376,
+              123,
+              435,
+              139
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Probe"
+          },
+          {
+            "display_text": "2O",
+            "exact": true,
+            "numeric_confidence": 0.9991613626480103,
+            "numeric_prediction": "20",
+            "official_confidence": 0.9997682869434357,
+            "official_prediction": "20",
+            "predicted_role": "y_tick",
+            "prediction": "20",
+            "proposal_bbox": [
+              18,
+              138,
+              38,
+              150
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              138,
+              38,
+              150
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "20"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 57,
+        "scene_id": "ocr-production-composition-v1-validation-00026",
+        "source_raster_sha256": "222025cdcbeba9a2917444374f8d05d199c3a5fa1442c6e5bb687dee8bd368b6",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase A",
+            "exact": true,
+            "numeric_confidence": 0.6809719204902649,
+            "numeric_prediction": "",
+            "official_confidence": 0.9991619161197117,
+            "official_prediction": "Phase A",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase A",
+            "proposal_bbox": [
+              184,
+              12,
+              248,
+              26
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              184,
+              12,
+              248,
+              26
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase A"
+          },
+          {
+            "display_text": "Criterion",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.999926315413581,
+            "official_prediction": "Criterion",
+            "predicted_role": "annotation",
+            "prediction": "Criterion",
+            "proposal_bbox": [
+              405,
+              140,
+              473,
+              152
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              405,
+              140,
+              473,
+              152
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Criterion"
+          },
+          {
+            "display_text": "8O",
+            "exact": true,
+            "numeric_confidence": 0.9969269633293152,
+            "numeric_prediction": "80",
+            "official_confidence": 0.9945166110992432,
+            "official_prediction": "80",
+            "predicted_role": "y_tick",
+            "prediction": "80",
+            "proposal_bbox": [
+              18,
+              158,
+              42,
+              172
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              158,
+              42,
+              172
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "80"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 18,
+        "scene_id": "ocr-production-composition-v1-validation-00027",
+        "source_raster_sha256": "f6304e33a98ea9c5594c6c99474da045bfbf044a3f08b6c9b115f5c21e8af457",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Treatment",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999642901950412,
+            "official_prediction": "Treatment",
+            "predicted_role": "phase_heading",
+            "prediction": "Treatment",
+            "proposal_bbox": [
+              220,
+              14,
+              325,
+              31
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              220,
+              14,
+              326,
+              30
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Treatment"
+          },
+          {
+            "display_text": "Transfer",
+            "exact": true,
+            "numeric_confidence": 0.7146096229553223,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999797195196152,
+            "official_prediction": "Transfer",
+            "predicted_role": "annotation",
+            "prediction": "Transfer",
+            "proposal_bbox": [
+              433,
+              114,
+              518,
+              130
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              433,
+              114,
+              518,
+              130
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Transfer"
+          },
+          {
+            "display_text": "Rate",
+            "exact": true,
+            "numeric_confidence": 0.8695762157440186,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999399185180664,
+            "official_prediction": "Rate",
+            "predicted_role": "legend_text",
+            "prediction": "Rate",
+            "proposal_bbox": [
+              583,
+              188,
+              626,
+              202
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              583,
+              188,
+              626,
+              202
+            ],
+            "truth_role": "legend_text",
+            "truth_text": "Rate"
+          },
+          {
+            "display_text": "10",
+            "exact": true,
+            "numeric_confidence": 0.9998834133148193,
+            "numeric_prediction": "10",
+            "official_confidence": 0.99994957447052,
+            "official_prediction": "10",
+            "predicted_role": "x_tick",
+            "prediction": "10",
+            "proposal_bbox": [
+              344,
+              289,
+              365,
+              305
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              343,
+              289,
+              366,
+              305
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "10"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 36,
+        "scene_id": "ocr-production-composition-v1-validation-00028",
+        "source_raster_sha256": "5943524860efb440f08256e670024ff4e39a84ba3b8628a3437f74b5f3cb4eb3",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Intervention",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999769429365793,
+            "official_prediction": "Intervention",
+            "predicted_role": "phase_heading",
+            "prediction": "Intervention",
+            "proposal_bbox": [
+              258,
+              14,
+              370,
+              29
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              257,
+              13,
+              370,
+              28
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Intervention"
+          },
+          {
+            "display_text": "10",
+            "exact": true,
+            "numeric_confidence": 0.9998092651367188,
+            "numeric_prediction": "10",
+            "official_confidence": 0.9993084371089935,
+            "official_prediction": "10",
+            "predicted_role": "y_tick",
+            "prediction": "10",
+            "proposal_bbox": [
+              18,
+              88,
+              37,
+              101
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              18,
+              88,
+              37,
+              101
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "10"
+          },
+          {
+            "display_text": "Review",
+            "exact": true,
+            "numeric_confidence": 0.7460290193557739,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999481638272604,
+            "official_prediction": "Review",
+            "predicted_role": "annotation",
+            "prediction": "Review",
+            "proposal_bbox": [
+              358,
+              129,
+              412,
+              142
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              358,
+              130,
+              413,
+              142
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Review"
+          },
+          {
+            "display_text": "2.5",
+            "exact": true,
+            "numeric_confidence": 0.997136116027832,
+            "numeric_prediction": "2.5",
+            "official_confidence": 0.9986250400543213,
+            "official_prediction": "2.5",
+            "predicted_role": "x_tick",
+            "prediction": "2.5",
+            "proposal_bbox": [
+              374,
+              289,
+              400,
+              304
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              373,
+              290,
+              400,
+              304
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "2.5"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 18,
+        "scene_id": "ocr-production-composition-v1-validation-00029",
+        "source_raster_sha256": "a887878faab9e3d3619ca8d2b109b2cef29343d95e269a452dd051c47da6b111",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Baseline",
+            "exact": true,
+            "numeric_confidence": 0.8211989402770996,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999665915966034,
+            "official_prediction": "Baseline",
+            "predicted_role": "phase_heading",
+            "prediction": "Baseline",
+            "proposal_bbox": [
+              295,
+              13,
+              368,
+              27
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              295,
+              13,
+              368,
+              27
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Baseline"
+          },
+          {
+            "display_text": "75",
+            "exact": true,
+            "numeric_confidence": 0.9993948936462402,
+            "numeric_prediction": "75",
+            "official_confidence": 0.9998380839824677,
+            "official_prediction": "75",
+            "predicted_role": "y_tick",
+            "prediction": "75",
+            "proposal_bbox": [
+              18,
+              107,
+              36,
+              119
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              107,
+              36,
+              119
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "75"
+          },
+          {
+            "display_text": "25",
+            "exact": true,
+            "numeric_confidence": 0.9997415542602539,
+            "numeric_prediction": "25",
+            "official_confidence": 0.9999547600746155,
+            "official_prediction": "25",
+            "predicted_role": "x_tick",
+            "prediction": "25",
+            "proposal_bbox": [
+              173,
+              289,
+              194,
+              304
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              172,
+              290,
+              194,
+              304
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "25"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 36,
+        "scene_id": "ocr-production-composition-v1-validation-00030",
+        "source_raster_sha256": "36133bc7ca495402ff36df74246a2177bd05de32af5aa83ac4dc2fdf8a86ae70",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 2,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Followup",
+            "exact": true,
+            "numeric_confidence": 0.871391773223877,
+            "numeric_prediction": "",
+            "official_confidence": 0.999971941113472,
+            "official_prediction": "Followup",
+            "predicted_role": "other",
+            "prediction": "Followup",
+            "proposal_bbox": [
+              143,
+              14,
+              225,
+              34
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              142,
+              14,
+              225,
+              34
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Followup"
+          },
+          {
+            "display_text": "Prompt",
+            "exact": true,
+            "numeric_confidence": 0.7900089621543884,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999538064002991,
+            "official_prediction": "Prompt",
+            "predicted_role": "annotation",
+            "prediction": "Prompt",
+            "proposal_bbox": [
+              417,
+              123,
+              485,
+              142
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              416,
+              123,
+              486,
+              142
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Prompt"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 19,
+        "scene_id": "ocr-production-composition-v1-validation-00031",
+        "source_raster_sha256": "98d8882eee7bb4893aa58e7145ef4cf94a65ae1c34a9f818af8a0446b672bd0b",
+        "true_positives": 2,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase B",
+            "exact": true,
+            "numeric_confidence": 0.6834659576416016,
+            "numeric_prediction": "",
+            "official_confidence": 0.9996800082070487,
+            "official_prediction": "Phase B",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase B",
+            "proposal_bbox": [
+              179,
+              13,
+              245,
+              27
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              179,
+              13,
+              245,
+              27
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase B"
+          },
+          {
+            "display_text": "Change",
+            "exact": true,
+            "numeric_confidence": 0.8147428035736084,
+            "numeric_prediction": "",
+            "official_confidence": 0.999955435593923,
+            "official_prediction": "Change",
+            "predicted_role": "annotation",
+            "prediction": "Change",
+            "proposal_bbox": [
+              445,
+              137,
+              507,
+              155
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              444,
+              137,
+              508,
+              155
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Change"
+          },
+          {
+            "display_text": "5",
+            "exact": true,
+            "numeric_confidence": 0.999692440032959,
+            "numeric_prediction": "5",
+            "official_confidence": 0.9999054670333862,
+            "official_prediction": "5",
+            "predicted_role": "y_tick",
+            "prediction": "5",
+            "proposal_bbox": [
+              18,
+              145,
+              28,
+              161
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              18,
+              145,
+              28,
+              161
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "5"
+          },
+          {
+            "display_text": "50",
+            "exact": true,
+            "numeric_confidence": 0.9992880821228027,
+            "numeric_prediction": "50",
+            "official_confidence": 0.9999060034751892,
+            "official_prediction": "50",
+            "predicted_role": "x_tick",
+            "prediction": "50",
+            "proposal_bbox": [
+              235,
+              289,
+              255,
+              303
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              235,
+              289,
+              255,
+              303
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "50"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 51,
+        "scene_id": "ocr-production-composition-v1-validation-00032",
+        "source_raster_sha256": "fb21a997562b01fc19b81fcd9d9afc2cf6c8f487dc99886889111202aad41242",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Maintenance",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999409426342357,
+            "official_prediction": "Maintenance",
+            "predicted_role": "phase_heading",
+            "prediction": "Maintenance",
+            "proposal_bbox": [
+              216,
+              13,
+              316,
+              25
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              216,
+              13,
+              316,
+              25
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Maintenance"
+          },
+          {
+            "display_text": "Probe",
+            "exact": true,
+            "numeric_confidence": 0.6880173087120056,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999580621719361,
+            "official_prediction": "Probe",
+            "predicted_role": "annotation",
+            "prediction": "Probe",
+            "proposal_bbox": [
+              369,
+              112,
+              418,
+              126
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              369,
+              112,
+              418,
+              126
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Probe"
+          },
+          {
+            "display_text": "50",
+            "exact": true,
+            "numeric_confidence": 0.9996623992919922,
+            "numeric_prediction": "50",
+            "official_confidence": 0.9998735785484314,
+            "official_prediction": "50",
+            "predicted_role": "y_tick",
+            "prediction": "50",
+            "proposal_bbox": [
+              18,
+              165,
+              39,
+              179
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              18,
+              165,
+              39,
+              179
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "50"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 17,
+        "scene_id": "ocr-production-composition-v1-validation-00033",
+        "source_raster_sha256": "7849faff0650f6b441fdd9023366b37600ca432183985c7daceaf5fe7d2d59e8",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 5,
+        "duplicate_region_count": 0,
+        "exact_detection": true,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase A",
+            "exact": true,
+            "numeric_confidence": 0.7726266980171204,
+            "numeric_prediction": "",
+            "official_confidence": 0.999270362513406,
+            "official_prediction": "Phase A",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase A",
+            "proposal_bbox": [
+              253,
+              12,
+              312,
+              25
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              253,
+              13,
+              313,
+              25
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase A"
+          },
+          {
+            "display_text": "Criterion",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999309049712287,
+            "official_prediction": "Criterion",
+            "predicted_role": "annotation",
+            "prediction": "Criterion",
+            "proposal_bbox": [
+              398,
+              130,
+              469,
+              142
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              398,
+              130,
+              469,
+              142
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Criterion"
+          },
+          {
+            "display_text": "2.5",
+            "exact": true,
+            "numeric_confidence": 0.9969821572303772,
+            "numeric_prediction": "2.5",
+            "official_confidence": 0.9994672338167826,
+            "official_prediction": "2.5",
+            "predicted_role": "y_tick",
+            "prediction": "2.5",
+            "proposal_bbox": [
+              18,
+              184,
+              44,
+              198
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              184,
+              44,
+              198
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "2.5"
+          },
+          {
+            "display_text": "Rate",
+            "exact": true,
+            "numeric_confidence": 0.8185218572616577,
+            "numeric_prediction": "",
+            "official_confidence": 0.9998974055051804,
+            "official_prediction": "Rate",
+            "predicted_role": "legend_text",
+            "prediction": "Rate",
+            "proposal_bbox": [
+              583,
+              185,
+              622,
+              198
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              583,
+              185,
+              622,
+              198
+            ],
+            "truth_role": "legend_text",
+            "truth_text": "Rate"
+          },
+          {
+            "display_text": "8O",
+            "exact": true,
+            "numeric_confidence": 0.9820033311843872,
+            "numeric_prediction": "80",
+            "official_confidence": 0.997411847114563,
+            "official_prediction": "80",
+            "predicted_role": "x_tick",
+            "prediction": "80",
+            "proposal_bbox": [
+              296,
+              288,
+              319,
+              301
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              296,
+              288,
+              319,
+              301
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "80"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 38,
+        "scene_id": "ocr-production-composition-v1-validation-00034",
+        "source_raster_sha256": "27642df9b116eb610117edf836349ce79ca609398ed24a7ea5dc409132a4dc29",
+        "true_positives": 5,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Treatment",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9642567237218221,
+            "official_prediction": "Treatment",
+            "predicted_role": "phase_heading",
+            "prediction": "Treatment",
+            "proposal_bbox": [
+              289,
+              14,
+              376,
+              26
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              289,
+              14,
+              377,
+              26
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Treatment"
+          },
+          {
+            "display_text": "Transfer",
+            "exact": true,
+            "numeric_confidence": 0.7016690969467163,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999731481075287,
+            "official_prediction": "Transfer",
+            "predicted_role": "annotation",
+            "prediction": "Transfer",
+            "proposal_bbox": [
+              426,
+              147,
+              511,
+              163
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              426,
+              147,
+              511,
+              163
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Transfer"
+          },
+          {
+            "display_text": "5",
+            "exact": true,
+            "numeric_confidence": 0.9989769458770752,
+            "numeric_prediction": "5",
+            "official_confidence": 0.9999167919158936,
+            "official_prediction": "5",
+            "predicted_role": "x_tick",
+            "prediction": "5",
+            "proposal_bbox": [
+              328,
+              289,
+              337,
+              303
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              328,
+              289,
+              337,
+              303
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "5"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 16,
+        "scene_id": "ocr-production-composition-v1-validation-00035",
+        "source_raster_sha256": "e7de27da08330df18555a664a7ac1ec77b0bc47e0d7c18faae07044c2f2aae84",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Intervention",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999721546967825,
+            "official_prediction": "Intervention",
+            "predicted_role": "phase_heading",
+            "prediction": "Intervention",
+            "proposal_bbox": [
+              136,
+              13,
+              263,
+              31
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              136,
+              14,
+              263,
+              30
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Intervention"
+          },
+          {
+            "display_text": "4O",
+            "exact": true,
+            "numeric_confidence": 0.9995715618133545,
+            "numeric_prediction": "40",
+            "official_confidence": 0.9754888713359833,
+            "official_prediction": "40",
+            "predicted_role": "y_tick",
+            "prediction": "40",
+            "proposal_bbox": [
+              17,
+              112,
+              44,
+              130
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              113,
+              45,
+              129
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "40"
+          },
+          {
+            "display_text": "Review",
+            "exact": true,
+            "numeric_confidence": 0.9228020906448364,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999412099520365,
+            "official_prediction": "Review",
+            "predicted_role": "annotation",
+            "prediction": "Review",
+            "proposal_bbox": [
+              456,
+              120,
+              508,
+              133
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              456,
+              120,
+              508,
+              132
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Review"
+          },
+          {
+            "display_text": "-2",
+            "exact": true,
+            "numeric_confidence": 0.999798059463501,
+            "numeric_prediction": "-2",
+            "official_confidence": 0.9999408721923828,
+            "official_prediction": "-2",
+            "predicted_role": "x_tick",
+            "prediction": "-2",
+            "proposal_bbox": [
+              365,
+              288,
+              374,
+              303
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              358,
+              289,
+              374,
+              303
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "-2"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 22,
+        "scene_id": "ocr-production-composition-v1-validation-00036",
+        "source_raster_sha256": "abcc7b133f8d3b0222e54c44ab7a276a1091a9033a8bb73c08f49278ad77ddb5",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Baseline",
+            "exact": true,
+            "numeric_confidence": 0.7897385954856873,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999629706144333,
+            "official_prediction": "Baseline",
+            "predicted_role": "phase_heading",
+            "prediction": "Baseline",
+            "proposal_bbox": [
+              174,
+              13,
+              240,
+              27
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              174,
+              14,
+              240,
+              26
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Baseline"
+          },
+          {
+            "display_text": "-2",
+            "exact": true,
+            "numeric_confidence": 0.996850848197937,
+            "numeric_prediction": "-2",
+            "official_confidence": 0.9999406337738037,
+            "official_prediction": "-2",
+            "predicted_role": "y_tick",
+            "prediction": "-2",
+            "proposal_bbox": [
+              24,
+              131,
+              33,
+              145
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              132,
+              33,
+              145
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "-2"
+          },
+          {
+            "display_text": "2O",
+            "exact": true,
+            "numeric_confidence": 0.9996919631958008,
+            "numeric_prediction": "20",
+            "official_confidence": 0.9997422695159912,
+            "official_prediction": "20",
+            "predicted_role": "x_tick",
+            "prediction": "20",
+            "proposal_bbox": [
+              389,
+              288,
+              414,
+              303
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              389,
+              289,
+              414,
+              303
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "20"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 14,
+        "scene_id": "ocr-production-composition-v1-validation-00037",
+        "source_raster_sha256": "7ba7bbca41f5441a84ca5e0acbdb01627ddaca1d859f310d3826c654c616dacf",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Followup",
+            "exact": true,
+            "numeric_confidence": 0.8734537363052368,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999359101057053,
+            "official_prediction": "Followup",
+            "predicted_role": "other",
+            "prediction": "Followup",
+            "proposal_bbox": [
+              211,
+              14,
+              301,
+              35
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              212,
+              14,
+              301,
+              35
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Followup"
+          },
+          {
+            "display_text": "Prompt",
+            "exact": true,
+            "numeric_confidence": 0.7703835964202881,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999615550041199,
+            "official_prediction": "Prompt",
+            "predicted_role": "annotation",
+            "prediction": "Prompt",
+            "proposal_bbox": [
+              409,
+              112,
+              481,
+              132
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              409,
+              113,
+              481,
+              132
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Prompt"
+          },
+          {
+            "display_text": "0",
+            "exact": true,
+            "numeric_confidence": 0.9999502897262573,
+            "numeric_prediction": "0",
+            "official_confidence": 0.9994661211967468,
+            "official_prediction": "0",
+            "predicted_role": "y_tick",
+            "prediction": "0",
+            "proposal_bbox": [
+              18,
+              152,
+              28,
+              166
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              152,
+              28,
+              166
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "0"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 41,
+        "scene_id": "ocr-production-composition-v1-validation-00038",
+        "source_raster_sha256": "cdcfe00b327b707e07c466357cdfb947da4c25da937cb73f63f6a5505b03adad",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase B",
+            "exact": true,
+            "numeric_confidence": 0.7779186367988586,
+            "numeric_prediction": "",
+            "official_confidence": 0.9997505290167672,
+            "official_prediction": "Phase B",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase B",
+            "proposal_bbox": [
+              248,
+              14,
+              323,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              248,
+              14,
+              324,
+              29
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase B"
+          },
+          {
+            "display_text": "Change",
+            "exact": true,
+            "numeric_confidence": 0.8426679968833923,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999024073282877,
+            "official_prediction": "Change",
+            "predicted_role": "annotation",
+            "prediction": "Change",
+            "proposal_bbox": [
+              438,
+              129,
+              499,
+              145
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              438,
+              129,
+              499,
+              145
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Change"
+          },
+          {
+            "display_text": "25",
+            "exact": true,
+            "numeric_confidence": 0.9993674755096436,
+            "numeric_prediction": "25",
+            "official_confidence": 0.9999635219573975,
+            "official_prediction": "25",
+            "predicted_role": "y_tick",
+            "prediction": "25",
+            "proposal_bbox": [
+              18,
+              170,
+              39,
+              185
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              171,
+              39,
+              185
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "25"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 15,
+        "scene_id": "ocr-production-composition-v1-validation-00039",
+        "source_raster_sha256": "615a9111eb2eccb9fa3e21531bf3515725c7c36ab7e1307191c69d26529201f6",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Maintenance",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9998758706179532,
+            "official_prediction": "Maintenance",
+            "predicted_role": "phase_heading",
+            "prediction": "Maintenance",
+            "proposal_bbox": [
+              285,
+              13,
+              382,
+              25
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              285,
+              13,
+              383,
+              25
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Maintenance"
+          },
+          {
+            "display_text": "100",
+            "exact": true,
+            "numeric_confidence": 0.9998936057090759,
+            "numeric_prediction": "100",
+            "official_confidence": 0.9999607801437378,
+            "official_prediction": "100",
+            "predicted_role": "y_tick",
+            "prediction": "100",
+            "proposal_bbox": [
+              19,
+              81,
+              52,
+              97
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              18,
+              81,
+              53,
+              97
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "100"
+          },
+          {
+            "display_text": "Probe",
+            "exact": true,
+            "numeric_confidence": 0.7887924313545227,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999571323394776,
+            "official_prediction": "Probe",
+            "predicted_role": "annotation",
+            "prediction": "Probe",
+            "proposal_bbox": [
+              362,
+              145,
+              412,
+              159
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              362,
+              145,
+              412,
+              159
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Probe"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 41,
+        "scene_id": "ocr-production-composition-v1-validation-00040",
+        "source_raster_sha256": "454e5ab922c93da6197f56606b299b52eb883b3747b7f5b34e82736087565828",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase A",
+            "exact": true,
+            "numeric_confidence": 0.6911929249763489,
+            "numeric_prediction": "",
+            "official_confidence": 0.9979884709630694,
+            "official_prediction": "Phase A",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase A",
+            "proposal_bbox": [
+              323,
+              14,
+              396,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              322,
+              14,
+              397,
+              29
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase A"
+          },
+          {
+            "display_text": "Criterion",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999766084882948,
+            "official_prediction": "Criterion",
+            "predicted_role": "annotation",
+            "prediction": "Criterion",
+            "proposal_bbox": [
+              391,
+              120,
+              479,
+              136
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              391,
+              120,
+              479,
+              136
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Criterion"
+          },
+          {
+            "display_text": "75",
+            "exact": true,
+            "numeric_confidence": 0.9996176958084106,
+            "numeric_prediction": "75",
+            "official_confidence": 0.9999218583106995,
+            "official_prediction": "75",
+            "predicted_role": "x_tick",
+            "prediction": "75",
+            "proposal_bbox": [
+              282,
+              287,
+              299,
+              300
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              281,
+              288,
+              299,
+              300
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "75"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 19,
+        "scene_id": "ocr-production-composition-v1-validation-00041",
+        "source_raster_sha256": "3a5d4c28c104123d816a2aa5903808f1a8e47955320fb72f0dc64c9cfa23bd29",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Treatment",
+            "exact": true,
+            "numeric_confidence": 0.9112430810928345,
+            "numeric_prediction": "",
+            "official_confidence": 0.9995524220996432,
+            "official_prediction": "Treatment",
+            "predicted_role": "phase_heading",
+            "prediction": "Treatment",
+            "proposal_bbox": [
+              168,
+              14,
+              265,
+              29
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              168,
+              14,
+              266,
+              28
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Treatment"
+          },
+          {
+            "display_text": "2O",
+            "exact": true,
+            "numeric_confidence": 0.985285758972168,
+            "numeric_prediction": "20",
+            "official_confidence": 0.999738335609436,
+            "official_prediction": "20",
+            "predicted_role": "y_tick",
+            "prediction": "20",
+            "proposal_bbox": [
+              18,
+              120,
+              43,
+              134
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              120,
+              43,
+              134
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "20"
+          },
+          {
+            "display_text": "Transfer",
+            "exact": true,
+            "numeric_confidence": 0.8656120896339417,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999800026416779,
+            "official_prediction": "Transfer",
+            "predicted_role": "annotation",
+            "prediction": "Transfer",
+            "proposal_bbox": [
+              419,
+              136,
+              490,
+              151
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              419,
+              136,
+              490,
+              150
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Transfer"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 26,
+        "scene_id": "ocr-production-composition-v1-validation-00042",
+        "source_raster_sha256": "c728d817b6f4c86fc15cbdf6f11dd3a8397196f20fc1e81ac315982d9a5bb0de",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Intervention",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999732375144958,
+            "official_prediction": "Intervention",
+            "predicted_role": "phase_heading",
+            "prediction": "Intervention",
+            "proposal_bbox": [
+              206,
+              15,
+              318,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              205,
+              14,
+              318,
+              29
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Intervention"
+          },
+          {
+            "display_text": "Review",
+            "exact": true,
+            "numeric_confidence": 0.692600429058075,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999452829360962,
+            "official_prediction": "Review",
+            "predicted_role": "annotation",
+            "prediction": "Review",
+            "proposal_bbox": [
+              449,
+              110,
+              507,
+              123
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              449,
+              111,
+              507,
+              123
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Review"
+          },
+          {
+            "display_text": "8O",
+            "exact": true,
+            "numeric_confidence": 0.9986202716827393,
+            "numeric_prediction": "80",
+            "official_confidence": 0.9965869784355164,
+            "official_prediction": "80",
+            "predicted_role": "y_tick",
+            "prediction": "80",
+            "proposal_bbox": [
+              18,
+              138,
+              40,
+              152
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              138,
+              41,
+              151
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "80"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 15,
+        "scene_id": "ocr-production-composition-v1-validation-00043",
+        "source_raster_sha256": "7cf0b69f9f84699685eea1a7a77cb7aace9119d0cf7caef43ef829768ec43d85",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 2,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Baseline",
+            "exact": true,
+            "numeric_confidence": 0.828734278678894,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999623447656631,
+            "official_prediction": "Baseline",
+            "predicted_role": "phase_heading",
+            "prediction": "Baseline",
+            "proposal_bbox": [
+              243,
+              14,
+              321,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              243,
+              14,
+              321,
+              29
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Baseline"
+          },
+          {
+            "display_text": "10",
+            "exact": true,
+            "numeric_confidence": 0.9997714757919312,
+            "numeric_prediction": "10",
+            "official_confidence": 0.9998091757297516,
+            "official_prediction": "10",
+            "predicted_role": "x_tick",
+            "prediction": "10",
+            "proposal_bbox": [
+              376,
+              287,
+              392,
+              300
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              375,
+              288,
+              392,
+              300
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "10"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 29,
+        "scene_id": "ocr-production-composition-v1-validation-00044",
+        "source_raster_sha256": "04cb86991f0ca638a447636b52a3da4fc72c5b8995722ea861375e05f59f229b",
+        "true_positives": 2,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Followup",
+            "exact": true,
+            "numeric_confidence": 0.9307762980461121,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999745786190033,
+            "official_prediction": "Followup",
+            "predicted_role": "other",
+            "prediction": "Followup",
+            "proposal_bbox": [
+              280,
+              13,
+              362,
+              33
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              280,
+              13,
+              362,
+              33
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Followup"
+          },
+          {
+            "display_text": "Prompt",
+            "exact": true,
+            "numeric_confidence": 0.8374500274658203,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999598860740662,
+            "official_prediction": "Prompt",
+            "predicted_role": "annotation",
+            "prediction": "Prompt",
+            "proposal_bbox": [
+              403,
+              145,
+              470,
+              164
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              402,
+              145,
+              470,
+              164
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Prompt"
+          },
+          {
+            "display_text": "10",
+            "exact": true,
+            "numeric_confidence": 0.9998317956924438,
+            "numeric_prediction": "10",
+            "official_confidence": 0.9999193549156189,
+            "official_prediction": "10",
+            "predicted_role": "y_tick",
+            "prediction": "10",
+            "proposal_bbox": [
+              19,
+              176,
+              38,
+              190
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              18,
+              176,
+              38,
+              190
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "10"
+          },
+          {
+            "display_text": "2.5",
+            "exact": true,
+            "numeric_confidence": 0.9993621706962585,
+            "numeric_prediction": "2.5",
+            "official_confidence": 0.9986808101336161,
+            "official_prediction": "2.5",
+            "predicted_role": "x_tick",
+            "prediction": "2.5",
+            "proposal_bbox": [
+              173,
+              288,
+              195,
+              300
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              173,
+              288,
+              195,
+              300
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "2.5"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 15,
+        "scene_id": "ocr-production-composition-v1-validation-00045",
+        "source_raster_sha256": "58876d0efe3bec6aeb3a95fa97df001617d70687f8858e9f816566454ccfc78a",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase B",
+            "exact": true,
+            "numeric_confidence": 0.7631350159645081,
+            "numeric_prediction": "",
+            "official_confidence": 0.9982922843524388,
+            "official_prediction": "Phase B",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase B",
+            "proposal_bbox": [
+              317,
+              12,
+              376,
+              25
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              317,
+              13,
+              376,
+              25
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase B"
+          },
+          {
+            "display_text": "75",
+            "exact": true,
+            "numeric_confidence": 0.9993751049041748,
+            "numeric_prediction": "75",
+            "official_confidence": 0.9998530447483063,
+            "official_prediction": "75",
+            "predicted_role": "y_tick",
+            "prediction": "75",
+            "proposal_bbox": [
+              18,
+              87,
+              36,
+              99
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              87,
+              36,
+              99
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "75"
+          },
+          {
+            "display_text": "Change",
+            "exact": true,
+            "numeric_confidence": 0.7537655830383301,
+            "numeric_prediction": "",
+            "official_confidence": 0.999961256980896,
+            "official_prediction": "Change",
+            "predicted_role": "annotation",
+            "prediction": "Change",
+            "proposal_bbox": [
+              431,
+              119,
+              505,
+              140
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              431,
+              119,
+              505,
+              140
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Change"
+          },
+          {
+            "display_text": "25",
+            "exact": true,
+            "numeric_confidence": 0.9980942010879517,
+            "numeric_prediction": "25",
+            "official_confidence": 0.9999325275421143,
+            "official_prediction": "25",
+            "predicted_role": "x_tick",
+            "prediction": "25",
+            "proposal_bbox": [
+              204,
+              288,
+              223,
+              301
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              204,
+              288,
+              223,
+              301
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "25"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 35,
+        "scene_id": "ocr-production-composition-v1-validation-00046",
+        "source_raster_sha256": "7965c889281dab8c21f403e7db5bb20da50ca93152de0da56807710052f6afe1",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 2,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Maintenance",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999572472138838,
+            "official_prediction": "Maintenance",
+            "predicted_role": "phase_heading",
+            "prediction": "Maintenance",
+            "proposal_bbox": [
+              165,
+              14,
+              292,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              165,
+              14,
+              292,
+              30
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Maintenance"
+          },
+          {
+            "display_text": "Probe",
+            "exact": true,
+            "numeric_confidence": 0.804190993309021,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999738693237304,
+            "official_prediction": "Probe",
+            "predicted_role": "annotation",
+            "prediction": "Probe",
+            "proposal_bbox": [
+              461,
+              136,
+              516,
+              151
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              460,
+              136,
+              516,
+              151
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Probe"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 13,
+        "scene_id": "ocr-production-composition-v1-validation-00047",
+        "source_raster_sha256": "cd205f19f16c893b533e7c7b2bafdaf74cc1778310d80b0ebc559de5b1845a7a",
+        "true_positives": 2,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase A",
+            "exact": true,
+            "numeric_confidence": 0.7170267701148987,
+            "numeric_prediction": "",
+            "official_confidence": 0.99021829026086,
+            "official_prediction": "Phase A",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase A",
+            "proposal_bbox": [
+              201,
+              13,
+              261,
+              25
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              201,
+              13,
+              261,
+              25
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase A"
+          },
+          {
+            "display_text": "5",
+            "exact": true,
+            "numeric_confidence": 0.9987277388572693,
+            "numeric_prediction": "5",
+            "official_confidence": 0.9996304512023926,
+            "official_prediction": "5",
+            "predicted_role": "y_tick",
+            "prediction": "5",
+            "proposal_bbox": [
+              18,
+              125,
+              26,
+              137
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              18,
+              125,
+              26,
+              137
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "5"
+          },
+          {
+            "display_text": "Rate",
+            "exact": true,
+            "numeric_confidence": 0.7877278327941895,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999417066574097,
+            "official_prediction": "Rate",
+            "predicted_role": "legend_text",
+            "prediction": "Rate",
+            "proposal_bbox": [
+              584,
+              184,
+              625,
+              198
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              583,
+              184,
+              625,
+              198
+            ],
+            "truth_role": "legend_text",
+            "truth_text": "Rate"
+          },
+          {
+            "display_text": "50",
+            "exact": true,
+            "numeric_confidence": 0.9995324611663818,
+            "numeric_prediction": "50",
+            "official_confidence": 0.9998270571231842,
+            "official_prediction": "50",
+            "predicted_role": "x_tick",
+            "prediction": "50",
+            "proposal_bbox": [
+              267,
+              289,
+              285,
+              301
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              267,
+              289,
+              285,
+              301
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "50"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 45,
+        "scene_id": "ocr-production-composition-v1-validation-00048",
+        "source_raster_sha256": "6a250730475218298583536e366b5f3d499b2f9a364c805c04e6f8acaea380b9",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Treatment",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9998250934812758,
+            "official_prediction": "Treatment",
+            "predicted_role": "phase_heading",
+            "prediction": "Treatment",
+            "proposal_bbox": [
+              237,
+              13,
+              333,
+              29
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              237,
+              14,
+              333,
+              28
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Treatment"
+          },
+          {
+            "display_text": "Transfer",
+            "exact": true,
+            "numeric_confidence": 0.7529593110084534,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999757558107376,
+            "official_prediction": "Transfer",
+            "predicted_role": "annotation",
+            "prediction": "Transfer",
+            "proposal_bbox": [
+              412,
+              126,
+              489,
+              141
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              412,
+              126,
+              489,
+              141
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Transfer"
+          },
+          {
+            "display_text": "50",
+            "exact": true,
+            "numeric_confidence": 0.9992002844810486,
+            "numeric_prediction": "50",
+            "official_confidence": 0.9998736381530762,
+            "official_prediction": "50",
+            "predicted_role": "y_tick",
+            "prediction": "50",
+            "proposal_bbox": [
+              18,
+              144,
+              36,
+              156
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              18,
+              144,
+              36,
+              156
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "50"
+          },
+          {
+            "display_text": "0",
+            "exact": true,
+            "numeric_confidence": 0.9997681975364685,
+            "numeric_prediction": "0",
+            "official_confidence": 0.9985722303390503,
+            "official_prediction": "0",
+            "predicted_role": "x_tick",
+            "prediction": "0",
+            "proposal_bbox": [
+              297,
+              288,
+              308,
+              303
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              297,
+              289,
+              308,
+              303
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "0"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 14,
+        "scene_id": "ocr-production-composition-v1-validation-00049",
+        "source_raster_sha256": "28854aea656d1ff77d9dcfb145180d5179e17f1a61ecc3ba48ae0e8f448dc044",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Intervention",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999592701594034,
+            "official_prediction": "Intervention",
+            "predicted_role": "phase_heading",
+            "prediction": "Intervention",
+            "proposal_bbox": [
+              274,
+              14,
+              377,
+              26
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              274,
+              14,
+              377,
+              26
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Intervention"
+          },
+          {
+            "display_text": "Review",
+            "exact": true,
+            "numeric_confidence": 0.721691906452179,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999661842981974,
+            "official_prediction": "Review",
+            "predicted_role": "annotation",
+            "prediction": "Review",
+            "proposal_bbox": [
+              442,
+              144,
+              512,
+              159
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              442,
+              144,
+              512,
+              159
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Review"
+          },
+          {
+            "display_text": "2.5",
+            "exact": true,
+            "numeric_confidence": 0.9996375441551208,
+            "numeric_prediction": "2.5",
+            "official_confidence": 0.9995535214742025,
+            "official_prediction": "2.5",
+            "predicted_role": "y_tick",
+            "prediction": "2.5",
+            "proposal_bbox": [
+              18,
+              163,
+              43,
+              177
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              163,
+              43,
+              177
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "2.5"
+          },
+          {
+            "display_text": "8O",
+            "exact": true,
+            "numeric_confidence": 0.9990568161010742,
+            "numeric_prediction": "80",
+            "official_confidence": 0.9959528744220734,
+            "official_prediction": "80",
+            "predicted_role": "x_tick",
+            "prediction": "80",
+            "proposal_bbox": [
+              329,
+              289,
+              355,
+              305
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              329,
+              289,
+              356,
+              305
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "80"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 30,
+        "scene_id": "ocr-production-composition-v1-validation-00050",
+        "source_raster_sha256": "f3fb31dd3295fe8a61e208508d46dc35b7b33db65977d1344a71f3dc4b342662",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 2,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Baseline",
+            "exact": true,
+            "numeric_confidence": 0.869500994682312,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999450296163559,
+            "official_prediction": "Baseline",
+            "predicted_role": "phase_heading",
+            "prediction": "Baseline",
+            "proposal_bbox": [
+              312,
+              14,
+              396,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              312,
+              14,
+              396,
+              30
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Baseline"
+          },
+          {
+            "display_text": "5",
+            "exact": true,
+            "numeric_confidence": 0.9996542930603027,
+            "numeric_prediction": "5",
+            "official_confidence": 0.9998574256896973,
+            "official_prediction": "5",
+            "predicted_role": "x_tick",
+            "prediction": "5",
+            "proposal_bbox": [
+              360,
+              289,
+              370,
+              305
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              360,
+              289,
+              370,
+              305
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "5"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 21,
+        "scene_id": "ocr-production-composition-v1-validation-00051",
+        "source_raster_sha256": "8b5c1b208304fb5f68f750178d3881f7c78e2e2848335e4ff3fee9a4dde7a185",
+        "true_positives": 2,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Followup",
+            "exact": true,
+            "numeric_confidence": 0.909976601600647,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999235421419144,
+            "official_prediction": "Followup",
+            "predicted_role": "other",
+            "prediction": "Followup",
+            "proposal_bbox": [
+              159,
+              13,
+              226,
+              29
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              159,
+              13,
+              226,
+              29
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Followup"
+          },
+          {
+            "display_text": "Prompt",
+            "exact": true,
+            "numeric_confidence": 0.8823218941688538,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999552369117737,
+            "official_prediction": "Prompt",
+            "predicted_role": "annotation",
+            "prediction": "Prompt",
+            "proposal_bbox": [
+              395,
+              135,
+              454,
+              151
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              395,
+              135,
+              455,
+              151
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Prompt"
+          },
+          {
+            "display_text": "-2",
+            "exact": true,
+            "numeric_confidence": 0.9995462894439697,
+            "numeric_prediction": "-2",
+            "official_confidence": 0.9999136328697205,
+            "official_prediction": "-2",
+            "predicted_role": "x_tick",
+            "prediction": "-2",
+            "proposal_bbox": [
+              397,
+              289,
+              406,
+              303
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              390,
+              289,
+              407,
+              303
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "-2"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 41,
+        "scene_id": "ocr-production-composition-v1-validation-00052",
+        "source_raster_sha256": "5d5b010d0ccaa53c30619df48c9cb3243cbbb81cd82200625fe4c9a99b0c7572",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase B",
+            "exact": true,
+            "numeric_confidence": 0.7557461261749268,
+            "numeric_prediction": "",
+            "official_confidence": 0.9946845855031695,
+            "official_prediction": "Phase B",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase B",
+            "proposal_bbox": [
+              196,
+              14,
+              258,
+              26
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              196,
+              14,
+              259,
+              26
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase B"
+          },
+          {
+            "display_text": "-2",
+            "exact": true,
+            "numeric_confidence": 0.9984356164932251,
+            "numeric_prediction": "-2",
+            "official_confidence": 0.9999843239784241,
+            "official_prediction": "-2",
+            "predicted_role": "y_tick",
+            "prediction": "-2",
+            "proposal_bbox": [
+              22,
+              111,
+              31,
+              124
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              111,
+              32,
+              124
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "-2"
+          },
+          {
+            "display_text": "Change",
+            "exact": true,
+            "numeric_confidence": 0.8291449546813965,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999609788258871,
+            "official_prediction": "Change",
+            "predicted_role": "annotation",
+            "prediction": "Change",
+            "proposal_bbox": [
+              424,
+              151,
+              493,
+              171
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              424,
+              151,
+              493,
+              171
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Change"
+          },
+          {
+            "display_text": "2O",
+            "exact": true,
+            "numeric_confidence": 0.9996005892753601,
+            "numeric_prediction": "20",
+            "official_confidence": 0.999420166015625,
+            "official_prediction": "20",
+            "predicted_role": "x_tick",
+            "prediction": "20",
+            "proposal_bbox": [
+              189,
+              288,
+              212,
+              301
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              189,
+              289,
+              212,
+              301
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "20"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 22,
+        "scene_id": "ocr-production-composition-v1-validation-00053",
+        "source_raster_sha256": "19dc75b209d83b29a0715c531f72e24587fd35201745166ecef85ac8785cdf11",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Maintenance",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999417770992626,
+            "official_prediction": "Maintenance",
+            "predicted_role": "phase_heading",
+            "prediction": "Maintenance",
+            "proposal_bbox": [
+              233,
+              13,
+              333,
+              25
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              233,
+              13,
+              333,
+              25
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Maintenance"
+          },
+          {
+            "display_text": "Probe",
+            "exact": true,
+            "numeric_confidence": 0.664300262928009,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999535799026489,
+            "official_prediction": "Probe",
+            "predicted_role": "annotation",
+            "prediction": "Probe",
+            "proposal_bbox": [
+              453,
+              125,
+              501,
+              139
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              453,
+              125,
+              502,
+              139
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Probe"
+          },
+          {
+            "display_text": "0",
+            "exact": true,
+            "numeric_confidence": 0.9999135732650757,
+            "numeric_prediction": "0",
+            "official_confidence": 0.9977105855941772,
+            "official_prediction": "0",
+            "predicted_role": "y_tick",
+            "prediction": "0",
+            "proposal_bbox": [
+              18,
+              130,
+              26,
+              143
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              131,
+              26,
+              143
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "0"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 32,
+        "scene_id": "ocr-production-composition-v1-validation-00054",
+        "source_raster_sha256": "2905f4236bbefcdcfa2fa2eeee912ff8cf6d1d044b42be84123b44c5d536ee75",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase A",
+            "exact": true,
+            "numeric_confidence": 0.7574324607849121,
+            "numeric_prediction": "",
+            "official_confidence": 0.9997181466647557,
+            "official_prediction": "Phase A",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase A",
+            "proposal_bbox": [
+              270,
+              13,
+              341,
+              29
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              270,
+              13,
+              342,
+              28
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase A"
+          },
+          {
+            "display_text": "Criterion",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999728467729356,
+            "official_prediction": "Criterion",
+            "predicted_role": "annotation",
+            "prediction": "Criterion",
+            "proposal_bbox": [
+              377,
+              143,
+              455,
+              157
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              377,
+              142,
+              455,
+              157
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Criterion"
+          },
+          {
+            "display_text": "25",
+            "exact": true,
+            "numeric_confidence": 0.9998795986175537,
+            "numeric_prediction": "25",
+            "official_confidence": 0.9998886287212372,
+            "official_prediction": "25",
+            "predicted_role": "y_tick",
+            "prediction": "25",
+            "proposal_bbox": [
+              18,
+              149,
+              40,
+              166
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              150,
+              40,
+              166
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "25"
+          },
+          {
+            "display_text": "Rate",
+            "exact": true,
+            "numeric_confidence": 0.8313964605331421,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999486804008484,
+            "official_prediction": "Rate",
+            "predicted_role": "legend_text",
+            "prediction": "Rate",
+            "proposal_bbox": [
+              583,
+              187,
+              626,
+              201
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              583,
+              187,
+              626,
+              201
+            ],
+            "truth_role": "legend_text",
+            "truth_text": "Rate"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 17,
+        "scene_id": "ocr-production-composition-v1-validation-00055",
+        "source_raster_sha256": "72f929cb6e0834ae5c8fa68ace99fc6cc3a100d1d0917ce316b78b9973d409ee",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 2,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Treatment",
+            "exact": true,
+            "numeric_confidence": 0.923704206943512,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999338520897759,
+            "official_prediction": "Treatment",
+            "predicted_role": "phase_heading",
+            "prediction": "Treatment",
+            "proposal_bbox": [
+              306,
+              15,
+              405,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              306,
+              15,
+              406,
+              29
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Treatment"
+          },
+          {
+            "display_text": "Transfer",
+            "exact": true,
+            "numeric_confidence": 0.7607735991477966,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999801516532898,
+            "official_prediction": "Transfer",
+            "predicted_role": "annotation",
+            "prediction": "Transfer",
+            "proposal_bbox": [
+              405,
+              117,
+              490,
+              133
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              405,
+              117,
+              490,
+              133
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Transfer"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 31,
+        "scene_id": "ocr-production-composition-v1-validation-00056",
+        "source_raster_sha256": "0987f877d8a1ed873a5564e12453dee91ba4869489d054564e000aa753f1cbbd",
+        "true_positives": 2,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Intervention",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999552915493647,
+            "official_prediction": "Intervention",
+            "predicted_role": "phase_heading",
+            "prediction": "Intervention",
+            "proposal_bbox": [
+              153,
+              13,
+              252,
+              25
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              153,
+              13,
+              252,
+              25
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Intervention"
+          },
+          {
+            "display_text": "Review",
+            "exact": true,
+            "numeric_confidence": 0.6417601108551025,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999675154685974,
+            "official_prediction": "Review",
+            "predicted_role": "annotation",
+            "prediction": "Review",
+            "proposal_bbox": [
+              436,
+              134,
+              503,
+              151
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              436,
+              134,
+              504,
+              150
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Review"
+          },
+          {
+            "display_text": "75",
+            "exact": true,
+            "numeric_confidence": 0.9996273517608643,
+            "numeric_prediction": "75",
+            "official_confidence": 0.9999867081642151,
+            "official_prediction": "75",
+            "predicted_role": "x_tick",
+            "prediction": "75",
+            "proposal_bbox": [
+              314,
+              289,
+              335,
+              304
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              313,
+              290,
+              335,
+              304
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "75"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 15,
+        "scene_id": "ocr-production-composition-v1-validation-00057",
+        "source_raster_sha256": "7bd2e4535dcf3917acecdfba9b2d46629f9515a5c157aa3993e440671013866b",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 2,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Baseline",
+            "exact": true,
+            "numeric_confidence": 0.7835203409194946,
+            "numeric_prediction": "",
+            "official_confidence": 0.9907167479395866,
+            "official_prediction": "Baseline",
+            "predicted_role": "phase_heading",
+            "prediction": "Baseline",
+            "proposal_bbox": [
+              192,
+              14,
+              272,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              192,
+              14,
+              272,
+              30
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Baseline"
+          },
+          {
+            "display_text": "2O",
+            "exact": true,
+            "numeric_confidence": 0.9993849992752075,
+            "numeric_prediction": "20",
+            "official_confidence": 0.9994468688964844,
+            "official_prediction": "20",
+            "predicted_role": "y_tick",
+            "prediction": "20",
+            "proposal_bbox": [
+              18,
+              99,
+              40,
+              112
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              99,
+              40,
+              111
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "20"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 46,
+        "scene_id": "ocr-production-composition-v1-validation-00058",
+        "source_raster_sha256": "c27e06e95e7f5f7a7a204c1c06791b062c782d302b564d4ed28a1563d6860c69",
+        "true_positives": 2,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Followup",
+            "exact": true,
+            "numeric_confidence": 0.8918054103851318,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999575763940811,
+            "official_prediction": "Followup",
+            "predicted_role": "other",
+            "prediction": "Followup",
+            "proposal_bbox": [
+              228,
+              13,
+              309,
+              33
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              228,
+              13,
+              309,
+              33
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Followup"
+          },
+          {
+            "display_text": "8O",
+            "exact": true,
+            "numeric_confidence": 0.9975669384002686,
+            "numeric_prediction": "80",
+            "official_confidence": 0.9934057593345642,
+            "official_prediction": "80",
+            "predicted_role": "y_tick",
+            "prediction": "80",
+            "proposal_bbox": [
+              17,
+              118,
+              40,
+              131
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              118,
+              41,
+              131
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "80"
+          },
+          {
+            "display_text": "Prompt",
+            "exact": true,
+            "numeric_confidence": 0.8220703601837158,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999472300211588,
+            "official_prediction": "Prompt",
+            "predicted_role": "annotation",
+            "prediction": "Prompt",
+            "proposal_bbox": [
+              388,
+              124,
+              445,
+              140
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              388,
+              124,
+              446,
+              140
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Prompt"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 17,
+        "scene_id": "ocr-production-composition-v1-validation-00059",
+        "source_raster_sha256": "8887a6d28f0ef9607f0e5e6b60fb04084a63e29f47465d71ea7364bc2bc90717",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 3,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase B",
+            "exact": true,
+            "numeric_confidence": 0.7897705435752869,
+            "numeric_prediction": "",
+            "official_confidence": 0.999777112688337,
+            "official_prediction": "Phase B",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase B",
+            "proposal_bbox": [
+              265,
+              14,
+              340,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              265,
+              14,
+              341,
+              29
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase B"
+          },
+          {
+            "display_text": "Change",
+            "exact": true,
+            "numeric_confidence": 0.7883676886558533,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999167025089264,
+            "official_prediction": "Change",
+            "predicted_role": "annotation",
+            "prediction": "Change",
+            "proposal_bbox": [
+              417,
+              141,
+              474,
+              157
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              416,
+              141,
+              474,
+              157
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Change"
+          },
+          {
+            "display_text": "10",
+            "exact": true,
+            "numeric_confidence": 0.9999508261680603,
+            "numeric_prediction": "10",
+            "official_confidence": 0.9999178051948547,
+            "official_prediction": "10",
+            "predicted_role": "x_tick",
+            "prediction": "10",
+            "proposal_bbox": [
+              176,
+              289,
+              196,
+              304
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              175,
+              290,
+              196,
+              304
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "10"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 24,
+        "scene_id": "ocr-production-composition-v1-validation-00060",
+        "source_raster_sha256": "0e848318b7a0987d514d52003ba634f0e40d6db2dad2f202b2a7ebb0abe36568",
+        "true_positives": 3,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Maintenance",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999672499569979,
+            "official_prediction": "Maintenance",
+            "predicted_role": "phase_heading",
+            "prediction": "Maintenance",
+            "proposal_bbox": [
+              303,
+              14,
+              429,
+              30
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              303,
+              14,
+              429,
+              30
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Maintenance"
+          },
+          {
+            "display_text": "Probe",
+            "exact": true,
+            "numeric_confidence": 0.8457337617874146,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999604225158691,
+            "official_prediction": "Probe",
+            "predicted_role": "annotation",
+            "prediction": "Probe",
+            "proposal_bbox": [
+              446,
+              116,
+              500,
+              131
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              446,
+              116,
+              500,
+              131
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Probe"
+          },
+          {
+            "display_text": "10",
+            "exact": true,
+            "numeric_confidence": 0.9998815059661865,
+            "numeric_prediction": "10",
+            "official_confidence": 0.9999158382415771,
+            "official_prediction": "10",
+            "predicted_role": "y_tick",
+            "prediction": "10",
+            "proposal_bbox": [
+              19,
+              156,
+              38,
+              170
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              18,
+              156,
+              38,
+              170
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "10"
+          },
+          {
+            "display_text": "2.5",
+            "exact": true,
+            "numeric_confidence": 0.9997262954711914,
+            "numeric_prediction": "2.5",
+            "official_confidence": 0.9990480144818624,
+            "official_prediction": "2.5",
+            "predicted_role": "x_tick",
+            "prediction": "2.5",
+            "proposal_bbox": [
+              206,
+              289,
+              234,
+              305
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              205,
+              289,
+              234,
+              305
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "2.5"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 23,
+        "scene_id": "ocr-production-composition-v1-validation-00061",
+        "source_raster_sha256": "8b4285de46246d4aeb667b189bd3f4903a172c9b04e01e584ea87bda06212161",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 4,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Phase A",
+            "exact": true,
+            "numeric_confidence": 0.7506975531578064,
+            "numeric_prediction": "",
+            "official_confidence": 0.9995250020708356,
+            "official_prediction": "Phase A",
+            "predicted_role": "phase_heading",
+            "prediction": "Phase A",
+            "proposal_bbox": [
+              149,
+              13,
+              220,
+              28
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              149,
+              13,
+              221,
+              28
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Phase A"
+          },
+          {
+            "display_text": "Criterion",
+            "exact": true,
+            "numeric_confidence": 0.0,
+            "numeric_prediction": "",
+            "official_confidence": 0.9711855782402886,
+            "official_prediction": "Criterion",
+            "predicted_role": "annotation",
+            "prediction": "Criterion",
+            "proposal_bbox": [
+              370,
+              132,
+              441,
+              145
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              369,
+              131,
+              441,
+              145
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Criterion"
+          },
+          {
+            "display_text": "75",
+            "exact": true,
+            "numeric_confidence": 0.9997107982635498,
+            "numeric_prediction": "75",
+            "official_confidence": 0.9999764561653137,
+            "official_prediction": "75",
+            "predicted_role": "y_tick",
+            "prediction": "75",
+            "proposal_bbox": [
+              17,
+              175,
+              38,
+              189
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              17,
+              175,
+              38,
+              189
+            ],
+            "truth_role": "y_tick",
+            "truth_text": "75"
+          },
+          {
+            "display_text": "25",
+            "exact": true,
+            "numeric_confidence": 0.9998331069946289,
+            "numeric_prediction": "25",
+            "official_confidence": 0.9999825954437256,
+            "official_prediction": "25",
+            "predicted_role": "x_tick",
+            "prediction": "25",
+            "proposal_bbox": [
+              237,
+              288,
+              259,
+              305
+            ],
+            "route": "numeric_specialist",
+            "truth_bbox": [
+              237,
+              289,
+              259,
+              305
+            ],
+            "truth_role": "x_tick",
+            "truth_text": "25"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 33,
+        "scene_id": "ocr-production-composition-v1-validation-00062",
+        "source_raster_sha256": "ddbbc03d1bc817b8eaac05542a5c3ae44e5d06e8c47a5fb3a17f77ddabe83f2a",
+        "true_positives": 4,
+        "truth_region_count": 5
+      },
+      {
+        "accepted_region_count": 2,
+        "duplicate_region_count": 0,
+        "exact_detection": false,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "predictions": [
+          {
+            "display_text": "Treatment",
+            "exact": true,
+            "numeric_confidence": 0.8646247386932373,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999546739790175,
+            "official_prediction": "Treatment",
+            "predicted_role": "phase_heading",
+            "prediction": "Treatment",
+            "proposal_bbox": [
+              185,
+              12,
+              273,
+              26
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              185,
+              13,
+              273,
+              26
+            ],
+            "truth_role": "phase_heading",
+            "truth_text": "Treatment"
+          },
+          {
+            "display_text": "Transfer",
+            "exact": true,
+            "numeric_confidence": 0.7826583385467529,
+            "numeric_prediction": "",
+            "official_confidence": 0.9999743551015854,
+            "official_prediction": "Transfer",
+            "predicted_role": "annotation",
+            "prediction": "Transfer",
+            "proposal_bbox": [
+              398,
+              148,
+              462,
+              161
+            ],
+            "route": "general_recognizer",
+            "truth_bbox": [
+              398,
+              149,
+              463,
+              161
+            ],
+            "truth_role": "annotation",
+            "truth_text": "Transfer"
+          }
+        ],
+        "prohibited_structure_hits": 0,
+        "proposal_count": 11,
+        "scene_id": "ocr-production-composition-v1-validation-00063",
+        "source_raster_sha256": "e2dbb3a990288ab40ad005582e1fd02f3c31ff036266dc5e2738f8c0dfbd4963",
+        "true_positives": 2,
+        "truth_region_count": 5
+      }
+    ],
+    "character_error_rate": 0.0,
+    "duplicate_region_count": 0,
+    "exact_detection_scene_count": 3,
+    "false_negatives": 113,
+    "false_positives": 0,
+    "forbidden_numeric_route_count": 0,
+    "marker_creation_evaluated": false,
+    "numeric_case_count": 82,
+    "numeric_exact_match": 1.0,
+    "prohibited_structure_hits": 0,
+    "recognition_exact_match": 0.646875,
+    "role_accuracy": 0.61875,
+    "route_counts": {
+      "general_recognizer": 125,
+      "numeric_specialist": 82
+    },
+    "scene_count": 64,
+    "true_positives": 207,
+    "truth_region_count": 320,
+    "word_case_count": 125,
+    "word_exact_match": 1.0
+  },
+  "payloads": {
+    "detector_onnx_sha256": "e0254920b26784a87369aa25cc4ec387c6544db30bda4f9542b7ce9a8712e431",
+    "numeric_recognizer_onnx_sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+    "official_inference_yaml_sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
+    "official_recognizer_onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743"
+  },
+  "private_manifest_sha256": "c9903f5c28a10c9f99387bd65d4d2d1c796acc2bd339e0f34029287d723752a0",
+  "production_approval": false,
+  "provider": "CPUExecutionProvider",
+  "release_eligible": false,
+  "revision": "graphreader-v8-official-english-v5-numeric-composition-v1-validation-v1",
+  "schema": "graphreader.ocr-production-composition-validation-gate.v1",
+  "seal_binding": {
+    "candidate_hash_key_schema": [
+      "detector_onnx_sha256",
+      "official_recognizer_onnx_sha256",
+      "numeric_recognizer_onnx_sha256"
+    ],
+    "candidate_hashes": {
+      "detector_onnx_sha256": "e0254920b26784a87369aa25cc4ec387c6544db30bda4f9542b7ce9a8712e431",
+      "numeric_recognizer_onnx_sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+      "official_recognizer_onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "c9903f5c28a10c9f99387bd65d4d2d1c796acc2bd339e0f34029287d723752a0",
+    "evaluator_source_bundle_sha256": "c243af4e17309875876dd255f8209df6bbbe5e03ca452b7dd0a6d99c53c47330",
+    "evaluator_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/ocr/component_context_detector_v7/dataset.py",
+      "ml/ocr/component_ensemble_v5/dataset.py",
+      "ml/ocr/component_geometric_v4/dataset.py",
+      "ml/ocr/component_region_detector_v6/dataset.py",
+      "ml/ocr/official_bakeoff/production_evaluate.py",
+      "ml/ocr/production_composition_v1/dataset.py",
+      "ml/ocr/production_composition_v1/pipeline.py",
+      "ml/ocr/production_composition_v1/protocol.py",
+      "ml/ocr/production_composition_v1/validation_gate.py"
+    ],
+    "gate_config_sha256": "b682ed4a145ac14962b3d8b7d92263296ebeec8004cc907256fa9d4664a89937",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "graphreader-v8-official-english-v5-numeric-composition-v1-validation-v1",
+    "split_config_path": "ml/ocr/production_composition_v1/gates/validation-v1.json",
+    "split_config_sha256": "38606e1dfbaf0f27423d56e624c9b256a250dcb764ed3ac849f514f86665112c",
+    "task": "ocr-production-composition"
+  },
+  "status": "fail",
+  "task": "ocr-production-composition",
+  "validation_seal_sha256": "e975b17626a429a6ce020ee98abbf9fded79bea716a543e24e69d74a32d2d62c"
+}

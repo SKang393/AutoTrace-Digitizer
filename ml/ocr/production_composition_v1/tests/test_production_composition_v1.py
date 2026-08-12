@@ -85,13 +85,23 @@ def test_fixture_archives_are_byte_bound_and_truth_hidden_before_gate() -> None:
         assert sha256_file(REPO_ROOT / seal["private_manifest_path"]) == seal["private_manifest_sha256"]
 
 
-def test_composition_cannot_be_promoted_by_preregistration() -> None:
+def test_failed_validation_cannot_promote_or_open_public_gate() -> None:
     protocol = _load(ROOT / "PROTOCOL.json")
+    validation_report = _load(ROOT / "VALIDATION_REPORT.json")
     assert protocol["revision"] == REVISION
     assert protocol["production_approval"] is False
     assert protocol["release_eligible"] is False
+    assert validation_report["status"] == "fail"
+    assert validation_report["evaluation_count"] == 1
+    assert validation_report["production_approval"] is False
+    assert validation_report["release_eligible"] is False
+    assert validation_report["metrics"]["false_negatives"] == 113
+    assert validation_report["metrics"]["word_exact_match"] == 1.0
+    assert validation_report["metrics"]["numeric_exact_match"] == 1.0
+    assert sha256_file(ROOT / "VALIDATION_REPORT.json") == (
+        "a3d851c043993bdc5546c68dfa26be837c88495600f7cbd214c55ee107ef330f"
+    )
     assert not (ROOT / "PUBLIC_GATE_REPORT.json").exists()
-    assert not (ROOT / "VALIDATION_REPORT.json").exists()
     assert not any(REPO_ROOT.glob("models/manifest/ocr/*production*composition*.json"))
     model_index = _load(REPO_ROOT / "artifacts/production-model-store/production-model-index.json")
     assert REVISION not in json.dumps(model_index, sort_keys=True)

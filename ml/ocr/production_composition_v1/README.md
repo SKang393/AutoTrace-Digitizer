@@ -23,3 +23,15 @@ Production promotion still requires the same fixture bytes to execute through
 the C# production composition, independent marker-stage evidence showing zero
 marker creation from OCR text, approved multi-payload model-store discovery,
 packaging and notices, and clean-machine offline evidence.
+
+The single authorized validation execution is consumed and failed closed. The
+exact three-model composition ran on CPU for all 64 frozen scenes. V8 retained
+207 of 320 truth regions with zero false regions, duplicates, or prohibited
+structure hits, but missed 113 regions and made only 3 scenes detection-exact.
+Misses were 56 of 64 legend labels, 25 of 64 x ticks, 21 of 64 y ticks, and 11
+of 64 annotations. All 207 detected regions were recognized exactly: word and
+numeric exact match were both 1.0 and character error rate was 0.0. The report
+SHA-256 is
+`a3d851c043993bdc5546c68dfa26be837c88495600f7cbd214c55ee107ef330f`.
+The truth-hidden public archive remains unopened. This composition must not be
+rerun, repaired, tuned, manifested, stored, packaged, or approved.
