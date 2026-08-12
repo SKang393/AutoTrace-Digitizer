@@ -22,3 +22,8 @@ Even a public pass remains unapproved until composed V9 detection, independent
 marker-stage safety, C# runtime parity, model-store, packaging, private, and
 clean-machine evidence all pass directly.
 
+P1 ran once and failed closed. It preserved every non-space truth, all numeric
+labels, and all word labels, but five of 28 ambiguity crops retained a lowercase
+`l` where the immutable source pixels showed the top and bottom bars of a
+capital `I`. P2 is preregistered to add only that source-shape distinction after
+P1 spacing. It does not receive truth, role, graph position, or a label list.

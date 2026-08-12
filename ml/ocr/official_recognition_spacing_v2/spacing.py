@@ -19,6 +19,10 @@ MINIMUM_FOREGROUND_CONTRAST = 10.0
 
 
 def _source_groups(image: Image.Image) -> tuple[int, ...]:
+    return tuple(item[0] for item in _source_group_features(image))
+
+
+def _source_group_features(image: Image.Image) -> tuple[tuple[int, int, float, float], ...]:
     gray = np.asarray(image.convert("L"), dtype=np.float32)
     if gray.ndim != 2 or min(gray.shape) == 0:
         return ()
@@ -45,7 +49,19 @@ def _source_groups(image: Image.Image) -> tuple[int, ...]:
             ends.append(int(prior))
             starts.append(int(current))
     ends.append(int(active[-1]))
-    return tuple(end - start + 1 for start, end in zip(starts, ends, strict=True))
+    features: list[tuple[int, int, float, float]] = []
+    for start, end in zip(starts, ends, strict=True):
+        group = foreground[:, start : end + 1]
+        group_coordinates = np.argwhere(group)
+        group_top, group_left = group_coordinates.min(axis=0)
+        group_bottom, group_right = group_coordinates.max(axis=0)
+        tight = group[int(group_top) : int(group_bottom) + 1, int(group_left) : int(group_right) + 1]
+        group_width = int(group_right - group_left + 1)
+        group_height = int(group_bottom - group_top + 1)
+        top_coverage = float(tight[0].sum()) / group_width
+        bottom_coverage = float(tight[-1].sum()) / group_width
+        features.append((group_width, group_height, top_coverage, bottom_coverage))
+    return tuple(features)
 
 
 def _partition_character_counts(character_count: int, widths: tuple[int, ...]) -> tuple[int, ...]:
@@ -85,4 +101,30 @@ def restore_source_evidenced_spaces(image: Image.Image, raw_prediction: str) -> 
     return " ".join(chunks)
 
 
-__all__ = ["restore_source_evidenced_spaces"]
+def restore_source_evidenced_spaces_and_vertical_case(image: Image.Image, raw_prediction: str) -> str:
+    """P2: also distinguish a serifed capital I from a lowercase l using source pixels."""
+
+    if len(raw_prediction) < 2 or any(character.isspace() for character in raw_prediction):
+        return raw_prediction
+    features = _source_group_features(image)
+    widths = tuple(item[0] for item in features)
+    counts = _partition_character_counts(len(raw_prediction), widths)
+    if not counts:
+        return raw_prediction
+    chunks: list[str] = []
+    offset = 0
+    for count, (width, height, top_coverage, bottom_coverage) in zip(counts, features, strict=True):
+        chunk = raw_prediction[offset : offset + count]
+        offset += count
+        if (
+            chunk == "l"
+            and width / max(1, height) >= 0.25
+            and top_coverage >= 0.75
+            and bottom_coverage >= 0.75
+        ):
+            chunk = "I"
+        chunks.append(chunk)
+    return " ".join(chunks)
+
+
+__all__ = ["restore_source_evidenced_spaces", "restore_source_evidenced_spaces_and_vertical_case"]

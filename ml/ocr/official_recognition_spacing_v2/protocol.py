@@ -7,7 +7,7 @@ from __future__ import annotations
 
 TASK = "ocr-recognition"
 REVISION = "official-ppocrv5-image-spacing-v2"
-CANDIDATE_ID = "P1"
+CANDIDATE_ID = "P2"
 EXPERIMENT_BUDGET = 3
 MODEL_SHA256 = "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743"
 INFERENCE_YAML_SHA256 = "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067"
@@ -37,18 +37,18 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
         "schema": "graphreader.ocr-official-recognition-spacing-protocol.v1",
         "task": TASK,
         "revision": REVISION,
-        "status": "p1_preregistered_before_inference",
+        "status": "p1_failed_selection_p2_preregistered_before_inference",
         "defect_class": (
             "the exact official recognizer preserved O/o/l/I glyph identities but removed visible inter-glyph "
             "whitespace in both exposed ambiguity failures"
         ),
         "experiment_budget": EXPERIMENT_BUDGET,
         "currently_preregistered_candidate": CANDIDATE_ID,
-        "consumed_candidates": [],
+        "consumed_candidates": ["P1"],
         "isolated_change": (
-            "retain the exact official ONNX weights and CTC decoder, then restore whitespace only from generic "
-            "large-gap evidence in the immutable source crop; no truth string, role, or label whitelist may "
-            "participate in postprocessing"
+            "retain P1 source-evidenced spacing, exact official ONNX weights, and CTC decoder; add only a "
+            "source-pixel top-and-bottom serif test to distinguish a capital I from a lowercase l after source "
+            "groups are formed; no truth string, role, graph position, or label whitelist may participate"
         ),
         "optimizer_steps": 0,
         "weights_changed": False,
@@ -57,7 +57,7 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
         "inference_yaml_sha256": INFERENCE_YAML_SHA256,
         "runner_source_bundle_sha256": runner_source_bundle_sha256,
         "spacing_algorithm": {
-            "id": "source-projection-large-gap-v1",
+            "id": "source-projection-large-gap-vertical-case-v2",
             "minimum_gap_pixels": 4,
             "minimum_gap_to_ink_height_ratio": 0.25,
             "minimum_source_groups": 3,
@@ -68,6 +68,24 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
             "requires_source_group_count_not_greater_than_unicode_scalar_count": True,
             "partitioning": "width-proportional dynamic programming with nonempty text groups",
             "truth_or_role_input_forbidden": True,
+            "capital_i_source_shape": {
+                "minimum_width_to_height_ratio": 0.25,
+                "minimum_top_row_coverage": 0.75,
+                "minimum_bottom_row_coverage": 0.75,
+                "applies_only_when_raw_group_is_lowercase_l": True,
+            },
+        },
+        "p1_failure_evidence": {
+            "result_path": "ml/ocr/official_recognition_spacing_v2/P1_RESULT.json",
+            "report_sha256": "d056b848c6aa376a1f59b4b82096b49af76f20b05cb9ece717ab2c4b60ee4c58",
+            "exact_match": 0.9776785714285714,
+            "ambiguity_exact_match": 0.8214285714285714,
+            "numeric_exact_match": 1.0,
+            "word_exact_match": 1.0,
+            "spacing_changed_nonspace_truth_count": 0,
+            "failed_case_count": 5,
+            "failure_signature": "source groups were restored but the final capital I was decoded as lowercase l",
+            "public_archive_opened": False,
         },
         "splits": {
             "selection": {

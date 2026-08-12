@@ -24,7 +24,7 @@ from .protocol import CANDIDATE_ID, GATES, MODEL_SHA256, PUBLIC_GATE_CONFIG, REV
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ROOT = Path("ml/ocr/official_recognition_spacing_v2")
-RESULT_PATH = ROOT / "P1_RESULT.json"
+RESULT_PATH = ROOT / "P2_RESULT.json"
 EVALUATOR_SOURCE_PATHS = (
     ROOT / "prepare_split.py", ROOT / "spacing.py", ROOT / "protocol.py", ROOT / "evaluate.py",
     ROOT / "sealed_gate.py", Path("ml/ocr/official_bakeoff/production_evaluate.py"),
@@ -60,8 +60,8 @@ def evaluate_public(*, output_path: Path) -> dict[str, object]:
         or entry.get("public_gate_authorized_candidate_id") != CANDIDATE_ID
         or entry.get("public_gate_evaluations") != 0
         or entry.get("public_gate_archive_opened") is not False
-        or entry.get("p1_result_sha256") != sha256_file(REPO_ROOT / RESULT_PATH)
-        or entry.get("p1_selection_report_sha256") != selection_report_sha256
+        or entry.get("p2_result_sha256") != sha256_file(REPO_ROOT / RESULT_PATH)
+        or entry.get("p2_selection_report_sha256") != selection_report_sha256
     ):
         raise RuntimeError("Recognition spacing public gate is not authorized by exact selection evidence")
     if sha256_file(REPO_ROOT / MODEL_PATH) != MODEL_SHA256:
@@ -87,6 +87,7 @@ def evaluate_public(*, output_path: Path) -> dict[str, object]:
         archive,
         _cpu_session(REPO_ROOT / MODEL_PATH),
         read_character_alphabet(REPO_ROOT / INFERENCE_YAML_PATH),
+        candidate_id=CANDIDATE_ID,
     )
     metrics = evaluated["metrics"]
     passed = bool(metrics["passed"] and metrics["inference_calls"] == len(manifest["cases"]))
@@ -128,4 +129,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

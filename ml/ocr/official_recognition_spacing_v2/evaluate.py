@@ -26,20 +26,21 @@ from ml.ocr.official_bakeoff.production_evaluate import (
 from .protocol import (
     CANDIDATE_ID, GATES, INFERENCE_YAML_SHA256, MODEL_SHA256, REVISION, TASK,
 )
-from .spacing import restore_source_evidenced_spaces
+from .spacing import restore_source_evidenced_spaces, restore_source_evidenced_spaces_and_vertical_case
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ROOT = Path("ml/ocr/official_recognition_spacing_v2")
 CONFIG_PATH = ROOT / "training/p1.json"
+P2_CONFIG_PATH = ROOT / "training/p2.json"
 PROTOCOL_PATH = ROOT / "PROTOCOL.json"
 SELECTION_SEAL_PATH = ROOT / "SELECTION_SEAL.json"
 PUBLIC_SEAL_PATH = ROOT / "SEALED_PUBLIC_TEST_SEAL.json"
-PUBLIC_GATE_CONFIG_PATH = ROOT / "gates/sealed-public-p1.json"
+PUBLIC_GATE_CONFIG_PATH = ROOT / "gates/sealed-public-p2.json"
 MODEL_PATH = Path("ml/ocr/official_bakeoff/runs/conversion/en_PP-OCRv5_mobile_rec.onnx")
 INFERENCE_YAML_PATH = Path("ml/ocr/official_bakeoff/runs/extracted/en_PP-OCRv5_mobile_rec_infer/inference.yml")
 CONVERSION_REPORT_PATH = Path("ml/ocr/official_bakeoff/runs/conversion/report.json")
-CANONICAL_OUTPUT = ROOT / "artifacts/P1-run"
+CANONICAL_OUTPUT = ROOT / "artifacts/P2-run"
 RUNNER_SOURCE_PATHS = (
     ROOT / "prepare_split.py", ROOT / "spacing.py", ROOT / "evaluate.py",
     Path("ml/ocr/official_bakeoff/production_evaluate.py"), Path("ml/markers/gate_seal.py"),
@@ -102,7 +103,14 @@ def _load_partition(seal_path: Path, partition: str) -> tuple[dict[str, Any], by
     return manifest, archive
 
 
-def evaluate_partition(manifest: dict[str, Any], archive: bytes, session: Any, alphabet: str) -> dict[str, Any]:
+def evaluate_partition(
+    manifest: dict[str, Any],
+    archive: bytes,
+    session: Any,
+    alphabet: str,
+    *,
+    candidate_id: str = "P1",
+) -> dict[str, Any]:
     records: list[dict[str, Any]] = []
     family_counts: dict[str, list[int]] = defaultdict(lambda: [0, 0])
     exact = role_exact = errors = characters = raw_exact = spacing_changes = changed_nonspace = 0
@@ -119,7 +127,11 @@ def evaluate_partition(manifest: dict[str, Any], archive: bytes, session: Any, a
             output = np.asarray(session.run([session.get_outputs()[0].name], {session.get_inputs()[0].name: tensor})[0], dtype=np.float32)
             output_digest.update(np.ascontiguousarray(output).tobytes(order="C"))
             raw = decode_ctc(output, alphabet)
-            prediction = restore_source_evidenced_spaces(image, raw)
+            prediction = (
+                restore_source_evidenced_spaces_and_vertical_case(image, raw)
+                if candidate_id == "P2"
+                else restore_source_evidenced_spaces(image, raw)
+            )
             matched = prediction == case["truth_text"]
             predicted_role = _role(prediction)
             role_matched = predicted_role == case["truth_role"]
@@ -172,22 +184,25 @@ def evaluate_partition(manifest: dict[str, Any], archive: bytes, session: Any, a
     return {"metrics": metrics, "records": records}
 
 
-def evaluate_candidate(output_dir: Path) -> dict[str, Any]:
+def evaluate_candidate(output_dir: Path, *, candidate_id: str = CANDIDATE_ID) -> dict[str, Any]:
     if output_dir.exists():
         raise RuntimeError(f"Recognition spacing candidate output exists: {output_dir}")
+    if candidate_id not in {"P1", "P2"}:
+        raise RuntimeError(f"Unknown recognition spacing candidate: {candidate_id}")
+    config_path = CONFIG_PATH if candidate_id == "P1" else P2_CONFIG_PATH
     authorization = acquire_training_candidate(
-        REPO_ROOT, task=TASK, revision=REVISION, candidate_id=CANDIDATE_ID,
-        config_path=CONFIG_PATH, runner_source_paths=RUNNER_SOURCE_PATHS,
+        REPO_ROOT, task=TASK, revision=REVISION, candidate_id=candidate_id,
+        config_path=config_path, runner_source_paths=RUNNER_SOURCE_PATHS,
     )
     output_dir.mkdir(parents=True)
     report_path = output_dir / "candidate-report.json"
     try:
-        config = _load(REPO_ROOT / CONFIG_PATH)
+        config = _load(REPO_ROOT / config_path)
         protocol = _load(REPO_ROOT / PROTOCOL_PATH)
         if (
             config.get("task") != TASK
             or config.get("revision") != REVISION
-            or config.get("candidate_id") != CANDIDATE_ID
+            or config.get("candidate_id") != candidate_id
             or config.get("model_sha256") != MODEL_SHA256
             or config.get("inference_yaml_sha256") != INFERENCE_YAML_SHA256
         ):
@@ -205,6 +220,18 @@ def evaluate_candidate(output_dir: Path) -> dict[str, Any]:
             raise RuntimeError("Recognition spacing public seal changed")
         if config["public_gate_config_sha256"] != sha256_file(REPO_ROOT / PUBLIC_GATE_CONFIG_PATH):
             raise RuntimeError("Recognition spacing public gate configuration changed")
+        if candidate_id == "P2":
+            p1_result_path = REPO_ROOT / str(config["p1_result_path"])
+            if config["p1_result_sha256"] != sha256_file(p1_result_path):
+                raise RuntimeError("Recognition spacing P1 failure evidence changed")
+            p1_result = _load(p1_result_path)
+            if (
+                p1_result.get("status") != "failed_selection"
+                or p1_result.get("candidate_id") != "P1"
+                or p1_result.get("public_gate_evaluations") != 0
+                or p1_result.get("public_gate_archive_opened") is not False
+            ):
+                raise RuntimeError("Recognition spacing P2 is not authorized by exact P1 failure evidence")
         if sha256_file(REPO_ROOT / MODEL_PATH) != MODEL_SHA256 or sha256_file(REPO_ROOT / INFERENCE_YAML_PATH) != INFERENCE_YAML_SHA256:
             raise RuntimeError("Exact official recognizer payload changed")
         conversion = _load(REPO_ROOT / CONVERSION_REPORT_PATH)
@@ -215,10 +242,16 @@ def evaluate_candidate(output_dir: Path) -> dict[str, Any]:
         selection_seal = _load(REPO_ROOT / SELECTION_SEAL_PATH)
         manifest, archive = _load_partition(SELECTION_SEAL_PATH, "selection")
         session = _cpu_session(REPO_ROOT / MODEL_PATH)
-        evaluated = evaluate_partition(manifest, archive, session, read_character_alphabet(REPO_ROOT / INFERENCE_YAML_PATH))
+        evaluated = evaluate_partition(
+            manifest,
+            archive,
+            session,
+            read_character_alphabet(REPO_ROOT / INFERENCE_YAML_PATH),
+            candidate_id=candidate_id,
+        )
         report = {
             "schema": "graphreader.ocr-official-recognition-spacing-candidate.v1",
-            "task": TASK, "revision": REVISION, "candidate_id": CANDIDATE_ID,
+            "task": TASK, "revision": REVISION, "candidate_id": candidate_id,
             "status": "selected" if evaluated["metrics"]["passed"] else "failed_selection",
             "optimizer_steps": 0, "weights_changed": False,
             "model_onnx_sha256": MODEL_SHA256, "provider": "CPUExecutionProvider",
@@ -238,7 +271,7 @@ def evaluate_candidate(output_dir: Path) -> dict[str, Any]:
         if not report_path.exists():
             report_path.write_bytes(canonical_json_bytes({
                 "schema": "graphreader.ocr-official-recognition-spacing-candidate.v1",
-                "task": TASK, "revision": REVISION, "candidate_id": CANDIDATE_ID,
+                "task": TASK, "revision": REVISION, "candidate_id": candidate_id,
                 "status": "failed_runner", "production_approval": False, "release_eligible": False,
                 "public_gate_evaluations": 0, "public_gate_archive_opened": False,
             }))
@@ -249,8 +282,9 @@ def evaluate_candidate(output_dir: Path) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=CANONICAL_OUTPUT)
+    parser.add_argument("--candidate", choices=("P1", "P2"), default=CANDIDATE_ID)
     args = parser.parse_args()
-    report = evaluate_candidate(REPO_ROOT / args.output)
+    report = evaluate_candidate(REPO_ROOT / args.output, candidate_id=args.candidate)
     print(json.dumps({"status": report["status"], "metrics": report["metrics"]}, indent=2, sort_keys=True))
     return 0 if report["status"] == "selected" else 2
 

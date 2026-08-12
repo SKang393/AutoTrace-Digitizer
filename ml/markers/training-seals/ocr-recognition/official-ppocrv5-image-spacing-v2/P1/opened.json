@@ -1,0 +1,23 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/official_recognition_spacing_v2/training/p1.json",
+    "candidate_config_sha256": "29a015ce82ce518da83c415750017b67bd8cd94eb5f8d768fb9d15a4862753c2",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "official-ppocrv5-image-spacing-v2",
+    "runner_source_bundle_sha256": "e4b312d29703afccfe87724a46e27cb6a4c06ece8c0d8b6554f4f2a4b24f172b",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/official_bakeoff/production_evaluate.py",
+      "ml/ocr/official_recognition_spacing_v2/evaluate.py",
+      "ml/ocr/official_recognition_spacing_v2/prepare_split.py",
+      "ml/ocr/official_recognition_spacing_v2/spacing.py"
+    ],
+    "task": "ocr-recognition",
+    "training_budget_ledger_sha256": "16a518845d7f19b1a01cb5993f389e8679ea5190f23d010946e602d7bd0f0af6"
+  },
+  "opened_utc": "2026-08-12T23:33:23.086175+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}
