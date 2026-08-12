@@ -49,3 +49,15 @@ This is synthetic component-level evidence only. It cannot create a production
 manifest, model-store entry, package, or release approval without detector and
 V5 recognition composition, independent marker-stage evidence, private
 validation, provider discovery, notices, packaging, and clean-machine proof.
+
+The production C# proposal runtime is implemented in
+`src/GraphReader.Ocr/LocalOnnxProposalTextRegionDetector.cs`. Two deterministic
+Gray8 fixtures reproduce the frozen Python `[N,2,32,140]` input tensors byte
+for byte at SHA-256
+`f0b0bd21da7c8db49e17fc7894fbaa4ce239b8ad2f16e8af38b6ca198998ac8b`
+and
+`c8c69a23d54223dca634680e78a222daebd0b20f28af364c2cc440fe983c22da`.
+The exact ignored P2 ONNX also executes through this adapter on CPU. That probe
+proves payload compatibility only. It is not paired recognition accuracy,
+marker-stage evidence, private validation, clean-machine evidence, a manifest,
+or production approval.
