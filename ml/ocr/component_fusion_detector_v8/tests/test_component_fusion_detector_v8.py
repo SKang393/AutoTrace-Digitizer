@@ -95,7 +95,7 @@ def test_p2_fixed_pool_exports_dynamic_cpu_onnx(tmp_path: Path) -> None:
     assert output.shape == (3, 2)
 
 
-def test_selected_p2_hashes_bind_runner_splits_and_single_public_candidate() -> None:
+def test_passed_p2_hashes_bind_runner_splits_and_consumed_public_pair() -> None:
     protocol = _load(ROOT / "PROTOCOL.json")
     selection = _load(ROOT / "SELECTION_MANIFEST.json")
     seal = _load(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
@@ -112,13 +112,15 @@ def test_selected_p2_hashes_bind_runner_splits_and_single_public_candidate() -> 
     assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
     result = _load(ROOT / "P2_RESULT.json")
     gate_config = _load(REPO_ROOT / SPLIT_CONFIG_PATH)
-    assert entry["status"] == "candidate_2_selected_public_gate_pending"
+    assert entry["status"] == "public_gate_passed_unapproved"
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["execution_authorized"] is False
-    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized"] is False
     assert entry["public_gate_authorized_candidate_id"] == "P2"
-    assert entry["public_gate_archive_opened"] is False
+    assert entry["public_gate_archive_opened"] is True
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_status"] == "pass"
     assert entry["candidate_onnx_sha256"]["P2"] == result["onnx_sha256"]
     assert entry["p2_training_report_sha256"] == result["candidate_report_sha256"]
     assert entry["p2_result_sha256"] == sha256_file(ROOT / "P2_RESULT.json")
@@ -128,15 +130,16 @@ def test_selected_p2_hashes_bind_runner_splits_and_single_public_candidate() -> 
     )
 
 
-def test_selected_candidate_cannot_be_discovered_as_a_production_model() -> None:
+def test_public_passing_candidate_cannot_be_discovered_as_a_production_model() -> None:
     p1 = _load(ROOT / "P1_RESULT.json")
     assert p1["status"] == "failed_runner"
     assert p1["optimizer_steps"] == 0
     assert p1["public_gate_archive_opened"] is False
     p2 = _load(ROOT / "P2_RESULT.json")
-    assert p2["status"] == "selected_public_gate_pending"
-    assert p2["public_gate_authorized"] is True
-    assert p2["public_gate_archive_opened"] is False
+    assert p2["status"] == "public_gate_passed_unapproved"
+    assert p2["public_gate_authorized"] is False
+    assert p2["public_gate_archive_opened"] is True
+    assert p2["public_gate_evaluations"] == 1
     assert not any(REPO_ROOT.glob("models/manifest/ocr/*component*fusion*v8*.json"))
     index = _load(REPO_ROOT / "artifacts/production-model-store/production-model-index.json")
     serialized = json.dumps(index, sort_keys=True)

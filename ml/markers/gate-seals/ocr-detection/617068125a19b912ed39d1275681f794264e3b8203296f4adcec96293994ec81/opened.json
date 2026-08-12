@@ -1,0 +1,37 @@
+{
+  "binding": {
+    "candidate_hash_key_schema": [
+      "onnx_sha256",
+      "selection_report_sha256"
+    ],
+    "candidate_hashes": {
+      "onnx_sha256": "e0254920b26784a87369aa25cc4ec387c6544db30bda4f9542b7ce9a8712e431",
+      "selection_report_sha256": "af97a598a5f20a2732ca22af6302357164b26e22938e8db2ab3ad3a70c191120"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "864d9184677f915b085a2d63e6107eaa1f879a92d6c9d7158e91f4c72844c429",
+    "evaluator_source_bundle_sha256": "f94165d06acb60a3b574799d09bbfc6346a5ec8742a6aa6f5cb4caf09b2902dc",
+    "evaluator_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/ocr/component_context_detector_v7/dataset.py",
+      "ml/ocr/component_fusion_detector_v8/dataset.py",
+      "ml/ocr/component_fusion_detector_v8/pipeline.py",
+      "ml/ocr/component_fusion_detector_v8/protocol.py",
+      "ml/ocr/component_fusion_detector_v8/sealed_gate.py",
+      "ml/ocr/component_region_detector_v6/dataset.py"
+    ],
+    "gate_config_sha256": "079fad8c1b90835d51b15b1e4b27e5cfa634dd0f66196a8f208a0e0830d7d51a",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "graph-text-component-fusion-v8-public-v1",
+    "split_config_path": "ml/ocr/component_fusion_detector_v8/gates/sealed-public-v1.json",
+    "split_config_sha256": "2235391f0003f3186bb960484768fc4102c49ec5d502c261b68a35bd7e3d08db",
+    "task": "ocr-detection"
+  },
+  "evaluation_count": 1,
+  "key": "617068125a19b912ed39d1275681f794264e3b8203296f4adcec96293994ec81",
+  "opened_utc": "2026-08-12T02:09:14.766410+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

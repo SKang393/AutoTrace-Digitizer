@@ -39,9 +39,13 @@ truth-hidden public archive.
 
 The exact selected ONNX SHA-256 is
 `e0254920b26784a87369aa25cc4ec387c6544db30bda4f9542b7ce9a8712e431`.
-It is authorized for the single truth-hidden public gate only after this
-selection result, evaluator identity, and canonical ledger are committed. A
-public pass remains synthetic evidence only and cannot create a production
+Its single truth-hidden public gate passed all 88 scenes with 352 of 352 truth
+regions and zero false regions, misses, duplicates, or prohibited-structure
+hits. The gate executed the exact ONNX on CPU 88 times and is sealed against a
+rerun. The public report SHA-256 is
+`6f13a622ee444442089104f5897e203beabb1b941981e75a42629d0d01acfdde`.
+
+This is synthetic component-level evidence only. It cannot create a production
 manifest, model-store entry, package, or release approval without detector and
 V5 recognition composition, independent marker-stage evidence, private
 validation, provider discovery, notices, packaging, and clean-machine proof.
