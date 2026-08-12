@@ -1887,7 +1887,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-component-context-v7",
-      "status": "candidate_3_preregistered",
+      "status": "exhausted_failed_selection",
       "defect_class": "component-line proposal decisions lacked expanded scene context for rejecting graph structures that resemble isolated text",
       "prior_revision": "graph-text-component-region-v6",
       "prior_exposed_fixture_bytes_reused": false,
@@ -1901,12 +1901,11 @@
       "architecture": "dual-context-component-proposal-cnn-v1",
       "proposal_algorithm": "adaptive-gray-baseline-bounded-line-grouping-v2",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [
-        "P3"
-      ],
+      "preregistered_candidate_ids": [],
       "consumed_candidate_ids": [
         "P1",
-        "P2"
+        "P2",
+        "P3"
       ],
       "remaining_unregistered_candidate_ids": [],
       "retired_unregistered_candidate_ids": [],
@@ -1922,11 +1921,13 @@
       },
       "candidate_checkpoint_sha256": {
         "P1": "c1bf01a26fd015f6c06d68696c0f7135a32d03296db468be5339735b2e0f18c1",
-        "P2": "0376bea38003247fa21ce96f3b321373bbfb89860a4d533443044ff1a71b7164"
+        "P2": "0376bea38003247fa21ce96f3b321373bbfb89860a4d533443044ff1a71b7164",
+        "P3": "5551d44116c06a4aea205a5d446785f8f7b9a04aeeb92070717f1959298daae0"
       },
       "candidate_onnx_sha256": {
         "P1": "4aeae1f67a2b421f02897bd39f04479db1b412fee2519342bc5261c810524c70",
-        "P2": "98922d3697cffbde846f7fbfb82e7738367006eaac13b190185fd2733dccd6dc"
+        "P2": "98922d3697cffbde846f7fbfb82e7738367006eaac13b190185fd2733dccd6dc",
+        "P3": "4e012c173df9126da8e1efe8fbaa994f64f114e20b9de857c9f56a611989781d"
       },
       "protocol_path": "ml/ocr/component_context_detector_v7/PROTOCOL.json",
       "protocol_sha256": "cbfd42d89e110423beeb4e31eff5930b702dd3fb45232f387607ae73d695eb4c",
@@ -1990,18 +1991,35 @@
       "p3_label_smoothing": 0.05,
       "p3_seed": 20261113,
       "p3_epochs": 12,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P3",
+      "p3_result_path": "ml/ocr/component_context_detector_v7/P3_RESULT.json",
+      "p3_result_sha256": "9fcf3193b1df9a45a25242d024858458f4c96e1091d63cd694fc123e174158b2",
+      "p3_training_report_sha256": "26e7c1c7d1f1faf20406d1020876aac8e49c22d4aa85edc96b18729c4b1df025",
+      "p3_training_opened_seal_sha256": "48890d69c96f23357495c2732c20bc63d548865dd9a3773fec616b49df66d90a",
+      "p3_training_result_seal_sha256": "f1cce49591f29f8636f75530d62e34cc6cd3721d2e6fa58985e44b5d345af018",
+      "p3_selection_exact_scene_count": 61,
+      "p3_selection_scene_count": 64,
+      "p3_selection_true_positives": 253,
+      "p3_selection_false_positives": 0,
+      "p3_selection_false_negatives": 3,
+      "p3_selection_duplicate_region_count": 0,
+      "p3_selection_prohibited_structure_hits": 0,
+      "p3_onnx_parity_maximum_absolute_error": 0.0000011920928955078125,
+      "p3_onnx_parity_passed": true,
+      "p3_optimizer_steps": 276,
+      "p3_failure": "P3 passed CPU ONNX parity and eliminated validation false regions, but missed three of 256 truth regions at the lowest evaluated threshold, leaving 61 of 64 scenes exact.",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1 through P3 are consumed and P3 failed the fixed selection gate. The experiment budget is exhausted, this revision may not rerun, and its truth-hidden public archive must remain unopened.",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
-      "public_gate_authorized_on_selection_pass": true,
+      "public_gate_authorized_on_selection_pass": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
       "manifest_created": false,
       "model_store_promoted": false,
       "production_approval": false,
       "release_eligible": false,
-      "refusal_required_before_output": false
+      "refusal_required_before_output": true
     }
   ]
 }

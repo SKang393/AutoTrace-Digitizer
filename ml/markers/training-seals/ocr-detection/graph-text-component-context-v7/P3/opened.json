@@ -1,0 +1,27 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/component_context_detector_v7/training/p3.json",
+    "candidate_config_sha256": "b90f7905f085efe5150d1b4210e888cfc76091d09c2518be8739add0cf14b666",
+    "candidate_id": "P3",
+    "committed_source_enforcement": true,
+    "revision": "graph-text-component-context-v7",
+    "runner_source_bundle_sha256": "5c67aac2d81af920db97b2d9f9e7300f65141a9e19e0969dab2410747a7eba4d",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/component_context_detector_v7/dataset.py",
+      "ml/ocr/component_context_detector_v7/model.py",
+      "ml/ocr/component_context_detector_v7/pipeline.py",
+      "ml/ocr/component_context_detector_v7/protocol.py",
+      "ml/ocr/component_context_detector_v7/train_p1.py",
+      "ml/ocr/component_context_detector_v7/train_p2.py",
+      "ml/ocr/component_context_detector_v7/train_p3.py",
+      "ml/ocr/component_region_detector_v6/dataset.py"
+    ],
+    "task": "ocr-detection",
+    "training_budget_ledger_sha256": "eaceed84ac98482321deab2586e27c99d163851037cdf5ba1b9fc14f23ca3419"
+  },
+  "opened_utc": "2026-08-11T23:51:19.125522+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

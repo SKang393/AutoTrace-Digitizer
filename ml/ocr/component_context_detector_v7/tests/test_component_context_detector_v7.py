@@ -95,7 +95,7 @@ def test_frozen_split_and_gate_hashes_are_directly_bound() -> None:
     assert gate["expected_gate_config_sha256"] == sha256_bytes(canonical_json_bytes(GATE_CONFIG))
 
 
-def test_failed_p1_and_p2_are_consumed_and_p3_is_the_final_preregistered_candidate() -> None:
+def test_all_candidates_are_consumed_and_v7_is_exhausted_before_public_gate() -> None:
     ledger = json.loads(LEDGER.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["task"] == TASK and item["revision"] == REVISION)
     p1_config = json.loads((REPO_ROOT / P1_CONFIG_PATH).read_text(encoding="utf-8"))
@@ -103,13 +103,15 @@ def test_failed_p1_and_p2_are_consumed_and_p3_is_the_final_preregistered_candida
     p3_config = json.loads((REPO_ROOT / P3_CONFIG_PATH).read_text(encoding="utf-8"))
     p1_result = json.loads((ROOT / "P1_RESULT.json").read_text(encoding="utf-8"))
     p2_result = json.loads((ROOT / "P2_RESULT.json").read_text(encoding="utf-8"))
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    p3_result = json.loads((ROOT / "P3_RESULT.json").read_text(encoding="utf-8"))
+    assert entry["status"] == "exhausted_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized_on_selection_pass"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(REPO_ROOT / P1_CONFIG_PATH)
@@ -135,7 +137,15 @@ def test_failed_p1_and_p2_are_consumed_and_p3_is_the_final_preregistered_candida
     assert p3_config["label_smoothing"] == 0.05
     assert p3_config["seed"] == p2_config["seed"]
     assert p3_config["selection_thresholds"] == p2_config["selection_thresholds"]
-    assert not (ROOT / "P3_RESULT.json").exists()
+    assert p3_result["status"] == "failed_selection"
+    assert p3_result["selection_exact_scene_count"] == 61
+    assert p3_result["selection_true_positives"] == 253
+    assert p3_result["selection_false_positives"] == 0
+    assert p3_result["selection_false_negatives"] == 3
+    assert p3_result["onnx_parity_passed"] is True
+    assert p3_result["public_gate_archive_opened"] is False
+    assert sha256_file(ROOT / "P3_RESULT.json") == entry["p3_result_sha256"]
+    assert entry["refusal_required_before_output"] is True
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
 

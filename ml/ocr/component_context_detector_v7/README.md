@@ -20,14 +20,17 @@ validation set to 63 of 64 exact scenes while retaining all 256 truths. One
 compact triangle still passed every evaluated threshold from 0.85 through 0.95,
 so the sealed public archive remains unopened.
 
-P3 is the final preregistered candidate. Its direct trigger is the P2 report:
+P3 was the final preregistered candidate. Its direct trigger was the P2 report:
 the final training loss reached 2.69520371547386e-7 while the remaining
-validation false structure persisted. P3 restarts from the exact P1 checkpoint
-and changes only P2's unweighted cross entropy to 0.05 label-smoothed cross
-entropy. Architecture, preprocessing, proposal algorithm, frozen split bytes,
-optimizer settings, epochs, seed, thresholds, and public gate remain unchanged.
-The public archive may be opened once only if P3 passes all 64 validation scenes
-with zero false, missed, duplicate, or prohibited regions and passes CPU ONNX
-parity. P1 and P2 cannot be rerun, and no candidate remains after P3.
+validation false structure persisted. P3 restarted from the exact P1 checkpoint
+and changed only P2's unweighted cross entropy to 0.05 label-smoothed cross
+entropy. It passed CPU ONNX parity and eliminated false regions, but missed
+three of 256 truths at the lowest evaluated threshold. Only 61 of 64 validation
+scenes were exact.
+
+P1 through P3 are consumed, V7 is exhausted, and no candidate may be rerun.
+Because no candidate passed the fixed validation gate, the public evaluator is
+not authorized and its truth-hidden archive remains unopened by training or the
+public gate. V7 produces no manifest, model-store payload, or packaging input.
 Nothing in this revision is production-approved, release-eligible, manifest,
 stored, packaged, or authorized for a 1.0.1 promotion.
