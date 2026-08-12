@@ -1,0 +1,29 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/component_recall_detector_v9/training/p1.json",
+    "candidate_config_sha256": "3a23a1eebfcd3edeb4f2f58d396b06285fd227042a1492d6e85d0dee00ae0f46",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "graph-text-component-recall-v9",
+    "runner_source_bundle_sha256": "6ccb4c1df1da50a920635cac89a8135e09db173949d9f7c7ba453a76552b6339",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/component_context_detector_v7/dataset.py",
+      "ml/ocr/component_fusion_detector_v8/dataset.py",
+      "ml/ocr/component_fusion_detector_v8/pipeline.py",
+      "ml/ocr/component_fusion_detector_v8/train_p1.py",
+      "ml/ocr/component_recall_detector_v9/dataset.py",
+      "ml/ocr/component_recall_detector_v9/model.py",
+      "ml/ocr/component_recall_detector_v9/pipeline.py",
+      "ml/ocr/component_recall_detector_v9/protocol.py",
+      "ml/ocr/component_recall_detector_v9/train_p1.py",
+      "ml/ocr/component_region_detector_v6/dataset.py"
+    ],
+    "task": "ocr-detection",
+    "training_budget_ledger_sha256": "62054e67dc54fd741cf6ee01092383b5ee0ffe5c9ee0af024acf0817de21eb70"
+  },
+  "opened_utc": "2026-08-12T12:16:02.309736+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

@@ -14,14 +14,19 @@ from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 from ml.ocr.component_recall_detector_v9.dataset import (
     build_split,
     encode_proposal,
+    proposal_examples,
     proposal_summary,
     proposals,
     split_fingerprint,
 )
+from ml.ocr.component_recall_detector_v9.dataset_p2 import p2_proposal_examples
 from ml.ocr.component_recall_detector_v9.model import ComponentRecallNet
+from ml.ocr.component_recall_detector_v9.pipeline import evaluate_scenes
+from ml.ocr.component_recall_detector_v9.pipeline_p2 import evaluate_thresholds
 from ml.ocr.component_recall_detector_v9.protocol import REVISION, SPLITS, protocol_configuration
 from ml.ocr.component_recall_detector_v9.sealed_gate import EVALUATOR_SOURCE_PATHS, SPLIT_CONFIG_PATH
-from ml.ocr.component_recall_detector_v9.train_p1 import CONFIG_PATH, RUNNER_SOURCE_PATHS, _export
+from ml.ocr.component_recall_detector_v9.train_p1 import _export
+from ml.ocr.component_recall_detector_v9.train_p2 import CONFIG_PATH, RUNNER_SOURCE_PATHS
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -67,7 +72,7 @@ def test_v9_retains_exact_proposal_tensor_and_v8_architecture_contract(tmp_path:
     assert output.shape == (2, 2)
 
 
-def test_p1_is_the_only_checksum_bound_authorized_candidate() -> None:
+def test_p2_is_the_only_checksum_bound_authorized_candidate_after_p1_failure() -> None:
     protocol = _load(ROOT / "PROTOCOL.json")
     expected = json.loads(json.dumps(protocol_configuration()))
     expected["split_generator_source_paths"] = protocol["split_generator_source_paths"]
@@ -76,17 +81,43 @@ def test_p1_is_the_only_checksum_bound_authorized_candidate() -> None:
     config = _load(REPO_ROOT / CONFIG_PATH)
     ledger = _load(LEDGER_PATH)
     entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["authorized_candidate_id"] == "P2"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
-    assert entry["candidate_config_sha256"]["P1"] == sha256_file(REPO_ROOT / CONFIG_PATH)
+    assert entry["candidate_config_sha256"]["P2"] == sha256_file(REPO_ROOT / CONFIG_PATH)
     assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
+
+
+def test_p2_adds_only_training_derived_scale_hard_negatives() -> None:
+    scenes = build_split("train")[:4]
+    original_values, original_labels = proposal_examples(scenes)
+    values, labels, evidence = p2_proposal_examples(scenes)
+    assert np.array_equal(values[: len(original_values)], original_values)
+    assert np.array_equal(labels[: len(original_labels)], original_labels)
+    assert len(values) > len(original_values)
+    assert np.all(labels[len(original_labels) :] == 0)
+    assert evidence["truth_overlap_allowed"] is False
+    assert evidence["validation_or_public_pixels_used"] is False
+    assert evidence["scene_count"] == 4
+
+
+def test_cached_threshold_evaluator_matches_single_threshold_contract() -> None:
+    scenes = build_split("validation")[:2]
+
+    def runner(values: np.ndarray) -> np.ndarray:
+        score = values[:, 0].mean(axis=(1, 2))
+        return np.stack((-score, score), axis=1).astype(np.float32)
+
+    threshold = 0.75
+    cached = evaluate_thresholds(scenes, runner, (threshold,))[0]["metrics"]
+    original = evaluate_scenes(scenes, runner, threshold)
+    assert cached == original
 
 
 def test_public_gate_is_frozen_hidden_and_unapproved() -> None:
@@ -100,5 +131,5 @@ def test_public_gate_is_frozen_hidden_and_unapproved() -> None:
     assert gate["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, EVALUATOR_SOURCE_PATHS
     )
-    assert not (ROOT / "P1_RESULT.json").exists()
+    assert _load(ROOT / "P1_RESULT.json")["status"] == "failed_selection"
     assert not any(REPO_ROOT.glob("models/manifest/ocr/*component*recall*v9*.json"))

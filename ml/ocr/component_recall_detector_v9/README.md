@@ -13,11 +13,20 @@ heading, annotation, and legend label in every scene. New axes, ticks, dividers,
 markers, connectors, arrows, brackets, legend frames, and compact shapes remain
 hard negatives.
 
-The three-candidate budget permits P1 through P3, but only P1 is authorized.
-Later candidates require a recorded P1 validation defect and a separately
-committed isolated change. The truth-hidden public archive has one evaluation
-and cannot open until a candidate passes every visible validation scene with
-zero false regions, misses, duplicates, or prohibited hits plus CPU ONNX parity.
+P1 ran once and retained all 400 validation truths, but it accepted 11
+prohibited structures across ten of 80 scenes at threshold `0.95`. CPU ONNX
+parity passed at `7.62939453125e-06`; report SHA-256 is
+`0156d908843e107aa7472276d1b08a3723d744380a0985e517a0f6a29c245062`.
+Seven false accepts were one repeated scale-degraded line grouping and four
+were compact marker-like shapes. Their scores overlap true text, so threshold
+calibration cannot pass.
+
+Only P2 is now authorized. It adds deterministic scale-degraded hard-negative
+proposals derived from the frozen training scenes and changes no model, loss,
+optimizer, epoch, seed, threshold, validation, or public-gate variable. P3
+remains unregistered. The truth-hidden public archive has zero evaluations and
+cannot open until a candidate passes every visible validation scene with zero
+false regions, misses, duplicates, or prohibited hits plus CPU ONNX parity.
 
 No Chandler, Generalization, private or article image, external dataset,
 pretrained weight, downloaded training sample, or predecessor fixture byte is

@@ -2137,7 +2137,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-component-recall-v9",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_2_preregistered",
       "defect_class": "V8 production composition missed 113 of 320 regions while recognition was exact on every retained region, with the largest recall gap in legend text",
       "prior_revision": "graph-text-component-fusion-v8",
       "prior_exposed_fixture_bytes_reused": false,
@@ -2149,24 +2149,27 @@
       "trigger_true_positives": 207,
       "trigger_false_negatives": 113,
       "trigger_false_positives": 0,
-      "isolated_change": "replace only the V8 training and selection families with new five-role-balanced production-composition recall families; retain the exact proposal, encoding, architecture, loss, optimizer, epochs, and inference contract",
+      "isolated_change": "add only deterministic box-downsample, bicubic-upsample, row-fade hard-negative proposals derived from the frozen training scenes; retain the exact V9 model, proposal algorithm, tensor encoding, loss, balanced sampler, optimizer, epochs, seed, thresholds, validation split, and sealed public gate",
       "architecture": "separated-visual-geometry-component-fusion-cnn-fixed-pool-v1",
       "proposal_algorithm": "adaptive-gray-baseline-bounded-line-grouping-v2",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
+        "P2"
+      ],
+      "consumed_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "retired_unregistered_candidate_ids": [],
       "candidate_config_paths": {
-        "P1": "ml/ocr/component_recall_detector_v9/training/p1.json"
+        "P1": "ml/ocr/component_recall_detector_v9/training/p1.json",
+        "P2": "ml/ocr/component_recall_detector_v9/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "3a23a1eebfcd3edeb4f2f58d396b06285fd227042a1492d6e85d0dee00ae0f46"
+        "P1": "3a23a1eebfcd3edeb4f2f58d396b06285fd227042a1492d6e85d0dee00ae0f46",
+        "P2": "137d2892b3bd710cbe1ed66abaf80e0b2ee8a35b855671ce133e7e6560e3fc52"
       },
       "protocol_path": "ml/ocr/component_recall_detector_v9/PROTOCOL.json",
       "protocol_sha256": "f329e6d58354adbd20afadc837820e579230aa4b58129a2fc02142ddd7fb4961",
@@ -2185,8 +2188,34 @@
       "public_gate_config_path": "ml/ocr/component_recall_detector_v9/gates/sealed-public-v1.json",
       "public_gate_config_sha256": "a29625e53c8a78ae7d1c5eb4b737264c3c01a265a021639823641e4a8f677dc6",
       "p1_expected_runner_source_bundle_sha256": "6ccb4c1df1da50a920635cac89a8135e09db173949d9f7c7ba453a76552b6339",
+      "p1_result_path": "ml/ocr/component_recall_detector_v9/P1_RESULT.json",
+      "p1_result_sha256": "d63cead4f5db48ca299e6e0cabd145cdfb1628382fff33d9e7dd18d4869481da",
+      "p1_training_report_path": "ml/ocr/component_recall_detector_v9/artifacts/P1-run/candidate-report.json",
+      "p1_training_report_sha256": "0156d908843e107aa7472276d1b08a3723d744380a0985e517a0f6a29c245062",
+      "p1_training_opened_seal_sha256": "2e42871086c098e5a5fbc04df939190dca8e5ed8501e4b8ed2a71e175d785799",
+      "p1_training_result_seal_sha256": "7ce764cf861e987786de136f1f86d50be88f2b3f7b3516f1a73bd769d33b8cec",
+      "p1_optimizer_steps": 2400,
+      "candidate_onnx_sha256": {
+        "P1": "186c1281e931e0a95e91fcf2bdbe57506118f0ee0f46b50553ef31e37f1cce60"
+      },
+      "p1_selected_threshold": 0.95,
+      "p1_selection_scene_count": 80,
+      "p1_selection_exact_scene_count": 70,
+      "p1_selection_true_positives": 400,
+      "p1_selection_false_positives": 11,
+      "p1_selection_false_negatives": 0,
+      "p1_selection_duplicate_region_count": 0,
+      "p1_selection_prohibited_structure_hits": 11,
+      "p1_public_gate_evaluations": 0,
+      "p1_defect_diagnosis": "Threshold-only calibration cannot pass: P1 positive minimum was 0.9990015625953674 while seven repeated line-group negatives exceeded 0.9999; all 11 false accepts were graph structures and none were missed text.",
+      "p2_expected_runner_source_bundle_sha256": "f3e17439205883c8e2b8bb53bb3bbd7472d344a3057b3005f94e4d631f5d7a4b",
+      "p2_augmented_negative_count": 4874,
+      "p2_augmented_negative_tensor_stream_sha256": "30c230f30eba435388608e80957a8aad23b57185f699ae1d07697ba3374be146",
+      "p2_training_proposal_count": 16013,
+      "p2_training_positive_proposal_count": 1600,
+      "p2_training_negative_proposal_count": 14413,
       "execution_authorized": true,
-      "authorized_candidate_id": "P1",
+      "authorized_candidate_id": "P2",
       "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
