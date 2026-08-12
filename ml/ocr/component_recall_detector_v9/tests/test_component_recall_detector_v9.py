@@ -73,7 +73,7 @@ def test_v9_retains_exact_proposal_tensor_and_v8_architecture_contract(tmp_path:
     assert output.shape == (2, 2)
 
 
-def test_p3_is_the_only_checksum_bound_authorized_candidate_after_p2_parity_failure() -> None:
+def test_p3_is_selected_and_is_the_only_checksum_bound_public_gate_candidate() -> None:
     protocol = _load(ROOT / "PROTOCOL.json")
     expected = json.loads(json.dumps(protocol_configuration()))
     expected["split_generator_source_paths"] = protocol["split_generator_source_paths"]
@@ -82,17 +82,24 @@ def test_p3_is_the_only_checksum_bound_authorized_candidate_after_p2_parity_fail
     config = _load(REPO_ROOT / CONFIG_PATH)
     ledger = _load(LEDGER_PATH)
     entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["status"] == "candidate_3_selected_public_gate_pending"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
-    assert entry["public_gate_authorized"] is False
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_candidate_id"] == "P3"
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
     assert entry["candidate_config_sha256"]["P3"] == sha256_file(REPO_ROOT / CONFIG_PATH)
     assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
+    result = _load(ROOT / "P3_RESULT.json")
+    assert result["status"] == "selected_public_gate_pending"
+    assert result["selection_exact_scene_count"] == result["selection_scene_count"] == 80
+    assert result["selection_false_positives"] == result["selection_false_negatives"] == 0
+    assert result["onnx_parity_passed"] is True
+    assert result["public_gate_archive_opened"] is False
 
 
 def test_p3_scales_exact_p2_logits_without_changing_class_decisions() -> None:
@@ -153,4 +160,5 @@ def test_public_gate_is_frozen_hidden_and_unapproved() -> None:
     )
     assert _load(ROOT / "P1_RESULT.json")["status"] == "failed_selection"
     assert _load(ROOT / "P2_RESULT.json")["status"] == "failed_parity"
+    assert _load(ROOT / "P3_RESULT.json")["status"] == "selected_public_gate_pending"
     assert not any(REPO_ROOT.glob("models/manifest/ocr/*component*recall*v9*.json"))

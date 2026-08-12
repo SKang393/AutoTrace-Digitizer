@@ -28,7 +28,7 @@ from .protocol import PUBLIC_REVISION, REVISION, TASK, THRESHOLDS
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 LEDGER_PATH = Path("ml/markers/training-budgets/production-repair-v1.json")
-RESULT_PATH = Path("ml/ocr/component_recall_detector_v9/P1_RESULT.json")
+RESULT_PATH = Path("ml/ocr/component_recall_detector_v9/P3_RESULT.json")
 SPLIT_CONFIG_PATH = Path("ml/ocr/component_recall_detector_v9/gates/sealed-public-v1.json")
 EVALUATOR_SOURCE_PATHS = (
     Path("ml/ocr/component_recall_detector_v9/dataset.py"),
@@ -69,16 +69,17 @@ def evaluate_candidate(*, onnx_path: Path, selection_report_path: Path, output_p
     candidate_id = str(result.get("candidate_id"))
     if (
         entry is None
-        or entry.get("status") != "candidate_1_selected_public_gate_pending"
-        or entry.get("consumed_candidate_ids") != ["P1"]
+        or entry.get("status") != "candidate_3_selected_public_gate_pending"
+        or entry.get("preregistered_candidate_ids") != []
+        or entry.get("consumed_candidate_ids") != ["P1", "P2", "P3"]
         or entry.get("execution_authorized") is not False
         or entry.get("public_gate_authorized") is not True
-        or entry.get("public_gate_authorized_candidate_id") != "P1"
+        or entry.get("public_gate_authorized_candidate_id") != "P3"
         or entry.get("public_gate_evaluations") != 0
         or entry.get("public_gate_archive_opened") is not False
-        or entry.get("candidate_onnx_sha256", {}).get("P1") != onnx_sha256
-        or entry.get("p1_training_report_sha256") != selection_sha256
-        or entry.get("p1_result_sha256") != sha256_file(REPO_ROOT / RESULT_PATH)
+        or entry.get("candidate_onnx_sha256", {}).get("P3") != onnx_sha256
+        or entry.get("p3_training_report_sha256") != selection_sha256
+        or entry.get("p3_result_sha256") != sha256_file(REPO_ROOT / RESULT_PATH)
     ):
         raise RuntimeError("OCR V9 public gate is not authorized by the canonical ledger")
     threshold = float(selection.get("selected_threshold", -1.0))
