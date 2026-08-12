@@ -1,0 +1,17 @@
+{
+  "evaluation_limit": 1,
+  "expected_candidate_hash_keys": [
+    "onnx_sha256",
+    "selection_report_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "864d9184677f915b085a2d63e6107eaa1f879a92d6c9d7158e91f4c72844c429",
+  "expected_evaluator_source_bundle_sha256": "96aefb9706291c94c3b499cf0882a71db2f2f5aa41541efde22cd6b4d737a0a2",
+  "expected_gate_config_sha256": "079fad8c1b90835d51b15b1e4b27e5cfa634dd0f66196a8f208a0e0830d7d51a",
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-component-fusion-v8-public-v1",
+  "schema": "graphreader.ocr-component-fusion-gate-config.v1",
+  "sealed_public_test_seal_path": "ml/ocr/component_fusion_detector_v8/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "bda87944c838fe6d9caeb218e87fa958c995ed1d15c5ae614d102e77b2cf736d",
+  "task": "ocr-detection"
+}

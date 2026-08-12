@@ -2020,6 +2020,71 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "ocr-detection",
+      "revision": "graph-text-component-fusion-v8",
+      "status": "candidate_1_preregistered",
+      "defect_class": "V7 mixed repeated geometry columns with image content in one flattening CNN and overfit a compact structure while threshold-only calibration could not separate it",
+      "prior_revision": "graph-text-component-context-v7",
+      "prior_exposed_fixture_bytes_reused": false,
+      "prior_public_sample_or_pixel_inspection_used": false,
+      "trigger_evidence_path": "ml/ocr/component_context_detector_v7/P2_RESULT.json",
+      "trigger_evidence_sha256": "935cdd4219ac9252a11543aec3177960b3cd690d2915c0bff39a9aec32563fc1",
+      "trigger_selection_scene_count": 64,
+      "trigger_selection_false_regions": 1,
+      "trigger_selection_missed_regions": 0,
+      "isolated_change": "replace the exhausted V7 flattening classifier with separate visual and scalar-geometry branches, deterministic class-balanced batches, and fresh structure-rich procedural families while retaining the exact proposal and encoding contract",
+      "architecture": "separated-visual-geometry-component-fusion-cnn-v1",
+      "proposal_algorithm": "adaptive-gray-baseline-bounded-line-grouping-v2",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "retired_unregistered_candidate_ids": [],
+      "candidate_config_paths": {
+        "P1": "ml/ocr/component_fusion_detector_v8/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "ca40d2be063e3fc8204ddaaa703a5fa790e6765ce6c5aa7bd165d89037d0558a"
+      },
+      "protocol_path": "ml/ocr/component_fusion_detector_v8/PROTOCOL.json",
+      "protocol_sha256": "0b04d250cfda13407721d0803b5a2a766ed332397353378c665fb01b71c6f07f",
+      "selection_manifest_path": "ml/ocr/component_fusion_detector_v8/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "ec475154ef5323c9f093fb5feb7b2b0d59bdcaf80cba93a72244795c362ae18b",
+      "selection_train_scene_count": 256,
+      "selection_validation_scene_count": 72,
+      "selection_train_proposal_count": 11643,
+      "selection_validation_proposal_count": 2442,
+      "sealed_public_test_seal_path": "ml/ocr/component_fusion_detector_v8/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "bda87944c838fe6d9caeb218e87fa958c995ed1d15c5ae614d102e77b2cf736d",
+      "sealed_public_fixture_archive_sha256": "61cdd4661d4bbd1878c32f4e9642836ebb5f8712cff0e33c4d527bcba940b5cd",
+      "sealed_public_private_manifest_sha256": "864d9184677f915b085a2d63e6107eaa1f879a92d6c9d7158e91f4c72844c429",
+      "sealed_public_scene_count": 88,
+      "sealed_public_proposal_count": 5104,
+      "split_generator_source_bundle_sha256": "197c1abc93cb7bf90a278c07441e59646cf2bcddace99da4e4ecd94c0815193d",
+      "public_gate_config_path": "ml/ocr/component_fusion_detector_v8/gates/sealed-public-v1.json",
+      "public_gate_config_sha256": "0f237af83cd9a6286c8e378825a6e3ff0fc14cf10db5d2bb6c52de499a232e28",
+      "expected_public_evaluator_source_bundle_sha256": "96aefb9706291c94c3b499cf0882a71db2f2f5aa41541efde22cd6b4d737a0a2",
+      "p1_expected_runner_source_bundle_sha256": "0275bd7e2cbaa82f75d6840f705b161d021702e646d67667eeab26c7d12fadad",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "execution_blocker": null,
+      "public_gate_authorized": false,
+      "public_gate_authorized_candidate_id": null,
+      "public_gate_authorized_on_selection_pass": true,
+      "public_gate_evaluations": 0,
+      "public_gate_archive_opened": false,
+      "manifest_created": false,
+      "model_store_promoted": false,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
     }
   ]
 }
