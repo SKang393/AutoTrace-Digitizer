@@ -903,7 +903,7 @@ public sealed class OcrPipeline
             failure,
             OcrCollections.Freeze(regionFailures ?? Array.Empty<OcrRegionFailure>()));
 
-    private static OcrFailure? ValidateRequest(OcrRequest request)
+    internal static OcrFailure? ValidateRequest(OcrRequest request)
     {
         if (request.ContractVersion != OcrContract.Version)
         {
@@ -998,7 +998,7 @@ public sealed class OcrPipeline
             StringComparison.OrdinalIgnoreCase);
     }
 
-    private static void ValidateDetectedRegions(IReadOnlyList<OcrDetectedRegion> regions)
+    internal static void ValidateDetectedRegions(IReadOnlyList<OcrDetectedRegion> regions)
     {
         ArgumentNullException.ThrowIfNull(regions);
         if (regions.Any(static region =>

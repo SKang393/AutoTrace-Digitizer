@@ -1,0 +1,120 @@
+{
+  "chandler_included": false,
+  "composition_id": "graphreader-v8-official-english-v5-numeric-composition-v1",
+  "data_scope": "fresh procedural graph scenes with independently registered renderer, degradation, seed, and layout families; generic numeric, phase, annotation, and legend labels only; no Chandler, Generalization, private or article images, external datasets, prior selection/public fixture bytes, or model tuning",
+  "font_notice_path": "LICENSES/NotoSans-OFL-1.1.txt",
+  "font_notice_sha256": "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a",
+  "gates": {
+    "character_error_rate_maximum": 0.05,
+    "direct_fixture_byte_execution_required": true,
+    "duplicate_region_count": 0,
+    "exact_match_minimum": 0.9,
+    "exact_region_count_every_fixture": true,
+    "false_region_count": 0,
+    "missed_region_count": 0,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "role_accuracy_minimum": 0.9,
+    "three_exact_onnx_payloads_required": true
+  },
+  "generalization_label_included": false,
+  "models": {
+    "detector": {
+      "onnx_sha256": "e0254920b26784a87369aa25cc4ec387c6544db30bda4f9542b7ce9a8712e431",
+      "revision": "graph-text-component-fusion-v8",
+      "threshold": 0.95
+    },
+    "general_recognizer": {
+      "inference_yaml_sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
+      "onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+      "revision": "en_PP-OCRv5_mobile_rec"
+    },
+    "numeric_specialist": {
+      "onnx_sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+      "revision": "graph-numeric-component-ensemble-v5",
+      "threshold": 0.65
+    }
+  },
+  "official_notice_paths": [
+    "LICENSES/PaddlePaddle-PP-OCRv5-Models-Apache-2.0.txt",
+    "LICENSES/PaddlePaddle-PP-OCRv5-Models-Notice.txt"
+  ],
+  "private_or_article_images": false,
+  "production_approval": false,
+  "recognition_crops": {
+    "general": {
+      "height": 48,
+      "horizontal_padding_pixels": 8,
+      "resampling": "half_pixel_bilinear_v1",
+      "right_padding_source_value": 0.5,
+      "vertical_padding_pixels": 2,
+      "width": 320
+    },
+    "numeric": {
+      "height": 32,
+      "horizontal_padding_pixels": 12,
+      "resampling": "half_pixel_bilinear_v1",
+      "right_padding_source_value": 1.0,
+      "vertical_content_padding_ratio": 0.25,
+      "vertical_padding_pixels": 1,
+      "width": 128
+    }
+  },
+  "release_eligible": false,
+  "revision": "graphreader-v8-official-english-v5-numeric-composition-v1",
+  "routing": {
+    "algorithm": "geometry-gated-numeric-specialist-v1",
+    "general_recognizer_default": true,
+    "numeric_specialist_requires_numeric_grammar": true,
+    "numeric_specialist_requires_x_or_y_tick_geometry": true,
+    "participant_phase_legend_annotation_numeric_substitution_forbidden": true
+  },
+  "schema": "graphreader.ocr-production-composition-protocol.v1",
+  "split_generator_source_bundle_sha256": "d6fc5527f162702f117afbf17329246138d481feddb5ca9e9b825554acbbba51",
+  "split_generator_source_paths": [
+    "ml/ocr/production_composition_v1/dataset.py",
+    "ml/ocr/production_composition_v1/prepare_split.py",
+    "ml/ocr/production_composition_v1/protocol.py",
+    "ml/ocr/component_context_detector_v7/dataset.py",
+    "ml/ocr/component_region_detector_v6/dataset.py"
+  ],
+  "splits": [
+    {
+      "degradation_family": "bicubic-resample-row-fade-composition-v1-validation",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "font_sha256": [
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0"
+      ],
+      "renderer_family": "four-role-offset-graph-scenes-composition-v1-validation",
+      "scene_count": 64,
+      "seed_offset": 319000,
+      "split": "validation"
+    },
+    {
+      "degradation_family": "gamma-quantization-pixel-loss-composition-v1-public",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf"
+      ],
+      "font_sha256": [
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb"
+      ],
+      "renderer_family": "four-role-reflected-graph-scenes-composition-v1-public",
+      "scene_count": 96,
+      "seed_offset": 337000,
+      "split": "sealed_public"
+    }
+  ],
+  "state": "split_frozen_before_any_composed_model_execution",
+  "synthetic_only": true,
+  "task": "ocr-production-composition"
+}
