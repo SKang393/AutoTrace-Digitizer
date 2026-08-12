@@ -10,6 +10,7 @@ ml/ocr/project_numeric_v1/** text eol=lf
 ml/ocr/production_gate.py text eol=lf
 ml/ocr/tests/test_production_gate.py text eol=lf
 tests/GraphReader.Ocr.Tests/OcrDualRecognizerPipelineTests.cs text eol=lf
+tests/GraphReader.Ocr.Tests/CropAndMaskTests.cs text eol=lf
 models/manifest/ocr/PROJECT_NUMERIC_V1_PREREGISTRATION.md text eol=lf
 ml/markers/center/production_train.py text eol=lf
 ml/markers/center/production_train_v2.py text eol=lf

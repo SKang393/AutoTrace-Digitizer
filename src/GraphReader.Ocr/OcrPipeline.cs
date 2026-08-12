@@ -17,6 +17,10 @@ public sealed record OcrPipelineOptions
 
     public double CropPaddingPixels { get; init; } = 1;
 
+    public double? CropHorizontalPaddingPixels { get; init; }
+
+    public double? CropVerticalPaddingPixels { get; init; }
+
     public double CropVerticalContentPaddingRatio { get; init; }
 
     public OcrCropResizeMode CropResizeMode { get; init; } =
@@ -59,6 +63,12 @@ public sealed class OcrPipeline
         _options = options ?? throw new ArgumentNullException(nameof(options));
         if (_options.BatchSize <= 0 || _options.CropWidth <= 0 || _options.CropHeight <= 0 ||
             _options.CropPaddingPixels < 0 ||
+            (_options.CropHorizontalPaddingPixels.HasValue &&
+             (!double.IsFinite(_options.CropHorizontalPaddingPixels.Value) ||
+              _options.CropHorizontalPaddingPixels.Value < 0)) ||
+            (_options.CropVerticalPaddingPixels.HasValue &&
+             (!double.IsFinite(_options.CropVerticalPaddingPixels.Value) ||
+              _options.CropVerticalPaddingPixels.Value < 0)) ||
             !double.IsFinite(_options.CropVerticalContentPaddingRatio) ||
             _options.CropVerticalContentPaddingRatio < 0 ||
             !Enum.IsDefined(_options.CropResizeMode) ||
@@ -164,6 +174,8 @@ public sealed class OcrPipeline
             TargetHeight = _options.CropHeight,
             BatchSize = _options.BatchSize,
             PaddingPixels = _options.CropPaddingPixels,
+            HorizontalPaddingPixels = _options.CropHorizontalPaddingPixels,
+            VerticalPaddingPixels = _options.CropVerticalPaddingPixels,
             VerticalContentPaddingRatio = _options.CropVerticalContentPaddingRatio,
             ResizeMode = _options.CropResizeMode,
             PaddingValue = _options.CropPaddingValue,

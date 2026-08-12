@@ -184,6 +184,49 @@ public sealed class OcrDualRecognizerPipelineTests
             new OcrDualRecognizerPipelineOptions { CompositionId = "unreviewed" }));
     }
 
+    [TestMethod]
+    public void AsymmetricPaddingChangesCropMaterialWithoutAlteringOutputShape()
+    {
+        const int width = 48;
+        const int height = 24;
+        var pixels = Enumerable.Repeat((byte)255, width * height).ToArray();
+        for (var y = 10; y < 14; y++)
+        {
+            for (var x = 20; x < 24; x++)
+            {
+                pixels[(y * width) + x] = 0;
+            }
+        }
+
+        var image = new OcrImage(
+            width,
+            height,
+            width,
+            pixels,
+            OcrSourceImage.Original,
+            OcrFrameTransform.Identity);
+        OcrDetectedRegion region = OcrTestFixtures.Region("asymmetric", 20, 10, 4, 4);
+        var options = new OcrCropBatcherOptions
+        {
+            TargetWidth = 32,
+            TargetHeight = 16,
+            PaddingPixels = 0,
+            HorizontalPaddingPixels = 12,
+            VerticalPaddingPixels = 1,
+            PaddingValue = 1,
+        };
+
+        OcrCrop asymmetric = OcrCropBatcher.CreateBatches(image, [region], options)[0][0];
+        OcrCrop symmetric = OcrCropBatcher.CreateBatches(
+            image,
+            [region],
+            options with { HorizontalPaddingPixels = null, VerticalPaddingPixels = null })[0][0];
+
+        Assert.AreNotEqual(symmetric.CropSha256, asymmetric.CropSha256);
+        Assert.AreEqual(32 * 16, asymmetric.Pixels.Length);
+        Assert.IsTrue(asymmetric.Pixels.Span.ToArray().All(float.IsFinite));
+    }
+
     private static OcrDualRecognizerPipeline Create(
         ITextRegionDetector detector,
         ITextRecognizer general,
@@ -198,7 +241,8 @@ public sealed class OcrDualRecognizerPipelineTests
                 StageVersion = "official-english-test",
                 CropWidth = 320,
                 CropHeight = 48,
-                CropPaddingPixels = 0,
+                CropHorizontalPaddingPixels = 8,
+                CropVerticalPaddingPixels = 2,
                 CropPaddingValue = 0.5f,
             },
             numeric,
@@ -208,7 +252,8 @@ public sealed class OcrDualRecognizerPipelineTests
                 StageVersion = "numeric-specialist-test",
                 CropWidth = 128,
                 CropHeight = 32,
-                CropPaddingPixels = 1,
+                CropHorizontalPaddingPixels = 12,
+                CropVerticalPaddingPixels = 1,
                 CropVerticalContentPaddingRatio = 0.25,
                 CropPaddingValue = 1f,
             },

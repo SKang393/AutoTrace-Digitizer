@@ -99,8 +99,20 @@ public static class OcrCacheKeyDeriver
         yield return request.TransformChain;
         yield return detectorConfigurationFingerprint;
         yield return options.StageVersion;
-        yield return FormattableString.Invariant(
-            $"{options.BatchSize},{options.CropWidth},{options.CropHeight},{options.CropPaddingPixels:R},{options.CropVerticalContentPaddingRatio:R},{options.CropResizeMode},{options.CropPaddingValue:R},{options.MaskPaddingPixels:R},{options.MinimumMaskRecognitionConfidence:R},{options.MaximumTickCombinationEvaluations}");
+        yield return string.Join(
+            ',',
+            options.BatchSize.ToString(CultureInfo.InvariantCulture),
+            options.CropWidth.ToString(CultureInfo.InvariantCulture),
+            options.CropHeight.ToString(CultureInfo.InvariantCulture),
+            options.CropPaddingPixels.ToString("R", CultureInfo.InvariantCulture),
+            NullableDouble(options.CropHorizontalPaddingPixels),
+            NullableDouble(options.CropVerticalPaddingPixels),
+            options.CropVerticalContentPaddingRatio.ToString("R", CultureInfo.InvariantCulture),
+            options.CropResizeMode.ToString(),
+            options.CropPaddingValue.ToString("R", CultureInfo.InvariantCulture),
+            options.MaskPaddingPixels.ToString("R", CultureInfo.InvariantCulture),
+            options.MinimumMaskRecognitionConfidence.ToString("R", CultureInfo.InvariantCulture),
+            options.MaximumTickCombinationEvaluations.ToString(CultureInfo.InvariantCulture));
         yield return RectangleMaterial(request.PlotBounds);
         yield return ImageMaterial(request.OriginalImage);
         yield return request.EnhancedImage is null ? "no_enhanced_image" : ImageMaterial(request.EnhancedImage);
@@ -126,6 +138,9 @@ public static class OcrCacheKeyDeriver
             yield return region.Evidence?.ToString() ?? "no_region_evidence";
         }
     }
+
+    private static string NullableDouble(double? value) =>
+        value?.ToString("R", CultureInfo.InvariantCulture) ?? "symmetric";
 
     private static string ImageMaterial(OcrImage image)
     {

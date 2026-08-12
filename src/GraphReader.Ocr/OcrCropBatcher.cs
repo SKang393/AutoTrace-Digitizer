@@ -22,6 +22,10 @@ public sealed record OcrCropBatcherOptions
 
     public double PaddingPixels { get; init; } = 1;
 
+    public double? HorizontalPaddingPixels { get; init; }
+
+    public double? VerticalPaddingPixels { get; init; }
+
     /// <summary>
     /// Adds padding on each side of the crop's oriented vertical content axis.
     /// A value of 0.25 maps a tight glyph to at most two thirds of the output
@@ -88,8 +92,8 @@ public static class OcrCropBatcher
 
         var orientation = GraphTextRoleClassifier.GetOrientation(region.OrientationDegrees);
         var bounds = region.Polygon.Bounds;
-        double horizontalPadding = options.PaddingPixels;
-        double verticalPadding = options.PaddingPixels;
+        double horizontalPadding = options.HorizontalPaddingPixels ?? options.PaddingPixels;
+        double verticalPadding = options.VerticalPaddingPixels ?? options.PaddingPixels;
         if (orientation is OcrOrientation.RotatedClockwise or OcrOrientation.RotatedCounterClockwise)
         {
             horizontalPadding += bounds.Width * options.VerticalContentPaddingRatio;
@@ -284,6 +288,12 @@ public static class OcrCropBatcher
 
         if (options.TargetWidth <= 0 || options.TargetHeight <= 0 || options.BatchSize <= 0 ||
             !double.IsFinite(options.PaddingPixels) || options.PaddingPixels < 0 ||
+            (options.HorizontalPaddingPixels.HasValue &&
+             (!double.IsFinite(options.HorizontalPaddingPixels.Value) ||
+              options.HorizontalPaddingPixels.Value < 0)) ||
+            (options.VerticalPaddingPixels.HasValue &&
+             (!double.IsFinite(options.VerticalPaddingPixels.Value) ||
+              options.VerticalPaddingPixels.Value < 0)) ||
             !double.IsFinite(options.VerticalContentPaddingRatio) ||
             options.VerticalContentPaddingRatio < 0 ||
             !Enum.IsDefined(options.ResizeMode) ||
