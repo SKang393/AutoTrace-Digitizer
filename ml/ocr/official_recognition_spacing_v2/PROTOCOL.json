@@ -1,0 +1,85 @@
+{
+  "chandler_included": false,
+  "consumed_candidates": [],
+  "currently_preregistered_candidate": "P1",
+  "defect_class": "the exact official recognizer preserved O/o/l/I glyph identities but removed visible inter-glyph whitespace in both exposed ambiguity failures",
+  "experiment_budget": 3,
+  "gates": {
+    "ambiguity_exact_match_minimum": 0.9,
+    "character_error_rate_maximum": 0.05,
+    "conversion_parity_maximum_absolute_error": 0.0001,
+    "exact_match_minimum": 0.9,
+    "numeric_exact_match_minimum": 0.9,
+    "provider": "CPUExecutionProvider",
+    "role_accuracy_minimum": 0.9,
+    "spacing_changed_nonspace_truth_count": 0,
+    "word_exact_match_minimum": 0.9
+  },
+  "generalization_label_included": false,
+  "inference_yaml_sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
+  "isolated_change": "retain the exact official ONNX weights and CTC decoder, then restore whitespace only from generic large-gap evidence in the immutable source crop; no truth string, role, or label whitelist may participate in postprocessing",
+  "manifest_created": false,
+  "marker_creation_evaluated": false,
+  "model_id": "en_PP-OCRv5_mobile_rec",
+  "model_onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+  "model_store_promoted": false,
+  "optimizer_steps": 0,
+  "prior_exposed_selection_used_only_for_defect_diagnosis": {
+    "failed_case_ids": [
+      "selection-recognition-0067",
+      "selection-recognition-0135"
+    ],
+    "public_archive_opened": false,
+    "raw_prediction": "OolI",
+    "result_sha256": "69966537744b51287ff1163c8bebf1b90e91a3b4a8548f048198ff1c2d9d9f3f",
+    "revision": "official-ppocrv5-recognition-only-v1",
+    "truth_text": "O o l I"
+  },
+  "private_or_article_images": false,
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "official-ppocrv5-image-spacing-v2",
+  "runner_source_bundle_sha256": "e4b312d29703afccfe87724a46e27cb6a4c06ece8c0d8b6554f4f2a4b24f172b",
+  "schema": "graphreader.ocr-official-recognition-spacing-protocol.v1",
+  "spacing_algorithm": {
+    "foreground_contrast_fraction": 0.3,
+    "id": "source-projection-large-gap-v1",
+    "minimum_foreground_contrast": 10,
+    "minimum_gap_pixels": 4,
+    "minimum_gap_to_ink_height_ratio": 0.25,
+    "minimum_source_groups": 3,
+    "partitioning": "width-proportional dynamic programming with nonempty text groups",
+    "requires_at_least_three_source_groups": true,
+    "requires_raw_prediction_without_spaces": true,
+    "requires_source_group_count_not_greater_than_unicode_scalar_count": true,
+    "truth_or_role_input_forbidden": true
+  },
+  "splits": {
+    "sealed_public": {
+      "case_count": 288,
+      "degradation_families": [
+        "subpixel-offset-v2",
+        "area-resample-v2",
+        "gamma-raster-v2",
+        "row-fade-v2"
+      ],
+      "renderer_family": "noto-variable-pad-spacing-v2-public",
+      "seed": 20461117
+    },
+    "selection": {
+      "case_count": 224,
+      "degradation_families": [
+        "mild-shear-v2",
+        "box-resample-v2",
+        "uneven-paper-v2",
+        "contrast-dither-v2"
+      ],
+      "renderer_family": "noto-variable-pad-spacing-v2-selection",
+      "seed": 20261117
+    }
+  },
+  "status": "p1_preregistered_before_inference",
+  "synthetic_only": true,
+  "task": "ocr-recognition",
+  "weights_changed": false
+}
