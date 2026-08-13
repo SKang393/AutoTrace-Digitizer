@@ -14,6 +14,8 @@ from ml.markers.gate_seal import canonical_json_bytes
 from ml.ocr.component_context_detector_v7.dataset import box_iou
 from ml.ocr.morphology_proposal_role_v13.dataset import render_scene, proposals
 from ml.ocr.morphology_proposal_role_v13.model import MorphologyProposalRoleNet
+from ml.ocr.morphology_proposal_role_v13.sealed_gate import GATE_CONFIG
+from ml.ocr.morphology_proposal_role_v13.train_p1 import RUNNER_SOURCE_PATHS
 from ml.ocr.morphology_proposal_role_v13.protocol import (
     ENCODED_WIDTH, EXPERIMENT_BUDGET, ROLE_ORDER, SPLITS, protocol_configuration,
 )
@@ -83,6 +85,14 @@ def test_design_checkpoint_contains_no_split_or_candidate_artifacts() -> None:
     ):
         assert not (V13_ROOT / relative).exists()
     assert not (V13_ROOT / "artifacts").exists()
+
+
+def test_runners_are_fail_closed_before_split_and_budget_freeze() -> None:
+    assert len(RUNNER_SOURCE_PATHS) == len(set(RUNNER_SOURCE_PATHS))
+    assert GATE_CONFIG["evaluation_limit"] == 1
+    assert GATE_CONFIG["case_level_failure_analysis_permitted"] is False
+    assert GATE_CONFIG["false_regions"] == GATE_CONFIG["missed_regions"] == 0
+    assert GATE_CONFIG["direct_fixture_byte_execution_required"] is True
 
 
 def test_no_v13_budget_ledger_entry_exists_before_runner_and_split_freeze() -> None:
