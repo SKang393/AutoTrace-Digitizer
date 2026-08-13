@@ -35,9 +35,42 @@ its embedded manifest SHA-256 is
 and the tracked hash-only split seal SHA-256 is
 `e348d645c85156fa5696de9ea9107031990b20d99832a9172cf9a2cf2daeef57`.
 The fresh 128-bit secret is not serialized. V1 fixture bytes, results, and
-truth were not read or reused. No model has executed against V2 fixture bytes.
+truth were not read or reused.
 
 The runtime clamps only finite activation-boundary drift within the frozen
 `1e-5` ONNX parity tolerance and still rejects larger or non-finite violations.
-The sealed identity must be committed before the one authorized CPU gate
+The sealed identity was committed before the one authorized CPU gate
 execution.
+
+## One-time result
+
+The only authorized run executed from commit
+`89cda2e789f329a68f906ceafaa8d93008458f07` through
+`CPUExecutionProvider` and failed closed. All five exact payloads executed and
+the ignored direct report records every input and output tensor hash. Report
+SHA-256 is
+`9875d0e9f82fb2cae2fecde8a1b38653286ee5a7eff92c5c851b85763525d670`.
+
+OCR produced 180 true-positive regions, 119 false-positive regions, 20 misses,
+and zero duplicate regions across 200 truths. No scene was region-exact.
+Recognition exact match was `0.845`, character error rate was
+`0.01195219123505976`, role accuracy was `0.64`, numeric exact match was
+`0.9166666666666666`, word exact match was `0.9469026548672567`, and ambiguity
+exact match was `1.0`.
+
+The marker stage produced 310 true positives, 19 false positives, 18 false
+negatives, zero duplicates, and 14 of 40 exact scenes across 328 truths. It
+also created 18 marker predictions from missed text. All explicitly scored
+axis, tick, divider, bracket, arrow, legend, line-intersection, and text hit
+counters were zero.
+
+Canonical seal key is
+`e7120ab3916e84c0f44addad26fdd790a99682180dd8403c5da0afbad91530e1`.
+Opened-seal SHA-256 is
+`cef6995b9a6bbd591d5866db98a92fa94f2105ecc1ccbe8408bd1d56664292ef`;
+result-seal SHA-256 is
+`8e79bf42de3c76ddafb0a5b059b6ef524ad417a6a5a06c74241d93304d3cdc63`.
+The result is consumed and the split is exposed. It must not be rerun, repaired,
+or tuned against. No manifest, model-store promotion, normal Auto Detect,
+packaging, private Chandler validation, production approval, or release
+eligibility is authorized by this result.

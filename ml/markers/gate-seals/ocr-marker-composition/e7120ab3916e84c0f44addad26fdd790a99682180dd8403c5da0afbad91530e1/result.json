@@ -1,0 +1,12 @@
+{
+  "schema": "graphreader.ocr-marker-production-composition-result-seal.v2",
+  "canonical_seal_key": "e7120ab3916e84c0f44addad26fdd790a99682180dd8403c5da0afbad91530e1",
+  "opened_seal_sha256": "cef6995b9a6bbd591d5866db98a92fa94f2105ecc1ccbe8408bd1d56664292ef",
+  "status": "fail",
+  "report_sha256": "9875d0e9f82fb2cae2fecde8a1b38653286ee5a7eff92c5c851b85763525d670",
+  "exception_type": null,
+  "exception_message": null,
+  "completed_utc": "2026-08-13T10:32:36.5715656+00:00",
+  "production_approval": false,
+  "release_eligible": false
+}

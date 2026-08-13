@@ -1,0 +1,17 @@
+{
+  "schema": "graphreader.ocr-marker-production-composition-opened-seal.v2",
+  "composition_id": "production-ocr-to-normalized-marker-composed-v2",
+  "canonical_seal_key": "e7120ab3916e84c0f44addad26fdd790a99682180dd8403c5da0afbad91530e1",
+  "source_commit": "89cda2e789f329a68f906ceafaa8d93008458f07",
+  "fixture_archive_sha256": "f7873bc6fca1bd42c216b94d89d267c843ec2133375bd41f13ab4b887538f301",
+  "candidate_sha256": [
+    "017fca04fa3817596ce3088d73f51003dd3658bc56ec3130e25c92252e6bf739",
+    "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+    "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+    "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+    "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096"
+  ],
+  "opened_utc": "2026-08-13T10:31:49.8519509+00:00",
+  "production_approval": false,
+  "release_eligible": false
+}
