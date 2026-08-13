@@ -103,7 +103,7 @@ def test_preregistration_binds_sources_splits_trigger_and_license() -> None:
     assert config["model_license"] == protocol["model_license"] == "Apache-2.0"
     assert config["p1_result_sha256"] == sha256_file(ROOT / "P1_RESULT.json")
     assert config["p1_checkpoint_sha256"] == sha256_file(REPO_ROOT / config["p1_checkpoint_path"])
-    assert entry["status"] == "selection_passed_public_preregistered"
+    assert entry["status"] == "public_gate_passed_unapproved"
     assert entry["candidate_config_sha256"]["P2"] == sha256_file(ROOT / "training/p2.json")
     assert entry["p1_result_sha256"] == sha256_file(ROOT / "P1_RESULT.json")
     assert entry["p1_onnx_parity_passed"] is False
@@ -113,9 +113,14 @@ def test_preregistration_binds_sources_splits_trigger_and_license() -> None:
     assert entry["p2_onnx_parity_passed"] is True
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized"] is False
     assert entry["public_gate_authorized_candidate_id"] == "P2"
-    assert entry["public_gate_evaluations"] == 0
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_archive_opened"] is True
+    assert entry["public_gate_report_sha256"] == sha256_file(
+        REPO_ROOT / "ml/ocr/ambiguity_source_group_classifier_v3/artifacts/public-gate-v1/report.json"
+    )
+    assert entry["public_gate_accuracy"] == 1.0
     assert entry["production_approval"] is False
 
 
