@@ -13,7 +13,13 @@ import time
 import numpy as np
 import onnxruntime as ort
 
-from ml.markers.gate_seal import acquire_gate_seal, canonical_json_bytes, complete_gate_seal, sha256_file
+from ml.markers.gate_seal import (
+    acquire_gate_seal,
+    canonical_json_bytes,
+    complete_gate_seal,
+    require_committed_sources,
+    sha256_file,
+)
 from .dataset import encode_proposal, load_sealed_public_archive, proposal_summary, proposals, split_fingerprint
 from .protocol import PUBLIC_REVISION, REVISION, TASK, THRESHOLDS, TRUTH_MATCH_IOU_MINIMUM
 from ml.ocr.component_context_detector_v7.dataset import box_iou
@@ -21,11 +27,28 @@ from ml.ocr.component_context_detector_v7.dataset import box_iou
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ROOT = Path("ml/ocr/component_spaced_recall_detector_v10")
+LEDGER_PATH = Path("ml/markers/training-budgets/production-repair-v1.json")
+RESULT_PATH = ROOT / "P3_RESULT.json"
 SPLIT_CONFIG_PATH = ROOT / "gates/sealed-public-v1.json"
 EVALUATOR_SOURCE_PATHS = (
-    ROOT / "dataset.py", ROOT / "pipeline.py", ROOT / "protocol.py", ROOT / "sealed_gate.py",
+    ROOT / "dataset.py",
+    ROOT / "pipeline.py",
+    ROOT / "protocol.py",
+    ROOT / "sealed_gate.py",
+    Path("ml/ocr/component_recall_detector_v9/dataset.py"),
+    Path("ml/ocr/component_recall_detector_v9/pipeline.py"),
+    Path("ml/ocr/component_recall_detector_v9/pipeline_p2.py"),
+    Path("ml/ocr/component_recall_detector_v9/protocol.py"),
+    Path("ml/ocr/component_fusion_detector_v8/dataset.py"),
+    Path("ml/ocr/component_fusion_detector_v8/pipeline.py"),
+    Path("ml/ocr/component_fusion_detector_v8/protocol.py"),
     Path("ml/ocr/component_context_detector_v7/dataset.py"),
-    Path("ml/ocr/component_region_detector_v6/dataset.py"), Path("ml/markers/gate_seal.py"),
+    Path("ml/ocr/component_context_detector_v7/protocol.py"),
+    Path("ml/ocr/component_region_detector_v6/dataset.py"),
+    Path("ml/ocr/component_region_detector_v6/protocol.py"),
+    Path("ml/ocr/production_composition_v1/dataset.py"),
+    Path("ml/ocr/production_composition_v1/protocol.py"),
+    Path("ml/markers/gate_seal.py"),
 )
 GATE_CONFIG = {
     "evaluation_limit": 1, "exact_region_count_every_fixture": True, "false_region_count": 0,
@@ -72,16 +95,48 @@ def evaluate_scenes(scenes: tuple[object, ...], runner: object, threshold: float
 
 
 def evaluate_candidate(*, onnx_path: Path, selection_report_path: Path, output_path: Path) -> dict[str, object]:
+    require_committed_sources(REPO_ROOT, (LEDGER_PATH, RESULT_PATH))
     if output_path.exists():
         raise RuntimeError(f"OCR V10 public output exists: {output_path}")
+    ledger = json.loads((REPO_ROOT / LEDGER_PATH).read_text(encoding="utf-8"))
+    entry = next(
+        (
+            item
+            for item in ledger.get("revisions", [])
+            if item.get("task") == TASK and item.get("revision") == REVISION
+        ),
+        None,
+    )
+    result = json.loads((REPO_ROOT / RESULT_PATH).read_text(encoding="utf-8"))
     selection = json.loads(selection_report_path.read_text(encoding="utf-8"))
     onnx_sha, selection_sha = sha256_file(onnx_path), sha256_file(selection_report_path)
     threshold = float(selection.get("selected_threshold", -1.0))
     if (
-        selection.get("task") != TASK or selection.get("revision") != REVISION
-        or selection.get("status") != "selected_public_gate_authorized"
+        entry is None
+        or entry.get("status") != "candidate_3_selected_public_gate_pending"
+        or entry.get("preregistered_candidate_ids") != []
+        or entry.get("consumed_candidate_ids") != ["P1", "P2", "P3"]
+        or entry.get("execution_authorized") is not False
+        or entry.get("public_gate_authorized") is not True
+        or entry.get("public_gate_authorized_candidate_id") != "P3"
+        or entry.get("public_gate_evaluations") != 0
+        or entry.get("public_gate_archive_opened") is not False
+        or entry.get("candidate_onnx_sha256", {}).get("P3") != onnx_sha
+        or entry.get("p3_training_report_sha256") != selection_sha
+        or entry.get("p3_result_sha256") != sha256_file(REPO_ROOT / RESULT_PATH)
+    ):
+        raise RuntimeError("OCR V10 public gate is not authorized by the canonical ledger")
+    if (
+        result.get("status") != "selected_public_gate_pending"
+        or result.get("onnx_sha256") != onnx_sha
+        or result.get("candidate_report_sha256") != selection_sha
+        or selection.get("task") != TASK
+        or selection.get("revision") != REVISION
+        or selection.get("status") != "selected"
         or selection.get("selection_gate_passed") is not True
-        or selection.get("onnx_sha256") != onnx_sha or threshold not in THRESHOLDS
+        or selection.get("onnx_parity_passed") is not True
+        or selection.get("sealed_public_archive_opened") is not False
+        or threshold not in THRESHOLDS
     ):
         raise RuntimeError("Only an exact authorized V10 selection may open public gate")
     config = json.loads((REPO_ROOT / SPLIT_CONFIG_PATH).read_text(encoding="utf-8"))

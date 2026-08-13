@@ -21,8 +21,12 @@ CPU parity execution, and validation inference, then failed closed before
 sealing metrics because the report gate requested a field the evaluator does
 not emit. P2 is consumed and cannot rerun.
 
-P3 is separately preregistered as a zero-optimizer evidence-path recovery. It
+P3 executed once as a zero-optimizer evidence-path recovery. It
 retains the exact P2 checkpoint and ONNX bytes and changes only the invalid
 truth-count lookup before executing the frozen validation through CPU ONNX
-again. The public archive remains unopened. No candidate is approved, and all
-downstream gates remain mandatory.
+again. It passed all 80 scenes and 400 truths with zero false regions, misses,
+duplicates, or prohibited hits at threshold `0.95`; CPU parity passed at
+`5.7220458984375e-06`. The candidate report SHA-256 is
+`3755d9d0308fa9420dd3e0cff5c620fed96407ffdc34e4b59e5c651bf50c7455`.
+The single checksum-bound public evaluation is authorized but remains unopened.
+No candidate is approved, and all downstream gates remain mandatory.

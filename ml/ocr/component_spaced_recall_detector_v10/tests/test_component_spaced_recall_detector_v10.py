@@ -51,19 +51,22 @@ def test_p1_is_zero_optimizer_exact_onnx_threshold_only() -> None:
     assert config["predecessor_fixture_bytes_reused"] is False
 
 
-def test_ledger_records_consumed_p1_p2_and_authorized_p3() -> None:
+def test_ledger_records_selected_p3_and_authorized_public_gate() -> None:
     ledger = _load(LEDGER)
     entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
-    config_path = ROOT / "training/p3.json"
-    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["status"] == "candidate_3_selected_public_gate_pending"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["candidate_config_sha256"]["P3"] == sha256_file(config_path)
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
-    assert entry["public_gate_authorized"] is False
+    assert entry["candidate_config_sha256"]["P3"] == sha256_file(ROOT / "training/p3.json")
+    assert entry["p3_result_sha256"] == sha256_file(ROOT / "P3_RESULT.json")
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_candidate_id"] == "P3"
+    assert entry["public_gate_evaluations"] == 0
+    assert entry["public_gate_archive_opened"] is False
 
 
 def test_p2_preregistration_records_training_only_examples() -> None:
@@ -123,4 +126,9 @@ def test_public_gate_is_hidden_bound_and_unapproved() -> None:
     assert result["selection_false_negatives"] == 4
     assert result["selection_false_positives"] == 0
     assert result["public_gate_archive_opened"] is False
+    selected = _load(ROOT / "P3_RESULT.json")
+    assert selected["status"] == "selected_public_gate_pending"
+    assert selected["public_gate_authorized"] is True
+    assert selected["public_gate_evaluations"] == 0
+    assert selected["public_gate_archive_opened"] is False
     assert not any(REPO_ROOT.glob("models/manifest/ocr/*spaced*recall*v10*.json"))
