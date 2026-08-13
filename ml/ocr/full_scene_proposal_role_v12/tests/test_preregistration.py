@@ -77,13 +77,13 @@ def test_split_and_candidate_records_are_frozen_but_execution_is_closed() -> Non
         assert record["release_eligible"] is False
 
 
-def test_canonical_ledger_consumes_p1_and_authorizes_only_parity_p2() -> None:
+def test_canonical_ledger_consumes_p1_p2_and_authorizes_nothing() -> None:
     ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-full-scene-proposal-role-v12")
-    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["status"] == "candidate_2_failed_selection"
     assert entry["protocol_sha256"] == sha256_file(PROTOCOL_PATH)
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
     result_path = ROOT / entry["p1_result_path"]
     assert entry["p1_result_sha256"] == sha256_file(result_path)
@@ -94,8 +94,12 @@ def test_canonical_ledger_consumes_p1_and_authorizes_only_parity_p2() -> None:
     assert entry["p1_selection_role_accuracy"] == 1.0
     assert entry["p1_onnx_parity_passed"] is False
     assert entry["candidate_config_sha256"]["P2"] == sha256_file(ROOT / entry["candidate_config_paths"]["P2"])
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["p2_result_sha256"] == sha256_file(ROOT / entry["p2_result_path"])
+    assert entry["p2_onnx_parity_passed"] is True
+    assert entry["p2_selection_exact_scene_count"] == 119
+    assert entry["p2_selection_false_positives"] == 1
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
