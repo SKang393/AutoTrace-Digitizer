@@ -40,6 +40,25 @@ the exact C# test, and the ignored report path. It does not authorize a rerun,
 repair, fixture-mask approval, manifest, model-store promotion, private
 validation, production approval, or release eligibility.
 
+The single authorized execution ran from source commit
+`458ec387076344229490e58bc98fa0bd07d36af7` and failed closed. The ignored
+report SHA-256 is
+`a5fc84a4a02c10f39abb156cb33895bb7b6a21c32a98137586b31b9058d7e9a4`.
+It records 373/384 OCR true positives, 95 false regions, 11 missed regions,
+zero duplicate regions, recognition exact match `0.8880208333333334`, CER
+`0.02302158273381295`, role accuracy `0.5260416666666666`, numeric exact match
+`1.0`, word exact match `0.8819188191881919`, and ambiguity exact match `1.0`.
+The composed marker stage retained 379/392 truths with eight false markers,
+13 missed markers, zero duplicates, eight text-derived marker creations, and
+zero hits on the separately enumerated prohibited structures. Only 30/48
+scenes had exact marker counts. The canonical opened-seal SHA-256 is
+`a09a3aa3dece30131d2814aa46262e015f65457956b8fe637bdd3f37b5b5f5d7`;
+the fail result-seal SHA-256 is
+`ce9c1d30ffbd9126ac9bea9fcbf7f3bfdfc5fe2abd5d77e347e8f358df2c4a1`.
+This consumed the authorization. Do not rerun, repair, tune against these
+fixtures, manifest, store, package, approve, or privately validate this
+composition.
+
 Passing cannot create a model manifest, approve a production model-store
 entry, enable normal Auto Detect, package a payload, validate Chandler, or make
 the release eligible. All of those gates remain mandatory and fail closed.
