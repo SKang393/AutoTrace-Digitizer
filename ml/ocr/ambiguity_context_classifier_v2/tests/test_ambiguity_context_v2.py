@@ -10,7 +10,7 @@ import numpy as np
 import torch
 
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
-from ml.ocr.ambiguity_context_classifier_v2 import dataset, sealed_gate, train_p1
+from ml.ocr.ambiguity_context_classifier_v2 import dataset, sealed_gate, train_p2
 from ml.ocr.ambiguity_context_classifier_v2.model import LineContextAmbiguityNet
 from ml.ocr.ambiguity_context_classifier_v2.protocol import GATES, GLYPHS, IMAGE_SIZE, REVISION, protocol_configuration
 
@@ -56,19 +56,20 @@ def test_sealed_public_bytes_reproduce_without_candidate_execution() -> None:
 
 def test_preregistration_binds_sources_splits_trigger_and_license() -> None:
     protocol = _load(ROOT / "PROTOCOL.json")
-    config = _load(ROOT / "training/p1.json")
+    config = _load(ROOT / "training/p2.json")
     ledger = _load(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
-    assert protocol == protocol_configuration(runner_source_bundle_sha256=source_bundle_sha256(REPO_ROOT, train_p1.RUNNER_SOURCE_PATHS))
+    assert protocol == protocol_configuration(runner_source_bundle_sha256=source_bundle_sha256(REPO_ROOT, train_p2.RUNNER_SOURCE_PATHS))
     assert config["expected_runner_source_bundle_sha256"] == protocol["runner_source_bundle_sha256"]
-    assert config["trigger_result_sha256"] == sha256_file(REPO_ROOT / config["trigger_result_path"])
+    assert config["p1_result_sha256"] == sha256_file(REPO_ROOT / config["p1_result_path"])
+    assert config["p1_checkpoint_sha256"] == sha256_file(REPO_ROOT / config["p1_checkpoint_path"])
     assert config["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
     assert config["selection_manifest_sha256"] == sha256_file(ROOT / "SELECTION_MANIFEST.json")
     assert config["sealed_public_test_seal_sha256"] == sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert config["model_license"] == protocol["model_license"] == "Apache-2.0"
-    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["status"] == "candidate_2_preregistered"
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["authorized_candidate_id"] == "P2"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_archive_opened"] is False
 

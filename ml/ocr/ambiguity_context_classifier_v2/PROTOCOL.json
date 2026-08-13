@@ -1,14 +1,9 @@
 {
   "architecture": "line-context-profile-cnn-v1",
   "chandler_included": false,
-  "classes": [
-    "O",
-    "o",
-    "l",
-    "I"
-  ],
-  "consumed_candidates": [],
-  "currently_preregistered_candidate": "P1",
+  "classes": ["O", "o", "l", "I"],
+  "consumed_candidates": ["P1"],
+  "currently_preregistered_candidate": "P2",
   "defect_class": "isolated tight glyph normalization discarded line-relative case scale, making O and o non-identifiable in the exhausted V1 representation",
   "experiment_budget": 3,
   "gates": {
@@ -25,50 +20,32 @@
   "generalization_label_included": false,
   "input_contract": {
     "coordinate_space": "complete-line-box-normalized glyph-centered crop",
-    "dtype": "float32",
-    "name": "glyphs",
-    "range": [
-      0,
-      1
-    ],
-    "shape": [
-      "batch",
-      1,
-      32,
-      32
-    ]
+    "dtype": "float32", "name": "glyphs", "range": [0, 1],
+    "shape": ["batch", 1, 32, 32]
   },
   "isolated_change": "render and normalize the complete font line box before taking a fixed square glyph-centered crop, preserving case-relative height and baseline; train new project-owned weights from a new seed",
   "manifest_created": false,
   "model_license": "Apache-2.0",
   "model_store_promoted": false,
-  "output_contract": {
-    "class_order": [
-      "O",
-      "o",
-      "l",
-      "I"
-    ],
-    "name": "logits",
-    "shape": [
-      "batch",
-      4
-    ]
+  "output_contract": {"class_order": ["O", "o", "l", "I"], "name": "logits", "shape": ["batch", 4]},
+  "p1_result": {
+    "onnx_parity_maximum_absolute_error": 0.0000152587890625,
+    "path": "ml/ocr/ambiguity_context_classifier_v2/P1_RESULT.json",
+    "public_archive_opened": false,
+    "selection_accuracy": 1.0,
+    "sha256": "8ea961dcde8a771aaea97232b34d1f2caf54036719175063d9e4dcae9da961bc"
   },
+  "p2_isolated_change": "multiply exact P1 output logits by 0.5 during export with zero optimizer steps",
   "prior_exposed_fixture_bytes_reused": false,
   "private_or_article_images": false,
   "production_approval": false,
   "release_eligible": false,
   "revision": "graph-ambiguity-line-context-v2",
-  "runner_source_bundle_sha256": "5df2b532f4291909d210232fa12e10ebd9fd7eb3c4cf834899d6c790dbc846d2",
+  "runner_source_bundle_sha256": "66e5090890f7f2f8049de5a3503c7ba2f50b0f67f18a9788dccfd714774492ce",
   "schema": "graphreader.ocr-ambiguity-context-protocol.v1",
   "seed": 20261421,
-  "split_counts_per_class": {
-    "sealed_public": 240,
-    "train": 640,
-    "validation": 160
-  },
-  "status": "candidate_1_preregistered",
+  "split_counts_per_class": {"sealed_public": 240, "train": 640, "validation": 160},
+  "status": "candidate_2_preregistered",
   "synthetic_only": true,
   "task": "ocr-recognition",
   "trigger_evidence": {

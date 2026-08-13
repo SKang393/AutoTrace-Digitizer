@@ -1,0 +1,23 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/ambiguity_context_classifier_v2/training/p1.json",
+    "candidate_config_sha256": "14939a9c9fe3748aad1dce275d277ebb7a41dd58b3b8fbc7a742ca0a1375d0e8",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "graph-ambiguity-line-context-v2",
+    "runner_source_bundle_sha256": "5df2b532f4291909d210232fa12e10ebd9fd7eb3c4cf834899d6c790dbc846d2",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/ambiguity_context_classifier_v2/dataset.py",
+      "ml/ocr/ambiguity_context_classifier_v2/model.py",
+      "ml/ocr/ambiguity_context_classifier_v2/protocol.py",
+      "ml/ocr/ambiguity_context_classifier_v2/train_p1.py"
+    ],
+    "task": "ocr-recognition",
+    "training_budget_ledger_sha256": "421c7d127cae187abe9efa3701f1a37b02671fb9bef9dfdc8df91bcf0786fff7"
+  },
+  "opened_utc": "2026-08-13T03:58:49.769469+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

@@ -8,7 +8,7 @@ from __future__ import annotations
 TASK = "ocr-recognition"
 REVISION = "graph-ambiguity-line-context-v2"
 PUBLIC_REVISION = f"{REVISION}-public-v1"
-CANDIDATE_ID = "P1"
+CANDIDATE_ID = "P2"
 EXPERIMENT_BUDGET = 3
 SEED = 20261421
 GLYPHS = ("O", "o", "l", "I")
@@ -30,7 +30,7 @@ GATES = {
 def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, object]:
     return {
         "schema": "graphreader.ocr-ambiguity-context-protocol.v1",
-        "task": TASK, "revision": REVISION, "status": "candidate_1_preregistered",
+        "task": TASK, "revision": REVISION, "status": "candidate_2_preregistered",
         "defect_class": (
             "isolated tight glyph normalization discarded line-relative case scale, making O and o "
             "non-identifiable in the exhausted V1 representation"
@@ -42,13 +42,21 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
             "v1_public_archive_opened": False,
         },
         "prior_exposed_fixture_bytes_reused": False, "experiment_budget": EXPERIMENT_BUDGET,
-        "currently_preregistered_candidate": CANDIDATE_ID, "consumed_candidates": [],
+        "currently_preregistered_candidate": CANDIDATE_ID, "consumed_candidates": ["P1"],
         "architecture": "line-context-profile-cnn-v1",
         "isolated_change": (
             "render and normalize the complete font line box before taking a fixed square glyph-centered crop, "
             "preserving case-relative height and baseline; train new project-owned weights from a new seed"
         ),
         "model_license": "Apache-2.0", "classes": list(GLYPHS),
+        "p1_result": {
+            "path": "ml/ocr/ambiguity_context_classifier_v2/P1_RESULT.json",
+            "sha256": "8ea961dcde8a771aaea97232b34d1f2caf54036719175063d9e4dcae9da961bc",
+            "selection_accuracy": 1.0,
+            "onnx_parity_maximum_absolute_error": 0.0000152587890625,
+            "public_archive_opened": False,
+        },
+        "p2_isolated_change": "multiply exact P1 output logits by 0.5 during export with zero optimizer steps",
         "input_contract": {"name": "glyphs", "shape": ["batch", 1, IMAGE_SIZE, IMAGE_SIZE], "dtype": "float32", "range": [0, 1],
                            "coordinate_space": "complete-line-box-normalized glyph-centered crop"},
         "output_contract": {"name": "logits", "shape": ["batch", len(GLYPHS)], "class_order": list(GLYPHS)},
@@ -62,4 +70,3 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
 
 __all__ = ["CANDIDATE_ID", "COUNTS_PER_CLASS", "EXPERIMENT_BUDGET", "GATES", "GLYPHS", "IMAGE_SIZE",
            "PUBLIC_REVISION", "REVISION", "SEED", "TASK", "protocol_configuration"]
-

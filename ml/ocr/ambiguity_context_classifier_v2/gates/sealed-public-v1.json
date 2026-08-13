@@ -8,7 +8,7 @@
   "private_manifest_sha256": "f99d9eb7c7154cf41011b0265cc263b614baab2af12d1c6551cad8f741f2cb79",
   "expected_candidate_hash_keys": ["onnx_sha256", "selection_report_sha256"],
   "expected_dataset_manifest_sha256": "f99d9eb7c7154cf41011b0265cc263b614baab2af12d1c6551cad8f741f2cb79",
-  "expected_evaluator_source_bundle_sha256": "0eb4576961323ad899e51cbc729e620e1d4a42ef3734a8ec01ac7c8c5f18babf",
+  "expected_evaluator_source_bundle_sha256": "db1841e898a939561cc80702358a745a7da4a39d94277ed40387fa2e11e2de7b",
   "expected_gate_config_sha256": "24311b417728066041474bde7fd2bfbbde7ce4e2e920570bc8625e00134de2aa",
   "evaluation_limit": 1,
   "production_approval": false,
