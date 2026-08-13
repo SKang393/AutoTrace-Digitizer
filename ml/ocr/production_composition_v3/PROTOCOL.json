@@ -1,0 +1,116 @@
+{
+  "chandler_included": false,
+  "composition_id": "graphreader-v10-official-spacing-p2-numeric-v5-composition-v3",
+  "data_scope": "fresh procedural graph scenes with new seed, renderer, degradation, layout, and label-family registrations; generic numeric, phase, annotation, ambiguity, and legend labels only; no Chandler, Generalization, private/article images, external datasets, V10/V2 fixture bytes, or tuning",
+  "gates": {
+    "ambiguity_exact_match_minimum": 0.9,
+    "character_error_rate_maximum": 0.05,
+    "direct_fixture_byte_execution_required": true,
+    "duplicate_region_count": 0,
+    "exact_match_minimum": 0.9,
+    "exact_region_count_every_fixture": true,
+    "false_region_count": 0,
+    "missed_region_count": 0,
+    "numeric_exact_match_minimum": 0.9,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "role_accuracy_minimum": 0.9,
+    "spacing_changed_nonspace_truth_count": 0,
+    "three_exact_onnx_payloads_required": true,
+    "word_exact_match_minimum": 0.9
+  },
+  "generalization_label_included": false,
+  "manifest_created": false,
+  "marker_creation_evaluated": false,
+  "model_store_promoted": false,
+  "models": {
+    "detector": {
+      "onnx_sha256": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+      "public_component_report_sha256": "1c7526cb2147a7a68cdc6eb3d6bc3a073324b3b08f3c81c8b359832f038de7b1",
+      "public_component_status": "pass_unapproved",
+      "revision": "graph-text-spaced-component-recall-v10-p3",
+      "threshold": 0.95
+    },
+    "general_recognizer": {
+      "inference_yaml_sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
+      "onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+      "postprocess_revision": "official-ppocrv5-image-spacing-v2-p2",
+      "postprocess_source_sha256": "42377b7ff0c650518861940a04f31382c8bed40013089354586e34bde12d4c40",
+      "public_component_report_sha256": "83afdcfd4fd3dd8b4fa8c0881b5f12d652c0d8c5f9b889af380b4fdf7b83091c",
+      "revision": "en_PP-OCRv5_mobile_rec"
+    },
+    "numeric_specialist": {
+      "onnx_sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+      "revision": "graph-numeric-component-ensemble-v5",
+      "threshold": 0.65
+    }
+  },
+  "predecessor": {
+    "failure": "one spaced multi-glyph annotation detector false negative across 400 truths",
+    "fixture_bytes_reused": false,
+    "public_archive_opened": false,
+    "revision": "graphreader-v9-official-spacing-p2-numeric-v5-composition-v2",
+    "status": "failed",
+    "validation_report_sha256": "7a20ae70e9c970f2d10dd80f03a41ab363424cf1a33d98327e835727b587bed1"
+  },
+  "private_or_article_images": false,
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graphreader-v10-official-spacing-p2-numeric-v5-composition-v3",
+  "routing": {
+    "algorithm": "geometry-gated-numeric-specialist-v1",
+    "general_recognizer_default": true,
+    "numeric_specialist_requires_numeric_grammar": true,
+    "numeric_specialist_requires_x_or_y_tick_geometry": true,
+    "participant_phase_legend_annotation_numeric_substitution_forbidden": true
+  },
+  "schema": "graphreader.ocr-production-composition-protocol.v3",
+  "split_generator_source_bundle_sha256": "9e69e3dce9fc0a7262c344b8ce8a017f09b1caf34e2a42d8d03a2305890211ff",
+  "split_generator_source_paths": [
+    "ml/ocr/production_composition_v3/dataset.py",
+    "ml/ocr/production_composition_v3/prepare_split.py",
+    "ml/ocr/production_composition_v3/protocol.py",
+    "ml/ocr/production_composition_v1/dataset.py",
+    "ml/ocr/component_context_detector_v7/dataset.py",
+    "ml/ocr/component_region_detector_v6/dataset.py"
+  ],
+  "splits": [
+    {
+      "degradation_family": "bilinear-resample-row-fade-composition-v3-validation",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf"
+      ],
+      "font_sha256": [
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb"
+      ],
+      "renderer_family": "five-role-offset-spacing-scenes-composition-v3-validation",
+      "scene_count": 80,
+      "seed_offset": 719000,
+      "split": "validation"
+    },
+    {
+      "degradation_family": "contrast-quantization-column-fade-composition-v3-public",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "font_sha256": [
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0"
+      ],
+      "renderer_family": "five-role-mirrored-spacing-scenes-composition-v3-public",
+      "scene_count": 112,
+      "seed_offset": 761000,
+      "split": "sealed_public"
+    }
+  ],
+  "state": "fresh_splits_frozen_before_any_composed_model_execution",
+  "synthetic_only": true,
+  "task": "ocr-production-composition"
+}
