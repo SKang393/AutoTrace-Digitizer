@@ -1,0 +1,115 @@
+{
+  "chandler_included": false,
+  "gates": {
+    "ambiguity_exact_match_minimum": 0.9,
+    "character_error_rate_maximum": 0.05,
+    "direct_fixture_byte_execution_required": true,
+    "duplicate_region_count": 0,
+    "exact_match_minimum": 0.9,
+    "exact_region_count_every_fixture": true,
+    "false_region_count": 0,
+    "forbidden_consensus_rescue_route_count": 0,
+    "forbidden_numeric_route_count": 0,
+    "forbidden_official_rescue_route_count": 0,
+    "missed_region_count": 0,
+    "numeric_exact_match_minimum": 0.9,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "role_accuracy_minimum": 0.9,
+    "spacing_changed_nonspace_truth_count": 0,
+    "word_exact_match_minimum": 0.9
+  },
+  "generalization_label_included": false,
+  "isolated_changes": [
+    "retain V5 official-only rescue in the detector score band 0.90 inclusive to 0.95 exclusive",
+    "in the detector score band 0.85 inclusive to 0.90 exclusive, rescue only when official and numeric recognizers return the same valid graph number at tick geometry",
+    "when all recognized nonspace characters are O/o/l/I and the exact V3 adapter yields too few groups, split at the largest positive inter-ink gaps until the expected character count, requiring every selected gap to be at least one quarter of ink height",
+    "for an ambiguity-only line whose source segmentation has one qualified group per recognized character, reconstruct a single space between those visibly separated groups after classification",
+    "when official raw text is a valid graph number, reject a spacing transform that would make it nonnumeric"
+  ],
+  "manifest_created": false,
+  "marker_creation_evaluated": false,
+  "model_store_promoted": false,
+  "models": {
+    "ambiguity_specialist": {
+      "onnx_sha256": "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096",
+      "public_accuracy": 1.0,
+      "public_report_sha256": "a69b11a164a87f9df959eda863f2263110c2eec3e1d3102f610f7ae32c4e99bd",
+      "revision": "graph-ambiguity-source-group-v3"
+    },
+    "detector": {
+      "onnx_sha256": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+      "threshold": 0.95
+    },
+    "numeric_specialist": {
+      "onnx_sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+      "threshold": 0.65
+    },
+    "official_recognizer": {
+      "onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+      "spacing_revision": "official-ppocrv5-conservative-spacing-v3-p1"
+    }
+  },
+  "predecessor": {
+    "ambiguity_exact_match": 0.8421052631578947,
+    "false_negatives": 1,
+    "fixture_bytes_reused": false,
+    "public_archive_opened": false,
+    "revision": "graphreader-v10-official-rejected-tick-rescue-source-group-v3-composition-v5",
+    "status": "failed",
+    "validation_report_sha256": "c3894907e9354b841baac5ae9d98997b2f486ff3c87c9d831ead9c827f339d84"
+  },
+  "private_or_article_images": false,
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graphreader-v10-two-band-tick-consensus-source-group-segmentation-composition-v6",
+  "schema": "graphreader.ocr-production-composition-protocol.v6",
+  "split_generator_source_bundle_sha256": "797929f800782aa5318b4d75c30014f6d87a7246ae9a5117c277855b422fcf37",
+  "split_generator_source_paths": [
+    "ml/ocr/production_composition_v6/dataset.py",
+    "ml/ocr/production_composition_v6/prepare_split.py",
+    "ml/ocr/production_composition_v6/protocol.py",
+    "ml/ocr/production_composition_v1/dataset.py",
+    "ml/ocr/component_context_detector_v7/dataset.py",
+    "ml/ocr/component_region_detector_v6/dataset.py"
+  ],
+  "splits": [
+    {
+      "degradation_family": "affine-row-fade-resample-composition-v6-validation",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "font_sha256": [
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0"
+      ],
+      "renderer_family": "six-role-context-composition-v6-validation",
+      "scene_count": 120,
+      "seed_offset": 1187000,
+      "split": "validation"
+    },
+    {
+      "degradation_family": "quantize-column-fade-contrast-composition-v6-public",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "font_sha256": [
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0"
+      ],
+      "renderer_family": "six-role-context-composition-v6-public",
+      "scene_count": 152,
+      "seed_offset": 1273000,
+      "split": "sealed_public"
+    }
+  ],
+  "state": "fresh_splits_frozen_before_any_composed_model_execution",
+  "synthetic_only": true,
+  "task": "ocr-production-composition"
+}
