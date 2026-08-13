@@ -1,0 +1,17 @@
+{
+  "schema": "graphreader.ocr-conservative-spacing-split-seal.v1",
+  "partition": "selection",
+  "case_count": 256,
+  "fixture_archive_path": "ml/ocr/official_recognition_spacing_v3/artifacts/split-freeze/selection/fixtures.zip",
+  "fixture_archive_sha256": "76a88f2c94ceb87cfcb2efb82a8d5f0b120096d988987b394597452b050b5841",
+  "fixture_archive_bytes": 656564,
+  "private_manifest_path": "ml/ocr/official_recognition_spacing_v3/artifacts/split-freeze/selection/private-manifest.json",
+  "private_manifest_sha256": "d55b04b0c4146105db1cb6964ad5e218ad5233849d832c1534f9766ab9586936",
+  "generator_sha256": "17d5999970977a25722224f5fa07137afa14e97e518cb9c8f817450a69a40a61",
+  "truth_visible_for_selection": true,
+  "model_execution_count": 0,
+  "synthetic_only": true,
+  "private_or_article_images": false,
+  "chandler_included": false,
+  "generalization_label_included": false
+}

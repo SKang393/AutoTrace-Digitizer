@@ -1,0 +1,75 @@
+{
+  "schema": "graphreader.ocr-official-recognition-spacing-protocol.v2",
+  "task": "ocr-recognition",
+  "revision": "official-ppocrv5-conservative-spacing-v3",
+  "status": "candidate_1_preregistered",
+  "defect_class": "the V2 source-gap repair inserted spaces into compact words and rewrote lowercase l as capital I during the first checksum-bound production composition validation",
+  "trigger_evidence": {
+    "path": "ml/ocr/production_composition_v3/VALIDATION_REPORT.json",
+    "sha256": "905bb12948ce7bdcdba95f4940e9b1b5f97017da6586c808ff5c43e128049ea9",
+    "recognition_exact_match": 0.96,
+    "ambiguity_exact_match": 0.8181818181818182,
+    "spacing_changed_nonspace_truth_count": 3,
+    "public_archive_opened": false
+  },
+  "prior_revision": "official-ppocrv5-image-spacing-v2",
+  "prior_exposed_fixture_bytes_reused": false,
+  "experiment_budget": 3,
+  "currently_preregistered_candidate": "P1",
+  "consumed_candidates": [],
+  "isolated_change": "raise the source-gap threshold from 0.25 to 0.40 of ink height, permit reconstruction from partially spaced raw output, and prohibit all recognized nonspace-character rewriting; retain the exact official ONNX weights, preprocessing, CTC decoder, and width-proportional partitioning",
+  "optimizer_steps": 0,
+  "weights_changed": false,
+  "model_id": "en_PP-OCRv5_mobile_rec",
+  "model_onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+  "inference_yaml_sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
+  "runner_source_bundle_sha256": "4e51e79fda0e13814da7aba4b44ed6ebd51b788a382317d5724731de9b8f7029",
+  "spacing_algorithm": {
+    "id": "conservative-source-projection-large-gap-v3",
+    "minimum_gap_pixels": 5,
+    "minimum_gap_to_ink_height_ratio": 0.4,
+    "minimum_source_groups": 2,
+    "foreground_contrast_fraction": 0.3,
+    "minimum_foreground_contrast": 10,
+    "partitioning": "width-proportional dynamic programming with nonempty text groups",
+    "existing_spaces_removed_before_partition_and_reconstructed_from_source": true,
+    "recognized_nonspace_character_rewriting_forbidden": true,
+    "truth_or_role_input_forbidden": true
+  },
+  "splits": {
+    "selection": {
+      "case_count": 256,
+      "seed": 20261231,
+      "renderer_family": "noto-controlled-gap-spacing-v3-selection",
+      "degradation_families": ["fractional-shear-v3", "anisotropic-resample-v3", "paper-gradient-v3", "soft-threshold-v3"]
+    },
+    "sealed_public": {
+      "case_count": 320,
+      "seed": 20561231,
+      "renderer_family": "noto-controlled-gap-spacing-v3-public",
+      "degradation_families": ["fractional-shift-v3", "lanczos-cycle-v3", "gamma-band-v3", "column-fade-v3"]
+    }
+  },
+  "gates": {
+    "exact_match_minimum": 0.9,
+    "character_error_rate_maximum": 0.05,
+    "role_accuracy_minimum": 0.9,
+    "numeric_exact_match_minimum": 0.9,
+    "word_exact_match_minimum": 0.9,
+    "ambiguity_exact_match_minimum": 0.9,
+    "partial_spacing_exact_match_minimum": 0.9,
+    "spacing_changed_nonspace_truth_count": 0,
+    "nonspace_character_mutation_count": 0,
+    "conversion_parity_maximum_absolute_error": 0.0001,
+    "provider": "CPUExecutionProvider"
+  },
+  "synthetic_only": true,
+  "private_or_article_images": false,
+  "chandler_included": false,
+  "generalization_label_included": false,
+  "marker_creation_evaluated": false,
+  "manifest_created": false,
+  "model_store_promoted": false,
+  "production_approval": false,
+  "release_eligible": false
+}

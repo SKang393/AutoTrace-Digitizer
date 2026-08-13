@@ -1,0 +1,17 @@
+{
+  "schema": "graphreader.ocr-conservative-spacing-public-gate-config.v1",
+  "task": "ocr-recognition",
+  "revision": "official-ppocrv5-conservative-spacing-v3-public-v1",
+  "candidate_id": "P1",
+  "sealed_public_test_seal_path": "ml/ocr/official_recognition_spacing_v3/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "8a00ea59963f9166c0982faa71f1a804b05eb94cedc62cc4f8bbaa97d457ae71",
+  "fixture_archive_sha256": "984fa88f2c293f6c84895da507d65c86a2374f2ef7715ff640327402bbfe4d2b",
+  "private_manifest_sha256": "547d150687e96174dc1963887c13fcc1497dd5bceba7a318a96db033275f67a9",
+  "expected_evaluator_source_bundle_sha256": "f5aa6c6c0d20d7265597e4e9478a87a1672aa29340a1145885da1b78c7ffdcba",
+  "expected_candidate_hash_keys": ["onnx_sha256", "spacing_source_sha256", "selection_report_sha256"],
+  "expected_dataset_manifest_sha256": "547d150687e96174dc1963887c13fcc1497dd5bceba7a318a96db033275f67a9",
+  "expected_gate_config_sha256": "8720c47ccb5ebbe03ec2b11a23b7f1d5b4d5093b4dfd191b4fe5f17647193116",
+  "evaluation_limit": 1,
+  "production_approval": false,
+  "release_eligible": false
+}
