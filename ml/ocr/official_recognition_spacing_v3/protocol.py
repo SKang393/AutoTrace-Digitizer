@@ -40,7 +40,7 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
         "schema": "graphreader.ocr-official-recognition-spacing-protocol.v2",
         "task": TASK,
         "revision": REVISION,
-        "status": "candidate_1_preregistered",
+        "status": "candidate_1_failed_selection",
         "defect_class": (
             "the V2 source-gap repair inserted spaces into compact words and rewrote lowercase l as capital I "
             "during the first checksum-bound production composition validation"
@@ -56,8 +56,8 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
         "prior_revision": "official-ppocrv5-image-spacing-v2",
         "prior_exposed_fixture_bytes_reused": False,
         "experiment_budget": EXPERIMENT_BUDGET,
-        "currently_preregistered_candidate": CANDIDATE_ID,
-        "consumed_candidates": [],
+        "currently_preregistered_candidate": None,
+        "consumed_candidates": [CANDIDATE_ID],
         "isolated_change": (
             "raise the source-gap threshold from 0.25 to 0.40 of ink height, permit reconstruction from "
             "partially spaced raw output, and prohibit all recognized nonspace-character rewriting; retain "
@@ -69,6 +69,18 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
         "model_onnx_sha256": MODEL_SHA256,
         "inference_yaml_sha256": INFERENCE_YAML_SHA256,
         "runner_source_bundle_sha256": runner_source_bundle_sha256,
+        "p1_failure_evidence": {
+            "result_path": "ml/ocr/official_recognition_spacing_v3/P1_RESULT.json",
+            "selection_report_sha256": "fe2030b63a5a50e76347fe7da827e2ca6084e7dacdbbccf89fb945fd9883f1e5",
+            "exact_match": 0.875,
+            "ambiguity_exact_match": 0.0,
+            "compact_word_exact_match": 1.0,
+            "spaced_word_exact_match": 1.0,
+            "partial_spacing_exact_match": 1.0,
+            "spacing_changed_nonspace_truth_count": 0,
+            "nonspace_character_mutation_count": 0,
+            "public_archive_opened": False,
+        },
         "spacing_algorithm": {
             "id": "conservative-source-projection-large-gap-v3",
             "minimum_gap_pixels": 5,

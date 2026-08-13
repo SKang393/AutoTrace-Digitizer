@@ -89,17 +89,19 @@ def test_preregistration_binds_exact_failure_payload_sources_and_unopened_gate()
     assert config["expected_runner_source_bundle_sha256"] == protocol["runner_source_bundle_sha256"]
     assert config["model_sha256"] == MODEL_SHA256 == sha256_file(REPO_ROOT / evaluate.MODEL_PATH)
     assert config["trigger_report_sha256"] == TRIGGER_REPORT_SHA256 == sha256_file(REPO_ROOT / evaluate.TRIGGER_REPORT_PATH)
-    assert config["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
+    assert config["protocol_sha256"] == entry["p1_preregistration_protocol_sha256"]
+    assert config["protocol_sha256"] != sha256_file(ROOT / "PROTOCOL.json")
     assert config["selection_seal_sha256"] == sha256_file(ROOT / "SELECTION_SEAL.json")
     assert config["sealed_public_test_seal_sha256"] == sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert selection["model_execution_count"] == 0
     assert public["truth_hidden_from_model_execution_until_gate"] is True
     assert public["public_gate_evaluations"] == 0
     assert CANDIDATE_ID == "P1"
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["execution_authorized"] is True
+    assert entry["status"] == "candidate_1_failed_selection"
+    assert entry["execution_authorized"] is False
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_archive_opened"] is False
+    assert entry["p1_result_sha256"] == sha256_file(ROOT / "P1_RESULT.json")
     assert protocol["gates"] == GATES
     assert protocol["production_approval"] is False
     assert protocol["release_eligible"] is False
@@ -107,10 +109,15 @@ def test_preregistration_binds_exact_failure_payload_sources_and_unopened_gate()
 
 def test_public_gate_binding_requires_committed_selection_authorization() -> None:
     config = _load(ROOT / "gates/sealed-public-p1.json")
-    assert config["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(
+    ledger = _load(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
+    entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
+    assert config["expected_evaluator_source_bundle_sha256"] == entry["p1_preregistered_public_evaluator_source_bundle_sha256"]
+    assert config["expected_evaluator_source_bundle_sha256"] != source_bundle_sha256(
         REPO_ROOT, sealed_gate.EVALUATOR_SOURCE_PATHS
     )
     assert config["evaluation_limit"] == 1
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_archive_opened"] is False
     assert config["production_approval"] is False
     assert config["release_eligible"] is False
 

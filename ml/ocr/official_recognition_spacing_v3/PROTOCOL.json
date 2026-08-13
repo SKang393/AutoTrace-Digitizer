@@ -2,7 +2,7 @@
   "schema": "graphreader.ocr-official-recognition-spacing-protocol.v2",
   "task": "ocr-recognition",
   "revision": "official-ppocrv5-conservative-spacing-v3",
-  "status": "candidate_1_preregistered",
+  "status": "candidate_1_failed_selection",
   "defect_class": "the V2 source-gap repair inserted spaces into compact words and rewrote lowercase l as capital I during the first checksum-bound production composition validation",
   "trigger_evidence": {
     "path": "ml/ocr/production_composition_v3/VALIDATION_REPORT.json",
@@ -15,8 +15,8 @@
   "prior_revision": "official-ppocrv5-image-spacing-v2",
   "prior_exposed_fixture_bytes_reused": false,
   "experiment_budget": 3,
-  "currently_preregistered_candidate": "P1",
-  "consumed_candidates": [],
+  "currently_preregistered_candidate": null,
+  "consumed_candidates": ["P1"],
   "isolated_change": "raise the source-gap threshold from 0.25 to 0.40 of ink height, permit reconstruction from partially spaced raw output, and prohibit all recognized nonspace-character rewriting; retain the exact official ONNX weights, preprocessing, CTC decoder, and width-proportional partitioning",
   "optimizer_steps": 0,
   "weights_changed": false,
@@ -24,6 +24,18 @@
   "model_onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
   "inference_yaml_sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
   "runner_source_bundle_sha256": "4e51e79fda0e13814da7aba4b44ed6ebd51b788a382317d5724731de9b8f7029",
+  "p1_failure_evidence": {
+    "result_path": "ml/ocr/official_recognition_spacing_v3/P1_RESULT.json",
+    "selection_report_sha256": "fe2030b63a5a50e76347fe7da827e2ca6084e7dacdbbccf89fb945fd9883f1e5",
+    "exact_match": 0.875,
+    "ambiguity_exact_match": 0.0,
+    "compact_word_exact_match": 1.0,
+    "spaced_word_exact_match": 1.0,
+    "partial_spacing_exact_match": 1.0,
+    "spacing_changed_nonspace_truth_count": 0,
+    "nonspace_character_mutation_count": 0,
+    "public_archive_opened": false
+  },
   "spacing_algorithm": {
     "id": "conservative-source-projection-large-gap-v3",
     "minimum_gap_pixels": 5,
