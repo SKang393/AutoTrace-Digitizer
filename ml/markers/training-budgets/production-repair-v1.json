@@ -26,7 +26,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-full-scene-proposal-role-v12",
-      "status": "candidate_2_failed_selection",
+      "status": "candidate_3_preregistered",
       "defect_class": "aggregate consumed V3 C# composition evidence showed 0 of 48 OCR-exact scenes, 95 false regions, 11 missed regions, role accuracy 0.5260416666666666, and 8 text-origin marker creations",
       "trigger_report_path": "artifacts/production-validation/ocr-marker-csharp-v3-report.json",
       "trigger_report_sha256": "a5fc84a4a02c10f39abb156cb33895bb7b6a21c32a98137586b31b9058d7e9a4",
@@ -39,15 +39,14 @@
       "architecture": "dual-context-geometry-gated-proposal-role-cnn-v2",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": [
+        "P3"
+      ],
       "consumed_candidate_ids": [
         "P1",
         "P2"
       ],
-      "remaining_unregistered_candidate_ids": [
-        "P2",
-        "P3"
-      ],
+      "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/ocr/full_scene_proposal_role_v12/PROTOCOL.json",
       "protocol_sha256": "8c0710e1ae8543b340a1614fa30ac88732a2680712b714a8bff605ef7f6c49d6",
       "selection_manifest_path": "ml/ocr/full_scene_proposal_role_v12/SELECTION_MANIFEST.json",
@@ -77,11 +76,13 @@
       "expected_public_evaluator_source_bundle_sha256": "6478ca6d9367206b4432a232b9901a1c9cb214494940bbfd62c4aa09f1336acf",
       "candidate_config_paths": {
         "P1": "ml/ocr/full_scene_proposal_role_v12/training/p1.json",
-        "P2": "ml/ocr/full_scene_proposal_role_v12/training/p2.json"
+        "P2": "ml/ocr/full_scene_proposal_role_v12/training/p2.json",
+        "P3": "ml/ocr/full_scene_proposal_role_v12/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "37694bd64b1e8b90d8d391f561418671e77c0e25032cf5280f18dc7fa46420a6",
-        "P2": "dc48caea44abb5f2f7c8fe672d818fb317e8bb02479de56d91554820f48b1ffd"
+        "P2": "dc48caea44abb5f2f7c8fe672d818fb317e8bb02479de56d91554820f48b1ffd",
+        "P3": "ac15de096cf38e73b53d0a4aca0daff760c9f0c2892461cc09c57da4b6d51939"
       },
       "p1_expected_runner_source_bundle_sha256": "fd329ad7f9c64aed2bbe869c0870c720f2011303149404041774e5fce986748b",
       "p1_result_path": "ml/ocr/full_scene_proposal_role_v12/P1_RESULT.json",
@@ -129,9 +130,30 @@
       "p2_training_opened_seal_sha256": "ab9aadf68d76cf0b68f32d19322c859756f81daf3c0eae86a54b85b0d5d857a4",
       "p2_training_result_seal_sha256": "ffe362ef47260dfc6b255b14808a0ee12ab61addeddbc3782212dca16e759929",
       "p2_failure": "P2 passed CPU ONNX parity with zero optimizer steps and retained exact recognition of all 960 validation regions and roles, but the same one structural false proposal remained, so only 119 of 120 scenes were exact.",
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "P1 and P2 are consumed. P2 fixed parity but retained one structural false proposal. P3 remains unregistered; no candidate or public-gate execution is authorized.",
+      "p3_isolated_change": "reuse the exact checksum-bound P2 ONNX with zero optimizer steps and reject only a single-component proposal whose ink density is at most 0.30 and whose width-to-height ratio is at least 2.75; no scene identity, truth, role, semantic label, graph position, or public bytes participate",
+      "p3_expected_runner_source_bundle_sha256": "5f9d0c4e232a3b8deb39c2d5cc180c543b8724607fa15dab886f0431efe2b68e",
+      "p3_source_onnx_sha256": "8d1fc526060cc0be455eaa25286d56319d566645ef2d2f9cebd92029cdd7a813",
+      "p3_optimizer_steps": 0,
+      "p3_weights_changed": false,
+      "p3_onnx_bytes_changed": false,
+      "p3_structural_guard": {
+        "component_count_equals": 1,
+        "ink_density_maximum_inclusive": 0.3,
+        "width_height_ratio_minimum_inclusive": 2.75
+      },
+      "p3_visible_guard_safety": {
+        "train": {
+          "guarded_positive_proposals": 0,
+          "guarded_negative_proposals": 493
+        },
+        "validation": {
+          "guarded_positive_proposals": 0,
+          "guarded_negative_proposals": 118
+        }
+      },
+      "execution_authorized": true,
+      "authorized_candidate_id": "P3",
+      "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_authorized_on_selection_pass": true,

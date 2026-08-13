@@ -1,0 +1,50 @@
+{
+  "candidate_id": "P3",
+  "expected_guard_safety": {
+    "train": {
+      "guarded_negative_proposals": 493,
+      "guarded_positive_proposals": 0
+    },
+    "validation": {
+      "guarded_negative_proposals": 118,
+      "guarded_positive_proposals": 0
+    }
+  },
+  "expected_runner_source_bundle_sha256": "5f9d0c4e232a3b8deb39c2d5cc180c543b8724607fa15dab886f0431efe2b68e",
+  "experiment_budget": 3,
+  "experiment_ordinal": 3,
+  "inherited_onnx_parity_maximum_absolute_error": 4.291534423828125e-06,
+  "isolated_change": "reuse the exact checksum-bound P2 ONNX with zero optimizer steps and reject only a single-component proposal whose ink density is at most 0.30 and whose width-to-height ratio is at least 2.75; no scene identity, truth, role, semantic label, graph position, or public bytes participate",
+  "onnx_bytes_changed": false,
+  "optimizer_steps": 0,
+  "p2_onnx_sha256": "8d1fc526060cc0be455eaa25286d56319d566645ef2d2f9cebd92029cdd7a813",
+  "p2_report_sha256": "72fde1db488d2ae87ee09bed9f77756aba39e078c33b56caa193f2264eee89a3",
+  "p2_result_path": "ml/ocr/full_scene_proposal_role_v12/P2_RESULT.json",
+  "p2_result_sha256": "c65022abf8d5a217056a3ed6fc6971f37ffe74fdb7be0a58bd0030106e7f1b97",
+  "production_approval": false,
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-full-scene-proposal-role-v12",
+  "schema": "graphreader.ocr-full-scene-proposal-role-training.v1",
+  "sealed_public_test_seal_path": "ml/ocr/full_scene_proposal_role_v12/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "7fe4adeb7901e94f9e5ead52d25f6ad58002c5c1c8b5d24568c58ed8992378df",
+  "selection_manifest_path": "ml/ocr/full_scene_proposal_role_v12/SELECTION_MANIFEST.json",
+  "selection_manifest_sha256": "b2b6951d42c28ac11a3ca3440b04ccfa93eb5a5042011c021acf68765cdae1aa",
+  "selection_thresholds": [
+    0.8,
+    0.85,
+    0.875,
+    0.9,
+    0.925,
+    0.95,
+    0.975
+  ],
+  "structural_guard": {
+    "component_count_equals": 1,
+    "ink_density_maximum_inclusive": 0.3,
+    "width_height_ratio_minimum_inclusive": 2.75
+  },
+  "task": "ocr-detection",
+  "weights_changed": false
+}

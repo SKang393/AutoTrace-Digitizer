@@ -13,9 +13,11 @@ import json
 
 from ml.markers.gate_seal import canonical_json_bytes, sha256_file
 from ml.ocr.full_scene_proposal_role_v12.model import FullSceneProposalRoleNet
+from ml.ocr.full_scene_proposal_role_v12.dataset import build_split, proposal_targets, proposals
 from ml.ocr.full_scene_proposal_role_v12.protocol import (
     ENCODED_WIDTH, EXPERIMENT_BUDGET, ROLE_ORDER, SPLITS, protocol_configuration,
 )
+from ml.ocr.full_scene_proposal_role_v12.structural_guard import is_rejected_structure
 
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -77,14 +79,27 @@ def test_split_and_candidate_records_are_frozen_but_execution_is_closed() -> Non
         assert record["release_eligible"] is False
 
 
-def test_canonical_ledger_consumes_p1_p2_and_authorizes_nothing() -> None:
+def test_p3_structural_guard_rejects_no_visible_truth_proposal() -> None:
+    rejected_negative = 0
+    for split in ("train", "validation"):
+        for scene in build_split(split):
+            candidates = proposals(scene.raster)
+            labels, _ = proposal_targets(scene, candidates)
+            for candidate, label in zip(candidates, labels, strict=True):
+                if is_rejected_structure(candidate):
+                    assert label == 0
+                    rejected_negative += 1
+    assert rejected_negative > 0
+
+
+def test_canonical_ledger_preregisters_only_p3() -> None:
     ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-full-scene-proposal-role-v12")
-    assert entry["status"] == "candidate_2_failed_selection"
+    assert entry["status"] == "candidate_3_preregistered"
     assert entry["protocol_sha256"] == sha256_file(PROTOCOL_PATH)
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == ["P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
     result_path = ROOT / entry["p1_result_path"]
     assert entry["p1_result_sha256"] == sha256_file(result_path)
     assert entry["p1_selection_exact_scene_count"] == 119
@@ -98,8 +113,9 @@ def test_canonical_ledger_consumes_p1_p2_and_authorizes_nothing() -> None:
     assert entry["p2_onnx_parity_passed"] is True
     assert entry["p2_selection_exact_scene_count"] == 119
     assert entry["p2_selection_false_positives"] == 1
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["candidate_config_sha256"]["P3"] == sha256_file(ROOT / entry["candidate_config_paths"]["P3"])
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
