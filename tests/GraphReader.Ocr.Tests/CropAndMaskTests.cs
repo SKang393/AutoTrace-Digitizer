@@ -27,6 +27,8 @@ public sealed class CropAndMaskTests
         Assert.AreEqual(24, crop.Height);
         Assert.AreEqual(64 * 24, crop.Pixels.Length);
         Assert.AreEqual(64, crop.CropSha256.Length);
+        Assert.IsNotNull(crop.SourceCrop);
+        Assert.AreEqual(64, crop.SourceCrop.PixelSha256.Length);
         CollectionAssert.AreEqual(tiny.Polygon.Points.ToArray(), crop.OriginalPolygon.Points.ToArray());
         Assert.IsTrue(crop.Pixels.Span.ToArray().All(float.IsFinite));
     }

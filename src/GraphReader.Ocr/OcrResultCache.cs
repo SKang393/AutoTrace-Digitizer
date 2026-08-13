@@ -81,6 +81,7 @@ public static class OcrCacheKeyDeriver
             Append(hash, crop.RegionId);
             Append(hash, crop.SourceImage.ToString());
             Append(hash, crop.CropSha256);
+            Append(hash, crop.SourceCrop?.PixelSha256 ?? "no_source_crop");
             foreach (var point in crop.OriginalPolygon.Points)
             {
                 Append(hash, FormattableString.Invariant($"{point.X:R},{point.Y:R}"));

@@ -143,6 +143,10 @@ public static class OcrCropBatcher
         var bgrPixels = bgrOutput is null
             ? null
             : new OcrBgrFloatPixels(checked(options.TargetWidth * 3), bgrOutput);
+        OcrV8SourceCrop? sourceCrop = image.SourceImage == OcrSourceImage.Original &&
+            image.OriginalToImage == OcrFrameTransform.Identity
+                ? OcrV8SourcePostprocessor.ExtractSourceCrop(image, region)
+                : null;
 
         return new OcrCrop(
             region.RegionId,
@@ -152,7 +156,8 @@ public static class OcrCropBatcher
             output,
             HashCrop(output, bgrOutput, image.SourceImage, options.TargetWidth, options.TargetHeight),
             region.Polygon,
-            bgrPixels);
+            bgrPixels,
+            sourceCrop);
     }
 
     private static int ContentWidth(

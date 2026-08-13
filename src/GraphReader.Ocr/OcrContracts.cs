@@ -195,7 +195,8 @@ public sealed record OcrCrop(
     ReadOnlyMemory<float> Pixels,
     string CropSha256,
     OcrPolygon OriginalPolygon,
-    OcrBgrFloatPixels? BgrPixels = null);
+    OcrBgrFloatPixels? BgrPixels = null,
+    OcrV8SourceCrop? SourceCrop = null);
 
 /// <summary>
 /// Optional interleaved BGR crop samples normalized to [0,1].
