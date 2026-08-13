@@ -76,16 +76,16 @@ def test_split_and_candidate_records_are_frozen_but_execution_is_closed() -> Non
         assert record["release_eligible"] is False
 
 
-def test_canonical_ledger_records_design_without_authorizing_execution() -> None:
+def test_canonical_ledger_authorizes_only_frozen_p1() -> None:
     ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-full-scene-proposal-role-v12")
-    assert entry["status"] == "split_frozen_candidate_pending_authorization"
+    assert entry["status"] == "candidate_1_preregistered"
     assert entry["protocol_sha256"] == sha256_file(PROTOCOL_PATH)
     assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False

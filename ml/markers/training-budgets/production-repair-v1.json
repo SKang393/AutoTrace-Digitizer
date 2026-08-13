@@ -26,7 +26,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-full-scene-proposal-role-v12",
-      "status": "split_frozen_candidate_pending_authorization",
+      "status": "candidate_1_preregistered",
       "defect_class": "aggregate consumed V3 C# composition evidence showed 0 of 48 OCR-exact scenes, 95 false regions, 11 missed regions, role accuracy 0.5260416666666666, and 8 text-origin marker creations",
       "trigger_report_path": "artifacts/production-validation/ocr-marker-csharp-v3-report.json",
       "trigger_report_sha256": "a5fc84a4a02c10f39abb156cb33895bb7b6a21c32a98137586b31b9058d7e9a4",
@@ -81,9 +81,9 @@
         "P1": "37694bd64b1e8b90d8d391f561418671e77c0e25032cf5280f18dc7fa46420a6"
       },
       "p1_expected_runner_source_bundle_sha256": "fd329ad7f9c64aed2bbe869c0870c720f2011303149404041774e5fce986748b",
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "P1 split and source binding are frozen but candidate execution has not been explicitly authorized in a committed ledger state.",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_authorized_on_selection_pass": true,
