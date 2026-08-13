@@ -31,7 +31,7 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
         "schema": "graphreader.ocr-ambiguity-glyph-protocol.v1",
         "task": TASK,
         "revision": REVISION,
-        "status": "candidate_2_preregistered",
+        "status": "exhausted_invalid_representation",
         "defect_class": (
             "the exact official recognizer collapses O/o/l/I identity on isolated source groups even after "
             "conservative spacing preserves all non-ambiguity text"
@@ -44,8 +44,8 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
             "public_archive_opened": False,
         },
         "experiment_budget": EXPERIMENT_BUDGET,
-        "currently_preregistered_candidate": CANDIDATE_ID,
-        "consumed_candidates": ["P1"],
+        "currently_preregistered_candidate": None,
+        "consumed_candidates": ["P1", "P2"],
         "architecture": "compact-ambiguity-glyph-cnn-v1",
         "isolated_change": (
             "train a project-owned four-class O/o/l/I glyph classifier on fresh procedural Noto crops; "
@@ -71,6 +71,19 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
         "p2_isolated_change": (
             "retain the exact frozen train and validation pixels; preserve canvas-relative height, width, row, "
             "and column profiles in a profile-aware CNN; replace GELU with ReLU to reduce CPU ONNX parity drift"
+        ),
+        "p2_failure_evidence": {
+            "result_path": "ml/ocr/ambiguity_glyph_classifier_v1/P2_RESULT.json",
+            "selection_report_sha256": "f7daf1f03860ee3f08f091d179e7007dca1e923c5374fe540fd0be9e1a17fa19",
+            "accuracy": 0.93125,
+            "lowercase_o_accuracy": 0.75625,
+            "onnx_parity_maximum_absolute_error": 0.0000152587890625,
+            "public_archive_opened": False,
+        },
+        "p3_retired_without_execution": True,
+        "representation_diagnosis": (
+            "P1 and P2 moved O/o errors between classes because the frozen renderer tightly rescales every "
+            "glyph crop to the same height; a new revision must preserve line-relative source scale"
         ),
         "synthetic_only": True,
         "private_or_article_images": False,
