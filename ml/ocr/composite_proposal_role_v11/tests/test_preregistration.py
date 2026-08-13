@@ -10,7 +10,6 @@ from pathlib import Path
 import pytest
 import torch
 
-from ml.markers import training_budget
 from ml.markers.gate_seal import canonical_json_bytes, sha256_file
 from ml.ocr.composite_proposal_role_v11.model import CompositeProposalRoleNet
 from ml.ocr.composite_proposal_role_v11.protocol import (
@@ -27,6 +26,10 @@ from ml.ocr.composite_proposal_role_v11.protocol import (
 ROOT = Path(__file__).resolve().parents[4]
 PROTOCOL_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/PROTOCOL.json"
 LEDGER_PATH = ROOT / "ml/markers/training-budgets/production-repair-v1.json"
+SELECTION_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/SELECTION_MANIFEST.json"
+SEAL_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/SEALED_PUBLIC_TEST_SEAL.json"
+GATE_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/gates/sealed-public-v1.json"
+CONFIG_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/training/p1.json"
 
 
 def test_protocol_file_is_canonical_and_fail_closed() -> None:
@@ -67,24 +70,49 @@ def test_model_contract_is_exact_and_finite() -> None:
         model(torch.zeros((1, 2, 32, ENCODED_WIDTH - 1), dtype=torch.float32))
 
 
-def test_canonical_ledger_records_design_without_execution_authority() -> None:
+def test_canonical_ledger_authorizes_only_exact_frozen_p1() -> None:
     ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == REVISION)
     assert entry["task"] == TASK
-    assert entry["status"] == "design_preregistered_split_pending"
+    assert entry["status"] == "candidate_1_preregistered"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
     assert entry["protocol_sha256"] == sha256_file(PROTOCOL_PATH)
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["selection_manifest_sha256"] == sha256_file(SELECTION_PATH)
+    assert entry["sealed_public_test_seal_sha256"] == sha256_file(SEAL_PATH)
+    assert entry["public_gate_config_sha256"] == sha256_file(GATE_PATH)
+    assert entry["candidate_config_paths"] == {"P1": CONFIG_PATH.relative_to(ROOT).as_posix()}
+    assert entry["candidate_config_sha256"] == {"P1": sha256_file(CONFIG_PATH)}
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["execution_blocker"] is None
     assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_evaluations"] == 0
+    assert entry["public_gate_archive_opened"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
 
 
-def test_training_refuses_before_split_and_candidate_freeze(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(training_budget, "require_committed_sources", lambda *_args, **_kwargs: None)
-    with pytest.raises(RuntimeError, match="design_preregistered_split_pending"):
-        training_budget.require_training_budget(ROOT, task=TASK, revision=REVISION)
+def test_frozen_records_remain_fail_closed_and_exclude_private_data() -> None:
+    selection = json.loads(SELECTION_PATH.read_text(encoding="utf-8"))
+    seal = json.loads(SEAL_PATH.read_text(encoding="utf-8"))
+    gate = json.loads(GATE_PATH.read_text(encoding="utf-8"))
+    config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    assert selection["training_evidence"]["validation_or_public_pixels_used"] is False
+    assert selection["training_evidence"]["v2_bytes_used"] is False
+    assert selection["sealed_public_truth_available_to_candidate"] is False
+    assert seal["truth_hidden_from_candidate_runner"] is True
+    assert seal["public_gate_evaluations"] == 0
+    assert gate["evaluation_limit"] == 1
+    assert config["candidate_id"] == "P1"
+    assert config["public_gate_archive_opened"] is False
+    for record in (selection, seal, gate, config):
+        assert record["production_approval"] is False
+        assert record["release_eligible"] is False
+    for record in (selection, seal, config):
+        assert record["chandler_included"] is False
+        assert record["generalization_label_included"] is False
+        assert record["private_or_article_images"] is False
+        assert record["v2_bytes_used"] is False

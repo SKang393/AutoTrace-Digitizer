@@ -1,0 +1,82 @@
+{
+  "chandler_included": false,
+  "generalization_label_included": false,
+  "predecessor_fixture_bytes_reused": false,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "protocol_path": "ml/ocr/composite_proposal_role_v11/PROTOCOL.json",
+  "protocol_sha256": "4db4cf8422b6e469360eb63e08977a6e2d468cee2b6c6006d664e95f9f49a1b7",
+  "release_eligible": false,
+  "revision": "graph-text-composite-proposal-role-v11",
+  "schema": "graphreader.ocr-composite-proposal-role-selection.v1",
+  "sealed_public_truth_available_to_candidate": false,
+  "split_generator_source_bundle_sha256": "e20be29bef8225fe32e96bd226afb4012592c5429a3772071369c1b63c70e1dc",
+  "split_generator_source_paths": [
+    "ml/ocr/composite_proposal_role_v11/dataset.py",
+    "ml/ocr/composite_proposal_role_v11/prepare_split.py",
+    "ml/ocr/composite_proposal_role_v11/protocol.py",
+    "ml/ocr/component_context_detector_v7/dataset.py",
+    "ml/ocr/component_context_detector_v7/protocol.py",
+    "ml/ocr/component_region_detector_v6/dataset.py",
+    "ml/ocr/production_composition_v1/dataset.py",
+    "ml/ocr/production_composition_v1/protocol.py"
+  ],
+  "synthetic_only": true,
+  "task": "ocr-detection",
+  "train": {
+    "negative_proposal_count": 21912,
+    "positive_proposal_count": 2560,
+    "proposal_count": 24472,
+    "role_truth_counts": {
+      "Annotation": 320,
+      "AxisTitle": 320,
+      "LegendText": 320,
+      "Other": 320,
+      "Participant": 320,
+      "PhaseHeading": 320,
+      "XTick": 320,
+      "YTick": 320
+    },
+    "scene_count": 320,
+    "split_fingerprint": "55a7e2e7f3148724c73a0aca566ddd5ff6758c2b626a6fc48028b9a09ba211f7",
+    "truth_region_count": 2560
+  },
+  "training_evidence": {
+    "negative_cap_per_scene": 48,
+    "negative_proposal_count": 12670,
+    "positive_proposal_count": 2560,
+    "proposal_count": 15230,
+    "scene_count": 320,
+    "tensor_label_stream_sha256": "f26339e8bf68909ef9f18020666ac3d5533d403b838ff0b3da55d1d37e704a4e",
+    "v2_bytes_used": false,
+    "validation_or_public_pixels_used": false
+  },
+  "training_proposal_label_count": 15230,
+  "training_role_label_count": 2560,
+  "training_tensor_shape": [
+    15230,
+    2,
+    32,
+    144
+  ],
+  "v2_bytes_used": false,
+  "validation": {
+    "negative_proposal_count": 6575,
+    "positive_proposal_count": 768,
+    "proposal_count": 7343,
+    "role_truth_counts": {
+      "Annotation": 96,
+      "AxisTitle": 96,
+      "LegendText": 96,
+      "Other": 96,
+      "Participant": 96,
+      "PhaseHeading": 96,
+      "XTick": 96,
+      "YTick": 96
+    },
+    "scene_count": 96,
+    "split_fingerprint": "d9512d089c40a19f831e19d949c04bb276a0dd5a204d1d88126fbc8d51acc42d",
+    "truth_region_count": 768
+  },
+  "validation_or_public_pixels_used_for_training": false
+}
