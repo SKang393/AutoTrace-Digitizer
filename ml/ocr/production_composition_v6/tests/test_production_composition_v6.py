@@ -85,12 +85,22 @@ def test_consumed_predecessor_and_component_evidence_are_unchanged() -> None:
     assert sha256_file(
         REPO_ROOT / "ml/ocr/ambiguity_source_group_classifier_v3/artifacts/public-gate-v1/report.json"
     ) == AMBIGUITY_PUBLIC_REPORT_SHA256
-    assert not (ROOT / "VALIDATION_REPORT.json").exists()
     assert not (ROOT / "PUBLIC_GATE_REPORT.json").exists()
 
 
-def test_public_gate_refuses_until_validation_pass_exists() -> None:
+def test_failed_instrumentation_gate_is_consumed_and_public_remains_unopened() -> None:
+    report = _load(ROOT / "VALIDATION_REPORT.json")
+    metrics = report["metrics"]
+    assert sha256_file(ROOT / "VALIDATION_REPORT.json") == "b50b8fc1f20da8e589a7436e4d8b41143f85f12a45445fc68ee38483175aa12f"
+    assert report["status"] == "fail"
+    assert report["evaluation_count"] == 1
+    assert metrics["exact_detection_scene_count"] == metrics["scene_count"] == 120
+    assert metrics["true_positives"] == metrics["truth_region_count"] == 600
+    assert metrics["false_positives"] == metrics["false_negatives"] == 0
+    assert metrics["duplicate_region_count"] == metrics["prohibited_structure_hits"] == 0
+    assert metrics["ambiguity_exact_match"] == 1.0
+    assert metrics["forbidden_consensus_rescue_route_count"] == 0
+    assert report["direct_execution"]["numeric_recognizer"]["calls"] == 512
     public = _load(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert public["truth_hidden_from_model_execution_until_gate"] is True
-    assert not (ROOT / "VALIDATION_REPORT.json").exists()
     assert not (ROOT / "PUBLIC_GATE_REPORT.json").exists()
