@@ -1,0 +1,33 @@
+{
+  "candidate_id": "P1",
+  "checkpoint_sha256": "2830cce9e9596f30c77b53e00e079a7f631c2f778f3ebf7f91b7d8624315a208",
+  "elapsed_ms": 3484666.145,
+  "onnx_parity_maximum_absolute_error": 1.0326504707336426e-05,
+  "onnx_parity_maximum_allowed": 1e-05,
+  "onnx_parity_passed": false,
+  "onnx_sha256": "c115f0e23a9a23b8ef84aa0b6141545fc8dd44b5b42015c36727422d5cc99a85",
+  "optimizer_steps": 1980,
+  "production_approval": false,
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "report_path": "ml/ocr/composite_proposal_role_v11/artifacts/P1-run/candidate-report.json",
+  "report_sha256": "4497a8f41778c75e1f5165206df2f60558498ea6237d2ad86cb73831ce5fcefd",
+  "revision": "graph-text-composite-proposal-role-v11",
+  "schema": "graphreader.ocr-composite-proposal-role-result.v1",
+  "selection_metrics": {
+    "duplicate_region_count": 0,
+    "exact_scene_count": 96,
+    "false_negatives": 0,
+    "false_positives": 0,
+    "minimum_per_role_accuracy": 1.0,
+    "prohibited_structure_hits": 0,
+    "role_accuracy": 1.0,
+    "scene_count": 96,
+    "true_positives": 768,
+    "truth_region_count": 768
+  },
+  "status": "failed_selection",
+  "task": "ocr-detection",
+  "trigger_for_p2": "The exact checkpoint passed every frozen scene, region, role, and exclusion gate at every preregistered threshold, but CPU ONNX maximum absolute parity error exceeded the fixed maximum by 3.265047073364252e-07."
+}

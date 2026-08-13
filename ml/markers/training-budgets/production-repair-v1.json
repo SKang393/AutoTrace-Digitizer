@@ -2913,7 +2913,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-composite-proposal-role-v11",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_2_preregistered",
       "defect_class": "aggregate V2 composition evidence showed 119 false text regions, 20 missed text regions, 0 exact scenes, role accuracy 0.64, and 18 text-origin marker creations",
       "trigger_report_path": "artifacts/production-validation/ocr-marker-csharp-v2-report.json",
       "trigger_report_sha256": "9875d0e9f82fb2cae2fecde8a1b38653286ee5a7eff92c5c851b85763525d670",
@@ -2925,11 +2925,12 @@
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
+        "P2"
+      ],
+      "consumed_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "protocol_path": "ml/ocr/composite_proposal_role_v11/PROTOCOL.json",
@@ -2960,14 +2961,39 @@
       "public_gate_config_sha256": "9a63e54e0e3f55a8e7a4df37c0a9fbd1da1930471848d013481d4759426ad1bb",
       "expected_public_evaluator_source_bundle_sha256": "4f3d7a41bd544390b2ba6ae5be8876185f54e5a499d79c8ffac07794d621362a",
       "candidate_config_paths": {
-        "P1": "ml/ocr/composite_proposal_role_v11/training/p1.json"
+        "P1": "ml/ocr/composite_proposal_role_v11/training/p1.json",
+        "P2": "ml/ocr/composite_proposal_role_v11/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "99d401a6deb3647fbcaed742c402b29af8f06103f625b4bce63de6a6684c4930"
+        "P1": "99d401a6deb3647fbcaed742c402b29af8f06103f625b4bce63de6a6684c4930",
+        "P2": "c8c1c1a98b44e66f010338d7782850e5f52a98c6e1f6e9dd5688fb4f150dede2"
       },
       "p1_expected_runner_source_bundle_sha256": "c1fca0f752f2a8d47b30d86bac98a9f7b7176b6b5d2b9d820dad5c85147a948f",
+      "p1_checkpoint_sha256": "2830cce9e9596f30c77b53e00e079a7f631c2f778f3ebf7f91b7d8624315a208",
+      "p1_onnx_sha256": "c115f0e23a9a23b8ef84aa0b6141545fc8dd44b5b42015c36727422d5cc99a85",
+      "p1_selection_report_path": "ml/ocr/composite_proposal_role_v11/artifacts/P1-run/candidate-report.json",
+      "p1_selection_report_sha256": "4497a8f41778c75e1f5165206df2f60558498ea6237d2ad86cb73831ce5fcefd",
+      "p1_result_path": "ml/ocr/composite_proposal_role_v11/P1_RESULT.json",
+      "p1_result_sha256": "4af3cc2bdee0731f0224e9f91c2ba14d7a192863146493f75c3a7efcb95b972f",
+      "p1_training_opened_seal_sha256": "d73000e7987c8e97d86868bbf352708aa2779f28cbabfb26fac9366f2872e7a7",
+      "p1_training_result_seal_sha256": "c25a012382f87a894774779528519a7708bc1f58f7fa2887e60d26f72dbe3d16",
+      "p1_optimizer_steps": 1980,
+      "p1_selection_exact_scene_count": 96,
+      "p1_selection_scene_count": 96,
+      "p1_selection_false_positives": 0,
+      "p1_selection_false_negatives": 0,
+      "p1_selection_duplicate_count": 0,
+      "p1_selection_prohibited_structure_hits": 0,
+      "p1_selection_role_accuracy": 1.0,
+      "p1_onnx_parity_maximum_absolute_error": 1.0326504707336426e-05,
+      "p1_onnx_parity_passed": false,
+      "p1_public_gate_evaluations": 0,
+      "p1_public_gate_archive_opened": false,
+      "p1_failure": "P1 passed every fixed validation scene, region, role, and exclusion gate at every preregistered threshold, but CPU ONNX maximum absolute parity error 1.0326504707336426e-05 exceeded the fixed 1e-05 maximum. P1 is consumed and cannot rerun.",
+      "p2_isolated_change": "reuse the exact P1 checkpoint with zero optimizer steps and append one fixed 0.5 output scale to reduce absolute ONNX exporter rounding error while preserving every argmax and probability ordering",
+      "p2_expected_runner_source_bundle_sha256": "5484c3686d4fb490ba1cdad22b19d56a349fede4fb01f97ad7419c650ca974d6",
       "execution_authorized": true,
-      "authorized_candidate_id": "P1",
+      "authorized_candidate_id": "P2",
       "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,

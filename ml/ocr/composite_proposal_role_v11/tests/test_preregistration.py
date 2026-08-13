@@ -30,6 +30,8 @@ SELECTION_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/SELECTION_MANIFEST.j
 SEAL_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/SEALED_PUBLIC_TEST_SEAL.json"
 GATE_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/gates/sealed-public-v1.json"
 CONFIG_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/training/p1.json"
+P2_CONFIG_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/training/p2.json"
+P1_RESULT_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/P1_RESULT.json"
 
 
 def test_protocol_file_is_canonical_and_fail_closed() -> None:
@@ -70,23 +72,34 @@ def test_model_contract_is_exact_and_finite() -> None:
         model(torch.zeros((1, 2, 32, ENCODED_WIDTH - 1), dtype=torch.float32))
 
 
-def test_canonical_ledger_authorizes_only_exact_frozen_p1() -> None:
+def test_canonical_ledger_consumes_p1_and_authorizes_only_exact_p2() -> None:
     ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == REVISION)
     assert entry["task"] == TASK
-    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["status"] == "candidate_2_preregistered"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["preregistered_candidate_ids"] == ["P2"]
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["protocol_sha256"] == sha256_file(PROTOCOL_PATH)
     assert entry["selection_manifest_sha256"] == sha256_file(SELECTION_PATH)
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(SEAL_PATH)
     assert entry["public_gate_config_sha256"] == sha256_file(GATE_PATH)
-    assert entry["candidate_config_paths"] == {"P1": CONFIG_PATH.relative_to(ROOT).as_posix()}
-    assert entry["candidate_config_sha256"] == {"P1": sha256_file(CONFIG_PATH)}
+    assert entry["candidate_config_paths"] == {
+        "P1": CONFIG_PATH.relative_to(ROOT).as_posix(),
+        "P2": P2_CONFIG_PATH.relative_to(ROOT).as_posix(),
+    }
+    assert entry["candidate_config_sha256"] == {
+        "P1": sha256_file(CONFIG_PATH),
+        "P2": sha256_file(P2_CONFIG_PATH),
+    }
+    assert entry["p1_result_sha256"] == sha256_file(P1_RESULT_PATH)
+    assert entry["p1_selection_exact_scene_count"] == entry["p1_selection_scene_count"] == 96
+    assert entry["p1_selection_false_positives"] == entry["p1_selection_false_negatives"] == 0
+    assert entry["p1_onnx_parity_passed"] is False
+    assert entry["p1_public_gate_archive_opened"] is False
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["authorized_candidate_id"] == "P2"
     assert entry["execution_blocker"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
@@ -116,3 +129,18 @@ def test_frozen_records_remain_fail_closed_and_exclude_private_data() -> None:
         assert record["generalization_label_included"] is False
         assert record["private_or_article_images"] is False
         assert record["v2_bytes_used"] is False
+
+
+def test_p2_repairs_only_absolute_export_parity_without_training() -> None:
+    config = json.loads(P2_CONFIG_PATH.read_text(encoding="utf-8"))
+    result = json.loads(P1_RESULT_PATH.read_text(encoding="utf-8"))
+    assert config["candidate_id"] == "P2"
+    assert config["optimizer_steps"] == 0
+    assert config["weights_changed"] is False
+    assert config["output_scale"] == 0.5
+    assert config["p1_checkpoint_sha256"] == result["checkpoint_sha256"]
+    assert config["p1_report_sha256"] == result["report_sha256"]
+    assert config["p1_result_sha256"] == sha256_file(P1_RESULT_PATH)
+    assert result["selection_metrics"]["exact_scene_count"] == result["selection_metrics"]["scene_count"] == 96
+    assert result["onnx_parity_passed"] is False
+    assert result["public_gate_archive_opened"] is False
