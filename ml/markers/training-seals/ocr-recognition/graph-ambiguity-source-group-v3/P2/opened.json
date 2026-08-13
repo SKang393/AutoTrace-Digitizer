@@ -1,0 +1,26 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/ambiguity_source_group_classifier_v3/training/p2.json",
+    "candidate_config_sha256": "638f9878709621e5987c3732c53bd4767154c3570bd65918a15c4e2abb2aab59",
+    "candidate_id": "P2",
+    "committed_source_enforcement": true,
+    "revision": "graph-ambiguity-source-group-v3",
+    "runner_source_bundle_sha256": "63656afc235bfef666e549adc3cc1ecf800deb495961922fc56ed05076ce56ed",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/ambiguity_source_group_classifier_v3/crop.py",
+      "ml/ocr/ambiguity_source_group_classifier_v3/dataset.py",
+      "ml/ocr/ambiguity_source_group_classifier_v3/model.py",
+      "ml/ocr/ambiguity_source_group_classifier_v3/model_p2.py",
+      "ml/ocr/ambiguity_source_group_classifier_v3/protocol.py",
+      "ml/ocr/ambiguity_source_group_classifier_v3/train_p1.py",
+      "ml/ocr/ambiguity_source_group_classifier_v3/train_p2.py"
+    ],
+    "task": "ocr-recognition",
+    "training_budget_ledger_sha256": "880fcd35acc31578c184e2440ed8ec37f2b09867506e0d408019561ce6de0b6f"
+  },
+  "opened_utc": "2026-08-13T04:57:27.809404+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}
