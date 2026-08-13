@@ -98,7 +98,7 @@ def test_v7_failure_is_consumed() -> None:
     assert report["direct_execution"]["numeric_recognizer"]["calls"] == 523
 
 
-def test_v8_validation_pass_is_consumed_and_public_is_unopened() -> None:
+def test_v8_validation_pass_is_consumed() -> None:
     report_path = ROOT / "VALIDATION_REPORT.json"
     report = _load(report_path)
     metrics = report["metrics"]
@@ -119,4 +119,30 @@ def test_v8_validation_pass_is_consumed_and_public_is_unopened() -> None:
     assert report["direct_execution"]["numeric_recognizer"]["calls"] == 547
     assert report["production_approval"] is False
     assert report["release_eligible"] is False
-    assert not (ROOT / "PUBLIC_GATE_REPORT.json").exists()
+
+
+def test_v8_public_pass_is_consumed_but_not_production_approval() -> None:
+    report_path = ROOT / "PUBLIC_GATE_REPORT.json"
+    report = _load(report_path)
+    metrics = report["metrics"]
+    assert sha256_file(report_path) == "43384271fefedab374613141a858367b00d86a14d41b1d0994a66d602f6329b4"
+    assert report["status"] == "pass"
+    assert report["evaluation_count"] == 1
+    assert report["validation_report_sha256"] == (
+        "032c6badcac9fbb5a093fd10b665df5e91bca1a2b8124588b8184efa15b196a9"
+    )
+    assert metrics["exact_detection_scene_count"] == metrics["scene_count"] == 160
+    assert metrics["true_positives"] == metrics["truth_region_count"] == 800
+    assert metrics["false_positives"] == metrics["false_negatives"] == 0
+    assert metrics["duplicate_region_count"] == metrics["prohibited_structure_hits"] == 0
+    assert metrics["recognition_exact_match"] == 0.99375
+    assert metrics["character_error_rate"] == 0.0013979496738117428
+    assert metrics["role_accuracy"] == 1.0
+    assert metrics["numeric_exact_match"] == 0.996875
+    assert metrics["word_exact_match"] == 0.9911894273127754
+    assert metrics["ambiguity_exact_match"] == 1.0
+    assert metrics["forbidden_zero_consensus_rescue_route_count"] == 0
+    assert report["direct_execution"]["numeric_recognizer"]["calls"] == 682
+    assert report["production_approval"] is False
+    assert report["release_eligible"] is False
+    assert "direct C# production composition" in report["remaining_mandatory_evidence"]

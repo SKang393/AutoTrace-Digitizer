@@ -34,3 +34,19 @@ numeric-recognizer calls, and 21 ambiguity-recognizer calls. Validation report
 SHA-256 is `032c6badcac9fbb5a093fd10b665df5e91bca1a2b8124588b8184efa15b196a9`.
 The report is consumed and cannot rerun. Its exact committed pass authorizes the
 single hidden-public evaluation, without approving any production model.
+
+The single hidden-public evaluation also passed. All 160 scenes and 800 truths
+had exact region counts, zero false regions, zero misses, zero duplicates, and
+zero prohibited hits. Recognition exact match was `0.99375`, CER was
+`0.0013979496738117428`, role accuracy was `1.0`, numeric exact match was
+`0.996875`, word exact match was `0.9911894273127754`, and ambiguity exact match
+was `1.0`. Direct CPU execution recorded 160 detector calls, 801 official calls,
+682 numeric calls, and 26 ambiguity calls. Public report SHA-256 is
+`43384271fefedab374613141a858367b00d86a14d41b1d0994a66d602f6329b4`.
+
+Both V8 model gates are consumed. Their pass establishes synthetic Python
+composition evidence only. Production approval remains false until the exact
+behavior executes through the C# application, independent marker-stage
+exclusion evidence passes, all exact payloads and notices resolve through the
+production model store and package, and private Chandler plus clean-machine
+offline workflows pass.
