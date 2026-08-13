@@ -262,6 +262,31 @@ public sealed class ProductionModelStoreTests
     }
 
     [TestMethod]
+    public async Task MultiOnnxCompositionResolvesOnePrimaryAndChecksumBoundCompanions()
+    {
+        using var store = TestStore.Create(
+            includeAuxiliaryPayload: true,
+            auxiliaryFileName: "numeric-specialist.onnx");
+
+        ResolvedProductionModel resolved = await store.CreateResolver().ResolveAsync(
+            TestStore.ModelId,
+            TestStore.Version,
+            InferenceProvider.Cpu,
+            CancellationToken.None);
+
+        Assert.AreEqual(store.ModelPath, resolved.Identity.FilePath);
+        Assert.HasCount(2, resolved.PayloadPaths);
+        Assert.HasCount(2, resolved.PayloadSha256);
+        Assert.AreEqual(
+            store.AuxiliaryPath,
+            resolved.PayloadPaths["numeric-specialist.onnx"]);
+        Assert.AreEqual(
+            Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(store.AuxiliaryPath!))),
+            resolved.PayloadSha256["numeric-specialist.onnx"],
+            ignoreCase: true);
+    }
+
+    [TestMethod]
     public async Task MissingProductionApprovalFailsClosed()
     {
         using var store = TestStore.Create(productionApproval: false);
@@ -537,6 +562,7 @@ public sealed class ProductionModelStoreTests
             string[]? providers = null,
             bool includeAuxiliaryPayload = false,
             bool includeAuxiliaryHash = true,
+            string auxiliaryFileName = "labels.txt",
             string licenseSpdx = "Apache-2.0")
         {
             var root = Path.Combine(Path.GetTempPath(), "GraphReaderProductionModelStoreTests", Guid.NewGuid().ToString("N"));
@@ -570,12 +596,13 @@ public sealed class ProductionModelStoreTests
             };
             if (includeAuxiliaryPayload)
             {
-                auxiliaryPath = Path.Combine(modelDirectory, "labels.txt");
+                auxiliaryPath = Path.Combine(modelDirectory, auxiliaryFileName);
                 File.WriteAllText(auxiliaryPath, "0\n1\n2\n");
-                files.Add("labels.txt");
+                files.Add(auxiliaryFileName);
                 if (includeAuxiliaryHash)
                 {
-                    payloadHashes["labels.txt"] = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(auxiliaryPath)));
+                    payloadHashes[auxiliaryFileName] = Convert.ToHexString(
+                        SHA256.HashData(File.ReadAllBytes(auxiliaryPath)));
                 }
             }
 

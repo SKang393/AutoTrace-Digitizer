@@ -66,6 +66,40 @@ public sealed class LocalOnnxProposalTextRegionDetectorTests
     }
 
     [TestMethod]
+    public async Task ProposalSeamRetainsReviewedRescueBandWithoutChangingNormalAcceptance()
+    {
+        string directory = CreateDirectory();
+        try
+        {
+            ModelIdentity identity = await CreateModelAsync(directory);
+            float rescueLogit = MathF.Log(0.90f / 0.10f);
+            var factory = new ProposalLogitSessionFactory(
+                [0f, rescueLogit, 20f, -20f]);
+            await using InferenceRuntime runtime = CreateRuntime(directory, factory);
+            var detector = new LocalOnnxProposalTextRegionDetector(runtime, Options(identity));
+
+            IReadOnlyList<OcrDetectedRegion> normal = await detector.DetectAsync(
+                FixtureImage(),
+                CancellationToken.None);
+            IReadOnlyList<OcrDetectedRegion> proposals = await detector.DetectProposalsAsync(
+                FixtureImage(),
+                CancellationToken.None);
+
+            Assert.IsEmpty(normal);
+            Assert.HasCount(1, proposals);
+            Assert.AreEqual(0.90, proposals[0].DetectionConfidence, 1e-5);
+            Assert.IsGreaterThanOrEqualTo(
+                LocalOnnxProposalTextRegionDetector.ProposalConfidenceFloor,
+                proposals[0].DetectionConfidence);
+            Assert.IsLessThan(0.95, proposals[0].DetectionConfidence);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public async Task ProposalDetectorMapsAcceptedBoxBackToOriginalPixels()
     {
         string directory = CreateDirectory();

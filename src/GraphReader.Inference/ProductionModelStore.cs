@@ -224,9 +224,24 @@ public sealed class ProductionModelStore
             var providers = ValidateProviders(root.GetProperty("providers"), requiredProvider);
             var approvalEvidence = ValidateApproval(root.GetProperty("benchmarks"));
             var expectedHashes = ReadDeclaredPayloadHashes(root);
-            if (expectedHashes.Keys.Count(path => string.Equals(Path.GetExtension(path), ".onnx", StringComparison.OrdinalIgnoreCase)) != 1)
+            string manifestSha256 = root.GetProperty("sha256").GetString()!;
+            string[] onnxDeclaredPaths = expectedHashes.Keys
+                .Where(path => string.Equals(
+                    Path.GetExtension(path),
+                    ".onnx",
+                    StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            string[] primaryOnnxDeclaredPaths = onnxDeclaredPaths
+                .Where(path => string.Equals(
+                    expectedHashes[path],
+                    manifestSha256,
+                    StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            if (onnxDeclaredPaths.Length == 0 || primaryOnnxDeclaredPaths.Length != 1)
             {
-                throw Failure("MODEL_PAYLOAD_INVALID", "A production ONNX manifest must identify exactly one .onnx payload.");
+                throw Failure(
+                    "MODEL_PAYLOAD_INVALID",
+                    "A production ONNX manifest must identify at least one .onnx payload and exactly one primary .onnx payload whose checksum equals the manifest SHA-256.");
             }
 
             var indexedPayloads = packageModel.Payloads.ToDictionary(
@@ -292,8 +307,7 @@ public sealed class ProductionModelStore
                 "MODEL_BENCHMARK_CHECKSUM_MISMATCH",
                 cancellationToken).ConfigureAwait(false);
 
-            var onnxDeclaredPath = expectedHashes.Keys.Single(path =>
-                string.Equals(Path.GetExtension(path), ".onnx", StringComparison.OrdinalIgnoreCase));
+            var onnxDeclaredPath = primaryOnnxDeclaredPaths[0];
             var onnxPath = resolvedPayloads[onnxDeclaredPath];
             var identity = new ModelIdentity(
                 modelId,
@@ -310,7 +324,9 @@ public sealed class ProductionModelStore
                 resolvedNotice,
                 packageModel.Notice.Sha256,
                 evidencePath,
-                packageModel.BenchmarkEvidence.Sha256);
+                packageModel.BenchmarkEvidence.Sha256,
+                resolvedPayloads,
+                expectedHashes);
         }
     }
 
@@ -961,7 +977,9 @@ public sealed class ResolvedProductionModel
         string noticePath,
         string noticeSha256,
         string benchmarkEvidencePath,
-        string benchmarkEvidenceSha256)
+        string benchmarkEvidenceSha256,
+        IReadOnlyDictionary<string, string> payloadPaths,
+        IReadOnlyDictionary<string, string> payloadSha256)
     {
         Identity = identity;
         Task = task;
@@ -972,6 +990,10 @@ public sealed class ResolvedProductionModel
         NoticeSha256 = noticeSha256;
         BenchmarkEvidencePath = benchmarkEvidencePath;
         BenchmarkEvidenceSha256 = benchmarkEvidenceSha256;
+        PayloadPaths = new ReadOnlyDictionary<string, string>(
+            new Dictionary<string, string>(payloadPaths, StringComparer.OrdinalIgnoreCase));
+        PayloadSha256 = new ReadOnlyDictionary<string, string>(
+            new Dictionary<string, string>(payloadSha256, StringComparer.OrdinalIgnoreCase));
     }
 
     public ModelIdentity Identity { get; }
@@ -991,6 +1013,16 @@ public sealed class ResolvedProductionModel
     public string BenchmarkEvidencePath { get; }
 
     public string BenchmarkEvidenceSha256 { get; }
+
+    /// <summary>
+    /// Checksum-validated payloads keyed by the exact relative paths declared in
+    /// the model manifest. The primary ONNX remains available through
+    /// <see cref="Identity"/>; composition-specific companion payloads must be
+    /// resolved through this immutable map rather than by constructing paths.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> PayloadPaths { get; }
+
+    public IReadOnlyDictionary<string, string> PayloadSha256 { get; }
 }
 
 public sealed class ProductionModelValidationException : Exception

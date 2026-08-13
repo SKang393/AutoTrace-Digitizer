@@ -71,11 +71,12 @@ public sealed record LocalOnnxProposalTextRegionDetectorOptions(ModelIdentity Mo
 /// produced from the immutable Gray8 frame. This runtime contains no model
 /// bytes and does not grant production approval to a candidate payload.
 /// </summary>
-public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionDetector
+public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionProposalDetector
 {
     public const string ProposalAlgorithm = "adaptive-gray-baseline-bounded-line-grouping-v2";
     public const string EncodingAlgorithm = "graph-text-component-context-v7-encoding-v1";
     public const string PostprocessingAlgorithm = "component-fusion-proposal-classifier-v1";
+    public const float ProposalConfidenceFloor = 0.82f;
 
     private readonly InferenceRuntime runtime;
     private readonly LocalOnnxProposalTextRegionDetectorOptions options;
@@ -100,6 +101,19 @@ public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionDetector
     public string ConfigurationFingerprint => configurationFingerprint;
 
     public async ValueTask<IReadOnlyList<OcrDetectedRegion>> DetectAsync(
+        OcrImage image,
+        CancellationToken cancellationToken)
+    {
+        IReadOnlyList<OcrDetectedRegion> proposals = await DetectProposalsAsync(
+                image,
+                cancellationToken)
+            .ConfigureAwait(false);
+        return Array.AsReadOnly(proposals
+            .Where(proposal => proposal.DetectionConfidence >= options.ConfidenceThreshold)
+            .ToArray());
+    }
+
+    public async ValueTask<IReadOnlyList<OcrDetectedRegion>> DetectProposalsAsync(
         OcrImage image,
         CancellationToken cancellationToken)
     {
@@ -157,6 +171,7 @@ public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionDetector
                     ["proposal_count"] = proposals.Length,
                     ["proposal_threshold"] = threshold,
                     ["confidence_threshold"] = options.ConfidenceThreshold,
+                    ["proposal_confidence_floor"] = ProposalConfidenceFloor,
                     ["allowed_providers"] = ProviderFingerprint(options.AllowedProviders),
                 },
                 OcrContract.Version),
@@ -196,7 +211,7 @@ public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionDetector
             float rejectedLogit = logits[proposalIndex * 2];
             float acceptedLogit = logits[(proposalIndex * 2) + 1];
             float confidence = SoftmaxClassOne(rejectedLogit, acceptedLogit);
-            if (confidence < options.ConfidenceThreshold)
+            if (confidence < ProposalConfidenceFloor)
             {
                 continue;
             }
@@ -766,6 +781,7 @@ public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionDetector
             options.ProposalThresholdMeanRatio.ToString("R", CultureInfo.InvariantCulture),
             options.ProposalThresholdMinimum.ToString(CultureInfo.InvariantCulture),
             options.ProposalThresholdMaximum.ToString(CultureInfo.InvariantCulture),
+            ProposalConfidenceFloor.ToString("R", CultureInfo.InvariantCulture),
             options.ConfidenceThreshold.ToString("R", CultureInfo.InvariantCulture),
             options.MaximumProposals.ToString(CultureInfo.InvariantCulture),
             options.InputName,

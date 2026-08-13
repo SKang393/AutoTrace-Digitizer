@@ -309,6 +309,19 @@ public interface ITextRegionDetector
         CancellationToken cancellationToken);
 }
 
+/// <summary>
+/// Internal production-composition seam for checksum-bound detectors whose
+/// reviewed acceptance policy includes recognizer-gated rescue bands. Proposal
+/// confidence is retained so the composition can apply those fixed bands
+/// without accepting low-confidence graph structure as text.
+/// </summary>
+public interface ITextRegionProposalDetector : ITextRegionDetector
+{
+    ValueTask<IReadOnlyList<OcrDetectedRegion>> DetectProposalsAsync(
+        OcrImage image,
+        CancellationToken cancellationToken);
+}
+
 public interface ITextRecognizer
 {
     string ModelId => "unspecified";
