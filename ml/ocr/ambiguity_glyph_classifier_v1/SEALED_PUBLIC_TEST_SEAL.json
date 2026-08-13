@@ -1,0 +1,21 @@
+{
+  "schema": "graphreader.ocr-ambiguity-glyph-public-seal.v1",
+  "partition": "sealed_public",
+  "sample_count": 960,
+  "count_per_class": 240,
+  "class_order": ["O", "o", "l", "I"],
+  "fixture_archive_path": "ml/ocr/ambiguity_glyph_classifier_v1/artifacts/split-freeze/sealed_public/fixtures.zip",
+  "fixture_archive_sha256": "f01bf9de357ab8f0bf9a477189fb80b31cd2155baa201da568ae8e2e765db3af",
+  "fixture_archive_bytes": 466604,
+  "private_manifest_path": "ml/ocr/ambiguity_glyph_classifier_v1/artifacts/split-freeze/sealed_public/private-manifest.json",
+  "private_manifest_sha256": "9f839985355445fc8f61ca90f7f79a23e3989d5a7f7d712be17919668c2eba10",
+  "tensor_label_stream_sha256": "b516c4726bd470f1658e761e137e365c39d2a6e095c5ae02d50b246e4aeb555e",
+  "split_fingerprint": "0ba0f2fb6cb54a996ae9a7846fb79d5c83533f1847b62a23065422c22de283e7",
+  "truth_hidden_from_model_execution_until_gate": true,
+  "evaluation_limit": 1,
+  "public_gate_evaluations": 0,
+  "synthetic_only": true,
+  "private_or_article_images": false,
+  "chandler_included": false,
+  "generalization_label_included": false
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "graphreader.ocr-ambiguity-glyph-selection.v1",
+  "train_sample_count": 2560,
+  "train_count_per_class": 640,
+  "train_private_manifest_sha256": "dd5c7d926c185cd8c6496b43e76efba63798d4a24f1b02384731bd3f02b967b1",
+  "train_fixture_archive_sha256": "b4ec4952913e412f9a214adf831862ad398fe16d56904b58f6983f01382acc8f",
+  "train_tensor_label_stream_sha256": "28622029bfff75d91f5f09627b413fe07f40a48a0f3e5b50814f2b6c61b80ace",
+  "train_split_fingerprint": "14588a79d6510f908d60886fb1464fefb425860e76dba48745a31358884d4af5",
+  "validation_sample_count": 640,
+  "validation_count_per_class": 160,
+  "validation_private_manifest_sha256": "fec599f065365f9e045a062b41faa0917a37da49c9ab7e754addc0ab4924481c",
+  "validation_fixture_archive_sha256": "01e5198602f04d401c3d4da9152b2509bee5d04c02cdd88d77bcaa72c7c0d3d5",
+  "validation_tensor_label_stream_sha256": "0c118f82c541604f560d048fb0966bc862f8b95f3cffd0a57128d86512af4f4c",
+  "validation_split_fingerprint": "242ddd804f45aa4078a21276f032053ee25f65db784b9997eabff7d02c6e7f6d",
+  "class_order": ["O", "o", "l", "I"],
+  "synthetic_only": true,
+  "private_or_article_images": false,
+  "chandler_included": false,
+  "generalization_label_included": false
+}

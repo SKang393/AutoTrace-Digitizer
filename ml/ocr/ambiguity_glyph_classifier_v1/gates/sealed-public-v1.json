@@ -1,0 +1,16 @@
+{
+  "schema": "graphreader.ocr-ambiguity-glyph-public-gate-config.v1",
+  "task": "ocr-recognition",
+  "revision": "graph-ambiguity-glyph-classifier-v1-public-v1",
+  "sealed_public_test_seal_path": "ml/ocr/ambiguity_glyph_classifier_v1/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "0a78d7342890b90fdd909b949e1747ba346ea80c15033cf678e647639ee456f1",
+  "fixture_archive_sha256": "f01bf9de357ab8f0bf9a477189fb80b31cd2155baa201da568ae8e2e765db3af",
+  "private_manifest_sha256": "9f839985355445fc8f61ca90f7f79a23e3989d5a7f7d712be17919668c2eba10",
+  "expected_candidate_hash_keys": ["onnx_sha256", "selection_report_sha256"],
+  "expected_dataset_manifest_sha256": "9f839985355445fc8f61ca90f7f79a23e3989d5a7f7d712be17919668c2eba10",
+  "expected_evaluator_source_bundle_sha256": "15829835af0054507ce74b2482e9136d1bc03c24e96c13f35891022cb1ac2099",
+  "expected_gate_config_sha256": "24311b417728066041474bde7fd2bfbbde7ce4e2e920570bc8625e00134de2aa",
+  "evaluation_limit": 1,
+  "production_approval": false,
+  "release_eligible": false
+}
