@@ -13,7 +13,7 @@ from PIL import Image
 import torch
 
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
-from ml.ocr.ambiguity_source_group_classifier_v3 import dataset, sealed_gate, train_p1
+from ml.ocr.ambiguity_source_group_classifier_v3 import dataset, sealed_gate, train_p1, train_p2
 from ml.ocr.ambiguity_source_group_classifier_v3.crop import active_groups, group_tensor
 from ml.ocr.ambiguity_source_group_classifier_v3.model import SourceGroupAmbiguityNet
 from ml.ocr.ambiguity_source_group_classifier_v3.protocol import (
@@ -90,10 +90,10 @@ def test_sealed_public_bytes_reproduce_without_candidate_execution() -> None:
 
 def test_preregistration_binds_sources_splits_trigger_and_license() -> None:
     protocol = _load(ROOT / "PROTOCOL.json")
-    config = _load(ROOT / "training/p1.json")
+    config = _load(ROOT / "training/p2.json")
     ledger = _load(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
-    runner_sha256 = source_bundle_sha256(REPO_ROOT, train_p1.RUNNER_SOURCE_PATHS)
+    runner_sha256 = source_bundle_sha256(REPO_ROOT, train_p2.RUNNER_SOURCE_PATHS)
     assert protocol == protocol_configuration(runner_source_bundle_sha256=runner_sha256)
     assert config["expected_runner_source_bundle_sha256"] == runner_sha256
     assert config["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
@@ -101,10 +101,14 @@ def test_preregistration_binds_sources_splits_trigger_and_license() -> None:
     assert config["sealed_public_test_seal_sha256"] == sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert config["public_gate_config_sha256"] == sha256_file(ROOT / "gates/sealed-public-v1.json")
     assert config["model_license"] == protocol["model_license"] == "Apache-2.0"
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["candidate_config_sha256"]["P1"] == sha256_file(ROOT / "training/p1.json")
+    assert config["p1_result_sha256"] == sha256_file(ROOT / "P1_RESULT.json")
+    assert config["p1_checkpoint_sha256"] == sha256_file(REPO_ROOT / config["p1_checkpoint_path"])
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["candidate_config_sha256"]["P2"] == sha256_file(ROOT / "training/p2.json")
+    assert entry["p1_result_sha256"] == sha256_file(ROOT / "P1_RESULT.json")
+    assert entry["p1_onnx_parity_passed"] is False
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["authorized_candidate_id"] == "P2"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
