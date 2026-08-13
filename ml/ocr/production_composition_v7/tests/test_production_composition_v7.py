@@ -91,7 +91,7 @@ def test_freeze_and_gate_bind_transitive_sources() -> None:
     assert public_config["release_eligible"] is False
 
 
-def test_consumed_v6_failure_remains_exact_and_v7_is_unexecuted() -> None:
+def test_consumed_v6_failure_remains_exact() -> None:
     report_path = REPO_ROOT / "ml/ocr/production_composition_v6/VALIDATION_REPORT.json"
     report = _load(report_path)
     metrics = report["metrics"]
@@ -108,5 +108,30 @@ def test_consumed_v6_failure_remains_exact_and_v7_is_unexecuted() -> None:
     assert metrics["word_exact_match"] >= 0.90
     assert metrics["ambiguity_exact_match"] >= 0.90
     assert report["direct_execution"]["numeric_recognizer"]["calls"] == 512
-    assert not (ROOT / "VALIDATION_REPORT.json").exists()
+
+
+def test_v7_validation_failure_is_consumed_and_public_remains_unopened() -> None:
+    report_path = ROOT / "VALIDATION_REPORT.json"
+    report = _load(report_path)
+    metrics = report["metrics"]
+    assert sha256_file(report_path) == "7d1b2ace57af890fcb95476cc74e1b73f9caf1c22f4c4c9b5a178ab8b80e5dd8"
+    assert report["status"] == "fail"
+    assert report["evaluation_count"] == 1
+    assert metrics["scene_count"] == 124
+    assert metrics["exact_detection_scene_count"] == 123
+    assert metrics["true_positives"] == 619
+    assert metrics["truth_region_count"] == 620
+    assert metrics["false_positives"] == 0
+    assert metrics["false_negatives"] == 1
+    assert metrics["duplicate_region_count"] == metrics["prohibited_structure_hits"] == 0
+    assert metrics["recognition_exact_match"] == 0.9903225806451613
+    assert metrics["character_error_rate"] == 0.0015028554253080854
+    assert metrics["role_accuracy"] == 0.9983870967741936
+    assert metrics["numeric_exact_match"] == 1.0
+    assert metrics["word_exact_match"] == 0.9914772727272727
+    assert metrics["ambiguity_exact_match"] == 0.9
+    assert report["direct_execution"]["numeric_recognizer"]["calls"] == 523
+    failure = next(case for case in metrics["cases"] if case["false_negatives"])
+    assert failure["scene_id"] == "ocr-production-composition-v7-validation-00079"
+    assert failure["accepted_region_count"] == 4
     assert not (ROOT / "PUBLIC_GATE_REPORT.json").exists()

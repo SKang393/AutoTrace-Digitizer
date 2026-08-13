@@ -18,8 +18,20 @@ fixture generator binds the transitive V6 renderer sources. The evaluator also
 binds the transitive V6 scientific pipeline sources rather than only the thin V7
 wrapper.
 
-Validation and public execution are each single use. Public execution is not
-authorized unless the exact V7 validation report is committed and passing. No
-model manifest is created and production approval remains false. Direct C#
-composition, marker-stage exclusions, model-store discovery, packaging,
-private Chandler, and clean-machine offline evidence remain mandatory.
+The one-use validation failed closed. It accepted 619 of 620 truths across 124
+fresh scenes with zero false regions, duplicates, or prohibited hits. The sole
+detection miss was the x-axis tick `0` in validation scene 79. Recognition exact
+match was `0.9903225806451613`, CER was `0.0015028554253080854`, role accuracy
+was `0.9983870967741936`, numeric exact match was `1.0`, word exact match was
+`0.9914772727272727`, and ambiguity exact match was exactly the required `0.90`.
+The repaired runtime invariant passed with 523 direct numeric ONNX calls. Report
+SHA-256 is `7d1b2ace57af890fcb95476cc74e1b73f9caf1c22f4c4c9b5a178ab8b80e5dd8`.
+
+The consumed report cannot be rewritten or rerun. Its public archive remains
+unopened and is not authorized because validation failed. No model manifest is
+created and production approval remains false. A fresh revision may use the
+observed missed tick and two ambiguity confusions to preregister a bounded
+composition repair, but it must use fresh validation and public fixture bytes.
+Direct C# composition, marker-stage exclusions, model-store discovery,
+packaging, private Chandler, and clean-machine offline evidence remain
+mandatory.
