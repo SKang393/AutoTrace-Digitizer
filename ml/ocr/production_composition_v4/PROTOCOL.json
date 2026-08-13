@@ -1,0 +1,106 @@
+{
+  "chandler_included": false,
+  "gates": {
+    "ambiguity_exact_match_minimum": 0.9,
+    "character_error_rate_maximum": 0.05,
+    "direct_fixture_byte_execution_required": true,
+    "duplicate_region_count": 0,
+    "exact_match_minimum": 0.9,
+    "exact_region_count_every_fixture": true,
+    "false_region_count": 0,
+    "forbidden_numeric_route_count": 0,
+    "missed_region_count": 0,
+    "numeric_exact_match_minimum": 0.9,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "role_accuracy_minimum": 0.9,
+    "spacing_changed_nonspace_truth_count": 0,
+    "word_exact_match_minimum": 0.9
+  },
+  "generalization_label_included": false,
+  "isolated_changes": [
+    "rescue a rejected proposal only when the numeric specialist returns a valid number at x- or y-tick geometry",
+    "replace only recognized O/o/l/I source groups using the checksum-bound context ambiguity classifier"
+  ],
+  "manifest_created": false,
+  "marker_creation_evaluated": false,
+  "model_store_promoted": false,
+  "models": {
+    "ambiguity_specialist": {
+      "onnx_sha256": "6486a2d1e10c69ca07c2c0e8fb3cd4e59bc21ad480a16a01eb99b03e21be2646",
+      "public_report_sha256": "a54856d932b695936b78fc92e6d3035f670791ec2cb7be3c15bc5b8e9415b05f"
+    },
+    "detector": {
+      "onnx_sha256": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+      "threshold": 0.95
+    },
+    "numeric_specialist": {
+      "onnx_sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+      "threshold": 0.65
+    },
+    "official_recognizer": {
+      "onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+      "spacing_revision": "official-ppocrv5-conservative-spacing-v3-p1"
+    }
+  },
+  "predecessor": {
+    "fixture_bytes_reused": false,
+    "public_archive_opened": false,
+    "revision": "graphreader-v10-official-spacing-p2-numeric-v5-composition-v3",
+    "status": "failed",
+    "validation_report_sha256": "905bb12948ce7bdcdba95f4940e9b1b5f97017da6586c808ff5c43e128049ea9"
+  },
+  "private_or_article_images": false,
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graphreader-v10-numeric-rescue-context-ambiguity-composition-v4",
+  "schema": "graphreader.ocr-production-composition-protocol.v4",
+  "split_generator_source_bundle_sha256": "661900a05630517fd1b19e529eb3dae2b52c5eff48b6ac57fd4c378beda5b3c4",
+  "split_generator_source_paths": [
+    "ml/ocr/production_composition_v4/dataset.py",
+    "ml/ocr/production_composition_v4/prepare_split.py",
+    "ml/ocr/production_composition_v4/protocol.py",
+    "ml/ocr/production_composition_v1/dataset.py",
+    "ml/ocr/component_context_detector_v7/dataset.py",
+    "ml/ocr/component_region_detector_v6/dataset.py"
+  ],
+  "splits": [
+    {
+      "degradation_family": "affine-contrast-row-fade-composition-v4-validation",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf"
+      ],
+      "font_sha256": [
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb"
+      ],
+      "renderer_family": "six-role-context-composition-v4-validation",
+      "scene_count": 96,
+      "seed_offset": 887000,
+      "split": "validation"
+    },
+    {
+      "degradation_family": "resample-quantize-column-fade-composition-v4-public",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "font_sha256": [
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0"
+      ],
+      "renderer_family": "six-role-context-composition-v4-public",
+      "scene_count": 128,
+      "seed_offset": 941000,
+      "split": "sealed_public"
+    }
+  ],
+  "state": "fresh_splits_frozen_before_any_composed_model_execution",
+  "synthetic_only": true,
+  "task": "ocr-production-composition"
+}
