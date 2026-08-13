@@ -8,7 +8,7 @@ from __future__ import annotations
 TASK = "ocr-recognition"
 REVISION = "graph-ambiguity-glyph-classifier-v1"
 PUBLIC_REVISION = f"{REVISION}-public-v1"
-CANDIDATE_ID = "P1"
+CANDIDATE_ID = "P2"
 EXPERIMENT_BUDGET = 3
 SEED = 20261317
 GLYPHS = ("O", "o", "l", "I")
@@ -31,7 +31,7 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
         "schema": "graphreader.ocr-ambiguity-glyph-protocol.v1",
         "task": TASK,
         "revision": REVISION,
-        "status": "candidate_1_failed_selection",
+        "status": "candidate_2_preregistered",
         "defect_class": (
             "the exact official recognizer collapses O/o/l/I identity on isolated source groups even after "
             "conservative spacing preserves all non-ambiguity text"
@@ -44,8 +44,8 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
             "public_archive_opened": False,
         },
         "experiment_budget": EXPERIMENT_BUDGET,
-        "currently_preregistered_candidate": None,
-        "consumed_candidates": [CANDIDATE_ID],
+        "currently_preregistered_candidate": CANDIDATE_ID,
+        "consumed_candidates": ["P1"],
         "architecture": "compact-ambiguity-glyph-cnn-v1",
         "isolated_change": (
             "train a project-owned four-class O/o/l/I glyph classifier on fresh procedural Noto crops; "
@@ -68,6 +68,10 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
             "onnx_parity_maximum_absolute_error": 0.0000133514404296875,
             "public_archive_opened": False,
         },
+        "p2_isolated_change": (
+            "retain the exact frozen train and validation pixels; preserve canvas-relative height, width, row, "
+            "and column profiles in a profile-aware CNN; replace GELU with ReLU to reduce CPU ONNX parity drift"
+        ),
         "synthetic_only": True,
         "private_or_article_images": False,
         "chandler_included": False,
