@@ -1,0 +1,7 @@
+# OCR morphology proposal and role V13
+
+V13 is a new defect class opened only from aggregate evidence produced by the consumed V12 hidden-public run. That run found 155 of 160 scenes exact, with four false regions, one missed region, zero duplicates, and perfect accepted-region role classification. No V12 hidden-public fixture bytes, truth, case identity, image, or case-level failure detail was inspected or reused, and the V12 gate cannot rerun.
+
+The preregistered P1 change is a fresh renderer spanning text scale, stroke, grid, connector, marker, and dropout morphology and a new dual-context network with parallel horizontal and vertical anisotropic branches. The production proposal grouping and `[N,2,32,144]` input to `[N,10]` output contract remain unchanged. The candidate budget is three. Selection and hidden-public gates require zero false, missed, duplicate, and prohibited-structure regions in every scene, role accuracy of at least `0.90`, every role at least `0.85`, and CPU ONNX maximum absolute parity error at most `1e-5`.
+
+This checkpoint freezes design only. Training and public execution are refused until the source bundle, candidate runner, split generator, fresh split bytes, fingerprints, and once-only gate configuration are committed and checksum-bound. Production approval, model-store promotion, packaging, private Chandler validation, and release eligibility remain false.
