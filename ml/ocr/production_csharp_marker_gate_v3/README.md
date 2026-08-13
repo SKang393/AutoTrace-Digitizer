@@ -33,6 +33,13 @@ No V3 model execution is authorized until this hash-only split identity is
 committed and pushed. A separate exact authorization commit must then bind the
 source commit and fixture hashes before the single gate run.
 
+`PUBLIC_GATE_AUTHORIZATION.json` now authorizes exactly one CPU execution. It
+binds sealed-identity commit `804c38468b475856a6c9fd3bf5039c359bd3f147`,
+the archive, embedded manifest, tracked seal, all five exact payload hashes,
+the exact C# test, and the ignored report path. It does not authorize a rerun,
+repair, fixture-mask approval, manifest, model-store promotion, private
+validation, production approval, or release eligibility.
+
 Passing cannot create a model manifest, approve a production model-store
 entry, enable normal Auto Detect, package a payload, validate Chandler, or make
 the release eligible. All of those gates remain mandatory and fail closed.

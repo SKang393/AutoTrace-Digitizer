@@ -137,3 +137,29 @@ def test_future_split_seal_is_hash_only_fail_closed_and_has_no_secret() -> None:
     assert seal["release_eligible"] is False
     for relative_path, expected in seal["source_sha256"].items():
         assert sha256((REPO_ROOT / relative_path).read_bytes()).hexdigest() == expected
+
+
+def test_public_gate_authorization_binds_exact_sealed_identity_and_candidates() -> None:
+    authorization = json.loads(
+        (REPO_ROOT / "ml/ocr/production_csharp_marker_gate_v3/PUBLIC_GATE_AUTHORIZATION.json")
+        .read_text(encoding="utf-8")
+    )
+    seal_path = REPO_ROOT / "ml/ocr/production_csharp_marker_gate_v3/SEALED_PUBLIC_TEST_SEAL.json"
+    seal = json.loads(seal_path.read_text(encoding="utf-8"))
+    assert authorization["execution_authorized"] is True
+    assert authorization["execution_count_authorized"] == 1
+    assert authorization["provider"] == "CPUExecutionProvider"
+    assert authorization["sealed_identity_commit"] == (
+        "804c38468b475856a6c9fd3bf5039c359bd3f147"
+    )
+    assert authorization["fixture_archive_sha256"] == seal["fixture_archive_sha256"]
+    assert authorization["fixture_manifest_sha256"] == seal["fixture_manifest_sha256"]
+    assert authorization["split_seal_sha256"] == sha256(seal_path.read_bytes()).hexdigest()
+    assert authorization["candidate_sha256"] == sorted(MODEL_SHA256.values())
+    assert authorization["rerun_or_repair_authorized"] is False
+    assert authorization["artifact_mask_production_approval"] is False
+    assert authorization["manifest_creation_authorized"] is False
+    assert authorization["model_store_promotion_authorized"] is False
+    assert authorization["private_validation_authorized"] is False
+    assert authorization["production_approval"] is False
+    assert authorization["release_eligible"] is False
