@@ -1,0 +1,106 @@
+{
+  "chandler_included": false,
+  "generalization_label_included": false,
+  "predecessor_fixture_bytes_reused": false,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "protocol_path": "ml/ocr/morphology_proposal_role_v13/PROTOCOL.json",
+  "protocol_sha256": "d5a64ac2a05ac5698cae92d95acf4c4ca3ad2a06e3741cc89ebc418e407d8543",
+  "release_eligible": false,
+  "revision": "graph-text-morphology-proposal-role-v13",
+  "schema": "graphreader.ocr-morphology-proposal-role-selection.v1",
+  "sealed_public_truth_available_to_candidate": false,
+  "split_generator_source_bundle_sha256": "8b2109111b5c50f2bcfda7d6b10e4c6c37bb70c0955c64a725dadfcd42f64af7",
+  "split_generator_source_paths": [
+    "ml/ocr/morphology_proposal_role_v13/dataset.py",
+    "ml/ocr/morphology_proposal_role_v13/prepare_split.py",
+    "ml/ocr/morphology_proposal_role_v13/protocol.py",
+    "ml/ocr/component_context_detector_v7/dataset.py",
+    "ml/ocr/component_context_detector_v7/protocol.py",
+    "ml/ocr/component_region_detector_v6/dataset.py"
+  ],
+  "synthetic_only": true,
+  "task": "ocr-detection",
+  "train": {
+    "negative_family_counts": {
+      "dense-marker-arrow": 95,
+      "horizontal-stroke-bracket": 8330,
+      "marker-tick-intersection": 34212,
+      "mixed-connected-structure": 1863,
+      "sparse-single-component": 1396,
+      "vertical-stroke-divider": 8602
+    },
+    "negative_proposal_count": 54498,
+    "positive_proposal_count": 4800,
+    "proposal_count": 59298,
+    "role_truth_counts": {
+      "Annotation": 600,
+      "AxisTitle": 600,
+      "LegendText": 600,
+      "Other": 600,
+      "Participant": 600,
+      "PhaseHeading": 600,
+      "XTick": 600,
+      "YTick": 600
+    },
+    "scene_count": 600,
+    "split_fingerprint": "b7507907918d260d5663eb675b4dd44ea87b23cf0430169fe7d969062509f8b7",
+    "truth_region_count": 4800
+  },
+  "training_evidence": {
+    "negative_cap_per_scene": 96,
+    "negative_family_counts": {
+      "dense-marker-arrow": 95,
+      "horizontal-stroke-bracket": 8300,
+      "marker-tick-intersection": 25679,
+      "mixed-connected-structure": 1863,
+      "sparse-single-component": 1396,
+      "vertical-stroke-divider": 8582
+    },
+    "negative_proposal_count": 45915,
+    "negative_sampling": "deterministic-round-robin-by-morphology-family-v1",
+    "positive_proposal_count": 4800,
+    "predecessor_fixture_bytes_used": false,
+    "proposal_count": 50715,
+    "scene_count": 600,
+    "tensor_label_stream_sha256": "b51360b32af539e99d5d26050e42bc4509ac535915ec91dae484c9df247391f6",
+    "v12_public_fixture_bytes_scene_truth_or_case_identity_used": false,
+    "validation_or_public_pixels_used": false
+  },
+  "training_proposal_label_count": 50715,
+  "training_role_label_count": 4800,
+  "training_tensor_shape": [
+    50715,
+    2,
+    32,
+    144
+  ],
+  "v12_public_fixture_bytes_scene_truth_or_case_identity_used": false,
+  "validation": {
+    "negative_family_counts": {
+      "dense-marker-arrow": 19,
+      "horizontal-stroke-bracket": 687,
+      "marker-tick-intersection": 2544,
+      "mixed-connected-structure": 368,
+      "sparse-single-component": 425,
+      "vertical-stroke-divider": 1873
+    },
+    "negative_proposal_count": 5916,
+    "positive_proposal_count": 1280,
+    "proposal_count": 7196,
+    "role_truth_counts": {
+      "Annotation": 160,
+      "AxisTitle": 160,
+      "LegendText": 160,
+      "Other": 160,
+      "Participant": 160,
+      "PhaseHeading": 160,
+      "XTick": 160,
+      "YTick": 160
+    },
+    "scene_count": 160,
+    "split_fingerprint": "54f988caeb193c189ecb56aa26e0b2ebc761cdf795457592fb1c4947c6050a14",
+    "truth_region_count": 1280
+  },
+  "validation_or_public_pixels_used_for_training": false
+}

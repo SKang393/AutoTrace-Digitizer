@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 import torch
 
-from ml.markers.gate_seal import canonical_json_bytes
+from ml.markers.gate_seal import canonical_json_bytes, sha256_file
 from ml.ocr.component_context_detector_v7.dataset import box_iou
 from ml.ocr.morphology_proposal_role_v13.dataset import render_scene, proposals
 from ml.ocr.morphology_proposal_role_v13.model import MorphologyProposalRoleNet
@@ -78,13 +78,24 @@ def test_preregistered_source_renderer_has_one_proposal_per_truth(split: str, in
         assert sum(box_iou(candidate.box, truth.box) >= 0.5 for candidate in candidates) == 1
 
 
-def test_design_checkpoint_contains_no_split_or_candidate_artifacts() -> None:
+def test_split_and_candidate_records_are_frozen_and_fail_closed() -> None:
     for relative in (
         "SELECTION_MANIFEST.json", "SEALED_PUBLIC_TEST_SEAL.json",
-        "gates/sealed-public-v1.json", "training/p1.json", "P1_RESULT.json",
+        "gates/sealed-public-v1.json", "training/p1.json",
     ):
-        assert not (V13_ROOT / relative).exists()
-    assert not (V13_ROOT / "artifacts").exists()
+        assert (V13_ROOT / relative).is_file()
+    selection = json.loads((V13_ROOT / "SELECTION_MANIFEST.json").read_text(encoding="utf-8"))
+    seal = json.loads((V13_ROOT / "SEALED_PUBLIC_TEST_SEAL.json").read_text(encoding="utf-8"))
+    config = json.loads((V13_ROOT / "training/p1.json").read_text(encoding="utf-8"))
+    assert selection["sealed_public_truth_available_to_candidate"] is False
+    assert seal["truth_hidden_from_candidate_runner"] is True
+    assert seal["public_gate_evaluations"] == 0
+    assert config["public_gate_archive_opened"] is False
+    assert not (V13_ROOT / "P1_RESULT.json").exists()
+    assert not (V13_ROOT / "artifacts/P1-run").exists()
+    for record in (selection, seal, config):
+        assert record["production_approval"] is False
+        assert record["release_eligible"] is False
 
 
 def test_runners_are_fail_closed_before_split_and_budget_freeze() -> None:
@@ -95,6 +106,19 @@ def test_runners_are_fail_closed_before_split_and_budget_freeze() -> None:
     assert GATE_CONFIG["direct_fixture_byte_execution_required"] is True
 
 
-def test_no_v13_budget_ledger_entry_exists_before_runner_and_split_freeze() -> None:
+def test_v13_budget_ledger_authorizes_only_exact_p1() -> None:
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
-    assert not any(item.get("revision") == "graph-text-morphology-proposal-role-v13" for item in ledger["revisions"])
+    entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-morphology-proposal-role-v13")
+    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P1"]
+    assert entry["consumed_candidate_ids"] == []
+    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["candidate_config_sha256"]["P1"] == sha256_file(V13_ROOT / "training/p1.json")
+    assert entry["selection_manifest_sha256"] == sha256_file(V13_ROOT / "SELECTION_MANIFEST.json")
+    assert entry["sealed_public_test_seal_sha256"] == sha256_file(V13_ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_evaluations"] == 0
+    assert entry["production_approval"] is False
+    assert entry["release_eligible"] is False
