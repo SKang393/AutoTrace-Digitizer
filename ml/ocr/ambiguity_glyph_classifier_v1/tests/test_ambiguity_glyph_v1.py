@@ -59,22 +59,27 @@ def test_preregistration_binds_sources_splits_trigger_and_license() -> None:
     ledger = _load(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
     assert protocol == protocol_configuration(runner_source_bundle_sha256=source_bundle_sha256(REPO_ROOT, train_p1.RUNNER_SOURCE_PATHS))
-    assert config["expected_runner_source_bundle_sha256"] == protocol["runner_source_bundle_sha256"]
+    assert config["expected_runner_source_bundle_sha256"] == protocol["p1_preregistered_runner_source_bundle_sha256"]
+    assert config["expected_runner_source_bundle_sha256"] != protocol["runner_source_bundle_sha256"]
     assert config["trigger_result_sha256"] == sha256_file(REPO_ROOT / config["trigger_result_path"])
-    assert config["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
+    assert config["protocol_sha256"] == entry["p1_preregistration_protocol_sha256"]
+    assert config["protocol_sha256"] != sha256_file(ROOT / "PROTOCOL.json")
     assert config["selection_manifest_sha256"] == sha256_file(ROOT / "SELECTION_MANIFEST.json")
     assert config["sealed_public_test_seal_sha256"] == sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert config["public_gate_config_sha256"] == sha256_file(ROOT / "gates/sealed-public-v1.json")
     assert config["model_license"] == protocol["model_license"] == "Apache-2.0"
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["execution_authorized"] is True
+    assert entry["status"] == "candidate_1_failed_selection"
+    assert entry["execution_authorized"] is False
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_archive_opened"] is False
 
 
 def test_public_gate_identity_is_frozen_and_never_approves_release() -> None:
     config = _load(ROOT / "gates/sealed-public-v1.json")
-    assert config["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, sealed_gate.EVALUATOR_SOURCE_PATHS)
+    ledger = _load(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
+    entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
+    assert config["expected_evaluator_source_bundle_sha256"] == entry["p1_preregistered_public_evaluator_source_bundle_sha256"]
+    assert config["expected_evaluator_source_bundle_sha256"] != source_bundle_sha256(REPO_ROOT, sealed_gate.EVALUATOR_SOURCE_PATHS)
     assert config["evaluation_limit"] == 1
     assert config["production_approval"] is False
     assert config["release_eligible"] is False

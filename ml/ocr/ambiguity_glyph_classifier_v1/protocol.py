@@ -31,7 +31,7 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
         "schema": "graphreader.ocr-ambiguity-glyph-protocol.v1",
         "task": TASK,
         "revision": REVISION,
-        "status": "candidate_1_preregistered",
+        "status": "candidate_1_failed_selection",
         "defect_class": (
             "the exact official recognizer collapses O/o/l/I identity on isolated source groups even after "
             "conservative spacing preserves all non-ambiguity text"
@@ -44,8 +44,8 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
             "public_archive_opened": False,
         },
         "experiment_budget": EXPERIMENT_BUDGET,
-        "currently_preregistered_candidate": CANDIDATE_ID,
-        "consumed_candidates": [],
+        "currently_preregistered_candidate": None,
+        "consumed_candidates": [CANDIDATE_ID],
         "architecture": "compact-ambiguity-glyph-cnn-v1",
         "isolated_change": (
             "train a project-owned four-class O/o/l/I glyph classifier on fresh procedural Noto crops; "
@@ -59,6 +59,15 @@ def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, obj
         "split_counts_per_class": COUNTS_PER_CLASS,
         "gates": GATES,
         "runner_source_bundle_sha256": runner_source_bundle_sha256,
+        "p1_preregistered_runner_source_bundle_sha256": "cd0d06032c2310261418604ea54ef3236d647ff918dfab5d1c398208268d0b1b",
+        "p1_failure_evidence": {
+            "result_path": "ml/ocr/ambiguity_glyph_classifier_v1/P1_RESULT.json",
+            "selection_report_sha256": "b68768c8866b4f726e9a10a68cf06ad4a6c5a9751bea88f2b3f2ef1c78525a3f",
+            "accuracy": 0.9328125,
+            "uppercase_o_accuracy": 0.7375,
+            "onnx_parity_maximum_absolute_error": 0.0000133514404296875,
+            "public_archive_opened": False,
+        },
         "synthetic_only": True,
         "private_or_article_images": False,
         "chandler_included": False,
@@ -74,4 +83,3 @@ __all__ = [
     "CANDIDATE_ID", "COUNTS_PER_CLASS", "EXPERIMENT_BUDGET", "GATES", "GLYPHS",
     "IMAGE_SIZE", "PUBLIC_REVISION", "REVISION", "SEED", "TASK", "protocol_configuration",
 ]
-

@@ -1,0 +1,23 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/ambiguity_glyph_classifier_v1/training/p1.json",
+    "candidate_config_sha256": "173750fe6977c5c24626716acb75914af653b8cb04f8bb01d3d467fa3962f933",
+    "candidate_id": "P1",
+    "committed_source_enforcement": true,
+    "revision": "graph-ambiguity-glyph-classifier-v1",
+    "runner_source_bundle_sha256": "cd0d06032c2310261418604ea54ef3236d647ff918dfab5d1c398208268d0b1b",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/ambiguity_glyph_classifier_v1/dataset.py",
+      "ml/ocr/ambiguity_glyph_classifier_v1/model.py",
+      "ml/ocr/ambiguity_glyph_classifier_v1/protocol.py",
+      "ml/ocr/ambiguity_glyph_classifier_v1/train_p1.py"
+    ],
+    "task": "ocr-recognition",
+    "training_budget_ledger_sha256": "61b4d82818d3ec427ac940636ec238bd3f714533ec7e94056b0e5fad73803e8a"
+  },
+  "opened_utc": "2026-08-13T03:21:46.902936+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}
