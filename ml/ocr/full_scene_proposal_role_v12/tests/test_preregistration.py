@@ -70,22 +70,31 @@ def test_split_and_candidate_records_are_frozen_but_execution_is_closed() -> Non
     assert seal["truth_hidden_from_candidate_runner"] is True
     assert seal["public_gate_evaluations"] == 0
     assert config["public_gate_archive_opened"] is False
-    assert not (root / "artifacts/P1-run").exists()
+    assert (root / "P1_RESULT.json").is_file()
+    assert not (root / "artifacts/P1-run/public-report.json").exists()
     for record in (selection, seal, config):
         assert record["production_approval"] is False
         assert record["release_eligible"] is False
 
 
-def test_canonical_ledger_authorizes_only_frozen_p1() -> None:
+def test_canonical_ledger_consumes_failed_p1_and_authorizes_nothing() -> None:
     ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-full-scene-proposal-role-v12")
-    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["status"] == "candidate_1_failed_selection"
     assert entry["protocol_sha256"] == sha256_file(PROTOCOL_PATH)
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    result_path = ROOT / entry["p1_result_path"]
+    assert entry["p1_result_sha256"] == sha256_file(result_path)
+    assert entry["p1_selection_exact_scene_count"] == 119
+    assert entry["p1_selection_scene_count"] == 120
+    assert entry["p1_selection_false_positives"] == 1
+    assert entry["p1_selection_false_negatives"] == 0
+    assert entry["p1_selection_role_accuracy"] == 1.0
+    assert entry["p1_onnx_parity_passed"] is False
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
