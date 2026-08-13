@@ -2909,6 +2909,45 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "ocr-detection",
+      "revision": "graph-text-composite-proposal-role-v11",
+      "status": "design_preregistered_split_pending",
+      "defect_class": "aggregate V2 composition evidence showed 119 false text regions, 20 missed text regions, 0 exact scenes, role accuracy 0.64, and 18 text-origin marker creations",
+      "trigger_report_path": "artifacts/production-validation/ocr-marker-csharp-v2-report.json",
+      "trigger_report_sha256": "9875d0e9f82fb2cae2fecde8a1b38653286ee5a7eff92c5c851b85763525d670",
+      "trigger_scene_level_or_fixture_byte_access_used": false,
+      "prior_revision": "graph-text-spaced-component-recall-v10",
+      "prior_fixture_bytes_reused": false,
+      "isolated_change": "new shared visual-geometry encoder with binary proposal and eight-role heads on fresh structure-dense composite scenes",
+      "architecture": "dual-context-shared-encoder-proposal-role-multitask-cnn-v1",
+      "model_license": "Apache-2.0",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "protocol_path": "ml/ocr/composite_proposal_role_v11/PROTOCOL.json",
+      "protocol_sha256": "4db4cf8422b6e469360eb63e08977a6e2d468cee2b6c6006d664e95f9f49a1b7",
+      "candidate_config_paths": {},
+      "candidate_config_sha256": {},
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "The design is committed before split materialization. Freeze exact train, validation, and sealed-public evidence and bind P1 configuration and sources in a later commit before execution.",
+      "public_gate_authorized": false,
+      "public_gate_evaluations": 0,
+      "public_gate_archive_opened": false,
+      "consumed_v2_gate_rerun_authorized": false,
+      "manifest_created": false,
+      "model_store_promoted": false,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
     }
   ]
 }

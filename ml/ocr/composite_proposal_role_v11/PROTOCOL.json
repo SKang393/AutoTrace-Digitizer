@@ -1,0 +1,187 @@
+{
+  "architecture": "dual-context-shared-encoder-proposal-role-multitask-cnn-v1",
+  "candidate_ids": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "currently_preregistered_candidate": "P1",
+  "data_scope": "fresh procedural eight-role graph scenes with dense axes, ticks, dividers, brackets, arrows, legends, intersections, connecting lines, and open and filled markers; synthetic only; no Chandler, Generalization, private or article images, external datasets, downloaded training data, or V2 bytes",
+  "defect_class": "aggregate V2 composition evidence showed 119 false text regions, 20 missed text regions, 0 exact scenes, role accuracy 0.64, and 18 text-origin marker creations",
+  "distinct_from": [
+    "separated-visual-geometry-component-fusion-cnn-fixed-pool-v1",
+    "threshold-only V10 repair",
+    "official PP-OCR DB detector"
+  ],
+  "downstream_composition_gates": {
+    "ambiguity_family_accuracy_minimum": 0.9,
+    "character_error_rate_maximum": 0.05,
+    "marker_duplicates": 0,
+    "marker_exact_count_every_scene": true,
+    "marker_false_negatives": 0,
+    "marker_false_positives": 0,
+    "numeric_family_accuracy_minimum": 0.9,
+    "recognition_exact_match_minimum": 0.9,
+    "structure_hits": 0,
+    "text_origin_marker_creations": 0,
+    "word_family_accuracy_minimum": 0.9
+  },
+  "execution_authorized": false,
+  "execution_blocker": "Split bytes, fingerprints, candidate configuration, and source checksums are not frozen yet.",
+  "experiment_budget": 3,
+  "font_notice_path": "LICENSES/NotoSans-OFL-1.1.txt",
+  "input": [
+    "proposal_count",
+    2,
+    32,
+    144
+  ],
+  "isolated_change": "replace the binary-only proposal classifier with a fresh shared visual-geometry encoder and separate binary proposal and eight-role heads trained on new structure-dense composite scenes",
+  "model_license": "Apache-2.0",
+  "output": [
+    "proposal_count",
+    10
+  ],
+  "output_contract": {
+    "proposal_logits": [
+      0,
+      2
+    ],
+    "role_logits": [
+      2,
+      10
+    ],
+    "role_logits_ignored_for_rejected_proposals": true,
+    "role_order": [
+      "YTick",
+      "XTick",
+      "AxisTitle",
+      "PhaseHeading",
+      "LegendText",
+      "Participant",
+      "Annotation",
+      "Other"
+    ]
+  },
+  "production_approval": false,
+  "proposal_algorithm": {
+    "algorithm": "adaptive-gray-baseline-bounded-line-grouping-v2",
+    "component_grouping_unchanged_from_production": true,
+    "encoding_change": "append normalized proposal center and origin coordinates to the V7 features",
+    "ordering": "top,left,bottom,right",
+    "tensor_encoding": "graph-text-component-context-position-v11-encoding-v1"
+  },
+  "release_eligible": false,
+  "revision": "graph-text-composite-proposal-role-v11",
+  "schema": "graphreader.ocr-composite-proposal-role-protocol.v1",
+  "selection_gates": {
+    "direct_fixture_byte_execution_required": true,
+    "duplicate_regions": 0,
+    "exact_region_count_every_scene": true,
+    "false_regions": 0,
+    "missed_regions": 0,
+    "onnx_parity_maximum_absolute_error": 1e-05,
+    "per_role_accuracy_minimum": 0.8,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "role_accuracy_minimum": 0.9
+  },
+  "selection_thresholds": [
+    0.8,
+    0.85,
+    0.875,
+    0.9,
+    0.925,
+    0.95,
+    0.975
+  ],
+  "split_policy": {
+    "predecessor_fixture_bytes_reused": false,
+    "sealed_public_truth_hidden_until_one_time_gate": true,
+    "train_validation_public_family_ids_disjoint": true,
+    "v2_scene_bytes_or_truth_reused": false,
+    "validation_or_public_pixels_used_for_training": false
+  },
+  "splits": [
+    {
+      "degradation_family": "local-tone-median-speckle-v11-train",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "font_sha256": [
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      ],
+      "renderer_family": "dense-eight-role-composite-v11-train",
+      "scene_count": 320,
+      "seed_offset": 811000,
+      "split": "train"
+    },
+    {
+      "degradation_family": "anisotropic-box-row-fade-v11-validation",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "font_sha256": [
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0"
+      ],
+      "renderer_family": "offset-eight-role-composite-v11-validation",
+      "scene_count": 96,
+      "seed_offset": 853000,
+      "split": "validation"
+    },
+    {
+      "degradation_family": "gamma-quantized-column-fade-v11-public",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf"
+      ],
+      "font_sha256": [
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb"
+      ],
+      "renderer_family": "mirrored-eight-role-composite-v11-public",
+      "scene_count": 128,
+      "seed_offset": 907000,
+      "split": "sealed_public"
+    }
+  ],
+  "state": "design_preregistered_before_split_materialization",
+  "task": "ocr-detection",
+  "training": {
+    "batch_size": 256,
+    "candidate": "P1",
+    "candidate_budget": 3,
+    "epochs": 20,
+    "learning_rate": 0.0003,
+    "negative_cap_per_scene": 48,
+    "proposal_loss": "balanced-cross-entropy",
+    "role_loss": "positive-proposals-only-balanced-cross-entropy",
+    "role_loss_weight": 0.6,
+    "seed": 20261831,
+    "weight_decay": 0.0002
+  },
+  "trigger_evidence": {
+    "consumed_gate_rerun_authorized": false,
+    "duplicates": 0,
+    "false_negatives": 20,
+    "false_positives": 119,
+    "report_path": "artifacts/production-validation/ocr-marker-csharp-v2-report.json",
+    "report_sha256": "9875d0e9f82fb2cae2fecde8a1b38653286ee5a7eff92c5c851b85763525d670",
+    "role_accuracy": 0.64,
+    "scene_count": 40,
+    "scene_level_or_fixture_byte_access_for_v11": false,
+    "text_marker_creations": 18,
+    "text_truth_count": 200,
+    "true_positives": 180
+  }
+}
