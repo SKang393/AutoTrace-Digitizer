@@ -28,5 +28,10 @@ again. It passed all 80 scenes and 400 truths with zero false regions, misses,
 duplicates, or prohibited hits at threshold `0.95`; CPU parity passed at
 `5.7220458984375e-06`. The candidate report SHA-256 is
 `3755d9d0308fa9420dd3e0cff5c620fed96407ffdc34e4b59e5c651bf50c7455`.
-The single checksum-bound public evaluation is authorized but remains unopened.
-No candidate is approved, and all downstream gates remain mandatory.
+The single checksum-bound public evaluation then passed all 112 scenes and
+560 truths with zero false regions, misses, duplicates, or prohibited hits
+through 112 direct CPU calls. Public report SHA-256 is
+`1c7526cb2147a7a68cdc6eb3d6bc3a073324b3b08f3c81c8b359832f038de7b1`.
+All candidates and the public gate are consumed. No candidate is production
+approved, and paired recognition, marker-stage, private, model-store, provider,
+packaging, and clean-machine gates remain mandatory.

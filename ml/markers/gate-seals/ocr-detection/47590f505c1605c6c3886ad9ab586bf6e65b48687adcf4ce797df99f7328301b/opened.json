@@ -1,0 +1,48 @@
+{
+  "binding": {
+    "candidate_hash_key_schema": [
+      "onnx_sha256",
+      "selection_report_sha256"
+    ],
+    "candidate_hashes": {
+      "onnx_sha256": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+      "selection_report_sha256": "3755d9d0308fa9420dd3e0cff5c620fed96407ffdc34e4b59e5c651bf50c7455"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "3d280fbc2415db7d6d197ee308b9769973b09182d281728f383b2bb0e6429a09",
+    "evaluator_source_bundle_sha256": "36d33bb2cbaa9e4ad7311ca70d58e02f140240fd565a2f37fd87ead019a3e12a",
+    "evaluator_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/ocr/component_context_detector_v7/dataset.py",
+      "ml/ocr/component_context_detector_v7/protocol.py",
+      "ml/ocr/component_fusion_detector_v8/dataset.py",
+      "ml/ocr/component_fusion_detector_v8/pipeline.py",
+      "ml/ocr/component_fusion_detector_v8/protocol.py",
+      "ml/ocr/component_recall_detector_v9/dataset.py",
+      "ml/ocr/component_recall_detector_v9/pipeline.py",
+      "ml/ocr/component_recall_detector_v9/pipeline_p2.py",
+      "ml/ocr/component_recall_detector_v9/protocol.py",
+      "ml/ocr/component_region_detector_v6/dataset.py",
+      "ml/ocr/component_region_detector_v6/protocol.py",
+      "ml/ocr/component_spaced_recall_detector_v10/dataset.py",
+      "ml/ocr/component_spaced_recall_detector_v10/pipeline.py",
+      "ml/ocr/component_spaced_recall_detector_v10/protocol.py",
+      "ml/ocr/component_spaced_recall_detector_v10/sealed_gate.py",
+      "ml/ocr/production_composition_v1/dataset.py",
+      "ml/ocr/production_composition_v1/protocol.py"
+    ],
+    "gate_config_sha256": "29a63b32d8e3f3079c9abd52c3ab4cb5852641fd20fc74e3eb8f33d39e4769e4",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "graph-text-spaced-component-recall-v10-public-v1",
+    "split_config_path": "ml/ocr/component_spaced_recall_detector_v10/gates/sealed-public-v1.json",
+    "split_config_sha256": "4c513bcbed9255c7128e8e3240b78fc01d20082c3ed8032d8b5e32a7fa8287ad",
+    "task": "ocr-detection"
+  },
+  "evaluation_count": 1,
+  "key": "47590f505c1605c6c3886ad9ab586bf6e65b48687adcf4ce797df99f7328301b",
+  "opened_utc": "2026-08-13T02:00:03.912897+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}
