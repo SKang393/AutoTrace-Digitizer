@@ -18,11 +18,20 @@ fixture supplies a checksum-bound procedural structure mask for direct
 composition evidence. That fixture mask is not an approved production
 artifact-mask provider.
 
-No fixture archive or split seal exists at preregistration. No V3 model
-execution is authorized until the preregistration is committed, pushed, and a
-hash-only split seal is committed from zero model executions. A separate exact
-authorization commit must then bind the source commit and fixture hashes before
-the single gate run.
+The generator ran once from preregistration commit
+`09559668821814af109c5e76b45094607aeb3c0c`. It created 48 scenes with 384
+text truths and 392 marker truths. The ignored archive SHA-256 is
+`d7fea47e77b46bcce097a1841227b19d4b29cf3cd284f0541f6dc45687386bdc`,
+its embedded manifest SHA-256 is
+`528b6b9bc107be6dc5ebe3847cc63e83b8158c019e043729d479d16833c3d2ca`,
+and the tracked hash-only split seal SHA-256 is
+`802b0cae08c71fb622a2d044826c25e4fd25a13079f34f231b54109ce43b86bb`.
+The fresh 128-bit secret is not serialized and the seal records zero model
+executions. No V1, V2, or V11 public fixture bytes or truth were read or reused.
+
+No V3 model execution is authorized until this hash-only split identity is
+committed and pushed. A separate exact authorization commit must then bind the
+source commit and fixture hashes before the single gate run.
 
 Passing cannot create a model manifest, approve a production model-store
 entry, enable normal Auto Detect, package a payload, validate Chandler, or make
