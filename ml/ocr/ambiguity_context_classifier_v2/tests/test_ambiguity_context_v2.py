@@ -67,10 +67,11 @@ def test_preregistration_binds_sources_splits_trigger_and_license() -> None:
     assert config["selection_manifest_sha256"] == sha256_file(ROOT / "SELECTION_MANIFEST.json")
     assert config["sealed_public_test_seal_sha256"] == sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert config["model_license"] == protocol["model_license"] == "Apache-2.0"
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
-    assert entry["public_gate_authorized"] is False
+    assert entry["status"] == "selection_passed_public_preregistered"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["p2_result_sha256"] == sha256_file(ROOT / "P2_RESULT.json")
+    assert entry["public_gate_authorized"] is True
     assert entry["public_gate_archive_opened"] is False
 
 
