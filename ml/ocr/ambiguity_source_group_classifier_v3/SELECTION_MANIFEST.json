@@ -1,0 +1,6 @@
+{
+  "schema":"graphreader.ocr-ambiguity-source-group-selection.v1",
+  "train_sample_count":2560,"train_count_per_class":640,"train_private_manifest_sha256":"00f08baf51024913a576f2f95214f33867fb2041ea614bd2cc80cd94d3209bbf","train_fixture_archive_sha256":"64de76a257e82c59581c8060757ca5a607817d9758423948d29468346bb46f7c","train_tensor_label_stream_sha256":"3d8ef98bd26ed7a3e54875118ad0e040f1190fdbc1c8913b60c757b646fd6100","train_split_fingerprint":"02d1f28e3aec6d7e790c6c5a95d525932584f769e812dfb33d4eef10a1ad3482",
+  "validation_sample_count":640,"validation_count_per_class":160,"validation_private_manifest_sha256":"c5e1eda7159806cda13d8f4d2cc7fb4ce368d9a8adda6163b35a42d25cd7cdee","validation_fixture_archive_sha256":"a0afe8b1086bd14445ed22afc3b3b8a59eaa4f6c549bc8ab40e5c83aa8e2779c","validation_tensor_label_stream_sha256":"6ccb7de31456a5bb68dd0ed5e93a56cde4b4c0422192ee7f04c44b681b425740","validation_split_fingerprint":"6005dbb1f9f90996550b10c11c72f33a43159df554eaeccd95ab27ca87633a81",
+  "class_order":["O","o","l","I"],"exact_production_crop_adapter":true,"prior_exposed_fixture_bytes_reused":false,"synthetic_only":true,"private_or_article_images":false,"chandler_included":false,"generalization_label_included":false
+}

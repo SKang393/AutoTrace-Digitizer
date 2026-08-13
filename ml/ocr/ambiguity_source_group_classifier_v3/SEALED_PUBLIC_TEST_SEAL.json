@@ -1,0 +1,6 @@
+{
+  "schema":"graphreader.ocr-ambiguity-source-group-public-seal.v1","partition":"sealed_public","sample_count":960,"count_per_class":240,"class_order":["O","o","l","I"],
+  "fixture_archive_path":"ml/ocr/ambiguity_source_group_classifier_v3/artifacts/split-freeze/sealed_public/fixtures.zip","fixture_archive_sha256":"1a5eab727289c98fae02d42459fbc56fd39b2366ea325be9675b1659868ac281","fixture_archive_bytes":2097151,
+  "private_manifest_path":"ml/ocr/ambiguity_source_group_classifier_v3/artifacts/split-freeze/sealed_public/private-manifest.json","private_manifest_sha256":"17647bbe1ec68b16dc5bb91c7c1234ba1d650bed5ed871e1c86476fe8dbf74cb","tensor_label_stream_sha256":"55b2db37b8329072f78a07e0ed4180dd3275b2b1aba995aee9032c495f326092","split_fingerprint":"b2593aedd62650156611042923fab8f1bbc04e487dcf2ef8bb98893b2870fadc",
+  "truth_hidden_from_model_execution_until_gate":true,"evaluation_limit":1,"public_gate_evaluations":0,"prior_exposed_fixture_bytes_reused":false,"synthetic_only":true,"private_or_article_images":false,"chandler_included":false,"generalization_label_included":false
+}

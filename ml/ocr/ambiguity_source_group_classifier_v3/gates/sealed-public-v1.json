@@ -1,0 +1,6 @@
+{
+  "schema":"graphreader.ocr-ambiguity-source-group-public-gate-config.v1","task":"ocr-recognition","revision":"graph-ambiguity-source-group-v3-public-v1",
+  "sealed_public_test_seal_path":"ml/ocr/ambiguity_source_group_classifier_v3/SEALED_PUBLIC_TEST_SEAL.json","sealed_public_test_seal_sha256":"44cfdaa3b3dc72c056f85eecb2c3ae65b52ed9dd3fc56e7dfdddbedbe03164f3",
+  "fixture_archive_sha256":"1a5eab727289c98fae02d42459fbc56fd39b2366ea325be9675b1659868ac281","private_manifest_sha256":"17647bbe1ec68b16dc5bb91c7c1234ba1d650bed5ed871e1c86476fe8dbf74cb",
+  "expected_candidate_hash_keys":["onnx_sha256","selection_report_sha256"],"expected_dataset_manifest_sha256":"17647bbe1ec68b16dc5bb91c7c1234ba1d650bed5ed871e1c86476fe8dbf74cb","expected_evaluator_source_bundle_sha256":"7887c587595760b426662da9b949a22ff03d23e8aecd7ba1b865c0b43dbe8998","expected_gate_config_sha256":"24311b417728066041474bde7fd2bfbbde7ce4e2e920570bc8625e00134de2aa","evaluation_limit":1,"production_approval":false,"release_eligible":false
+}
