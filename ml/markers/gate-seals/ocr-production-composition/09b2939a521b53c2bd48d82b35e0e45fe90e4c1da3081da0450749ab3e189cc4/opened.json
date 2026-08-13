@@ -1,0 +1,55 @@
+{
+  "binding": {
+    "candidate_hash_key_schema": [
+      "detector_onnx_sha256",
+      "official_recognizer_onnx_sha256",
+      "numeric_recognizer_onnx_sha256",
+      "ambiguity_recognizer_onnx_sha256",
+      "spacing_source_sha256"
+    ],
+    "candidate_hashes": {
+      "ambiguity_recognizer_onnx_sha256": "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096",
+      "detector_onnx_sha256": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+      "numeric_recognizer_onnx_sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+      "official_recognizer_onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+      "spacing_source_sha256": "a8eed54028c6d872942f5c2e54b8b7f8ad458ef6dd021b467639e821066c36e4"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "a14225a21e8b45187e0c183eec014c81c28eb0b1ac5148e4a81102637c4e6944",
+    "evaluator_source_bundle_sha256": "e725e456f71f1b91baee93601d69cd2cfbc19f35d98ad0f60420da1c96bcbfd9",
+    "evaluator_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/ocr/ambiguity_source_group_classifier_v3/crop.py",
+      "ml/ocr/ambiguity_source_group_classifier_v3/protocol.py",
+      "ml/ocr/component_context_detector_v7/dataset.py",
+      "ml/ocr/component_ensemble_v5/dataset.py",
+      "ml/ocr/component_ensemble_v5/protocol.py",
+      "ml/ocr/component_geometric_v4/dataset.py",
+      "ml/ocr/component_recall_detector_v9/dataset.py",
+      "ml/ocr/component_region_detector_v6/dataset.py",
+      "ml/ocr/component_spaced_recall_detector_v10/dataset.py",
+      "ml/ocr/official_bakeoff/production_evaluate.py",
+      "ml/ocr/official_recognition_spacing_v3/spacing.py",
+      "ml/ocr/production_composition_v1/dataset.py",
+      "ml/ocr/production_composition_v2/pipeline.py",
+      "ml/ocr/production_composition_v2/protocol.py",
+      "ml/ocr/production_composition_v5/dataset.py",
+      "ml/ocr/production_composition_v5/pipeline.py",
+      "ml/ocr/production_composition_v5/protocol.py",
+      "ml/ocr/production_composition_v5/validation_gate.py"
+    ],
+    "gate_config_sha256": "2da504c51d9e767efc7229bc92b66af3a937e47fa2fabb76d80748fc0f33ecc4",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "graphreader-v10-official-rejected-tick-rescue-source-group-v3-composition-v5-validation-v1",
+    "split_config_path": "ml/ocr/production_composition_v5/gates/validation-v1.json",
+    "split_config_sha256": "a1e1a7a5003b63d5409c42f5efb37083b313f28c6386289748f57245a19150dc",
+    "task": "ocr-production-composition"
+  },
+  "evaluation_count": 1,
+  "key": "09b2939a521b53c2bd48d82b35e0e45fe90e4c1da3081da0450749ab3e189cc4",
+  "opened_utc": "2026-08-13T05:10:18.765671+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}
