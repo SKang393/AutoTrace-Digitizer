@@ -1,0 +1,137 @@
+{
+  "candidate_ids": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "chandler_included": false,
+  "currently_preregistered_candidate": "P1",
+  "data_scope": "fresh procedural five-role graph scenes emphasizing generic spaced multi-glyph annotations with new seed, renderer, degradation, and layout families; no Chandler, Generalization, private/article images, external data, pretrained additions, or V9/V2 fixture-byte reuse",
+  "defect_class": "generic spaced multi-glyph text-region recall in production composition",
+  "experiment_budget": 3,
+  "generalization_label_included": false,
+  "input": [
+    "proposal_count",
+    2,
+    32,
+    140
+  ],
+  "output": [
+    "proposal_count",
+    2
+  ],
+  "p1": {
+    "base_onnx_sha256": "2d35ce2f55cee8317dfe1faf0281a6e87693cca485dbdaf39e4039ced5b97d9c",
+    "base_revision": "graph-text-component-recall-v9-p3",
+    "isolated_change": "select only the inference threshold on new V10 selection scenes",
+    "optimizer_steps": 0,
+    "weights_changed": false
+  },
+  "p2_p3_policy": "remain unregistered unless P1 direct selection evidence proves a distinct training defect",
+  "private_or_article_images": false,
+  "production_approval": false,
+  "proposal_algorithm": {
+    "algorithm": "adaptive-gray-baseline-bounded-line-grouping-v2",
+    "ordering": "top,left,bottom,right",
+    "source": "ml/ocr/component_context_detector_v7/dataset.py"
+  },
+  "release_eligible": false,
+  "revision": "graph-text-spaced-component-recall-v10",
+  "schema": "graphreader.ocr-spaced-component-recall-protocol.v1",
+  "selection_gates": {
+    "direct_fixture_byte_execution_required": true,
+    "duplicate_region_count": 0,
+    "exact_region_count_every_fixture": true,
+    "false_region_count": 0,
+    "missed_region_count": 0,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider"
+  },
+  "selection_thresholds": [
+    0.8,
+    0.85,
+    0.875,
+    0.9,
+    0.91,
+    0.925,
+    0.95
+  ],
+  "split_generator_source_bundle_sha256": "982d9576311496b44f22c7477f4b9b8528433d942dd1a496990d7b9bf0e16206",
+  "split_generator_source_paths": [
+    "ml/ocr/component_spaced_recall_detector_v10/dataset.py",
+    "ml/ocr/component_spaced_recall_detector_v10/prepare_split.py",
+    "ml/ocr/component_spaced_recall_detector_v10/protocol.py",
+    "ml/ocr/production_composition_v1/dataset.py",
+    "ml/ocr/component_context_detector_v7/dataset.py",
+    "ml/ocr/component_region_detector_v6/dataset.py"
+  ],
+  "splits": [
+    {
+      "degradation_family": "median-tone-speckle-v10-train",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "font_sha256": [
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      ],
+      "renderer_family": "spaced-five-role-scenes-v10-train",
+      "scene_count": 240,
+      "seed_offset": 601000,
+      "split": "train"
+    },
+    {
+      "degradation_family": "box-resample-column-fade-v10-validation",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "font_sha256": [
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0"
+      ],
+      "renderer_family": "spaced-five-role-scenes-v10-validation",
+      "scene_count": 80,
+      "seed_offset": 631000,
+      "split": "validation"
+    },
+    {
+      "degradation_family": "gamma-quantization-row-fade-v10-public",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf"
+      ],
+      "font_sha256": [
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb"
+      ],
+      "renderer_family": "spaced-five-role-scenes-v10-public",
+      "scene_count": 112,
+      "seed_offset": 673000,
+      "split": "sealed_public"
+    }
+  ],
+  "state": "split_frozen_before_candidate_execution",
+  "synthetic_only": true,
+  "task": "ocr-detection",
+  "trigger_evidence": {
+    "composition_revision": "graphreader-v9-official-spacing-p2-numeric-v5-composition-v2",
+    "duplicates": 0,
+    "false_negatives": 1,
+    "false_positives": 0,
+    "missed_family": "spaced_multi_glyph",
+    "missed_role": "annotation",
+    "public_archive_opened": false,
+    "scene_count": 80,
+    "true_positives": 399,
+    "truth_region_count": 400,
+    "validation_report_sha256": "7a20ae70e9c970f2d10dd80f03a41ab363424cf1a33d98327e835727b587bed1"
+  }
+}

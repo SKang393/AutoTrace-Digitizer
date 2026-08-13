@@ -2396,6 +2396,65 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "ocr-detection",
+      "revision": "graph-text-spaced-component-recall-v10",
+      "status": "candidate_1_preregistered",
+      "defect_class": "generic spaced multi-glyph text-region recall in production composition",
+      "prior_revision": "graph-text-component-recall-v9",
+      "trigger_evidence_path": "ml/ocr/production_composition_v2/VALIDATION_REPORT.json",
+      "trigger_evidence_sha256": "7a20ae70e9c970f2d10dd80f03a41ab363424cf1a33d98327e835727b587bed1",
+      "trigger_truth_region_count": 400,
+      "trigger_true_positives": 399,
+      "trigger_false_negatives": 1,
+      "trigger_false_positives": 0,
+      "trigger_duplicate_region_count": 0,
+      "trigger_prohibited_structure_hits": 0,
+      "trigger_public_archive_opened": false,
+      "prior_exposed_fixture_bytes_reused": false,
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "candidate_config_paths": {
+        "P1": "ml/ocr/component_spaced_recall_detector_v10/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "b88f07495c44799684f0dcdf2516e7ee2fe33b2ef93083178a88ecccdf158740"
+      },
+      "protocol_path": "ml/ocr/component_spaced_recall_detector_v10/PROTOCOL.json",
+      "protocol_sha256": "60dc6f60e37ed403c4e65d4c0489de3ce575fc6f3cda9dbcf56c327db87a05b4",
+      "selection_manifest_path": "ml/ocr/component_spaced_recall_detector_v10/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "1277b1b0f1a12a1844439635b2be09fe9e287959d0800dc4d7816872dbba980a",
+      "sealed_public_test_seal_path": "ml/ocr/component_spaced_recall_detector_v10/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "83997ae97d477619bee4e21f61eb3130ae78c1b83df26a8a3a9c121a6cde9a73",
+      "sealed_public_fixture_archive_sha256": "ac03990f2bc3f9c0c57490fb5d2505e3555ffd6b8fe00e7c0208aef6297ce317",
+      "sealed_public_private_manifest_sha256": "3d280fbc2415db7d6d197ee308b9769973b09182d281728f383b2bb0e6429a09",
+      "sealed_public_scene_count": 112,
+      "public_gate_config_path": "ml/ocr/component_spaced_recall_detector_v10/gates/sealed-public-v1.json",
+      "public_gate_config_sha256": "9af01df483d60382f5a89d9d316b73c476e2673e94c40fe93383354cbdde8577",
+      "p1_expected_runner_source_bundle_sha256": "5ffe04a37bbb41d8c698012a11010ffabacf47f69709228ad9bcb00f1595395e",
+      "p1_base_onnx_sha256": "2d35ce2f55cee8317dfe1faf0281a6e87693cca485dbdaf39e4039ced5b97d9c",
+      "p1_optimizer_steps": 0,
+      "p1_weights_changed": false,
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "execution_blocker": null,
+      "public_gate_authorized": false,
+      "public_gate_authorized_candidate_id": null,
+      "public_gate_evaluations": 0,
+      "public_gate_archive_opened": false,
+      "manifest_created": false,
+      "model_store_promoted": false,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": false
     }
   ]
 }
