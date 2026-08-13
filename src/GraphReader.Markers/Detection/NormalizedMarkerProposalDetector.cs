@@ -22,6 +22,10 @@ public static class NormalizedMarkerProposalPostprocessContract
     public const double RadiusSuppressionScale = 1.25;
     public const double GeometryInkThreshold = 0.12;
     public const double GeometryCenterDensityThreshold = 0.28;
+    // The sealed candidate permits CPU ONNX parity drift through 1e-5. Clamp
+    // only activation-boundary drift inside that frozen tolerance; larger or
+    // non-finite violations remain incompatible and fail closed.
+    public const double ActivationBoundaryTolerance = 1e-5;
 }
 
 public sealed record NormalizedMarkerProposalDetectionOptions
@@ -534,16 +538,11 @@ internal static class NormalizedMarkerProposalPostprocessor
             float offsetX = output[offset + 1];
             float offsetY = output[offset + 2];
             float radiusValue = output[offset + 3];
-            if (!float.IsFinite(probability) || probability < 0 || probability > 1 ||
-                !float.IsFinite(offsetX) ||
-                offsetX < NormalizedMarkerProposalPostprocessContract.MinimumOffset ||
-                offsetX > NormalizedMarkerProposalPostprocessContract.MaximumOffset ||
-                !float.IsFinite(offsetY) ||
-                offsetY < NormalizedMarkerProposalPostprocessContract.MinimumOffset ||
-                offsetY > NormalizedMarkerProposalPostprocessContract.MaximumOffset ||
-                !float.IsFinite(radiusValue) ||
-                radiusValue < NormalizedMarkerProposalPostprocessContract.MinimumRadius ||
-                radiusValue > NormalizedMarkerProposalPostprocessContract.MaximumRadius)
+            if (!TryClampActivatedOutput(
+                    ref probability,
+                    ref offsetX,
+                    ref offsetY,
+                    ref radiusValue))
             {
                 throw new MarkerPipelineException(
                     "MARKER_MODEL_OUTPUT_INVALID",
@@ -605,6 +604,51 @@ internal static class NormalizedMarkerProposalPostprocessor
                 .ThenByDescending(static candidate => candidate.CenterConfidence)),
             rawCandidateCount);
     }
+
+    private static bool TryClampActivatedOutput(
+        ref float probability,
+        ref float offsetX,
+        ref float offsetY,
+        ref float radius)
+    {
+        if (!float.IsFinite(probability) || !float.IsFinite(offsetX) ||
+            !float.IsFinite(offsetY) || !float.IsFinite(radius) ||
+            !WithinTolerance(probability, 0, 1) ||
+            !WithinTolerance(
+                offsetX,
+                NormalizedMarkerProposalPostprocessContract.MinimumOffset,
+                NormalizedMarkerProposalPostprocessContract.MaximumOffset) ||
+            !WithinTolerance(
+                offsetY,
+                NormalizedMarkerProposalPostprocessContract.MinimumOffset,
+                NormalizedMarkerProposalPostprocessContract.MaximumOffset) ||
+            !WithinTolerance(
+                radius,
+                NormalizedMarkerProposalPostprocessContract.MinimumRadius,
+                NormalizedMarkerProposalPostprocessContract.MaximumRadius))
+        {
+            return false;
+        }
+
+        probability = Math.Clamp(probability, 0f, 1f);
+        offsetX = Math.Clamp(
+            offsetX,
+            (float)NormalizedMarkerProposalPostprocessContract.MinimumOffset,
+            (float)NormalizedMarkerProposalPostprocessContract.MaximumOffset);
+        offsetY = Math.Clamp(
+            offsetY,
+            (float)NormalizedMarkerProposalPostprocessContract.MinimumOffset,
+            (float)NormalizedMarkerProposalPostprocessContract.MaximumOffset);
+        radius = Math.Clamp(
+            radius,
+            (float)NormalizedMarkerProposalPostprocessContract.MinimumRadius,
+            (float)NormalizedMarkerProposalPostprocessContract.MaximumRadius);
+        return true;
+    }
+
+    private static bool WithinTolerance(float value, double minimum, double maximum) =>
+        value >= minimum - NormalizedMarkerProposalPostprocessContract.ActivationBoundaryTolerance &&
+        value <= maximum + NormalizedMarkerProposalPostprocessContract.ActivationBoundaryTolerance;
 
     private static MarkerPoint? RefineGeometryCenter(
         MarkerImageFrame frame,

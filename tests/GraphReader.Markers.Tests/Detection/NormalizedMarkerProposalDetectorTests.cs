@@ -151,6 +151,48 @@ public sealed class NormalizedMarkerProposalDetectorTests
     }
 
     [TestMethod]
+    public async Task FrozenOnnxParityToleranceClampsActivationBoundaryDriftOnly()
+    {
+        MarkerImageFrame frame = FilledMarkerFrame();
+        NormalizedMarkerProposalBatch proposals =
+            NormalizedMarkerProposalPreprocessor.Prepare(frame, CancellationToken.None);
+        int centerIndex = CoordinateIndex(proposals, 16, 16);
+        int boundaryIndex = CoordinateIndex(proposals, 12, 16);
+        var withinTolerance = new NormalizedMarkerProposalDetector(
+            new MarkerInferenceRunnerStub((_, _) =>
+            {
+                float[] output = Output(proposals.Count);
+                Set(output, centerIndex, 1.000001f, 0, 0, 4);
+                Set(output, boundaryIndex, 0, 0.750001f, -0.750001f, 8.000001f);
+                return ValueTask.FromResult(Success(output));
+            }));
+
+        MarkerDetectionResult clamped = await withinTolerance.DetectAsync(
+            Request(frame),
+            CancellationToken.None);
+
+        Assert.IsTrue(clamped.Succeeded, clamped.Failure?.TechnicalMessage);
+        Assert.HasCount(1, clamped.Markers);
+        Assert.AreEqual(1, clamped.Markers[0].CenterConfidence, 0);
+        Assert.AreEqual(4, clamped.Markers[0].Radius, 0);
+
+        var outsideTolerance = new NormalizedMarkerProposalDetector(
+            new MarkerInferenceRunnerStub((_, _) =>
+            {
+                float[] output = Output(proposals.Count);
+                Set(output, centerIndex, 1.00002f, 0, 0, 4);
+                return ValueTask.FromResult(Success(output));
+            }));
+
+        MarkerDetectionResult rejected = await outsideTolerance.DetectAsync(
+            Request(frame),
+            CancellationToken.None);
+
+        Assert.IsFalse(rejected.Succeeded);
+        Assert.AreEqual("MARKER_MODEL_OUTPUT_INVALID", rejected.Failure?.Code);
+    }
+
+    [TestMethod]
     public async Task RuntimeFailurePreservesCacheAndProviderAttemptEvidence()
     {
         MarkerImageFrame frame = FilledMarkerFrame();

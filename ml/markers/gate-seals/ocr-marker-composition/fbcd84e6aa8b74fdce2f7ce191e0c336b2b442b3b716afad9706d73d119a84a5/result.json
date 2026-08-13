@@ -1,0 +1,12 @@
+{
+  "schema": "graphreader.ocr-marker-production-composition-result-seal.v1",
+  "canonical_seal_key": "fbcd84e6aa8b74fdce2f7ce191e0c336b2b442b3b716afad9706d73d119a84a5",
+  "opened_seal_sha256": "379425b78fb3a7c1ccf6ce264e29aca5b81b60b744fa49b09eb057d37adb4b23",
+  "status": "failed_runner",
+  "report_sha256": null,
+  "exception_type": "AssertFailedException",
+  "exception_message": "Assertion failed. Expected condition to be true.\r\nNormalized marker output violates the activated probability, offset, or radius contract.\r\n\r\nactual: false\r\n\r\nAssert.IsTrue(markerResult.Succeeded)",
+  "completed_utc": "2026-08-13T09:23:40.415398+00:00",
+  "production_approval": false,
+  "release_eligible": false
+}
