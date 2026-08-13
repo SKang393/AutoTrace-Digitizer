@@ -5,7 +5,7 @@
     "selection_report_sha256"
   ],
   "expected_dataset_manifest_sha256": "01a9fbd830a7fbd194bf3993020169a2f5cc6cc6c970e4fe5428d1630029a86f",
-  "expected_evaluator_source_bundle_sha256": "4f3d7a41bd544390b2ba6ae5be8876185f54e5a499d79c8ffac07794d621362a",
+  "expected_evaluator_source_bundle_sha256": "7864ab8d0e65a6b0a2cf68e9795a998586b772dda411fc1741e2da128e6db12b",
   "expected_gate_config_sha256": "0efbf4cb4f1e7d0ff497ac9011620bd0e296fd9261a1de529a0a013efa77dc48",
   "production_approval": false,
   "release_eligible": false,

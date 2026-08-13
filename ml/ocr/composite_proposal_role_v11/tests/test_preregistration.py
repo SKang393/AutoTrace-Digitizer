@@ -32,6 +32,7 @@ GATE_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/gates/sealed-public-v1.js
 CONFIG_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/training/p1.json"
 P2_CONFIG_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/training/p2.json"
 P1_RESULT_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/P1_RESULT.json"
+P2_RESULT_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/P2_RESULT.json"
 
 
 def test_protocol_file_is_canonical_and_fail_closed() -> None:
@@ -72,14 +73,14 @@ def test_model_contract_is_exact_and_finite() -> None:
         model(torch.zeros((1, 2, 32, ENCODED_WIDTH - 1), dtype=torch.float32))
 
 
-def test_canonical_ledger_consumes_p1_and_authorizes_only_exact_p2() -> None:
+def test_canonical_ledger_consumes_p1_and_p2_then_authorizes_one_public_gate() -> None:
     ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == REVISION)
     assert entry["task"] == TASK
-    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["status"] == "candidate_2_selected_public_gate_pending"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["protocol_sha256"] == sha256_file(PROTOCOL_PATH)
     assert entry["selection_manifest_sha256"] == sha256_file(SELECTION_PATH)
@@ -98,10 +99,14 @@ def test_canonical_ledger_consumes_p1_and_authorizes_only_exact_p2() -> None:
     assert entry["p1_selection_false_positives"] == entry["p1_selection_false_negatives"] == 0
     assert entry["p1_onnx_parity_passed"] is False
     assert entry["p1_public_gate_archive_opened"] is False
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
-    assert entry["execution_blocker"] is None
-    assert entry["public_gate_authorized"] is False
+    assert entry["p2_result_sha256"] == sha256_file(P2_RESULT_PATH)
+    assert entry["p2_selection_exact_scene_count"] == entry["p2_selection_scene_count"] == 96
+    assert entry["p2_selection_false_positives"] == entry["p2_selection_false_negatives"] == 0
+    assert entry["p2_onnx_parity_passed"] is True
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_candidate_id"] == "P2"
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
     assert entry["production_approval"] is False
@@ -144,3 +149,17 @@ def test_p2_repairs_only_absolute_export_parity_without_training() -> None:
     assert result["selection_metrics"]["exact_scene_count"] == result["selection_metrics"]["scene_count"] == 96
     assert result["onnx_parity_passed"] is False
     assert result["public_gate_archive_opened"] is False
+
+
+def test_p2_selected_result_is_still_not_production_approved() -> None:
+    result = json.loads(P2_RESULT_PATH.read_text(encoding="utf-8"))
+    assert result["status"] == "selected_public_gate_pending"
+    assert result["optimizer_steps"] == 0
+    assert result["weights_changed"] is False
+    assert result["onnx_parity_passed"] is True
+    assert result["selection_metrics"]["exact_scene_count"] == result["selection_metrics"]["scene_count"] == 96
+    assert result["selection_metrics"]["false_positives"] == result["selection_metrics"]["false_negatives"] == 0
+    assert result["public_gate_evaluations"] == 0
+    assert result["public_gate_archive_opened"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False

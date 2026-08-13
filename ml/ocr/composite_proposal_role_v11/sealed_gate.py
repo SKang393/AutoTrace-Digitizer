@@ -22,7 +22,7 @@ from .protocol import PUBLIC_REVISION, REVISION, ROLE_ACCURACY_MINIMUM, ROLE_CLA
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ROOT = Path("ml/ocr/composite_proposal_role_v11")
 LEDGER_PATH = Path("ml/markers/training-budgets/production-repair-v1.json")
-RESULT_PATH = ROOT / "P1_RESULT.json"
+RESULT_PATH = ROOT / "P2_RESULT.json"
 SPLIT_CONFIG_PATH = ROOT / "gates/sealed-public-v1.json"
 EVALUATOR_SOURCE_PATHS = (
     ROOT / "dataset.py", ROOT / "pipeline.py", ROOT / "protocol.py", ROOT / "sealed_gate.py",
@@ -52,13 +52,13 @@ def evaluate_candidate(*, onnx_path: Path, selection_report_path: Path, output_p
     onnx_sha, selection_sha = sha256_file(onnx_path), sha256_file(selection_report_path)
     threshold = float(selection.get("selected_threshold", -1.0))
     if (
-        entry is None or entry.get("status") != "candidate_1_selected_public_gate_pending"
-        or entry.get("preregistered_candidate_ids") != [] or entry.get("consumed_candidate_ids") != ["P1"]
+        entry is None or entry.get("status") != "candidate_2_selected_public_gate_pending"
+        or entry.get("preregistered_candidate_ids") != [] or entry.get("consumed_candidate_ids") != ["P1", "P2"]
         or entry.get("execution_authorized") is not False or entry.get("public_gate_authorized") is not True
-        or entry.get("public_gate_authorized_candidate_id") != "P1" or entry.get("public_gate_evaluations") != 0
-        or entry.get("public_gate_archive_opened") is not False or entry.get("p1_onnx_sha256") != onnx_sha
-        or entry.get("p1_selection_report_sha256") != selection_sha
-        or entry.get("p1_result_sha256") != sha256_file(REPO_ROOT / RESULT_PATH)
+        or entry.get("public_gate_authorized_candidate_id") != "P2" or entry.get("public_gate_evaluations") != 0
+        or entry.get("public_gate_archive_opened") is not False or entry.get("p2_onnx_sha256") != onnx_sha
+        or entry.get("p2_selection_report_sha256") != selection_sha
+        or entry.get("p2_result_sha256") != sha256_file(REPO_ROOT / RESULT_PATH)
     ):
         raise RuntimeError("OCR V11 public gate is not authorized by the canonical ledger")
     if (
