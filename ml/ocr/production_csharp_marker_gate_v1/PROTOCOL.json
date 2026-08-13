@@ -1,0 +1,49 @@
+{
+  "schema": "graphreader.ocr-marker-production-composition-protocol.v1",
+  "task": "ocr-marker-production-composition",
+  "revision": "graphreader-csharp-ocr-marker-composition-v1",
+  "composition_id": "production-ocr-to-normalized-marker-composed-v1",
+  "state": "frozen_before_any_model_execution_on_the_new_split",
+  "split": {
+    "name": "sealed_public",
+    "scene_count": 40,
+    "scene_width": 640,
+    "scene_height": 320,
+    "plot_bounds": [104, 48, 510, 256],
+    "secret_seed_generated_once_and_not_serialized": true,
+    "predecessor_fixture_bytes_reused": false
+  },
+  "composition": {
+    "ocr_text_mask_source": "accepted_CSharp_OcrResult_regions_and_masks_only",
+    "artifact_mask_source": "checksum_bound_fixture_authored_structure_plane",
+    "artifact_mask_production_approval": false,
+    "marker_runtime": "normalized_marker_proposal_runtime_v1"
+  },
+  "gates": {
+    "exact_ocr_region_count_every_fixture": true,
+    "recognition_exact_match_minimum": 0.9,
+    "character_error_rate_maximum": 0.05,
+    "role_accuracy_minimum": 0.9,
+    "numeric_exact_match_minimum": 0.9,
+    "word_exact_match_minimum": 0.9,
+    "ambiguity_exact_match_minimum": 0.9,
+    "exact_marker_count_every_fixture": true,
+    "marker_false_positives": 0,
+    "marker_false_negatives": 0,
+    "marker_duplicates": 0,
+    "text_marker_creation_count": 0,
+    "prohibited_structure_hits": 0,
+    "direct_fixture_byte_execution_required": true,
+    "direct_tensor_hash_per_model_call_required": true,
+    "provider": "CPUExecutionProvider"
+  },
+  "synthetic_only": true,
+  "private_or_article_images": false,
+  "chandler_included": false,
+  "generalization_label_included": false,
+  "candidate_mode_only": true,
+  "manifest_created": false,
+  "model_store_promoted": false,
+  "production_approval": false,
+  "release_eligible": false
+}
