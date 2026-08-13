@@ -1,0 +1,47 @@
+{
+  "binding": {
+    "candidate_hash_key_schema": [
+      "detector_onnx_sha256",
+      "official_recognizer_onnx_sha256",
+      "numeric_recognizer_onnx_sha256",
+      "spacing_source_sha256"
+    ],
+    "candidate_hashes": {
+      "detector_onnx_sha256": "2d35ce2f55cee8317dfe1faf0281a6e87693cca485dbdaf39e4039ced5b97d9c",
+      "numeric_recognizer_onnx_sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+      "official_recognizer_onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+      "spacing_source_sha256": "42377b7ff0c650518861940a04f31382c8bed40013089354586e34bde12d4c40"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "8d250b9f873aad9fecbda5f619abb35b58d92881b41f01d78c95005cbf8f1ca7",
+    "evaluator_source_bundle_sha256": "2eacc68b166a398f9b1012028c845f3b44ba85f8c7e9097f82dc53020c787fe4",
+    "evaluator_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/ocr/component_context_detector_v7/dataset.py",
+      "ml/ocr/component_ensemble_v5/dataset.py",
+      "ml/ocr/component_geometric_v4/dataset.py",
+      "ml/ocr/component_recall_detector_v9/dataset.py",
+      "ml/ocr/component_region_detector_v6/dataset.py",
+      "ml/ocr/official_bakeoff/production_evaluate.py",
+      "ml/ocr/official_recognition_spacing_v2/spacing.py",
+      "ml/ocr/production_composition_v1/dataset.py",
+      "ml/ocr/production_composition_v2/dataset.py",
+      "ml/ocr/production_composition_v2/pipeline.py",
+      "ml/ocr/production_composition_v2/protocol.py",
+      "ml/ocr/production_composition_v2/validation_gate.py"
+    ],
+    "gate_config_sha256": "9ae98ff0d89679657e507d1c4b975ccb4a19d66b012daab666334f7b078b8503",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "graphreader-v9-official-spacing-p2-numeric-v5-composition-v2-validation-v1",
+    "split_config_path": "ml/ocr/production_composition_v2/gates/validation-v1.json",
+    "split_config_sha256": "64d24ad042311102f8f8314fc8e32b4d0969b3e37a6028cef33a778dde0ce346",
+    "task": "ocr-production-composition"
+  },
+  "evaluation_count": 1,
+  "key": "7f85986285a6dd7b4ffed8527c75a816d8753be7e6960436a5080a37cb183886",
+  "opened_utc": "2026-08-13T00:22:50.645273+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

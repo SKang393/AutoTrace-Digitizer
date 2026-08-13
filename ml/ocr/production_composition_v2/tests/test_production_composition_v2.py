@@ -67,12 +67,24 @@ def test_archives_are_byte_bound_and_public_truth_is_unopened() -> None:
         assert sha256_file(REPO_ROOT / seal["private_manifest_path"]) == seal["private_manifest_sha256"]
 
 
-def test_preregistration_cannot_promote_or_open_public_gate() -> None:
+def test_failed_validation_cannot_promote_or_open_public_gate() -> None:
     protocol = _load(ROOT / "PROTOCOL.json")
+    report = _load(ROOT / "VALIDATION_REPORT.json")
     assert protocol["revision"] == REVISION
     assert protocol["production_approval"] is False
     assert protocol["release_eligible"] is False
-    assert not (ROOT / "VALIDATION_REPORT.json").exists()
+    assert report["status"] == "fail"
+    assert report["evaluation_count"] == 1
+    assert report["production_approval"] is False
+    assert report["release_eligible"] is False
+    assert report["metrics"]["true_positives"] == 399
+    assert report["metrics"]["false_negatives"] == 1
+    assert report["metrics"]["false_positives"] == 0
+    assert report["metrics"]["duplicate_region_count"] == 0
+    assert report["metrics"]["prohibited_structure_hits"] == 0
+    assert report["metrics"]["recognition_exact_match"] == 0.955
+    assert sha256_file(ROOT / "VALIDATION_REPORT.json") == (
+        "7a20ae70e9c970f2d10dd80f03a41ab363424cf1a33d98327e835727b587bed1"
+    )
     assert not (ROOT / "PUBLIC_GATE_REPORT.json").exists()
     assert not any(REPO_ROOT.glob("models/manifest/ocr/*composition-v2*.json"))
-
