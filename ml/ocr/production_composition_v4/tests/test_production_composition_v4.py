@@ -38,4 +38,15 @@ def test_gate_binds_all_transitive_sources_and_passed_component_hashes()->None:
 def test_consumed_predecessor_and_component_evidence_are_unchanged()->None:
     assert sha256_file(REPO_ROOT/"ml/ocr/production_composition_v3/VALIDATION_REPORT.json")=="905bb12948ce7bdcdba95f4940e9b1b5f97017da6586c808ff5c43e128049ea9"
     assert sha256_file(REPO_ROOT/"ml/ocr/ambiguity_context_classifier_v2/artifacts/P2-run/graph-ambiguity-line-context-v2-p2.onnx")==AMBIGUITY_RECOGNIZER_ONNX_SHA256
-    assert not (ROOT/"VALIDATION_REPORT.json").exists() and not (ROOT/"PUBLIC_GATE_REPORT.json").exists()
+    assert not (ROOT/"PUBLIC_GATE_REPORT.json").exists()
+
+def test_failed_validation_is_consumed_and_public_remains_unopened()->None:
+    report=load(ROOT/"VALIDATION_REPORT.json"); metrics=report["metrics"]
+    assert sha256_file(ROOT/"VALIDATION_REPORT.json")=="075eb4cfee77591b8c2f16e3752a85364db261425ca477d99b26d940733a978e"
+    assert report["status"]=="fail" and report["evaluation_count"]==1
+    assert metrics["true_positives"]==476 and metrics["false_negatives"]==4 and metrics["false_positives"]==0
+    assert metrics["numeric_rescue_count"]==4 and metrics["ambiguity_exact_match"]==0.5
+    assert metrics["spacing_changed_nonspace_truth_count"]==1
+    public=load(ROOT/"SEALED_PUBLIC_TEST_SEAL.json")
+    assert public["truth_hidden_from_model_execution_until_gate"] is True
+    assert not (ROOT/"PUBLIC_GATE_REPORT.json").exists()
