@@ -63,7 +63,7 @@ def evaluate_candidate(*, onnx_path: Path, selection_report_path: Path, output_p
         raise RuntimeError("OCR V11 public gate is not authorized by the canonical ledger")
     if (
         result.get("status") != "selected_public_gate_pending" or result.get("onnx_sha256") != onnx_sha
-        or result.get("selection_report_sha256") != selection_sha or selection.get("status") != "selected"
+        or result.get("report_sha256") != selection_sha or selection.get("status") != "selected"
         or selection.get("selection_gate_passed") is not True or selection.get("onnx_parity_passed") is not True
         or selection.get("sealed_public_archive_opened") is not False or threshold not in THRESHOLDS
     ):

@@ -2957,8 +2957,8 @@
       "sealed_public_negative_proposal_count": 8776,
       "sealed_public_split_fingerprint": "30475a609373cef4c74f8234cec1d5a2d314b0f85ef96a2bd50834687107eebd",
       "public_gate_config_path": "ml/ocr/composite_proposal_role_v11/gates/sealed-public-v1.json",
-      "public_gate_config_sha256": "ef27ad61543a3b488290533979619332e76ed68249ed8df92c11749da6051c3a",
-      "expected_public_evaluator_source_bundle_sha256": "7864ab8d0e65a6b0a2cf68e9795a998586b772dda411fc1741e2da128e6db12b",
+      "public_gate_config_sha256": "c8cda545db7fe4f63b7f93e4a6262d079d20976502646a889a620882f24fa765",
+      "expected_public_evaluator_source_bundle_sha256": "d16b4df8711600ee5faaeebf1b89f26b557d18521e1a2c3a15af2e9606d3c421",
       "candidate_config_paths": {
         "P1": "ml/ocr/composite_proposal_role_v11/training/p1.json",
         "P2": "ml/ocr/composite_proposal_role_v11/training/p2.json"

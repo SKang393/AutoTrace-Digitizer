@@ -153,10 +153,13 @@ def test_p2_repairs_only_absolute_export_parity_without_training() -> None:
 
 def test_p2_selected_result_is_still_not_production_approved() -> None:
     result = json.loads(P2_RESULT_PATH.read_text(encoding="utf-8"))
+    ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
+    entry = next(item for item in ledger["revisions"] if item.get("revision") == REVISION)
     assert result["status"] == "selected_public_gate_pending"
     assert result["optimizer_steps"] == 0
     assert result["weights_changed"] is False
     assert result["onnx_parity_passed"] is True
+    assert result["report_sha256"] == entry["p2_selection_report_sha256"]
     assert result["selection_metrics"]["exact_scene_count"] == result["selection_metrics"]["scene_count"] == 96
     assert result["selection_metrics"]["false_positives"] == result["selection_metrics"]["false_negatives"] == 0
     assert result["public_gate_evaluations"] == 0
