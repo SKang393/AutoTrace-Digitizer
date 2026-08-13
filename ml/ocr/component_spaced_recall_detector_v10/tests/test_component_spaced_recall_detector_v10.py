@@ -11,6 +11,11 @@ from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 from ml.ocr.component_spaced_recall_detector_v10.dataset import build_split, proposal_summary, split_fingerprint
 from ml.ocr.component_spaced_recall_detector_v10.protocol import BASE_ONNX_SHA256, REVISION, SPLITS, protocol_configuration
 from ml.ocr.component_spaced_recall_detector_v10.sealed_gate import EVALUATOR_SOURCE_PATHS, SPLIT_CONFIG_PATH
+from ml.ocr.component_spaced_recall_detector_v10.train_p2 import RUNNER_SOURCE_PATHS
+from ml.ocr.component_spaced_recall_detector_v10.training_data_p2 import (
+    NEGATIVE_CAP_PER_SCENE,
+    training_examples,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -49,17 +54,40 @@ def test_p1_is_zero_optimizer_exact_onnx_threshold_only() -> None:
     assert config["predecessor_fixture_bytes_reused"] is False
 
 
-def test_ledger_records_consumed_failed_p1() -> None:
+def test_ledger_records_consumed_p1_and_authorized_p2() -> None:
     ledger = _load(LEDGER)
     entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
-    assert entry["status"] == "candidate_1_failed_selection"
+    config_path = ROOT / "training/p2.json"
+    assert entry["status"] == "candidate_2_preregistered"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["candidate_config_sha256"]["P2"] == sha256_file(config_path)
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P2"
     assert entry["public_gate_authorized"] is False
+
+
+def test_p2_preregistration_binds_training_only_examples_and_runner() -> None:
+    config = _load(ROOT / "training/p2.json")
+    values, labels, evidence = training_examples()
+    assert config["candidate_id"] == "P2"
+    assert config["experiment_ordinal"] == 2
+    assert config["source_checkpoint_sha256"] == sha256_file(
+        REPO_ROOT / config["source_checkpoint_path"]
+    )
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, RUNNER_SOURCE_PATHS
+    )
+    assert evidence["negative_cap_per_scene"] == NEGATIVE_CAP_PER_SCENE
+    assert evidence["proposal_count"] == len(labels) == len(values) == config["proposal_count"]
+    assert evidence["positive_proposal_count"] == config["positive_proposal_count"]
+    assert evidence["negative_proposal_count"] == config["negative_proposal_count"]
+    assert evidence["tensor_label_stream_sha256"] == config["tensor_label_stream_sha256"]
+    assert evidence["validation_or_public_pixels_used"] is False
+    assert config["public_gate_archive_opened"] is False
+    assert config["production_approval"] is False
 
 
 def test_public_gate_is_hidden_bound_and_unapproved() -> None:

@@ -2400,7 +2400,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-spaced-component-recall-v10",
-      "status": "candidate_1_failed_selection",
+      "status": "candidate_2_preregistered",
       "defect_class": "generic spaced multi-glyph text-region recall in production composition",
       "prior_revision": "graph-text-component-recall-v9",
       "trigger_evidence_path": "ml/ocr/production_composition_v2/VALIDATION_REPORT.json",
@@ -2414,19 +2414,22 @@
       "trigger_public_archive_opened": false,
       "prior_exposed_fixture_bytes_reused": false,
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": [
+        "P2"
+      ],
       "consumed_candidate_ids": [
         "P1"
       ],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "candidate_config_paths": {
-        "P1": "ml/ocr/component_spaced_recall_detector_v10/training/p1.json"
+        "P1": "ml/ocr/component_spaced_recall_detector_v10/training/p1.json",
+        "P2": "ml/ocr/component_spaced_recall_detector_v10/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "b88f07495c44799684f0dcdf2516e7ee2fe33b2ef93083178a88ecccdf158740"
+        "P1": "b88f07495c44799684f0dcdf2516e7ee2fe33b2ef93083178a88ecccdf158740",
+        "P2": "fb4edb60b49f83ed8c8d9b13d5bffeec46de578f2b2381faa7a5bec5bbcff21d"
       },
       "protocol_path": "ml/ocr/component_spaced_recall_detector_v10/PROTOCOL.json",
       "protocol_sha256": "60dc6f60e37ed403c4e65d4c0489de3ce575fc6f3cda9dbcf56c327db87a05b4",
@@ -2458,9 +2461,15 @@
       "p1_selection_duplicate_region_count": 0,
       "p1_selection_prohibited_structure_hits": 0,
       "p1_public_gate_evaluations": 0,
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "P1 is consumed. P2 remains unregistered until a separate committed training repair preregistration.",
+      "p2_expected_runner_source_bundle_sha256": "430a7da2fac1bd3157351bc4c90ff7a12d7e69e0c4bd6a7bae5ed6fcd37da31f",
+      "p2_source_checkpoint_sha256": "bf897f49e9ac092578f7546ff206dc523f536080d5fbfa960590357795746f85",
+      "p2_training_scene_count": 240,
+      "p2_training_proposal_count": 7999,
+      "p2_training_tensor_label_stream_sha256": "1f1bc23cd4ed06f95d638bbf53de27089b5572f6abe91d824f4129050abdbf9c",
+      "p2_isolated_change": "fine-tune only the exact checksum-bound V9 P2 checkpoint on positive and capped negative proposals from the already-frozen V10 training scenes; retain the model architecture, proposal algorithm, tensor encoding, balanced cross-entropy, output-logit scale, thresholds, validation split, and unopened public gate",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P2",
+      "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,
@@ -2469,7 +2478,7 @@
       "model_store_promoted": false,
       "production_approval": false,
       "release_eligible": false,
-      "refusal_required_before_output": true
+      "refusal_required_before_output": false
     }
   ]
 }
