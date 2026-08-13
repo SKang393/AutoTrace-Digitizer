@@ -33,6 +33,7 @@ CONFIG_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/training/p1.json"
 P2_CONFIG_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/training/p2.json"
 P1_RESULT_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/P1_RESULT.json"
 P2_RESULT_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/P2_RESULT.json"
+PUBLIC_RESULT_PATH = ROOT / "ml/ocr/composite_proposal_role_v11/PUBLIC_GATE_RESULT.json"
 
 
 def test_protocol_file_is_canonical_and_fail_closed() -> None:
@@ -73,11 +74,11 @@ def test_model_contract_is_exact_and_finite() -> None:
         model(torch.zeros((1, 2, 32, ENCODED_WIDTH - 1), dtype=torch.float32))
 
 
-def test_canonical_ledger_consumes_p1_and_p2_then_authorizes_one_public_gate() -> None:
+def test_canonical_ledger_consumes_p1_p2_and_the_only_public_gate() -> None:
     ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == REVISION)
     assert entry["task"] == TASK
-    assert entry["status"] == "candidate_2_selected_public_gate_pending"
+    assert entry["status"] == "public_gate_passed_unapproved"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
@@ -105,10 +106,18 @@ def test_canonical_ledger_consumes_p1_and_p2_then_authorizes_one_public_gate() -
     assert entry["p2_onnx_parity_passed"] is True
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert entry["public_gate_authorized"] is True
-    assert entry["public_gate_authorized_candidate_id"] == "P2"
-    assert entry["public_gate_evaluations"] == 0
-    assert entry["public_gate_archive_opened"] is False
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized_candidate_id"] is None
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_archive_opened"] is True
+    assert entry["public_gate_status"] == "pass"
+    assert entry["public_gate_result_sha256"] == sha256_file(PUBLIC_RESULT_PATH)
+    assert entry["public_exact_scene_count"] == entry["public_scene_count"] == 128
+    assert entry["public_true_positives"] == entry["public_truth_region_count"] == 1024
+    assert entry["public_false_positives"] == entry["public_false_negatives"] == 0
+    assert entry["public_duplicate_region_count"] == entry["public_prohibited_structure_hits"] == 0
+    assert entry["public_role_accuracy"] == entry["public_minimum_per_role_accuracy"] == 1.0
+    assert entry["public_direct_execution_inference_calls"] == 128
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
 
@@ -164,5 +173,19 @@ def test_p2_selected_result_is_still_not_production_approved() -> None:
     assert result["selection_metrics"]["false_positives"] == result["selection_metrics"]["false_negatives"] == 0
     assert result["public_gate_evaluations"] == 0
     assert result["public_gate_archive_opened"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
+
+
+def test_public_result_passes_only_the_proposal_role_gate() -> None:
+    result = json.loads(PUBLIC_RESULT_PATH.read_text(encoding="utf-8"))
+    assert result["status"] == "public_gate_passed_unapproved"
+    assert result["public_gate_status"] == "pass"
+    assert result["public_exact_scene_count"] == result["public_scene_count"] == 128
+    assert result["public_true_positives"] == result["public_truth_region_count"] == 1024
+    assert result["public_false_positives"] == result["public_false_negatives"] == 0
+    assert result["public_duplicate_region_count"] == result["public_prohibited_structure_hits"] == 0
+    assert result["public_role_accuracy"] == result["public_minimum_per_role_accuracy"] == 1.0
+    assert result["direct_execution_inference_calls"] == 128
     assert result["production_approval"] is False
     assert result["release_eligible"] is False
