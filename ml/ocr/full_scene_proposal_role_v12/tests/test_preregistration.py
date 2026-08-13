@@ -59,23 +59,31 @@ def test_model_contract_is_exact_finite_and_geometry_gated() -> None:
         model(torch.zeros((1, 2, 32, ENCODED_WIDTH - 1), dtype=torch.float32))
 
 
-def test_no_split_or_candidate_artifacts_exist_before_freeze() -> None:
+def test_split_and_candidate_records_are_frozen_but_execution_is_closed() -> None:
     root = ROOT / "ml/ocr/full_scene_proposal_role_v12"
-    for relative in (
-        "SELECTION_MANIFEST.json", "SEALED_PUBLIC_TEST_SEAL.json",
-        "gates/sealed-public-v1.json", "training/p1.json", "artifacts",
-    ):
-        assert not (root / relative).exists()
+    for relative in ("SELECTION_MANIFEST.json", "SEALED_PUBLIC_TEST_SEAL.json", "gates/sealed-public-v1.json", "training/p1.json"):
+        assert (root / relative).is_file()
+    selection = json.loads((root / "SELECTION_MANIFEST.json").read_text(encoding="utf-8"))
+    seal = json.loads((root / "SEALED_PUBLIC_TEST_SEAL.json").read_text(encoding="utf-8"))
+    config = json.loads((root / "training/p1.json").read_text(encoding="utf-8"))
+    assert selection["sealed_public_truth_available_to_candidate"] is False
+    assert seal["truth_hidden_from_candidate_runner"] is True
+    assert seal["public_gate_evaluations"] == 0
+    assert config["public_gate_archive_opened"] is False
+    assert not (root / "artifacts/P1-run").exists()
+    for record in (selection, seal, config):
+        assert record["production_approval"] is False
+        assert record["release_eligible"] is False
 
 
 def test_canonical_ledger_records_design_without_authorizing_execution() -> None:
     ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-full-scene-proposal-role-v12")
-    assert entry["status"] == "design_preregistered"
+    assert entry["status"] == "split_frozen_candidate_pending_authorization"
     assert entry["protocol_sha256"] == sha256_file(PROTOCOL_PATH)
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
-    assert entry["remaining_unregistered_candidate_ids"] == ["P1", "P2", "P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False

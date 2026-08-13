@@ -1,0 +1,17 @@
+{
+  "evaluation_limit": 1,
+  "expected_candidate_hash_keys": [
+    "onnx_sha256",
+    "selection_report_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "a9a4afc4d6e85204d9bd5b8ce05f1c7d83df5405130e9b06ae59263d40ba266e",
+  "expected_evaluator_source_bundle_sha256": "6478ca6d9367206b4432a232b9901a1c9cb214494940bbfd62c4aa09f1336acf",
+  "expected_gate_config_sha256": "c32a21be7252efabab3b9552ede0d16fa70bc9bab7cfddf9cd0b712f5d6592b8",
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-full-scene-proposal-role-v12-public-v1",
+  "schema": "graphreader.ocr-full-scene-proposal-role-gate-config.v1",
+  "sealed_public_test_seal_path": "ml/ocr/full_scene_proposal_role_v12/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "7fe4adeb7901e94f9e5ead52d25f6ad58002c5c1c8b5d24568c58ed8992378df",
+  "task": "ocr-detection"
+}
