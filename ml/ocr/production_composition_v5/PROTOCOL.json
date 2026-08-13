@@ -1,0 +1,113 @@
+{
+  "chandler_included": false,
+  "gates": {
+    "ambiguity_exact_match_minimum": 0.9,
+    "character_error_rate_maximum": 0.05,
+    "direct_fixture_byte_execution_required": true,
+    "duplicate_region_count": 0,
+    "exact_match_minimum": 0.9,
+    "exact_region_count_every_fixture": true,
+    "false_region_count": 0,
+    "forbidden_numeric_route_count": 0,
+    "forbidden_official_rescue_route_count": 0,
+    "missed_region_count": 0,
+    "numeric_exact_match_minimum": 0.9,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "role_accuracy_minimum": 0.9,
+    "spacing_changed_nonspace_truth_count": 0,
+    "word_exact_match_minimum": 0.9
+  },
+  "generalization_label_included": false,
+  "isolated_changes": [
+    "replace the mismatched V4 ambiguity crop path with the exact checksum-bound source-group V3 adapter and ONNX",
+    "for detector-rejected proposals only in the fixed 0.90 inclusive to 0.95 exclusive score band, accept only valid official-recognizer numeric text at x- or y-tick geometry",
+    "never use the numeric specialist alone to accept a rejected proposal",
+    "when official raw text is a valid graph number, reject a spacing transform that would make it nonnumeric"
+  ],
+  "manifest_created": false,
+  "marker_creation_evaluated": false,
+  "model_store_promoted": false,
+  "models": {
+    "ambiguity_specialist": {
+      "onnx_sha256": "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096",
+      "public_accuracy": 1.0,
+      "public_report_sha256": "a69b11a164a87f9df959eda863f2263110c2eec3e1d3102f610f7ae32c4e99bd",
+      "revision": "graph-ambiguity-source-group-v3"
+    },
+    "detector": {
+      "onnx_sha256": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+      "threshold": 0.95
+    },
+    "numeric_specialist": {
+      "onnx_sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+      "threshold": 0.65
+    },
+    "official_recognizer": {
+      "onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+      "spacing_revision": "official-ppocrv5-conservative-spacing-v3-p1"
+    }
+  },
+  "predecessor": {
+    "ambiguity_exact_match": 0.5,
+    "false_negatives": 4,
+    "fixture_bytes_reused": false,
+    "public_archive_opened": false,
+    "revision": "graphreader-v10-numeric-rescue-context-ambiguity-composition-v4",
+    "status": "failed",
+    "validation_report_sha256": "075eb4cfee77591b8c2f16e3752a85364db261425ca477d99b26d940733a978e"
+  },
+  "private_or_article_images": false,
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graphreader-v10-official-rejected-tick-rescue-source-group-v3-composition-v5",
+  "schema": "graphreader.ocr-production-composition-protocol.v5",
+  "split_generator_source_bundle_sha256": "8b0c8c53ec3b2243829d60b01b4b5a3d2d06ab8c3b2c52ab394c223958cd3a56",
+  "split_generator_source_paths": [
+    "ml/ocr/production_composition_v5/dataset.py",
+    "ml/ocr/production_composition_v5/prepare_split.py",
+    "ml/ocr/production_composition_v5/protocol.py",
+    "ml/ocr/production_composition_v1/dataset.py",
+    "ml/ocr/component_context_detector_v7/dataset.py",
+    "ml/ocr/component_region_detector_v6/dataset.py"
+  ],
+  "splits": [
+    {
+      "degradation_family": "resample-contrast-diagonal-fade-composition-v5-validation",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "font_sha256": [
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      ],
+      "renderer_family": "six-role-context-composition-v5-validation",
+      "scene_count": 112,
+      "seed_offset": 1037000,
+      "split": "validation"
+    },
+    {
+      "degradation_family": "affine-quantize-edge-fade-composition-v5-public",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "font_sha256": [
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      ],
+      "renderer_family": "six-role-context-composition-v5-public",
+      "scene_count": 144,
+      "seed_offset": 1109000,
+      "split": "sealed_public"
+    }
+  ],
+  "state": "fresh_splits_frozen_before_any_composed_model_execution",
+  "synthetic_only": true,
+  "task": "ocr-production-composition"
+}

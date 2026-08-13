@@ -1,0 +1,20 @@
+{
+  "evaluation_limit": 1,
+  "expected_candidate_hash_keys": [
+    "detector_onnx_sha256",
+    "official_recognizer_onnx_sha256",
+    "numeric_recognizer_onnx_sha256",
+    "ambiguity_recognizer_onnx_sha256",
+    "spacing_source_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "a14225a21e8b45187e0c183eec014c81c28eb0b1ac5148e4a81102637c4e6944",
+  "expected_evaluator_source_bundle_sha256": "e725e456f71f1b91baee93601d69cd2cfbc19f35d98ad0f60420da1c96bcbfd9",
+  "expected_gate_config_sha256": "2da504c51d9e767efc7229bc92b66af3a937e47fa2fabb76d80748fc0f33ecc4",
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graphreader-v10-official-rejected-tick-rescue-source-group-v3-composition-v5-validation-v1",
+  "schema": "graphreader.ocr-production-composition-validation-gate-config.v5",
+  "task": "ocr-production-composition",
+  "validation_seal_path": "ml/ocr/production_composition_v5/VALIDATION_SEAL.json",
+  "validation_seal_sha256": "ec338269ae22d689c084db5142f4db73afdbb629ef85d3cc2b35d55aa67ef03e"
+}
