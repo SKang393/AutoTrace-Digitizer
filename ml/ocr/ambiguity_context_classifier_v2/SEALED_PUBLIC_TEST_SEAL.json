@@ -1,0 +1,22 @@
+{
+  "schema": "graphreader.ocr-ambiguity-context-public-seal.v1",
+  "partition": "sealed_public",
+  "sample_count": 960,
+  "count_per_class": 240,
+  "class_order": ["O", "o", "l", "I"],
+  "fixture_archive_path": "ml/ocr/ambiguity_context_classifier_v2/artifacts/split-freeze/sealed_public/fixtures.zip",
+  "fixture_archive_sha256": "b32360575ac82229a48e22312df925583fdb169e068b62abb2e78bfcb2698e93",
+  "fixture_archive_bytes": 532836,
+  "private_manifest_path": "ml/ocr/ambiguity_context_classifier_v2/artifacts/split-freeze/sealed_public/private-manifest.json",
+  "private_manifest_sha256": "f99d9eb7c7154cf41011b0265cc263b614baab2af12d1c6551cad8f741f2cb79",
+  "tensor_label_stream_sha256": "c71dad2da3c730eafbe105350632b7c6fa7d492385b5538b8f8afc05c3bf090d",
+  "split_fingerprint": "02f8345229810812acff41c4419c3d00bd7d6b254af98129aa4fdc303485a01f",
+  "truth_hidden_from_model_execution_until_gate": true,
+  "evaluation_limit": 1,
+  "public_gate_evaluations": 0,
+  "prior_exposed_fixture_bytes_reused": false,
+  "synthetic_only": true,
+  "private_or_article_images": false,
+  "chandler_included": false,
+  "generalization_label_included": false
+}

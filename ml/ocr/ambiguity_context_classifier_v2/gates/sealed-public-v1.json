@@ -1,0 +1,16 @@
+{
+  "schema": "graphreader.ocr-ambiguity-context-public-gate-config.v1",
+  "task": "ocr-recognition",
+  "revision": "graph-ambiguity-line-context-v2-public-v1",
+  "sealed_public_test_seal_path": "ml/ocr/ambiguity_context_classifier_v2/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "84c2cc0422ba0ffc75aa3bbc6ee440a475a5876c96e6bebfe6388354fce8fca5",
+  "fixture_archive_sha256": "b32360575ac82229a48e22312df925583fdb169e068b62abb2e78bfcb2698e93",
+  "private_manifest_sha256": "f99d9eb7c7154cf41011b0265cc263b614baab2af12d1c6551cad8f741f2cb79",
+  "expected_candidate_hash_keys": ["onnx_sha256", "selection_report_sha256"],
+  "expected_dataset_manifest_sha256": "f99d9eb7c7154cf41011b0265cc263b614baab2af12d1c6551cad8f741f2cb79",
+  "expected_evaluator_source_bundle_sha256": "0eb4576961323ad899e51cbc729e620e1d4a42ef3734a8ec01ac7c8c5f18babf",
+  "expected_gate_config_sha256": "24311b417728066041474bde7fd2bfbbde7ce4e2e920570bc8625e00134de2aa",
+  "evaluation_limit": 1,
+  "production_approval": false,
+  "release_eligible": false
+}

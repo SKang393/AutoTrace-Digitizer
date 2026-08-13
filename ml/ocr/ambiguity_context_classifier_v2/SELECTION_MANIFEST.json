@@ -1,0 +1,22 @@
+{
+  "schema": "graphreader.ocr-ambiguity-context-selection.v1",
+  "train_sample_count": 2560,
+  "train_count_per_class": 640,
+  "train_private_manifest_sha256": "87ad2f35ee5948e014e016daa94a0b93f45df952a8e3547a9422e71cae73e758",
+  "train_fixture_archive_sha256": "6bdf9d801a5602db507ccc089e6bf8064fe8f2d7b62d05edc0e45bcca6008aaf",
+  "train_tensor_label_stream_sha256": "e2b7d2376ba111909aa85ad0161a1bd4c0468303ce845df4bcef372f1ec6d574",
+  "train_split_fingerprint": "bf7b1f3cc2e0cf195f34c8d233dc0c32b301df9ee786fdbf180ae1469a9ebefb",
+  "validation_sample_count": 640,
+  "validation_count_per_class": 160,
+  "validation_private_manifest_sha256": "cda48707a36aebf86a0e9f1cbca6ef826d552eea6c4f3377d2fa947bdeac5a27",
+  "validation_fixture_archive_sha256": "871ada754c5e93f179fe336354ea75664dc915794795c2c40b61af5f8869b6c5",
+  "validation_tensor_label_stream_sha256": "216f62ddbad2f2e218a1258fc50a1d8a0a372a21af60d1f70155d6ac0adf55a0",
+  "validation_split_fingerprint": "39a2ea187470b94d03f1a2e4c5ebe70a0804004aa85d57c1730bd24388836c3b",
+  "class_order": ["O", "o", "l", "I"],
+  "coordinate_space": "complete-line-box-normalized glyph-centered crop",
+  "prior_exposed_fixture_bytes_reused": false,
+  "synthetic_only": true,
+  "private_or_article_images": false,
+  "chandler_included": false,
+  "generalization_label_included": false
+}

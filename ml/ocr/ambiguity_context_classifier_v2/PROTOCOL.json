@@ -1,0 +1,81 @@
+{
+  "architecture": "line-context-profile-cnn-v1",
+  "chandler_included": false,
+  "classes": [
+    "O",
+    "o",
+    "l",
+    "I"
+  ],
+  "consumed_candidates": [],
+  "currently_preregistered_candidate": "P1",
+  "defect_class": "isolated tight glyph normalization discarded line-relative case scale, making O and o non-identifiable in the exhausted V1 representation",
+  "experiment_budget": 3,
+  "gates": {
+    "onnx_argmax_mismatch_count": 0,
+    "onnx_parity_maximum_absolute_error": 0.00001,
+    "provider": "CPUExecutionProvider",
+    "sealed_accuracy_minimum": 0.97,
+    "sealed_macro_accuracy_minimum": 0.97,
+    "sealed_per_class_accuracy_minimum": 0.95,
+    "validation_accuracy_minimum": 0.97,
+    "validation_macro_accuracy_minimum": 0.97,
+    "validation_per_class_accuracy_minimum": 0.95
+  },
+  "generalization_label_included": false,
+  "input_contract": {
+    "coordinate_space": "complete-line-box-normalized glyph-centered crop",
+    "dtype": "float32",
+    "name": "glyphs",
+    "range": [
+      0,
+      1
+    ],
+    "shape": [
+      "batch",
+      1,
+      32,
+      32
+    ]
+  },
+  "isolated_change": "render and normalize the complete font line box before taking a fixed square glyph-centered crop, preserving case-relative height and baseline; train new project-owned weights from a new seed",
+  "manifest_created": false,
+  "model_license": "Apache-2.0",
+  "model_store_promoted": false,
+  "output_contract": {
+    "class_order": [
+      "O",
+      "o",
+      "l",
+      "I"
+    ],
+    "name": "logits",
+    "shape": [
+      "batch",
+      4
+    ]
+  },
+  "prior_exposed_fixture_bytes_reused": false,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-ambiguity-line-context-v2",
+  "runner_source_bundle_sha256": "5df2b532f4291909d210232fa12e10ebd9fd7eb3c4cf834899d6c790dbc846d2",
+  "schema": "graphreader.ocr-ambiguity-context-protocol.v1",
+  "seed": 20261421,
+  "split_counts_per_class": {
+    "sealed_public": 240,
+    "train": 640,
+    "validation": 160
+  },
+  "status": "candidate_1_preregistered",
+  "synthetic_only": true,
+  "task": "ocr-recognition",
+  "trigger_evidence": {
+    "p1_uppercase_o_accuracy": 0.7375,
+    "p2_lowercase_o_accuracy": 0.75625,
+    "path": "ml/ocr/ambiguity_glyph_classifier_v1/P2_RESULT.json",
+    "sha256": "5c8d252a54615382697130494b3fbe114b71cd55d6a194643aa79af65d2f7801",
+    "v1_public_archive_opened": false
+  }
+}
