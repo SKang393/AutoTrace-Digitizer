@@ -1,0 +1,39 @@
+{
+  "binding": {
+    "candidate_hash_key_schema": [
+      "onnx_sha256",
+      "spacing_source_sha256",
+      "selection_report_sha256"
+    ],
+    "candidate_hashes": {
+      "onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+      "selection_report_sha256": "1dfe29e25ea42acfabc327e64e1d872f8e38f9ef1f7f2de22ebd48a2734e09f7",
+      "spacing_source_sha256": "42377b7ff0c650518861940a04f31382c8bed40013089354586e34bde12d4c40"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "4183b3143b0036a76861dccec286128c7e1d3fce16ac9c98b1f0b8706424ba82",
+    "evaluator_source_bundle_sha256": "fc716334d1788b6501e1fdd7cb4ab18d7fc7684289e511e7d4db4120110345f7",
+    "evaluator_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/ocr/official_bakeoff/production_evaluate.py",
+      "ml/ocr/official_recognition_spacing_v2/evaluate.py",
+      "ml/ocr/official_recognition_spacing_v2/prepare_split.py",
+      "ml/ocr/official_recognition_spacing_v2/protocol.py",
+      "ml/ocr/official_recognition_spacing_v2/sealed_gate.py",
+      "ml/ocr/official_recognition_spacing_v2/spacing.py"
+    ],
+    "gate_config_sha256": "d52c8c3ec979126f850a333b84f664c134fd3bc903d733121a2712b54c11a24e",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "official-ppocrv5-image-spacing-v2-public-v1",
+    "split_config_path": "ml/ocr/official_recognition_spacing_v2/gates/sealed-public-p2-authorized.json",
+    "split_config_sha256": "0f734959d8de2da45b1613d4bf2a1a101bb66bc34ee3d1e21781cd7d006151fa",
+    "task": "ocr-recognition"
+  },
+  "evaluation_count": 1,
+  "key": "d5c78c28618febc6c1739d081d38f6337b7f3a6064b70af4e2832fb078165c45",
+  "opened_utc": "2026-08-13T00:00:08.460017+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

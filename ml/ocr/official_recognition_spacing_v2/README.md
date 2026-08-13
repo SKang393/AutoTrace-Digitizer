@@ -32,3 +32,9 @@ P2 then ran once from committed source and passed all 224 selection crops with
 exact match, role, numeric, word, and ambiguity accuracy `1.0`, CER `0.0`, and
 zero changes to truths without spaces. The public archive remains unopened and
 may be evaluated only once from the separately committed authorization.
+
+That single public run passed 287 of 288 crops exactly (`0.9965277777777778`),
+with CER `0.000946073793755913`, role accuracy `0.9965277777777778`, numeric
+and word exact `1.0`, ambiguity exact `0.9722222222222222`, and zero changes to
+truths without spaces. The public gate is now consumed. This remains an
+unapproved component pending production composition and every later gate.

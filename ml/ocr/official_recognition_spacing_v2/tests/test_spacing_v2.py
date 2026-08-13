@@ -98,10 +98,10 @@ def test_preregistration_binds_exact_weights_sources_and_unopened_public_gate() 
     assert public["truth_hidden_from_model_execution_until_gate"] is True
     assert public["public_gate_evaluations"] == 0
     assert CANDIDATE_ID == "P2"
-    assert entry["status"] == "candidate_2_selected_public_gate_pending"
+    assert entry["status"] == "public_gate_passed_unapproved"
     assert entry["execution_authorized"] is False
-    assert entry["public_gate_authorized"] is True
-    assert entry["public_gate_archive_opened"] is False
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_archive_opened"] is True
     assert entry["p2_result_sha256"] == sha256_file(ROOT / "P2_RESULT.json")
     assert protocol["gates"] == GATES
     assert protocol["production_approval"] is False
