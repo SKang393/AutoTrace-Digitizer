@@ -56,6 +56,16 @@ public sealed class OcrV8SourcePostprocessorTests
     }
 
     [TestMethod]
+    public void ConservativeSpacingCountsUnicodeScalarsWithoutSplittingSurrogatePairs()
+    {
+        OcrV8SourceCrop separated = CropWithBars((2, 4), (14, 17));
+
+        Assert.AreEqual(
+            "A 😀B",
+            OcrV8SourcePostprocessor.RestoreConservativeSourceSpaces(separated, "A😀B"));
+    }
+
+    [TestMethod]
     public async Task ExtendedAliasRouteExecutesExactGroupsAndReconstructsCanonicalText()
     {
         string directory = CreateDirectory();

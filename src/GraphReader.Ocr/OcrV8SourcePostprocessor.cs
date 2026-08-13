@@ -165,7 +165,10 @@ public sealed partial class OcrV8SourcePostprocessor
     {
         ValidateCrop(crop);
         ArgumentNullException.ThrowIfNull(rawPrediction);
-        string characters = string.Concat(rawPrediction.Where(static character => !char.IsWhiteSpace(character)));
+        Rune[] characters = rawPrediction
+            .EnumerateRunes()
+            .Where(static character => !Rune.IsWhiteSpace(character))
+            .ToArray();
         if (characters.Length < 2)
         {
             return rawPrediction;
@@ -182,7 +185,8 @@ public sealed partial class OcrV8SourcePostprocessor
         var offset = 0;
         for (var index = 0; index < counts.Length; index++)
         {
-            chunks[index] = characters.Substring(offset, counts[index]);
+            chunks[index] = string.Concat(
+                characters.AsSpan(offset, counts[index]).ToArray().Select(static character => character.ToString()));
             offset += counts[index];
         }
 
@@ -197,11 +201,12 @@ public sealed partial class OcrV8SourcePostprocessor
         ValidateCrop(crop);
         ArgumentNullException.ThrowIfNull(conservativePrediction);
         cancellationToken.ThrowIfCancellationRequested();
-        char[] nonspace = conservativePrediction
-            .Where(static character => !char.IsWhiteSpace(character))
+        Rune[] nonspace = conservativePrediction
+            .EnumerateRunes()
+            .Where(static character => !Rune.IsWhiteSpace(character))
             .ToArray();
         bool allExtended = nonspace.Length > 0 &&
-            nonspace.All(static character => ExtendedAmbiguityGlyphs.Contains(character, StringComparison.Ordinal));
+            nonspace.All(static character => ContainsAsciiRune(ExtendedAmbiguityGlyphs, character));
         Group[] groups = ActiveGroups(crop);
         if (allExtended)
         {
@@ -209,7 +214,7 @@ public sealed partial class OcrV8SourcePostprocessor
         }
 
         if (groups.Length != nonspace.Length ||
-            !nonspace.Any(static character => ExtendedAmbiguityGlyphs.Contains(character, StringComparison.Ordinal)))
+            !nonspace.Any(static character => ContainsAsciiRune(ExtendedAmbiguityGlyphs, character)))
         {
             return Unchanged(conservativePrediction);
         }
@@ -217,7 +222,7 @@ public sealed partial class OcrV8SourcePostprocessor
         int[] indices = allExtended
             ? Enumerable.Range(0, nonspace.Length).ToArray()
             : Enumerable.Range(0, nonspace.Length)
-                .Where(index => CanonicalAmbiguityGlyphs.Contains(nonspace[index], StringComparison.Ordinal))
+                .Where(index => ContainsAsciiRune(CanonicalAmbiguityGlyphs, nonspace[index]))
                 .ToArray();
         if (indices.Length == 0)
         {
@@ -296,14 +301,13 @@ public sealed partial class OcrV8SourcePostprocessor
         {
             int bestClass = ArgMaxFinite(logits.AsSpan(targetIndex * classCount, classCount));
             int characterIndex = indices[targetIndex];
-            char replacement = CanonicalAmbiguityGlyphs[bestClass];
+            var replacement = new Rune(CanonicalAmbiguityGlyphs[bestClass]);
             changed += nonspace[characterIndex] == replacement ? 0 : 1;
             nonspace[characterIndex] = replacement;
         }
 
-        string final = nonspace.All(static character =>
-                CanonicalAmbiguityGlyphs.Contains(character, StringComparison.Ordinal))
-            ? string.Join(' ', nonspace)
+        string final = nonspace.All(static character => ContainsAsciiRune(CanonicalAmbiguityGlyphs, character))
+            ? string.Join(' ', nonspace.Select(static character => character.ToString()))
             : ReinsertWhitespace(conservativePrediction, nonspace);
         return new OcrV8AmbiguityResult(
             final,
@@ -741,13 +745,16 @@ public sealed partial class OcrV8SourcePostprocessor
         return best;
     }
 
-    private static string ReinsertWhitespace(string source, char[] nonspace)
+    private static bool ContainsAsciiRune(string values, Rune candidate) =>
+        candidate.IsAscii && values.Contains((char)candidate.Value, StringComparison.Ordinal);
+
+    private static string ReinsertWhitespace(string source, Rune[] nonspace)
     {
         var result = new StringBuilder(source.Length);
         var index = 0;
-        foreach (char character in source)
+        foreach (Rune character in source.EnumerateRunes())
         {
-            result.Append(char.IsWhiteSpace(character) ? character : nonspace[index++]);
+            result.Append(Rune.IsWhiteSpace(character) ? character.ToString() : nonspace[index++].ToString());
         }
 
         return result.ToString();
