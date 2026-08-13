@@ -1,0 +1,52 @@
+{
+  "binding": {
+    "candidate_hash_key_schema": [
+      "detector_onnx_sha256",
+      "official_recognizer_onnx_sha256",
+      "numeric_recognizer_onnx_sha256",
+      "spacing_source_sha256"
+    ],
+    "candidate_hashes": {
+      "detector_onnx_sha256": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+      "numeric_recognizer_onnx_sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+      "official_recognizer_onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+      "spacing_source_sha256": "42377b7ff0c650518861940a04f31382c8bed40013089354586e34bde12d4c40"
+    },
+    "committed_source_enforcement": true,
+    "dataset_manifest_sha256": "618c349a29697e258284db3f89fa23adc46a9ccb396f05373a27df771dea9f77",
+    "evaluator_source_bundle_sha256": "697b1774f10e288a51930a26da32a209e48368f531db125f594c1b3b059ff5c2",
+    "evaluator_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/ocr/component_context_detector_v7/dataset.py",
+      "ml/ocr/component_ensemble_v5/dataset.py",
+      "ml/ocr/component_ensemble_v5/protocol.py",
+      "ml/ocr/component_geometric_v4/dataset.py",
+      "ml/ocr/component_recall_detector_v9/dataset.py",
+      "ml/ocr/component_region_detector_v6/dataset.py",
+      "ml/ocr/component_spaced_recall_detector_v10/dataset.py",
+      "ml/ocr/component_spaced_recall_detector_v10/protocol.py",
+      "ml/ocr/official_bakeoff/production_evaluate.py",
+      "ml/ocr/official_recognition_spacing_v2/spacing.py",
+      "ml/ocr/production_composition_v1/dataset.py",
+      "ml/ocr/production_composition_v2/pipeline.py",
+      "ml/ocr/production_composition_v2/protocol.py",
+      "ml/ocr/production_composition_v3/dataset.py",
+      "ml/ocr/production_composition_v3/pipeline.py",
+      "ml/ocr/production_composition_v3/protocol.py",
+      "ml/ocr/production_composition_v3/validation_gate.py"
+    ],
+    "gate_config_sha256": "9ae98ff0d89679657e507d1c4b975ccb4a19d66b012daab666334f7b078b8503",
+    "ledger_mode": "canonical_repository",
+    "ledger_root": "ml/markers/gate-seals",
+    "retired_policy_sha256": "a6aa944a226320309ec8a2a0805bc3700334dedcc702f601a00bb99d282bd8a8",
+    "revision": "graphreader-v10-official-spacing-p2-numeric-v5-composition-v3-validation-v1",
+    "split_config_path": "ml/ocr/production_composition_v3/gates/validation-v1.json",
+    "split_config_sha256": "8156ae079930d3cba408b60283c7608e8722b3811e0c8d33cdc8ef80790d1362",
+    "task": "ocr-production-composition"
+  },
+  "evaluation_count": 1,
+  "key": "27e3daa7ceab8766d70efac2f172b602e0689dccf551ebda505afb790068ef79",
+  "opened_utc": "2026-08-13T02:41:36.300644+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

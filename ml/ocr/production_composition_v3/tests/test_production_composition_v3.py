@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Sungwoo Kang
-"""Fail-closed tests for preregistered OCR production-composition V3."""
+"""Fail-closed tests for consumed OCR production-composition V3."""
 
 from __future__ import annotations
 
@@ -40,7 +40,6 @@ def test_protocol_freezes_fresh_v10_composition_without_approval() -> None:
     assert protocol["production_approval"] is False
     assert protocol["release_eligible"] is False
     assert [item.scene_count for item in SPLITS] == [80, 112]
-    assert not (ROOT / "VALIDATION_REPORT.json").exists()
     assert not (ROOT / "PUBLIC_GATE_REPORT.json").exists()
 
 
@@ -85,6 +84,42 @@ def test_consumed_predecessors_are_unchanged() -> None:
     assert sha256_file(REPO_ROOT / "ml/ocr/component_spaced_recall_detector_v10/P3_RESULT.json") == (
         "46c75ec72e1b01c6b296b4618fe05b6528e4cf9cf559e12775b240239bef6957"
     )
+
+
+def test_failed_validation_is_consumed_and_cannot_open_public_gate() -> None:
+    report_path = ROOT / "VALIDATION_REPORT.json"
+    report = _load(report_path)
+    assert sha256_file(report_path) == "905bb12948ce7bdcdba95f4940e9b1b5f97017da6586c808ff5c43e128049ea9"
+    assert report["status"] == "fail"
+    assert report["evaluation_count"] == 1
+    assert report["production_approval"] is False
+    assert report["release_eligible"] is False
+    assert report["metrics"]["scene_count"] == 80
+    assert report["metrics"]["truth_region_count"] == 400
+    assert report["metrics"]["exact_detection_scene_count"] == 76
+    assert report["metrics"]["true_positives"] == 396
+    assert report["metrics"]["false_positives"] == 0
+    assert report["metrics"]["false_negatives"] == 4
+    assert report["metrics"]["duplicate_region_count"] == 0
+    assert report["metrics"]["prohibited_structure_hits"] == 0
+    assert report["metrics"]["recognition_exact_match"] == 0.96
+    assert report["metrics"]["character_error_rate"] == 0.00797373358348968
+    assert report["metrics"]["role_accuracy"] == 0.9825
+    assert report["metrics"]["numeric_exact_match"] == 1.0
+    assert report["metrics"]["word_exact_match"] == 0.9563318777292577
+    assert report["metrics"]["ambiguity_exact_match"] == 0.8181818181818182
+    assert report["metrics"]["spacing_changed_nonspace_truth_count"] == 3
+    assert report["metrics"]["forbidden_numeric_route_count"] == 0
+    assert report["direct_execution"]["detector"]["calls"] == 80
+    assert report["direct_execution"]["official_recognizer"]["calls"] == 396
+    assert report["direct_execution"]["numeric_recognizer"]["calls"] == 340
+    seal_root = REPO_ROOT / "ml/markers/gate-seals/ocr-production-composition" / report["canonical_seal_key"]
+    opened = _load(seal_root / "opened.json")
+    result = _load(seal_root / "result.json")
+    assert opened["evaluation_count"] == 1
+    assert result["status"] == "fail"
+    assert result["report_sha256"] == sha256_file(report_path)
+    assert not (ROOT / "PUBLIC_GATE_REPORT.json").exists()
 
 
 def test_frozen_gate_source_bundle_will_include_all_declared_sources() -> None:

@@ -10,13 +10,19 @@ families, and fixture bytes are new. Neither split contains Chandler,
 Generalization, private or article images, external data, or predecessor
 fixture bytes.
 
-The validation gate may execute once. The public gate remains inaccessible
-unless the exact passing validation report is committed with all evaluator
-sources. Both gates require the three exact ONNX payloads, direct CPU execution
-over checksum-bound fixture bytes, exact detection in every scene, zero false
-or duplicate regions, and all preregistered recognition thresholds.
+The validation gate executed once through `CPUExecutionProvider` and failed.
+It retained 396/400 truth regions across 76/80 exact scenes with zero false
+regions, duplicates, or prohibited hits. Recognition exact match was `0.96`,
+CER was `0.00797373358348968`, and role accuracy was `0.9825`, but ambiguity
+exact match was only `0.8181818181818182` and spacing-P2 improperly changed
+three non-space truths. Report SHA-256 is
+`905bb12948ce7bdcdba95f4940e9b1b5f97017da6586c808ff5c43e128049ea9`.
+The validation gate is consumed and cannot rerun. The public gate requires an
+exact passing validation report, so the truth-hidden public archive remains
+unopened and must not execute under this revision.
 
-No payload is approved by this gate. Direct C# composition, independent marker
-composition, model-store, provider, private Chandler, packaging, notices, and
-clean-machine evidence remain mandatory. No manifest or release asset may be
-created from a Python-only pass.
+No payload is approved by this gate. Future detector-recall and conservative
+spacing defect classes require new frozen splits rather than tuning against or
+rerunning these exposed validation scenes. Direct C# composition, independent
+marker composition, model-store, provider, private Chandler, packaging,
+notices, and clean-machine evidence remain mandatory.
