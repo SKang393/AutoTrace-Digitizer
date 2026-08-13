@@ -2400,7 +2400,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-spaced-component-recall-v10",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_3_preregistered",
       "defect_class": "generic spaced multi-glyph text-region recall in production composition",
       "prior_revision": "graph-text-component-recall-v9",
       "trigger_evidence_path": "ml/ocr/production_composition_v2/VALIDATION_REPORT.json",
@@ -2415,21 +2415,22 @@
       "prior_exposed_fixture_bytes_reused": false,
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P2"
-      ],
-      "consumed_candidate_ids": [
-        "P1"
-      ],
-      "remaining_unregistered_candidate_ids": [
         "P3"
       ],
+      "consumed_candidate_ids": [
+        "P1",
+        "P2"
+      ],
+      "remaining_unregistered_candidate_ids": [],
       "candidate_config_paths": {
         "P1": "ml/ocr/component_spaced_recall_detector_v10/training/p1.json",
-        "P2": "ml/ocr/component_spaced_recall_detector_v10/training/p2.json"
+        "P2": "ml/ocr/component_spaced_recall_detector_v10/training/p2.json",
+        "P3": "ml/ocr/component_spaced_recall_detector_v10/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "b88f07495c44799684f0dcdf2516e7ee2fe33b2ef93083178a88ecccdf158740",
-        "P2": "fb4edb60b49f83ed8c8d9b13d5bffeec46de578f2b2381faa7a5bec5bbcff21d"
+        "P2": "fb4edb60b49f83ed8c8d9b13d5bffeec46de578f2b2381faa7a5bec5bbcff21d",
+        "P3": "44d76cc19de8108afa50ec702777e88a59eebf1f5b7afa1acc6298c6689ff507"
       },
       "protocol_path": "ml/ocr/component_spaced_recall_detector_v10/PROTOCOL.json",
       "protocol_sha256": "60dc6f60e37ed403c4e65d4c0489de3ce575fc6f3cda9dbcf56c327db87a05b4",
@@ -2467,8 +2468,23 @@
       "p2_training_proposal_count": 7999,
       "p2_training_tensor_label_stream_sha256": "1f1bc23cd4ed06f95d638bbf53de27089b5572f6abe91d824f4129050abdbf9c",
       "p2_isolated_change": "fine-tune only the exact checksum-bound V9 P2 checkpoint on positive and capped negative proposals from the already-frozen V10 training scenes; retain the model architecture, proposal algorithm, tensor encoding, balanced cross-entropy, output-logit scale, thresholds, validation split, and unopened public gate",
+      "p2_result_path": "ml/ocr/component_spaced_recall_detector_v10/P2_RESULT.json",
+      "p2_result_sha256": "0ee50cfeb8ea304c92e93c07d7b669acf5d9b9344d0b0ba391df1a8b12683af6",
+      "p2_status": "failed_runner",
+      "p2_optimizer_steps": 648,
+      "p2_failure_phase": "selection",
+      "p2_failure": "Training, ONNX export, CPU parity execution, and validation inference completed, but the report gate referenced a summary field that the evaluator does not emit. No selection metrics were sealed, so P2 is consumed and cannot rerun.",
+      "p2_candidate_report_sha256": "1cfc2dd3bc4fdd0c1386116075db480bf34c2ec4a552aa470b8178627c98debe",
+      "p2_checkpoint_sha256": "c452e66013610a5ea79de78f6bbbac53d809c6c80f82d64798c4c694a27e7301",
+      "p2_onnx_sha256": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+      "p2_training_opened_seal_sha256": "8cc5cf2c39c5fd6dfd234793a5fd73799f560f8a44f7f8b99a86015352b46962",
+      "p2_training_result_seal_sha256": "14619161154bf7dc7dc4e31b453d14ae290f4f506a85a043f87ebbc9ecf50a18",
+      "p3_expected_runner_source_bundle_sha256": "4cd9b8a05b47f27e4eeebbd0e0eabc82311c4ab6390532e3a0794ec39c2e578b",
+      "p3_optimizer_steps": 0,
+      "p3_weights_changed": false,
+      "p3_isolated_change": "reuse the exact checksum-bound P2 checkpoint and ONNX with zero optimizer steps; replace only P2's invalid truth-region summary lookup with the direct frozen validation truth count before sealing selection evidence",
       "execution_authorized": true,
-      "authorized_candidate_id": "P2",
+      "authorized_candidate_id": "P3",
       "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,

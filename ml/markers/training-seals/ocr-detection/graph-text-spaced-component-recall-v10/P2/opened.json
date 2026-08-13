@@ -1,0 +1,40 @@
+{
+  "binding": {
+    "candidate_config_path": "ml/ocr/component_spaced_recall_detector_v10/training/p2.json",
+    "candidate_config_sha256": "fb4edb60b49f83ed8c8d9b13d5bffeec46de578f2b2381faa7a5bec5bbcff21d",
+    "candidate_id": "P2",
+    "committed_source_enforcement": true,
+    "revision": "graph-text-spaced-component-recall-v10",
+    "runner_source_bundle_sha256": "430a7da2fac1bd3157351bc4c90ff7a12d7e69e0c4bd6a7bae5ed6fcd37da31f",
+    "runner_source_paths": [
+      "ml/markers/gate_seal.py",
+      "ml/markers/training_budget.py",
+      "ml/ocr/component_context_detector_v7/dataset.py",
+      "ml/ocr/component_context_detector_v7/protocol.py",
+      "ml/ocr/component_fusion_detector_v8/dataset.py",
+      "ml/ocr/component_fusion_detector_v8/pipeline.py",
+      "ml/ocr/component_fusion_detector_v8/protocol.py",
+      "ml/ocr/component_fusion_detector_v8/train_p1.py",
+      "ml/ocr/component_recall_detector_v9/dataset.py",
+      "ml/ocr/component_recall_detector_v9/model.py",
+      "ml/ocr/component_recall_detector_v9/model_p3.py",
+      "ml/ocr/component_recall_detector_v9/pipeline.py",
+      "ml/ocr/component_recall_detector_v9/pipeline_p2.py",
+      "ml/ocr/component_recall_detector_v9/protocol.py",
+      "ml/ocr/component_region_detector_v6/dataset.py",
+      "ml/ocr/component_region_detector_v6/protocol.py",
+      "ml/ocr/component_spaced_recall_detector_v10/dataset.py",
+      "ml/ocr/component_spaced_recall_detector_v10/pipeline.py",
+      "ml/ocr/component_spaced_recall_detector_v10/protocol.py",
+      "ml/ocr/component_spaced_recall_detector_v10/train_p2.py",
+      "ml/ocr/component_spaced_recall_detector_v10/training_data_p2.py",
+      "ml/ocr/production_composition_v1/dataset.py",
+      "ml/ocr/production_composition_v1/protocol.py"
+    ],
+    "task": "ocr-detection",
+    "training_budget_ledger_sha256": "4d6d9f721eca0ea72067ed924e65b40bedde9c3fc85cd1d6accab21ea01b935f"
+  },
+  "opened_utc": "2026-08-13T01:21:40.300926+00:00",
+  "schema_version": 1,
+  "status": "opened"
+}

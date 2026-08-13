@@ -11,11 +11,8 @@ from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 from ml.ocr.component_spaced_recall_detector_v10.dataset import build_split, proposal_summary, split_fingerprint
 from ml.ocr.component_spaced_recall_detector_v10.protocol import BASE_ONNX_SHA256, REVISION, SPLITS, protocol_configuration
 from ml.ocr.component_spaced_recall_detector_v10.sealed_gate import EVALUATOR_SOURCE_PATHS, SPLIT_CONFIG_PATH
-from ml.ocr.component_spaced_recall_detector_v10.train_p2 import RUNNER_SOURCE_PATHS
-from ml.ocr.component_spaced_recall_detector_v10.training_data_p2 import (
-    NEGATIVE_CAP_PER_SCENE,
-    training_examples,
-)
+from ml.ocr.component_spaced_recall_detector_v10.train_p3 import RUNNER_SOURCE_PATHS
+from ml.ocr.component_spaced_recall_detector_v10.training_data_p2 import NEGATIVE_CAP_PER_SCENE
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -54,38 +51,60 @@ def test_p1_is_zero_optimizer_exact_onnx_threshold_only() -> None:
     assert config["predecessor_fixture_bytes_reused"] is False
 
 
-def test_ledger_records_consumed_p1_and_authorized_p2() -> None:
+def test_ledger_records_consumed_p1_p2_and_authorized_p3() -> None:
     ledger = _load(LEDGER)
     entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
-    config_path = ROOT / "training/p2.json"
-    assert entry["status"] == "candidate_2_preregistered"
+    config_path = ROOT / "training/p3.json"
+    assert entry["status"] == "candidate_3_preregistered"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
-    assert entry["candidate_config_sha256"]["P2"] == sha256_file(config_path)
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
+    assert entry["candidate_config_sha256"]["P3"] == sha256_file(config_path)
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["public_gate_authorized"] is False
 
 
-def test_p2_preregistration_binds_training_only_examples_and_runner() -> None:
+def test_p2_preregistration_records_training_only_examples() -> None:
     config = _load(ROOT / "training/p2.json")
-    values, labels, evidence = training_examples()
     assert config["candidate_id"] == "P2"
     assert config["experiment_ordinal"] == 2
     assert config["source_checkpoint_sha256"] == sha256_file(
         REPO_ROOT / config["source_checkpoint_path"]
     )
+    assert config["expected_runner_source_bundle_sha256"] == (
+        "430a7da2fac1bd3157351bc4c90ff7a12d7e69e0c4bd6a7bae5ed6fcd37da31f"
+    )
+    assert config["negative_cap_per_scene"] == NEGATIVE_CAP_PER_SCENE
+    assert config["proposal_count"] == 7999
+    assert config["positive_proposal_count"] == 1200
+    assert config["negative_proposal_count"] == 6799
+    assert config["tensor_label_stream_sha256"] == (
+        "1f1bc23cd4ed06f95d638bbf53de27089b5572f6abe91d824f4129050abdbf9c"
+    )
+    assert config["validation_or_public_pixels_used_for_training"] is False
+    assert config["public_gate_archive_opened"] is False
+    assert config["production_approval"] is False
+
+
+def test_p3_preregistration_binds_exact_p2_failure_and_runner() -> None:
+    config = _load(ROOT / "training/p3.json")
+    p2 = _load(ROOT / "P2_RESULT.json")
+    assert config["candidate_id"] == "P3"
+    assert config["experiment_ordinal"] == 3
+    assert config["optimizer_steps"] == 0
+    assert config["weights_changed"] is False
+    assert config["p2_result_sha256"] == sha256_file(ROOT / "P2_RESULT.json")
+    assert p2["status"] == "failed_runner"
+    assert p2["failure_phase"] == "selection"
+    assert p2["selection_metrics_available_for_approval"] is False
+    assert p2["public_gate_archive_opened"] is False
+    assert config["p2_checkpoint_sha256"] == p2["checkpoint_sha256"]
+    assert config["p2_onnx_sha256"] == p2["onnx_sha256"]
     assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, RUNNER_SOURCE_PATHS
     )
-    assert evidence["negative_cap_per_scene"] == NEGATIVE_CAP_PER_SCENE
-    assert evidence["proposal_count"] == len(labels) == len(values) == config["proposal_count"]
-    assert evidence["positive_proposal_count"] == config["positive_proposal_count"]
-    assert evidence["negative_proposal_count"] == config["negative_proposal_count"]
-    assert evidence["tensor_label_stream_sha256"] == config["tensor_label_stream_sha256"]
-    assert evidence["validation_or_public_pixels_used"] is False
     assert config["public_gate_archive_opened"] is False
     assert config["production_approval"] is False
 
