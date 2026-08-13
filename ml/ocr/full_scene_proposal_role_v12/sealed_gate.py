@@ -15,7 +15,7 @@ import onnxruntime as ort
 
 from ml.markers.gate_seal import acquire_gate_seal, canonical_json_bytes, complete_gate_seal, require_committed_sources, sha256_file
 from .dataset import load_sealed_public_archive, proposal_summary, split_fingerprint
-from .pipeline import evaluate_thresholds
+from .pipeline_p3 import evaluate_thresholds
 from .protocol import PUBLIC_REVISION, REVISION, ROLE_ACCURACY_MINIMUM, ROLE_CLASS_ACCURACY_MINIMUM, TASK, THRESHOLDS
 
 
@@ -24,7 +24,8 @@ ROOT = Path("ml/ocr/full_scene_proposal_role_v12")
 LEDGER_PATH = Path("ml/markers/training-budgets/production-repair-v1.json")
 SPLIT_CONFIG_PATH = ROOT / "gates/sealed-public-v1.json"
 EVALUATOR_SOURCE_PATHS = (
-    ROOT / "dataset.py", ROOT / "pipeline.py", ROOT / "protocol.py", ROOT / "sealed_gate.py",
+    ROOT / "dataset.py", ROOT / "pipeline_p3.py", ROOT / "protocol.py", ROOT / "sealed_gate.py",
+    ROOT / "structural_guard.py",
     Path("ml/ocr/component_context_detector_v7/dataset.py"),
     Path("ml/ocr/component_context_detector_v7/protocol.py"),
     Path("ml/ocr/component_region_detector_v6/dataset.py"), Path("ml/markers/gate_seal.py"),
@@ -48,12 +49,12 @@ def evaluate_candidate(*, onnx_path: Path, selection_report_path: Path, output_p
     onnx_sha, selection_sha = sha256_file(onnx_path), sha256_file(selection_report_path)
     threshold = float(selection.get("selected_threshold", -1.0))
     if (
-        entry is None or entry.get("status") != "candidate_1_selected_public_gate_pending"
-        or entry.get("preregistered_candidate_ids") != [] or entry.get("consumed_candidate_ids") != ["P1"]
+        entry is None or entry.get("status") != "candidate_3_selected_public_gate_pending"
+        or entry.get("preregistered_candidate_ids") != [] or entry.get("consumed_candidate_ids") != ["P1", "P2", "P3"]
         or entry.get("execution_authorized") is not False or entry.get("public_gate_authorized") is not True
-        or entry.get("public_gate_authorized_candidate_id") != "P1" or entry.get("public_gate_evaluations") != 0
-        or entry.get("public_gate_archive_opened") is not False or entry.get("p1_onnx_sha256") != onnx_sha
-        or entry.get("p1_selection_report_sha256") != selection_sha
+        or entry.get("public_gate_authorized_candidate_id") != "P3" or entry.get("public_gate_evaluations") != 0
+        or entry.get("public_gate_archive_opened") is not False or entry.get("p3_onnx_sha256") != onnx_sha
+        or entry.get("p3_selection_report_sha256") != selection_sha
     ):
         raise RuntimeError("OCR V12 public gate is not authorized by the canonical ledger")
     if (
@@ -140,4 +141,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

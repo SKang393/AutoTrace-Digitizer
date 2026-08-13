@@ -92,13 +92,13 @@ def test_p3_structural_guard_rejects_no_visible_truth_proposal() -> None:
     assert rejected_negative > 0
 
 
-def test_canonical_ledger_preregisters_only_p3() -> None:
+def test_canonical_ledger_consumes_p3_and_authorizes_one_public_gate() -> None:
     ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-full-scene-proposal-role-v12")
-    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["status"] == "candidate_3_selected_public_gate_pending"
     assert entry["protocol_sha256"] == sha256_file(PROTOCOL_PATH)
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
     result_path = ROOT / entry["p1_result_path"]
     assert entry["p1_result_sha256"] == sha256_file(result_path)
@@ -114,9 +114,15 @@ def test_canonical_ledger_preregisters_only_p3() -> None:
     assert entry["p2_selection_exact_scene_count"] == 119
     assert entry["p2_selection_false_positives"] == 1
     assert entry["candidate_config_sha256"]["P3"] == sha256_file(ROOT / entry["candidate_config_paths"]["P3"])
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
-    assert entry["public_gate_authorized"] is False
+    assert entry["p3_result_sha256"] == sha256_file(ROOT / entry["p3_result_path"])
+    assert entry["p3_selection_exact_scene_count"] == 120
+    assert entry["p3_selection_false_positives"] == 0
+    assert entry["p3_selection_false_negatives"] == 0
+    assert entry["p3_guard_truth_match_count"] == 0
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_candidate_id"] == "P3"
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
