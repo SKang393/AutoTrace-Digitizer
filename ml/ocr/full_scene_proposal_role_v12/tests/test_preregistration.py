@@ -92,10 +92,10 @@ def test_p3_structural_guard_rejects_no_visible_truth_proposal() -> None:
     assert rejected_negative > 0
 
 
-def test_canonical_ledger_consumes_p3_and_authorizes_one_public_gate() -> None:
+def test_canonical_ledger_records_exhausted_public_failure() -> None:
     ledger = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-full-scene-proposal-role-v12")
-    assert entry["status"] == "candidate_3_selected_public_gate_pending"
+    assert entry["status"] == "exhausted_failed_public_gate"
     assert entry["protocol_sha256"] == sha256_file(PROTOCOL_PATH)
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
@@ -121,8 +121,14 @@ def test_canonical_ledger_consumes_p3_and_authorizes_one_public_gate() -> None:
     assert entry["p3_guard_truth_match_count"] == 0
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert entry["public_gate_authorized"] is True
-    assert entry["public_gate_authorized_candidate_id"] == "P3"
-    assert entry["public_gate_evaluations"] == 0
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized_candidate_id"] is None
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_archive_opened"] is True
+    assert entry["public_gate_status"] == "fail"
+    assert entry["public_gate_report_sha256"] == "412ffe748d7aacc927fc5c5f19109c68937954a14ed7e10ccbb34276063630b0"
+    assert entry["public_gate_exact_scene_count"] == 155
+    assert entry["public_gate_false_positives"] == 4
+    assert entry["public_gate_false_negatives"] == 1
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
