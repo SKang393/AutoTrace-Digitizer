@@ -457,7 +457,12 @@ public sealed partial class LocalOnnxComponentTextRecognizer : ITextRecognizer
             (options.GlyphHeight - 4d) / Math.Max(1, sourceHeight));
         int resizedWidth = Math.Max(1, (int)Math.Round(sourceWidth * scale, MidpointRounding.ToEven));
         int resizedHeight = Math.Max(1, (int)Math.Round(sourceHeight * scale, MidpointRounding.ToEven));
-        float[] resized = ResizeBilinear(source, sourceWidth, sourceHeight, resizedWidth, resizedHeight);
+        byte[] resized = PillowBilinearResizer.Resize(
+            source,
+            sourceWidth,
+            sourceHeight,
+            resizedWidth,
+            resizedHeight);
         var normalized = new float[checked(options.GlyphWidth * options.GlyphHeight)];
         int offsetX = (options.GlyphWidth - resizedWidth) / 2;
         int offsetY = (options.GlyphHeight - resizedHeight) / 2;
@@ -483,14 +488,15 @@ public sealed partial class LocalOnnxComponentTextRecognizer : ITextRecognizer
         int componentWidth = right - left + 1;
         int componentHeight = maximumY - minimumY + 1;
         int area = Math.Max(1, componentHeight * componentWidth);
+        float foregroundMean = (float)foregroundSum / count;
         float[] geometry =
         [
-            componentHeight / (float)options.CanvasHeight,
-            componentWidth / (float)options.CanvasHeight,
-            ((minimumY + maximumY) / 2f) / (options.CanvasHeight - 1),
-            count / (float)area,
-            (foregroundSum / (float)count) / 255f,
-            componentWidth / (float)Math.Max(1, componentHeight),
+            (float)(componentHeight / (double)options.CanvasHeight),
+            (float)(componentWidth / (double)options.CanvasHeight),
+            (float)(((minimumY + maximumY) / 2d) / (options.CanvasHeight - 1)),
+            (float)(count / (double)area),
+            (float)(foregroundMean / 255d),
+            (float)(componentWidth / (double)Math.Max(1, componentHeight)),
         ];
         int encodedWidth = options.GlyphWidth + options.GeometryFeatureCount;
         var values = new float[checked(options.GlyphHeight * encodedWidth)];
@@ -501,37 +507,6 @@ public sealed partial class LocalOnnxComponentTextRecognizer : ITextRecognizer
         }
 
         return new EncodedGlyph(values, geometry[0]);
-    }
-
-    private static float[] ResizeBilinear(
-        byte[] source,
-        int sourceWidth,
-        int sourceHeight,
-        int destinationWidth,
-        int destinationHeight)
-    {
-        var destination = new float[checked(destinationWidth * destinationHeight)];
-        for (var y = 0; y < destinationHeight; y++)
-        {
-            double sourceY = ((y + 0.5d) * sourceHeight / destinationHeight) - 0.5d;
-            int y0 = Math.Clamp((int)Math.Floor(sourceY), 0, sourceHeight - 1);
-            int y1 = Math.Clamp(y0 + 1, 0, sourceHeight - 1);
-            double yWeight = Math.Clamp(sourceY - Math.Floor(sourceY), 0d, 1d);
-            for (var x = 0; x < destinationWidth; x++)
-            {
-                double sourceX = ((x + 0.5d) * sourceWidth / destinationWidth) - 0.5d;
-                int x0 = Math.Clamp((int)Math.Floor(sourceX), 0, sourceWidth - 1);
-                int x1 = Math.Clamp(x0 + 1, 0, sourceWidth - 1);
-                double xWeight = Math.Clamp(sourceX - Math.Floor(sourceX), 0d, 1d);
-                double top = (source[(y0 * sourceWidth) + x0] * (1d - xWeight)) +
-                    (source[(y0 * sourceWidth) + x1] * xWeight);
-                double bottom = (source[(y1 * sourceWidth) + x0] * (1d - xWeight)) +
-                    (source[(y1 * sourceWidth) + x1] * xWeight);
-                destination[(y * destinationWidth) + x] = (float)((top * (1d - yWeight)) + (bottom * yWeight));
-            }
-        }
-
-        return destination;
     }
 
     private static OcrRecognitionAlternative[] Decode(

@@ -544,7 +544,21 @@ public sealed partial class OcrV8SourcePostprocessor
         double scale = 11.5 / Math.Max(1, lineHeight);
         int resizedWidth = Math.Max(1, checked((int)Math.Round(group.Width * scale, MidpointRounding.ToEven)));
         int resizedHeight = Math.Max(1, checked((int)Math.Round(group.Height * scale, MidpointRounding.ToEven)));
-        byte[] resized = ResizeBilinear(crop, group, resizedWidth, resizedHeight);
+        var source = new byte[checked(group.Width * group.Height)];
+        for (var y = 0; y < group.Height; y++)
+        {
+            crop.Pixels.Span.Slice(
+                    ((group.Top + y) * crop.Width) + group.Left,
+                    group.Width)
+                .CopyTo(source.AsSpan(y * group.Width, group.Width));
+        }
+
+        byte[] resized = PillowBilinearResizer.Resize(
+            source,
+            group.Width,
+            group.Height,
+            resizedWidth,
+            resizedHeight);
         destination.Clear();
         int pasteX = (AmbiguityImageSize - resizedWidth) / 2;
         int pasteY = checked((int)Math.Round(
@@ -570,42 +584,6 @@ public sealed partial class OcrV8SourcePostprocessor
                     1f - (resized[(y * resizedWidth) + x] / 255f);
             }
         }
-    }
-
-    private static byte[] ResizeBilinear(
-        OcrV8SourceCrop crop,
-        Group group,
-        int destinationWidth,
-        int destinationHeight)
-    {
-        var destination = new byte[checked(destinationWidth * destinationHeight)];
-        ReadOnlySpan<byte> source = crop.Pixels.Span;
-        for (var y = 0; y < destinationHeight; y++)
-        {
-            double sourceY = ((y + 0.5d) * group.Height / destinationHeight) - 0.5d;
-            double boundedY = Math.Clamp(sourceY, 0, group.Height - 1d);
-            int y0 = (int)Math.Floor(boundedY);
-            int y1 = Math.Min(y0 + 1, group.Height - 1);
-            double yWeight = boundedY - y0;
-            for (var x = 0; x < destinationWidth; x++)
-            {
-                double sourceX = ((x + 0.5d) * group.Width / destinationWidth) - 0.5d;
-                double boundedX = Math.Clamp(sourceX, 0, group.Width - 1d);
-                int x0 = (int)Math.Floor(boundedX);
-                int x1 = Math.Min(x0 + 1, group.Width - 1);
-                double xWeight = boundedX - x0;
-                double top = (source[((group.Top + y0) * crop.Width) + group.Left + x0] * (1 - xWeight)) +
-                    (source[((group.Top + y0) * crop.Width) + group.Left + x1] * xWeight);
-                double bottom = (source[((group.Top + y1) * crop.Width) + group.Left + x0] * (1 - xWeight)) +
-                    (source[((group.Top + y1) * crop.Width) + group.Left + x1] * xWeight);
-                destination[(y * destinationWidth) + x] = (byte)Math.Clamp(
-                    (int)Math.Round((top * (1 - yWeight)) + (bottom * yWeight), MidpointRounding.ToEven),
-                    byte.MinValue,
-                    byte.MaxValue);
-            }
-        }
-
-        return destination;
     }
 
     private static bool[] ForegroundMask(OcrV8SourceCrop crop, out Bounds bounds)

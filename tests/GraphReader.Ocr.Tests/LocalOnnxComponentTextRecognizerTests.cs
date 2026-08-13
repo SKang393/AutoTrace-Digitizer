@@ -11,6 +11,8 @@ namespace GraphReader.Ocr.Tests;
 [TestClass]
 public sealed class LocalOnnxComponentTextRecognizerTests
 {
+    private const string PillowNoticeSha256 =
+        "15181e7363dca9aed78b79bebebc7fde7f1814b8bd311ea3b87ae8ccadfc185b";
     private const string ComponentModelEnvironmentVariable = "GRAPHREADER_OCR_COMPONENT_V5";
     private const string ComponentModelSha256 =
         "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84";
@@ -63,6 +65,75 @@ public sealed class LocalOnnxComponentTextRecognizerTests
         {
             Directory.Delete(directory, recursive: true);
         }
+    }
+
+    [TestMethod]
+    public async Task ComponentEncodingMatchesFrozenPillowV5TensorBytes()
+    {
+        string directory = CreateDirectory();
+        try
+        {
+            ModelIdentity identity = await CreateModelAsync(directory);
+            var factory = new ComponentLogitSessionFactory([1, 2]);
+            await using InferenceRuntime runtime = CreateRuntime(directory, factory);
+            var recognizer = new LocalOnnxComponentTextRecognizer(
+                runtime,
+                new LocalOnnxComponentTextRecognizerOptions(identity, "0123456789.-%")
+                {
+                    AllowedProviders = [InferenceProvider.Cpu],
+                });
+
+            float[] pixels = Enumerable.Repeat(1f, 128 * 32).ToArray();
+            for (var y = 6; y < 25; y++)
+            {
+                for (var x = 20; x < 30; x++)
+                {
+                    pixels[(y * 128) + x] = (30 + ((x * 13 + y * 17) % 90)) / 255f;
+                }
+            }
+
+            for (var y = 10; y < 20; y++)
+            {
+                for (var x = 38; x < 43; x++)
+                {
+                    pixels[(y * 128) + x] = (55 + ((x * 11 + y * 19) % 70)) / 255f;
+                }
+            }
+
+            pixels[(5 * 128) + 90] = 0;
+            IReadOnlyList<OcrRecognition> results = await recognizer.RecognizeBatchAsync(
+                [Crop("pillow-v5-parity", pixels)],
+                CancellationToken.None);
+
+            Assert.HasCount(1, results);
+            Assert.IsNull(results[0].Failure);
+            Assert.AreEqual("12", results[0].Alternatives.Single().Text);
+            Assert.AreEqual(
+                "cacefe3619f6c71c6241cf1a95dae4b0b841c395520696079ed0c382897ea3e8",
+                Convert.ToHexStringLower(SHA256.HashData(
+                    System.Runtime.InteropServices.MemoryMarshal.AsBytes(
+                        factory.Session.LastInputValues.ToArray().AsSpan()))));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public void SourceDerivedPillowKernelRetainsExactReviewedNoticeAndAuditCoverage()
+    {
+        string root = FindRepositoryRoot();
+        string noticePath = Path.Combine(root, "LICENSES", "Pillow-12.3.0-HPND.txt");
+        Assert.AreEqual(PillowNoticeSha256, Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(noticePath))));
+        string notices = File.ReadAllText(Path.Combine(root, "THIRD_PARTY_NOTICES.md"));
+        StringAssert.Contains(notices, "LICENSES/Pillow-12.3.0-HPND.txt");
+        StringAssert.Contains(notices, "bb1d8e8ab8d29048624d96e3ee53cecf7c13d13d");
+        StringAssert.Contains(notices, "808c212d03289b9ab70fad67168da1b14ed8dd74f1607c7a7278c50cbc1ae0ab");
+
+        string audit = File.ReadAllText(Path.Combine(root, "packaging", "common", "release-audit.json"));
+        StringAssert.Contains(audit, "Apache-2.0 AND OFL-1.1 AND HPND");
+        StringAssert.Contains(audit, "LICENSES/Pillow-12.3.0-HPND.txt");
     }
 
     [TestMethod]
@@ -274,6 +345,22 @@ public sealed class LocalOnnxComponentTextRecognizerTests
             Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(path);
         return path;
+    }
+
+    private static string FindRepositoryRoot()
+    {
+        DirectoryInfo? directory = new(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            if (File.Exists(Path.Combine(directory.FullName, "GraphAutoReader.slnx")))
+            {
+                return directory.FullName;
+            }
+
+            directory = directory.Parent;
+        }
+
+        throw new DirectoryNotFoundException("Could not locate the Graph Auto Reader repository root.");
     }
 
     private sealed class ComponentLogitSessionFactory : IInferenceSessionFactory

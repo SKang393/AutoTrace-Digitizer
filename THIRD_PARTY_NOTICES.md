@@ -155,6 +155,22 @@ Current release blockers are:
   `LICENSES/System.Numerics.Tensors-9.0.0-License.txt` and
   `LICENSES/System.Numerics.Tensors-9.0.0-ThirdPartyNotices.txt`.
 
+## Pillow resize implementation
+
+- Component: source-derived 8-bit fixed-point bilinear resize implementation
+  in `GraphReader.Ocr`; no Pillow binary or Python runtime is bundled.
+- Source: Pillow tag `12.3.0`, commit
+  `bb1d8e8ab8d29048624d96e3ee53cecf7c13d13d`,
+  `src/libImaging/Resample.c` blob
+  `c25383a70e4351aed7ceb9f158a9ef66d7197dd3`, SHA-256
+  `808c212d03289b9ab70fad67168da1b14ed8dd74f1607c7a7278c50cbc1ae0ab`.
+- License: HPND/MIT-CMU. Full notice:
+  `LICENSES/Pillow-12.3.0-HPND.txt`.
+- Use: preserves the byte-exact preprocessing contract of reviewed local OCR
+  models. Commercial use, modification, and redistribution are permitted with
+  attribution; the source-derived code is covered in the release SBOM as part
+  of `GraphReader.Ocr.dll`.
+
 ## Microsoft DirectML redistributable
 
 - Component: Microsoft.AI.DirectML 1.15.4, transitively bundled by ONNX

@@ -111,17 +111,17 @@
       "version": "central",
       "source": "repository",
       "sourceRevision": "git-commit",
-      "license": "Apache-2.0 AND OFL-1.1",
+      "license": "Apache-2.0 AND OFL-1.1 AND HPND",
       "bundledOrDownloaded": "bundled",
       "artifactSha256": null,
       "checksumPolicy": "release-sbom",
-      "noticePaths": ["LICENSE", "NOTICE", "LICENSES/NotoSans-OFL-1.1.txt"],
+      "noticePaths": ["LICENSE", "NOTICE", "LICENSES/NotoSans-OFL-1.1.txt", "LICENSES/Pillow-12.3.0-HPND.txt"],
       "commercialUse": true,
       "redistribution": true,
       "reviewStatus": "reviewed",
-      "reviewer": "Session 17",
-      "reviewDate": "2026-08-03",
-      "notes": "Original project binaries are hashed after the shared publish. GraphReader.App.dll embeds the reviewed unmodified Noto Sans resources covered by OFL-1.1."
+      "reviewer": "Codex",
+      "reviewDate": "2026-08-13",
+      "notes": "Original project binaries are hashed after the shared publish. GraphReader.App.dll embeds the reviewed unmodified Noto Sans resources covered by OFL-1.1. GraphReader.Ocr.dll includes the source-derived Pillow 12.3.0 fixed-point bilinear resize path covered by HPND."
     },
     {
       "id": "noto-sans-regular",
