@@ -105,6 +105,30 @@ public sealed class OcrV8ProductionCompositionPipelineTests
     }
 
     [TestMethod]
+    public async Task CandidateCompositionUsesCandidateOnlyWarningLabels()
+    {
+        var detector = new StubProposalDetector([Tick("candidate", 42, 0.96)]);
+        OcrV8ProductionCompositionPipeline pipeline = Create(
+            detector,
+            Recognizer(("candidate", "6", 0.96)),
+            Recognizer(("candidate", "6", 0.96)),
+            new OcrV8ProductionCompositionOptions
+            {
+                CompositionId = OcrV8ProductionCompositionOptions.CandidateV11CompositionId,
+                StageVersion = "0.0.21-v11",
+            });
+
+        OcrResult result = await pipeline.RecognizeAsync(Request(), CancellationToken.None);
+
+        Assert.IsTrue(result.Succeeded, result.Failure?.TechnicalMessage);
+        CollectionAssert.Contains(result.Warnings.ToArray(), "ocr_v11_candidate_composition");
+        Assert.IsTrue(result.Warnings.Any(static warning =>
+            warning.StartsWith("ocr_v11_candidate_acceptance_route:", StringComparison.Ordinal)));
+        Assert.IsFalse(result.Warnings.Any(static warning =>
+            warning.StartsWith("ocr_v8", StringComparison.Ordinal)));
+    }
+
+    [TestMethod]
     public async Task ProposalBelowFrozenFloorFailsClosedBeforeRecognition()
     {
         var detector = new StubProposalDetector([Tick("below", 50, 0.819)]);

@@ -57,6 +57,22 @@ public static class OcrV8ProductionCompositionFactory
                 AllowedProviders = providers,
                 BypassCache = bypassCache,
             });
+        return CreateWithDetector(
+            runtime,
+            payloads,
+            providers,
+            detector,
+            bypassCache);
+    }
+
+    internal static OcrV8ProductionCompositionPipeline CreateWithDetector(
+        InferenceRuntime runtime,
+        OcrV8ProductionPayloadSet payloads,
+        IReadOnlyList<InferenceProvider> providers,
+        ITextRegionProposalDetector detector,
+        bool bypassCache,
+        OcrV8ProductionCompositionOptions? compositionOptions = null)
+    {
         var officialBase = new LocalOnnxTextRecognizer(
             runtime,
             new LocalOnnxTextRecognizerOptions(
@@ -129,13 +145,13 @@ public static class OcrV8ProductionCompositionFactory
                 CropVerticalContentPaddingRatio = 0.25,
                 CropResizeMode = OcrCropResizeMode.PreserveAspectRatioPad,
                 CropPaddingValue = 1f,
-            });
+            },
+            compositionOptions);
     }
 
-    public static void ValidatePayloads(OcrV8ProductionPayloadSet payloads)
+    internal static void ValidateRecognitionPayloads(OcrV8ProductionPayloadSet payloads)
     {
         ArgumentNullException.ThrowIfNull(payloads);
-        ValidatePayload(payloads.Detector, DetectorModelId, DetectorSha256, nameof(payloads.Detector));
         ValidatePayload(
             payloads.OfficialRecognizer,
             OfficialModelId,
@@ -163,7 +179,14 @@ public static class OcrV8ProductionCompositionFactory
         }
     }
 
-    private static void ValidatePayload(
+    public static void ValidatePayloads(OcrV8ProductionPayloadSet payloads)
+    {
+        ArgumentNullException.ThrowIfNull(payloads);
+        ValidatePayload(payloads.Detector, DetectorModelId, DetectorSha256, nameof(payloads.Detector));
+        ValidateRecognitionPayloads(payloads);
+    }
+
+    internal static void ValidatePayload(
         ModelIdentity model,
         string expectedModelId,
         string expectedSha256,
@@ -185,7 +208,7 @@ public static class OcrV8ProductionCompositionFactory
         }
     }
 
-    private static System.Collections.ObjectModel.ReadOnlyCollection<InferenceProvider> ValidateProviderPolicy(
+    internal static System.Collections.ObjectModel.ReadOnlyCollection<InferenceProvider> ValidateProviderPolicy(
         IReadOnlyList<InferenceProvider> allowedProviders)
     {
         ArgumentNullException.ThrowIfNull(allowedProviders);

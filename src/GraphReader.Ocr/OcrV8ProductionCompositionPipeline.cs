@@ -12,6 +12,8 @@ public sealed record OcrV8ProductionCompositionOptions
 {
     public const string ReviewedCompositionId =
         "graphreader-v10-bounded-zero-consensus-ambiguity-alias-composition-v8";
+    public const string CandidateV11CompositionId =
+        "graphreader-v11-composite-proposal-role-candidate-composition-v1";
 
     public string CompositionId { get; init; } = ReviewedCompositionId;
 
@@ -39,7 +41,6 @@ public sealed record OcrV8ProductionCompositionOptions
 /// </summary>
 public sealed class OcrV8ProductionCompositionPipeline
 {
-    private const string CompositionWarning = "ocr_production_composition_v8";
     private readonly ITextRegionProposalDetector detector;
     private readonly OcrPipeline officialPipeline;
     private readonly OcrPipeline numericPipeline;
@@ -156,7 +157,8 @@ public sealed class OcrV8ProductionCompositionPipeline
         OcrResult numeric = await numericPipeline
             .RecognizeAsync(recognitionRequest, cancellationToken)
             .ConfigureAwait(false);
-        var warnings = new List<string> { CompositionWarning };
+        string warningPrefix = WarningPrefix(options.CompositionId);
+        var warnings = new List<string> { warningPrefix + "_composition" };
         warnings.AddRange(official.Warnings);
         warnings.AddRange(numeric.Warnings);
         if (official.Failure is not null)
@@ -186,7 +188,7 @@ public sealed class OcrV8ProductionCompositionPipeline
                 options);
             if (acceptanceRoute is null)
             {
-                warnings.Add($"ocr_v8_proposal_rejected:{proposal.RegionId}");
+                warnings.Add($"{warningPrefix}_proposal_rejected:{proposal.RegionId}");
                 continue;
             }
 
@@ -195,14 +197,14 @@ public sealed class OcrV8ProductionCompositionPipeline
                 : officialRegion;
             if (chosen is null)
             {
-                warnings.Add($"ocr_v8_accepted_proposal_without_recognition:{proposal.RegionId}");
+                warnings.Add($"{warningPrefix}_accepted_proposal_without_recognition:{proposal.RegionId}");
                 continue;
             }
 
             OcrRegion? other = ReferenceEquals(chosen, numericRegion) ? officialRegion : numericRegion;
             selected.Add(MergeAlternatives(chosen, other));
             acceptedProposals.Add(proposal);
-            warnings.Add($"ocr_v8_acceptance_route:{proposal.RegionId}:{acceptanceRoute}");
+            warnings.Add($"{warningPrefix}_acceptance_route:{proposal.RegionId}:{acceptanceRoute}");
             if (ReferenceEquals(chosen, numericRegion))
             {
                 warnings.Add($"ocr_numeric_specialist_selected:{proposal.RegionId}");
@@ -226,7 +228,9 @@ public sealed class OcrV8ProductionCompositionPipeline
                     "OCR_RECOGNITION_ENSEMBLE_FAILED",
                     $"Official recognizer: {official.Failure.TechnicalMessage} " +
                     $"Numeric recognizer: {numeric.Failure.TechnicalMessage}",
-                    "repair_ocr_v8_payload_set"),
+                    warningPrefix == "ocr_v11_candidate"
+                        ? "repair_ocr_v11_candidate_payload_set"
+                        : "repair_ocr_v8_payload_set"),
                 total.Elapsed.TotalMilliseconds,
                 warnings,
                 regionFailures,
@@ -392,10 +396,16 @@ public sealed class OcrV8ProductionCompositionPipeline
 
     private static void ValidateOptions(OcrV8ProductionCompositionOptions options)
     {
-        if (!string.Equals(
-                options.CompositionId,
-                OcrV8ProductionCompositionOptions.ReviewedCompositionId,
-                StringComparison.Ordinal) ||
+        bool reviewedV8 = string.Equals(
+            options.CompositionId,
+            OcrV8ProductionCompositionOptions.ReviewedCompositionId,
+            StringComparison.Ordinal);
+        bool candidateV11 = string.Equals(
+            options.CompositionId,
+            OcrV8ProductionCompositionOptions.CandidateV11CompositionId,
+            StringComparison.Ordinal) &&
+            string.Equals(options.StageVersion, "0.0.21-v11", StringComparison.Ordinal);
+        if ((!reviewedV8 && !candidateV11) ||
             string.IsNullOrWhiteSpace(options.StageVersion) ||
             options.DetectorThreshold != 0.95 ||
             options.OfficialRescueThreshold != 0.90 ||
@@ -409,6 +419,14 @@ public sealed class OcrV8ProductionCompositionPipeline
                 nameof(options));
         }
     }
+
+    private static string WarningPrefix(string compositionId) =>
+        string.Equals(
+            compositionId,
+            OcrV8ProductionCompositionOptions.CandidateV11CompositionId,
+            StringComparison.Ordinal)
+            ? "ocr_v11_candidate"
+            : "ocr_v8";
 
     private static string HashStrings(IEnumerable<string> values)
     {

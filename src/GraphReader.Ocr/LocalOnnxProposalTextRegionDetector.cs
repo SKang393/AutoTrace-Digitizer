@@ -9,8 +9,17 @@ using GraphReader.Inference;
 
 namespace GraphReader.Ocr;
 
+public enum OcrProposalClassifierContract
+{
+    BinaryV8,
+    CompositeProposalRoleV11,
+}
+
 public sealed record LocalOnnxProposalTextRegionDetectorOptions(ModelIdentity Model)
 {
+    public OcrProposalClassifierContract Contract { get; init; } =
+        OcrProposalClassifierContract.BinaryV8;
+
     public int CropWidth { get; init; } = 128;
 
     public int CropHeight { get; init; } = 32;
@@ -75,8 +84,25 @@ public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionProposalDet
 {
     public const string ProposalAlgorithm = "adaptive-gray-baseline-bounded-line-grouping-v2";
     public const string EncodingAlgorithm = "graph-text-component-context-v7-encoding-v1";
+    public const string CompositeRoleEncodingAlgorithm =
+        "graph-text-component-context-position-v11-encoding-v1";
     public const string PostprocessingAlgorithm = "component-fusion-proposal-classifier-v1";
+    public const string CompositeRolePostprocessingAlgorithm =
+        "composite-proposal-role-classifier-v11";
     public const float ProposalConfidenceFloor = 0.82f;
+    public const float CompositeRoleConfidenceFloor = 0.95f;
+
+    private static readonly OcrTextRole[] CompositeRoleOrder =
+    [
+        OcrTextRole.YTick,
+        OcrTextRole.XTick,
+        OcrTextRole.AxisTitle,
+        OcrTextRole.PhaseHeading,
+        OcrTextRole.LegendText,
+        OcrTextRole.Participant,
+        OcrTextRole.Annotation,
+        OcrTextRole.Other,
+    ];
 
     private readonly InferenceRuntime runtime;
     private readonly LocalOnnxProposalTextRegionDetectorOptions options;
@@ -195,7 +221,10 @@ public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionProposalDet
                 $"OCR proposal classification executed with undeclared provider '{response.Execution.Provider}'.");
         }
 
-        int expectedOutputCount = checked(proposals.Length * 2);
+        int outputWidth = options.Contract == OcrProposalClassifierContract.CompositeProposalRoleV11
+            ? 2 + CompositeRoleOrder.Length
+            : 2;
+        int expectedOutputCount = checked(proposals.Length * outputWidth);
         if (response.Execution.Output.Count != expectedOutputCount)
         {
             throw new InvalidDataException(
@@ -205,13 +234,27 @@ public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionProposalDet
 
         var accepted = new List<OcrDetectedRegion>();
         ReadOnlySpan<float> logits = response.Execution.Output.ToArray();
+        for (var outputIndex = 0; outputIndex < logits.Length; outputIndex++)
+        {
+            if (!float.IsFinite(logits[outputIndex]))
+            {
+                throw new InvalidDataException(
+                    "OCR proposal classifier output contains a non-finite logit.");
+            }
+        }
+
         for (var proposalIndex = 0; proposalIndex < proposals.Length; proposalIndex++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            float rejectedLogit = logits[proposalIndex * 2];
-            float acceptedLogit = logits[(proposalIndex * 2) + 1];
+            int outputOffset = proposalIndex * outputWidth;
+            float rejectedLogit = logits[outputOffset];
+            float acceptedLogit = logits[outputOffset + 1];
             float confidence = SoftmaxClassOne(rejectedLogit, acceptedLogit);
-            if (confidence < ProposalConfidenceFloor)
+            float confidenceFloor = options.Contract ==
+                OcrProposalClassifierContract.CompositeProposalRoleV11
+                    ? CompositeRoleConfidenceFloor
+                    : ProposalConfidenceFloor;
+            if (confidence < confidenceFloor)
             {
                 continue;
             }
@@ -219,18 +262,31 @@ public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionProposalDet
             Component proposal = proposals[proposalIndex];
             OcrRectangle rectangle = MapToOriginal(image, proposal);
             double density = proposal.Area / (double)Math.Max(1, proposal.Width * proposal.Height);
+            OcrTextRole? explicitRole = null;
+            string postprocessingAlgorithm = PostprocessingAlgorithm;
+            if (options.Contract == OcrProposalClassifierContract.CompositeProposalRoleV11)
+            {
+                int roleIndex = MaximumFiniteLogitIndex(
+                    logits.Slice(outputOffset + 2, CompositeRoleOrder.Length));
+                explicitRole = CompositeRoleOrder[roleIndex];
+                postprocessingAlgorithm = CompositeRolePostprocessingAlgorithm;
+            }
+
             accepted.Add(new OcrDetectedRegion(
-                DeterministicRegionId(options.Model.Sha256, rectangle),
+                DeterministicRegionId(options.Model.Sha256, rectangle, postprocessingAlgorithm),
                 OcrPolygon.FromRectangle(rectangle),
                 0,
                 confidence,
+                Context: explicitRole is null
+                    ? null
+                    : new OcrRegionContext(ExplicitRoleHint: explicitRole),
                 Evidence: new OcrRegionEvidence(
                     proposal.Count,
                     density,
                     confidence,
                     1d - confidence,
                     false,
-                    Array.AsReadOnly(new[] { PostprocessingAlgorithm }))));
+                    Array.AsReadOnly(new[] { postprocessingAlgorithm }))));
         }
 
         return Array.AsReadOnly(accepted.ToArray());
@@ -240,8 +296,19 @@ public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionProposalDet
     {
         ArgumentNullException.ThrowIfNull(options);
         options.Model.Validate();
-        if (options.CropWidth != 128 || options.CropHeight != 32 ||
-            options.InputChannels != 2 || options.GeometryFeatureCount != 12 ||
+        bool validContract = options.Contract switch
+        {
+            OcrProposalClassifierContract.BinaryV8 =>
+                options.GeometryFeatureCount == 12 &&
+                string.Equals(options.OutputName, "region_logits", StringComparison.Ordinal),
+            OcrProposalClassifierContract.CompositeProposalRoleV11 =>
+                options.GeometryFeatureCount == 16 &&
+                string.Equals(options.OutputName, "proposal_role_logits", StringComparison.Ordinal),
+            _ => false,
+        };
+        if (!validContract ||
+            options.CropWidth != 128 || options.CropHeight != 32 ||
+            options.InputChannels != 2 ||
             options.MinimumComponentArea != 2 ||
             options.MaximumComponentWidthRatio != 0.15 ||
             options.MaximumComponentHeightRatio != 0.20 ||
@@ -260,13 +327,12 @@ public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionProposalDet
             options.ConfidenceThreshold != 0.95f ||
             options.MaximumProposals != 4096 ||
             !string.Equals(options.InputName, "region_proposals", StringComparison.Ordinal) ||
-            !string.Equals(options.OutputName, "region_logits", StringComparison.Ordinal) ||
             string.IsNullOrWhiteSpace(options.StageVersion) ||
             options.Timeout <= TimeSpan.Zero || options.Timeout > TimeSpan.FromMinutes(5) ||
             !ValidProviderPolicy(options.AllowedProviders))
         {
             throw new ArgumentException(
-                "Local ONNX proposal-classifier OCR detector options do not match the frozen V8 contract.",
+                "Local ONNX proposal-classifier OCR detector options do not match a frozen contract.",
                 nameof(options));
         }
     }
@@ -492,6 +558,18 @@ public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionProposalDet
             maximumColumnDensity,
             edgeDensity,
         ];
+
+        if (options.Contract == OcrProposalClassifierContract.CompositeProposalRoleV11)
+        {
+            geometry =
+            [
+                .. geometry,
+                (float)((proposal.Left + proposal.Right + 1.0) / (2.0 * image.Width)),
+                (float)((proposal.Top + proposal.Bottom + 1.0) / (2.0 * image.Height)),
+                proposal.Left / (float)image.Width,
+                proposal.Top / (float)image.Height,
+            ];
+        }
 
         for (var channel = 0; channel < options.InputChannels; channel++)
         {
@@ -735,6 +813,38 @@ public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionProposalDet
         return (float)(one / (zero + one));
     }
 
+    private static int MaximumFiniteLogitIndex(ReadOnlySpan<float> values)
+    {
+        if (values.IsEmpty)
+        {
+            throw new InvalidDataException("OCR proposal classifier role output is empty.");
+        }
+
+        var bestIndex = 0;
+        float bestValue = values[0];
+        if (!float.IsFinite(bestValue))
+        {
+            throw new InvalidDataException("OCR proposal classifier output contains a non-finite logit.");
+        }
+
+        for (var index = 1; index < values.Length; index++)
+        {
+            float value = values[index];
+            if (!float.IsFinite(value))
+            {
+                throw new InvalidDataException("OCR proposal classifier output contains a non-finite logit.");
+            }
+
+            if (value > bestValue)
+            {
+                bestValue = value;
+                bestIndex = index;
+            }
+        }
+
+        return bestIndex;
+    }
+
     private static void ValidateImage(OcrImage image)
     {
         if (image.Width <= 0 || image.Height <= 0 || image.Stride < image.Width ||
@@ -759,8 +869,13 @@ public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionProposalDet
         HashStrings(
         [
             ProposalAlgorithm,
-            EncodingAlgorithm,
-            PostprocessingAlgorithm,
+            options.Contract == OcrProposalClassifierContract.CompositeProposalRoleV11
+                ? CompositeRoleEncodingAlgorithm
+                : EncodingAlgorithm,
+            options.Contract == OcrProposalClassifierContract.CompositeProposalRoleV11
+                ? CompositeRolePostprocessingAlgorithm
+                : PostprocessingAlgorithm,
+            options.Contract.ToString(),
             options.Model.Sha256.ToLowerInvariant(),
             options.CropWidth.ToString(CultureInfo.InvariantCulture),
             options.CropHeight.ToString(CultureInfo.InvariantCulture),
@@ -790,11 +905,14 @@ public sealed class LocalOnnxProposalTextRegionDetector : ITextRegionProposalDet
             ProviderFingerprint(options.AllowedProviders),
         ]);
 
-    private static string DeterministicRegionId(string modelSha256, OcrRectangle rectangle)
+    private static string DeterministicRegionId(
+        string modelSha256,
+        OcrRectangle rectangle,
+        string postprocessingAlgorithm)
     {
         string material = string.Create(
             CultureInfo.InvariantCulture,
-            $"{modelSha256.ToLowerInvariant()}:{PostprocessingAlgorithm}:" +
+            $"{modelSha256.ToLowerInvariant()}:{postprocessingAlgorithm}:" +
             $"{rectangle.X:R},{rectangle.Y:R},{rectangle.Width:R},{rectangle.Height:R}");
         byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(material));
         return new Guid(hash.AsSpan(0, 16)).ToString("D");
