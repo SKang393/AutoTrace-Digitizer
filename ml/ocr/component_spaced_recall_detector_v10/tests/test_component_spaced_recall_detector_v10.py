@@ -49,16 +49,16 @@ def test_p1_is_zero_optimizer_exact_onnx_threshold_only() -> None:
     assert config["predecessor_fixture_bytes_reused"] is False
 
 
-def test_ledger_authorizes_only_unused_p1() -> None:
+def test_ledger_records_consumed_failed_p1() -> None:
     ledger = _load(LEDGER)
     entry = next(item for item in ledger["revisions"] if item["revision"] == REVISION)
-    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["status"] == "candidate_1_failed_selection"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
 
 
@@ -70,6 +70,10 @@ def test_public_gate_is_hidden_bound_and_unapproved() -> None:
     assert seal["release_eligible"] is False
     assert sha256_file(REPO_ROOT / seal["fixture_archive_path"]) == seal["fixture_archive_sha256"]
     assert gate["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, EVALUATOR_SOURCE_PATHS)
-    assert not (ROOT / "P1_RESULT.json").exists()
+    result = _load(ROOT / "P1_RESULT.json")
+    assert result["status"] == "failed_selection"
+    assert result["selection_true_positives"] == 396
+    assert result["selection_false_negatives"] == 4
+    assert result["selection_false_positives"] == 0
+    assert result["public_gate_archive_opened"] is False
     assert not any(REPO_ROOT.glob("models/manifest/ocr/*spaced*recall*v10*.json"))
-

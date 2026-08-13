@@ -2400,7 +2400,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-spaced-component-recall-v10",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_1_failed_selection",
       "defect_class": "generic spaced multi-glyph text-region recall in production composition",
       "prior_revision": "graph-text-component-recall-v9",
       "trigger_evidence_path": "ml/ocr/production_composition_v2/VALIDATION_REPORT.json",
@@ -2414,10 +2414,10 @@
       "trigger_public_archive_opened": false,
       "prior_exposed_fixture_bytes_reused": false,
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [
+      "preregistered_candidate_ids": [],
+      "consumed_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
       "remaining_unregistered_candidate_ids": [
         "P2",
         "P3"
@@ -2443,9 +2443,24 @@
       "p1_base_onnx_sha256": "2d35ce2f55cee8317dfe1faf0281a6e87693cca485dbdaf39e4039ced5b97d9c",
       "p1_optimizer_steps": 0,
       "p1_weights_changed": false,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P1",
-      "execution_blocker": null,
+      "p1_result_path": "ml/ocr/component_spaced_recall_detector_v10/P1_RESULT.json",
+      "p1_result_sha256": "ccf2c49cfdfe7d3777565e03ae838bf5aaa2b85e09a81f2521dfd9eb16d5f0dd",
+      "p1_candidate_report_path": "ml/ocr/component_spaced_recall_detector_v10/artifacts/P1-run/candidate-report.json",
+      "p1_candidate_report_sha256": "549bb167159ff6b2b82a1d922cc57b7f4d716d1f1c872b6fc49772f85c366602",
+      "p1_training_opened_seal_sha256": "0dea1b262e2dc08134bc72237aa98a0f65df29e8b0ebfece8a440c11359a46f8",
+      "p1_training_result_seal_sha256": "c8a2e1de82c14d90f56bc616d424d01e7b6a46686d6db3bc2c4c3cb7caca1505",
+      "p1_selected_threshold": 0.9,
+      "p1_selection_scene_count": 80,
+      "p1_selection_exact_scene_count": 76,
+      "p1_selection_true_positives": 396,
+      "p1_selection_false_positives": 0,
+      "p1_selection_false_negatives": 4,
+      "p1_selection_duplicate_region_count": 0,
+      "p1_selection_prohibited_structure_hits": 0,
+      "p1_public_gate_evaluations": 0,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1 is consumed. P2 remains unregistered until a separate committed training repair preregistration.",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,
@@ -2454,7 +2469,7 @@
       "model_store_promoted": false,
       "production_approval": false,
       "release_eligible": false,
-      "refusal_required_before_output": false
+      "refusal_required_before_output": true
     }
   ]
 }
