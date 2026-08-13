@@ -1,0 +1,41 @@
+{
+  "chandler_included": false,
+  "fixture_archive_path": "artifacts/production-validation/ocr-marker-csharp-v2-sealed.zip",
+  "fixture_archive_sha256": "f7873bc6fca1bd42c216b94d89d267c843ec2133375bd41f13ab4b887538f301",
+  "fixture_manifest_sha256": "8167cdfbb7d24cd7d3201ed1eeb7c63bb676029f9f85fb7006043fcdaa9bf607",
+  "generalization_label_included": false,
+  "generation_environment": {
+    "implementation": "CPython",
+    "numpy": "2.3.5",
+    "pillow": "12.3.0",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.13.7",
+    "torch": "2.13.0+cpu"
+  },
+  "marker_truth_count": 328,
+  "model_execution_count_at_freeze": 0,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graphreader-csharp-ocr-marker-composition-v2",
+  "scene_count": 40,
+  "schema": "graphreader.ocr-marker-production-composition-split-seal.v1",
+  "secret_seed_serialized": false,
+  "source_sha256": {
+    "ml/markers/center/runtime_consistency_v2/dataset.py": "86392199781338bbea7921ae061fc3c5c3fdb43b38bdb751c44741d11b5b35d1",
+    "ml/markers/gate_seal.py": "8b01113d0881dc2b89df3763f4c66fe311cffa48520e72963d2bd6366372122a",
+    "ml/ocr/production_composition_v1/dataset.py": "a10d838a93335ab2413c7f03a4f7b21198878e0cdd994dd6fe8bdd13e4e0c9eb",
+    "ml/ocr/production_csharp_marker_gate_v2/PROTOCOL.json": "c7889881dcd9e43d5edcb609453d4da4df220645d5072c80851ad9e747020e7c",
+    "ml/ocr/production_csharp_marker_gate_v2/dataset.py": "f4b2df92b21ef3a692c988454f23f67aa10d8ea8f843c0dc902bccf848edc966",
+    "ml/ocr/production_csharp_marker_gate_v2/prepare_split.py": "e45f08f0219ceb7bf7af8f4c3270b199dcbba55556a56599e7bbda67854831fd",
+    "ml/ocr/production_csharp_marker_gate_v2/protocol.py": "40a62822237f230cf39e7799303de23b03c97ede176cf073e9af5e94d880be21",
+    "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf": "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+    "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+    "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf": "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+    "src/GraphReader.Markers/Detection/NormalizedMarkerProposalDetector.cs": "93dd5ff1daf61026371852101ccf360648f0bb9bbd149a97042ac038a6f7a750",
+    "tests/GraphReader.Integration.Tests/IntegrationSmoke/OcrMarkerDirectPublicGateV2Tests.cs": "c145b811d52e1f2d513dfaec79d331074b872b6cfdcb7b0a9918b9b89d4fbd8a"
+  },
+  "split": "sealed_public",
+  "synthetic_only": true,
+  "text_truth_count": 200
+}

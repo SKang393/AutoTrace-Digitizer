@@ -24,14 +24,20 @@ family, generates a 128-bit secret once, does not serialize it, and writes a
 single immutable archive plus a tracked hash-only split seal. No Chandler,
 Generalization label, private image, or article image is read or generated.
 
-## Preregistered state
+## Sealed fixture identity
 
-No fixture archive has been generated and no model has executed against this
-split. The generator uses a fresh non-serialized 128-bit secret, distinct label
-sets, distinct renderer and degradation identities, and a distinct scene ID
-namespace. V1 fixture bytes, results, and truth are not read or reused.
+The generator ran once from preregistration commit
+`04227904ef3e4abd66bf58d272712ebbb879fa51`. It created 40 scenes with 200
+text truths and 328 marker truths. The ignored archive SHA-256 is
+`f7873bc6fca1bd42c216b94d89d267c843ec2133375bd41f13ab4b887538f301`,
+its embedded manifest SHA-256 is
+`8167cdfbb7d24cd7d3201ed1eeb7c63bb676029f9f85fb7006043fcdaa9bf607`,
+and the tracked hash-only split seal SHA-256 is
+`e348d645c85156fa5696de9ea9107031990b20d99832a9172cf9a2cf2daeef57`.
+The fresh 128-bit secret is not serialized. V1 fixture bytes, results, and
+truth were not read or reused. No model has executed against V2 fixture bytes.
 
 The runtime clamps only finite activation-boundary drift within the frozen
 `1e-5` ONNX parity tolerance and still rejects larger or non-finite violations.
-This protocol must be committed before new fixture bytes are sealed. The sealed
-identity must then be committed before the one authorized CPU gate execution.
+The sealed identity must be committed before the one authorized CPU gate
+execution.
