@@ -98,4 +98,3 @@ def test_sealed_archive_binds_png_and_truth_bytes(tmp_path: Path) -> None:
     assert split_fingerprint(loaded) == split_fingerprint(scenes)
     assert private["fixture_archive_sha256"]
     assert private["v2_bytes_used"] is False
-

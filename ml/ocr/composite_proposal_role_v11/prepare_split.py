@@ -125,4 +125,3 @@ def freeze_split() -> dict[str, str]:
 
 if __name__ == "__main__":
     print(json.dumps(freeze_split(), indent=2, sort_keys=True))
-
