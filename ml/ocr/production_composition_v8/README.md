@@ -22,3 +22,15 @@ for public. Public remains hidden and cannot run unless exact V8 validation is
 committed and passing. Production approval, model-store promotion, marker-stage
 evidence, packaging, private Chandler validation, and clean-machine evidence
 remain false or absent.
+
+The one-use validation passed all 128 scenes and 640 truths with exact region
+counts, zero false regions, zero misses, zero duplicates, and zero prohibited
+hits. Recognition exact match was `0.9953125`, CER was
+`0.000873871249635887`, role accuracy was `1.0`, numeric exact match was `1.0`,
+word exact match was `0.9917355371900827`, and ambiguity exact match was `1.0`.
+The lower zero-consensus band was not needed on this fresh split. Direct CPU
+execution recorded 128 detector calls, 640 official-recognizer calls, 547
+numeric-recognizer calls, and 21 ambiguity-recognizer calls. Validation report
+SHA-256 is `032c6badcac9fbb5a093fd10b665df5e91bca1a2b8124588b8184efa15b196a9`.
+The report is consumed and cannot rerun. Its exact committed pass authorizes the
+single hidden-public evaluation, without approving any production model.

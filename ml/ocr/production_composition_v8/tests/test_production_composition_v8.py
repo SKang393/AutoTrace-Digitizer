@@ -88,7 +88,7 @@ def test_freeze_and_gate_bind_all_transitive_sources() -> None:
     assert public_config["release_eligible"] is False
 
 
-def test_v7_failure_is_consumed_and_v8_is_unexecuted() -> None:
+def test_v7_failure_is_consumed() -> None:
     report_path = REPO_ROOT / "ml/ocr/production_composition_v7/VALIDATION_REPORT.json"
     report = _load(report_path)
     assert sha256_file(report_path) == "7d1b2ace57af890fcb95476cc74e1b73f9caf1c22f4c4c9b5a178ab8b80e5dd8"
@@ -96,5 +96,27 @@ def test_v7_failure_is_consumed_and_v8_is_unexecuted() -> None:
     assert report["metrics"]["false_negatives"] == 1
     assert report["metrics"]["ambiguity_exact_match"] == 0.9
     assert report["direct_execution"]["numeric_recognizer"]["calls"] == 523
-    assert not (ROOT / "VALIDATION_REPORT.json").exists()
+
+
+def test_v8_validation_pass_is_consumed_and_public_is_unopened() -> None:
+    report_path = ROOT / "VALIDATION_REPORT.json"
+    report = _load(report_path)
+    metrics = report["metrics"]
+    assert sha256_file(report_path) == "032c6badcac9fbb5a093fd10b665df5e91bca1a2b8124588b8184efa15b196a9"
+    assert report["status"] == "pass"
+    assert report["evaluation_count"] == 1
+    assert metrics["exact_detection_scene_count"] == metrics["scene_count"] == 128
+    assert metrics["true_positives"] == metrics["truth_region_count"] == 640
+    assert metrics["false_positives"] == metrics["false_negatives"] == 0
+    assert metrics["duplicate_region_count"] == metrics["prohibited_structure_hits"] == 0
+    assert metrics["recognition_exact_match"] == 0.9953125
+    assert metrics["character_error_rate"] == 0.000873871249635887
+    assert metrics["role_accuracy"] == 1.0
+    assert metrics["numeric_exact_match"] == 1.0
+    assert metrics["word_exact_match"] == 0.9917355371900827
+    assert metrics["ambiguity_exact_match"] == 1.0
+    assert metrics["forbidden_zero_consensus_rescue_route_count"] == 0
+    assert report["direct_execution"]["numeric_recognizer"]["calls"] == 547
+    assert report["production_approval"] is False
+    assert report["release_eligible"] is False
     assert not (ROOT / "PUBLIC_GATE_REPORT.json").exists()
