@@ -1,0 +1,112 @@
+{
+  "chandler_included": false,
+  "generalization_label_included": false,
+  "predecessor_fixture_bytes_reused": false,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "protocol_path": "ml/ocr/structural_graph_proposal_role_v14/PROTOCOL.json",
+  "protocol_sha256": "934e5af3ff7929b6220b9d7af216db192cc2b33be0cd6139210bda9d6f2e82ce",
+  "release_eligible": false,
+  "revision": "graph-text-structural-graph-proposal-role-v14",
+  "schema": "graphreader.ocr-structural-graph-proposal-role-selection.v1",
+  "sealed_public_truth_available_to_candidate": false,
+  "split_generator_source_bundle_sha256": "15bf1f4ce06b0c552f81e9e38151ebff0994ed9d8409db10108bc1cdc9d09351",
+  "split_generator_source_paths": [
+    "ml/ocr/structural_graph_proposal_role_v14/dataset.py",
+    "ml/ocr/structural_graph_proposal_role_v14/prepare_split.py",
+    "ml/ocr/structural_graph_proposal_role_v14/protocol.py",
+    "ml/ocr/component_context_detector_v7/dataset.py",
+    "ml/ocr/component_context_detector_v7/protocol.py",
+    "ml/ocr/component_region_detector_v6/dataset.py"
+  ],
+  "synthetic_only": true,
+  "task": "ocr-detection",
+  "train": {
+    "negative_family_counts": {
+      "clustered-legend-arrow": 342,
+      "compact-marker-intersection": 23043,
+      "dense-arrowhead-fill": 60,
+      "horizontal-bracket-connector": 1708,
+      "mixed-topology-structure": 1054,
+      "multi-component-crosshatch": 4,
+      "sparse-single-stroke": 831,
+      "vertical-ruler-divider": 2857
+    },
+    "negative_proposal_count": 29899,
+    "positive_proposal_count": 3840,
+    "proposal_count": 33739,
+    "role_truth_counts": {
+      "Annotation": 480,
+      "AxisTitle": 480,
+      "LegendText": 480,
+      "Other": 480,
+      "Participant": 480,
+      "PhaseHeading": 480,
+      "XTick": 480,
+      "YTick": 480
+    },
+    "scene_count": 480,
+    "split_fingerprint": "29fd2e0274aaaddd3a95b228fd46e06ddcdc2570139538b11a9b878b9e3ba263",
+    "truth_region_count": 3840
+  },
+  "training_evidence": {
+    "negative_cap_per_scene": 72,
+    "negative_family_counts": {
+      "clustered-legend-arrow": 342,
+      "compact-marker-intersection": 18822,
+      "dense-arrowhead-fill": 60,
+      "horizontal-bracket-connector": 1708,
+      "mixed-topology-structure": 1054,
+      "multi-component-crosshatch": 4,
+      "sparse-single-stroke": 831,
+      "vertical-ruler-divider": 2857
+    },
+    "negative_proposal_count": 25678,
+    "negative_sampling": "deterministic-round-robin-by-structural-family-v2",
+    "positive_proposal_count": 3840,
+    "predecessor_fixture_bytes_used": false,
+    "proposal_count": 29518,
+    "scene_count": 480,
+    "tensor_label_stream_sha256": "7ed7ae3b0ef7a969d254ce4f7a798b670adb9edf18a0dd17eef3039adde2fd9f",
+    "v13_public_fixture_bytes_scene_truth_or_case_identity_used": false,
+    "validation_or_public_pixels_used": false
+  },
+  "training_proposal_label_count": 29518,
+  "training_role_label_count": 3840,
+  "training_tensor_shape": [
+    29518,
+    2,
+    32,
+    144
+  ],
+  "v13_public_fixture_bytes_scene_truth_or_case_identity_used": false,
+  "validation": {
+    "negative_family_counts": {
+      "clustered-legend-arrow": 274,
+      "compact-marker-intersection": 11178,
+      "dense-arrowhead-fill": 38,
+      "horizontal-bracket-connector": 1574,
+      "mixed-topology-structure": 762,
+      "multi-component-crosshatch": 16,
+      "sparse-single-stroke": 256,
+      "vertical-ruler-divider": 1840
+    },
+    "negative_proposal_count": 15938,
+    "positive_proposal_count": 1152,
+    "proposal_count": 17090,
+    "role_truth_counts": {
+      "Annotation": 144,
+      "AxisTitle": 144,
+      "LegendText": 144,
+      "Other": 144,
+      "Participant": 144,
+      "PhaseHeading": 144,
+      "XTick": 144,
+      "YTick": 144
+    },
+    "scene_count": 144,
+    "split_fingerprint": "f1744da5c00ffe6c8f74e3a084c10e93926f05d25ddaebd8f0a9f0eac7593b00",
+    "truth_region_count": 1152
+  },
+  "validation_or_public_pixels_used_for_training": false
+}

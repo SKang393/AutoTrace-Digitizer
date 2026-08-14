@@ -6,4 +6,6 @@ The P1 preregistration replaces V13's anisotropic morphology mixture with a topo
 
 The candidate budget is three. Before any optimizer execution, the source renderer must prove exactly one production proposal per text truth across every stored split. Selection and the one-time public gate require every scene exact, zero false, missed, duplicate, or prohibited regions, overall role accuracy at least `0.90`, each role at least `0.85`, direct CPU ONNX execution, and maximum absolute parity error at most `1e-5`.
 
-No V14 candidate is currently authorized to execute. No manifest, production model-store entry, package payload, private Chandler automatic run, production approval, or release eligibility exists.
+The split is now frozen. The training tensor contains 29,518 proposals, including all 3,840 train truths and 25,678 structural-family negatives. The 208-scene truth-hidden public archive SHA-256 is `57d8dbf2435f1cff415a1ef7641db59de0556c416532f11f6790164e3db66ebf`; its truth remains unavailable to the candidate runner and its evaluation limit is one. P1 remains unauthorized until these exact bindings are committed and a separate ledger checkpoint explicitly opens only that candidate.
+
+No V14 candidate has executed. No manifest, production model-store entry, package payload, private Chandler automatic run, production approval, or release eligibility exists.
