@@ -37,11 +37,11 @@ CPU ONNX parity, but one prohibited false region remained while misses began at
 threshold 0.68. It produced no three-threshold zero-error window. No validation
 case details or pixels were used to design P3.
 
-P3 is the final budgeted candidate. It is preregistered but not execution-
-authorized. It loads and freezes the exact consumed P2 model, then adds one
-context-topology veto branch over the existing tight and context crops, row and
-column projections, and frozen geometry. Only this new nonnegative positive-
-logit veto may train on the unchanged fresh split. Roles, proposals, selection
-thresholds, and the public seal remain unchanged. The public gate remains
-unauthorized and unopened, and no production approval or release eligibility
-exists.
+P3 is the final budgeted candidate. It is preregistered and separately
+authorized for exactly one execution. It loads and freezes the exact consumed
+P2 model, then adds one context-topology veto branch over the existing tight and
+context crops, row and column projections, and frozen geometry. Only this new
+nonnegative positive-logit veto may train on the unchanged fresh split. Roles,
+proposals, selection thresholds, and the public seal remain unchanged. The
+public gate remains unauthorized and unopened, and no production approval or
+release eligibility exists.
