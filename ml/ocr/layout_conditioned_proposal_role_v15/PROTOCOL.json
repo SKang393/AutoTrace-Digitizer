@@ -1,0 +1,202 @@
+{
+  "architecture": "dual-context-topology-layout-conditioned-proposal-role-cnn-v1",
+  "candidate_ids": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "currently_preregistered_candidate": null,
+  "data_scope": "fresh procedural scientific graph scenes with independently varied plot bounds, role lanes, phase headers, axis labels, annotations, graph structures, labels, and degradation families; synthetic only; no Chandler, Generalization, private or article images, external datasets, downloaded training data, or predecessor fixture bytes",
+  "defect_class": "aggregate consumed V14 P3 visible-selection evidence showed zero false proposals and prohibited hits, but two missed truths and PhaseHeading role accuracy 0.7638888888888888 below the fixed 0.85 per-role gate",
+  "distinct_from": [
+    "dual-context-topology-spectrum-residual-proposal-role-cnn-v1",
+    "dual-context-anisotropic-morphology-mixture-proposal-role-cnn-v1",
+    "official PP-OCR DB detector"
+  ],
+  "downstream_composition_gates": {
+    "ambiguity_family_accuracy_minimum": 0.9,
+    "character_error_rate_maximum": 0.05,
+    "marker_duplicates": 0,
+    "marker_exact_count_every_scene": true,
+    "marker_false_negatives": 0,
+    "marker_false_positives": 0,
+    "numeric_family_accuracy_minimum": 0.9,
+    "recognition_exact_match_minimum": 0.9,
+    "role_accuracy_minimum": 0.9,
+    "structure_hits": 0,
+    "text_origin_marker_creations": 0,
+    "word_family_accuracy_minimum": 0.9
+  },
+  "execution_authorized": false,
+  "execution_blocker": "The fresh renderer, plot-bound proposal encoder, runner sources, frozen split bytes, fingerprints, candidate configuration, and single-use public evaluator must be committed before any candidate can execute.",
+  "experiment_budget": 3,
+  "font_notice_path": "LICENSES/NotoSans-OFL-1.1.txt",
+  "input": [
+    "proposal_count",
+    2,
+    32,
+    152
+  ],
+  "isolated_change": "extend the unchanged production proposal crop encoding with exactly eight axis-stage plot-relative geometry values and add a separate layout-conditioned role branch; replace every renderer, degradation, seed, label, and layout family with fresh V15 families while retaining the two-logit proposal and eight-logit role output contract",
+  "model_license": "Apache-2.0",
+  "output": [
+    "proposal_count",
+    10
+  ],
+  "output_contract": {
+    "proposal_logits": [
+      0,
+      2
+    ],
+    "role_logits": [
+      2,
+      10
+    ],
+    "role_logits_ignored_for_rejected_proposals": true,
+    "role_order": [
+      "YTick",
+      "XTick",
+      "AxisTitle",
+      "PhaseHeading",
+      "LegendText",
+      "Participant",
+      "Annotation",
+      "Other"
+    ]
+  },
+  "production_approval": false,
+  "proposal_algorithm": {
+    "algorithm": "adaptive-gray-baseline-bounded-line-grouping-v2",
+    "base_tensor_encoding": "graph-text-component-context-position-v11-encoding-v1",
+    "component_grouping_unchanged_from_production": true,
+    "one_production_proposal_per_truth_required_before_freeze": true,
+    "ordering": "top,left,bottom,right",
+    "plot_geometry_order": [
+      "center_x_over_plot",
+      "center_y_over_plot",
+      "left_over_plot",
+      "right_over_plot",
+      "top_over_plot",
+      "bottom_over_plot",
+      "width_over_plot",
+      "height_over_plot"
+    ],
+    "plot_geometry_source": "verified-axis-stage-plot-bounds-v1"
+  },
+  "release_eligible": false,
+  "revision": "graph-text-layout-conditioned-proposal-role-v15",
+  "schema": "graphreader.ocr-layout-conditioned-proposal-role-protocol.v1",
+  "selection_gates": {
+    "direct_fixture_byte_execution_required": true,
+    "duplicate_regions": 0,
+    "exact_region_count_every_scene": true,
+    "false_regions": 0,
+    "missed_regions": 0,
+    "onnx_parity_maximum_absolute_error": 1e-05,
+    "per_role_accuracy_minimum": 0.85,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "role_accuracy_minimum": 0.9
+  },
+  "selection_thresholds": [
+    0.66,
+    0.72,
+    0.78,
+    0.84,
+    0.88,
+    0.92,
+    0.96
+  ],
+  "split_policy": {
+    "predecessor_fixture_bytes_reused": false,
+    "public_case_level_failure_analysis_permitted": false,
+    "sealed_public_truth_hidden_until_one_time_gate": true,
+    "train_validation_public_family_ids_disjoint": true,
+    "v14_validation_fixture_bytes_scene_truth_or_case_identity_reused": false,
+    "validation_or_public_pixels_used_for_training": false
+  },
+  "splits": [
+    {
+      "degradation_family": "directional-resample-fleck-v15-train",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "font_sha256": [
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0"
+      ],
+      "renderer_family": "layout-lane-collision-v15-train",
+      "scene_count": 512,
+      "seed_offset": 2271000,
+      "split": "train"
+    },
+    {
+      "degradation_family": "stair-step-shadow-v15-validation",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "font_sha256": [
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      ],
+      "renderer_family": "plot-offset-role-lane-v15-validation",
+      "scene_count": 160,
+      "seed_offset": 2439000,
+      "split": "validation"
+    },
+    {
+      "degradation_family": "localized-erode-band-v15-public",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "font_sha256": [
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      ],
+      "renderer_family": "layout-boundary-interleave-v15-public",
+      "scene_count": 224,
+      "seed_offset": 2603000,
+      "split": "sealed_public"
+    }
+  ],
+  "state": "design_preregistered_before_stored_split_materialization",
+  "task": "ocr-detection",
+  "training": {
+    "batch_size": 512,
+    "candidate": "P1",
+    "candidate_budget": 3,
+    "epochs": 16,
+    "learning_rate": 0.00022,
+    "negative_cap_per_scene": 72,
+    "negative_sampling": "deterministic-round-robin-by-structural-family-v3",
+    "output_logit_scale": 0.04,
+    "proposal_loss": "balanced-cross-entropy",
+    "role_loss": "positive-proposals-only-balanced-cross-entropy",
+    "role_loss_weight": 1.0,
+    "seed": 20262051,
+    "weight_decay": 0.0003
+  },
+  "trigger_evidence": {
+    "case_level_details_emitted": false,
+    "consumed_v14_candidate_rerun_authorized": false,
+    "duplicate_regions": 0,
+    "evidence_scope_used_for_v15_design": "aggregate metrics only",
+    "exact_scene_count": 89,
+    "false_regions": 0,
+    "missed_regions": 2,
+    "phase_heading_accuracy": 0.7638888888888888,
+    "prohibited_structure_hits": 0,
+    "report_sha256": "89b66d006166a8a2efb770c029e0a3f9dc76a5ed0425a2ee16a9f0900da262a4",
+    "role_accuracy": 0.9539130434782609,
+    "scene_count": 144,
+    "true_positives": 1150,
+    "truth_regions": 1152,
+    "v14_validation_fixture_bytes_scene_truth_or_case_identity_used": false,
+    "y_tick_accuracy": 0.8680555555555556
+  }
+}

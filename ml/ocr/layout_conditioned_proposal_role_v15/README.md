@@ -1,0 +1,9 @@
+# OCR layout-conditioned proposal and role V15
+
+V15 is a new defect class derived only from aggregate output of the consumed V14 P3 visible-selection run. V14 P3 eliminated all false proposals, duplicates, and prohibited structure hits, but missed two of 1,152 truths and classified PhaseHeading at `0.7638888888888888`, below the fixed `0.85` per-role gate. No V14 validation image, truth, scene identity, case-level result, or fixture byte is inspected or reused, and V14 cannot rerun.
+
+V15 preregisters a plot-conditioned role representation. The unchanged production proposal crop gains exactly eight plot-relative geometry values derived from verified axis-stage plot bounds. A separate role branch consumes those values while proposal acceptance retains the same two-logit contract. All renderer, degradation, seed, label, and layout families are fresh. The input changes from `[N,2,32,144]` to `[N,2,32,152]`; output remains `[N,10]` with two proposal logits and the same eight role logits.
+
+The experiment budget is three. Before any optimizer execution, the renderer must prove exactly one production proposal per truth across each stored split. Selection and the one-time public gate retain the strict zero false, missed, duplicate, and prohibited-region contract, overall role accuracy at least `0.90`, every role at least `0.85`, direct CPU ONNX execution, and parity error at most `1e-5`.
+
+This checkpoint freezes only the design. No split bytes, fingerprints, candidate configuration, runner authorization, optimizer execution, public evaluation, manifest, production model-store entry, package payload, private Chandler automatic run, production approval, or release eligibility exists.
