@@ -80,9 +80,9 @@
         "P1": "7623fdd4fcea9854242976b348b9e5f1cd59d1e657495808b9dab72cbe9281eb"
       },
       "split_materialized": true,
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "P1 source, frozen train and validation evidence, truth-hidden public archive, candidate configuration, and evaluator are committed. A separate clean committed authorization checkpoint remains required before P1 can execute.",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,

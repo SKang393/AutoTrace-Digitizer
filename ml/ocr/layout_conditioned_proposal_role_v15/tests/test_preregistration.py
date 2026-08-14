@@ -163,7 +163,7 @@ def test_split_registrations_are_fresh_disjoint_and_frozen_fail_closed() -> None
         assert value["release_eligible"] is False
 
 
-def test_canonical_ledger_registers_p1_but_authorizes_nothing() -> None:
+def test_canonical_ledger_authorizes_only_single_use_p1() -> None:
     ledger = json.loads(
         (ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
@@ -190,8 +190,8 @@ def test_canonical_ledger_registers_p1_but_authorizes_nothing() -> None:
     )
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(V15_ROOT / "training/p1.json")
     assert entry["split_materialized"] is True
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
