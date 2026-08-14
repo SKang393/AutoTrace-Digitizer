@@ -26,7 +26,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-morphology-proposal-role-v13",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_1_failed_selection",
       "defect_class": "aggregate consumed V12 hidden-public evidence showed 155 of 160 exact scenes, four false regions, one missed region, zero duplicates, and perfect role classification",
       "trigger_report_sha256": "412ffe748d7aacc927fc5c5f19109c68937954a14ed7e10ccbb34276063630b0",
       "trigger_evidence_scope_used_for_design": "aggregate metrics only",
@@ -41,7 +41,9 @@
       "preregistered_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
+      "consumed_candidate_ids": [
+        "P1"
+      ],
       "remaining_unregistered_candidate_ids": [
         "P2",
         "P3"
@@ -83,9 +85,30 @@
         "P1": "bd127eb6fd7cbdb15c7a565d9ad8540e5d8d56de5fc9b5f72e432f34e8be74eb"
       },
       "p1_expected_runner_source_bundle_sha256": "dc30a1443a6014ea1ce0b5eb70d6e964ee8e4d61075b42eb2db76c9be3a1b49c",
-      "execution_authorized": true,
-      "authorized_candidate_id": "P1",
-      "execution_blocker": null,
+      "p1_result_path": "ml/ocr/morphology_proposal_role_v13/P1_RESULT.json",
+      "p1_result_sha256": "828431aeced12741d46b2df03a77669c703d769c675540bb778187a6bdbab466",
+      "p1_selection_report_path": "ml/ocr/morphology_proposal_role_v13/artifacts/P1-run/candidate-report.json",
+      "p1_selection_report_sha256": "abc39cdb055c84e301ddcb927b94eafb0ac412d79abaa03a42f1cda81f31d52a",
+      "p1_checkpoint_sha256": "c09401b7f2676b8e0f103e5788f2c2988a1bce5f73cc32017c5e97494b9e7aa6",
+      "p1_onnx_sha256": "1da78b5c69ceca7dea3e125bf1af6a84a22278c293ec1c0d41eefa6c9432f8d6",
+      "p1_optimizer_steps": 9334,
+      "p1_selection_exact_scene_count": 159,
+      "p1_selection_scene_count": 160,
+      "p1_selection_true_positives": 1280,
+      "p1_selection_false_positives": 1,
+      "p1_selection_false_negatives": 0,
+      "p1_selection_duplicate_count": 0,
+      "p1_selection_prohibited_structure_hits": 1,
+      "p1_selection_role_accuracy": 1.0,
+      "p1_selection_minimum_per_role_accuracy": 1.0,
+      "p1_onnx_parity_maximum_absolute_error": 1.52587890625e-05,
+      "p1_onnx_parity_passed": false,
+      "p1_training_opened_seal_sha256": "fe8c8b760c8dc1c1253e6fe3dcd27355ebbea2f931f9c1051a3b0fe204e736d7",
+      "p1_training_result_seal_sha256": "32aefc0088dc2bf477935f8b418aaba38e97eb2e9e79521a5c8083bc4e2cc9bc",
+      "p1_failure": "P1 found all 1,280 validation text regions with all eight role classes exact, but one prohibited structural proposal remained at every fixed threshold and CPU ONNX maximum absolute parity error 1.52587890625e-05 exceeded the fixed 1e-05 maximum.",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1 is consumed and failed selection. P2 and P3 remain unregistered.",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,
