@@ -22,6 +22,11 @@ from ml.ocr.layout_conditioned_proposal_role_v15.dataset import (
 from ml.ocr.layout_conditioned_proposal_role_v15.model import LayoutConditionedProposalRoleNet
 from ml.ocr.layout_conditioned_proposal_role_v15.sealed_gate import EVALUATOR_SOURCE_PATHS, GATE_CONFIG
 from ml.ocr.layout_conditioned_proposal_role_v15.train_p1 import RUNNER_SOURCE_PATHS, _export
+from ml.ocr.layout_conditioned_proposal_role_v15.train_p2 import (
+    P1_RESULT_PATH,
+    RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
+    _hard_negative_indices,
+)
 from ml.ocr.layout_conditioned_proposal_role_v15.protocol import (
     BASE_GEOMETRY_FEATURE_COUNT,
     ENCODED_WIDTH,
@@ -163,7 +168,42 @@ def test_split_registrations_are_fresh_disjoint_and_frozen_fail_closed() -> None
         assert value["release_eligible"] is False
 
 
-def test_canonical_ledger_authorizes_only_single_use_p1() -> None:
+def test_p1_result_and_p2_sources_are_checksum_bound() -> None:
+    result_path = ROOT / P1_RESULT_PATH
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    config_path = V15_ROOT / "training/p2.json"
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    assert result["status"] == "failed_selection"
+    assert result["consumed"] is True
+    assert result["selection_metrics"]["false_negatives"] == 1
+    assert result["selection_metrics"]["false_positives"] == 0
+    assert result["threshold_0_88_aggregate"]["false_negatives"] == 0
+    assert result["threshold_0_88_aggregate"]["false_positives"] == 3
+    assert result["public_gate_archive_opened"] is False
+    assert config["p1_result_sha256"] == sha256_file(result_path)
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        ROOT, P2_RUNNER_SOURCE_PATHS
+    )
+    assert config["p1_aggregate_metrics_only_used_for_design"] is True
+    assert config["p1_validation_case_detail_or_pixels_used_for_design"] is False
+    assert config["expected_optimizer_steps"] == 128
+    assert config["public_gate_archive_opened"] is False
+
+
+def test_p2_hard_negative_selector_uses_highest_training_scores_only() -> None:
+    class Scores(torch.nn.Module):
+        def forward(self, values: torch.Tensor) -> torch.Tensor:
+            score = values[:, 0, 0, 0]
+            return torch.stack((-score, score), dim=1)
+
+    values = torch.zeros((6, 2, 32, 152), dtype=torch.float32)
+    values[:, 0, 0, 0] = torch.tensor([0.1, 0.7, 0.4, 0.9, 0.3, 0.8])
+    labels = torch.tensor([1, 0, 0, 1, 0, 0], dtype=torch.int64)
+    selected = _hard_negative_indices(Scores(), values, labels, 2, 3)
+    assert selected.tolist() == [5, 1]
+
+
+def test_canonical_ledger_registers_p2_but_authorizes_nothing() -> None:
     ledger = json.loads(
         (ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
@@ -171,10 +211,10 @@ def test_canonical_ledger_authorizes_only_single_use_p1() -> None:
         item for item in ledger["revisions"]
         if item.get("revision") == "graph-text-layout-conditioned-proposal-role-v15"
     )
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["protocol_sha256"] == sha256_file(V15_ROOT / "PROTOCOL.json")
     assert entry["split_generator_source_bundle_sha256"] == "502d3fefa949acc1b755871005fcf66824ba07ee04b1c9515d9d9874e62ff3e5"
     assert entry["p1_expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS)
@@ -189,9 +229,14 @@ def test_canonical_ledger_authorizes_only_single_use_p1() -> None:
         V15_ROOT / "gates/sealed-public-v1.json"
     )
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(V15_ROOT / "training/p1.json")
+    assert entry["candidate_config_sha256"]["P2"] == sha256_file(V15_ROOT / "training/p2.json")
+    assert entry["p1_result_sha256"] == sha256_file(V15_ROOT / "P1_RESULT.json")
+    assert entry["p2_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        ROOT, P2_RUNNER_SOURCE_PATHS
+    )
     assert entry["split_materialized"] is True
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
