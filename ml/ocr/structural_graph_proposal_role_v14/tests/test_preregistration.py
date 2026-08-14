@@ -107,14 +107,15 @@ def test_split_and_candidate_records_are_frozen_and_fail_closed() -> None:
         assert record["release_eligible"] is False
 
 
-def test_frozen_budget_ledger_still_refuses_p1_execution() -> None:
+def test_frozen_budget_ledger_authorizes_only_exact_p1() -> None:
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-structural-graph-proposal-role-v14")
-    assert entry["status"] == "split_frozen_execution_pending"
+    assert entry["status"] == "candidate_1_preregistered"
     assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["execution_blocker"] is None
     assert entry["selection_manifest_sha256"] == sha256_file(V14_ROOT / "SELECTION_MANIFEST.json")
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(V14_ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(V14_ROOT / "training/p1.json")
