@@ -25,6 +25,13 @@ one false positive in its once-only public gate. The official OCR execution
 failed earlier at the detector probability-tensor contract, so no OCR metrics
 or marker-stage result was emitted and approval remains impossible.
 
+The separate project-owned structural-veto V17 detector budget is also
+exhausted. P1, P2, and P3 each failed selection before public evaluation. Final
+P3 retained all 1,728 validation truths and passed CPU parity but left one
+prohibited false region, so the truth-hidden 288-scene public archive remains
+unopened with zero evaluations. It cannot replace or approve the official
+detector, and no rerun is authorized.
+
 | Task | Model | Converted ONNX SHA-256 | Current status |
 | --- | --- | --- | --- |
 | OCR detection | `PP-OCRv5_mobile_det` | `d4aa24d408cd70b8b9f66cc758e20f397fc31a9c69d8477cf8887fc53bd5fceb` | Conversion parity passed; public evaluation failed |

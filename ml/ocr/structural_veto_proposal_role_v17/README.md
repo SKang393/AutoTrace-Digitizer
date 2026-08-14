@@ -37,11 +37,15 @@ CPU ONNX parity, but one prohibited false region remained while misses began at
 threshold 0.68. It produced no three-threshold zero-error window. No validation
 case details or pixels were used to design P3.
 
-P3 is the final budgeted candidate. It is preregistered and separately
-authorized for exactly one execution. It loads and freezes the exact consumed
-P2 model, then adds one context-topology veto branch over the existing tight and
-context crops, row and column projections, and frozen geometry. Only this new
-nonnegative positive-logit veto may train on the unchanged fresh split. Roles,
-proposals, selection thresholds, and the public seal remain unchanged. The
-public gate remains unauthorized and unopened, and no production approval or
-release eligibility exists.
+P3 is consumed and failed selection after its single authorized 1,072-step
+run. It loaded and froze the exact consumed P2 model and trained only the new
+context-topology veto branch. It preserved all 1,728 validation truths, role
+logits, and CPU ONNX parity, but retained the same one prohibited false region
+at threshold 0.64 while misses began at threshold 0.68. It produced no
+three-threshold zero-error window.
+
+The fixed P1 through P3 budget is exhausted. No candidate, selection rerun, or
+public evaluation is authorized. The truth-hidden 288-scene public archive was
+never opened and has zero evaluations. Production approval, model-store
+promotion, packaging discovery, private validation, and release eligibility
+remain false.

@@ -85,7 +85,7 @@ def test_fresh_splits_and_zero_error_threshold_margin_are_fixed() -> None:
     assert "no Chandler" in expected["data_scope"]
 
 
-def test_materialized_split_and_consumed_p1_p2_bind_unapproved_p3() -> None:
+def test_materialized_split_and_exhausted_candidates_keep_public_gate_closed() -> None:
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text())
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol_configuration()["revision"])
     selection_path = V17_ROOT / "SELECTION_MANIFEST.json"
@@ -96,6 +96,7 @@ def test_materialized_split_and_consumed_p1_p2_bind_unapproved_p3() -> None:
     config_path = V17_ROOT / "training/p3.json"
     p1_result_path = V17_ROOT / "P1_RESULT.json"
     p2_result_path = V17_ROOT / "P2_RESULT.json"
+    p3_result_path = V17_ROOT / "P3_RESULT.json"
     selection = json.loads(selection_path.read_text(encoding="utf-8"))
     seal = json.loads(seal_path.read_text(encoding="utf-8"))
     gate = json.loads(gate_path.read_text(encoding="utf-8"))
@@ -103,15 +104,17 @@ def test_materialized_split_and_consumed_p1_p2_bind_unapproved_p3() -> None:
 
     p1_result = json.loads(p1_result_path.read_text(encoding="utf-8"))
     p2_result = json.loads(p2_result_path.read_text(encoding="utf-8"))
+    p3_result = json.loads(p3_result_path.read_text(encoding="utf-8"))
 
-    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["status"] == "exhausted_failed_selection"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["split_materialized"] is True
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_blocker"] == "P1 through P3 are consumed; no rerun or public gate is authorized."
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
@@ -154,12 +157,25 @@ def test_materialized_split_and_consumed_p1_p2_bind_unapproved_p3() -> None:
     assert p2_result["passing_threshold_window"] == []
     assert p2_result["public_gate_archive_opened"] is False
     assert p2_result["public_gate_evaluations"] == 0
+    assert sha256_file(p3_result_path) == entry["p3_result_sha256"]
+    assert p3_result["status"] == "failed_selection"
+    assert p3_result["consumed"] is True
+    assert p3_result["optimizer_steps"] == 1072
+    assert p3_result["selection_metrics"]["true_positives"] == 1728
+    assert p3_result["selection_metrics"]["false_positives"] == 1
+    assert p3_result["selection_metrics"]["false_negatives"] == 0
+    assert p3_result["passing_threshold_window"] == []
+    assert p3_result["public_gate_archive_opened"] is False
+    assert p3_result["public_gate_evaluations"] == 0
+    assert sha256_file(ROOT / p3_result["candidate_report_path"]) == p3_result["candidate_report_sha256"]
+    assert sha256_file(ROOT / p3_result["checkpoint_path"]) == p3_result["checkpoint_sha256"]
+    assert sha256_file(ROOT / p3_result["onnx_path"]) == p3_result["onnx_sha256"]
     assert sha256_file(ROOT / seal["fixture_archive_path"]) == seal["fixture_archive_sha256"]
     assert sha256_file(ROOT / seal["private_manifest_path"]) == seal["private_manifest_sha256"]
-    assert not (V17_ROOT / "artifacts/P3-run").exists()
-    assert not (
-        ROOT / "ml/markers/training-seals/ocr-detection/graph-text-structural-veto-proposal-role-v17/P3"
-    ).exists()
+    p3_seal_root = ROOT / "ml/markers/training-seals/ocr-detection/graph-text-structural-veto-proposal-role-v17/P3"
+    assert sha256_file(p3_seal_root / "opened.json") == p3_result["training_opened_seal_sha256"]
+    assert sha256_file(p3_seal_root / "result.json") == p3_result["training_result_seal_sha256"]
+    assert not (V17_ROOT / "artifacts/public-gate-report.json").exists()
 
 
 def test_p2_objective_is_class_balanced_and_separates_only_the_hard_tails() -> None:
