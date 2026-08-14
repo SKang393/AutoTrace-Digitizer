@@ -1,0 +1,115 @@
+{
+  "chandler_included": false,
+  "generalization_label_included": false,
+  "predecessor_fixture_bytes_reused": false,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "protocol_path": "ml/ocr/margin_robust_layout_proposal_role_v16/PROTOCOL.json",
+  "protocol_sha256": "9896048e054981f49369b03351fc7394e3408251a2a426e77cb082d372d65f13",
+  "release_eligible": false,
+  "revision": "graph-text-margin-robust-layout-proposal-role-v16",
+  "schema": "graphreader.ocr-margin-robust-layout-proposal-role-selection.v1",
+  "sealed_public_truth_available_to_candidate": false,
+  "split_generator_source_bundle_sha256": "13356dab14814ae7bebc358b2ba3bb50d2a89fb3872bd2cc697474a5a56c7ccd",
+  "split_generator_source_paths": [
+    "ml/ocr/margin_robust_layout_proposal_role_v16/dataset.py",
+    "ml/ocr/margin_robust_layout_proposal_role_v16/prepare_split.py",
+    "ml/ocr/margin_robust_layout_proposal_role_v16/protocol.py",
+    "ml/ocr/layout_conditioned_proposal_role_v15/dataset.py",
+    "ml/ocr/component_context_detector_v7/dataset.py",
+    "ml/ocr/component_context_detector_v7/protocol.py",
+    "ml/ocr/component_region_detector_v6/dataset.py"
+  ],
+  "synthetic_only": true,
+  "task": "ocr-detection",
+  "train": {
+    "negative_family_counts": {
+      "clustered-arrow-legend": 49,
+      "compact-marker-cross": 17860,
+      "dense-fill-arrowhead": 9,
+      "horizontal-bracket-connector": 1737,
+      "mixed-layout-structure": 1093,
+      "sparse-stroke": 1561,
+      "vertical-divider-ruler": 3071
+    },
+    "negative_proposal_count": 25380,
+    "positive_proposal_count": 5120,
+    "proposal_count": 30500,
+    "role_truth_counts": {
+      "Annotation": 640,
+      "AxisTitle": 640,
+      "LegendText": 640,
+      "Other": 640,
+      "Participant": 640,
+      "PhaseHeading": 640,
+      "XTick": 640,
+      "YTick": 640
+    },
+    "scene_count": 640,
+    "split_fingerprint": "816a09f397aa984b6e13ec26133f104dd04087c00a800d55230523db52ea8f70",
+    "truth_region_count": 5120
+  },
+  "training_evidence": {
+    "fresh_renderer_and_degradation_family_ids_used": true,
+    "fresh_seed_offsets_used": true,
+    "negative_cap_per_scene": 72,
+    "negative_family_counts": {
+      "clustered-arrow-legend": 49,
+      "compact-marker-cross": 17814,
+      "dense-fill-arrowhead": 9,
+      "horizontal-bracket-connector": 1737,
+      "mixed-layout-structure": 1093,
+      "sparse-stroke": 1561,
+      "vertical-divider-ruler": 3071
+    },
+    "negative_proposal_count": 25334,
+    "negative_sampling": "deterministic-round-robin-by-structural-family-v3",
+    "positive_proposal_count": 5120,
+    "predecessor_fixture_bytes_used": false,
+    "procedural_renderer_implementation_reused": true,
+    "proposal_count": 30454,
+    "scene_count": 640,
+    "tensor_label_stream_sha256": "5472b4104c0d31ed8978f225b35911aca37c27e7e8476472f60cb7a915501032",
+    "v14_validation_fixture_bytes_scene_truth_or_case_identity_used": false,
+    "v15_public_fixture_bytes_scene_truth_or_case_identity_used": false,
+    "validation_or_public_pixels_used": false
+  },
+  "training_proposal_label_count": 30454,
+  "training_role_label_count": 5120,
+  "training_tensor_shape": [
+    30454,
+    2,
+    32,
+    152
+  ],
+  "v15_public_fixture_bytes_scene_truth_or_case_identity_used": false,
+  "validation": {
+    "negative_family_counts": {
+      "clustered-arrow-legend": 71,
+      "compact-marker-cross": 8375,
+      "dense-fill-arrowhead": 38,
+      "horizontal-bracket-connector": 1276,
+      "mixed-layout-structure": 771,
+      "multi-component-frame": 1,
+      "sparse-stroke": 380,
+      "vertical-divider-ruler": 1003
+    },
+    "negative_proposal_count": 11915,
+    "positive_proposal_count": 1536,
+    "proposal_count": 13451,
+    "role_truth_counts": {
+      "Annotation": 192,
+      "AxisTitle": 192,
+      "LegendText": 192,
+      "Other": 192,
+      "Participant": 192,
+      "PhaseHeading": 192,
+      "XTick": 192,
+      "YTick": 192
+    },
+    "scene_count": 192,
+    "split_fingerprint": "f9cabe4af3428ec0d5dddd3eed52d95cd9e4c6dc5edd2514523338b4ffa1951c",
+    "truth_region_count": 1536
+  },
+  "validation_or_public_pixels_used_for_training": false
+}

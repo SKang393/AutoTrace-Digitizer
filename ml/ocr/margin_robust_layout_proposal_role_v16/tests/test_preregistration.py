@@ -12,7 +12,7 @@ import onnxruntime as ort
 import pytest
 import torch
 
-from ml.markers.gate_seal import canonical_json_bytes, source_bundle_sha256
+from ml.markers.gate_seal import canonical_json_bytes, sha256_file, source_bundle_sha256
 from ml.ocr.component_context_detector_v7.dataset import box_iou
 from ml.ocr.layout_conditioned_proposal_role_v15.dataset import render_scene as render_v15_scene
 from ml.ocr.margin_robust_layout_proposal_role_v16.dataset import encode_proposal, proposals, render_scene
@@ -151,10 +151,47 @@ def test_runner_public_sources_and_ledger_are_fail_closed() -> None:
     assert GATE_CONFIG["case_level_failure_analysis_permitted"] is False
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol_configuration()["revision"])
-    assert entry["status"] == "design_preregistered_before_split_materialization"
+    assert entry["status"] == "split_materialized_execution_blocked"
+    assert entry["split_materialized"] is True
+    assert entry["selection_manifest_sha256"] == "06253f5a0a7318fde69093027d99c4ef1cacf876e9906cc6c33fc0a9d15be72f"
+    assert entry["sealed_public_fixture_archive_sha256"] == "663b9a0c1600ca65c04c2acf85a021a057777a44f7e930ce82fc6beb4b7a97c1"
+    assert entry["sealed_public_private_manifest_sha256"] == "cd6dc64bff9fc3fb8d1ba6a6185e142b661fdd10fc215bf9064dc7ef438163e9"
     assert entry["execution_authorized"] is False
     assert entry["public_gate_authorized"] is False
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == []
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
+
+
+def test_materialized_split_and_p1_configuration_remain_closed() -> None:
+    selection_path = V16_ROOT / "SELECTION_MANIFEST.json"
+    seal_path = V16_ROOT / "SEALED_PUBLIC_TEST_SEAL.json"
+    gate_path = V16_ROOT / "gates/sealed-public-v1.json"
+    config_path = V16_ROOT / "training/p1.json"
+    selection = json.loads(selection_path.read_text(encoding="utf-8"))
+    seal = json.loads(seal_path.read_text(encoding="utf-8"))
+    gate = json.loads(gate_path.read_text(encoding="utf-8"))
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    assert selection["train"]["scene_count"] == 640
+    assert selection["train"]["split_fingerprint"] == "816a09f397aa984b6e13ec26133f104dd04087c00a800d55230523db52ea8f70"
+    assert selection["validation"]["scene_count"] == 192
+    assert selection["validation"]["split_fingerprint"] == "f9cabe4af3428ec0d5dddd3eed52d95cd9e4c6dc5edd2514523338b4ffa1951c"
+    assert selection["training_evidence"]["v15_public_fixture_bytes_scene_truth_or_case_identity_used"] is False
+    assert seal["scene_count"] == 256
+    assert seal["split_fingerprint"] == "e1ec6d2272e83126474f0a09cc5f8c566444dab68fb816899cca2d932ee6dbde"
+    assert seal["fixture_archive_sha256"] == "663b9a0c1600ca65c04c2acf85a021a057777a44f7e930ce82fc6beb4b7a97c1"
+    assert seal["truth_hidden_from_candidate_runner"] is True
+    assert seal["public_gate_evaluations"] == 0
+    assert gate["sealed_public_test_seal_sha256"] == sha256_file(seal_path)
+    assert gate["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(ROOT, EVALUATOR_SOURCE_PATHS)
+    assert config["candidate_id"] == "P1"
+    assert config["selection_manifest_sha256"] == sha256_file(selection_path)
+    assert config["sealed_public_test_seal_sha256"] == sha256_file(seal_path)
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS)
+    assert config["minimum_consecutive_passing_thresholds"] == 3
+    assert config["public_gate_archive_opened"] is False
+    assert config["public_gate_evaluations"] == 0
+    for value in (selection, seal, gate, config):
+        assert value["production_approval"] is False
+        assert value["release_eligible"] is False
