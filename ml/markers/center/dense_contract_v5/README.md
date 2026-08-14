@@ -24,5 +24,6 @@ parity at most `1e-5`, and at least three adjacent passing thresholds.
 The 96 training, 24 validation, and 32 truth-hidden public scenes are frozen
 before optimization. The public archive may open once only after selection
 passes and separate authorization is committed. Up to three candidates are
-available, but only P1 is preregistered. Production approval, model-store
+available, but only P1 is preregistered and ledger-authorized for one execution.
+The public gate remains separately locked. Production approval, model-store
 promotion, packaging, private validation, and release eligibility remain false.
