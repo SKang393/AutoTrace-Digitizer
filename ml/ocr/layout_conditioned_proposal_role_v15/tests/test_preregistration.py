@@ -257,7 +257,34 @@ def test_p3_anchor_calibration_preserves_acceptance_and_roles() -> None:
     assert all(parameter.requires_grad is False for parameter in candidate.parameters())
 
 
-def test_canonical_ledger_authorizes_only_single_use_p3() -> None:
+def test_p3_result_is_selected_and_public_gate_remains_closed() -> None:
+    result_path = V15_ROOT / "P3_RESULT.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert result["status"] == "selected"
+    assert result["consumed"] is True
+    assert result["selection_gate_passed"] is True
+    assert result["optimizer_steps"] == 0
+    assert result["weights_changed"] is False
+    assert result["selected_threshold"] == 0.66
+    assert result["selection_metrics"]["exact_scene_count"] == 160
+    assert result["selection_metrics"]["true_positives"] == 1280
+    assert result["selection_metrics"]["false_positives"] == 0
+    assert result["selection_metrics"]["false_negatives"] == 0
+    assert result["selection_metrics"]["duplicate_region_count"] == 0
+    assert result["selection_metrics"]["prohibited_structure_hits"] == 0
+    assert min(result["selection_metrics"]["per_role_accuracy"].values()) == 1.0
+    assert result["anchor_acceptance_mismatch_count"] == 0
+    assert result["role_argmax_mismatch_count"] == 0
+    assert result["onnx_parity_passed"] is True
+    assert result["onnx_parity_maximum_absolute_error"] == 5.7220458984375e-06
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_authorized"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
+
+
+def test_canonical_ledger_records_selected_p3_without_public_authorization() -> None:
     ledger = json.loads(
         (ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
@@ -265,9 +292,9 @@ def test_canonical_ledger_authorizes_only_single_use_p3() -> None:
         item for item in ledger["revisions"]
         if item.get("revision") == "graph-text-layout-conditioned-proposal-role-v15"
     )
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["status"] == "candidate_3_selected_public_gate_pending"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["protocol_sha256"] == sha256_file(V15_ROOT / "PROTOCOL.json")
     assert entry["split_generator_source_bundle_sha256"] == "502d3fefa949acc1b755871005fcf66824ba07ee04b1c9515d9d9874e62ff3e5"
@@ -296,10 +323,20 @@ def test_canonical_ledger_authorizes_only_single_use_p3() -> None:
     assert entry["p3_expected_optimizer_steps"] == 0
     assert entry["p3_output_scale"] == 0.8
     assert entry["p3_anchor_threshold"] == 0.66
+    assert entry["p3_result_sha256"] == sha256_file(V15_ROOT / "P3_RESULT.json")
+    assert entry["p3_selection_report_sha256"] == "1c89f43258a561e77421244deb5a3f093cb5ce68bd567dc7320ebd86ada0cc12"
+    assert entry["p3_onnx_sha256"] == "ff145e14a6f84170e1d727dbd89f57316cb7ee2eaccb6c7f3df5013271d7c948"
+    assert entry["p3_selection_exact_scene_count"] == 160
+    assert entry["p3_selection_true_positives"] == 1280
+    assert entry["p3_selection_false_positives"] == 0
+    assert entry["p3_selection_false_negatives"] == 0
+    assert entry["p3_anchor_acceptance_mismatch_count"] == 0
+    assert entry["p3_role_argmax_mismatch_count"] == 0
+    assert entry["p3_onnx_parity_passed"] is True
     assert entry["split_materialized"] is True
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
-    assert entry["execution_blocker"] is None
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert "budget is exhausted" in entry["execution_blocker"]
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
