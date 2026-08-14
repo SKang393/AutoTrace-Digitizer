@@ -6,7 +6,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-layout-conditioned-proposal-role-v15",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_3_preregistered",
       "defect_class": "aggregate consumed V14 P3 visible-selection evidence showed zero false proposals and prohibited hits, but two missed truths and PhaseHeading role accuracy 0.7638888888888888 below the fixed 0.85 per-role gate",
       "trigger_report_sha256": "89b66d006166a8a2efb770c029e0a3f9dc76a5ed0425a2ee16a9f0900da262a4",
       "trigger_evidence_scope_used_for_design": "aggregate metrics only",
@@ -19,14 +19,13 @@
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P2"
-      ],
-      "consumed_candidate_ids": [
-        "P1"
-      ],
-      "remaining_unregistered_candidate_ids": [
         "P3"
       ],
+      "consumed_candidate_ids": [
+        "P1",
+        "P2"
+      ],
+      "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/ocr/layout_conditioned_proposal_role_v15/PROTOCOL.json",
       "protocol_sha256": "96afdf8c8f67aa74d5dc75b1119aa0ca7f4c2e7b6e81490f049e993c4f4fc1ba",
       "split_generator_source_bundle_sha256": "502d3fefa949acc1b755871005fcf66824ba07ee04b1c9515d9d9874e62ff3e5",
@@ -76,11 +75,13 @@
       "public_gate_config_sha256": "9fdad2894583672b4715662296dfc400319d80982f1d385053055778c8b00297",
       "candidate_config_paths": {
         "P1": "ml/ocr/layout_conditioned_proposal_role_v15/training/p1.json",
-        "P2": "ml/ocr/layout_conditioned_proposal_role_v15/training/p2.json"
+        "P2": "ml/ocr/layout_conditioned_proposal_role_v15/training/p2.json",
+        "P3": "ml/ocr/layout_conditioned_proposal_role_v15/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "7623fdd4fcea9854242976b348b9e5f1cd59d1e657495808b9dab72cbe9281eb",
-        "P2": "6044d417596ad8f30376c16207c446f243fac4951ffea9fcdba60ee0ff1d81c6"
+        "P2": "6044d417596ad8f30376c16207c446f243fac4951ffea9fcdba60ee0ff1d81c6",
+        "P3": "debdfcff21b5d9333c1f7595b852b0204f9c2adf059b3bd6252ba9142934ed3e"
       },
       "p1_result_path": "ml/ocr/layout_conditioned_proposal_role_v15/P1_RESULT.json",
       "p1_result_sha256": "64b52617fcf72f6c6d4af44840956a459bfc150dd51161bf67ee6368d1c5c107",
@@ -111,10 +112,39 @@
       "p2_expected_optimizer_steps": 128,
       "p2_p1_aggregate_metrics_only_used_for_design": true,
       "p2_p1_validation_case_detail_or_pixels_used_for_design": false,
+      "p2_result_path": "ml/ocr/layout_conditioned_proposal_role_v15/P2_RESULT.json",
+      "p2_result_sha256": "4104558dd72e629c900957470e50cd1a616de5995696a4340499fe11a7796e46",
+      "p2_selection_report_path": "ml/ocr/layout_conditioned_proposal_role_v15/artifacts/P2-run/candidate-report.json",
+      "p2_selection_report_sha256": "e87e520a0e634afbc0d1bb1091e4329dd418ba5c87547d57b7cc99305ecd35fc",
+      "p2_checkpoint_sha256": "98a766c438e8c6eaf7136ef29583357a45cf59db6f4f33199b6c7fc349e0962a",
+      "p2_onnx_sha256": "b5022532c50cd76494389ec8b5223540e8fcaa7ad8ca597d9c770328fb70a3c2",
+      "p2_optimizer_steps": 128,
+      "p2_selected_threshold": 0.66,
+      "p2_selection_exact_scene_count": 160,
+      "p2_selection_scene_count": 160,
+      "p2_selection_true_positives": 1280,
+      "p2_selection_false_positives": 0,
+      "p2_selection_false_negatives": 0,
+      "p2_selection_duplicate_count": 0,
+      "p2_selection_prohibited_structure_hits": 0,
+      "p2_selection_role_accuracy": 1.0,
+      "p2_selection_minimum_per_role_accuracy": 1.0,
+      "p2_role_invariance_maximum_absolute_error": 0.0,
+      "p2_onnx_parity_maximum_absolute_error": 1.1444091796875e-05,
+      "p2_onnx_parity_passed": false,
+      "p2_training_opened_seal_sha256": "96507d3297fd74999185fb47b22c84d973b48588fddbdf40fef1b8a6b3a1afbc",
+      "p2_training_result_seal_sha256": "9f2fdfaa736950f188fa057073927ad9a553b12618b7dfad3dc7ed517259b353",
+      "p3_isolated_change": "load the exact checksum-bound P2 checkpoint with zero optimizer steps and no weight updates; apply a fixed 0.8 affine output scale plus proposal bias anchored at threshold 0.66 so P2 acceptance and every role argmax are preserved while reducing ONNX parity error",
+      "p3_expected_runner_source_bundle_sha256": "f0a4017e8b074e10dd04cfee379f9b2307eb176ef1a83406d469a8c6de65f06f",
+      "p3_expected_optimizer_steps": 0,
+      "p3_output_scale": 0.8,
+      "p3_anchor_threshold": 0.66,
+      "p3_p2_aggregate_metrics_only_used_for_design": true,
+      "p3_p2_validation_case_detail_or_pixels_used_for_design": false,
       "split_materialized": true,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P2",
-      "execution_blocker": null,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P3 requires a separate clean authorization commit after preregistration source, config, ledger, tests, and documentation are committed and verified",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,
