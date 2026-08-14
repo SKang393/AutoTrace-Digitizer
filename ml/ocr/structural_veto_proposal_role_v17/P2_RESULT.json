@@ -1,0 +1,100 @@
+{
+  "candidate_id": "P2",
+  "candidate_report_path": "ml/ocr/structural_veto_proposal_role_v17/artifacts/P2-run/candidate-report.json",
+  "candidate_report_sha256": "5c966e0d06ef824ff071996c9b5f2f9919d36d2b9549837628e85347271797a5",
+  "checkpoint_path": "ml/ocr/structural_veto_proposal_role_v17/artifacts/P2-run/graph-text-structural-veto-proposal-role-v17-p2.pt",
+  "checkpoint_sha256": "05e2189b82ccd4bc35c8e5429654f48e350f5f7797898e879aee9838d0181b28",
+  "consumed": true,
+  "direct_execution_inference_calls": 216,
+  "elapsed_ms": 3461030.944,
+  "failure": "P2 shifted the all-truth operating point from threshold 0.60 to 0.64 while preserving roles and CPU ONNX parity, but one prohibited false region remained and misses began at threshold 0.68, so no three-threshold zero-error window existed.",
+  "onnx_parity_maximum_absolute_error": 0.000005245208740234375,
+  "onnx_parity_passed": true,
+  "onnx_path": "ml/ocr/structural_veto_proposal_role_v17/artifacts/P2-run/graph-text-structural-veto-proposal-role-v17-p2.onnx",
+  "onnx_sha256": "90d5ceec079f378ab570fb7ae44896964a8d6546d6401846837879faad32794d",
+  "optimizer_steps": 804,
+  "passing_threshold_window": [],
+  "production_approval": false,
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-structural-veto-proposal-role-v17",
+  "role_argmax_mismatch_count": 0,
+  "role_invariance_maximum_absolute_error": 0.0,
+  "schema": "graphreader.ocr-structural-veto-proposal-role-result.v1",
+  "selected_threshold": 0.64,
+  "selection_metrics": {
+    "duplicate_region_count": 0,
+    "exact_scene_count": 214,
+    "false_negatives": 0,
+    "false_positives": 1,
+    "minimum_per_role_accuracy": 0.9953703703703703,
+    "prohibited_structure_hits": 1,
+    "role_accuracy": 0.9994212962962963,
+    "scene_count": 216,
+    "true_positives": 1728,
+    "truth_region_count": 1728
+  },
+  "status": "failed_selection",
+  "task": "ocr-detection",
+  "threshold_aggregates": [
+    {
+      "exact_scene_count": 213,
+      "false_negatives": 0,
+      "false_positives": 2,
+      "prohibited_structure_hits": 2,
+      "threshold": 0.56,
+      "true_positives": 1728
+    },
+    {
+      "exact_scene_count": 213,
+      "false_negatives": 0,
+      "false_positives": 2,
+      "prohibited_structure_hits": 2,
+      "threshold": 0.6,
+      "true_positives": 1728
+    },
+    {
+      "exact_scene_count": 214,
+      "false_negatives": 0,
+      "false_positives": 1,
+      "prohibited_structure_hits": 1,
+      "threshold": 0.64,
+      "true_positives": 1728
+    },
+    {
+      "exact_scene_count": 213,
+      "false_negatives": 1,
+      "false_positives": 1,
+      "prohibited_structure_hits": 1,
+      "threshold": 0.68,
+      "true_positives": 1727
+    },
+    {
+      "exact_scene_count": 212,
+      "false_negatives": 2,
+      "false_positives": 1,
+      "prohibited_structure_hits": 1,
+      "threshold": 0.72,
+      "true_positives": 1726
+    },
+    {
+      "exact_scene_count": 211,
+      "false_negatives": 4,
+      "false_positives": 1,
+      "prohibited_structure_hits": 1,
+      "threshold": 0.76,
+      "true_positives": 1724
+    },
+    {
+      "exact_scene_count": 208,
+      "false_negatives": 8,
+      "false_positives": 0,
+      "prohibited_structure_hits": 0,
+      "threshold": 0.8,
+      "true_positives": 1720
+    }
+  ],
+  "training_opened_seal_sha256": "0c3a1e0eea3c64088a28ec5404f3b90f598ccfeaa55e3a1732364dc9d3fbef5f",
+  "training_result_seal_sha256": "3d7b6e56565444a8e4d4d660fdc3d97ceb57b91ab830636e616ca0cf549b22b2"
+}

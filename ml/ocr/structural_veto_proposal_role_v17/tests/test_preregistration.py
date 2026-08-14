@@ -16,6 +16,7 @@ from ml.ocr.component_context_detector_v7.dataset import box_iou
 from ml.ocr.margin_robust_layout_proposal_role_v16.train_p1 import _export
 from ml.ocr.structural_veto_proposal_role_v17.dataset import encode_proposal, proposals, render_scene
 from ml.ocr.structural_veto_proposal_role_v17.model import StructuralVetoProposalRoleNet
+from ml.ocr.structural_veto_proposal_role_v17.model_p3 import ContextTopologyVetoProposalRoleNet
 from ml.ocr.structural_veto_proposal_role_v17.sealed_gate import EVALUATOR_SOURCE_PATHS
 from ml.ocr.structural_veto_proposal_role_v17.train_p1 import RUNNER_SOURCE_PATHS as P1_RUNNER_SOURCE_PATHS
 from ml.ocr.structural_veto_proposal_role_v17.train_p2 import (
@@ -23,6 +24,7 @@ from ml.ocr.structural_veto_proposal_role_v17.train_p2 import (
     class_balanced_focal_loss,
     hard_tail_separation_loss,
 )
+from ml.ocr.structural_veto_proposal_role_v17.train_p3 import RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS
 from ml.ocr.structural_veto_proposal_role_v17.protocol import (
     BASE_CHECKPOINT_SHA256,
     EXPERIMENT_BUDGET,
@@ -83,30 +85,33 @@ def test_fresh_splits_and_zero_error_threshold_margin_are_fixed() -> None:
     assert "no Chandler" in expected["data_scope"]
 
 
-def test_materialized_split_and_consumed_p1_bind_unapproved_p2() -> None:
+def test_materialized_split_and_consumed_p1_p2_bind_unapproved_p3() -> None:
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text())
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol_configuration()["revision"])
     selection_path = V17_ROOT / "SELECTION_MANIFEST.json"
     seal_path = V17_ROOT / "SEALED_PUBLIC_TEST_SEAL.json"
     gate_path = V17_ROOT / "gates/sealed-public-v1.json"
     p1_config_path = V17_ROOT / "training/p1.json"
-    config_path = V17_ROOT / "training/p2.json"
+    p2_config_path = V17_ROOT / "training/p2.json"
+    config_path = V17_ROOT / "training/p3.json"
     p1_result_path = V17_ROOT / "P1_RESULT.json"
+    p2_result_path = V17_ROOT / "P2_RESULT.json"
     selection = json.loads(selection_path.read_text(encoding="utf-8"))
     seal = json.loads(seal_path.read_text(encoding="utf-8"))
     gate = json.loads(gate_path.read_text(encoding="utf-8"))
     config = json.loads(config_path.read_text(encoding="utf-8"))
 
     p1_result = json.loads(p1_result_path.read_text(encoding="utf-8"))
+    p2_result = json.loads(p2_result_path.read_text(encoding="utf-8"))
 
-    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["status"] == "candidate_3_preregistered"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["split_materialized"] is True
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
@@ -116,18 +121,21 @@ def test_materialized_split_and_consumed_p1_bind_unapproved_p2() -> None:
     assert sha256_file(seal_path) == entry["sealed_public_test_seal_sha256"]
     assert sha256_file(gate_path) == entry["public_gate_config_sha256"]
     assert sha256_file(p1_config_path) == entry["candidate_config_sha256"]["P1"]
-    assert sha256_file(config_path) == entry["candidate_config_sha256"]["P2"]
+    assert sha256_file(p2_config_path) == entry["candidate_config_sha256"]["P2"]
+    assert sha256_file(config_path) == entry["candidate_config_sha256"]["P3"]
     assert source_bundle_sha256(ROOT, P1_RUNNER_SOURCE_PATHS) == entry["p1_expected_runner_source_bundle_sha256"]
-    assert source_bundle_sha256(ROOT, P2_RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
+    assert source_bundle_sha256(ROOT, P2_RUNNER_SOURCE_PATHS) == entry["p2_expected_runner_source_bundle_sha256"]
+    assert source_bundle_sha256(ROOT, P3_RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
     assert source_bundle_sha256(ROOT, EVALUATOR_SOURCE_PATHS) == gate["expected_evaluator_source_bundle_sha256"]
     assert selection["train"]["scene_count"] == 720
     assert selection["validation"]["scene_count"] == 216
     assert seal["scene_count"] == 288
     assert seal["truth_hidden_from_candidate_runner"] is True
     assert seal["public_gate_evaluations"] == 0
-    assert config["expected_optimizer_steps"] == 804
+    assert config["expected_optimizer_steps"] == 1072
     assert config["public_gate_archive_opened"] is False
     assert config["p1_result_sha256"] == sha256_file(p1_result_path)
+    assert config["p2_result_sha256"] == sha256_file(p2_result_path)
     assert p1_result["status"] == "failed_selection"
     assert p1_result["consumed"] is True
     assert p1_result["optimizer_steps"] == 1608
@@ -137,11 +145,20 @@ def test_materialized_split_and_consumed_p1_bind_unapproved_p2() -> None:
     assert p1_result["passing_threshold_window"] == []
     assert p1_result["public_gate_archive_opened"] is False
     assert p1_result["public_gate_evaluations"] == 0
+    assert p2_result["status"] == "failed_selection"
+    assert p2_result["consumed"] is True
+    assert p2_result["optimizer_steps"] == 804
+    assert p2_result["selection_metrics"]["true_positives"] == 1728
+    assert p2_result["selection_metrics"]["false_positives"] == 1
+    assert p2_result["selection_metrics"]["false_negatives"] == 0
+    assert p2_result["passing_threshold_window"] == []
+    assert p2_result["public_gate_archive_opened"] is False
+    assert p2_result["public_gate_evaluations"] == 0
     assert sha256_file(ROOT / seal["fixture_archive_path"]) == seal["fixture_archive_sha256"]
     assert sha256_file(ROOT / seal["private_manifest_path"]) == seal["private_manifest_sha256"]
-    assert not (V17_ROOT / "artifacts/P2-run").exists()
+    assert not (V17_ROOT / "artifacts/P3-run").exists()
     assert not (
-        ROOT / "ml/markers/training-seals/ocr-detection/graph-text-structural-veto-proposal-role-v17/P2"
+        ROOT / "ml/markers/training-seals/ocr-detection/graph-text-structural-veto-proposal-role-v17/P3"
     ).exists()
 
 
@@ -162,6 +179,31 @@ def test_p2_objective_is_class_balanced_and_separates_only_the_hard_tails() -> N
     improved[1] += 0.5
     improved[2] -= 0.5
     assert hard_tail_separation_loss(improved, targets, tail_count=1, margin=1.5) < separated
+
+
+def test_p3_context_topology_branch_freezes_p2_and_modifies_only_positive_logit(tmp_path: Path) -> None:
+    scene = render_scene("train", 1)
+    values = np.stack([
+        encode_proposal(scene.raster, candidate, scene.plot)
+        for candidate in proposals(scene.raster)[:3]
+    ]).astype(np.float32)
+    model = ContextTopologyVetoProposalRoleNet().eval()
+    tensor = torch.from_numpy(values)
+    with torch.inference_mode():
+        base = model.base(tensor)
+        output = model(tensor)
+    assert output.shape == (3, 10)
+    assert torch.equal(output[:, :1], base[:, :1])
+    assert torch.equal(output[:, 2:], base[:, 2:])
+    assert torch.all(output[:, 1] <= base[:, 1])
+    assert all(parameter.requires_grad is False for parameter in model.base.parameters())
+    assert all(parameter.requires_grad is True for parameter in model.trainable_parameters())
+    path = tmp_path / "v17-p3.onnx"
+    _export(model, tensor, path)
+    session = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
+    actual = np.asarray(session.run(None, {"region_proposals": values})[0], dtype=np.float32)
+    assert session.get_providers() == ["CPUExecutionProvider"]
+    assert float(np.max(np.abs(output.numpy() - actual))) <= 1e-5
 
 
 def test_fresh_renderer_has_one_production_proposal_per_truth() -> None:

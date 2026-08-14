@@ -31,10 +31,17 @@ false prohibited region at threshold 0.60 while misses began at threshold 0.64,
 so it produced no three-threshold zero-error window. No validation case details
 or pixels were used to design P2.
 
-P2 is preregistered and separately authorized for exactly one execution. It
-loads the exact consumed P1 checkpoint and changes only the training objective
-to class-balanced focal loss plus worst-tail pairwise separation on the
-unchanged fresh training split. The architecture, frozen base, role logits,
-proposals, selection thresholds, and public seal remain unchanged. The public
-gate remains unauthorized and unopened, and no production approval or release
-eligibility exists.
+P2 is consumed and failed selection after its single authorized 804-step run.
+It shifted the all-truth operating point from threshold 0.60 to 0.64 and passed
+CPU ONNX parity, but one prohibited false region remained while misses began at
+threshold 0.68. It produced no three-threshold zero-error window. No validation
+case details or pixels were used to design P3.
+
+P3 is the final budgeted candidate. It is preregistered but not execution-
+authorized. It loads and freezes the exact consumed P2 model, then adds one
+context-topology veto branch over the existing tight and context crops, row and
+column projections, and frozen geometry. Only this new nonnegative positive-
+logit veto may train on the unchanged fresh split. Roles, proposals, selection
+thresholds, and the public seal remain unchanged. The public gate remains
+unauthorized and unopened, and no production approval or release eligibility
+exists.
