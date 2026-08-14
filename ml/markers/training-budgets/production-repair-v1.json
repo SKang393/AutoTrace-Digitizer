@@ -26,7 +26,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-morphology-proposal-role-v13",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_2_selected_public_gate_pending",
       "defect_class": "aggregate consumed V12 hidden-public evidence showed 155 of 160 exact scenes, four false regions, one missed region, zero duplicates, and perfect role classification",
       "trigger_report_sha256": "412ffe748d7aacc927fc5c5f19109c68937954a14ed7e10ccbb34276063630b0",
       "trigger_evidence_scope_used_for_design": "aggregate metrics only",
@@ -38,11 +38,10 @@
       "architecture": "dual-context-anisotropic-morphology-mixture-proposal-role-cnn-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [
-        "P2"
-      ],
+      "preregistered_candidate_ids": [],
       "consumed_candidate_ids": [
-        "P1"
+        "P1",
+        "P2"
       ],
       "remaining_unregistered_candidate_ids": [
         "P3"
@@ -114,9 +113,28 @@
       "p2_weights_changed": false,
       "p2_output_scale": 0.5,
       "p2_effective_output_logit_scale": 0.05,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P2",
-      "execution_blocker": null,
+      "p2_result_path": "ml/ocr/morphology_proposal_role_v13/P2_RESULT.json",
+      "p2_result_sha256": "fec4e24db0dc20c0350f02fb14474b4e3f0c4e7155a306929fc1db5c1d281f9e",
+      "p2_selection_report_path": "ml/ocr/morphology_proposal_role_v13/artifacts/P2-run/candidate-report.json",
+      "p2_selection_report_sha256": "508394b746b5435fce3cc6cd5b6361bbac1c87fee81fc94f3d060f8f54e8eb16",
+      "p2_onnx_sha256": "8d7fd1358508da29620e622d72bb9fb5b5286516cede426843fdfe3ce8ca4b60",
+      "p2_selection_exact_scene_count": 160,
+      "p2_selection_scene_count": 160,
+      "p2_selection_true_positives": 1280,
+      "p2_selection_false_positives": 0,
+      "p2_selection_false_negatives": 0,
+      "p2_selection_duplicate_count": 0,
+      "p2_selection_prohibited_structure_hits": 0,
+      "p2_selection_role_accuracy": 1.0,
+      "p2_selection_minimum_per_role_accuracy": 1.0,
+      "p2_selected_threshold": 0.94,
+      "p2_onnx_parity_maximum_absolute_error": 7.62939453125e-06,
+      "p2_onnx_parity_passed": true,
+      "p2_training_opened_seal_sha256": "61b55484e4de9529f6f737cbfd9eb53d9db1c076d1535aeaecabeb731e43f525",
+      "p2_training_result_seal_sha256": "71f2c30e031e73b3a5c1fce6466b292dbf580bef2058cf2a77e511f91b6e4bb4",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P2 passed visible selection. The exact public gate requires a separate authorization commit; P3 remains unregistered.",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,

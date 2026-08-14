@@ -105,6 +105,21 @@ def test_split_and_candidate_records_are_frozen_and_fail_closed() -> None:
     assert result["onnx_parity_maximum_absolute_error"] == 1.52587890625e-05
     assert result["public_gate_archive_opened"] is False
     assert result["public_gate_evaluations"] == 0
+    p2_result = json.loads((V13_ROOT / "P2_RESULT.json").read_text(encoding="utf-8"))
+    assert p2_result["status"] == "selected"
+    assert p2_result["consumed"] is True
+    assert p2_result["selection_metrics"]["exact_scene_count"] == 160
+    assert p2_result["selection_metrics"]["scene_count"] == 160
+    assert p2_result["selection_metrics"]["false_positives"] == 0
+    assert p2_result["selection_metrics"]["false_negatives"] == 0
+    assert p2_result["selection_metrics"]["duplicate_region_count"] == 0
+    assert p2_result["selection_metrics"]["prohibited_structure_hits"] == 0
+    assert p2_result["selection_metrics"]["role_accuracy"] == 1.0
+    assert min(p2_result["selection_metrics"]["per_role_accuracy"].values()) == 1.0
+    assert p2_result["onnx_parity_passed"] is True
+    assert p2_result["onnx_parity_maximum_absolute_error"] == 7.62939453125e-06
+    assert p2_result["public_gate_archive_opened"] is False
+    assert p2_result["public_gate_evaluations"] == 0
     assert not (V13_ROOT / "artifacts/P1-sealed-public").exists()
     for record in (selection, seal, config):
         assert record["production_approval"] is False
@@ -122,13 +137,13 @@ def test_runners_are_fail_closed_before_split_and_budget_freeze() -> None:
 def test_v13_budget_ledger_authorizes_only_exact_p2() -> None:
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-morphology-proposal-role-v13")
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["status"] == "candidate_2_selected_public_gate_pending"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
-    assert entry["execution_blocker"] is None
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_blocker"] == "P2 passed visible selection. The exact public gate requires a separate authorization commit; P3 remains unregistered."
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(V13_ROOT / "training/p1.json")
     assert entry["candidate_config_sha256"]["P2"] == sha256_file(V13_ROOT / "training/p2.json")
     assert entry["p1_result_sha256"] == sha256_file(V13_ROOT / "P1_RESULT.json")
@@ -150,6 +165,15 @@ def test_v13_budget_ledger_authorizes_only_exact_p2() -> None:
     assert p2["public_gate_archive_opened"] is False
     assert entry["p2_source_checkpoint_sha256"] == p2["p1_checkpoint_sha256"]
     assert entry["p2_expected_runner_source_bundle_sha256"] == p2["expected_runner_source_bundle_sha256"]
+    assert entry["p2_result_sha256"] == sha256_file(V13_ROOT / "P2_RESULT.json")
+    assert entry["p2_selection_exact_scene_count"] == 160
+    assert entry["p2_selection_scene_count"] == 160
+    assert entry["p2_selection_false_positives"] == 0
+    assert entry["p2_selection_false_negatives"] == 0
+    assert entry["p2_selection_duplicate_count"] == 0
+    assert entry["p2_selection_prohibited_structure_hits"] == 0
+    assert entry["p2_selection_role_accuracy"] == 1.0
+    assert entry["p2_onnx_parity_passed"] is True
     assert entry["selection_manifest_sha256"] == sha256_file(V13_ROOT / "SELECTION_MANIFEST.json")
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(V13_ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert entry["public_gate_authorized"] is False
