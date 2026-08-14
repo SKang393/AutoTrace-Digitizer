@@ -162,16 +162,16 @@ def test_runner_public_sources_and_ledger_are_fail_closed() -> None:
     assert GATE_CONFIG["case_level_failure_analysis_permitted"] is False
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol_configuration()["revision"])
-    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["status"] == "exhausted_failed_selection"
     assert entry["split_materialized"] is True
     assert entry["selection_manifest_sha256"] == "06253f5a0a7318fde69093027d99c4ef1cacf876e9906cc6c33fc0a9d15be72f"
     assert entry["sealed_public_fixture_archive_sha256"] == "663b9a0c1600ca65c04c2acf85a021a057777a44f7e930ce82fc6beb4b7a97c1"
     assert entry["sealed_public_private_manifest_sha256"] == "cd6dc64bff9fc3fb8d1ba6a6185e142b661fdd10fc215bf9064dc7ef438163e9"
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
 
@@ -305,3 +305,34 @@ def test_p3_hard_negative_mining_is_deterministic_and_training_only() -> None:
         ScoreModel(), values, labels, multiplier=2, batch_size=3,
     )
     assert selected.tolist() == [4, 7, 6, 5]
+
+
+def test_p3_result_exhausts_v16_without_opening_the_public_gate() -> None:
+    result_path = V16_ROOT / "P3_RESULT.json"
+    report_path = V16_ROOT / "artifacts/P3-run/candidate-report.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert result_path.read_bytes() == canonical_json_bytes(result)
+    assert result["candidate_report_sha256"] == "c1121b120e89accbf4153aece1a6f8af819df9eafd74bde01f1e81e167bfacb1"
+    if report_path.is_file():
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        assert report_path.read_bytes() == canonical_json_bytes(report)
+        assert result["candidate_report_sha256"] == sha256_file(report_path)
+        assert result["checkpoint_sha256"] == report["checkpoint_sha256"]
+        assert result["onnx_sha256"] == report["onnx_sha256"]
+        assert result["status"] == report["status"]
+    assert result["status"] == "failed_selection"
+    assert result["consumed"] is True
+    assert result["optimizer_steps"] == 480
+    assert result["hard_negative_count"] == 10240
+    assert result["onnx_parity_passed"] is True
+    assert result["onnx_parity_maximum_absolute_error"] <= 1e-5
+    assert result["role_invariance_maximum_absolute_error"] == 0.0
+    assert result["selection_metrics"]["true_positives"] == 1536
+    assert result["selection_metrics"]["false_positives"] == 4
+    assert result["selection_metrics"]["false_negatives"] == 0
+    assert result["selection_metrics"]["role_accuracy"] == 1.0
+    assert result["passing_threshold_window"] == []
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
