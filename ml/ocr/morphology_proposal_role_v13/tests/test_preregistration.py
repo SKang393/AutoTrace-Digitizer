@@ -10,12 +10,13 @@ from pathlib import Path
 import pytest
 import torch
 
-from ml.markers.gate_seal import canonical_json_bytes, sha256_file
+from ml.markers.gate_seal import canonical_json_bytes, sha256_file, source_bundle_sha256
 from ml.ocr.component_context_detector_v7.dataset import box_iou
 from ml.ocr.morphology_proposal_role_v13.dataset import render_scene, proposals
 from ml.ocr.morphology_proposal_role_v13.model import MorphologyProposalRoleNet
 from ml.ocr.morphology_proposal_role_v13.sealed_gate import GATE_CONFIG
 from ml.ocr.morphology_proposal_role_v13.train_p1 import RUNNER_SOURCE_PATHS
+from ml.ocr.morphology_proposal_role_v13.train_p2 import RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS
 from ml.ocr.morphology_proposal_role_v13.protocol import (
     ENCODED_WIDTH, EXPERIMENT_BUDGET, ROLE_ORDER, SPLITS, protocol_configuration,
 )
@@ -81,7 +82,7 @@ def test_preregistered_source_renderer_has_one_proposal_per_truth(split: str, in
 def test_split_and_candidate_records_are_frozen_and_fail_closed() -> None:
     for relative in (
         "SELECTION_MANIFEST.json", "SEALED_PUBLIC_TEST_SEAL.json",
-        "gates/sealed-public-v1.json", "training/p1.json",
+        "gates/sealed-public-v1.json", "training/p1.json", "training/p2.json",
     ):
         assert (V13_ROOT / relative).is_file()
     selection = json.loads((V13_ROOT / "SELECTION_MANIFEST.json").read_text(encoding="utf-8"))
@@ -118,17 +119,18 @@ def test_runners_are_fail_closed_before_split_and_budget_freeze() -> None:
     assert GATE_CONFIG["direct_fixture_byte_execution_required"] is True
 
 
-def test_v13_budget_ledger_authorizes_only_exact_p1() -> None:
+def test_v13_budget_ledger_authorizes_only_exact_p2() -> None:
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-morphology-proposal-role-v13")
-    assert entry["status"] == "candidate_1_failed_selection"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
-    assert entry["execution_blocker"] == "P1 is consumed and failed selection. P2 and P3 remain unregistered."
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["execution_blocker"] is None
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(V13_ROOT / "training/p1.json")
+    assert entry["candidate_config_sha256"]["P2"] == sha256_file(V13_ROOT / "training/p2.json")
     assert entry["p1_result_sha256"] == sha256_file(V13_ROOT / "P1_RESULT.json")
     assert entry["p1_selection_exact_scene_count"] == 159
     assert entry["p1_selection_scene_count"] == 160
@@ -137,6 +139,17 @@ def test_v13_budget_ledger_authorizes_only_exact_p1() -> None:
     assert entry["p1_selection_prohibited_structure_hits"] == 1
     assert entry["p1_selection_role_accuracy"] == 1.0
     assert entry["p1_onnx_parity_passed"] is False
+    p2 = json.loads((V13_ROOT / "training/p2.json").read_text(encoding="utf-8"))
+    assert p2["p1_result_sha256"] == sha256_file(V13_ROOT / "P1_RESULT.json")
+    assert p2["expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, P2_RUNNER_SOURCE_PATHS)
+    assert p2["optimizer_steps"] == 0
+    assert p2["weights_changed"] is False
+    assert p2["output_scale"] == 0.5
+    assert p2["effective_output_logit_scale"] == 0.05
+    assert p2["validation_or_public_pixels_used_for_design"] is False
+    assert p2["public_gate_archive_opened"] is False
+    assert entry["p2_source_checkpoint_sha256"] == p2["p1_checkpoint_sha256"]
+    assert entry["p2_expected_runner_source_bundle_sha256"] == p2["expected_runner_source_bundle_sha256"]
     assert entry["selection_manifest_sha256"] == sha256_file(V13_ROOT / "SELECTION_MANIFEST.json")
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(V13_ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert entry["public_gate_authorized"] is False
