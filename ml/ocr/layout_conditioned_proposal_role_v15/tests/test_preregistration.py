@@ -284,7 +284,7 @@ def test_p3_result_is_selected_and_public_gate_remains_closed() -> None:
     assert result["release_eligible"] is False
 
 
-def test_canonical_ledger_records_selected_p3_without_public_authorization() -> None:
+def test_canonical_ledger_authorizes_only_selected_p3_public_gate() -> None:
     ledger = json.loads(
         (ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
@@ -337,7 +337,8 @@ def test_canonical_ledger_records_selected_p3_without_public_authorization() -> 
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert "budget is exhausted" in entry["execution_blocker"]
-    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_candidate_id"] == "P3"
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
     assert entry["production_approval"] is False
