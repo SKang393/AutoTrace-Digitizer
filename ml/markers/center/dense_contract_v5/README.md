@@ -27,7 +27,13 @@ passes and separate authorization is committed. Up to three candidates are
 available. P1 is consumed and failed selection with 21 missed markers, six
 prohibited hits, and CPU ONNX parity above the fixed tolerance. P2 is
 consumed after improving recall to 200/216 but retaining 16 misses, seven
-prohibited hits, and parity above tolerance. P3 is not preregistered. The public
-gate remains locked and unopened. Production
+prohibited hits, and parity above tolerance. The final P3 slot is preregistered
+from those aggregate failures only. It replaces P2's single-pixel exclusion
+penalty with one spatial acceptance-margin objective over the unchanged
+five-pixel truth and six-pixel exclusion radii, and uses a semantically bounded
+convolution/batch-normalization-fused inference graph for the unchanged parity
+gate. P3 is fresh, reuses no predecessor checkpoint, and remains execution
+blocked until a separate committed authorization. The public gate remains
+locked and unopened. Production
 approval, model-store
 promotion, packaging, private validation, and release eligibility remain false.

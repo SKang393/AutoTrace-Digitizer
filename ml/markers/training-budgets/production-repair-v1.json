@@ -6,7 +6,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-dense-contract-v5",
-      "status": "candidate_2_failed_selection",
+      "status": "candidate_3_preregistered",
       "defect_class": "the public-passing normalized V4 proposal model cannot satisfy the frozen dense three-head production marker-center and artifact-mask tensor contract",
       "prior_revision": "marker-center-normalized-training-v4",
       "trigger_result_path": "ml/markers/center/normalized_training_v4/P1_RESULT.json",
@@ -19,14 +19,14 @@
       "architecture": "dense-contract-expanded-compact-fpn-v5",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": [
+        "P3"
+      ],
       "consumed_candidate_ids": [
         "P1",
         "P2"
       ],
-      "remaining_unregistered_candidate_ids": [
-        "P3"
-      ],
+      "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/markers/center/dense_contract_v5/PROTOCOL.json",
       "protocol_sha256": "3dfa011dcd3894af04937860c55db954b3d3b0a2ab1dbcbb5251648ac52fe39d",
       "design_source_paths": [
@@ -90,11 +90,13 @@
       "public_dataset_manifest_sha256": "881d94bc37fe7a275bac3d4fa813726ca571985f5bf0985c0609d15be00ef7c3",
       "candidate_config_paths": {
         "P1": "ml/markers/center/dense_contract_v5/training/p1.json",
-        "P2": "ml/markers/center/dense_contract_v5/training/p2.json"
+        "P2": "ml/markers/center/dense_contract_v5/training/p2.json",
+        "P3": "ml/markers/center/dense_contract_v5/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "c3a04038753de6f9ac8717c5798b1a31b5e69a67f454d60ff506210c4f1e31c4",
-        "P2": "9457cdeb335639a963c658bc20fba0a80b68479ad26cb1e1e6e6ff7f923f1ae6"
+        "P2": "9457cdeb335639a963c658bc20fba0a80b68479ad26cb1e1e6e6ff7f923f1ae6",
+        "P3": "23c732b11d8294aa6bec127433fd463ec17211d9d477d67eb50fce6cbb546622"
       },
       "p1_expected_runner_source_bundle_sha256": "7c7bcd545ce12dd848780a69674426b6c4d22b48630223a0928385a0acc6f559",
       "p1_expected_optimizer_steps": 576,
@@ -146,13 +148,21 @@
       "p2_training_opened_seal_sha256": "3e1024fe7c12132a9b3aaaff4a90281ad828543dc90201fb7413ecfb226d2ad7",
       "p2_training_result_seal_sha256": "db988b97a88ee72805b067e615833751146d1fad2c0f982b1bcc6bf8b198209f",
       "p2_failure": "P2 improved to 200 of 216 marker truths and 8 of 24 exact scenes, but retained 16 misses and seven prohibited hits. CPU ONNX maximum absolute error 0.000014990568161010742 also exceeded the fixed 0.00001 limit.",
+      "p3_protocol_path": "ml/markers/center/dense_contract_v5/P3_PROTOCOL.json",
+      "p3_protocol_sha256": "d7f4a55078b5dc0a3c494ea15312c27f2761ff146f3db453028ae23c68718e08",
+      "p3_isolated_change": "replace P2 single-pixel hard-negative sampling with one fixed spatial acceptance-margin objective over the existing five-pixel truth and six-pixel exclusion radii, then fuse convolution and batch-normalization layers into the semantically bounded inference graph before ONNX export",
+      "p3_predecessor_checkpoint_reused": false,
+      "p3_aggregate_metrics_only_used_for_design": true,
+      "p3_validation_case_detail_or_pixels_used_for_design": false,
+      "p3_expected_runner_source_bundle_sha256": "91d48567b8669000438d396cc0177a8fb487888f05fb76b54b0bd899680b93c4",
+      "p3_expected_optimizer_steps": 1152,
       "public_gate_config_path": "ml/markers/center/dense_contract_v5/gates/sealed-public-v1.json",
       "public_gate_config_sha256": "b8812b8f207e853ba6479caa477440034ddbb7ec1d7ac592ab6d1161241e1f2f",
       "expected_public_evaluator_source_bundle_sha256": "7e26c1c20db4341bff915b644155f6163da5a7faf1fd60a747eb8b81bbfb572f",
       "expected_public_gate_configuration_sha256": "2cce2921f95041fcf5b768689c9f8d12d997c78879d51e8efabc631298899197",
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "execution_blocker": "P1 and P2 are consumed and failed selection. The final P3 slot requires a new source-bound preregistration and separate authorization. The public gate remains locked and unopened.",
+      "execution_blocker": "P3 is source-bound and preregistered but execution remains blocked until a separate committed authorization. The public gate remains locked and unopened.",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,

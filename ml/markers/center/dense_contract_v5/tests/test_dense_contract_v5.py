@@ -14,6 +14,7 @@ import torch
 import ml.markers.center.dense_contract_v5.public_gate as public_gate_module
 import ml.markers.center.dense_contract_v5.train_p1 as train_p1_module
 import ml.markers.center.dense_contract_v5.train_p2 as train_p2_module
+import ml.markers.center.dense_contract_v5.train_p3 as train_p3_module
 
 from ml.markers.center.dense_contract_v5.dataset import (
     HEIGHT,
@@ -111,6 +112,43 @@ def test_p2_hard_negative_loss_penalizes_only_frozen_structure_points() -> None:
     assert float(high_loss) > float(low_loss)
 
 
+def test_p3_spatial_margin_covers_the_fixed_matching_and_exclusion_disks() -> None:
+    archive = {
+        "center_counts": np.asarray([1], dtype=np.int32),
+        "centers": np.asarray([[[2.0, 2.0]]], dtype=np.float32),
+        "hard_counts": np.asarray([1], dtype=np.int32),
+        "hard_points": np.asarray([[[8.0, 8.0]]], dtype=np.float32),
+    }
+    favorable = torch.full((1, 1, 12, 12), 0.01, dtype=torch.float32)
+    favorable[0, 0, 2, 5] = 0.9
+    unfavorable = favorable.clone()
+    unfavorable[0, 0, 2, 5] = 0.01
+    unfavorable[0, 0, 8, 3] = 0.9
+    favorable_positive, favorable_negative = train_p3_module._spatial_margin_losses(
+        favorable,
+        archive,
+        np.asarray([0]),
+    )
+    unfavorable_positive, unfavorable_negative = train_p3_module._spatial_margin_losses(
+        unfavorable,
+        archive,
+        np.asarray([0]),
+    )
+    assert float(favorable_positive) < float(unfavorable_positive)
+    assert float(favorable_negative) < float(unfavorable_negative)
+
+
+def test_p3_fused_inference_graph_preserves_activated_three_head_values() -> None:
+    model = create_model().eval()
+    fused = train_p3_module._fuse_inference_model(model)
+    value = torch.linspace(0.0, 1.0, steps=3 * 32 * 32, dtype=torch.float32).reshape(1, 3, 32, 32)
+    with torch.inference_mode():
+        expected = model(value)
+        actual = fused(value)
+    assert not any(isinstance(module, torch.nn.BatchNorm2d) for module in fused.modules())
+    assert float(torch.max(torch.abs(expected - actual))) <= train_p3_module.FUSION_SEMANTIC_TOLERANCE
+
+
 def test_source_bindings_and_gate_configuration_are_frozen() -> None:
     protocol = json.loads((ROOT / "PROTOCOL.json").read_text(encoding="utf-8"))
     config = json.loads((ROOT / "training/p1.json").read_text(encoding="utf-8"))
@@ -127,17 +165,27 @@ def test_source_bindings_and_gate_configuration_are_frozen() -> None:
     assert sha256_file(ROOT / "training/p2.json") == p2_protocol["candidate_config_sha256"]
     assert p2_protocol["public_gate_archive_opened"] is False
     assert p2_protocol["public_gate_evaluations"] == 0
+    p3_protocol = json.loads((ROOT / "P3_PROTOCOL.json").read_text(encoding="utf-8"))
+    p3_config = json.loads((ROOT / "training/p3.json").read_text(encoding="utf-8"))
+    assert source_bundle_sha256(REPO_ROOT, train_p3_module.RUNNER_SOURCE_PATHS) == p3_config[
+        "expected_runner_source_bundle_sha256"
+    ]
+    assert sha256_file(ROOT / "training/p3.json") == p3_protocol["candidate_config_sha256"]
+    assert p3_protocol["p1_p2_aggregate_metrics_only_used_for_design"] is True
+    assert p3_protocol["p1_p2_validation_case_detail_or_pixels_used_for_design"] is False
+    assert p3_protocol["public_gate_archive_opened"] is False
+    assert p3_protocol["public_gate_evaluations"] == 0
 
 
-def test_canonical_budget_records_consumed_p1_p2_and_blocks_public_gate() -> None:
+def test_canonical_budget_preregisters_only_final_p3_and_blocks_execution_and_public_gate() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-dense-contract-v5")
-    assert entry["status"] == "candidate_2_failed_selection"
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
