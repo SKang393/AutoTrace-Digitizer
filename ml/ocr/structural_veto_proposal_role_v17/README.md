@@ -31,9 +31,10 @@ false prohibited region at threshold 0.60 while misses began at threshold 0.64,
 so it produced no three-threshold zero-error window. No validation case details
 or pixels were used to design P2.
 
-P2 is preregistered but not execution-authorized. It loads the exact consumed P1
-checkpoint and changes only the training objective to class-balanced focal loss
-plus worst-tail pairwise separation on the unchanged fresh training split. The
-architecture, frozen base, role logits, proposals, selection thresholds, and
-public seal remain unchanged. The public gate remains unauthorized and unopened,
-and no production approval or release eligibility exists.
+P2 is preregistered and separately authorized for exactly one execution. It
+loads the exact consumed P1 checkpoint and changes only the training objective
+to class-balanced focal loss plus worst-tail pairwise separation on the
+unchanged fresh training split. The architecture, frozen base, role logits,
+proposals, selection thresholds, and public seal remain unchanged. The public
+gate remains unauthorized and unopened, and no production approval or release
+eligibility exists.
