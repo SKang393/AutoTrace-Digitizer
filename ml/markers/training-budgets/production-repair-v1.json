@@ -6,7 +6,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-structural-graph-proposal-role-v14",
-      "status": "candidate_2_failed_selection",
+      "status": "candidate_3_preregistered",
       "defect_class": "aggregate consumed V13 hidden-public evidence showed 223 of 224 exact scenes, one false prohibited structural region, zero misses, zero duplicates, and perfect role classification",
       "trigger_report_sha256": "fe0a0d63d0c00c35c463e45c11a87f97aa81bb625d0744c8c2307537b6d6d2ff",
       "trigger_evidence_scope_used_for_design": "aggregate metrics only",
@@ -18,14 +18,14 @@
       "architecture": "dual-context-topology-spectrum-residual-proposal-role-cnn-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": [
+        "P3"
+      ],
       "consumed_candidate_ids": [
         "P1",
         "P2"
       ],
-      "remaining_unregistered_candidate_ids": [
-        "P3"
-      ],
+      "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/ocr/structural_graph_proposal_role_v14/PROTOCOL.json",
       "protocol_sha256": "934e5af3ff7929b6220b9d7af216db192cc2b33be0cd6139210bda9d6f2e82ce",
       "selection_manifest_path": "ml/ocr/structural_graph_proposal_role_v14/SELECTION_MANIFEST.json",
@@ -59,11 +59,13 @@
       "expected_public_evaluator_source_bundle_sha256": "2990839dc705e2dd74e2de23075460d1895f7bf39e91d8a5aa11be080d6cfb9e",
       "candidate_config_paths": {
         "P1": "ml/ocr/structural_graph_proposal_role_v14/training/p1.json",
-        "P2": "ml/ocr/structural_graph_proposal_role_v14/training/p2.json"
+        "P2": "ml/ocr/structural_graph_proposal_role_v14/training/p2.json",
+        "P3": "ml/ocr/structural_graph_proposal_role_v14/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "18bb3c45c2d5ccddb0fbc717176885989dfdb486a401dc5266c183a57e71fc8e",
-        "P2": "4b783027b7ec37cb9d5feaa4630316dcb0ed0fa68570d9f042d86983baf95ee1"
+        "P2": "4b783027b7ec37cb9d5feaa4630316dcb0ed0fa68570d9f042d86983baf95ee1",
+        "P3": "bd36cd93b8f02e5834f727180eda18fa5d27ecdf2f494d0e43a1bf1bfc971f21"
       },
       "p1_expected_runner_source_bundle_sha256": "8e5ea480d381052c78f1a3b3f05630e6a6e700209e99ea513c4ae9be226d4e53",
       "p1_result_path": "ml/ocr/structural_graph_proposal_role_v14/P1_RESULT.json",
@@ -104,9 +106,16 @@
       "p2_onnx_parity_passed": false,
       "p2_training_opened_seal_sha256": "f64f05e73ec021442ecd67183ee26c5069432312fd170d50d8e59d934051fa15",
       "p2_training_result_seal_sha256": "569b8b654ea4e4cf529804e5a49dee411eee517569a4365e472bf14c5f7f6408",
+      "p3_isolated_change": "load the exact P1 checkpoint into the export-safe P2 occupancy architecture; add one zero-initialized raw-geometry role residual; fine-tune only proposal and role heads for eight fixed epochs with aggregate-only P2-derived class weights; apply fixed 0.5 output scaling after training",
+      "p3_expected_runner_source_bundle_sha256": "1d12c7ef969de7add58188cb1a422483d27ec371ba4c76eba910a80bd24eb41a",
+      "p3_source_checkpoint_sha256": "e09c250e567a00b7c79e4995235a9ac3aa5ecb84fdf5f3eda44254efda36ce28",
+      "p3_expected_optimizer_steps": 808,
+      "p3_output_scale": 0.5,
+      "p3_p2_aggregate_metrics_only_used_for_design": true,
+      "p3_p2_validation_case_detail_or_pixels_used_for_design": false,
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "execution_blocker": "P1 and P2 are consumed and cannot rerun. P3 remains unregistered. Any final candidate requires a separate aggregate-only preregistration and committed authorization before execution.",
+      "execution_blocker": "P1 and P2 are consumed and cannot rerun. P3 is preregistered but requires a separate committed authorization checkpoint before its single execution.",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,
