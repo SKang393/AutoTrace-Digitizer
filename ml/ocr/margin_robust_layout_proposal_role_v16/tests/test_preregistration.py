@@ -151,14 +151,15 @@ def test_runner_public_sources_and_ledger_are_fail_closed() -> None:
     assert GATE_CONFIG["case_level_failure_analysis_permitted"] is False
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol_configuration()["revision"])
-    assert entry["status"] == "split_materialized_execution_blocked"
+    assert entry["status"] == "candidate_1_preregistered"
     assert entry["split_materialized"] is True
     assert entry["selection_manifest_sha256"] == "06253f5a0a7318fde69093027d99c4ef1cacf876e9906cc6c33fc0a9d15be72f"
     assert entry["sealed_public_fixture_archive_sha256"] == "663b9a0c1600ca65c04c2acf85a021a057777a44f7e930ce82fc6beb4b7a97c1"
     assert entry["sealed_public_private_manifest_sha256"] == "cd6dc64bff9fc3fb8d1ba6a6185e142b661fdd10fc215bf9064dc7ef438163e9"
-    assert entry["execution_authorized"] is False
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
     assert entry["public_gate_authorized"] is False
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
