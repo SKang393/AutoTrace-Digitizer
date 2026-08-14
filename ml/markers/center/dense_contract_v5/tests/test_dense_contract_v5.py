@@ -177,7 +177,7 @@ def test_source_bindings_and_gate_configuration_are_frozen() -> None:
     assert p3_protocol["public_gate_evaluations"] == 0
 
 
-def test_canonical_budget_preregisters_only_final_p3_and_blocks_execution_and_public_gate() -> None:
+def test_canonical_budget_authorizes_only_final_p3_and_blocks_public_gate() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
@@ -186,8 +186,8 @@ def test_canonical_budget_preregisters_only_final_p3_and_blocks_execution_and_pu
     assert entry["preregistered_candidate_ids"] == ["P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False

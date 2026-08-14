@@ -32,8 +32,8 @@ from those aggregate failures only. It replaces P2's single-pixel exclusion
 penalty with one spatial acceptance-margin objective over the unchanged
 five-pixel truth and six-pixel exclusion radii, and uses a semantically bounded
 convolution/batch-normalization-fused inference graph for the unchanged parity
-gate. P3 is fresh, reuses no predecessor checkpoint, and remains execution
-blocked until a separate committed authorization. The public gate remains
-locked and unopened. Production
+gate. P3 is fresh, reuses no predecessor checkpoint, and is ledger-authorized
+for exactly one execution from its committed source and configuration. The
+public gate remains locked and unopened. Production
 approval, model-store
 promotion, packaging, private validation, and release eligibility remain false.
