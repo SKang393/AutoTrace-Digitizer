@@ -23,5 +23,6 @@ remain false.
 The renderer adapter, frozen-base model, P1 runner, split freezer, aggregate
 selection evaluator, and one-use public gate are implemented as source. The
 fresh split and its source-bound P1 and gate configurations are now frozen.
-P1 remains execution-blocked until this checkpoint is committed and a separate
-canonical authorization checkpoint explicitly enables it.
+The canonical ledger now authorizes exactly one P1 execution. P1 remains unrun,
+the public gate remains unauthorized and unopened, and no production approval
+or release eligibility exists.

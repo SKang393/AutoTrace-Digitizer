@@ -78,7 +78,7 @@ def test_fresh_splits_and_zero_error_threshold_margin_are_fixed() -> None:
     assert "no Chandler" in expected["data_scope"]
 
 
-def test_materialized_split_is_source_bound_and_execution_blocked() -> None:
+def test_materialized_split_is_source_bound_and_p1_only_is_authorized() -> None:
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text())
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol_configuration()["revision"])
     selection_path = V17_ROOT / "SELECTION_MANIFEST.json"
@@ -90,14 +90,14 @@ def test_materialized_split_is_source_bound_and_execution_blocked() -> None:
     gate = json.loads(gate_path.read_text(encoding="utf-8"))
     config = json.loads(config_path.read_text(encoding="utf-8"))
 
-    assert entry["status"] == "split_materialized_candidate1_preregistered_execution_blocked"
+    assert entry["status"] == "candidate_1_preregistered"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
     assert entry["split_materialized"] is True
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
