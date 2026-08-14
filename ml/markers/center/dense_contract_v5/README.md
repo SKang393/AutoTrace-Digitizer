@@ -25,7 +25,9 @@ The 96 training, 24 validation, and 32 truth-hidden public scenes are frozen
 before optimization. The public archive may open once only after selection
 passes and separate authorization is committed. Up to three candidates are
 available. P1 is consumed and failed selection with 21 missed markers, six
-prohibited hits, and CPU ONNX parity above the fixed tolerance. P2 and P3 are
-not yet preregistered. The public gate remains locked and unopened. Production
+prohibited hits, and CPU ONNX parity above the fixed tolerance. P2 is
+source-bound and preregistered with a hard-negative and stronger center objective,
+but optimizer execution is not authorized. P3 is not preregistered. The public
+gate remains locked and unopened. Production
 approval, model-store
 promotion, packaging, private validation, and release eligibility remain false.

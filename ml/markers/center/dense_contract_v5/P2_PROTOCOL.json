@@ -1,0 +1,23 @@
+{
+  "architecture": "dense-contract-expanded-compact-fpn-v5",
+  "candidate_id": "P2",
+  "candidate_config_path": "ml/markers/center/dense_contract_v5/training/p2.json",
+  "candidate_config_sha256": "9457cdeb335639a963c658bc20fba0a80b68479ad26cb1e1e6e6ff7f923f1ae6",
+  "chandler_used": false,
+  "experiment_budget": 3,
+  "expected_runner_source_bundle_sha256": "a104e2f9d80dfa6947fd7f5fa6fb428d05bd48b140624a26cfafa6c0e7ea71be",
+  "isolated_change": "add an explicit source-bound hard-negative center penalty and increased center-objective weight while keeping architecture, initialization, tensor contract, data, two-pass composition, postprocessing, thresholds, and gates fixed",
+  "p1_result_sha256": "29b4550474becf7a182fbc74eedb4e9668a712bb0faf915f940c0aba479423a6",
+  "predecessor_checkpoint_reused": false,
+  "private_data": false,
+  "production_approval": false,
+  "public_fixture_archive_sha256": "a33485140acd88ad96a04511e63a6f6a661ce43d4b3c2c6e540bdfa25edf6c0a",
+  "public_gate_archive_opened": false,
+  "public_gate_authorized": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "marker-center-dense-contract-v5",
+  "selection_manifest_sha256": "12210c9917b8139055b24274def9935a3d1e08588e335131c92b724cd784166e",
+  "state": "candidate_2_preregistered_execution_blocked",
+  "task": "marker-center"
+}

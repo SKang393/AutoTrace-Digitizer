@@ -6,7 +6,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-dense-contract-v5",
-      "status": "candidate_1_failed_selection",
+      "status": "candidate_2_preregistered",
       "defect_class": "the public-passing normalized V4 proposal model cannot satisfy the frozen dense three-head production marker-center and artifact-mask tensor contract",
       "prior_revision": "marker-center-normalized-training-v4",
       "trigger_result_path": "ml/markers/center/normalized_training_v4/P1_RESULT.json",
@@ -19,12 +19,13 @@
       "architecture": "dense-contract-expanded-compact-fpn-v5",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": [
+        "P2"
+      ],
       "consumed_candidate_ids": [
         "P1"
       ],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "protocol_path": "ml/markers/center/dense_contract_v5/PROTOCOL.json",
@@ -89,10 +90,12 @@
       "public_dataset_manifest_path": "ml/markers/center/dense_contract_v5/PUBLIC_DATASET_MANIFEST.json",
       "public_dataset_manifest_sha256": "881d94bc37fe7a275bac3d4fa813726ca571985f5bf0985c0609d15be00ef7c3",
       "candidate_config_paths": {
-        "P1": "ml/markers/center/dense_contract_v5/training/p1.json"
+        "P1": "ml/markers/center/dense_contract_v5/training/p1.json",
+        "P2": "ml/markers/center/dense_contract_v5/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "c3a04038753de6f9ac8717c5798b1a31b5e69a67f454d60ff506210c4f1e31c4"
+        "P1": "c3a04038753de6f9ac8717c5798b1a31b5e69a67f454d60ff506210c4f1e31c4",
+        "P2": "9457cdeb335639a963c658bc20fba0a80b68479ad26cb1e1e6e6ff7f923f1ae6"
       },
       "p1_expected_runner_source_bundle_sha256": "7c7bcd545ce12dd848780a69674426b6c4d22b48630223a0928385a0acc6f559",
       "p1_expected_optimizer_steps": 576,
@@ -117,13 +120,19 @@
       "p1_training_opened_seal_sha256": "74e1ce756e4f66f61959fa338bec78088b7d8b38a768d5270a41cd53042e50fb",
       "p1_training_result_seal_sha256": "03a1cea82a4bc963152ddd17f3c6784d2182ced7bfb0960e330a648b895e9c73",
       "p1_failure": "P1 passed artifact precision, recall, and marker-mask exclusion, but only 7 of 24 validation scenes were exact, with 21 missed markers and six prohibited hits. CPU ONNX maximum absolute error 0.000031888484954833984 also exceeded the fixed 0.00001 limit.",
+      "p2_protocol_path": "ml/markers/center/dense_contract_v5/P2_PROTOCOL.json",
+      "p2_protocol_sha256": "dc271a66d5cd27495f783ef72903eacab5eb76158b0734b6fc6aa96fdc9afb8d",
+      "p2_isolated_change": "add an explicit source-bound hard-negative center penalty and increased center-objective weight while keeping architecture, initialization, tensor contract, data, two-pass composition, postprocessing, thresholds, and gates fixed",
+      "p2_predecessor_checkpoint_reused": false,
+      "p2_expected_runner_source_bundle_sha256": "a104e2f9d80dfa6947fd7f5fa6fb428d05bd48b140624a26cfafa6c0e7ea71be",
+      "p2_expected_optimizer_steps": 864,
       "public_gate_config_path": "ml/markers/center/dense_contract_v5/gates/sealed-public-v1.json",
       "public_gate_config_sha256": "b8812b8f207e853ba6479caa477440034ddbb7ec1d7ac592ab6d1161241e1f2f",
       "expected_public_evaluator_source_bundle_sha256": "7e26c1c20db4341bff915b644155f6163da5a7faf1fd60a747eb8b81bbfb572f",
       "expected_public_gate_configuration_sha256": "2cce2921f95041fcf5b768689c9f8d12d997c78879d51e8efabc631298899197",
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "execution_blocker": "P1 is consumed and failed selection. P2 or P3 requires a new source-bound preregistration and separate authorization. The public gate remains locked and unopened.",
+      "execution_blocker": "P2 source and configuration are frozen but require a separate committed authorization before optimizer execution. The public gate remains locked and unopened.",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,

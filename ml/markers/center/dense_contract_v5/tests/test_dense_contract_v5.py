@@ -13,6 +13,7 @@ import torch
 
 import ml.markers.center.dense_contract_v5.public_gate as public_gate_module
 import ml.markers.center.dense_contract_v5.train_p1 as train_p1_module
+import ml.markers.center.dense_contract_v5.train_p2 as train_p2_module
 
 from ml.markers.center.dense_contract_v5.dataset import (
     HEIGHT,
@@ -96,6 +97,20 @@ def test_model_preserves_frozen_dense_three_head_contract() -> None:
     )
 
 
+def test_p2_hard_negative_loss_penalizes_only_frozen_structure_points() -> None:
+    archive = {
+        "hard_counts": np.asarray([1], dtype=np.int32),
+        "hard_points": np.asarray([[[2.0, 1.0]]], dtype=np.float32),
+    }
+    high = torch.full((1, 1, 4, 4), 0.01, dtype=torch.float32)
+    high[0, 0, 1, 2] = 0.9
+    low = high.clone()
+    low[0, 0, 1, 2] = 0.1
+    high_loss = train_p2_module._point_loss(high, archive, np.asarray([0]))
+    low_loss = train_p2_module._point_loss(low, archive, np.asarray([0]))
+    assert float(high_loss) > float(low_loss)
+
+
 def test_source_bindings_and_gate_configuration_are_frozen() -> None:
     protocol = json.loads((ROOT / "PROTOCOL.json").read_text(encoding="utf-8"))
     config = json.loads((ROOT / "training/p1.json").read_text(encoding="utf-8"))
@@ -106,6 +121,12 @@ def test_source_bindings_and_gate_configuration_are_frozen() -> None:
     assert sha256_file(ROOT / "training/p1.json") == protocol["candidate_config_sha256"]
     assert sha256_file(ROOT / "gates/sealed-public-v1.json") == protocol["public_gate_config_sha256"]
     assert config["selection_thresholds"] == list(THRESHOLDS)
+    p2_protocol = json.loads((ROOT / "P2_PROTOCOL.json").read_text(encoding="utf-8"))
+    p2_config = json.loads((ROOT / "training/p2.json").read_text(encoding="utf-8"))
+    assert source_bundle_sha256(REPO_ROOT, train_p2_module.RUNNER_SOURCE_PATHS) == p2_config["expected_runner_source_bundle_sha256"]
+    assert sha256_file(ROOT / "training/p2.json") == p2_protocol["candidate_config_sha256"]
+    assert p2_protocol["public_gate_archive_opened"] is False
+    assert p2_protocol["public_gate_evaluations"] == 0
 
 
 def test_canonical_budget_records_consumed_p1_and_blocks_public_gate() -> None:
@@ -113,10 +134,10 @@ def test_canonical_budget_records_consumed_p1_and_blocks_public_gate() -> None:
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-dense-contract-v5")
-    assert entry["status"] == "candidate_1_failed_selection"
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
