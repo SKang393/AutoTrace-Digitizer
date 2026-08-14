@@ -1,0 +1,16 @@
+{
+  "candidate_id": "P1",
+  "expected_candidate_hash_keys": [
+    "candidate_report_sha256",
+    "onnx_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "881d94bc37fe7a275bac3d4fa813726ca571985f5bf0985c0609d15be00ef7c3",
+  "expected_evaluator_source_bundle_sha256": "7e26c1c20db4341bff915b644155f6163da5a7faf1fd60a747eb8b81bbfb572f",
+  "expected_gate_config_sha256": "2cce2921f95041fcf5b768689c9f8d12d997c78879d51e8efabc631298899197",
+  "expected_public_fixture_archive_sha256": "a33485140acd88ad96a04511e63a6f6a661ce43d4b3c2c6e540bdfa25edf6c0a",
+  "profile": "marker-center-artifact-mask-public-gate-v1",
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "revision": "marker-center-dense-contract-v5-public-v1",
+  "task": "marker-center"
+}

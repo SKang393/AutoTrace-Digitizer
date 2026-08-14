@@ -1,0 +1,35 @@
+{
+  "chandler_used": false,
+  "private_data": false,
+  "revision": "marker-center-dense-contract-v5",
+  "schema": "graphreader.marker-center-dense-contract-selection.v5",
+  "sealed_public": {
+    "archive_sha256": "a33485140acd88ad96a04511e63a6f6a661ce43d4b3c2c6e540bdfa25edf6c0a",
+    "count": 32,
+    "dataset_manifest_sha256": "881d94bc37fe7a275bac3d4fa813726ca571985f5bf0985c0609d15be00ef7c3",
+    "degradation_family": "mixed-width-quantized-v5-public",
+    "renderer_family": "dense-cross-series-and-nested-legend-v5-public",
+    "seed_offset": 910393,
+    "split_seal_sha256": "7f93c13b091c125e6a38fe127d29bfd4cd455a20060cdfb3919688572b93d57a",
+    "truth_hidden_from_candidate_runner": true
+  },
+  "task": "marker-center",
+  "train": {
+    "archive_path": "ml/markers/center/dense_contract_v5/artifacts/splits/train.npz",
+    "archive_sha256": "f4e5ae1d1948bc2a6c19723dbff167bf1a96c69b21a23b01f66458ad57844c08",
+    "count": 96,
+    "degradation_family": "soft-ink-anisotropic-v5-train",
+    "renderer_family": "dense-offset-series-and-hollow-legend-v5-train",
+    "seed_offset": 510393,
+    "tensor_stream_sha256": "7e130d544244d9b8bd803f8e3962419335d7fd2f550eeba8fbe4dd209f22d6c6"
+  },
+  "validation": {
+    "archive_path": "ml/markers/center/dense_contract_v5/artifacts/splits/validation.npz",
+    "archive_sha256": "14eb9d9ba450d94099ca7a12a2ba7e82e46616992c2cbc06966cb33bca89b194",
+    "count": 24,
+    "degradation_family": "broken-stroke-low-contrast-v5-validation",
+    "renderer_family": "dense-step-series-and-twin-bracket-v5-validation",
+    "seed_offset": 730393,
+    "tensor_stream_sha256": "d816182095ca6dc1d506bfec7d2ac1339de50f8dfa947c74c8ba8af325a1472d"
+  }
+}

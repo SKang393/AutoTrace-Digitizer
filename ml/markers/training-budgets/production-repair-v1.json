@@ -4,6 +4,116 @@
   "policy": "A consumed revision and candidate ID cannot be reused with changed code. A future authorized defect class requires a new preregistered revision.",
   "revisions": [
     {
+      "task": "marker-center",
+      "revision": "marker-center-dense-contract-v5",
+      "status": "candidate_1_preregistered",
+      "defect_class": "the public-passing normalized V4 proposal model cannot satisfy the frozen dense three-head production marker-center and artifact-mask tensor contract",
+      "prior_revision": "marker-center-normalized-training-v4",
+      "trigger_result_path": "ml/markers/center/normalized_training_v4/P1_RESULT.json",
+      "trigger_result_sha256": "7f203ae5a7182c76a7d5210334695a0742634d97f2d0e9e5bd80a296c00d9ef3",
+      "trigger_public_report_sha256": "f8c22631103825eb6fb2e09b2e209304951a10d62adefb5a10b2d823667051e1",
+      "trigger_evidence_scope_used_for_design": "aggregate metrics and production tensor-contract source inspection only",
+      "trigger_public_case_detail_or_pixels_used": false,
+      "prior_fixture_bytes_reused": false,
+      "isolated_change": "train a larger compact dense network on fresh source-sealed synthetic scenes while preserving the exact three-channel input, activated center-radius-artifact output, two-pass artifact composition, postprocessing, and fixed gates",
+      "architecture": "dense-contract-expanded-compact-fpn-v5",
+      "model_license": "Apache-2.0",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "protocol_path": "ml/markers/center/dense_contract_v5/PROTOCOL.json",
+      "protocol_sha256": "3dfa011dcd3894af04937860c55db954b3d3b0a2ab1dbcbb5251648ac52fe39d",
+      "design_source_paths": [
+        "ml/markers/center/model.py",
+        "ml/markers/center/postprocess.py",
+        "ml/markers/center/dense_contract_v5/dataset.py",
+        "ml/markers/center/dense_contract_v5/model.py",
+        "ml/markers/center/dense_contract_v5/prepare_split.py"
+      ],
+      "design_source_bundle_sha256": "7596aa615e943a2ea98b306aa4066c065cb95747e48a64625ab5398e182d443d",
+      "input_shape": [
+        "N",
+        3,
+        "H",
+        "W"
+      ],
+      "input_channels": [
+        "ink_probability",
+        "text_mask",
+        "artifact_mask"
+      ],
+      "output_shape": [
+        "N",
+        3,
+        "H",
+        "W"
+      ],
+      "output_channels": [
+        "center_probability",
+        "radius_pixels",
+        "artifact_probability"
+      ],
+      "two_pass_artifact_composition": true,
+      "selection_thresholds": [
+        0.3,
+        0.35,
+        0.4,
+        0.45,
+        0.5,
+        0.55,
+        0.6
+      ],
+      "minimum_consecutive_passing_thresholds": 3,
+      "artifact_threshold": 0.35,
+      "minimum_artifact_precision": 0.9,
+      "minimum_artifact_recall": 0.95,
+      "maximum_marker_artifact_hits": 0,
+      "onnx_parity_tolerance": 0.00001,
+      "split_materialized": true,
+      "selection_manifest_path": "ml/markers/center/dense_contract_v5/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "12210c9917b8139055b24274def9935a3d1e08588e335131c92b724cd784166e",
+      "train_scene_count": 96,
+      "train_archive_sha256": "f4e5ae1d1948bc2a6c19723dbff167bf1a96c69b21a23b01f66458ad57844c08",
+      "validation_scene_count": 24,
+      "validation_archive_sha256": "14eb9d9ba450d94099ca7a12a2ba7e82e46616992c2cbc06966cb33bca89b194",
+      "sealed_public_scene_count": 32,
+      "sealed_public_test_seal_path": "ml/markers/center/dense_contract_v5/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "7f93c13b091c125e6a38fe127d29bfd4cd455a20060cdfb3919688572b93d57a",
+      "sealed_public_fixture_archive_sha256": "a33485140acd88ad96a04511e63a6f6a661ce43d4b3c2c6e540bdfa25edf6c0a",
+      "public_dataset_manifest_path": "ml/markers/center/dense_contract_v5/PUBLIC_DATASET_MANIFEST.json",
+      "public_dataset_manifest_sha256": "881d94bc37fe7a275bac3d4fa813726ca571985f5bf0985c0609d15be00ef7c3",
+      "candidate_config_paths": {
+        "P1": "ml/markers/center/dense_contract_v5/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "c3a04038753de6f9ac8717c5798b1a31b5e69a67f454d60ff506210c4f1e31c4"
+      },
+      "p1_expected_runner_source_bundle_sha256": "7c7bcd545ce12dd848780a69674426b6c4d22b48630223a0928385a0acc6f559",
+      "p1_expected_optimizer_steps": 576,
+      "public_gate_config_path": "ml/markers/center/dense_contract_v5/gates/sealed-public-v1.json",
+      "public_gate_config_sha256": "b8812b8f207e853ba6479caa477440034ddbb7ec1d7ac592ab6d1161241e1f2f",
+      "expected_public_evaluator_source_bundle_sha256": "7e26c1c20db4341bff915b644155f6163da5a7faf1fd60a747eb8b81bbfb572f",
+      "expected_public_gate_configuration_sha256": "2cce2921f95041fcf5b768689c9f8d12d997c78879d51e8efabc631298899197",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1 source, configuration, and fresh split are frozen but require a separate committed authorization before optimizer execution.",
+      "public_gate_authorized": false,
+      "public_gate_authorized_candidate_id": null,
+      "public_gate_evaluations": 0,
+      "public_gate_archive_opened": false,
+      "manifest_created": false,
+      "model_store_promoted": false,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
+    },
+    {
       "task": "ocr-detection",
       "revision": "graph-text-structural-veto-proposal-role-v17",
       "status": "exhausted_failed_selection",

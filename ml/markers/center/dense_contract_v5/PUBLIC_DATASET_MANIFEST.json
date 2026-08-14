@@ -1,0 +1,201 @@
+{
+  "chandler_used": false,
+  "fixtures": [
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0000",
+      "ground_truth_sha256": "63410bc4b43b0a26460dd5732f0888401b2078018a31ddfe0433ac723ce1be25",
+      "image_sha256": "68ced516c09b2c39556589a0eddc5d4ab80e5eb1e4ba0842a6fc3d8d7e0e1329"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0001",
+      "ground_truth_sha256": "e49e3a5a32c6e3bc8b94a9478e3cf00c15e15032c076ef65d02c7015283df134",
+      "image_sha256": "b07253755f2849dea54a3615a3a9b767e6bd0e2a4c8b1688381a9f576aeda6a5"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0002",
+      "ground_truth_sha256": "88a69e5168ed4171eaa69e26c40936c94757b431d29b123bab1a166eafa73355",
+      "image_sha256": "268226cd5184aad0cc7a88b7402c5f9a813587d8364cd42df228655a7338111f"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0003",
+      "ground_truth_sha256": "68a219996cd27b09e8ac17f4ce57e2d66a060a93bcc50ce014e7e06906ffec6e",
+      "image_sha256": "7699fc87d31e5640df3114f6cd7c6d3139fc483abb59776b9193d63de209821f"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0004",
+      "ground_truth_sha256": "717ef1500093f4e928f49a0ccd915396c7119ec2f7b270871380aa1fbe66c36f",
+      "image_sha256": "64db75a2975a1b58c491a123a34ecb6a498e8e4021cf5cf35967e83a0184b1fd"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0005",
+      "ground_truth_sha256": "00cb8454d87474d8b4f41fe46c79d65ed0efc8799df7cfe487eb8ba2ff36cd5f",
+      "image_sha256": "24c02964633062199791de2a4a3d012a880480e3681e3fa0bc7d424cc330a1a0"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0006",
+      "ground_truth_sha256": "88599d794b4cdeac53a80d384b91914c5fb06bf4e093bf79f144bf5aa7aec33c",
+      "image_sha256": "115bce7116e29332c64882a1c9762069cfa4a137625fd5d56bb6fe61cead6a3a"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0007",
+      "ground_truth_sha256": "5a77916b7c1afd9f9527d926dde8a1396cf1271bdd8cd05ee22b70dbc8182b2e",
+      "image_sha256": "4814ce391d4012e55b82d62815b1b6c540a60332ffb0a9e3859df60835e83336"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0008",
+      "ground_truth_sha256": "39661106b076afa8bbb30a5281bd387efd23627f8a2764dbdc7a398f405461f7",
+      "image_sha256": "a534a212b6ea89bc9f55f088c79d19fb6833869a484c9c569b8a81bd089a0411"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0009",
+      "ground_truth_sha256": "98d2656e31b46c5b3a6f0060852f8b4b83054e4fc2d4f1e3922d754502ab7394",
+      "image_sha256": "a54d3f84f7557e0cc4c270ac9e92442633c71acc1de8527957620542a7b8b250"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0010",
+      "ground_truth_sha256": "9cc174336be30baf051009739a48bcaa0b78181605c2b6cd9920bc8e0c171477",
+      "image_sha256": "ce59127f090625b4e28caf1505cc5602a2329cee883781a981075e6883b18acf"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0011",
+      "ground_truth_sha256": "81f0b5d0904b7570e4b42728464773f079ebb13ab8728bb67140e887609fc3da",
+      "image_sha256": "f6faead91379444369b51221fc27d68d2875d91f76bb0ad1ce8a18e2c3dbb04e"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0012",
+      "ground_truth_sha256": "019ec502bef45d967406e7d21df1ab796e496e5e03180abcd6524d90aece7bbb",
+      "image_sha256": "855f34e00e23837466f4188cd2fbac4a2672ab426a53323bfad572c7b4a3bfc1"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0013",
+      "ground_truth_sha256": "0bb3af5ee8863886453e4245040726fb621c3259522e5929812f29be88d0f7c4",
+      "image_sha256": "bc18252538c22c97651305e1300cb5f242e933a488f0a08a32d5f4efde0f7fac"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0014",
+      "ground_truth_sha256": "a351fdfa17ce83c806708deb5bd57bc2414cca3d0b5d07de45686c90d0aa65da",
+      "image_sha256": "670b1cfbcb21f7db572993ad3c694a682aa8dec7d18ecdba0a124278927982da"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0015",
+      "ground_truth_sha256": "58444933bef79ad56eec78d457c2803434b794db3085ad65753a4ff2171741a1",
+      "image_sha256": "ed17cd0d5f873127c692ae10a0400d2aca20905024127c69cd1f6bd17e13dfcc"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0016",
+      "ground_truth_sha256": "3c47389dd1661b8331f5304d72ef56f75fe2e06c1ee9be331389c582fb5db90b",
+      "image_sha256": "db4cf4556f295d0a22598d570223191869a85ae143d1838df7f804fe1210e9e5"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0017",
+      "ground_truth_sha256": "8bc7d08357e4de85284441fe8bece61173bf8bf7c2604efff0646b5acae46601",
+      "image_sha256": "c362a3ffcb774b97a3328beb815d3ec4d688d6862336dfe4ee55f2f22ac65c8f"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0018",
+      "ground_truth_sha256": "d8b3060047f58f8e6823f2690c007e83c2b857ed67f38cc264675a14721ad07d",
+      "image_sha256": "bbf3076bfe0aeae462aa2682a0d55a1813de4c50a5a9d42fd8cee4c2ed29f82f"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0019",
+      "ground_truth_sha256": "aba85affbdca90f0171710654dc1871281f845e942983469b1848e78398dd3f1",
+      "image_sha256": "6f6cf2475661fe6d204657094843b1767e0078c64a27bc6a34158e5327bb1fa4"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0020",
+      "ground_truth_sha256": "0c4bccc36f7eb993dd7be76eb000855d5014a8a6f0123d27c9ced9eb43993a34",
+      "image_sha256": "ed91afba17b2c0e8c926dc1d2f076784785bab8b34f5c9df86c83ef1a77ae5d5"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0021",
+      "ground_truth_sha256": "8435d6dba946cdfcaa8299a770bfb79c77f8195175aee1637ce99c95dd6a0c45",
+      "image_sha256": "0e12259bc158f76151bd7f0a8c7af5d1a0b4bb08f6932db7a4137139413daa38"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0022",
+      "ground_truth_sha256": "f5c8d81cfbc7ccadde3eb92beb817cfc795dc4d91f971c9275663ddef2da0cad",
+      "image_sha256": "a98de70a196b6a1b287919500b4e37761f167d4fcd0c3ec07ebf7e8bd729106d"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0023",
+      "ground_truth_sha256": "c5cb2ed0b8624eae71f25cd95d2ce0ae0db25c9258f88530d52a094d8080fc5b",
+      "image_sha256": "2df766ae297f9f7edc102d2d0108865a2086b29bdec88badaa945208cd3f6be9"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0024",
+      "ground_truth_sha256": "1b59b867b4ff309f1569c97a018f08072cfeb69832ce17e5d68c2b7900669f63",
+      "image_sha256": "75265c0cf741d75f5aa865140a1f8d8082f200de7a2accf1dae89b55ca77a94b"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0025",
+      "ground_truth_sha256": "7c43bfb680017774116e07bf59e1f51a440bbaa3c01bb9862bbced30db7a6bdf",
+      "image_sha256": "cf1c5b67bdb54913b72520c8beda1727aed0b7f50fb5b97b07c9a4858c8d4b20"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0026",
+      "ground_truth_sha256": "67ddc5412d6f9fe9e20bdeaf6c55c6e7b857a0605726f43cc00e350843bb5b15",
+      "image_sha256": "64b040b18a6868b7ae583523b175d4684cd5870c7b7a0c139cc1c4e7197ee920"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0027",
+      "ground_truth_sha256": "8f138d1513b14c920eb46a2f3d7a9cf40ca8785687ccbefe4b939cc67d31cfc9",
+      "image_sha256": "bb3c98417e9ec232db15f73a5f8d744b14100ff1bd8780c5d3b0d99a35596014"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0028",
+      "ground_truth_sha256": "9e45943b6297d3373ee3a9bed8078f2e88b6613156a42a7a299d85678411af10",
+      "image_sha256": "ae5381db8fba2c0a685ca91b065ea0a4367ba9f6365bd4ae54a3903c616eb738"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0029",
+      "ground_truth_sha256": "20655d8dec2bcc2d74f22f51fd4c12f88985c9e900c8ff33e66685016c97f180",
+      "image_sha256": "e8a95e2ac65f44e10653ed9c14c7ed5fb8544f6f7009c60b1a8d1669483d60a0"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0030",
+      "ground_truth_sha256": "be08d1eeb1185942f0cfbfbf9a7a52299d05af4bf004ba8bffe9e6b1c83ad36f",
+      "image_sha256": "5dd0123af2989aa0f3e115c31ec340c88e26d5556eb26bd8471e36ed5779d3ee"
+    },
+    {
+      "family": "dense-cross-series-and-nested-legend-v5-public",
+      "fixture_id": "marker-dense-contract-v5-sealed_public-0031",
+      "ground_truth_sha256": "db68e250a777ab3abdcf6dcd8c2a4199e0014e191753cacae8dee46949593e60",
+      "image_sha256": "7d9b3846f968931e73c6da09fd2c833026faba4d6159f7eec29ff15c830c6b11"
+    }
+  ],
+  "private_data": false,
+  "schema": "graphreader.marker-artifact-mask-dataset.v1",
+  "scope": "public_synthetic",
+  "seed": 393
+}

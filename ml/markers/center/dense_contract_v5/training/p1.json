@@ -1,0 +1,58 @@
+{
+  "architecture": "dense-contract-expanded-compact-fpn-v5",
+  "artifact_gate": {
+    "maximum_marker_artifact_hits": 0,
+    "minimum_precision": 0.9,
+    "minimum_recall": 0.95,
+    "threshold": 0.35
+  },
+  "batch_size": 8,
+  "candidate_id": "P1",
+  "epochs": 48,
+  "expected_optimizer_steps": 576,
+  "expected_runner_source_bundle_sha256": "7c7bcd545ce12dd848780a69674426b6c4d22b48630223a0928385a0acc6f559",
+  "learning_rate": 0.002,
+  "minimum_consecutive_passing_thresholds": 3,
+  "onnx_parity_tolerance": 0.00001,
+  "private_data": false,
+  "chandler_used": false,
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "revision": "marker-center-dense-contract-v5",
+  "seed": 20261393,
+  "selection_manifest_sha256": "12210c9917b8139055b24274def9935a3d1e08588e335131c92b724cd784166e",
+  "selection_thresholds": [
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6
+  ],
+  "task": "marker-center",
+  "tensor_contract": {
+    "input": [
+      "N",
+      3,
+      "H",
+      "W"
+    ],
+    "input_channels": [
+      "ink_probability",
+      "text_mask",
+      "artifact_mask"
+    ],
+    "output": [
+      "N",
+      3,
+      "H",
+      "W"
+    ],
+    "output_channels": [
+      "center_probability",
+      "radius_pixels",
+      "artifact_probability"
+    ]
+  }
+}

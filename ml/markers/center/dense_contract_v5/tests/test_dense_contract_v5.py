@@ -1,0 +1,205 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sungwoo Kang
+"""Fail-closed preregistration checks for dense marker contract V5."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import numpy as np
+import pytest
+import torch
+
+import ml.markers.center.dense_contract_v5.public_gate as public_gate_module
+import ml.markers.center.dense_contract_v5.train_p1 as train_p1_module
+
+from ml.markers.center.dense_contract_v5.dataset import (
+    HEIGHT,
+    PROHIBITED_KINDS,
+    PUBLIC_SCENE_COUNT,
+    TRAIN_SCENE_COUNT,
+    VALIDATION_SCENE_COUNT,
+    WIDTH,
+    read_archive,
+    render_split,
+)
+from ml.markers.center.dense_contract_v5.model import create_model
+from ml.markers.center.dense_contract_v5.public_gate import EVALUATOR_SOURCE_PATHS, GATE_CONFIGURATION
+from ml.markers.center.dense_contract_v5.train_p1 import RUNNER_SOURCE_PATHS, THRESHOLDS
+from ml.markers.gate_seal import (
+    GateSeal,
+    canonical_json_bytes,
+    sha256_bytes,
+    sha256_file,
+    source_bundle_sha256,
+)
+from ml.markers.training_budget import TrainingAuthorization
+
+
+REPO_ROOT = Path(__file__).resolve().parents[5]
+ROOT = REPO_ROOT / "ml/markers/center/dense_contract_v5"
+
+
+def test_frozen_archives_and_split_metadata_are_exact() -> None:
+    selection = json.loads((ROOT / "SELECTION_MANIFEST.json").read_text(encoding="utf-8"))
+    seal = json.loads((ROOT / "SEALED_PUBLIC_TEST_SEAL.json").read_text(encoding="utf-8"))
+    dataset = json.loads((ROOT / "PUBLIC_DATASET_MANIFEST.json").read_text(encoding="utf-8"))
+    assert selection["train"]["count"] == TRAIN_SCENE_COUNT == 96
+    assert selection["validation"]["count"] == VALIDATION_SCENE_COUNT == 24
+    assert selection["sealed_public"]["count"] == PUBLIC_SCENE_COUNT == 32
+    assert len({selection[name]["renderer_family"] for name in ("train", "validation", "sealed_public")}) == 3
+    assert len({selection[name]["degradation_family"] for name in ("train", "validation", "sealed_public")}) == 3
+    for name in ("train", "validation"):
+        path = REPO_ROOT / selection[name]["archive_path"]
+        assert sha256_file(path) == selection[name]["archive_sha256"]
+    public_path = REPO_ROOT / seal["fixture_archive_path"]
+    assert sha256_file(public_path) == seal["fixture_archive_sha256"]
+    assert sha256_file(ROOT / "PUBLIC_DATASET_MANIFEST.json") == seal["dataset_manifest_sha256"]
+    assert seal["public_gate_archive_opened"] is False
+    assert seal["public_gate_evaluations"] == 0
+    assert dataset["seed"] == 393
+    assert len(dataset["fixtures"]) == 32
+    assert len({fixture["fixture_id"] for fixture in dataset["fixtures"]}) == 32
+
+
+def test_one_fresh_scene_has_dense_contract_targets_and_taxonomy() -> None:
+    scene = render_split("validation")[0]
+    assert scene.tensor.shape == (3, HEIGHT, WIDTH)
+    assert scene.center_target.shape == (1, HEIGHT, WIDTH)
+    assert scene.radius_target.shape == (1, HEIGHT, WIDTH)
+    assert scene.artifact_target.shape == (1, HEIGHT, WIDTH)
+    assert np.isfinite(scene.tensor).all()
+    assert 8 <= len(scene.centers) <= 10
+    assert set(kind for kind, _, _ in scene.hard_negatives) == set(PROHIBITED_KINDS)
+    assert scene.scene_id.startswith("marker-dense-contract-v5-validation-")
+
+
+def test_model_preserves_frozen_dense_three_head_contract() -> None:
+    model = create_model().eval()
+    value = torch.zeros((1, 3, HEIGHT, WIDTH), dtype=torch.float32)
+    with torch.inference_mode():
+        output = model(value)
+    assert output.shape == value.shape
+    assert torch.all((output[:, 0] >= 0) & (output[:, 0] <= 1))
+    assert torch.all(output[:, 1] >= 1)
+    assert torch.all((output[:, 2] >= 0) & (output[:, 2] <= 1))
+    assert tuple(model.contract.input_channels) == (
+        "ink_probability",
+        "text_mask",
+        "artifact_mask",
+    )
+    assert tuple(model.contract.output_channels) == (
+        "center_probability",
+        "radius_pixels",
+        "artifact_probability",
+    )
+
+
+def test_source_bindings_and_gate_configuration_are_frozen() -> None:
+    protocol = json.loads((ROOT / "PROTOCOL.json").read_text(encoding="utf-8"))
+    config = json.loads((ROOT / "training/p1.json").read_text(encoding="utf-8"))
+    gate = json.loads((ROOT / "gates/sealed-public-v1.json").read_text(encoding="utf-8"))
+    assert source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
+    assert source_bundle_sha256(REPO_ROOT, EVALUATOR_SOURCE_PATHS) == gate["expected_evaluator_source_bundle_sha256"]
+    assert sha256_bytes(canonical_json_bytes(GATE_CONFIGURATION)) == gate["expected_gate_config_sha256"]
+    assert sha256_file(ROOT / "training/p1.json") == protocol["candidate_config_sha256"]
+    assert sha256_file(ROOT / "gates/sealed-public-v1.json") == protocol["public_gate_config_sha256"]
+    assert config["selection_thresholds"] == list(THRESHOLDS)
+
+
+def test_canonical_budget_blocks_optimizer_and_public_gate() -> None:
+    ledger = json.loads(
+        (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
+    )
+    entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-dense-contract-v5")
+    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P1"]
+    assert entry["consumed_candidate_ids"] == []
+    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_evaluations"] == 0
+    assert entry["production_approval"] is False
+    assert entry["release_eligible"] is False
+    assert not (ROOT / "artifacts/P1-run").exists()
+
+
+def test_training_runner_records_terminal_failure_after_authorization(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    seal_directory = tmp_path / "training-seal"
+    seal_directory.mkdir()
+    opened_path = seal_directory / "opened.json"
+    opened_path.write_bytes(canonical_json_bytes({"status": "opened"}))
+    authorization = TrainingAuthorization(
+        directory=seal_directory,
+        opened_path=opened_path,
+        binding={"candidate_id": "P1", "committed_source_enforcement": True},
+    )
+    monkeypatch.setattr(
+        train_p1_module,
+        "acquire_training_candidate",
+        lambda *args, **kwargs: authorization,
+    )
+
+    def fail_candidate(*args, **kwargs):
+        raise RuntimeError("controlled training failure")
+
+    monkeypatch.setattr(train_p1_module, "_execute_candidate", fail_candidate)
+    output = tmp_path / "P1-run"
+    with pytest.raises(RuntimeError, match="controlled training failure"):
+        train_p1_module.run(output)
+    report = json.loads((output / "candidate-report.json").read_text(encoding="utf-8"))
+    result = json.loads((seal_directory / "result.json").read_text(encoding="utf-8"))
+    assert report["status"] == "failed_runner"
+    assert report["public_gate_archive_opened"] is False
+    assert report["public_gate_evaluations"] == 0
+    assert result["status"] == "failed_runner"
+    assert result["report_sha256"] == sha256_file(output / "candidate-report.json")
+
+
+def test_public_runner_records_terminal_failure_after_gate_open(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    seal_directory = tmp_path / "public-seal"
+    seal_directory.mkdir()
+    opened_path = seal_directory / "opened.json"
+    opened_path.write_bytes(canonical_json_bytes({"status": "opened"}))
+    seal = GateSeal(
+        key="controlled-key",
+        directory=seal_directory,
+        opened_path=opened_path,
+        binding={"evaluation_count": 1},
+    )
+    candidate_report_path = tmp_path / "candidate-report.json"
+    onnx_path = tmp_path / "candidate.onnx"
+    candidate_report_path.write_bytes(canonical_json_bytes({"selection_gate_passed": True}))
+    onnx_path.write_bytes(b"controlled-onnx")
+
+    def fail_gate(*args, **kwargs):
+        raise RuntimeError("controlled public failure")
+
+    monkeypatch.setattr(public_gate_module, "_evaluate_opened_gate", fail_gate)
+    output = tmp_path / "public" / "report.json"
+    with pytest.raises(RuntimeError, match="controlled public failure"):
+        public_gate_module._run_opened_gate(
+            candidate={"selection_gate_passed": True},
+            candidate_report_path=candidate_report_path,
+            onnx_path=onnx_path,
+            archive_path=tmp_path / "sealed-public.npz",
+            dataset_path=tmp_path / "dataset.json",
+            split_seal_path=tmp_path / "split-seal.json",
+            seal=seal,
+            output_path=output,
+        )
+    report = json.loads(output.read_text(encoding="utf-8"))
+    result = json.loads((seal_directory / "result.json").read_text(encoding="utf-8"))
+    assert report["status"] == "failed_runner"
+    assert report["evaluation_count"] == 1
+    assert result["status"] == "failed_runner"
+    assert result["evaluation_count"] == 1
+    assert result["report_sha256"] == sha256_file(output)
