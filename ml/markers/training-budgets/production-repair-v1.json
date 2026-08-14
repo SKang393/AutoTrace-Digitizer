@@ -4,6 +4,43 @@
   "policy": "A consumed revision and candidate ID cannot be reused with changed code. A future authorized defect class requires a new preregistered revision.",
   "revisions": [
     {
+      "task": "ocr-detection",
+      "revision": "graph-text-structural-graph-proposal-role-v14",
+      "status": "design_preregistered_before_split_freeze",
+      "defect_class": "aggregate consumed V13 hidden-public evidence showed 223 of 224 exact scenes, one false prohibited structural region, zero misses, zero duplicates, and perfect role classification",
+      "trigger_report_sha256": "fe0a0d63d0c00c35c463e45c11a87f97aa81bb625d0744c8c2307537b6d6d2ff",
+      "trigger_evidence_scope_used_for_design": "aggregate metrics only",
+      "trigger_v13_public_fixture_bytes_scene_truth_or_case_identity_used": false,
+      "consumed_v13_gate_rerun_authorized": false,
+      "prior_revision": "graph-text-morphology-proposal-role-v13",
+      "prior_fixture_bytes_reused": false,
+      "isolated_change": "replace V13 anisotropic morphology mixture branches with a topology-spectrum residual encoder over tight and contextual ink, fixed edge magnitude, occupancy spectra, and unchanged production geometry; replace every renderer and degradation family with fresh structure-collision scenes while retaining [N,2,32,144] to [N,10]",
+      "architecture": "dual-context-topology-spectrum-residual-proposal-role-cnn-v1",
+      "model_license": "Apache-2.0",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "protocol_path": "ml/ocr/structural_graph_proposal_role_v14/PROTOCOL.json",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "The V14 runner bundle, complete fresh split, truth-hidden public archive, fingerprints, candidate configuration, and single-use evaluator must be committed and checksum-bound before P1 execution.",
+      "public_gate_authorized": false,
+      "public_gate_authorized_candidate_id": null,
+      "public_gate_evaluations": 0,
+      "public_gate_archive_opened": false,
+      "manifest_created": false,
+      "model_store_promoted": false,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
+    },
+    {
       "task": "marker-center",
       "revision": "marker-center-production-repair-v1",
       "status": "exhausted",
