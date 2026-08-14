@@ -150,21 +150,32 @@ def test_split_and_candidate_records_are_frozen_and_fail_closed() -> None:
     assert result["selection_metrics_available"] is False
     assert result["public_gate_archive_opened"] is False
     assert result["public_gate_evaluations"] == 0
+    p2_result = json.loads((V14_ROOT / "P2_RESULT.json").read_text(encoding="utf-8"))
+    assert p2_result["status"] == "failed_selection"
+    assert p2_result["optimizer_steps"] == 0
+    assert p2_result["weights_changed"] is False
+    assert p2_result["selection_metrics"]["true_positives"] == 1152
+    assert p2_result["selection_metrics"]["false_positives"] == 2
+    assert p2_result["selection_metrics"]["false_negatives"] == 0
+    assert p2_result["selection_metrics"]["role_accuracy"] == 0.9444444444444444
+    assert p2_result["onnx_parity_passed"] is False
+    assert p2_result["public_gate_archive_opened"] is False
+    assert p2_result["public_gate_evaluations"] == 0
     for record in (selection, seal, config):
         assert record["production_approval"] is False
         assert record["release_eligible"] is False
 
 
-def test_frozen_budget_ledger_authorizes_only_exact_p2_and_keeps_public_closed() -> None:
+def test_frozen_budget_ledger_consumes_failed_p2_and_keeps_p3_unregistered() -> None:
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-structural-graph-proposal-role-v14")
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["status"] == "candidate_2_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
-    assert entry["execution_blocker"] is None
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert "P1 and P2 are consumed" in entry["execution_blocker"]
     assert entry["selection_manifest_sha256"] == sha256_file(V14_ROOT / "SELECTION_MANIFEST.json")
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(V14_ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(V14_ROOT / "training/p1.json")
@@ -180,6 +191,17 @@ def test_frozen_budget_ledger_authorizes_only_exact_p2_and_keeps_public_closed()
     assert entry["p2_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         ROOT, P2_RUNNER_SOURCE_PATHS
     )
+    assert entry["p2_result_sha256"] == sha256_file(V14_ROOT / "P2_RESULT.json")
+    assert entry["p2_selection_report_sha256"] == "66db4c1819bbb62ec5a1d900285f612f4e57aba692630f10c67cad3a62dfc6c2"
+    assert entry["p2_onnx_sha256"] == "2e429dc0c58bf587385bc20a03fa542bbe5e39f41972d6921ff96d6f970b5232"
+    assert entry["p2_selection_exact_scene_count"] == 81
+    assert entry["p2_selection_false_positives"] == 2
+    assert entry["p2_selection_false_negatives"] == 0
+    assert entry["p2_selection_role_accuracy"] == 0.9444444444444444
+    assert entry["p2_phase_heading_accuracy"] == 0.7847222222222222
+    assert entry["p2_y_tick_accuracy"] == 0.7777777777777778
+    assert entry["p2_pytorch_equivalence_passed"] is False
+    assert entry["p2_onnx_parity_passed"] is False
     p2 = json.loads((V14_ROOT / "training/p2.json").read_text(encoding="utf-8"))
     assert p2["expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, P2_RUNNER_SOURCE_PATHS)
     assert p2["optimizer_steps"] == 0
