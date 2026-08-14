@@ -20,9 +20,20 @@ committed, then separately authorized. No Chandler, private, article, or
 `Generalization` data may be used. Production approval and release eligibility
 remain false.
 
-The renderer adapter, frozen-base model, P1 runner, split freezer, aggregate
-selection evaluator, and one-use public gate are implemented as source. The
-fresh split and its source-bound P1 and gate configurations are now frozen.
-The canonical ledger now authorizes exactly one P1 execution. P1 remains unrun,
-the public gate remains unauthorized and unopened, and no production approval
-or release eligibility exists.
+The renderer adapter, frozen-base model, candidate runners, split freezer,
+aggregate selection evaluator, and one-use public gate are implemented as
+source. The fresh split and its source-bound gate configuration are frozen.
+
+P1 is consumed and failed selection. Its single authorized run completed 1,608
+optimizer steps, preserved all 1,728 validation truths, emitted no duplicates,
+passed CPU ONNX parity, and preserved the frozen role logits. It retained one
+false prohibited region at threshold 0.60 while misses began at threshold 0.64,
+so it produced no three-threshold zero-error window. No validation case details
+or pixels were used to design P2.
+
+P2 is preregistered but not execution-authorized. It loads the exact consumed P1
+checkpoint and changes only the training objective to class-balanced focal loss
+plus worst-tail pairwise separation on the unchanged fresh training split. The
+architecture, frozen base, role logits, proposals, selection thresholds, and
+public seal remain unchanged. The public gate remains unauthorized and unopened,
+and no production approval or release eligibility exists.
