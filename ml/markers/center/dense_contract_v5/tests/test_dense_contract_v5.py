@@ -177,17 +177,17 @@ def test_source_bindings_and_gate_configuration_are_frozen() -> None:
     assert p3_protocol["public_gate_evaluations"] == 0
 
 
-def test_canonical_budget_authorizes_only_final_p3_and_blocks_public_gate() -> None:
+def test_canonical_budget_records_exhausted_p3_and_blocks_public_gate() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-dense-contract-v5")
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["status"] == "exhausted_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
@@ -206,6 +206,15 @@ def test_canonical_budget_authorizes_only_final_p3_and_blocks_public_gate() -> N
     assert sum(p2_result["selection_prohibited_structure_hits"].values()) == 7
     assert p2_result["onnx_parity_passed"] is False
     assert p2_result["public_gate_evaluations"] == 0
+    p3_result = json.loads((ROOT / "P3_RESULT.json").read_text(encoding="utf-8"))
+    assert sha256_file(ROOT / "P3_RESULT.json") == entry["p3_result_sha256"]
+    assert p3_result["selection_gate_passed"] is False
+    assert p3_result["selection_false_negatives"] == 16
+    assert sum(p3_result["selection_prohibited_structure_hits"].values()) == 7
+    assert p3_result["onnx_parity_passed"] is True
+    assert p3_result["checkpoint_to_inference_graph_passed"] is False
+    assert p3_result["public_gate_evaluations"] == 0
+    assert p3_result["public_archive_opened_by_gate"] is False
 
 
 def test_training_runner_records_terminal_failure_after_authorization(

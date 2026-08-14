@@ -32,8 +32,10 @@ from those aggregate failures only. It replaces P2's single-pixel exclusion
 penalty with one spatial acceptance-margin objective over the unchanged
 five-pixel truth and six-pixel exclusion radii, and uses a semantically bounded
 convolution/batch-normalization-fused inference graph for the unchanged parity
-gate. P3 is fresh, reuses no predecessor checkpoint, and is ledger-authorized
-for exactly one execution from its committed source and configuration. The
-public gate remains locked and unopened. Production
+gate. P3 ran exactly once from committed source for 1,152 optimizer steps. CPU
+ONNX parity passed, but checkpoint-to-fused-graph semantic error exceeded the
+same `1e-5` limit. It remained at 200/216 markers and 8/24 exact scenes, with
+16 misses and seven prohibited hits. P1 through P3 are consumed, V5 is
+exhausted, and its public gate remains locked and unopened. Production
 approval, model-store
 promotion, packaging, private validation, and release eligibility remain false.
