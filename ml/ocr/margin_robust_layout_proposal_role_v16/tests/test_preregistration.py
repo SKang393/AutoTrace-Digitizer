@@ -18,6 +18,7 @@ from ml.ocr.layout_conditioned_proposal_role_v15.dataset import render_scene as 
 from ml.ocr.margin_robust_layout_proposal_role_v16.dataset import encode_proposal, proposals, render_scene
 from ml.ocr.margin_robust_layout_proposal_role_v16.model import MarginRobustLayoutProposalRoleNet
 from ml.ocr.margin_robust_layout_proposal_role_v16.model_p2 import CalibratedMarginCandidate
+from ml.ocr.margin_robust_layout_proposal_role_v16.model_p3 import OutputScaledMarginCandidate
 from ml.ocr.margin_robust_layout_proposal_role_v16.protocol import (
     ENCODED_WIDTH,
     EXPERIMENT_BUDGET,
@@ -35,6 +36,11 @@ from ml.ocr.margin_robust_layout_proposal_role_v16.train_p1 import (
 from ml.ocr.margin_robust_layout_proposal_role_v16.train_p2 import (
     P1_RESULT_PATH,
     RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
+)
+from ml.ocr.margin_robust_layout_proposal_role_v16.train_p3 import (
+    P2_RESULT_PATH,
+    RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS,
+    _hard_negative_indices,
 )
 
 
@@ -156,16 +162,16 @@ def test_runner_public_sources_and_ledger_are_fail_closed() -> None:
     assert GATE_CONFIG["case_level_failure_analysis_permitted"] is False
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol_configuration()["revision"])
-    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["status"] == "candidate_2_failed_selection_p3_preregistered_execution_blocked"
     assert entry["split_materialized"] is True
     assert entry["selection_manifest_sha256"] == "06253f5a0a7318fde69093027d99c4ef1cacf876e9906cc6c33fc0a9d15be72f"
     assert entry["sealed_public_fixture_archive_sha256"] == "663b9a0c1600ca65c04c2acf85a021a057777a44f7e930ce82fc6beb4b7a97c1"
     assert entry["sealed_public_private_manifest_sha256"] == "cd6dc64bff9fc3fb8d1ba6a6185e142b661fdd10fc215bf9064dc7ef438163e9"
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
 
@@ -240,3 +246,62 @@ def test_p1_result_and_p2_calibration_are_checksum_bound_and_closed() -> None:
     assert torch.equal(before[:, :1], after[:, :1])
     assert torch.equal(before[:, 2:], after[:, 2:])
     assert torch.allclose(before[:, 1] - 2.0, after[:, 1], atol=0.0, rtol=0.0)
+
+
+def test_p2_result_and_p3_training_repair_are_checksum_bound_and_closed() -> None:
+    result_path = ROOT / P2_RESULT_PATH
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    config_path = V16_ROOT / "training/p3.json"
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    assert result_path.read_bytes() == canonical_json_bytes(result)
+    assert result["status"] == "failed_selection"
+    assert result["consumed"] is True
+    assert result["selection_metrics"]["true_positives"] == 1536
+    assert result["selection_metrics"]["false_positives"] == 4
+    assert result["selection_metrics"]["false_negatives"] == 0
+    assert result["passing_threshold_window"] == []
+    assert result["onnx_parity_passed"] is False
+    assert result["public_gate_archive_opened"] is False
+    assert config_path.read_bytes() == canonical_json_bytes(config)
+    assert config["candidate_id"] == "P3"
+    assert config["p1_result_sha256"] == sha256_file(ROOT / P1_RESULT_PATH)
+    assert config["p2_result_sha256"] == sha256_file(result_path)
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        ROOT, P3_RUNNER_SOURCE_PATHS
+    )
+    assert config["expected_hard_negative_count"] == 10240
+    assert config["expected_optimizer_steps"] == 480
+    assert config["hard_negative_multiplier"] == 2
+    assert config["output_scale"] == 0.5
+    assert config["p1_p2_aggregate_metrics_only_used_for_design"] is True
+    assert config["p1_p2_validation_case_detail_or_pixels_used_for_design"] is False
+    assert config["validation_or_public_pixels_used"] is False
+    assert config["public_gate_archive_opened"] is False
+    assert config["production_approval"] is False
+    assert config["release_eligible"] is False
+
+    base = MarginRobustLayoutProposalRoleNet().eval()
+    scaled = OutputScaledMarginCandidate(base, output_scale=0.5).eval()
+    values = torch.rand((5, 2, 32, 152), generator=torch.Generator().manual_seed(20262181))
+    with torch.inference_mode():
+        before = base(values)
+        after = scaled(values)
+    assert torch.equal(torch.argmax(before[:, :2], dim=1), torch.argmax(after[:, :2], dim=1))
+    assert torch.equal(torch.argmax(before[:, 2:], dim=1), torch.argmax(after[:, 2:], dim=1))
+    assert torch.allclose(before * 0.5, after, atol=0.0, rtol=0.0)
+
+
+def test_p3_hard_negative_mining_is_deterministic_and_training_only() -> None:
+    class ScoreModel(torch.nn.Module):
+        def forward(self, value: torch.Tensor) -> torch.Tensor:
+            score = value[:, 0, 0, 0]
+            zeros = torch.zeros((len(value), 8), dtype=value.dtype)
+            return torch.cat((-score[:, None], score[:, None], zeros), dim=1)
+
+    values = torch.zeros((8, 2, 32, 152), dtype=torch.float32)
+    values[:, 0, 0, 0] = torch.tensor((0.0, 0.1, 0.2, 0.3, 0.9, 0.5, 0.7, 0.8))
+    labels = torch.tensor((1, 1, 0, 0, 0, 0, 0, 0), dtype=torch.int64)
+    selected = _hard_negative_indices(
+        ScoreModel(), values, labels, multiplier=2, batch_size=3,
+    )
+    assert selected.tolist() == [4, 7, 6, 5]

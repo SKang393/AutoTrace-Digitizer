@@ -1,0 +1,99 @@
+{
+  "candidate_id": "P2",
+  "candidate_report_path": "ml/ocr/margin_robust_layout_proposal_role_v16/artifacts/P2-run/candidate-report.json",
+  "candidate_report_sha256": "5b026d67e35ec3e06b4aff4d279ad968246258167a3a996f6d6250051df35061",
+  "consumed": true,
+  "direct_execution_inference_calls": 192,
+  "elapsed_ms": 835192.0,
+  "failure": "P2 preserved every truth and role while reducing false prohibited regions from five to four, but no zero-error threshold existed and CPU ONNX parity exceeded the fixed limit by 4.9041748046875e-07.",
+  "onnx_parity_maximum_absolute_error": 1.049041748046875e-05,
+  "onnx_parity_passed": false,
+  "onnx_path": "ml/ocr/margin_robust_layout_proposal_role_v16/artifacts/P2-run/graph-text-margin-robust-layout-proposal-role-v16-p2.onnx",
+  "onnx_sha256": "03ceffdfe0df755a01eb777eb21d638c1ed4b76a5bfef84a5c97a7d32572d459",
+  "optimizer_steps": 0,
+  "passing_threshold_window": [],
+  "positive_logit_bias": -2.0,
+  "production_approval": false,
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-margin-robust-layout-proposal-role-v16",
+  "role_argmax_mismatch_count": 0,
+  "schema": "graphreader.ocr-margin-robust-layout-proposal-role-result.v1",
+  "selected_threshold": 0.72,
+  "selection_metrics": {
+    "duplicate_region_count": 0,
+    "exact_scene_count": 188,
+    "false_negatives": 0,
+    "false_positives": 4,
+    "minimum_per_role_accuracy": 1.0,
+    "prohibited_structure_hits": 4,
+    "role_accuracy": 1.0,
+    "scene_count": 192,
+    "true_positives": 1536,
+    "truth_region_count": 1536
+  },
+  "status": "failed_selection",
+  "task": "ocr-detection",
+  "threshold_aggregates": [
+    {
+      "exact_scene_count": 187,
+      "false_negatives": 0,
+      "false_positives": 5,
+      "prohibited_structure_hits": 5,
+      "threshold": 0.56,
+      "true_positives": 1536
+    },
+    {
+      "exact_scene_count": 187,
+      "false_negatives": 0,
+      "false_positives": 5,
+      "prohibited_structure_hits": 5,
+      "threshold": 0.6,
+      "true_positives": 1536
+    },
+    {
+      "exact_scene_count": 188,
+      "false_negatives": 0,
+      "false_positives": 4,
+      "prohibited_structure_hits": 4,
+      "threshold": 0.64,
+      "true_positives": 1536
+    },
+    {
+      "exact_scene_count": 188,
+      "false_negatives": 0,
+      "false_positives": 4,
+      "prohibited_structure_hits": 4,
+      "threshold": 0.68,
+      "true_positives": 1536
+    },
+    {
+      "exact_scene_count": 188,
+      "false_negatives": 0,
+      "false_positives": 4,
+      "prohibited_structure_hits": 4,
+      "threshold": 0.72,
+      "true_positives": 1536
+    },
+    {
+      "exact_scene_count": 185,
+      "false_negatives": 3,
+      "false_positives": 4,
+      "prohibited_structure_hits": 4,
+      "threshold": 0.76,
+      "true_positives": 1533
+    },
+    {
+      "exact_scene_count": 185,
+      "false_negatives": 3,
+      "false_positives": 4,
+      "prohibited_structure_hits": 4,
+      "threshold": 0.8,
+      "true_positives": 1533
+    }
+  ],
+  "training_opened_seal_sha256": "94f72ddba6f7698bf961abc5837a464eb49b288f142dac504a610a1fa7613e8b",
+  "training_result_seal_sha256": "4497c86f97015b8713bdd47fbe67850b7e4367c2d6401acbcaa3cbb473aa8ce6",
+  "weights_changed": false
+}
