@@ -7,6 +7,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import numpy as np
+import onnxruntime as ort
 import pytest
 import torch
 
@@ -14,8 +16,14 @@ from ml.markers.gate_seal import canonical_json_bytes, sha256_file, source_bundl
 from ml.ocr.component_context_detector_v7.dataset import box_iou
 from ml.ocr.structural_graph_proposal_role_v14.dataset import render_scene, proposals
 from ml.ocr.structural_graph_proposal_role_v14.model import StructuralGraphProposalRoleNet
+from ml.ocr.structural_graph_proposal_role_v14.model_p2 import (
+    COLUMN_BIN_BOUNDS, StructuralGraphProposalRoleP2Net,
+)
 from ml.ocr.structural_graph_proposal_role_v14.sealed_gate import EVALUATOR_SOURCE_PATHS, GATE_CONFIG
 from ml.ocr.structural_graph_proposal_role_v14.train_p1 import RUNNER_SOURCE_PATHS
+from ml.ocr.structural_graph_proposal_role_v14.train_p2 import (
+    RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS, _export as export_p2,
+)
 from ml.ocr.structural_graph_proposal_role_v14.protocol import (
     ENCODED_WIDTH, EXPERIMENT_BUDGET, ROLE_ORDER, SPLITS, protocol_configuration,
 )
@@ -68,6 +76,39 @@ def test_model_contract_is_exact_finite_and_topology_aware() -> None:
         model(torch.zeros((1, 2, 32, ENCODED_WIDTH - 1), dtype=torch.float32))
 
 
+def test_p2_static_occupancy_preserves_p1_outputs_and_state_contract() -> None:
+    assert COLUMN_BIN_BOUNDS == tuple(
+        (index * 128 // 18, ((index + 1) * 128 + 17) // 18)
+        for index in range(18)
+    )
+    p1 = StructuralGraphProposalRoleNet().eval()
+    p2 = StructuralGraphProposalRoleP2Net().eval()
+    assert tuple(p1.state_dict()) == tuple(p2.state_dict())
+    generator = torch.Generator().manual_seed(20262042)
+    value = torch.rand((7, 2, 32, ENCODED_WIDTH), generator=generator)
+    with torch.inference_mode():
+        p1_output = p1(value)
+        p2_output = p2(value)
+    assert torch.max(torch.abs(p1_output - p2_output)).item() <= 1e-6
+    assert torch.equal(torch.argmax(p1_output, dim=1), torch.argmax(p2_output, dim=1))
+
+
+def test_p2_fixed_occupancy_exports_dynamic_cpu_onnx(tmp_path: Path) -> None:
+    model = StructuralGraphProposalRoleP2Net().eval()
+    source = torch.rand((5, 2, 32, ENCODED_WIDTH), generator=torch.Generator().manual_seed(20262043))
+    path = tmp_path / "p2-export.onnx"
+    export_p2(model, source, path)
+    session = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
+    values = np.zeros((3, 2, 32, ENCODED_WIDTH), dtype=np.float32)
+    output = np.asarray(session.run(None, {"region_proposals": values})[0], dtype=np.float32)
+    assert session.get_providers() == ["CPUExecutionProvider"]
+    assert output.shape == (3, 10)
+    assert np.isfinite(output).all()
+    with torch.inference_mode():
+        expected = model(torch.from_numpy(values)).numpy()
+    assert float(np.max(np.abs(expected - output))) <= 1e-5
+
+
 @pytest.mark.parametrize("split,index", [
     ("train", 0), ("train", 173), ("train", 479),
     ("validation", 0), ("validation", 143),
@@ -114,19 +155,20 @@ def test_split_and_candidate_records_are_frozen_and_fail_closed() -> None:
         assert record["release_eligible"] is False
 
 
-def test_frozen_budget_ledger_consumes_failed_p1_and_keeps_later_gates_closed() -> None:
+def test_frozen_budget_ledger_preregisters_p2_but_keeps_execution_closed() -> None:
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-structural-graph-proposal-role-v14")
-    assert entry["status"] == "candidate_1_failed_runner"
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert "P1 is consumed" in entry["execution_blocker"]
+    assert "P2 is preregistered" in entry["execution_blocker"]
     assert entry["selection_manifest_sha256"] == sha256_file(V14_ROOT / "SELECTION_MANIFEST.json")
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(V14_ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(V14_ROOT / "training/p1.json")
+    assert entry["candidate_config_sha256"]["P2"] == sha256_file(V14_ROOT / "training/p2.json")
     assert entry["p1_expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS)
     assert entry["p1_result_sha256"] == sha256_file(V14_ROOT / "P1_RESULT.json")
     assert entry["p1_selection_report_sha256"] == "6019b0612cd968248bd1c7379dfbf4f527c0b79787c97e0775c4d35129eb6c45"
@@ -135,6 +177,14 @@ def test_frozen_budget_ledger_consumes_failed_p1_and_keeps_later_gates_closed() 
     assert entry["p1_failure_phase"] == "export"
     assert entry["p1_training_opened_seal_sha256"] == "d36e462f13e22959d0fd90fc17be6a757dac941fa8f0e7a7683975526469dd8c"
     assert entry["p1_training_result_seal_sha256"] == "fce5aaf7ba68223a2d9175a2f77a83c24e0ee7ce245667abc19923b1a94d6748"
+    assert entry["p2_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        ROOT, P2_RUNNER_SOURCE_PATHS
+    )
+    p2 = json.loads((V14_ROOT / "training/p2.json").read_text(encoding="utf-8"))
+    assert p2["expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, P2_RUNNER_SOURCE_PATHS)
+    assert p2["optimizer_steps"] == 0
+    assert p2["weights_changed"] is False
+    assert p2["p1_checkpoint_sha256"] == entry["p1_checkpoint_sha256"]
     assert entry["expected_public_evaluator_source_bundle_sha256"] == source_bundle_sha256(ROOT, EVALUATOR_SOURCE_PATHS)
     assert GATE_CONFIG["evaluation_limit"] == 1
     assert GATE_CONFIG["case_level_failure_analysis_permitted"] is False
