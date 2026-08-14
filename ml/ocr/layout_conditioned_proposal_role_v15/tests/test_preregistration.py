@@ -257,7 +257,7 @@ def test_p3_anchor_calibration_preserves_acceptance_and_roles() -> None:
     assert all(parameter.requires_grad is False for parameter in candidate.parameters())
 
 
-def test_canonical_ledger_preregisters_but_does_not_authorize_p3() -> None:
+def test_canonical_ledger_authorizes_only_single_use_p3() -> None:
     ledger = json.loads(
         (ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
@@ -297,8 +297,9 @@ def test_canonical_ledger_preregisters_but_does_not_authorize_p3() -> None:
     assert entry["p3_output_scale"] == 0.8
     assert entry["p3_anchor_threshold"] == 0.66
     assert entry["split_materialized"] is True
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_blocker"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
