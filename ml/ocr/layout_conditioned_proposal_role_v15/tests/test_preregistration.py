@@ -124,7 +124,7 @@ def test_source_renderer_has_one_production_proposal_per_truth(split: str, index
         assert sum(box_iou(candidate.box, truth.box) >= 0.5 for candidate in candidates) == 1
 
 
-def test_split_registrations_are_fresh_disjoint_and_unmaterialized() -> None:
+def test_split_registrations_are_fresh_disjoint_and_frozen_fail_closed() -> None:
     assert [item.scene_count for item in SPLITS] == [512, 160, 224]
     assert len({item.seed_offset for item in SPLITS}) == 3
     assert len({item.renderer_family for item in SPLITS}) == 3
@@ -135,14 +135,35 @@ def test_split_registrations_are_fresh_disjoint_and_unmaterialized() -> None:
     assert protocol["split_policy"]["public_case_level_failure_analysis_permitted"] is False
     assert "no Chandler" in protocol["data_scope"]
     assert "Generalization" in protocol["data_scope"]
-    for relative in (
-        "SELECTION_MANIFEST.json", "SEALED_PUBLIC_TEST_SEAL.json",
-        "gates/sealed-public-v1.json", "training/p1.json",
-    ):
-        assert not (V15_ROOT / relative).exists()
+    selection_path = V15_ROOT / "SELECTION_MANIFEST.json"
+    seal_path = V15_ROOT / "SEALED_PUBLIC_TEST_SEAL.json"
+    gate_path = V15_ROOT / "gates/sealed-public-v1.json"
+    candidate_path = V15_ROOT / "training/p1.json"
+    selection = json.loads(selection_path.read_text(encoding="utf-8"))
+    seal = json.loads(seal_path.read_text(encoding="utf-8"))
+    gate = json.loads(gate_path.read_text(encoding="utf-8"))
+    candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+    assert selection["train"]["split_fingerprint"] == "e0aee54d8ccccb6f29737276eae628079bf739bbe5f7c303973006f994a2d35c"
+    assert selection["validation"]["split_fingerprint"] == "fc03e37194b2aeff37a3828f5d62d551db602fc5be730b7193807190123fc7d1"
+    assert selection["training_tensor_shape"] == [24272, 2, 32, 152]
+    assert selection["sealed_public_truth_available_to_candidate"] is False
+    assert seal["split_fingerprint"] == "47a19f9f0f1bec2ca4eead39a0cc673eec6df891d007bbd5e96e9079c30ddc40"
+    assert seal["fixture_archive_sha256"] == "f2c6783ed0269aa794448b61b09cfca767a82e274247c98bd14d0ab3fcfcf722"
+    assert seal["truth_hidden_from_candidate_runner"] is True
+    assert seal["public_gate_evaluations"] == 0
+    assert gate["sealed_public_test_seal_sha256"] == sha256_file(seal_path)
+    assert gate["evaluation_limit"] == 1
+    assert candidate["candidate_id"] == "P1"
+    assert candidate["selection_manifest_sha256"] == sha256_file(selection_path)
+    assert candidate["sealed_public_test_seal_sha256"] == sha256_file(seal_path)
+    assert candidate["public_gate_archive_opened"] is False
+    assert candidate["public_gate_evaluations"] == 0
+    for value in (selection, seal, gate, candidate):
+        assert value["production_approval"] is False
+        assert value["release_eligible"] is False
 
 
-def test_canonical_ledger_registers_design_but_authorizes_nothing() -> None:
+def test_canonical_ledger_registers_p1_but_authorizes_nothing() -> None:
     ledger = json.loads(
         (ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
@@ -150,17 +171,25 @@ def test_canonical_ledger_registers_design_but_authorizes_nothing() -> None:
         item for item in ledger["revisions"]
         if item.get("revision") == "graph-text-layout-conditioned-proposal-role-v15"
     )
-    assert entry["status"] == "source_preregistered_split_pending"
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
-    assert entry["remaining_unregistered_candidate_ids"] == ["P1", "P2", "P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
     assert entry["protocol_sha256"] == sha256_file(V15_ROOT / "PROTOCOL.json")
     assert entry["split_generator_source_bundle_sha256"] == "502d3fefa949acc1b755871005fcf66824ba07ee04b1c9515d9d9874e62ff3e5"
     assert entry["p1_expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS)
     assert entry["expected_public_evaluator_source_bundle_sha256"] == source_bundle_sha256(
         ROOT, EVALUATOR_SOURCE_PATHS
     )
-    assert entry["split_materialized"] is False
+    assert entry["selection_manifest_sha256"] == sha256_file(V15_ROOT / "SELECTION_MANIFEST.json")
+    assert entry["sealed_public_test_seal_sha256"] == sha256_file(
+        V15_ROOT / "SEALED_PUBLIC_TEST_SEAL.json"
+    )
+    assert entry["public_gate_config_sha256"] == sha256_file(
+        V15_ROOT / "gates/sealed-public-v1.json"
+    )
+    assert entry["candidate_config_sha256"]["P1"] == sha256_file(V15_ROOT / "training/p1.json")
+    assert entry["split_materialized"] is True
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False

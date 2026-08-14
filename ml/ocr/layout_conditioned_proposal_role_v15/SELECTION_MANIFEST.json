@@ -1,0 +1,109 @@
+{
+  "chandler_included": false,
+  "generalization_label_included": false,
+  "predecessor_fixture_bytes_reused": false,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "protocol_path": "ml/ocr/layout_conditioned_proposal_role_v15/PROTOCOL.json",
+  "protocol_sha256": "96afdf8c8f67aa74d5dc75b1119aa0ca7f4c2e7b6e81490f049e993c4f4fc1ba",
+  "release_eligible": false,
+  "revision": "graph-text-layout-conditioned-proposal-role-v15",
+  "schema": "graphreader.ocr-layout-conditioned-proposal-role-selection.v1",
+  "sealed_public_truth_available_to_candidate": false,
+  "split_generator_source_bundle_sha256": "502d3fefa949acc1b755871005fcf66824ba07ee04b1c9515d9d9874e62ff3e5",
+  "split_generator_source_paths": [
+    "ml/ocr/layout_conditioned_proposal_role_v15/dataset.py",
+    "ml/ocr/layout_conditioned_proposal_role_v15/prepare_split.py",
+    "ml/ocr/layout_conditioned_proposal_role_v15/protocol.py",
+    "ml/ocr/component_context_detector_v7/dataset.py",
+    "ml/ocr/component_context_detector_v7/protocol.py",
+    "ml/ocr/component_region_detector_v6/dataset.py"
+  ],
+  "synthetic_only": true,
+  "task": "ocr-detection",
+  "train": {
+    "negative_family_counts": {
+      "clustered-arrow-legend": 39,
+      "compact-marker-cross": 14272,
+      "dense-fill-arrowhead": 12,
+      "horizontal-bracket-connector": 1377,
+      "mixed-layout-structure": 822,
+      "sparse-stroke": 1244,
+      "vertical-divider-ruler": 2414
+    },
+    "negative_proposal_count": 20180,
+    "positive_proposal_count": 4096,
+    "proposal_count": 24276,
+    "role_truth_counts": {
+      "Annotation": 512,
+      "AxisTitle": 512,
+      "LegendText": 512,
+      "Other": 512,
+      "Participant": 512,
+      "PhaseHeading": 512,
+      "XTick": 512,
+      "YTick": 512
+    },
+    "scene_count": 512,
+    "split_fingerprint": "e0aee54d8ccccb6f29737276eae628079bf739bbe5f7c303973006f994a2d35c",
+    "truth_region_count": 4096
+  },
+  "training_evidence": {
+    "negative_cap_per_scene": 72,
+    "negative_family_counts": {
+      "clustered-arrow-legend": 39,
+      "compact-marker-cross": 14268,
+      "dense-fill-arrowhead": 12,
+      "horizontal-bracket-connector": 1377,
+      "mixed-layout-structure": 822,
+      "sparse-stroke": 1244,
+      "vertical-divider-ruler": 2414
+    },
+    "negative_proposal_count": 20176,
+    "negative_sampling": "deterministic-round-robin-by-structural-family-v3",
+    "positive_proposal_count": 4096,
+    "predecessor_fixture_bytes_used": false,
+    "proposal_count": 24272,
+    "scene_count": 512,
+    "tensor_label_stream_sha256": "b6c422098c87a7f8a301aaec8e993b34fdc19b96e0dca2cf97fc10dd3d004e7d",
+    "v14_validation_fixture_bytes_scene_truth_or_case_identity_used": false,
+    "validation_or_public_pixels_used": false
+  },
+  "training_proposal_label_count": 24272,
+  "training_role_label_count": 4096,
+  "training_tensor_shape": [
+    24272,
+    2,
+    32,
+    152
+  ],
+  "v14_validation_fixture_bytes_scene_truth_or_case_identity_used": false,
+  "validation": {
+    "negative_family_counts": {
+      "clustered-arrow-legend": 67,
+      "compact-marker-cross": 7078,
+      "dense-fill-arrowhead": 27,
+      "horizontal-bracket-connector": 1116,
+      "mixed-layout-structure": 648,
+      "sparse-stroke": 345,
+      "vertical-divider-ruler": 826
+    },
+    "negative_proposal_count": 10107,
+    "positive_proposal_count": 1280,
+    "proposal_count": 11387,
+    "role_truth_counts": {
+      "Annotation": 160,
+      "AxisTitle": 160,
+      "LegendText": 160,
+      "Other": 160,
+      "Participant": 160,
+      "PhaseHeading": 160,
+      "XTick": 160,
+      "YTick": 160
+    },
+    "scene_count": 160,
+    "split_fingerprint": "fc03e37194b2aeff37a3828f5d62d551db602fc5be730b7193807190123fc7d1",
+    "truth_region_count": 1280
+  },
+  "validation_or_public_pixels_used_for_training": false
+}
