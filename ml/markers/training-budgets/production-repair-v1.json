@@ -6,7 +6,7 @@
     {
       "task": "ocr-detection",
       "revision": "graph-text-margin-robust-layout-proposal-role-v16",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_1_failed_selection_p2_preregistered_execution_blocked",
       "defect_class": "aggregate consumed V15 public evidence showed 217 of 224 exact scenes, one false prohibited region, one missed truth, zero duplicates, role accuracy 0.9972082635399219, and minimum XTick accuracy 0.9820627802690582",
       "trigger_report_path": "ml/ocr/layout_conditioned_proposal_role_v15/artifacts/public-gate-report.json",
       "trigger_report_sha256": "8bd7170db115f6fccbfc9b998bd5f6fce0d8ae001469b692fa07e8392068553d",
@@ -30,12 +30,11 @@
       "architecture": "dual-context-topology-layout-margin-proposal-role-cnn-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [
+      "preregistered_candidate_ids": [],
+      "consumed_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "protocol_path": "ml/ocr/margin_robust_layout_proposal_role_v16/PROTOCOL.json",
@@ -84,10 +83,12 @@
       "public_gate_config_path": "ml/ocr/margin_robust_layout_proposal_role_v16/gates/sealed-public-v1.json",
       "public_gate_config_sha256": "b97cfda7f68c5db6120e169adfb2b9aa77edf341854ed8647789f665bca53b91",
       "candidate_config_paths": {
-        "P1": "ml/ocr/margin_robust_layout_proposal_role_v16/training/p1.json"
+        "P1": "ml/ocr/margin_robust_layout_proposal_role_v16/training/p1.json",
+        "P2": "ml/ocr/margin_robust_layout_proposal_role_v16/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "086f2eb958775f4d64d375d9b23fcbe2ce194218ce0add0e8e1dae0fa64cdee4"
+        "P1": "086f2eb958775f4d64d375d9b23fcbe2ce194218ce0add0e8e1dae0fa64cdee4",
+        "P2": "c344f50b6f503c93decb3e4bce907d2912939e235f0191bbd84edd2281400f76"
       },
       "proposal_margin": 1.2,
       "proposal_margin_loss_weight": 0.5,
@@ -102,9 +103,38 @@
       ],
       "minimum_consecutive_passing_thresholds": 3,
       "split_materialized": true,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P1",
-      "execution_blocker": null,
+      "p1_result_path": "ml/ocr/margin_robust_layout_proposal_role_v16/P1_RESULT.json",
+      "p1_result_sha256": "e184443e414fbf1cff464cd3f5fc6ee6eab628a8d42c42ea0417af993ae46130",
+      "p1_selection_report_path": "ml/ocr/margin_robust_layout_proposal_role_v16/artifacts/P1-run/candidate-report.json",
+      "p1_selection_report_sha256": "feca6c973a07cc7b5d671aa8a317549344b79193d59df58035b60197db59653d",
+      "p1_checkpoint_sha256": "dc0f9cd6810cfb50fe51209f49dd8db05fa85ee952cd6d5bf52b5eb5e025f512",
+      "p1_onnx_sha256": "1705fa1590d3573f30ebe4c22917a051e9510fbe3de4f47993955b7904847be9",
+      "p1_optimizer_steps": 1782,
+      "p1_selected_threshold": 0.8,
+      "p1_passing_threshold_window": [],
+      "p1_selection_exact_scene_count": 187,
+      "p1_selection_scene_count": 192,
+      "p1_selection_true_positives": 1536,
+      "p1_selection_false_positives": 5,
+      "p1_selection_false_negatives": 0,
+      "p1_selection_duplicate_count": 0,
+      "p1_selection_prohibited_structure_hits": 5,
+      "p1_selection_role_accuracy": 1.0,
+      "p1_selection_minimum_per_role_accuracy": 1.0,
+      "p1_onnx_parity_maximum_absolute_error": 7.62939453125e-06,
+      "p1_onnx_parity_passed": true,
+      "p1_training_opened_seal_sha256": "bdd18d88ffe9c56f0b7046e3552ced32d8c075ef00ee4a3701c5420c9d3a31d2",
+      "p1_training_result_seal_sha256": "906280a98fc8b88f7f0efd80c0d7934f116de8bc2ad80a8635afd75de294b766",
+      "p1_failure": "P1 found all 1536 validation truths with perfect role accuracy and passed CPU ONNX parity, but retained five false prohibited regions at the strictest fixed threshold and produced no three-threshold zero-error window.",
+      "p2_isolated_change": "load the exact checksum-bound P1 checkpoint with zero optimizer steps and no weight updates, preserve all role logits, and subtract a fixed 2.0 from only the positive proposal logit so the fixed V16 thresholds test the stricter original-confidence range",
+      "p2_expected_runner_source_bundle_sha256": "ca2368ec97fbc40f8b4eb8a11c2a45d0ce16ec497eb7270af64306ade2d71231",
+      "p2_expected_optimizer_steps": 0,
+      "p2_positive_logit_bias": -2.0,
+      "p2_p1_aggregate_metrics_only_used_for_design": true,
+      "p2_p1_validation_case_detail_or_pixels_used_for_design": false,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1 is consumed. The checksum-bound zero-optimizer P2 configuration and runner must be committed before a separate P2 authorization.",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,

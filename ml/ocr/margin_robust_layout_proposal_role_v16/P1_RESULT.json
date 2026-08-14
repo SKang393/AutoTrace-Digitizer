@@ -1,0 +1,98 @@
+{
+  "candidate_id": "P1",
+  "candidate_report_path": "ml/ocr/margin_robust_layout_proposal_role_v16/artifacts/P1-run/candidate-report.json",
+  "candidate_report_sha256": "feca6c973a07cc7b5d671aa8a317549344b79193d59df58035b60197db59653d",
+  "checkpoint_path": "ml/ocr/margin_robust_layout_proposal_role_v16/artifacts/P1-run/graph-text-margin-robust-layout-proposal-role-v16-p1.pt",
+  "checkpoint_sha256": "dc0f9cd6810cfb50fe51209f49dd8db05fa85ee952cd6d5bf52b5eb5e025f512",
+  "consumed": true,
+  "direct_execution_inference_calls": 192,
+  "elapsed_ms": 7012733.247,
+  "failure": "P1 found all 1536 validation truths with perfect role accuracy and passed CPU ONNX parity, but retained five false prohibited regions at the strictest fixed threshold and produced no three-threshold zero-error window.",
+  "onnx_parity_maximum_absolute_error": 7.62939453125e-06,
+  "onnx_parity_passed": true,
+  "onnx_path": "ml/ocr/margin_robust_layout_proposal_role_v16/artifacts/P1-run/graph-text-margin-robust-layout-proposal-role-v16-p1.onnx",
+  "onnx_sha256": "1705fa1590d3573f30ebe4c22917a051e9510fbe3de4f47993955b7904847be9",
+  "optimizer_steps": 1782,
+  "passing_threshold_window": [],
+  "production_approval": false,
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graph-text-margin-robust-layout-proposal-role-v16",
+  "schema": "graphreader.ocr-margin-robust-layout-proposal-role-result.v1",
+  "selected_threshold": 0.8,
+  "selection_metrics": {
+    "duplicate_region_count": 0,
+    "exact_scene_count": 187,
+    "false_negatives": 0,
+    "false_positives": 5,
+    "minimum_per_role_accuracy": 1.0,
+    "prohibited_structure_hits": 5,
+    "role_accuracy": 1.0,
+    "scene_count": 192,
+    "true_positives": 1536,
+    "truth_region_count": 1536
+  },
+  "status": "failed_selection",
+  "task": "ocr-detection",
+  "threshold_aggregates": [
+    {
+      "exact_scene_count": 184,
+      "false_negatives": 0,
+      "false_positives": 8,
+      "prohibited_structure_hits": 8,
+      "threshold": 0.56,
+      "true_positives": 1536
+    },
+    {
+      "exact_scene_count": 185,
+      "false_negatives": 0,
+      "false_positives": 7,
+      "prohibited_structure_hits": 7,
+      "threshold": 0.6,
+      "true_positives": 1536
+    },
+    {
+      "exact_scene_count": 186,
+      "false_negatives": 0,
+      "false_positives": 6,
+      "prohibited_structure_hits": 6,
+      "threshold": 0.64,
+      "true_positives": 1536
+    },
+    {
+      "exact_scene_count": 186,
+      "false_negatives": 0,
+      "false_positives": 6,
+      "prohibited_structure_hits": 6,
+      "threshold": 0.68,
+      "true_positives": 1536
+    },
+    {
+      "exact_scene_count": 186,
+      "false_negatives": 0,
+      "false_positives": 6,
+      "prohibited_structure_hits": 6,
+      "threshold": 0.72,
+      "true_positives": 1536
+    },
+    {
+      "exact_scene_count": 186,
+      "false_negatives": 0,
+      "false_positives": 6,
+      "prohibited_structure_hits": 6,
+      "threshold": 0.76,
+      "true_positives": 1536
+    },
+    {
+      "exact_scene_count": 187,
+      "false_negatives": 0,
+      "false_positives": 5,
+      "prohibited_structure_hits": 5,
+      "threshold": 0.8,
+      "true_positives": 1536
+    }
+  ],
+  "training_opened_seal_sha256": "bdd18d88ffe9c56f0b7046e3552ced32d8c075ef00ee4a3701c5420c9d3a31d2",
+  "training_result_seal_sha256": "906280a98fc8b88f7f0efd80c0d7934f116de8bc2ad80a8635afd75de294b766"
+}
