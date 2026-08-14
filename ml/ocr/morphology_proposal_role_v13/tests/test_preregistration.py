@@ -143,7 +143,7 @@ def test_v13_budget_ledger_authorizes_only_exact_p2() -> None:
     assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert entry["execution_blocker"] == "P2 passed visible selection. The exact public gate requires a separate authorization commit; P3 remains unregistered."
+    assert entry["execution_blocker"] == "P2 training cannot rerun. The exact P2 public gate is authorized once; P3 remains unregistered."
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(V13_ROOT / "training/p1.json")
     assert entry["candidate_config_sha256"]["P2"] == sha256_file(V13_ROOT / "training/p2.json")
     assert entry["p1_result_sha256"] == sha256_file(V13_ROOT / "P1_RESULT.json")
@@ -176,7 +176,9 @@ def test_v13_budget_ledger_authorizes_only_exact_p2() -> None:
     assert entry["p2_onnx_parity_passed"] is True
     assert entry["selection_manifest_sha256"] == sha256_file(V13_ROOT / "SELECTION_MANIFEST.json")
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(V13_ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
-    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_candidate_id"] == "P2"
+    assert entry["public_gate_authorized_on_selection_pass"] is True
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
