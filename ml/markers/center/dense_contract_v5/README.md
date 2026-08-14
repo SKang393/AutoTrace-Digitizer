@@ -26,8 +26,8 @@ before optimization. The public archive may open once only after selection
 passes and separate authorization is committed. Up to three candidates are
 available. P1 is consumed and failed selection with 21 missed markers, six
 prohibited hits, and CPU ONNX parity above the fixed tolerance. P2 is
-source-bound, preregistered, and ledger-authorized for one execution with a
-hard-negative and stronger center objective. P3 is not preregistered. The public
+consumed after improving recall to 200/216 but retaining 16 misses, seven
+prohibited hits, and parity above tolerance. P3 is not preregistered. The public
 gate remains locked and unopened. Production
 approval, model-store
 promotion, packaging, private validation, and release eligibility remain false.

@@ -129,17 +129,17 @@ def test_source_bindings_and_gate_configuration_are_frozen() -> None:
     assert p2_protocol["public_gate_evaluations"] == 0
 
 
-def test_canonical_budget_records_consumed_p1_and_blocks_public_gate() -> None:
+def test_canonical_budget_records_consumed_p1_p2_and_blocks_public_gate() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-dense-contract-v5")
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["status"] == "candidate_2_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
@@ -152,6 +152,12 @@ def test_canonical_budget_records_consumed_p1_and_blocks_public_gate() -> None:
     assert result["onnx_parity_passed"] is False
     assert result["public_gate_evaluations"] == 0
     assert result["public_archive_opened_by_gate"] is False
+    p2_result = json.loads((ROOT / "P2_RESULT.json").read_text(encoding="utf-8"))
+    assert sha256_file(ROOT / "P2_RESULT.json") == entry["p2_result_sha256"]
+    assert p2_result["selection_false_negatives"] == 16
+    assert sum(p2_result["selection_prohibited_structure_hits"].values()) == 7
+    assert p2_result["onnx_parity_passed"] is False
+    assert p2_result["public_gate_evaluations"] == 0
 
 
 def test_training_runner_records_terminal_failure_after_authorization(
