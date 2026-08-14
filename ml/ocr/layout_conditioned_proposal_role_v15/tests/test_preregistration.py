@@ -203,7 +203,7 @@ def test_p2_hard_negative_selector_uses_highest_training_scores_only() -> None:
     assert selected.tolist() == [5, 1]
 
 
-def test_canonical_ledger_registers_p2_but_authorizes_nothing() -> None:
+def test_canonical_ledger_authorizes_only_single_use_p2() -> None:
     ledger = json.loads(
         (ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
@@ -235,8 +235,8 @@ def test_canonical_ledger_registers_p2_but_authorizes_nothing() -> None:
         ROOT, P2_RUNNER_SOURCE_PATHS
     )
     assert entry["split_materialized"] is True
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P2"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
