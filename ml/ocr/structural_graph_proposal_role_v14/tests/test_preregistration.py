@@ -189,22 +189,33 @@ def test_split_and_candidate_records_are_frozen_and_fail_closed() -> None:
     assert p2_result["onnx_parity_passed"] is False
     assert p2_result["public_gate_archive_opened"] is False
     assert p2_result["public_gate_evaluations"] == 0
-    assert not (V14_ROOT / "P3_RESULT.json").exists()
+    p3_result = json.loads((V14_ROOT / "P3_RESULT.json").read_text(encoding="utf-8"))
+    assert p3_result["status"] == "failed_selection"
+    assert p3_result["optimizer_steps"] == 808
+    assert p3_result["weights_changed"] is True
+    assert p3_result["selection_metrics"]["true_positives"] == 1150
+    assert p3_result["selection_metrics"]["false_positives"] == 0
+    assert p3_result["selection_metrics"]["false_negatives"] == 2
+    assert p3_result["selection_metrics"]["prohibited_structure_hits"] == 0
+    assert p3_result["selection_metrics"]["per_role_accuracy"]["PhaseHeading"] == 0.7638888888888888
+    assert p3_result["onnx_parity_passed"] is True
+    assert p3_result["public_gate_archive_opened"] is False
+    assert p3_result["public_gate_evaluations"] == 0
     for record in (selection, seal, config):
         assert record["production_approval"] is False
         assert record["release_eligible"] is False
 
 
-def test_frozen_budget_ledger_authorizes_exact_p3_but_keeps_public_gate_closed() -> None:
+def test_frozen_budget_ledger_exhausts_p3_and_keeps_public_gate_closed() -> None:
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-structural-graph-proposal-role-v14")
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["status"] == "exhausted"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
-    assert entry["execution_blocker"] is None
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert "V14 is exhausted" in entry["execution_blocker"]
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_authorized_candidate_id"] is None
     assert entry["public_gate_evaluations"] == 0
@@ -239,6 +250,22 @@ def test_frozen_budget_ledger_authorizes_exact_p3_but_keeps_public_gate_closed()
     assert entry["p3_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         ROOT, P3_RUNNER_SOURCE_PATHS
     )
+    assert entry["p3_result_sha256"] == sha256_file(V14_ROOT / "P3_RESULT.json")
+    assert entry["p3_selection_report_sha256"] == "89b66d006166a8a2efb770c029e0a3f9dc76a5ed0425a2ee16a9f0900da262a4"
+    assert entry["p3_checkpoint_sha256"] == "0d7bdfce92f8ad37f4483f60eb99f50f1fd13c08797713ba210ae523ae172bb1"
+    assert entry["p3_onnx_sha256"] == "6fc8ec245262eb99aaa2c6fd315be97353dea569fc336aeb248b2a808f9014d6"
+    assert entry["p3_optimizer_steps"] == 808
+    assert entry["p3_weights_changed"] is True
+    assert entry["p3_selection_exact_scene_count"] == 89
+    assert entry["p3_selection_true_positives"] == 1150
+    assert entry["p3_selection_false_positives"] == 0
+    assert entry["p3_selection_false_negatives"] == 2
+    assert entry["p3_selection_prohibited_structure_hits"] == 0
+    assert entry["p3_phase_heading_accuracy"] == 0.7638888888888888
+    assert entry["p3_y_tick_accuracy"] == 0.8680555555555556
+    assert entry["p3_onnx_parity_passed"] is True
+    assert entry["p3_training_opened_seal_sha256"] == "d7776678316e681e588f0cbd51e46ef983f5a67ee36eeb545824d7b8195cf6a5"
+    assert entry["p3_training_result_seal_sha256"] == "7c01f522acc478e764914d97f161079c9e2682195ddc186282971625b0548c23"
     p3 = json.loads((V14_ROOT / "training/p3.json").read_text(encoding="utf-8"))
     assert p3["expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, P3_RUNNER_SOURCE_PATHS)
     assert p3["p2_aggregate_trigger_only"] is True
