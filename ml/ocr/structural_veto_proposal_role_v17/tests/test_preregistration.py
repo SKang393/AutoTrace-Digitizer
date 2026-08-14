@@ -7,7 +7,15 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import numpy as np
+import onnxruntime as ort
+import torch
+
 from ml.markers.gate_seal import canonical_json_bytes, sha256_file
+from ml.ocr.component_context_detector_v7.dataset import box_iou
+from ml.ocr.margin_robust_layout_proposal_role_v16.train_p1 import _export
+from ml.ocr.structural_veto_proposal_role_v17.dataset import encode_proposal, proposals, render_scene
+from ml.ocr.structural_veto_proposal_role_v17.model import StructuralVetoProposalRoleNet
 from ml.ocr.structural_veto_proposal_role_v17.protocol import (
     BASE_CHECKPOINT_SHA256,
     EXPERIMENT_BUDGET,
@@ -83,3 +91,37 @@ def test_canonical_ledger_records_design_only_without_authorization() -> None:
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
 
+
+def test_fresh_renderer_has_one_production_proposal_per_truth() -> None:
+    for split, index in (("train", 0), ("validation", 215), ("sealed_public", 287)):
+        scene = render_scene(split, index)
+        candidates = proposals(scene.raster)
+        assert scene.scene_id.startswith(f"structural-veto-proposal-role-v17-{split}-")
+        assert len(scene.truths) == 8
+        for truth in scene.truths:
+            assert sum(box_iou(candidate.box, truth.box) >= 0.5 for candidate in candidates) == 1
+
+
+def test_veto_model_modifies_only_positive_proposal_logit_and_exports(tmp_path: Path) -> None:
+    scene = render_scene("train", 0)
+    values = np.stack([
+        encode_proposal(scene.raster, candidate, scene.plot)
+        for candidate in proposals(scene.raster)[:3]
+    ]).astype(np.float32)
+    model = StructuralVetoProposalRoleNet().eval()
+    tensor = torch.from_numpy(values)
+    with torch.inference_mode():
+        base = model.base(tensor) * model.base_output_scale
+        output = model(tensor)
+    assert output.shape == (3, 10)
+    assert torch.equal(output[:, :1], base[:, :1])
+    assert torch.equal(output[:, 2:], base[:, 2:])
+    assert torch.all(output[:, 1] <= base[:, 1])
+    assert all(parameter.requires_grad is False for parameter in model.base.parameters())
+    assert all(parameter.requires_grad is True for parameter in model.trainable_parameters())
+    path = tmp_path / "v17-p1.onnx"
+    _export(model, tensor, path)
+    session = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
+    actual = np.asarray(session.run(None, {"region_proposals": values})[0], dtype=np.float32)
+    assert session.get_providers() == ["CPUExecutionProvider"]
+    assert float(np.max(np.abs(output.numpy() - actual))) <= 1e-5

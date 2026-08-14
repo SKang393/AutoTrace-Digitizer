@@ -78,7 +78,7 @@
       "candidate_config_sha256": {},
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "execution_blocker": "Fresh split materialization, candidate runner, candidate configuration, and single-use gate bindings must be committed and verified before a separate authorization checkpoint.",
+      "execution_blocker": "Fresh split materialization and its source-bound candidate configuration and single-use gate bindings must be committed and verified before a separate authorization checkpoint.",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,

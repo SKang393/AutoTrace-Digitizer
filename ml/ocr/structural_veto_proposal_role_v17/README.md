@@ -20,3 +20,7 @@ committed, then separately authorized. No Chandler, private, article, or
 `Generalization` data may be used. Production approval and release eligibility
 remain false.
 
+The renderer adapter, frozen-base model, P1 runner, split freezer, aggregate
+selection evaluator, and one-use public gate are now implemented as source.
+They do not constitute a materialized split or candidate authorization. The
+next permitted checkpoint is source-bound split materialization only.
