@@ -108,22 +108,29 @@ def test_source_bindings_and_gate_configuration_are_frozen() -> None:
     assert config["selection_thresholds"] == list(THRESHOLDS)
 
 
-def test_canonical_budget_blocks_optimizer_and_public_gate() -> None:
+def test_canonical_budget_records_consumed_p1_and_blocks_public_gate() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-dense-contract-v5")
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert entry["status"] == "candidate_1_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
-    assert not (ROOT / "artifacts/P1-run").exists()
+    result = json.loads((ROOT / "P1_RESULT.json").read_text(encoding="utf-8"))
+    assert sha256_file(ROOT / "P1_RESULT.json") == entry["p1_result_sha256"]
+    assert result["selection_gate_passed"] is False
+    assert result["selection_false_negatives"] == 21
+    assert sum(result["selection_prohibited_structure_hits"].values()) == 6
+    assert result["onnx_parity_passed"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert result["public_archive_opened_by_gate"] is False
 
 
 def test_training_runner_records_terminal_failure_after_authorization(
