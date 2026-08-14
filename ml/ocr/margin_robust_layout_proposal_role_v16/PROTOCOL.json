@@ -1,0 +1,197 @@
+{
+  "architecture": "dual-context-topology-layout-margin-proposal-role-cnn-v1",
+  "candidate_ids": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "currently_preregistered_candidate": null,
+  "data_scope": "fresh procedural scientific graph scenes only; no Chandler, Generalization, private or article images, external datasets, downloaded training data, predecessor fixture bytes, or V15 public case identities",
+  "defect_class": "aggregate consumed V15 public evidence showed 217 of 224 exact scenes, one false prohibited region, one missed truth, zero duplicates, role accuracy 0.9972082635399219, and minimum XTick accuracy 0.9820627802690582",
+  "distinct_from": [
+    "dual-context-topology-layout-conditioned-proposal-role-cnn-v1",
+    "official PP-OCR DB detector"
+  ],
+  "execution_authorized": false,
+  "execution_blocker": "Fresh split bytes, fingerprints, candidate configuration, runner sources, and the single-use public evaluator must be committed before a candidate can execute.",
+  "experiment_budget": 3,
+  "font_notice_path": "LICENSES/NotoSans-OFL-1.1.txt",
+  "input": [
+    "proposal_count",
+    2,
+    32,
+    152
+  ],
+  "isolated_change": "add a separate eight-value plot-geometry proposal residual to the V15 layout role architecture, train with a signed proposal-margin objective on fresh V16 procedural families, and require a zero-error interior run of at least three adjacent thresholds",
+  "model_license": "Apache-2.0",
+  "output": [
+    "proposal_count",
+    10
+  ],
+  "output_contract": {
+    "proposal_logits": [
+      0,
+      2
+    ],
+    "role_logits": [
+      2,
+      10
+    ],
+    "role_logits_ignored_for_rejected_proposals": true,
+    "role_order": [
+      "YTick",
+      "XTick",
+      "AxisTitle",
+      "PhaseHeading",
+      "LegendText",
+      "Participant",
+      "Annotation",
+      "Other"
+    ]
+  },
+  "production_approval": false,
+  "proposal_algorithm": {
+    "algorithm": "adaptive-gray-baseline-bounded-line-grouping-v2",
+    "base_tensor_encoding": "graph-text-component-context-position-v11-encoding-v1",
+    "component_grouping_unchanged_from_production": true,
+    "one_production_proposal_per_truth_required_before_freeze": true,
+    "ordering": "top,left,bottom,right",
+    "plot_geometry_order": [
+      "center_x_over_plot",
+      "center_y_over_plot",
+      "left_over_plot",
+      "right_over_plot",
+      "top_over_plot",
+      "bottom_over_plot",
+      "width_over_plot",
+      "height_over_plot"
+    ],
+    "plot_geometry_source": "verified-axis-stage-plot-bounds-v1"
+  },
+  "release_eligible": false,
+  "renderer_implementation": {
+    "fresh_degradation_family_ids": true,
+    "fresh_renderer_family_ids": true,
+    "fresh_seed_offsets": true,
+    "predecessor_fixture_bytes_reused": false,
+    "procedural_implementation_source": "layout-conditioned-proposal-role-v15-renderer-code"
+  },
+  "revision": "graph-text-margin-robust-layout-proposal-role-v16",
+  "schema": "graphreader.ocr-margin-robust-layout-proposal-role-protocol.v1",
+  "selection_gates": {
+    "direct_fixture_byte_execution_required": true,
+    "duplicate_regions": 0,
+    "exact_region_and_role_every_scene": true,
+    "false_regions": 0,
+    "minimum_consecutive_passing_thresholds": 3,
+    "missed_regions": 0,
+    "onnx_parity_maximum_absolute_error": 1e-05,
+    "per_role_accuracy_minimum": 0.85,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "role_accuracy_minimum": 0.9,
+    "selected_threshold": "interior-midpoint-of-longest-passing-run"
+  },
+  "selection_thresholds": [
+    0.56,
+    0.6,
+    0.64,
+    0.68,
+    0.72,
+    0.76,
+    0.8
+  ],
+  "split_policy": {
+    "predecessor_fixture_bytes_reused": false,
+    "public_case_level_failure_analysis_permitted": false,
+    "sealed_public_truth_hidden_until_one_time_gate": true,
+    "train_validation_public_family_ids_disjoint": true,
+    "v15_public_fixture_bytes_scene_truth_or_case_identity_reused": false,
+    "validation_or_public_pixels_used_for_training": false
+  },
+  "splits": [
+    {
+      "degradation_family": "fractional-stroke-band-v16-train",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "font_sha256": [
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0"
+      ],
+      "renderer_family": "margin-lane-pressure-v16-train",
+      "scene_count": 640,
+      "seed_offset": 2791000,
+      "split": "train"
+    },
+    {
+      "degradation_family": "mixed-width-threshold-v16-validation",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "font_sha256": [
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      ],
+      "renderer_family": "boundary-margin-grid-v16-validation",
+      "scene_count": 192,
+      "seed_offset": 3011000,
+      "split": "validation"
+    },
+    {
+      "degradation_family": "edge-contrast-envelope-v16-public",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "font_sha256": [
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      ],
+      "renderer_family": "role-margin-interleave-v16-public",
+      "scene_count": 256,
+      "seed_offset": 3239000,
+      "split": "sealed_public"
+    }
+  ],
+  "state": "design_preregistered_before_stored_split_materialization",
+  "task": "ocr-detection",
+  "training": {
+    "batch_size": 512,
+    "candidate": "P1",
+    "candidate_budget": 3,
+    "epochs": 18,
+    "learning_rate": 0.0002,
+    "negative_cap_per_scene": 72,
+    "negative_sampling": "deterministic-round-robin-by-structural-family-v3",
+    "proposal_loss": "balanced-cross-entropy",
+    "proposal_margin": 1.2,
+    "proposal_margin_loss": "signed-hinge-margin",
+    "proposal_margin_loss_weight": 0.5,
+    "role_loss": "positive-proposals-only-balanced-cross-entropy",
+    "role_loss_weight": 1.0,
+    "seed": 20262179,
+    "weight_decay": 0.0003
+  },
+  "trigger_evidence": {
+    "case_level_details_emitted": false,
+    "consumed_v15_candidate_or_gate_rerun_authorized": false,
+    "duplicate_regions": 0,
+    "evidence_scope_used_for_v16_design": "aggregate metrics only",
+    "exact_scene_count": 217,
+    "false_regions": 1,
+    "minimum_role_accuracy": 0.9820627802690582,
+    "missed_regions": 1,
+    "prohibited_structure_hits": 1,
+    "report_sha256": "8bd7170db115f6fccbfc9b998bd5f6fce0d8ae001469b692fa07e8392068553d",
+    "role_accuracy": 0.9972082635399219,
+    "scene_count": 224,
+    "true_positives": 1791,
+    "truth_regions": 1792,
+    "v15_public_fixture_bytes_scene_truth_or_case_identity_used": false
+  }
+}
