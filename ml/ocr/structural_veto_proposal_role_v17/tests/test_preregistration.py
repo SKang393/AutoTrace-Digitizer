@@ -11,11 +11,13 @@ import numpy as np
 import onnxruntime as ort
 import torch
 
-from ml.markers.gate_seal import canonical_json_bytes, sha256_file
+from ml.markers.gate_seal import canonical_json_bytes, sha256_file, source_bundle_sha256
 from ml.ocr.component_context_detector_v7.dataset import box_iou
 from ml.ocr.margin_robust_layout_proposal_role_v16.train_p1 import _export
 from ml.ocr.structural_veto_proposal_role_v17.dataset import encode_proposal, proposals, render_scene
 from ml.ocr.structural_veto_proposal_role_v17.model import StructuralVetoProposalRoleNet
+from ml.ocr.structural_veto_proposal_role_v17.sealed_gate import EVALUATOR_SOURCE_PATHS
+from ml.ocr.structural_veto_proposal_role_v17.train_p1 import RUNNER_SOURCE_PATHS
 from ml.ocr.structural_veto_proposal_role_v17.protocol import (
     BASE_CHECKPOINT_SHA256,
     EXPERIMENT_BUDGET,
@@ -76,20 +78,50 @@ def test_fresh_splits_and_zero_error_threshold_margin_are_fixed() -> None:
     assert "no Chandler" in expected["data_scope"]
 
 
-def test_canonical_ledger_records_design_only_without_authorization() -> None:
+def test_materialized_split_is_source_bound_and_execution_blocked() -> None:
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text())
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol_configuration()["revision"])
-    assert entry["status"] == "design_preregistered"
+    selection_path = V17_ROOT / "SELECTION_MANIFEST.json"
+    seal_path = V17_ROOT / "SEALED_PUBLIC_TEST_SEAL.json"
+    gate_path = V17_ROOT / "gates/sealed-public-v1.json"
+    config_path = V17_ROOT / "training/p1.json"
+    selection = json.loads(selection_path.read_text(encoding="utf-8"))
+    seal = json.loads(seal_path.read_text(encoding="utf-8"))
+    gate = json.loads(gate_path.read_text(encoding="utf-8"))
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+
+    assert entry["status"] == "split_materialized_candidate1_preregistered_execution_blocked"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
-    assert entry["remaining_unregistered_candidate_ids"] == ["P1", "P2", "P3"]
-    assert entry["split_materialized"] is False
+    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["split_materialized"] is True
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_evaluations"] == 0
+    assert entry["public_gate_archive_opened"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
+    assert sha256_file(selection_path) == entry["selection_manifest_sha256"]
+    assert sha256_file(seal_path) == entry["sealed_public_test_seal_sha256"]
+    assert sha256_file(gate_path) == entry["public_gate_config_sha256"]
+    assert sha256_file(config_path) == entry["candidate_config_sha256"]["P1"]
+    assert source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
+    assert source_bundle_sha256(ROOT, EVALUATOR_SOURCE_PATHS) == gate["expected_evaluator_source_bundle_sha256"]
+    assert selection["train"]["scene_count"] == 720
+    assert selection["validation"]["scene_count"] == 216
+    assert seal["scene_count"] == 288
+    assert seal["truth_hidden_from_candidate_runner"] is True
+    assert seal["public_gate_evaluations"] == 0
+    assert config["expected_optimizer_steps"] == 1608
+    assert config["public_gate_archive_opened"] is False
+    assert sha256_file(ROOT / seal["fixture_archive_path"]) == seal["fixture_archive_sha256"]
+    assert sha256_file(ROOT / seal["private_manifest_path"]) == seal["private_manifest_sha256"]
+    assert not (V17_ROOT / "artifacts/P1-run").exists()
+    assert not (
+        ROOT / "ml/markers/training-seals/ocr-detection/graph-text-structural-veto-proposal-role-v17"
+    ).exists()
 
 
 def test_fresh_renderer_has_one_production_proposal_per_truth() -> None:

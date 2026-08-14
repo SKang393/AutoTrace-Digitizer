@@ -21,6 +21,7 @@ committed, then separately authorized. No Chandler, private, article, or
 remain false.
 
 The renderer adapter, frozen-base model, P1 runner, split freezer, aggregate
-selection evaluator, and one-use public gate are now implemented as source.
-They do not constitute a materialized split or candidate authorization. The
-next permitted checkpoint is source-bound split materialization only.
+selection evaluator, and one-use public gate are implemented as source. The
+fresh split and its source-bound P1 and gate configurations are now frozen.
+P1 remains execution-blocked until this checkpoint is committed and a separate
+canonical authorization checkpoint explicitly enables it.

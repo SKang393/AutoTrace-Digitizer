@@ -1,0 +1,17 @@
+{
+  "evaluation_limit": 1,
+  "expected_candidate_hash_keys": [
+    "onnx_sha256",
+    "selection_report_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "a375a82b16844ebb095f782303c718c352d43ac1cb9046cbee784dcadd82d121",
+  "expected_evaluator_source_bundle_sha256": "05407db0128e76bafe19c4512b39f1cdde39ea3f0c0b61c53e040d6ae56bd7f6",
+  "expected_gate_config_sha256": "cb3b8a32dbc537fcca11a361ab1e012d121d16a7538c992fab41c13403fadbbb",
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-structural-veto-proposal-role-v17-public-v1",
+  "schema": "graphreader.ocr-structural-veto-proposal-role-gate-config.v1",
+  "sealed_public_test_seal_path": "ml/ocr/structural_veto_proposal_role_v17/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "82f3596dd9c741b6864c4ce1d82c98c0b273e5412b53a6dbc27368179708f723",
+  "task": "ocr-detection"
+}
