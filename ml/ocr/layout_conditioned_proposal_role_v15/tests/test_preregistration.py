@@ -284,7 +284,25 @@ def test_p3_result_is_selected_and_public_gate_remains_closed() -> None:
     assert result["release_eligible"] is False
 
 
-def test_canonical_ledger_authorizes_only_selected_p3_public_gate() -> None:
+def test_public_gate_result_fails_closed_without_case_details() -> None:
+    result_path = V15_ROOT / "PUBLIC_GATE_RESULT.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert result["status"] == "fail"
+    assert result["rerun_allowed"] is False
+    assert result["public_gate_evaluations"] == 1
+    assert result["direct_execution_inference_calls"] == 224
+    assert result["public_scene_count"] == 224
+    assert result["public_exact_scene_count"] == 217
+    assert result["public_true_positives"] == 1791
+    assert result["public_false_positives"] == 1
+    assert result["public_false_negatives"] == 1
+    assert result["public_duplicate_region_count"] == 0
+    assert result["public_prohibited_structure_hits"] == 1
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
+
+
+def test_canonical_ledger_exhausts_v15_after_failed_public_gate() -> None:
     ledger = json.loads(
         (ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
@@ -292,7 +310,7 @@ def test_canonical_ledger_authorizes_only_selected_p3_public_gate() -> None:
         item for item in ledger["revisions"]
         if item.get("revision") == "graph-text-layout-conditioned-proposal-role-v15"
     )
-    assert entry["status"] == "candidate_3_selected_public_gate_pending"
+    assert entry["status"] == "exhausted_failed_public_gate"
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
@@ -336,10 +354,18 @@ def test_canonical_ledger_authorizes_only_selected_p3_public_gate() -> None:
     assert entry["split_materialized"] is True
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert "budget is exhausted" in entry["execution_blocker"]
-    assert entry["public_gate_authorized"] is True
-    assert entry["public_gate_authorized_candidate_id"] == "P3"
-    assert entry["public_gate_evaluations"] == 0
-    assert entry["public_gate_archive_opened"] is False
+    assert "cannot rerun" in entry["execution_blocker"]
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized_candidate_id"] is None
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_archive_opened"] is True
+    assert entry["public_gate_result_sha256"] == sha256_file(V15_ROOT / "PUBLIC_GATE_RESULT.json")
+    assert entry["public_gate_report_sha256"] == "8bd7170db115f6fccbfc9b998bd5f6fce0d8ae001469b692fa07e8392068553d"
+    assert entry["public_gate_status"] == "fail"
+    assert entry["public_gate_exact_scene_count"] == 217
+    assert entry["public_gate_false_positives"] == 1
+    assert entry["public_gate_false_negatives"] == 1
+    assert entry["public_gate_prohibited_structure_hits"] == 1
+    assert entry["public_gate_case_level_details_emitted"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
