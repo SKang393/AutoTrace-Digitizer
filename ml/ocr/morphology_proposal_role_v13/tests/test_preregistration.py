@@ -137,13 +137,14 @@ def test_runners_are_fail_closed_before_split_and_budget_freeze() -> None:
 def test_v13_budget_ledger_authorizes_only_exact_p2() -> None:
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-morphology-proposal-role-v13")
-    assert entry["status"] == "candidate_2_selected_public_gate_pending"
+    assert entry["status"] == "exhausted_failed_public_gate"
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
+    assert entry["retired_unregistered_candidate_ids"] == ["P3"]
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert entry["execution_blocker"] == "P2 training cannot rerun. The exact P2 public gate is authorized once; P3 remains unregistered."
+    assert "single V13 public gate is consumed" in entry["execution_blocker"]
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(V13_ROOT / "training/p1.json")
     assert entry["candidate_config_sha256"]["P2"] == sha256_file(V13_ROOT / "training/p2.json")
     assert entry["p1_result_sha256"] == sha256_file(V13_ROOT / "P1_RESULT.json")
@@ -176,9 +177,22 @@ def test_v13_budget_ledger_authorizes_only_exact_p2() -> None:
     assert entry["p2_onnx_parity_passed"] is True
     assert entry["selection_manifest_sha256"] == sha256_file(V13_ROOT / "SELECTION_MANIFEST.json")
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(V13_ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
-    assert entry["public_gate_authorized"] is True
-    assert entry["public_gate_authorized_candidate_id"] == "P2"
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized_candidate_id"] is None
     assert entry["public_gate_authorized_on_selection_pass"] is True
-    assert entry["public_gate_evaluations"] == 0
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_archive_opened"] is True
+    assert entry["public_gate_status"] == "fail"
+    assert entry["public_gate_report_sha256"] == "fe0a0d63d0c00c35c463e45c11a87f97aa81bb625d0744c8c2307537b6d6d2ff"
+    assert entry["public_gate_scene_count"] == 224
+    assert entry["public_gate_exact_scene_count"] == 223
+    assert entry["public_gate_true_positives"] == 1792
+    assert entry["public_gate_false_positives"] == 1
+    assert entry["public_gate_false_negatives"] == 0
+    assert entry["public_gate_duplicate_count"] == 0
+    assert entry["public_gate_prohibited_structure_hits"] == 1
+    assert entry["public_gate_role_accuracy"] == 1.0
+    assert entry["public_gate_minimum_per_role_accuracy"] == 1.0
+    assert entry["public_gate_case_level_details_emitted"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
