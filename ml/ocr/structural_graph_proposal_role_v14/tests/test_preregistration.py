@@ -101,25 +101,40 @@ def test_split_and_candidate_records_are_frozen_and_fail_closed() -> None:
     assert config["public_gate_archive_opened"] is False
     assert config["public_gate_evaluations"] == 0
     assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS)
-    assert not (V14_ROOT / "P1_RESULT.json").exists()
+    result = json.loads((V14_ROOT / "P1_RESULT.json").read_text(encoding="utf-8"))
+    assert result["status"] == "failed_runner"
+    assert result["failure_phase"] == "export"
+    assert result["optimizer_steps"] == 1616
+    assert result["onnx_created"] is False
+    assert result["selection_metrics_available"] is False
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
     for record in (selection, seal, config):
         assert record["production_approval"] is False
         assert record["release_eligible"] is False
 
 
-def test_frozen_budget_ledger_authorizes_only_exact_p1() -> None:
+def test_frozen_budget_ledger_consumes_failed_p1_and_keeps_later_gates_closed() -> None:
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8"))
     entry = next(item for item in ledger["revisions"] if item.get("revision") == "graph-text-structural-graph-proposal-role-v14")
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
-    assert entry["execution_blocker"] is None
+    assert entry["status"] == "candidate_1_failed_runner"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert "P1 is consumed" in entry["execution_blocker"]
     assert entry["selection_manifest_sha256"] == sha256_file(V14_ROOT / "SELECTION_MANIFEST.json")
     assert entry["sealed_public_test_seal_sha256"] == sha256_file(V14_ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(V14_ROOT / "training/p1.json")
     assert entry["p1_expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS)
+    assert entry["p1_result_sha256"] == sha256_file(V14_ROOT / "P1_RESULT.json")
+    assert entry["p1_selection_report_sha256"] == "6019b0612cd968248bd1c7379dfbf4f527c0b79787c97e0775c4d35129eb6c45"
+    assert entry["p1_checkpoint_sha256"] == "e09c250e567a00b7c79e4995235a9ac3aa5ecb84fdf5f3eda44254efda36ce28"
+    assert entry["p1_optimizer_steps"] == 1616
+    assert entry["p1_failure_phase"] == "export"
+    assert entry["p1_training_opened_seal_sha256"] == "d36e462f13e22959d0fd90fc17be6a757dac941fa8f0e7a7683975526469dd8c"
+    assert entry["p1_training_result_seal_sha256"] == "fce5aaf7ba68223a2d9175a2f77a83c24e0ee7ce245667abc19923b1a94d6748"
     assert entry["expected_public_evaluator_source_bundle_sha256"] == source_bundle_sha256(ROOT, EVALUATOR_SOURCE_PATHS)
     assert GATE_CONFIG["evaluation_limit"] == 1
     assert GATE_CONFIG["case_level_failure_analysis_permitted"] is False
