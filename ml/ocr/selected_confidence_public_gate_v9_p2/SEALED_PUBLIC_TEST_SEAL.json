@@ -1,0 +1,27 @@
+{
+  "candidate_id": "P2",
+  "fixture_archive_path": "artifacts/production-validation/ocr-v9-p2-eight-role-public.zip",
+  "fixture_archive_sha256": "b666230e0cce4f1bf539c3210741d8379d2a95e919ed4d2d955f87bd975c876a",
+  "fixture_manifest_sha256": "faf0e66effbafa7b710a65a31cef81044e2b3d40dbd69b640d18e05f6effa8d9",
+  "marker_creation_evaluated": false,
+  "model_execution_count_at_freeze": 0,
+  "p2_selection_result_sha256": "288a04e4c1d4eb8c11aeae6cccb606b43dad4253c697e7703593e354c834e7b1",
+  "production_approval": false,
+  "public_execution_authorized": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "resource_count": 160,
+  "scene_count": 160,
+  "schema": "graphreader.ocr-selected-confidence-public-seal.v1",
+  "secret_seed_serialized": false,
+  "source_sha256": {
+    "ml/ocr/selected_confidence_acceptance_v9_p2/P2_SELECTION_RESULT.json": "288a04e4c1d4eb8c11aeae6cccb606b43dad4253c697e7703593e354c834e7b1",
+    "ml/ocr/selected_confidence_public_gate_v9_p2/PROTOCOL.json": "78f4f55bad3c21ad5da688c8284dfb4068e96822253aab164067f6cfd6cf592f",
+    "ml/ocr/selected_confidence_public_gate_v9_p2/dataset.py": "531aa84fda582e5e3dac512dff7b45e123acd392523c2ea746545ce7641a887a",
+    "ml/ocr/selected_confidence_public_gate_v9_p2/prepare_split.py": "a78ab3a41d4daf34111662afc03aa2dc650cf0d406f44d662335f0c90a9455ee",
+    "ml/ocr/selected_confidence_public_gate_v9_p2/protocol.py": "0f433f6fc4a5badc77e15c5d244ff5b00534910cf565d57f5bb26bede91e6fe6",
+    "src/GraphReader.Ocr/OcrV9P2CandidateCompositionPipeline.cs": "756e6620c133f41c9cfbef19d9f6ee8a7007f06afd33561f96a7a4c5359e668e",
+    "tests/GraphReader.Ocr.Tests/OcrV9P2DirectPublicCorpusTests.cs": "d6f2eb5b0ce701b6ee9d2544d4f26ba38b08a04704542c9e3b51c10a9361e611"
+  },
+  "truth_region_count": 1280
+}
