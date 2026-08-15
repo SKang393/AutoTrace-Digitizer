@@ -1,0 +1,177 @@
+{
+  "architecture": {
+    "dynamic_proposal_count": true,
+    "geometry_features": 24,
+    "id": "dynamic-proposal-set-relational-message-passing-v1",
+    "input": [
+      1,
+      "proposal_count",
+      2,
+      32,
+      152
+    ],
+    "ordinary_production_reachable": false,
+    "output": [
+      1,
+      "proposal_count",
+      10
+    ],
+    "per_proposal_visual_encoder": "dual-crop convolutional encoder",
+    "proposal_and_role_heads": "separate binary proposal and eight-role heads",
+    "scene_context": "two learned all-proposal message-passing blocks",
+    "single_tensor_input": true
+  },
+  "artifact_mask_production_approval": false,
+  "candidate_budget": {
+    "candidate_limit": 3,
+    "candidate_number": 1,
+    "optimizer_steps_maximum": 1536,
+    "public_execution_limit": 1
+  },
+  "chandler_included": false,
+  "defect_class": "scene-relational proposal acceptance and eight-role generalization",
+  "external_training_data": false,
+  "fixture_identity_frozen": false,
+  "gates": {
+    "duplicate_regions": 0,
+    "every_required_role_observed": true,
+    "exact_region_count_every_fixture": true,
+    "false_regions": 0,
+    "missed_regions": 0,
+    "onnx_parity_maximum": 1e-05,
+    "per_role_accuracy_minimum": 0.9,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "public_execution_count": 1,
+    "role_accuracy_minimum": 0.9,
+    "thresholds": [
+      0.45,
+      0.5,
+      0.55,
+      0.6,
+      0.65,
+      0.7,
+      0.75,
+      0.8
+    ],
+    "truth_match_iou_minimum": 0.5
+  },
+  "generalization_label_included": false,
+  "isolated_change": "replace independent per-proposal classification with scene-level relational message passing; retain production component grouping, crop pixels, and original-coordinate geometry",
+  "manifest_created": false,
+  "marker_creation_evaluated": false,
+  "model_store_promoted": false,
+  "original_coordinate_output": true,
+  "predecessor_aggregate_only": {
+    "aggregate_failure": {
+      "exact_scenes": 102,
+      "false_regions": 5,
+      "missed_regions": 91,
+      "role_accuracy": 0.494140625,
+      "scene_count": 192
+    },
+    "case_level_evidence_used": false,
+    "fixture_bytes_truth_or_scene_ids_reused": false,
+    "p3_selection_result_sha256": "f7935a64de07f1187a4ca854c01a90b4fcd004c533f57c6f464d98c5e59105e2"
+  },
+  "private_or_article_images": false,
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "public_execution_authorized": false,
+  "release_eligible": false,
+  "required_roles": [
+    "YTick",
+    "XTick",
+    "AxisTitle",
+    "PhaseHeading",
+    "LegendText",
+    "Participant",
+    "Annotation",
+    "Other"
+  ],
+  "revision": "graph-text-relational-scene-proposal-role-v21",
+  "schema": "graphreader.ocr-relational-scene-proposal-role-protocol.v1",
+  "source_bytes_immutable": true,
+  "splits": {
+    "sealed_public": {
+      "degradation_families": [
+        "off-axis-paper-wave-v21-public",
+        "localized-contrast-shelf-v21-public",
+        "cross-channel-resample-v21-public",
+        "sparse-speckle-band-v21-public"
+      ],
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "name": "sealed_public",
+      "renderer_families": [
+        "relational-tall-plot-v21-public-i",
+        "relational-lateral-legend-v21-public-j",
+        "relational-multi-divider-v21-public-k",
+        "relational-asymmetric-caption-v21-public-l"
+      ],
+      "scene_count": 192,
+      "seed_offset": 2807000
+    },
+    "train": {
+      "degradation_families": [
+        "subpixel-column-shear-v21-train",
+        "low-frequency-paper-bowl-v21-train",
+        "alternating-ink-spread-v21-train",
+        "weak-row-dropout-v21-train"
+      ],
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf"
+      ],
+      "name": "train",
+      "renderer_families": [
+        "relational-grid-ledger-v21-train-a",
+        "relational-staggered-panels-v21-train-b",
+        "relational-offset-margins-v21-train-c",
+        "relational-compact-legend-v21-train-d"
+      ],
+      "scene_count": 384,
+      "seed_offset": 2101000
+    },
+    "validation": {
+      "degradation_families": [
+        "anisotropic-resample-v21-selection",
+        "corner-illumination-v21-selection",
+        "paired-scanline-v21-selection",
+        "mild-block-quantization-v21-selection"
+      ],
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "name": "validation",
+      "renderer_families": [
+        "relational-wide-axis-v21-selection-e",
+        "relational-inset-plot-v21-selection-f",
+        "relational-split-caption-v21-selection-g",
+        "relational-floating-note-v21-selection-h"
+      ],
+      "scene_count": 128,
+      "seed_offset": 2403000
+    }
+  },
+  "state": "preregistered_before_fixture_identity_or_optimizer_execution",
+  "task": "ocr-detection-role-composition",
+  "training": {
+    "cpu_threads": 1,
+    "deterministic_algorithms": true,
+    "epochs": 4,
+    "learning_rate": 0.00035,
+    "optimizer": "AdamW",
+    "proposal_loss": "balanced-cross-entropy",
+    "role_loss": "positive-only-balanced-cross-entropy",
+    "role_loss_weight": 0.75,
+    "scene_batch_size": 1,
+    "seed": 2608152101,
+    "synthetic_only": true,
+    "weight_decay": 0.0001
+  },
+  "training_authorized": false
+}
