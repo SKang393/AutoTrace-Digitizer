@@ -11,7 +11,7 @@ namespace GraphReader.Ocr.Tests;
 public sealed class OcrV21ProductionStatusTests
 {
     [TestMethod]
-    public void FrozenIdentitiesRemainUnauthorizedAndUnapproved()
+    public void FrozenIdentitiesHaveOnlyBoundedTrainingAuthorizationAndRemainUnapproved()
     {
         string root = FindRepositoryRoot();
         string candidateRoot = Path.Combine(root, "ml", "ocr", "relational_scene_proposal_role_v21");
@@ -57,7 +57,25 @@ public sealed class OcrV21ProductionStatusTests
         Assert.AreEqual(
             "b4ae7547731949ac6df1f9afe3fd83178b3cf9c55c81dbd017592a71d90ddab8",
             seal.GetProperty("sealed_public").GetProperty("archive_sha256").GetString());
-        Assert.IsFalse(File.Exists(Path.Combine(candidateRoot, "P1_TRAINING_AUTHORIZATION.json")));
+        string authorizationPath = Path.Combine(candidateRoot, "P1_TRAINING_AUTHORIZATION.json");
+        using JsonDocument authorizationDocument = JsonDocument.Parse(File.ReadAllBytes(authorizationPath));
+        JsonElement authorization = authorizationDocument.RootElement;
+        Assert.AreEqual(
+            "d9d5ed2eda4f53da54660f47ef1de594b5e628b7",
+            authorization.GetProperty("authorized_source_commit").GetString());
+        Assert.AreEqual(
+            "e3fdbb0208a49b890ae4eebda0bf3db9b52417c31ecdbef5d9521fd327be5fca",
+            authorization.GetProperty("candidate_config_sha256").GetString());
+        Assert.AreEqual(
+            "f6a090b2611d41ddd045939f1c4e918d464297e99b080a9bee696a3ddc26a4a1",
+            authorization.GetProperty("runner_source_bundle_sha256").GetString());
+        Assert.AreEqual(1, authorization.GetProperty("execution_limit").GetInt32());
+        Assert.AreEqual(0, authorization.GetProperty("execution_count").GetInt32());
+        Assert.IsTrue(authorization.GetProperty("training_authorized").GetBoolean());
+        Assert.IsFalse(authorization.GetProperty("public_execution_authorized").GetBoolean());
+        Assert.IsFalse(authorization.GetProperty("private_validation_authorized").GetBoolean());
+        Assert.IsFalse(authorization.GetProperty("production_approval").GetBoolean());
+        Assert.IsFalse(authorization.GetProperty("release_eligible").GetBoolean());
         Assert.IsFalse(File.Exists(Path.Combine(candidateRoot, "P1_SELECTION_RESULT.json")));
         Assert.IsFalse(File.Exists(Path.Combine(candidateRoot, "PUBLIC_GATE_AUTHORIZATION.json")));
         Assert.IsFalse(Directory.Exists(Path.Combine(root, "models", "manifest", "ocr", "relational_scene_proposal_role_v21")));

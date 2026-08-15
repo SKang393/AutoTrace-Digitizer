@@ -60,7 +60,7 @@ def test_protocol_json_matches_the_executable_preregistration() -> None:
     assert json.loads(path.read_text(encoding="utf-8")) == expected
 
 
-def test_p1_config_is_fixed_but_does_not_authorize_training() -> None:
+def test_p1_config_and_separate_authorization_are_fixed_and_fail_closed() -> None:
     root = Path(__file__).resolve().parents[1]
     config = json.loads((root / "P1_CONFIG.json").read_text(encoding="utf-8"))
     assert config["candidate_id"] == "P1"
@@ -70,7 +70,17 @@ def test_p1_config_is_fixed_but_does_not_authorize_training() -> None:
     assert config["split_seal_sha256"] == "085c93c73731ca97bc85d4eed52841547e6faab28effa56ca14db90d999b3047"
     assert config["training_authorized"] is False
     assert config["public_execution_authorized"] is False
-    assert not (root / "P1_TRAINING_AUTHORIZATION.json").exists()
+    authorization = json.loads((root / "P1_TRAINING_AUTHORIZATION.json").read_text(encoding="utf-8"))
+    assert authorization["authorized_source_commit"] == "d9d5ed2eda4f53da54660f47ef1de594b5e628b7"
+    assert authorization["candidate_config_sha256"] == "e3fdbb0208a49b890ae4eebda0bf3db9b52417c31ecdbef5d9521fd327be5fca"
+    assert authorization["runner_source_bundle_sha256"] == "f6a090b2611d41ddd045939f1c4e918d464297e99b080a9bee696a3ddc26a4a1"
+    assert authorization["execution_limit"] == 1
+    assert authorization["execution_count"] == 0
+    assert authorization["training_authorized"] is True
+    assert authorization["public_execution_authorized"] is False
+    assert authorization["private_validation_authorized"] is False
+    assert authorization["production_approval"] is False
+    assert authorization["release_eligible"] is False
 
 
 def test_runner_source_bundle_is_order_independent_and_path_bound() -> None:

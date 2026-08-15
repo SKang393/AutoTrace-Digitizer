@@ -1,0 +1,26 @@
+{
+  "authorization_scope": "one fixed P1 CPU training run and one visible-selection evaluation only",
+  "authorized_source_commit": "d9d5ed2eda4f53da54660f47ef1de594b5e628b7",
+  "candidate_config_sha256": "e3fdbb0208a49b890ae4eebda0bf3db9b52417c31ecdbef5d9521fd327be5fca",
+  "candidate_id": "P1",
+  "execution_count": 0,
+  "execution_limit": 1,
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "public_archive_sha256": "b4ae7547731949ac6df1f9afe3fd83178b3cf9c55c81dbd017592a71d90ddab8",
+  "public_execution_authorized": false,
+  "release_eligible": false,
+  "runner_source_bundle_sha256": "f6a090b2611d41ddd045939f1c4e918d464297e99b080a9bee696a3ddc26a4a1",
+  "runner_source_sha256": {
+    "ml/ocr/relational_scene_proposal_role_v21/P1_CONFIG.json": "e3fdbb0208a49b890ae4eebda0bf3db9b52417c31ecdbef5d9521fd327be5fca",
+    "ml/ocr/relational_scene_proposal_role_v21/dataset.py": "5e453ca512f96a7f9b318cd183006020006dad8e8a5ef8fa53b270fc21b638f5",
+    "ml/ocr/relational_scene_proposal_role_v21/model.py": "4d92e891e5c4ac887c8b335881e1da05f6e0b93ab07835f8643eb231d2687614",
+    "ml/ocr/relational_scene_proposal_role_v21/protocol.py": "3a26c86aca49eea2731ad32fdf98ff6489871e480a4d52f3492f1931bdd4e5ed",
+    "ml/ocr/relational_scene_proposal_role_v21/train_p1.py": "951801f6e587036324bcce867a10fe0c6188d327772664a047a017fe8eb4b664"
+  },
+  "schema": "graphreader.ocr-relational-scene-proposal-role-training-authorization.v1",
+  "selection_archive_sha256": "9d3831f31cdb097f0ec4a2d174ed8d9653d76472394fb5f42c44a17e99990371",
+  "split_seal_sha256": "085c93c73731ca97bc85d4eed52841547e6faab28effa56ca14db90d999b3047",
+  "train_archive_sha256": "c82c527daa4afdadaa477895cd58a93072d73c6ece12b39318f5b6b5f951563d",
+  "training_authorized": true
+}
