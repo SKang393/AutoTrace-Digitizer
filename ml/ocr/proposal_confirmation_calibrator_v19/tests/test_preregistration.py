@@ -75,7 +75,8 @@ def test_calibrator_contract_is_small_and_deterministic() -> None:
 def test_public_gate_and_production_remain_fail_closed() -> None:
     seal = _read("SEALED_PUBLIC_TEST_SEAL.json")
     gate = _read("gates/sealed-public-v1.json")
-    result = _read("P1_RESULT.json")
+    p1_result = _read("P1_RESULT.json")
+    result = _read("P2_RESULT.json")
     ledger = json.loads(
         (ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
@@ -93,14 +94,17 @@ def test_public_gate_and_production_remain_fail_closed() -> None:
     assert result["selection_metrics"]["false_negatives"] == 0
     assert result["selection_metrics"]["prohibited_structure_hits"] == 1
     assert result["passing_threshold_window"] == []
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert p1_result["status"] == "failed_selection"
+    assert entry["status"] == "candidate_2_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["p1_result_sha256"] == sha256_file(MODULE / "P1_RESULT.json")
+    assert entry["p2_result_sha256"] == sha256_file(MODULE / "P2_RESULT.json")
     assert not (MODULE / "PUBLIC_GATE_REPORT.json").exists()
-    local_report = MODULE / "artifacts/P1-run/candidate-report.json"
+    local_report = MODULE / "artifacts/P2-run/candidate-report.json"
     if local_report.exists():
-        assert sha256_file(local_report) == sha256_file(MODULE / "P1_RESULT.json")
+        assert sha256_file(local_report) == sha256_file(MODULE / "P2_RESULT.json")

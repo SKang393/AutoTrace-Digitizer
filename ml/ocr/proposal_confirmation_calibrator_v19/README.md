@@ -12,10 +12,18 @@ article image was used. V19 has fresh stored train and validation bytes plus a
 fresh truth-hidden public archive. All three split families and seeds are
 disjoint.
 
-P1 is preregistered but not authorized. Its execution requires a separate commit
-that binds the exact candidate configuration and source bundle in the canonical
-training ledger. If visible selection does not contain at least three consecutive
-zero-error thresholds, the public archive stays unopened. A passing public run
-would still require independent marker-stage composition, manifests, model-store
-discovery, packaging, clean-machine, and private validation evidence before any
-production approval.
+P1 and P2 each executed exactly once from separately committed source and ledger
+authorizations. Both preserved all 1,024 validation truths at the selected
+threshold and passed recognition, role, and CPU ONNX parity gates, but each left
+one prohibited false region and no required three-threshold zero-error window.
+P2's only isolated change was to increase negative-class loss weight from `2.0`
+to `4.0` based on aggregate P1 counts. At threshold `0.65`, P2 removed the false
+region while missing six truths. P1 and P2 are consumed. P3 remains unregistered
+and unauthorized. The public archive is unopened with zero evaluations.
+
+Any P3 design may use only the aggregate committed P1 and P2 results, must be
+preregistered in a separate stable checkpoint, and must receive a later separate
+execution authorization. A passing selection and public run would still require
+independent marker-stage composition, manifests, model-store discovery,
+packaging, clean-machine, and private validation evidence before any production
+approval.
