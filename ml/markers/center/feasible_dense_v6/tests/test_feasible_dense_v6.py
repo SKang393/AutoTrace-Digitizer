@@ -133,7 +133,8 @@ def test_source_protocol_and_public_gate_bindings_are_exact() -> None:
     assert protocol["execution_authorized"] is False
     assert protocol["p1_selection_gate_passed"] is True
     assert protocol["p1_result_sha256"] == sha256_file(ROOT / "P1_RESULT.json")
-    assert protocol["public_gate_authorized"] is False
+    assert protocol["public_gate_authorized"] is True
+    assert protocol["public_gate_authorized_candidate_id"] == "P1"
     assert protocol["public_gate_archive_opened"] is False
     assert protocol["public_gate_evaluations"] == 0
 
@@ -141,7 +142,7 @@ def test_source_protocol_and_public_gate_bindings_are_exact() -> None:
 def test_canonical_budget_records_selected_p1_and_sealed_public_gate() -> None:
     ledger = _json(LEDGER_PATH)
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-feasible-dense-v6")
-    assert entry["status"] == "candidate_1_selected_public_blocked"
+    assert entry["status"] == "candidate_1_selected_public_authorized"
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
@@ -159,7 +160,10 @@ def test_canonical_budget_records_selected_p1_and_sealed_public_gate() -> None:
     assert result["onnx_parity_passed"] is True
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_candidate_id"] == "P1"
+    assert entry["public_gate_authorized_candidate_report_sha256"] == result["candidate_report_sha256"]
+    assert entry["public_gate_authorized_onnx_sha256"] == result["onnx_sha256"]
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
     assert entry["manifest_created"] is False

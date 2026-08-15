@@ -4316,7 +4316,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-feasible-dense-v6",
-      "status": "candidate_1_selected_public_blocked",
+      "status": "candidate_1_selected_public_authorized",
       "defect_class": "V5 selection fixtures overlapped required marker truth and prohibited acceptance regions and cleared prohibited hard points from artifact-mask truth, making its training targets and fixed gates internally conflicting",
       "prior_revision": "marker-center-dense-contract-v5",
       "trigger_diagnosis_path": "ml/markers/center/dense_contract_v5/V5_FEASIBILITY_DIAGNOSIS.json",
@@ -4337,7 +4337,7 @@
         "P3"
       ],
       "protocol_path": "ml/markers/center/feasible_dense_v6/PROTOCOL.json",
-      "protocol_sha256": "38644a399ab70f976b90759f643e6d8e67842f467b086ed4cee71ca420dc9d99",
+      "protocol_sha256": "7a9b0f1b06c5d77d00e72b21376b364d1fcf86b20c35bb2caca44dce55e1e30c",
       "design_source_paths": [
         "ml/markers/center/feasible_dense_v6/dataset.py",
         "ml/markers/center/feasible_dense_v6/model.py",
@@ -4449,8 +4449,10 @@
       "execution_authorized": false,
       "authorized_candidate_id": null,
       "execution_blocker": "P1 is consumed and passed visible selection. No candidate rerun or P2/P3 execution is authorized while the separate truth-hidden public decision is pending.",
-      "public_gate_authorized": false,
-      "public_gate_authorized_candidate_id": null,
+      "public_gate_authorized": true,
+      "public_gate_authorized_candidate_id": "P1",
+      "public_gate_authorized_candidate_report_sha256": "342c1a18276603ef05e5e68a53a5c4e8f372183142cef9846293058a4d854e09",
+      "public_gate_authorized_onnx_sha256": "f2e4c209250101ba7c6c1aecec529602d565c3526af4b569a5dd645a2623268c",
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
       "manifest_created": false,

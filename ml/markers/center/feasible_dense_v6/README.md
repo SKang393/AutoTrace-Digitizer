@@ -25,7 +25,8 @@ postprocessing, thresholds, and all artifact, exclusion, and CPU ONNX parity
 gates. P1 consumed its single 1,152-step execution and passed all 48 visible
 selection scenes with 432/432 markers, zero false positives, misses, duplicates,
 or prohibited hits, plus CPU ONNX parity at `6.16908073425293e-06`. The
-truth-hidden public archive remains separately locked, unopened, and at zero
-evaluations until a later committed authorization. No public run, manifest,
-model-store promotion, packaging, private validation, production approval, or
-release eligibility is authorized.
+truth-hidden public archive is now separately authorized for exactly one run,
+but remains unopened and at zero evaluations. The committed authorization binds
+the selected candidate report and ONNX checksums. No manifest, model-store
+promotion, packaging, private validation, production approval, or release
+eligibility is authorized.
