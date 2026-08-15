@@ -123,7 +123,7 @@ public static class OcrV8ProductionCompositionFactory
             new MemoryOcrResultCache(),
             new OcrPipelineOptions
             {
-                StageVersion = "0.0.21-v8-official",
+                StageVersion = "0.0.21-v8-official-horizontal",
                 BatchSize = 16,
                 CropWidth = 320,
                 CropHeight = 48,
@@ -131,12 +131,13 @@ public static class OcrV8ProductionCompositionFactory
                 CropVerticalPaddingPixels = 2,
                 CropResizeMode = OcrCropResizeMode.PreserveAspectRatioPad,
                 CropPaddingValue = 0.5f,
+                InferVerticalOrientationForTallRegions = false,
             },
             numeric,
             new MemoryOcrResultCache(),
             new OcrPipelineOptions
             {
-                StageVersion = "0.0.21-v8-numeric",
+                StageVersion = "0.0.21-v8-numeric-horizontal",
                 BatchSize = 16,
                 CropWidth = 128,
                 CropHeight = 32,
@@ -145,6 +146,7 @@ public static class OcrV8ProductionCompositionFactory
                 CropVerticalContentPaddingRatio = 0.25,
                 CropResizeMode = OcrCropResizeMode.PreserveAspectRatioPad,
                 CropPaddingValue = 1f,
+                InferVerticalOrientationForTallRegions = false,
             },
             compositionOptions);
     }

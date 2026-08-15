@@ -373,7 +373,7 @@ public sealed class OcrV8DirectPublicCorpusTests
                 ambiguity),
             alphabet);
 
-    private static string ReadOfficialAlphabet(string path)
+    internal static string ReadOfficialAlphabet(string path)
     {
         string[] lines = File.ReadAllLines(path, Encoding.UTF8);
         int start = Array.FindIndex(lines, static line =>
@@ -424,7 +424,7 @@ public sealed class OcrV8DirectPublicCorpusTests
         return alphabet;
     }
 
-    private static (byte[] Pixels, int Width, int Height) DecodeGray8(byte[] source)
+    internal static (byte[] Pixels, int Width, int Height) DecodeGray8(byte[] source)
     {
         ReadOnlySpan<byte> png = source;
         ReadOnlySpan<byte> signature = [137, 80, 78, 71, 13, 10, 26, 10];
@@ -534,7 +534,7 @@ public sealed class OcrV8DirectPublicCorpusTests
             : upDistance <= diagonalDistance ? up : upLeft;
     }
 
-    private static async Task<byte[]> ReadEntryAsync(
+    internal static async Task<byte[]> ReadEntryAsync(
         ZipArchiveEntry entry,
         CancellationToken cancellationToken)
     {
@@ -574,10 +574,10 @@ public sealed class OcrV8DirectPublicCorpusTests
     private static void AssertHash(string path, string expected, string label) =>
         Assert.AreEqual(expected, Sha256(File.ReadAllBytes(path)), $"{label} checksum changed.");
 
-    private static string Sha256(ReadOnlySpan<byte> bytes) =>
+    internal static string Sha256(ReadOnlySpan<byte> bytes) =>
         Convert.ToHexStringLower(SHA256.HashData(bytes));
 
-    private static double IntersectionOverUnion(OcrRectangle left, int[] right)
+    internal static double IntersectionOverUnion(OcrRectangle left, int[] right)
     {
         double intersectionWidth = Math.Max(0, Math.Min(left.Right, right[2]) - Math.Max(left.Left, right[0]));
         double intersectionHeight = Math.Max(0, Math.Min(left.Bottom, right[3]) - Math.Max(left.Top, right[1]));
@@ -590,7 +590,7 @@ public sealed class OcrV8DirectPublicCorpusTests
     private static double[] Rectangle(OcrRectangle value) =>
         [value.Left, value.Top, value.Right, value.Bottom];
 
-    private static string RoleName(OcrTextRole role) => role switch
+    internal static string RoleName(OcrTextRole role) => role switch
     {
         OcrTextRole.XTick => "x_tick",
         OcrTextRole.YTick => "y_tick",
@@ -602,7 +602,7 @@ public sealed class OcrV8DirectPublicCorpusTests
         _ => "other",
     };
 
-    private static int LevenshteinDistance(string expected, string actual)
+    internal static int LevenshteinDistance(string expected, string actual)
     {
         string[] left = expected.EnumerateRunes().Select(static rune => rune.ToString()).ToArray();
         string[] right = actual.EnumerateRunes().Select(static rune => rune.ToString()).ToArray();
@@ -739,7 +739,7 @@ public sealed class OcrV8DirectPublicCorpusTests
             new(model.ModelId, model.Version, model.Sha256.ToLowerInvariant());
     }
 
-    private sealed record ModelExecutionEvidence(
+    internal sealed record ModelExecutionEvidence(
         string ModelId,
         string ModelSha256,
         int CallCount,
@@ -747,7 +747,7 @@ public sealed class OcrV8DirectPublicCorpusTests
         IReadOnlyList<string> OutputTensorSha256,
         IReadOnlyList<string> Providers);
 
-    private sealed class EvidenceInferenceSessionFactory : IInferenceSessionFactory
+    internal sealed class EvidenceInferenceSessionFactory : IInferenceSessionFactory
     {
         private readonly IInferenceSessionFactory inner;
         private readonly ConcurrentDictionary<string, ExecutionCollector> executions =

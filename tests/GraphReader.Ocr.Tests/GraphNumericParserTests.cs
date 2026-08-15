@@ -78,4 +78,14 @@ public sealed class GraphNumericParserTests
         Assert.IsFalse(result.IsSuccess);
         Assert.IsNull(result.Value);
     }
+
+    [TestMethod]
+    public void LiteralNumberCheckDoesNotPromoteAmbiguousLetterGlyphs()
+    {
+        Assert.IsTrue(GraphNumericParser.IsLiteralGraphNumber("-2.5%"));
+        Assert.IsTrue(GraphNumericParser.IsLiteralGraphNumber("1,000"));
+        Assert.IsFalse(GraphNumericParser.IsLiteralGraphNumber("O"));
+        Assert.IsFalse(GraphNumericParser.IsLiteralGraphNumber("I"));
+        Assert.IsFalse(GraphNumericParser.IsLiteralGraphNumber("l"));
+    }
 }

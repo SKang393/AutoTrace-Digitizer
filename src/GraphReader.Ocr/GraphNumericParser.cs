@@ -20,6 +20,29 @@ public sealed record NumericParseResult(
 
 public static partial class GraphNumericParser
 {
+    /// <summary>
+    /// Returns true only when the recognized text is already a graph-number
+    /// literal after punctuation and separator normalization. Unlike Parse,
+    /// this does not reinterpret letter glyphs such as O, I, or l as digits.
+    /// Role classification uses this stricter check so semantic text is not
+    /// relabeled as numeric without an explicit numeric geometry context.
+    /// </summary>
+    public static bool IsLiteralGraphNumber(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return false;
+        }
+
+        string normalized = text.Trim()
+            .Replace('\u2212', '-')
+            .Replace('\u2013', '-')
+            .Replace('\u2014', '-')
+            .Replace('\u2044', '/');
+        string compact = RemoveSpacing(normalized);
+        return ParseCandidate((NormalizeSeparators(compact), 1d)) is not null;
+    }
+
     public static NumericParseResult Parse(string? text)
     {
         if (string.IsNullOrWhiteSpace(text))

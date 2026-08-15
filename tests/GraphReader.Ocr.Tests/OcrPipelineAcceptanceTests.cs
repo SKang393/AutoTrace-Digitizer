@@ -42,6 +42,75 @@ public sealed class OcrPipelineAcceptanceTests
     }
 
     [TestMethod]
+    public async Task TallHorizontalRegionCanPreserveDetectorOrientation()
+    {
+        OcrDetectedRegion region = OcrTestFixtures.Region(
+            "tall-horizontal-digit",
+            45,
+            30,
+            4,
+            12,
+            context: new OcrRegionContext(NumericExpected: true));
+        OcrRequest request = OcrTestFixtures.Request([region]);
+        var cropOptions = new OcrCropBatcherOptions
+        {
+            TargetWidth = 128,
+            TargetHeight = 32,
+            BatchSize = 16,
+            HorizontalPaddingPixels = 12,
+            VerticalPaddingPixels = 1,
+            VerticalContentPaddingRatio = 0.25,
+            ResizeMode = OcrCropResizeMode.PreserveAspectRatioPad,
+            PaddingValue = 1f,
+        };
+        string horizontalHash = OcrCropBatcher.CreateBatches(
+            request.OriginalImage,
+            [region],
+            cropOptions)[0][0].CropSha256;
+        string rotatedHash = OcrCropBatcher.CreateBatches(
+            request.OriginalImage,
+            [region with { OrientationDegrees = -90d }],
+            cropOptions)[0][0].CropSha256;
+        string? observedHash = null;
+        var recognizer = new StubTextRecognizer((crops, cancellationToken) =>
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            observedHash = crops.Single().CropSha256;
+            return ValueTask.FromResult<IReadOnlyList<OcrRecognition>>(
+            [
+                new OcrRecognition(
+                    crops[0].RegionId,
+                    crops[0].SourceImage,
+                    [new OcrRecognitionAlternative("1", 0.99, crops[0].SourceImage)],
+                    0.25),
+            ]);
+        });
+        var pipeline = new OcrPipeline(
+            new StubTextRegionDetector([]),
+            recognizer,
+            new InMemoryOcrResultCache(),
+            new OcrPipelineOptions
+            {
+                StageVersion = "horizontal-tight-box-test",
+                CropWidth = cropOptions.TargetWidth,
+                CropHeight = cropOptions.TargetHeight,
+                BatchSize = cropOptions.BatchSize,
+                CropHorizontalPaddingPixels = cropOptions.HorizontalPaddingPixels,
+                CropVerticalPaddingPixels = cropOptions.VerticalPaddingPixels,
+                CropVerticalContentPaddingRatio = cropOptions.VerticalContentPaddingRatio,
+                CropResizeMode = cropOptions.ResizeMode,
+                CropPaddingValue = cropOptions.PaddingValue,
+                InferVerticalOrientationForTallRegions = false,
+            });
+
+        OcrResult result = await pipeline.RecognizeAsync(request, CancellationToken.None);
+
+        Assert.IsTrue(result.Succeeded, result.Failure?.TechnicalMessage);
+        Assert.AreNotEqual(rotatedHash, horizontalHash);
+        Assert.AreEqual(horizontalHash, observedHash);
+    }
+
+    [TestMethod]
     public async Task CropRecognitionUsesBoundedBatchesAndPreservesInputOrder()
     {
         OcrDetectedRegion[] regions = Enumerable.Range(0, 5)

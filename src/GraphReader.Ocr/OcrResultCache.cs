@@ -113,7 +113,8 @@ public static class OcrCacheKeyDeriver
             options.CropPaddingValue.ToString("R", CultureInfo.InvariantCulture),
             options.MaskPaddingPixels.ToString("R", CultureInfo.InvariantCulture),
             options.MinimumMaskRecognitionConfidence.ToString("R", CultureInfo.InvariantCulture),
-            options.MaximumTickCombinationEvaluations.ToString(CultureInfo.InvariantCulture));
+            options.MaximumTickCombinationEvaluations.ToString(CultureInfo.InvariantCulture),
+            options.InferVerticalOrientationForTallRegions.ToString(CultureInfo.InvariantCulture));
         yield return RectangleMaterial(request.PlotBounds);
         yield return ImageMaterial(request.OriginalImage);
         yield return request.EnhancedImage is null ? "no_enhanced_image" : ImageMaterial(request.EnhancedImage);

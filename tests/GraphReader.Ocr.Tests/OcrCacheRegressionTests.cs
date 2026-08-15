@@ -194,6 +194,26 @@ public sealed class OcrCacheRegressionTests
         Assert.AreNotEqual(baselineKey, componentKey);
     }
 
+    [TestMethod]
+    public void TallRegionOrientationInferencePolicyInvalidatesPriorCacheKeys()
+    {
+        var recognizer = new StubTextRecognizer(
+            new Dictionary<(string RegionId, OcrSourceImage Source), IReadOnlyList<OcrRecognitionAlternative>>());
+        OcrRequest request = OcrTestFixtures.Request();
+        var inferred = new OcrPipelineOptions();
+        OcrPipelineOptions detectorPreserved = inferred with
+        {
+            InferVerticalOrientationForTallRegions = false,
+        };
+
+        string inferredKey = OcrCacheKeyDeriver.CreateRequestAlias(
+            request, recognizer, inferred, "detector-v1");
+        string detectorPreservedKey = OcrCacheKeyDeriver.CreateRequestAlias(
+            request, recognizer, detectorPreserved, "detector-v1");
+
+        Assert.AreNotEqual(inferredKey, detectorPreservedKey);
+    }
+
     private static OcrDetectorImage DetectorImage(OcrImage image) => new(
         image,
         Convert.ToHexStringLower(SHA256.HashData(image.Pixels.Span)));

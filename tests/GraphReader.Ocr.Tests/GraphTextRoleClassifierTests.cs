@@ -106,6 +106,16 @@ public sealed class GraphTextRoleClassifierTests
     }
 
     [TestMethod]
+    public void FollowupAbovePlotMatchesFrozenCompositionRoleVocabulary()
+    {
+        OcrDetectedRegion region = OcrTestFixtures.Region("followup", 72, 3, 44, 9);
+
+        RoleClassification result = GraphTextRoleClassifier.Classify(region, "Followup", Plot);
+
+        Assert.AreEqual(OcrTextRole.PhaseHeading, result.Role);
+    }
+
+    [TestMethod]
     public void PhaseHeadingRequiresDividerContext()
     {
         OcrDetectedRegion withDivider = OcrTestFixtures.Region(
@@ -149,6 +159,26 @@ public sealed class GraphTextRoleClassifierTests
 
         Assert.AreEqual(OcrTextRole.XTick, GraphTextRoleClassifier.Classify(xRegion, "10", Plot).Role);
         Assert.AreEqual(OcrTextRole.YTick, GraphTextRoleClassifier.Classify(yRegion, "50", Plot).Role);
+    }
+
+    [TestMethod]
+    public void AmbiguousLetterInsidePlotStaysAnnotationUnlessNumericGeometryIsExplicit()
+    {
+        OcrDetectedRegion annotation = OcrTestFixtures.Region("letter", 72, 42, 8, 9);
+        OcrDetectedRegion expectedTick = OcrTestFixtures.Region(
+            "letter-tick",
+            60,
+            89,
+            8,
+            7,
+            context: new OcrRegionContext(NumericExpected: true));
+
+        Assert.AreEqual(
+            OcrTextRole.Annotation,
+            GraphTextRoleClassifier.Classify(annotation, "O", Plot).Role);
+        Assert.AreEqual(
+            OcrTextRole.XTick,
+            GraphTextRoleClassifier.Classify(expectedTick, "O", Plot).Role);
     }
 
     [TestMethod]

@@ -49,7 +49,7 @@ public static class GraphTextRoleClassifier
         }
 
         var center = region.Polygon.Bounds.Center;
-        var numeric = GraphNumericParser.Parse(recognizedText).IsSuccess;
+        var numeric = GraphNumericParser.IsLiteralGraphNumber(recognizedText);
         var horizontalTolerance = Math.Max(4, plotBounds.Width * 0.05);
         var verticalTolerance = Math.Max(4, plotBounds.Height * 0.05);
         var withinPlotX = center.X >= plotBounds.Left - horizontalTolerance &&
@@ -146,6 +146,7 @@ public static class GraphTextRoleClassifier
             normalized.Equals("treatment", StringComparison.OrdinalIgnoreCase) ||
             normalized.Equals("maintenance", StringComparison.OrdinalIgnoreCase) ||
             normalized.Equals("generalization", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Equals("followup", StringComparison.OrdinalIgnoreCase) ||
             normalized.Equals("follow up", StringComparison.OrdinalIgnoreCase) ||
             normalized.StartsWith("phase", StringComparison.OrdinalIgnoreCase);
     }

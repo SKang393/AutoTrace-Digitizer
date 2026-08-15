@@ -33,6 +33,14 @@ public sealed record OcrPipelineOptions
     public double MinimumMaskRecognitionConfidence { get; init; } = 0.55;
 
     public int MaximumTickCombinationEvaluations { get; init; } = 4096;
+
+    /// <summary>
+    /// Infers a vertical orientation for detector regions whose height is more
+    /// than 1.4 times their width. Disable this for proposal models that emit
+    /// tight horizontal graph-label boxes, where a single digit can be tall
+    /// without being rotated text.
+    /// </summary>
+    public bool InferVerticalOrientationForTallRegions { get; init; } = true;
 }
 
 public sealed class OcrPipeline
@@ -154,7 +162,7 @@ public sealed class OcrPipeline
                         cancellationToken)
                     .ConfigureAwait(false);
             ValidateDetectedRegions(detectedRegions);
-            detectedRegions = EnrichGeometry(detectedRegions, request.PlotBounds);
+            detectedRegions = EnrichGeometry(detectedRegions, request.PlotBounds, _options);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -588,11 +596,13 @@ public sealed class OcrPipeline
 
     private static IReadOnlyList<OcrDetectedRegion> EnrichGeometry(
         IReadOnlyList<OcrDetectedRegion> regions,
-        OcrRectangle plotBounds) =>
+        OcrRectangle plotBounds,
+        OcrPipelineOptions options) =>
         OcrCollections.Freeze(regions.Select(region =>
         {
             var bounds = region.Polygon.Bounds;
-            var orientation = Math.Abs(region.OrientationDegrees) <= double.Epsilon &&
+            var orientation = options.InferVerticalOrientationForTallRegions &&
+                Math.Abs(region.OrientationDegrees) <= double.Epsilon &&
                 bounds.Height > bounds.Width * 1.4
                 ? -90d
                 : region.OrientationDegrees;
