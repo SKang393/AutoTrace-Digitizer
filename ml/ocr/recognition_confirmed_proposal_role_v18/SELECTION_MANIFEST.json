@@ -1,0 +1,98 @@
+{
+  "chandler_included": false,
+  "fixed_artifacts": {
+    "LICENSES/PaddlePaddle-PP-OCRv5-Models-Apache-2.0.txt": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "LICENSES/PaddlePaddle-PP-OCRv5-Models-Notice.txt": "8d81f5d0c58547cce471c24f82efe768a9d907d06764f67e90cc680c6d777729",
+    "ml/ocr/official_bakeoff/runs/conversion/en_PP-OCRv5_mobile_rec.onnx": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+    "ml/ocr/official_bakeoff/runs/extracted/en_PP-OCRv5_mobile_rec_infer/inference.yml": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
+    "ml/ocr/recognition_confirmed_proposal_role_v18/FEASIBILITY_EVIDENCE.json": "cd309eb202cffe97f6b43ef2d337a300eb3da955e8a85d0b0c10e6d1f425164e",
+    "ml/ocr/structural_veto_proposal_role_v17/P3_RESULT.json": "917353b0449b884bd2536e4b4581b700c80cbbf3b787235eca146975e414d8f1",
+    "ml/ocr/structural_veto_proposal_role_v17/artifacts/P3-run/graph-text-structural-veto-proposal-role-v17-p3.onnx": "ca32487f1df2c3fea1b8c2f51daf7578ed9756e9140d1b0eaf2a16b283591262"
+  },
+  "generalization_label_included": false,
+  "optimizer_steps": 0,
+  "predecessor_fixture_bytes_reused": false,
+  "private_or_article_images": false,
+  "production_approval": false,
+  "protocol_path": "ml/ocr/recognition_confirmed_proposal_role_v18/PROTOCOL.json",
+  "protocol_sha256": "fa7b7118270fc786fa8e2236d9d5b4c5e669074302503aee56a67adbbf0bff47",
+  "release_eligible": false,
+  "revision": "graph-text-recognition-confirmed-proposal-role-v18",
+  "schema": "graphreader.ocr-recognition-confirmed-selection.v1",
+  "sealed_public": {
+    "fixture_archive_path": "ml/ocr/recognition_confirmed_proposal_role_v18/artifacts/split-freeze/sealed-public-fixtures.zip",
+    "fixture_archive_sha256": "30c7cd5151b3e8959e688593d6eaf67a86cfa379e7ed035e7801250b6b2f210c",
+    "negative_family_counts": {
+      "clustered-arrow-legend": 4,
+      "compact-marker-cross": 4634,
+      "dense-fill-arrowhead": 18,
+      "horizontal-bracket-connector": 364,
+      "mixed-layout-structure": 294,
+      "sparse-stroke": 84,
+      "vertical-divider-ruler": 679
+    },
+    "negative_proposal_count": 6077,
+    "positive_proposal_count": 2048,
+    "private_manifest_path": "ml/ocr/recognition_confirmed_proposal_role_v18/artifacts/split-freeze/sealed-public-private-manifest.json",
+    "private_manifest_sha256": "860e5f197413e325c90cedd505048b31c16de3e4f67a199a506e04f3494dc481",
+    "proposal_count": 8125,
+    "role_truth_counts": {
+      "Annotation": 256,
+      "AxisTitle": 256,
+      "LegendText": 256,
+      "Other": 256,
+      "Participant": 256,
+      "PhaseHeading": 256,
+      "XTick": 256,
+      "YTick": 256
+    },
+    "scene_count": 256,
+    "split_fingerprint": "4f41ac098860edb5a6f72972e7a9c22e47461fee61c23ea57653033af753ed4e",
+    "truth_region_count": 2048
+  },
+  "sealed_public_truth_available_to_candidate": false,
+  "split_generator_source_bundle_sha256": "02d21e84da25d0a9e50399a8d72ecb4aa928bf0fbdb0136c3aca7fa08d8dafc9",
+  "split_generator_source_paths": [
+    "ml/ocr/recognition_confirmed_proposal_role_v18/dataset.py",
+    "ml/ocr/recognition_confirmed_proposal_role_v18/prepare_split.py",
+    "ml/ocr/recognition_confirmed_proposal_role_v18/protocol.py",
+    "ml/ocr/layout_conditioned_proposal_role_v15/dataset.py",
+    "ml/ocr/component_context_detector_v7/dataset.py",
+    "ml/ocr/component_context_detector_v7/protocol.py",
+    "ml/ocr/component_region_detector_v6/dataset.py"
+  ],
+  "synthetic_only": true,
+  "task": "ocr-detection-recognition",
+  "v17_fixture_bytes_scene_truth_or_case_identity_reused": false,
+  "validation": {
+    "fixture_archive_path": "ml/ocr/recognition_confirmed_proposal_role_v18/artifacts/split-freeze/validation-fixtures.zip",
+    "fixture_archive_sha256": "a58af6a727f7483bbe50d0e8c038f02fa9d887b3b424fe375a40fd07bcb65b15",
+    "negative_family_counts": {
+      "clustered-arrow-legend": 73,
+      "compact-marker-cross": 8348,
+      "dense-fill-arrowhead": 34,
+      "horizontal-bracket-connector": 1305,
+      "mixed-layout-structure": 748,
+      "sparse-stroke": 426,
+      "vertical-divider-ruler": 1034
+    },
+    "negative_proposal_count": 11968,
+    "positive_proposal_count": 1536,
+    "private_manifest_path": "ml/ocr/recognition_confirmed_proposal_role_v18/artifacts/split-freeze/validation-private-manifest.json",
+    "private_manifest_sha256": "50682cf9e47402e2ebac07781e0600a07c34b519fdea3b651956ca3d16f66f0c",
+    "proposal_count": 13504,
+    "role_truth_counts": {
+      "Annotation": 192,
+      "AxisTitle": 192,
+      "LegendText": 192,
+      "Other": 192,
+      "Participant": 192,
+      "PhaseHeading": 192,
+      "XTick": 192,
+      "YTick": 192
+    },
+    "scene_count": 192,
+    "split_fingerprint": "7f22d8ffadeb12a2db893d996b40d4d89c0253103cb3104664bf753ef1b30725",
+    "truth_region_count": 1536
+  }
+}

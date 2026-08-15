@@ -1,0 +1,18 @@
+{
+  "evaluation_limit": 1,
+  "expected_candidate_hash_keys": [
+    "detector_onnx_sha256",
+    "recognizer_onnx_sha256",
+    "selection_report_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "860e5f197413e325c90cedd505048b31c16de3e4f67a199a506e04f3494dc481",
+  "expected_evaluator_source_bundle_sha256": "52ac96b2f4e1f688dc03efdea8a648d594889e4401b63aa36d82d41ddc60ebec",
+  "expected_gate_config_sha256": "bce392eee7d3407b976c031a0d7974828e83a477cb7f22f35750130bb2f88209",
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-recognition-confirmed-proposal-role-v18-public-v1",
+  "schema": "graphreader.ocr-recognition-confirmed-gate-config.v1",
+  "sealed_public_test_seal_path": "ml/ocr/recognition_confirmed_proposal_role_v18/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "36ec96c32ed4208e3868cb0343e60a7aac15cf71b99610bb19a2abff928520c5",
+  "task": "ocr-detection-recognition"
+}

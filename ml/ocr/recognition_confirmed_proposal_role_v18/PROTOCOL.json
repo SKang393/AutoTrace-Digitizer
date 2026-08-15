@@ -1,0 +1,112 @@
+{
+  "architecture": "exact-v17-p3-plus-official-recognizer-confidence-confirmation-v1",
+  "artifact_provenance": {
+    "detector_license": "Apache-2.0 project-trained weights",
+    "license_path": "LICENSES/PaddlePaddle-PP-OCRv5-Models-Apache-2.0.txt",
+    "license_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "model_store_promotion_authorized": false,
+    "notice_path": "LICENSES/PaddlePaddle-PP-OCRv5-Models-Notice.txt",
+    "notice_sha256": "8d81f5d0c58547cce471c24f82efe768a9d907d06764f67e90cc680c6d777729",
+    "packaging_authorized": false,
+    "recognizer_license": "Apache-2.0 official PaddlePaddle model weights"
+  },
+  "candidate_ids": [
+    "P1"
+  ],
+  "currently_preregistered_candidate": null,
+  "data_scope": "fresh procedural scientific graph scenes only; no Chandler, Generalization, private or article images, external datasets, downloaded training data, predecessor fixture bytes, or V17 validation case identities",
+  "defect_class": "the exhausted V17 P3 detector retained one prohibited false proposal at its last all-truth threshold, while an aggregate visible-only feasibility pass showed the exact official recognizer confidence separated that false proposal from every truth",
+  "execution_authorized": false,
+  "execution_blocker": "Fresh V18 validation and truth-hidden public fixture bytes, their checksums, the zero-optimizer candidate configuration, runner sources, and one-use gate must be committed before a separate authorization commit.",
+  "experiment_budget": 1,
+  "feasibility_evidence": {
+    "additional_parameter_sweeps_authorized": false,
+    "case_level_details_used": false,
+    "fixture_bytes_or_case_identity_reused_by_v18": false,
+    "path": "ml/ocr/recognition_confirmed_proposal_role_v18/FEASIBILITY_EVIDENCE.json",
+    "public_or_private_data_used": false,
+    "sha256": "cd309eb202cffe97f6b43ef2d337a300eb3da955e8a85d0b0c10e6d1f425164e",
+    "visible_v17_validation_only": true
+  },
+  "fixed_composition": {
+    "detector_path": "ml/ocr/structural_veto_proposal_role_v17/artifacts/P3-run/graph-text-structural-veto-proposal-role-v17-p3.onnx",
+    "detector_probability_threshold": 0.64,
+    "detector_result_path": "ml/ocr/structural_veto_proposal_role_v17/P3_RESULT.json",
+    "detector_result_sha256": "917353b0449b884bd2536e4b4581b700c80cbbf3b787235eca146975e414d8f1",
+    "detector_sha256": "ca32487f1df2c3fea1b8c2f51daf7578ed9756e9140d1b0eaf2a16b283591262",
+    "empty_ctc_path_confidence": 0.0,
+    "provider": "CPUExecutionProvider",
+    "recognition_confidence_measure": "mean-softmax-probability-of-collapsed-nonblank-ctc-path",
+    "recognition_confidence_threshold": 0.6,
+    "recognizer_inference_yaml_path": "ml/ocr/official_bakeoff/runs/extracted/en_PP-OCRv5_mobile_rec_infer/inference.yml",
+    "recognizer_inference_yaml_sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
+    "recognizer_path": "ml/ocr/official_bakeoff/runs/conversion/en_PP-OCRv5_mobile_rec.onnx",
+    "recognizer_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+    "session_options": "single-threaded-sequential-deterministic"
+  },
+  "isolated_change": "reuse the exact immutable V17 P3 proposal and role ONNX at threshold 0.64 and the exact official PP-OCRv5 English mobile recognition ONNX, rejecting only proposals whose nonblank collapsed CTC path has mean selected-character probability below 0.60",
+  "manifest_created": false,
+  "marker_creation_gate_required_before_approval": true,
+  "optimizer_steps": 0,
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-recognition-confirmed-proposal-role-v18",
+  "schema": "graphreader.ocr-recognition-confirmed-proposal-role-protocol.v1",
+  "selection_gates": {
+    "case_level_details_emitted": false,
+    "character_error_rate_maximum": 0.05,
+    "detector_and_recognizer_tensor_stream_hashes_required": true,
+    "direct_fixture_byte_execution_required": true,
+    "duplicate_regions": 0,
+    "exact_region_and_role_every_scene": true,
+    "false_regions": 0,
+    "missed_regions": 0,
+    "per_role_accuracy_minimum": 0.85,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "recognition_exact_minimum": 0.9,
+    "role_accuracy_minimum": 0.9
+  },
+  "split_policy": {
+    "predecessor_fixture_bytes_reused": false,
+    "public_case_level_failure_analysis_permitted": false,
+    "sealed_public_truth_hidden_until_one_time_gate": true,
+    "v17_fixture_bytes_scene_truth_or_case_identity_reused": false,
+    "validation_and_public_family_ids_disjoint": true,
+    "validation_or_public_pixels_used_for_threshold_selection": false
+  },
+  "splits": [
+    {
+      "degradation_family": "recognition-confidence-envelope-v18-validation",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "font_sha256": [
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      ],
+      "renderer_family": "recognition-confirmed-lattice-v18-validation",
+      "scene_count": 192,
+      "seed_offset": 4217000,
+      "split": "validation"
+    },
+    {
+      "degradation_family": "recognition-confidence-edge-band-v18-public",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "font_sha256": [
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      ],
+      "renderer_family": "recognition-confirmed-interleave-v18-public",
+      "scene_count": 256,
+      "seed_offset": 4491000,
+      "split": "sealed_public"
+    }
+  ],
+  "state": "design_preregistered_before_stored_split_materialization",
+  "task": "ocr-detection-recognition"
+}
