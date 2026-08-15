@@ -132,9 +132,9 @@ def test_consumed_p1_and_p2_and_preregistered_p3_are_bound_while_public_remains_
     assert entry["preregistered_candidate_ids"] == ["P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
-    assert "P3 is preregistered but not authorized" in entry["execution_blocker"]
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_blocker"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(MODULE / "training/p1.json")
     assert entry["p1_result_sha256"] == sha256_file(MODULE / "P1_RESULT.json")
