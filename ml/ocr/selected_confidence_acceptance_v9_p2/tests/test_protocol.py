@@ -58,12 +58,13 @@ def test_fresh_scene_is_deterministic_distinct_and_private_free() -> None:
     assert "Chandler" not in labels
 
 
-def test_no_selection_identity_or_execution_result_exists_at_preregistration() -> None:
+def test_selection_lifecycle_is_fail_closed() -> None:
     seal = ROOT / "SELECTION_SEAL.json"
     authorization = ROOT / "SELECTION_AUTHORIZATION.json"
+    result = ROOT / "P2_SELECTION_RESULT.json"
     if not seal.exists():
         assert not authorization.exists()
-    assert not (ROOT / "P2_SELECTION_RESULT.json").exists()
+        assert not result.exists()
 
 
 def test_frozen_selection_authorization_is_exactly_one_run_and_fail_closed() -> None:
@@ -106,3 +107,57 @@ def test_frozen_selection_authorization_is_exactly_one_run_and_fail_closed() -> 
         "release_eligible",
     ):
         assert authorization[field] is False
+
+
+def test_consumed_result_records_only_aggregate_selection_evidence() -> None:
+    result_path = ROOT / "P2_SELECTION_RESULT.json"
+    if not result_path.exists():
+        return
+
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert result["schema"] == "graphreader.ocr-selected-confidence-selection-result.v1"
+    assert result["candidate_id"] == "P2"
+    assert result["execution_consumed"] is True
+    assert result["direct_runtime_evidence_passed"] is True
+    assert result["model_execution_count"] == 4
+    assert result["selection_gates_passed"] is True
+    metrics = result["metrics"]
+    assert metrics["scene_count"] == 128
+    assert metrics["truth_region_count"] == 640
+    assert metrics["exact_detection_scene_count"] == 128
+    assert metrics["true_positives"] == 640
+    assert metrics["false_positives"] == 0
+    assert metrics["false_negatives"] == 0
+    assert metrics["duplicate_region_count"] == 0
+    assert metrics["prohibited_structure_hits"] == 0
+    assert metrics["recognition_exact_match"] >= 0.90
+    assert metrics["character_error_rate"] <= 0.05
+    assert metrics["role_accuracy"] >= 0.90
+    assert result["blocking_gates"] == [
+        "fresh_truth_hidden_public_eight_role_gate",
+        "marker_stage_direct_composition_evidence",
+        "approved_artifact_mask_provider",
+        "approved_production_model_store",
+        "packaging_discovery_and_clean_machine_evidence",
+        "private_chandler_automatic_validation",
+    ]
+    for field in (
+        "rerun_or_repair_authorized",
+        "case_level_tuning_authorized",
+        "full_eight_role_coverage_proven",
+        "marker_creation_evaluated",
+        "artifact_mask_production_approval",
+        "manifest_created",
+        "model_store_promoted",
+        "public_gate_authorized",
+        "private_validation_authorized",
+        "production_approval",
+        "release_eligible",
+    ):
+        assert result[field] is False
+
+    report_path = ROOT.parents[2] / result["selection_report_path"]
+    if report_path.exists():
+        assert hashlib.sha256(report_path.read_bytes()).hexdigest() == (
+            result["selection_report_sha256"]
+        )

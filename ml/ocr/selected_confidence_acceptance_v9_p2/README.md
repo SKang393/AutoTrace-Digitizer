@@ -16,3 +16,11 @@ hashes for all four payloads, and all frozen recognition and role thresholds.
 Even a pass cannot authorize the full eight-role public gate, marker evidence,
 artifact-mask approval, manifests, model-store promotion, packaging, private
 validation, production approval, or release.
+
+The single authorized P2 selection run was consumed at source commit
+`e2c0db4810d27074bd34f82b0a6ab45cc14d2625`. It passed the frozen selection
+gate on 128 scenes and 640 truth regions with zero false, missed, duplicate, or
+prohibited regions. Recognition exact match was `0.9984375`, CER was
+`0.00029239766081871346`, and role accuracy was `1.0`. This is selection
+evidence only. The six broader gates recorded in `P2_SELECTION_RESULT.json`
+remain mandatory and closed.
