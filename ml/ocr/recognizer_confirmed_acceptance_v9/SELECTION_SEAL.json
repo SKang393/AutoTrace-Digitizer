@@ -1,0 +1,35 @@
+{
+  "candidate_id": "P1",
+  "fixture_archive_path": "artifacts/production-validation/ocr-v9-p1-selection.zip",
+  "fixture_archive_sha256": "d81aec71164a892ec1da2e37af3b91d5c7b98df89afbf24130532722db5d2a86",
+  "fixture_manifest_sha256": "ab7fd37e794e6e5de1ce831ad1e3646188e27af4f5a9d576cd93af12822d7e7e",
+  "generation_environment": {
+    "numpy": "2.3.5",
+    "pillow": "12.3.0",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.13.7",
+    "torch": "2.13.0+cpu"
+  },
+  "model_execution_count_at_freeze": 0,
+  "production_approval": false,
+  "public_gate_authorized": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "resource_count": 96,
+  "scene_count": 96,
+  "schema": "graphreader.ocr-recognizer-confirmed-selection-seal.v1",
+  "secret_seed_serialized": false,
+  "selection_execution_authorized": false,
+  "source_sha256": {
+    "ml/markers/gate_seal.py": "8b01113d0881dc2b89df3763f4c66fe311cffa48520e72963d2bd6366372122a",
+    "ml/ocr/production_csharp_marker_gate_v4/dataset.py": "2f2675cc61580998da80211e82209296b3428c67d00beb12696136de924f5e18",
+    "ml/ocr/recognizer_confirmed_acceptance_v9/PROTOCOL.json": "d3f55af8ce285b4ccc6b45c6e118d3b77d643c03a9df6a6d2797c3a78552026c",
+    "ml/ocr/recognizer_confirmed_acceptance_v9/dataset.py": "e920b201d3a0db61cfcbedac1d85b5105731576f157c792b3504ba02b46c19e0",
+    "ml/ocr/recognizer_confirmed_acceptance_v9/prepare_split.py": "cc59e375b9a9b6f10c2193071c4a6fc45041ff7eebc9fa6d93b0e5bf95680e97",
+    "ml/ocr/recognizer_confirmed_acceptance_v9/protocol.py": "9fa720e6779f80e7bb4a46507aa95853e8fc21507827de9254fce334c1b7caa2",
+    "src/GraphReader.Ocr/OcrV8ProductionCompositionPipeline.cs": "19aa2bf1578e6ec62a91ea0b3395bd8436e06dcd22281c6b0e3b20f2270e9958",
+    "src/GraphReader.Ocr/OcrV9CandidateCompositionFactory.cs": "2c9b80f55970fcbdf51a6df4d5e3bbfb40d5a5fe984c6060d068c3ae67e618ba",
+    "tests/GraphReader.Ocr.Tests/OcrV9CandidateSelectionTests.cs": "c1a8c3f46c2fc0f58b236421bd013b9aa3c91cfac296a0602c869187cc277c3f"
+  },
+  "truth_region_count": 480
+}
