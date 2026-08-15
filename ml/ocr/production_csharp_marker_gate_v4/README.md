@@ -41,6 +41,15 @@ and pushed. A separate authorization commit must bind that committed identity,
 the archive, embedded manifest, seal, exact test, output path, and five payload
 hashes before exactly one CPU execution is eligible to run.
 
+`PUBLIC_GATE_AUTHORIZATION.json` now authorizes exactly one CPU execution. It
+binds sealed-identity commit `81ba8f3ca9e35ac89544b63b9cf85ab0c82f8d9f`,
+the archive, embedded manifest, tracked seal, exact C# test, ignored report
+path, and all five payload hashes. The runner additionally requires the
+authorization commit to be the direct child of that sealed identity. The
+authorization does not permit a rerun or repair, full-role approval,
+artifact-mask approval, a manifest, model-store promotion, private validation,
+production approval, or release eligibility.
+
 Passing cannot create a model manifest, approve the production model store,
 enable normal Auto Detect, package a payload, validate Chandler, or make the
 release eligible. Full role coverage, an approved artifact-mask provider,

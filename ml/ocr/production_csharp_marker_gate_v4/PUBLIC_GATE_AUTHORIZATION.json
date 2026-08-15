@@ -1,0 +1,30 @@
+{
+  "schema": "graphreader.ocr-marker-production-composition-authorization.v1",
+  "task": "ocr-marker-production-composition",
+  "revision": "graphreader-csharp-ocr-marker-composition-v4",
+  "composition_id": "production-v8-ocr-to-normalized-marker-composed-v4",
+  "execution_authorized": true,
+  "execution_count_authorized": 1,
+  "provider": "CPUExecutionProvider",
+  "sealed_identity_commit": "81ba8f3ca9e35ac89544b63b9cf85ab0c82f8d9f",
+  "fixture_archive_sha256": "b916ab47fa2734ffc657c702572c86da5110eabcd730306062236f9fb6001432",
+  "fixture_manifest_sha256": "58fe558aedee77495e630e7bc1e8658f70b5ee970b70147bccc302b18d515707",
+  "split_seal_sha256": "3ac34dc2b34a111c2714368c3f7356b7c83f15a1aec5d7db15cb37157ab41b87",
+  "candidate_sha256": [
+    "017fca04fa3817596ce3088d73f51003dd3658bc56ec3130e25c92252e6bf739",
+    "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+    "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+    "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+    "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096"
+  ],
+  "exact_test": "OcrMarkerDirectPublicGateV4Tests.NewSealedBytesExecuteOnceThroughCSharpOcrAndMarkerCpuComposition",
+  "result_path": "artifacts/production-validation/ocr-marker-csharp-v4-report.json",
+  "rerun_or_repair_authorized": false,
+  "full_eight_role_coverage_proven": false,
+  "artifact_mask_production_approval": false,
+  "manifest_creation_authorized": false,
+  "model_store_promotion_authorized": false,
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "release_eligible": false
+}
