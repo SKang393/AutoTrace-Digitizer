@@ -1,0 +1,100 @@
+{
+  "candidate": {
+    "applies_only_to_p1_recognizer_confirmed_detector_route": true,
+    "model_bytes_unchanged": true,
+    "p1_pipeline_immutable": true,
+    "selected_text_minimum_confidence": 0.75
+  },
+  "candidate_id": "P2",
+  "candidate_number": 2,
+  "chandler_included": false,
+  "composition_id": "graphreader-v10-selected-confidence-acceptance-composition-v9-p2",
+  "experiment_budget": 3,
+  "generalization_label_included": false,
+  "isolated_change": "retain the immutable P1 pipeline and require selected-text confidence at or above 0.75 only for its high detector acceptance route",
+  "manifest_created": false,
+  "models": {
+    "ambiguity_recognizer": {
+      "provider": "CPUExecutionProvider",
+      "sha256": "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096"
+    },
+    "numeric_recognizer": {
+      "provider": "CPUExecutionProvider",
+      "sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84"
+    },
+    "ocr_detector": {
+      "provider": "CPUExecutionProvider",
+      "sha256": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db"
+    },
+    "official_recognizer": {
+      "provider": "CPUExecutionProvider",
+      "sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743"
+    }
+  },
+  "predecessor_aggregate": {
+    "candidate_id": "P1",
+    "case_level_evidence_used": false,
+    "duplicates": 0,
+    "false_negatives": 0,
+    "false_positives": 4,
+    "result_sha256": "49c4c84ca4667e2263a0b66a9ae054ec00a7e3ecb542a8d66d871ce36ff643b0",
+    "scene_count": 96,
+    "true_positives": 480,
+    "truth_region_count": 480
+  },
+  "private_or_article_images": false,
+  "production_approval": false,
+  "public_gate_authorized": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graphreader-v10-selected-confidence-acceptance-v9-p2",
+  "schema": "graphreader.ocr-selected-confidence-acceptance-protocol.v1",
+  "selection_execution_authorized": false,
+  "selection_gates": {
+    "ambiguity_exact_match_minimum": 0.9,
+    "character_error_rate_maximum": 0.05,
+    "direct_fixture_byte_execution_required": true,
+    "direct_tensor_hash_per_model_call_required": true,
+    "duplicate_regions": 0,
+    "exact_region_count_every_fixture": true,
+    "false_regions": 0,
+    "missed_regions": 0,
+    "numeric_exact_match_minimum": 0.9,
+    "provider": "CPUExecutionProvider",
+    "recognition_exact_match_minimum": 0.9,
+    "role_accuracy_minimum": 0.9,
+    "word_exact_match_minimum": 0.9
+  },
+  "split": {
+    "degradation_families": [
+      "oblique-paper-ripple-v9-p2-selection",
+      "piecewise-contrast-shelf-v9-p2-selection",
+      "radial-fade-quantization-v9-p2-selection",
+      "row-drift-speckle-v9-p2-selection"
+    ],
+    "full_eight_role_coverage_proven": false,
+    "name": "visible_selection",
+    "p1_fixture_bytes_reused": false,
+    "p1_truth_or_scene_ids_reused": false,
+    "plot_bounds": [104, 48, 510, 256],
+    "renderer_families": [
+      "selected-confidence-shape-confound-v9-p2-selection-a",
+      "selected-confidence-shape-confound-v9-p2-selection-b",
+      "selected-confidence-shape-confound-v9-p2-selection-c",
+      "selected-confidence-shape-confound-v9-p2-selection-d",
+      "selected-confidence-shape-confound-v9-p2-selection-e",
+      "selected-confidence-shape-confound-v9-p2-selection-f",
+      "selected-confidence-shape-confound-v9-p2-selection-g",
+      "selected-confidence-shape-confound-v9-p2-selection-h"
+    ],
+    "required_roles": ["y_tick", "x_tick", "phase_heading", "annotation", "legend_text"],
+    "scene_count": 128,
+    "scene_height": 320,
+    "scene_width": 640,
+    "secret_seed_generated_once_and_not_serialized": true,
+    "text_truths_per_scene": 5
+  },
+  "state": "p2_preregistered_before_selection_identity_materialization_or_model_execution",
+  "synthetic_only": true,
+  "task": "ocr-detection-recognition-composition"
+}
