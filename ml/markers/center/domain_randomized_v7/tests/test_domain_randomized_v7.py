@@ -115,7 +115,7 @@ def test_model_preserves_frozen_dense_three_head_contract() -> None:
     assert torch.all((output[:, 2] >= 0) & (output[:, 2] <= 1))
 
 
-def test_protocol_config_and_budget_are_checksum_bound_and_p2_blocked() -> None:
+def test_protocol_config_and_budget_are_checksum_bound_and_p2_only() -> None:
     protocol = _json(ROOT / "PROTOCOL.json")
     config = _json(ROOT / "training/p2.json")
     ledger = _json(LEDGER_PATH)
@@ -137,7 +137,7 @@ def test_protocol_config_and_budget_are_checksum_bound_and_p2_blocked() -> None:
     assert p1_result["failure_phase"] == "selection"
     assert p1_result["public_gate_archive_opened"] is False
     assert p1_result["public_gate_evaluations"] == 0
-    assert protocol["execution_authorized"] is False
+    assert protocol["execution_authorized"] is True
     assert protocol["public_gate_authorized"] is False
     assert protocol["public_gate_archive_opened"] is False
     assert protocol["public_gate_evaluations"] == 0
@@ -146,8 +146,8 @@ def test_protocol_config_and_budget_are_checksum_bound_and_p2_blocked() -> None:
     assert entry["status"] == "candidate_2_preregistered"
     assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P2"
     assert entry["public_gate_authorized"] is False
     assert entry["manifest_created"] is False
     assert entry["model_store_promoted"] is False

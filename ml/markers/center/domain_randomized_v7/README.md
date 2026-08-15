@@ -24,7 +24,7 @@ because the explicitly supplied relative output path could not be normalized
 against the absolute repository root. P1 is consumed and cannot rerun. P2 is
 preregistered to reuse the exact P1 bytes with zero optimizer steps, normalize
 its output path, and recover only the lost visible selection and parity report.
-P2 execution remains blocked pending a separate committed authorization. P3 is
-unregistered. Public evaluation stays locked. No manifest, model-store entry,
+Exactly one checksum-bound P2 execution is now authorized. P3 is unregistered.
+Public evaluation stays locked. No manifest, model-store entry,
 package payload, private validation, production approval, or release eligibility
 exists.

@@ -4531,7 +4531,7 @@
         "P3"
       ],
       "protocol_path": "ml/markers/center/domain_randomized_v7/PROTOCOL.json",
-      "protocol_sha256": "88da0f1d828d2fd19d6249141f4d613956b9c0ab84998e109a904e1df7818d6f",
+      "protocol_sha256": "23ec0a30f33a23b9eb21dc1701f4189a13cc3e886d9762c6637c38aee092532e",
       "design_source_paths": [
         "ml/markers/center/domain_randomized_v7/dataset.py",
         "ml/markers/center/domain_randomized_v7/model.py",
@@ -4626,9 +4626,9 @@
       "p1_training_result_seal_sha256": "4e4e0f9ab1b1f6f50c17e0a8afd6e1ed28628035a26ebc2e7bf432275f3b633c",
       "p2_expected_runner_source_bundle_sha256": "0bdff4e9b416b3724c5135316202c940e4275d25c407ea74aaf9ea0cc1285d10",
       "p2_expected_optimizer_steps": 0,
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "P1 is consumed after a final report-path failure. P2 is preregistered to reuse the exact completed P1 bytes with zero optimizer steps but requires a separate clean committed authorization. Public evaluation remains blocked.",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P2",
+      "execution_blocker": "Exactly one checksum-bound zero-optimizer P2 selection recovery is authorized. P1 is consumed, P3 is unregistered, and every public evaluation remains blocked.",
       "public_gate_authorized": false,
       "public_gate_evaluator_preregistered": false,
       "public_gate_evaluations": 0,
