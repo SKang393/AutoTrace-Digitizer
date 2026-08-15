@@ -1,0 +1,61 @@
+{
+  "revision": "marker-center-domain-randomized-v7",
+  "schema": "graphreader.marker-center-domain-randomized-selection.v7",
+  "sealed_public": {
+    "archive_path": "ml/markers/center/domain_randomized_v7/artifacts/splits/sealed-public.npz",
+    "archive_sha256": "2097d81f6c5b9d05f6015b1528c7a96094259478bf7a40c3a214dbab3c027502",
+    "count": 96,
+    "degradation_family": "truth-hidden-capture-mixture-v7-public",
+    "feasibility": {
+      "hard_negative_count": 960,
+      "hard_point_missing_from_artifact_truth_count": 0,
+      "minimum_center_separation_px": 12.041594505310059,
+      "minimum_truth_to_hard_negative_distance_px": 11.011357307434082,
+      "required_disjoint_clearance_px": 11.0,
+      "scene_count": 96,
+      "truth_center_count": 862,
+      "truth_hard_acceptance_overlap_count": 0,
+      "truth_mask_conflict_count": 0
+    },
+    "renderer_family": "truth-hidden-layout-mixture-v7-public",
+    "seed_offset": 4310431
+  },
+  "train": {
+    "archive_path": "ml/markers/center/domain_randomized_v7/artifacts/splits/train.npz",
+    "archive_sha256": "accdc7117821d0e27900988262ff09c5730b31016a02ec4c651c5ebdc4042fa6",
+    "count": 384,
+    "degradation_family": "domain-randomized-scan-mixture-v7-train",
+    "feasibility": {
+      "hard_negative_count": 3840,
+      "hard_point_missing_from_artifact_truth_count": 0,
+      "minimum_center_separation_px": 12.041594505310059,
+      "minimum_truth_to_hard_negative_distance_px": 11.011357307434082,
+      "required_disjoint_clearance_px": 11.0,
+      "scene_count": 384,
+      "truth_center_count": 3454,
+      "truth_hard_acceptance_overlap_count": 0,
+      "truth_mask_conflict_count": 0
+    },
+    "renderer_family": "domain-randomized-layout-mixture-v7-train",
+    "seed_offset": 3110431
+  },
+  "validation": {
+    "archive_path": "ml/markers/center/domain_randomized_v7/artifacts/splits/validation.npz",
+    "archive_sha256": "8f20701ce02dcf1510cd9773fc0cacc27b102c46bb087b026f81831a754c4e05",
+    "count": 96,
+    "degradation_family": "heldout-document-mixture-v7-validation",
+    "feasibility": {
+      "hard_negative_count": 960,
+      "hard_point_missing_from_artifact_truth_count": 0,
+      "minimum_center_separation_px": 12.083045959472656,
+      "minimum_truth_to_hard_negative_distance_px": 11.011357307434082,
+      "required_disjoint_clearance_px": 11.0,
+      "scene_count": 96,
+      "truth_center_count": 862,
+      "truth_hard_acceptance_overlap_count": 0,
+      "truth_mask_conflict_count": 0
+    },
+    "renderer_family": "heldout-geometry-mixture-v7-validation",
+    "seed_offset": 3730431
+  }
+}

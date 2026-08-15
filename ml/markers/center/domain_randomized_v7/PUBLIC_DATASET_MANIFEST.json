@@ -1,0 +1,696 @@
+{
+  "case_truth_values_emitted": false,
+  "chandler_used": false,
+  "feasibility": {
+    "hard_negative_count": 960,
+    "hard_point_missing_from_artifact_truth_count": 0,
+    "minimum_center_separation_px": 12.041594505310059,
+    "minimum_truth_to_hard_negative_distance_px": 11.011357307434082,
+    "required_disjoint_clearance_px": 11.0,
+    "scene_count": 96,
+    "truth_center_count": 862,
+    "truth_hard_acceptance_overlap_count": 0,
+    "truth_mask_conflict_count": 0
+  },
+  "fixture_count": 96,
+  "fixture_pixels_emitted": false,
+  "fixtures": [
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0000",
+      "ground_truth_sha256": "639fd30676d2edf5b1a63332a271b5ec4b33856d806b2a0c89a5912277d9eca1",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "a43aab9142522856354ed9a636a817bbb933c849d818e51813d262debdcf0cf5"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0001",
+      "ground_truth_sha256": "4b0f4796606d4a00bf701df30b9c92674abe21faf0645d7f036c2e258b4433b9",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "efda6add4e194476b69427cdd0b9c0166eba02d6ce28033ff932fa64233e7fbe"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0002",
+      "ground_truth_sha256": "269e7095ba8163a1d307b5748c3bc7fcb2cd88f0aa4fcc360451f97e88c71a25",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "fafd42ae8358b13b814eb87cb74db3d4d3403dc42e73ca1bb41fc917a91b35ba"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0003",
+      "ground_truth_sha256": "c10dd83b475e107e3699ac9ad876baf0171ff9c2aa5da34e4a9ae815ec54b5b9",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "505dfd04dee58cc4f948f17bb9cad7e2b59c3e5d826a95cba85b4bf6afcf5c79"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0004",
+      "ground_truth_sha256": "41062f1e7b2991f9753023ff17f1a82b11a820398fd1b4b365311130a3b079d4",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "50a94702c0d1f4d6d625e658ae92147536b54ca51e5c3df5851456cbeebd87f3"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0005",
+      "ground_truth_sha256": "19e9b6af4b0ba09ee9c6d35da98bda2187dc77be7f9dcb4cbccd25fe4ea363b2",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "afa9e10c886690a73c76cbba76e83eee2d828c69adffd5af3f98b1a32b5adddc"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0006",
+      "ground_truth_sha256": "7aa78cad51dad6688b49220a1df1ef122ee6b09aabd4d52549b4f6fac121c448",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "e19f762917b64220e9dfbf46fbd4702330ce0d92fde679384dddd371f7a44e3b"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0007",
+      "ground_truth_sha256": "f399c6b5237365ffb686dd81a35df9db6236f06ed4d1bea8c81184f09584ba9a",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "1e9541987367412b900e88aad50eb94158c88d84c4fa749310e552ad7181013d"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0008",
+      "ground_truth_sha256": "d3ec5c940fb44bd691d305d2621b38c1150087c2e4342130373ba460e1bf9450",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "0eaf844803bff0910ff414cfc42bf30f6a6856d03a87ce57e891d2ee62377762"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0009",
+      "ground_truth_sha256": "5280fb11ff9ef545390955bbe25e424efe62022557711e82088532d52574ffaa",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "84445a2911c7fe722234d8119ced6d9aafa57bb7a074d7428555ef4f6193035c"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0010",
+      "ground_truth_sha256": "025824697ae7976cdf6a310c3f71bb5715cf419f4aa351dc8dabfb606eae1b4b",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "01ce29305571b943e38606d8fdc34de4ccc11aef8bf6d2a7ce65da349ba1d061"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0011",
+      "ground_truth_sha256": "3546c98fc4b6de1e03a0d7d805c43bf0ee420bac34f4aa2c1f0290365988da92",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "8d4c254ba1ebb75f8ed44b3c58332d848a12137d68c8580343ec87eb4fc7dfaa"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0012",
+      "ground_truth_sha256": "11c6632a8957238ecc46f5f73b5ff602798525d937ce7819492d9b00d7ff0c12",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "aa393149b72f606ee531216971e25d140a61c33226c418bced97a67fec6ba99c"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0013",
+      "ground_truth_sha256": "02c089a97e6f8703f33f5f538e057b7f7b56d8c7379ce0c94ac9fcc499f25cef",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "0c1e425e5bbd2e730e37468d33ffa7bb02b5f3fbb6cbe79366a916c0218894e3"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0014",
+      "ground_truth_sha256": "c88babef177f749a3fcb050298f5acb2be5bc802aa3caf3a106175c8bf94d17c",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "1788bde4ac0f1004360f1dd3900dcefc91927a13ae9c5c47db18a94666670f26"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0015",
+      "ground_truth_sha256": "948d511e5984378fa05ac41db292282f7c5a835acef6628ee952837848d6085e",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "0598570b767e202a8d937488a00c6954e19a16133eb0bc10ca6b36ecf99e9f69"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0016",
+      "ground_truth_sha256": "fb7f263c49870a8ef8a424f2f731a6f80b20bdd46e83ea981881f85866d85eed",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "12c32bbe964bbaa937d180ff34cb3eb1deeba78287742a8c8e4b88d942495051"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0017",
+      "ground_truth_sha256": "f890b00f70f35bc6b2011ccd6aa388bbd51fde067a6ec29ca129b6c12f8dd448",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "671e925d2df8559c7db894c711e0af028aed92cad48bc705dfa549d44baf9170"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0018",
+      "ground_truth_sha256": "7dd40aa4f20b792671fb10952717d2febc16a9a58466e7fd7123eb4f467320fe",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "856cc0722aacf9691c68d5db0518b95f720a963160557e072577cc9a826c63de"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0019",
+      "ground_truth_sha256": "009c26f21833431d174d372ff8ef05a9c447cec21d946135f554ef942e0d32d6",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "77479a6bf930d8b9c3f6780103f66a316d1f2187690cfb9f8f09a98fde522798"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0020",
+      "ground_truth_sha256": "999738663f448b20f851f2e43cee20bada9a086c140b104a071264f0ac689fd9",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "d8c27d5949d106f9ff9fbdd168c810bdf21b3809e8ccd3181c14231e9a39f432"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0021",
+      "ground_truth_sha256": "4ce1163e69b7f5467d885a3be0b17e5cbf2e4babc73b59f2613196b68e6ed89b",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "8a6b382ac71aa29da17b070fda5da5af6973197193d6c0791fe4f8ae094ee4ff"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0022",
+      "ground_truth_sha256": "ed9e33f46241a418802dbb96e9e4db463bd1637396359d0705bd3a78cda86062",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "25ffe4f1abaa83a2c452a49048839b9e77e3a936fac0f1fc56730789872dd241"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0023",
+      "ground_truth_sha256": "735fed06de00721a13524467140b88babc91f629f7009f43a8c83198f31bbe0a",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "9adcd34c5985d28955151da72924bb0d3dcef06cce11ee672e1f46791a3bd507"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0024",
+      "ground_truth_sha256": "67537008d7bba1f1ca95554f7f7b21e8e961950b887ba808bf05c2f39a91fac8",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "26f998ca9aa5ed9fad25457b0740583fb4b8b39c4cd9a13ff9ae5a47b550ec0f"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0025",
+      "ground_truth_sha256": "ed56fd894f9fb532c89b48cc15639827b80c7843eea5a9b84a252820e9087f6b",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "9e79c8bc4ce266d49cf46749405a801c06c7454cb7c4c351d61861346d16ece2"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0026",
+      "ground_truth_sha256": "3e1cacf67edc6d7bde63f43448bbdc1a4e53fcc70b652217d01120953bb5bd0f",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "362847f90dffc667a49fc2f298a5420ea0498ea5867e7f1ab4108cacf5ca76c6"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0027",
+      "ground_truth_sha256": "1ca8bec34b8971f43a3f6bc6b79bd785d69ee05ac5696f656eb21b18978ecdbc",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "d2b711d3cb7cb536d486529ea873e23392e6ad14deeff2c7a6d6d2829bddfd88"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0028",
+      "ground_truth_sha256": "6f967b31a3693fba016478df541c544ef5c74b0c49e65c2ac0d7b340fbdd7d98",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "a8400535cfcea3b7257fa8d15432591fefb353bb93c5a6666b8063b181cdafdf"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0029",
+      "ground_truth_sha256": "e0a93eca881fba22523653b9e0929898c1d8ab559ff360f80fb2db77380578cf",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "7b25ab798f22cc2cd47bb5485b424cde654225785963a1d9ce43d55f11a49e81"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0030",
+      "ground_truth_sha256": "94a3b67c244a5ee51b8d201bbc1a4218820f641780860a6fa74a175b75fd7e04",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "74e811932843db7bc08abfb06125c0941cc62152bd43ce043defb40229ab43fb"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0031",
+      "ground_truth_sha256": "f5f2f1e915a11b54424a4fc1b568b819bec24598defeb49e75a2ff1c0ce8e8fd",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "ccf39d940f069fe4cae80542fab67334f388a8cc6a6e6a2e0b616b0e7d4685cd"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0032",
+      "ground_truth_sha256": "cf09cbde84e724fd7dec65d4ff303e93d3edd694a5fb5647c8ae8dbed41e0afb",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "b46629378f5957479c44ca88f81f52833fd163685612c8bbb088faab67c17b10"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0033",
+      "ground_truth_sha256": "98498410d5f04d4bdb3528e4d3f919e2766a79c09749c40e04f7e2e3a9d9a6bc",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "a73a2209fddb40286fea47bb82c3ab4f7c2f340275c8f2f4abb2bc9a08790918"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0034",
+      "ground_truth_sha256": "6df6852217e77a05b1c6fb0d8a068806c779ef81814444673807217c42dd8f9d",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "30d7a74ce83d2ff5851732654edcac385e20d3f9f9d43b5f10c963038560b655"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0035",
+      "ground_truth_sha256": "bad7fb553434116e910a97f31384dcb57337a795319bd11e90b4166a0ef00e6a",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "d33e4bdba9c4d24b4a308f0c98c85bfcf4e614cdac0dd599438c24e4ca2f567b"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0036",
+      "ground_truth_sha256": "a331859164769b6fddaec832e61ac2a220ae37580b89841193ad02dcc594d0ec",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "1ea340d72c9f7edc7fc78a29a708c2a62b01f90857f20959d299bb70751cebd8"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0037",
+      "ground_truth_sha256": "b4c49e7a98fa1baa21ecff8ffaf694173dc77b8f1092aa7e206a816b666618d6",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "4f3896c27ba3916d08bf3aa8f54193d1018a169faa8bc09ae0670d586846be8a"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0038",
+      "ground_truth_sha256": "9fa486ab38e306ecb0af557d139ee66b7d7af5725e2b18fb830fc6502b0ff2e3",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "6988d39392227dd09e2742326cd24a2b63e3a5ec2a711aba3ef97856feb8f972"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0039",
+      "ground_truth_sha256": "af766b4ce11b7032b9617316db170569ec37f380c72dea9c9c79881f9088880c",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "9827033399292948c55f42c477920746774fbf9117bce62ab1b6c89eb184b5e2"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0040",
+      "ground_truth_sha256": "c75e44511eae3836c127683b6b89c835eb5a1efe9289534c17f573e201192dcb",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "03d3c678ccc30d579c6bd7659616d0cb33514fb5fbffbadb664f0382e7e76624"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0041",
+      "ground_truth_sha256": "0287b40f05a78041959b4cf64a9a34e43bd611dddf760f2428190ce5a377231f",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "4cbc53500c77fb040628a1d6567a30a89f609ec9cc9ccc62cb57f4a0d6a929d3"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0042",
+      "ground_truth_sha256": "bf7f2628edaa7da77da8de9b4f19c867d43ce76ea6876e39e2021eec9909a78f",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "9e2ca10269729282953349388e85437f2f30d1e4d6337dc1ad7918892c8f8a58"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0043",
+      "ground_truth_sha256": "a668a8919e80db554c155a278c795ddd513028d7113a358fb3cfa97f83ceccbc",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "4e9466b099e49f0662f679684038948f4e06e2861254f787f842f9510d281c53"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0044",
+      "ground_truth_sha256": "b256fcb8a9dcb08a47103d6ca677efc8296b6d85bfd6cc57e2862fee267f858e",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "0fa98cfc0a050aea2f05b51ba3073352797a73088995a79ee5982b6b19a82709"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0045",
+      "ground_truth_sha256": "873b5629fe36c70c9aa1d4aae201d15f3392c828c46af1777d1e5f55a7bc6218",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "6bbe62feb5f88560028dd077bffe8216ad0c56d3648e642d97f97cf0f735e3e7"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0046",
+      "ground_truth_sha256": "8c3ae00647437f014994504d9c317a1736d28ce825499961da22420060fc6f4a",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "c09a28dc088ed06eba641e6a15ec76af5caef3c041b9dac5703282c525cfd9fd"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0047",
+      "ground_truth_sha256": "d970ef753d9371851d118073ca1410b0fa9d0ac9b4b03e5213a45a720981ecc6",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "b114773bce69682572930271f8958f0c0203f7d30d170c7702a753fcf6658f8f"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0048",
+      "ground_truth_sha256": "1929701cf90c9edd4e07e5fb0e849a4b9cef6ff8f6fca94ae354f85621090485",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "9e3c6fbb96af0b1530924b8058ded77bee5c23b04b44ac8da155d42e12f5356b"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0049",
+      "ground_truth_sha256": "a23ceb63614e30c906ebaccef7f801289530c36dacb97cc6e6e3a190998cf0fc",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "3047795ce070458f2919903dbaab71f8b2d037453bd2bf4ee3444dae2411f6a3"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0050",
+      "ground_truth_sha256": "c5aafd1126b34c1ac147bf881174b233da58d4e01a2228c47373b5f0eb668f34",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "7aacfd7560aa1177895c32913eca6830b16e3776b2cda2730eeb090a4c8eea87"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0051",
+      "ground_truth_sha256": "8a0b32db973c6295d0bc86c16d30a31189f2d9780dc94a3b8e2e3cbbb65ad1bc",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "f90dd12444030669a88d03c535ea595350f32b651c27b2781da0fb2694b2b859"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0052",
+      "ground_truth_sha256": "65c48146a8e280b98f267613e8cb6d158d9f73c655b9a7d1f808db1290ee49ab",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "b35cbc7c7303786cdf36e55296445360394e63ad6a9f909b7681c54d66a60158"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0053",
+      "ground_truth_sha256": "55e9cd2936d2f21e3cc55eff246ccdf4d367607e0fd792e5e68c2190affb0342",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "1da544fdffa95ce1c45071cd1f2cc46f0f3285de29ecfe960189c86eaf943bed"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0054",
+      "ground_truth_sha256": "d595c7eb83f4e9d8126953773f5e666859a2f311f97e9d5fd5e8d23acb443c99",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "9c466d5d32adfff3064d34c79ca9f41879510f3fd6ef3c211fddb4d9c6d04530"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0055",
+      "ground_truth_sha256": "bd8e7c1fff140a7ca2eff2240a71ee1b0137ddffaaeccec086cd28f31f90b5e3",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "0d1effe2564446f892a7f86cf60800abdb052259086c04a548651712056648ae"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0056",
+      "ground_truth_sha256": "01f77dab61a83230e6a0364ecd1d35864f51aa6668f595559ab9acf145761ef6",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "0d4d9b7d0df94b4bf94da4f726583e39b188d327c1b6ae4a47a8512d19f72302"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0057",
+      "ground_truth_sha256": "492aa118969d52e32b61b545ba623adad3b97ce1e8149373b137c84c7f6bd844",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "b504a78bb9a3747de3e381fa50c0878c4a7fb88db6ecd2f01752bfe78f3b9408"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0058",
+      "ground_truth_sha256": "0c9dc95fad275a3e6954cddf4e1c4b0ba82a145503f6cc90fe13f394945c8fa3",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "ec811e839752b0805c1fd4d9f4a042c7348c70cbce9292be40b5cc39dc7ee870"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0059",
+      "ground_truth_sha256": "4edb54ebfb7a4a01013f703bd1b9fc33e4f49cb921e6663c99f059b882a81fc7",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "6e071bf3dfc4c391b8485797fb8bfb100e6c90a0d8aa1a0fb0cf3046430501cb"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0060",
+      "ground_truth_sha256": "677af1301c3af85b03b5474b51951d90dbf85d2b2e0921b6e78a5cb71d8ca5d9",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "2bb8317e70d6632f0e602ce2d2a4a7930e25f7b22e1445d2f7628812a5847ede"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0061",
+      "ground_truth_sha256": "70ebb8ba423d8a169ed7e8ce069af623ee36a20d0a7b448bc892bb74d5fa011c",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "8ee0b4793d3e8ce8aa16c64618f880dc6b0ee2ea5a073dd834f650b49f6257df"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0062",
+      "ground_truth_sha256": "c0b3ea6b776c3613fe200bce9cab639f50b65c455ffcf5126f4397b67c0e7485",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "bd2a19e47ac9f68b94a175647c6a7517e5efb34c81db652df0fbc7c37c7a57a6"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0063",
+      "ground_truth_sha256": "c29b934940e2ec07e3385dc07c9073cbbb5d762dfa1a9485133e130d74819ced",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "927981f30adb28b6b791de582a551258f4008486b6b2591d593b184532282a86"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0064",
+      "ground_truth_sha256": "36035b1a61c974562a72cfcdc3b540870c8ba2a0e74049389636c113399e654b",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "cc6e968e9f786b38cfdc0b7f712033a140f56894289c71f694c8c744a5ab569d"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0065",
+      "ground_truth_sha256": "219814ffd41c56433005a52ae26cdde28a63c676b517ef9b8c953c268ee5a153",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "aa203efc41d0b0ee5e57ee8f8d70b95668013bdb3dca1dcc4ce714dbc1d14a42"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0066",
+      "ground_truth_sha256": "d251c3e3f195a252c1ca17e746f8835f34119fc6b17d661c8d5ece3955b2db5a",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "00adffb0e3d5afb5d2e28705bd1428a228ba58d8d90343748589866823fd3e94"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0067",
+      "ground_truth_sha256": "0c890425f06042a6828e810d7ec7c0b8212eeb7d3b3ddf588489f6bca06c657d",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "de5a88ee4cb69ef9859ce4efb9c9610b5bef2d9c3b538ea9762082b23b9077b1"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0068",
+      "ground_truth_sha256": "c334a427fd63878f405887f51022eea1c98a8b14acb2f71e55f5f2c8123a77e8",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "fbcd61f3a6d8c09f9bac878db34fc58fd450c05a96d6405d694d55ba9adfedd6"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0069",
+      "ground_truth_sha256": "f234a3c28fce970fcbf926abd70dd298e50bfb8eaedc5fbfb096cf0f4797e253",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "ab9a284bf28308e06bd62d331fb56aa7b173656114d4c8662556a225052d28f2"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0070",
+      "ground_truth_sha256": "f8560473c759edcb3a471748f56839809936cea7bcba24f026efa876a65e24ca",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "39cf5eeb65bb37a449ed517d1f6306c31e7e7369cd62909f94c1eddabb51ec5b"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0071",
+      "ground_truth_sha256": "22a6fd6aa7ab36e429618bc12e946f633a0dfc56d37d2893197bcf5d879298f3",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "0805f7969a0e48f6a68678bc768744d1d5fe65c3e8661a4ff4d4f7dc373caba6"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0072",
+      "ground_truth_sha256": "708259bdb36b1dbc18802f3e54b91818a1bf1d2978aa5ec6b7312ac27cf01d01",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "97a558ad341bc67803b1bf4db346df2e17d97422cdfebb1aea1d124259cbc890"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0073",
+      "ground_truth_sha256": "a90575c1f8208669eafc270b98ccb2c4735a13f8f55c298acf3e574ebc5b0e4a",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "c4dc1776ce851da3d2f1975709e066e3be407db794e58bd967b62640bc1c1406"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0074",
+      "ground_truth_sha256": "76823a400749e1aa916f81c0e1a40b5d7ee4135d94f4c6acd16d4dd048397ac7",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "3c93b3348c80a1bc0cd8d034e7d232e32146fe2b255bfa2cccee797b7da057c2"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0075",
+      "ground_truth_sha256": "73ab3091382754278ad12a65548c83bb7a3533ae1f1069068975bdea63ffc358",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "ca91210e816b48e0685ae4badebd5c6d8a8bf28672b011731506f45b0a93a315"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0076",
+      "ground_truth_sha256": "5f9eb26d2f18a5c9a2717d3c429c0804b0c15bd3ff4d4b0f5159c5a536ee0df2",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "4dba173576e33ae9b8a158ba2e54db3049b0359b7f59d28055598383ceeef2e2"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0077",
+      "ground_truth_sha256": "5a3505ac06d345c9311227b46d16e1848ea835635b5ab27562461414891aeb53",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "5abdc639eb3e6dbb2f8042d97fb229bc22934a28a38a3c19aa05f1ef086a747d"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0078",
+      "ground_truth_sha256": "0a04dfd110f5c8fb649b6672aba92093fbdebde2cd6d0614d5f2fa154505fc22",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "822823f0a1f303242011a7d944b6e0cd49739a4d73d7f229428d60f00d368ad1"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0079",
+      "ground_truth_sha256": "5cea7c795962ae267b0b6c4b03ea254559580f39217e1fcf1c28a0893c93cbc2",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "8a6ba15222c05e2f63329af65f9b3a261f03483d861a3e9fbc89889aa4a6a023"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0080",
+      "ground_truth_sha256": "5e5a984e688ec7f5cd791d327b7607bafa8baf593f5470972c9640a6c6fe1b84",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "81a6713b25b3f69db0556ba4c02cee80f72b226323f61cd877e09c6cf03a105d"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0081",
+      "ground_truth_sha256": "7774bbacaab266c4166a299250f35b77bac8de1738403e70ec57cb51b76b441f",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "7798ad1ff39e608946c7bb25dd7de114a79cd6fee59478bbfa7b88e0cf85e73f"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0082",
+      "ground_truth_sha256": "682d15b879b2b95140d137fe29e6fe79c7bd009f261395d7c7c0dad118f892c7",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "6e86bc6387eed4e908cca7b02d6745b023624cfa4051e41f0b5a1fa18bf701b1"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0083",
+      "ground_truth_sha256": "dbb0fe15d8b27a7cd6f8140c0d3574902bde532facb822937c7ad22682a45d13",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "fea1195eff84a3ea4af1e16afecebfc45d5267ab2bd9ef7e7e485fbd00dd41c5"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0084",
+      "ground_truth_sha256": "f46895f47e90083c59f8a034d2e7d842ec65610a9b8571936086dce3b3d37e14",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "b0ad014f9c3ea0b06817a31c22407617177d89b73c729bfe9952989a0222cee7"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0085",
+      "ground_truth_sha256": "9d1778b3486beb6b2920908d95c36ce073966649b1b03ec10e5998f6a6cd88b5",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "3d6fb4a36458929b35c7530609c513aa9f1a69f7cd09a51425203086191acdab"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0086",
+      "ground_truth_sha256": "78b58d176e772ceb558a42da304468e467e446cf8d0f2bfa588c7939d6057cf6",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "bb9bdb7f9f85bbdc0d034bd958057a9a29830f70fd2f83e6c491781da838db2d"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0087",
+      "ground_truth_sha256": "ca57d52fd9d3a433481711bc85bdc2af3cbcacd1101b192a438c610149e38897",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "e8b593c911c83386ceb0aab3c2f238958e62923668b407e61341d608adcb8f6c"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0088",
+      "ground_truth_sha256": "151ab7089d0fb5a4f1872087f381fba76f806d24b26b1cb82bfadbcbd9c21534",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "257b5c021aa2f43ab5a2cfc2d1770c9cc64be7696eed616f008dce1fc21257e2"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0089",
+      "ground_truth_sha256": "c878c5c87ed4f20b8cfaf7fc70f7361fa7aee64877ae9329642db221f054db51",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "ad0989d941b062101f0a3c601b811a226225df13b8790b8b52a0aee2b64b80aa"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0090",
+      "ground_truth_sha256": "f203bf5c1febab891901919a14e4f55cbc07e65b37d3cc173a0671e5db9b2c4f",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "30f42d8e45e2caed93fb8a4f64894ada713b86978f3c8a3017b06dfcd42d5143"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0091",
+      "ground_truth_sha256": "1fde5e27255d509f93df68c63733f2d990c0e7ed5fc2e58d63821d688455e45f",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "00f5062927b1660b80ac31a4a7522c6d8862fb8c1d5f314fa8dcbdaf9bba9b8e"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0092",
+      "ground_truth_sha256": "ffbcef831ded7e4791e00d9a073982a1a7fe9f4b5ba4391d20570adc1028b74f",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "39c17fb3a18322f7c13e6382d6f1b3836ff2fc56b80ff80a5217d7985705eb62"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0093",
+      "ground_truth_sha256": "2814ba0800ac53390449d87535e9ad30f57e48993f442360354a5593ca7c276f",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "01438c3ba672dcf946e2886a59e5aad42947e7db4874a1c28fbdf4cb65045d9d"
+    },
+    {
+      "degradation_family": "truth-hidden-capture-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0094",
+      "ground_truth_sha256": "33980546e8ede72d5971282e4ee89f76e628af544f74eb48326eee3fe9b353f9",
+      "renderer_family": "truth-hidden-segmented-trajectory-v7-public",
+      "source_sha256": "f48c28ec7222d7fb7df326999d1873788df3a566cf93c026e23af0a48e39b8e9"
+    },
+    {
+      "degradation_family": "truth-hidden-print-chain-v7-public",
+      "fixture_id": "marker-domain-randomized-v7-sealed_public-0095",
+      "ground_truth_sha256": "05c322e2cb46e33dd815d584e7b69ab9cab54efabfdae42a76215c0eb31a65cf",
+      "renderer_family": "truth-hidden-reversed-annotation-v7-public",
+      "source_sha256": "07c09ddd3727c6b8fca4c7ad0ac6ed3a083a4e572c568b0bb6a4a9b39a84858c"
+    }
+  ],
+  "private_data": false,
+  "revision": "marker-center-domain-randomized-v7",
+  "schema": "graphreader.marker-center-domain-randomized-public-dataset.v7",
+  "scope": "public_synthetic_truth_hidden",
+  "seed": 7431
+}
