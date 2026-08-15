@@ -130,7 +130,7 @@ def test_source_protocol_and_public_gate_bindings_are_exact() -> None:
     assert sha256_file(ROOT / "SELECTION_MANIFEST.json") == protocol["selection_manifest_sha256"]
     assert sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json") == protocol["sealed_public_test_seal_sha256"]
     assert config["selection_thresholds"] == list(THRESHOLDS)
-    assert protocol["execution_authorized"] is False
+    assert protocol["execution_authorized"] is True
     assert protocol["public_gate_authorized"] is False
     assert protocol["public_gate_archive_opened"] is False
     assert protocol["public_gate_evaluations"] == 0
@@ -145,8 +145,8 @@ def test_canonical_budget_records_preregistered_p1_and_sealed_public_gate() -> N
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
     assert entry["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
     assert entry["p1_expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False

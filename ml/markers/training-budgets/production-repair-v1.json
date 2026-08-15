@@ -4337,7 +4337,7 @@
         "P3"
       ],
       "protocol_path": "ml/markers/center/feasible_dense_v6/PROTOCOL.json",
-      "protocol_sha256": "c5a13ecffd3e8572eca76f31696af87a28106462e4a3e3b7d3202a5845483c17",
+      "protocol_sha256": "11a9939668446a2feb611a36e11cbde69ebf63c037b85d4b36fa2c2d7c7de5c1",
       "design_source_paths": [
         "ml/markers/center/feasible_dense_v6/dataset.py",
         "ml/markers/center/feasible_dense_v6/model.py",
@@ -4422,9 +4422,9 @@
       "public_gate_config_sha256": "c21faf376f687b37061d662f4f4ab0ef858fc88d7d21a58351df20ab77a81393",
       "expected_public_evaluator_source_bundle_sha256": "216c6fb4382350b67c15f34dd7934bf4fe86fb10abaf6adcf09990caa6bfa83f",
       "expected_public_gate_configuration_sha256": "2cce2921f95041fcf5b768689c9f8d12d997c78879d51e8efabc631298899197",
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "P1 is preregistered and source-bound but requires a separate committed authorization before training may execute.",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,
