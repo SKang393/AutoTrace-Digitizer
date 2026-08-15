@@ -28,9 +28,10 @@ P1 configuration SHA-256 is
 `51de16e69364bb54f2818713ee095333c88484e2597fd0ecb307edbcf6e9e56e`;
 runner source bundle SHA-256 is
 `f4a91b00f3483e5bc7b2b06fb0d0d17311aef2fc7ba3c4c20cffd2fd32fece69`.
-Execution remains blocked until this preregistration is committed and a separate
-single-use authorization is recorded. A selected candidate would still require
-a separate public-gate authorization, independent marker-stage composition,
-manifest, model-store, packaging, clean-machine, private validation, and
-release evidence.
-
+The committed canonical budget ledger now authorizes P1 for one execution. The
+runner requires the authorization, candidate configuration, and every bound
+source file to be committed before it creates an opened seal or training output.
+P1 cannot rerun after that seal is opened. A selected candidate would still
+require a separate public-gate authorization, independent marker-stage
+composition, manifest, model-store, packaging, clean-machine, private
+validation, and release evidence.

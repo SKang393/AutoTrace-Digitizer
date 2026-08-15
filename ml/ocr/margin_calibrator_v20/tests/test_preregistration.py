@@ -74,7 +74,7 @@ def test_model_is_small_deterministic_and_export_shaped() -> None:
     assert sum(parameter.numel() for parameter in first.parameters()) < 2_200
 
 
-def test_candidate_and_public_gate_remain_execution_blocked() -> None:
+def test_candidate_is_single_use_authorized_while_public_gate_remains_blocked() -> None:
     config = _read("training/p1.json")
     gate = _read("gates/sealed-public-v1.json")
     seal = _read("SEALED_PUBLIC_TEST_SEAL.json")
@@ -89,9 +89,10 @@ def test_candidate_and_public_gate_remain_execution_blocked() -> None:
     assert entry["status"] == "candidate_1_preregistered"
     assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
-    assert entry["execution_authorized"] is False
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["execution_blocker"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(MODULE / "training/p1.json")
     assert not (MODULE / "P1_RESULT.json").exists()
     assert not (MODULE / "PUBLIC_GATE_RESULT.json").exists()
-
