@@ -70,3 +70,31 @@ def test_no_public_identity_authorization_or_result_exists_at_preregistration() 
     if not seal.exists():
         assert not authorization.exists()
         assert not result.exists()
+
+
+def test_authorization_binds_frozen_public_identity_and_remains_fail_closed() -> None:
+    seal_path = ROOT / "SEALED_PUBLIC_TEST_SEAL.json"
+    authorization_path = ROOT / "PUBLIC_GATE_AUTHORIZATION.json"
+    assert seal_path.exists()
+    assert authorization_path.exists()
+
+    seal = json.loads(seal_path.read_text(encoding="utf-8"))
+    authorization = json.loads(authorization_path.read_text(encoding="utf-8"))
+    assert authorization["schema"] == "graphreader.ocr-selected-confidence-public-authorization.v1"
+    assert authorization["candidate_id"] == "P2"
+    assert authorization["sealed_identity_commit"] == "209ca6ffb917eada1657e90a00cb59fc84e685e0"
+    assert authorization["fixture_archive_sha256"] == seal["fixture_archive_sha256"]
+    assert authorization["fixture_manifest_sha256"] == seal["fixture_manifest_sha256"]
+    assert authorization["public_seal_sha256"] == sha256(seal_path.read_bytes()).hexdigest()
+    assert authorization["execution_authorized"] is True
+    assert authorization["public_gate_authorized"] is True
+    assert authorization["execution_count_authorized"] == 1
+    assert authorization["provider"] == "CPUExecutionProvider"
+    assert authorization["rerun_or_repair_authorized"] is False
+    assert authorization["marker_stage_authorized"] is False
+    assert authorization["artifact_mask_production_approval"] is False
+    assert authorization["manifest_creation_authorized"] is False
+    assert authorization["model_store_promotion_authorized"] is False
+    assert authorization["private_validation_authorized"] is False
+    assert authorization["production_approval"] is False
+    assert authorization["release_eligible"] is False

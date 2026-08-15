@@ -1,0 +1,28 @@
+{
+  "schema": "graphreader.ocr-selected-confidence-public-authorization.v1",
+  "candidate_id": "P2",
+  "execution_authorized": true,
+  "public_gate_authorized": true,
+  "execution_count_authorized": 1,
+  "provider": "CPUExecutionProvider",
+  "sealed_identity_commit": "209ca6ffb917eada1657e90a00cb59fc84e685e0",
+  "fixture_archive_sha256": "b666230e0cce4f1bf539c3210741d8379d2a95e919ed4d2d955f87bd975c876a",
+  "fixture_manifest_sha256": "faf0e66effbafa7b710a65a31cef81044e2b3d40dbd69b640d18e05f6effa8d9",
+  "public_seal_sha256": "2a33bae2163ff234f28b92d44e89c6162861507df769ca2f5546eff22f5629ea",
+  "candidate_sha256": [
+    "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+    "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+    "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+    "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096"
+  ],
+  "exact_test": "OcrV9P2DirectPublicCorpusTests.FreshEightRolePublicBytesExecuteOnceThroughCSharpCpuCandidate",
+  "result_path": "artifacts/production-validation/ocr-v9-p2-eight-role-public-report.json",
+  "rerun_or_repair_authorized": false,
+  "marker_stage_authorized": false,
+  "artifact_mask_production_approval": false,
+  "manifest_creation_authorized": false,
+  "model_store_promotion_authorized": false,
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "release_eligible": false
+}
