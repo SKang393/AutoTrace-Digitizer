@@ -55,3 +55,26 @@ enable normal Auto Detect, package a payload, validate Chandler, or make the
 release eligible. Full role coverage, an approved artifact-mask provider,
 model-store and packaging discovery, clean-machine execution, and private
 Chandler validation all remain mandatory and fail closed.
+
+## Consumed result
+
+The single authorized run from exact commit
+`e70eb014b0436f22abd811a243b85a13cbd72f9e` failed closed. Report SHA-256 is
+`ac6dfc56095f1d010330fef604bae8e7e0f880763b64ad0d02eb923ff03cc0d3`,
+opened-seal SHA-256 is
+`32b0f796e5162e252887b7ded0021702a5d1e70bd2677da4e7625c602ed305b1`,
+and fail result-seal SHA-256 is
+`b8a7c7672ddf3e6ebc2e7e5de923f4ca07b3da10352a0e8e116dd63c46acfb18`.
+
+OCR found 320/320 truths but produced 192 false regions, zero misses or
+duplicates, and zero exact scenes. Recognition exact match was `0.99375`, CER
+was `0.0011695906432748538`, role and numeric accuracy were `1.0`, word exact
+match was `0.988950276243094`, and ambiguity exact match was `1.0`. Marker
+composition retained 465/522 truths with two false markers, 57 misses, zero
+duplicates, and exact counts in 14/64 scenes. Text-derived marker creation and
+all prohibited-structure hits were zero. All five payloads recorded direct CPU
+input and output tensor hashes.
+
+V4 is consumed. It may not rerun, be repaired, or be tuned against the exposed
+fixtures. It created no manifest, model-store entry, packaging approval,
+private validation, production approval, or release eligibility.
