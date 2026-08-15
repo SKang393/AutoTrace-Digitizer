@@ -1,0 +1,34 @@
+{
+  "candidate_id": "P2",
+  "fixture_archive_path": "artifacts/production-validation/ocr-v9-p2-selection.zip",
+  "fixture_archive_sha256": "8dd61664870725f896bacc37d3593a0891c1b465a6b848a8a2083f20cf9b4133",
+  "fixture_manifest_sha256": "4b0b4c948ebf814a464ff6f8b6df06645b3436e262fc6336daf65ed5b7d4fdea",
+  "generation_environment": {
+    "numpy": "2.3.5",
+    "pillow": "12.3.0",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.13.7",
+    "torch": "2.13.0+cpu"
+  },
+  "model_execution_count_at_freeze": 0,
+  "production_approval": false,
+  "public_gate_authorized": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "resource_count": 128,
+  "scene_count": 128,
+  "schema": "graphreader.ocr-selected-confidence-selection-seal.v1",
+  "secret_seed_serialized": false,
+  "selection_execution_authorized": false,
+  "source_sha256": {
+    "ml/markers/gate_seal.py": "8b01113d0881dc2b89df3763f4c66fe311cffa48520e72963d2bd6366372122a",
+    "ml/ocr/production_csharp_marker_gate_v4/dataset.py": "2f2675cc61580998da80211e82209296b3428c67d00beb12696136de924f5e18",
+    "ml/ocr/selected_confidence_acceptance_v9_p2/PROTOCOL.json": "840a3e09b6b109e861bda490aa992a6c24c181f4467b05d451d6d674564e7877",
+    "ml/ocr/selected_confidence_acceptance_v9_p2/dataset.py": "1c76696d74b1eab62efe1a065a0788f1531d8f2e023c155b3c6f4f22365d22b5",
+    "ml/ocr/selected_confidence_acceptance_v9_p2/prepare_split.py": "897898641677e050b52b2b2f2b5e550590253e5115a41f0bcc80c969cc990699",
+    "ml/ocr/selected_confidence_acceptance_v9_p2/protocol.py": "608f564b2220041ddb01c008c9c9bfeefe096716f1ee4a1949c15702656647a9",
+    "src/GraphReader.Ocr/OcrV9P2CandidateCompositionPipeline.cs": "756e6620c133f41c9cfbef19d9f6ee8a7007f06afd33561f96a7a4c5359e668e",
+    "tests/GraphReader.Ocr.Tests/OcrV9P2CandidateSelectionTests.cs": "d50ac896ab99f1807eb641bdaf7af2f25dedbf7019bdd3621d886f0930c925f9"
+  },
+  "truth_region_count": 640
+}
