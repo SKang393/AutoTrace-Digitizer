@@ -106,7 +106,7 @@ def test_mean_collapsed_ctc_confidence_is_fixed_and_rejects_blank() -> None:
     assert RECOGNITION_CONFIDENCE_THRESHOLD == 0.60
 
 
-def test_canonical_ledger_preregisters_only_unconsumed_p1() -> None:
+def test_canonical_ledger_authorizes_only_unconsumed_p1_selection() -> None:
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text())
     entry = next(
         item for item in ledger["revisions"]
@@ -117,8 +117,8 @@ def test_canonical_ledger_preregisters_only_unconsumed_p1() -> None:
     assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False

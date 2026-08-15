@@ -24,8 +24,9 @@ hits, recognition exact match at least `0.90`, CER at most `0.05`, overall role
 accuracy at least `0.90`, and every role at least `0.85`. Tensor input and
 output streams for both models are hashed.
 
-P1 is a single zero-optimizer candidate. It is preregistered but not authorized.
-The public archive is unopened with zero evaluations. Even a public pass cannot
+P1 is a single zero-optimizer candidate. Its exact source-bound visible-selection
+execution is authorized once by the canonical ledger. The public archive is
+unopened with zero evaluations. Even a public pass cannot
 create a production manifest or approval until direct marker-stage composition,
 reviewed model-store discovery, packaging, clean-machine, and private gates also
 pass. Release eligibility remains false.

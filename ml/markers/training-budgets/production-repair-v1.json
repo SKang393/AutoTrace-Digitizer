@@ -286,9 +286,9 @@
         "provider": "CPUExecutionProvider",
         "direct_fixture_byte_execution_required": true
       },
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "P1 source, fresh stored split bytes, exact artifact hashes, and gates are preregistered. A separate committed authorization is required before the single zero-optimizer evaluation.",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "execution_blocker": "Only the exact checksum-bound P1 zero-optimizer visible-selection evaluation is authorized once. Public archive access, another candidate, tuning, packaging, private validation, and approval remain prohibited.",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,
