@@ -143,17 +143,26 @@ def test_protocol_config_and_budget_are_checksum_bound_and_p3_blocked() -> None:
     assert p2_result["selection_exact_scene_count"] == 49
     assert p2_result["public_gate_archive_opened"] is False
     assert p2_result["public_gate_evaluations"] == 0
-    assert protocol["execution_authorized"] is True
+    p3_result = _json(ROOT / "P3_RESULT.json")
+    assert sha256_file(ROOT / "P3_RESULT.json") == protocol["p3_result_sha256"]
+    assert p3_result["status"] == "failed_selection_consumed"
+    assert p3_result["optimizer_steps"] == 1536
+    assert p3_result["selection_exact_scene_count"] == 50
+    assert p3_result["onnx_parity_passed"] is False
+    assert p3_result["public_gate_archive_opened"] is False
+    assert p3_result["public_gate_evaluations"] == 0
+    assert protocol["execution_authorized"] is False
+    assert protocol["state"] == "candidate_budget_exhausted_selection_failed"
     assert protocol["public_gate_authorized"] is False
     assert protocol["public_gate_archive_opened"] is False
     assert protocol["public_gate_evaluations"] == 0
     assert protocol["trigger_case_detail_or_pixels_used"] is False
     assert entry["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["status"] == "exhausted_selection_failed"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["manifest_created"] is False
     assert entry["model_store_promoted"] is False
