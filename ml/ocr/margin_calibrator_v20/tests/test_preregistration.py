@@ -75,7 +75,7 @@ def test_model_is_small_deterministic_and_export_shaped() -> None:
     assert sum(parameter.numel() for parameter in first.parameters()) < 2_200
 
 
-def test_consumed_p1_and_preregistered_p2_are_bound_while_public_remains_blocked() -> None:
+def test_consumed_p1_and_p2_are_bound_while_p3_and_public_remain_blocked() -> None:
     config = _read("training/p1.json")
     p2_config = _read("training/p2.json")
     gate = _read("gates/sealed-public-v1.json")
@@ -88,13 +88,13 @@ def test_consumed_p1_and_preregistered_p2_are_bound_while_public_remains_blocked
     assert gate["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(ROOT, EVALUATOR_SOURCE_PATHS)
     assert seal["truth_hidden_from_candidate_runner"] is True
     assert seal["public_gate_evaluations"] == 0
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["status"] == "candidate_2_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
-    assert entry["execution_blocker"] is None
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert "P3 is the only remaining candidate" in entry["execution_blocker"]
     assert entry["public_gate_authorized"] is False
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(MODULE / "training/p1.json")
     assert entry["p1_result_sha256"] == sha256_file(MODULE / "P1_RESULT.json")
@@ -109,6 +109,14 @@ def test_consumed_p1_and_preregistered_p2_are_bound_while_public_remains_blocked
     assert p2_config["expected_optimizer_steps"] == 0
     assert p2_config["weights_changed"] is False
     assert p2_config["proposal_count"] == 5384
-    assert not (MODULE / "P2_RESULT.json").exists()
-    assert not (MODULE / "artifacts/P2-run").exists()
+    p2_result = _read("P2_RESULT.json")
+    assert entry["p2_result_sha256"] == sha256_file(MODULE / "P2_RESULT.json")
+    assert entry["p2_candidate_report_sha256"] == p2_result["candidate_report_sha256"]
+    assert entry["p2_status"] == "failed_selection_consumed"
+    assert p2_result["case_level_details_emitted"] is False
+    assert p2_result["public_gate_archive_opened"] is False
+    assert p2_result["selection_metrics"]["false_positives"] == 4
+    assert p2_result["selection_metrics"]["false_negatives"] == 4
+    assert p2_result["selection_metrics"]["minimum_role_accuracy"] == 0.5625
+    assert p2_result["passing_threshold_window"] == []
     assert not (MODULE / "PUBLIC_GATE_RESULT.json").exists()
