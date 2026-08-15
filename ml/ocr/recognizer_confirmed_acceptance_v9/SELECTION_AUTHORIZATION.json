@@ -1,0 +1,32 @@
+{
+  "schema": "graphreader.ocr-recognizer-confirmed-selection-authorization.v1",
+  "task": "ocr-detection-recognition-composition",
+  "revision": "graphreader-v10-recognizer-confirmed-acceptance-v9",
+  "candidate_id": "P1",
+  "composition_id": "graphreader-v10-recognizer-confirmed-acceptance-composition-v9",
+  "execution_authorized": true,
+  "execution_count_authorized": 1,
+  "provider": "CPUExecutionProvider",
+  "sealed_identity_commit": "2a8602f683b9fb88dee85a4dfcc6d657c8e01392",
+  "fixture_archive_sha256": "d81aec71164a892ec1da2e37af3b91d5c7b98df89afbf24130532722db5d2a86",
+  "fixture_manifest_sha256": "ab7fd37e794e6e5de1ce831ad1e3646188e27af4f5a9d576cd93af12822d7e7e",
+  "split_seal_sha256": "a76fb9e98df9d3cc1104ab0591680ecaac721acd39e7825c4503464e604806b8",
+  "candidate_sha256": [
+    "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+    "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+    "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+    "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096"
+  ],
+  "exact_test": "OcrV9CandidateSelectionTests.FreshVisibleSelectionExecutesOnceThroughCSharpCpuCandidate",
+  "result_path": "artifacts/production-validation/ocr-v9-p1-selection-report.json",
+  "rerun_or_repair_authorized": false,
+  "public_gate_authorized": false,
+  "full_eight_role_coverage_proven": false,
+  "marker_creation_evaluated": false,
+  "artifact_mask_production_approval": false,
+  "manifest_creation_authorized": false,
+  "model_store_promotion_authorized": false,
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "release_eligible": false
+}
