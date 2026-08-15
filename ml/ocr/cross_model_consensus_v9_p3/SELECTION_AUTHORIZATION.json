@@ -1,0 +1,30 @@
+{
+  "schema": "graphreader.ocr-cross-model-consensus-authorization.v1",
+  "candidate_id": "P3",
+  "split": "selection",
+  "execution_authorized": true,
+  "execution_count_authorized": 1,
+  "provider": "CPUExecutionProvider",
+  "sealed_identity_commit": "9c8d73081b69c81799118e92fd1d63c4682828a5",
+  "split_seal_sha256": "9f491cc9d31d320280daa34d5323dbf924748689808f118e8b8a3b1958917ba3",
+  "fixture_archive_sha256": "e8691349879eb6861aaa231154ab73e9aec9c048f4b52ec5ca6de28b67179e6e",
+  "fixture_manifest_sha256": "9cec2c378a4df6949598e8163c7ddb132e1ff920f3f2c269073b8e55da644759",
+  "candidate_sha256": [
+    "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+    "af13b387140d70946b23ff7349fed82649fde95eb6f6cabe90179b2914a16631",
+    "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+    "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+    "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096"
+  ],
+  "exact_test": "OcrV9P3DirectCorpusTests.FreshSelectionBytesExecuteOnceThroughCSharpCpuConsensus",
+  "result_path": "artifacts/production-validation/ocr-v9-p3-selection-report.json",
+  "selection_result_sha256": null,
+  "rerun_or_repair_authorized": false,
+  "marker_stage_authorized": false,
+  "artifact_mask_production_approval": false,
+  "manifest_creation_authorized": false,
+  "model_store_promotion_authorized": false,
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "release_eligible": false
+}
