@@ -24,10 +24,22 @@ fixture supplies a checksum-bound procedural structure mask for direct
 composition evidence. That fixture mask is not an approved production
 artifact-mask provider.
 
-No V4 model execution is authorized by this preregistration. The generator may
-run once only after this protocol is committed and pushed. The resulting
-hash-only split identity must then be committed and pushed before a separate
-authorization commit can permit exactly one CPU execution.
+The generator ran once from preregistration commit
+`fff9c96e08672541ea62bdbdb2f08b78fe960609`. It created 64 scenes with 320
+text truths and 522 marker truths. The ignored archive SHA-256 is
+`b916ab47fa2734ffc657c702572c86da5110eabcd730306062236f9fb6001432`,
+its embedded manifest SHA-256 is
+`58fe558aedee77495e630e7bc1e8658f70b5ee970b70147bccc302b18d515707`,
+and the tracked hash-only split seal SHA-256 is
+`3ac34dc2b34a111c2714368c3f7356b7c83f15a1aec5d7db15cb37157ab41b87`.
+All 128 image and artifact-mask resources match their embedded checksums. The
+fresh secret is not serialized, the seal records zero model executions, and
+no predecessor fixture bytes, truth, or scene IDs were reused.
+
+No V4 model execution is authorized until this hash-only identity is committed
+and pushed. A separate authorization commit must bind that committed identity,
+the archive, embedded manifest, seal, exact test, output path, and five payload
+hashes before exactly one CPU execution is eligible to run.
 
 Passing cannot create a model manifest, approve the production model store,
 enable normal Auto Detect, package a payload, validate Chandler, or make the
