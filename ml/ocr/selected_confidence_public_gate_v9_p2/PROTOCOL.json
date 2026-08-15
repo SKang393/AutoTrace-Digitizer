@@ -1,0 +1,112 @@
+{
+  "artifact_mask_production_approval": false,
+  "blocking_gates_after_pass": [
+    "marker_stage_direct_composition_evidence",
+    "approved_artifact_mask_provider",
+    "approved_production_model_store",
+    "packaging_discovery_and_clean_machine_evidence",
+    "private_chandler_automatic_validation"
+  ],
+  "candidate_id": "P2",
+  "chandler_included": false,
+  "composition_id": "graphreader-v10-selected-confidence-acceptance-composition-v9-p2",
+  "gates": {
+    "ambiguity_exact_match_minimum": 0.9,
+    "character_error_rate_maximum": 0.05,
+    "direct_fixture_byte_execution_required": true,
+    "direct_tensor_hash_per_model_call_required": true,
+    "duplicate_regions": 0,
+    "every_required_role_observed": true,
+    "exact_region_count_every_fixture": true,
+    "false_regions": 0,
+    "missed_regions": 0,
+    "numeric_exact_match_minimum": 0.9,
+    "per_role_accuracy_minimum": 0.9,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "recognition_exact_match_minimum": 0.9,
+    "role_accuracy_minimum": 0.9,
+    "single_authorized_execution": true,
+    "word_exact_match_minimum": 0.9
+  },
+  "generalization_label_included": false,
+  "manifest_created": false,
+  "marker_creation_evaluated": false,
+  "model_store_promoted": false,
+  "models": {
+    "ambiguity_recognizer": {
+      "provider": "CPUExecutionProvider",
+      "sha256": "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096"
+    },
+    "numeric_recognizer": {
+      "provider": "CPUExecutionProvider",
+      "sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84"
+    },
+    "ocr_detector": {
+      "provider": "CPUExecutionProvider",
+      "sha256": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db"
+    },
+    "official_recognizer": {
+      "provider": "CPUExecutionProvider",
+      "sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743"
+    }
+  },
+  "predecessor_selection": {
+    "case_level_evidence_used": false,
+    "duplicates": 0,
+    "false_negatives": 0,
+    "false_positives": 0,
+    "result_sha256": "288a04e4c1d4eb8c11aeae6cccb606b43dad4253c697e7703593e354c834e7b1",
+    "scene_count": 128,
+    "selection_gates_passed": true,
+    "truth_region_count": 640
+  },
+  "private_or_article_images": false,
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "public_execution_authorized": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graphreader-v10-selected-confidence-eight-role-public-v9-p2",
+  "schema": "graphreader.ocr-selected-confidence-public-protocol.v1",
+  "split": {
+    "degradation_families": [
+      "diagonal-fiber-drift-v9-p2-public",
+      "low-amplitude-ring-fade-v9-p2-public",
+      "offset-row-shelf-v9-p2-public",
+      "subpixel-paper-wave-v9-p2-public"
+    ],
+    "name": "sealed_public",
+    "p1_or_p2_selection_fixture_bytes_reused": false,
+    "plot_bounds": [104, 48, 510, 256],
+    "predecessor_truth_or_scene_ids_reused": false,
+    "renderer_families": [
+      "selected-confidence-eight-role-public-v9-p2-a",
+      "selected-confidence-eight-role-public-v9-p2-b",
+      "selected-confidence-eight-role-public-v9-p2-c",
+      "selected-confidence-eight-role-public-v9-p2-d",
+      "selected-confidence-eight-role-public-v9-p2-e",
+      "selected-confidence-eight-role-public-v9-p2-f",
+      "selected-confidence-eight-role-public-v9-p2-g",
+      "selected-confidence-eight-role-public-v9-p2-h"
+    ],
+    "required_roles": [
+      "y_tick",
+      "x_tick",
+      "axis_title",
+      "phase_heading",
+      "legend_text",
+      "participant",
+      "annotation",
+      "other"
+    ],
+    "scene_count": 160,
+    "scene_height": 320,
+    "scene_width": 640,
+    "secret_seed_generated_once_and_not_serialized": true,
+    "text_truths_per_scene": 8
+  },
+  "state": "preregistered_before_public_identity_materialization_or_model_execution",
+  "synthetic_only": true,
+  "task": "ocr-detection-recognition-composition"
+}
