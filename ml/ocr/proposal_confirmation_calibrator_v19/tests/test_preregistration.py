@@ -92,7 +92,8 @@ def test_public_gate_and_production_remain_fail_closed() -> None:
     seal = _read("SEALED_PUBLIC_TEST_SEAL.json")
     gate = _read("gates/sealed-public-v1.json")
     p1_result = _read("P1_RESULT.json")
-    result = _read("P2_RESULT.json")
+    p2_result = _read("P2_RESULT.json")
+    result = _read("P3_RESULT.json")
     ledger = json.loads(
         (ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
     )
@@ -106,23 +107,25 @@ def test_public_gate_and_production_remain_fail_closed() -> None:
     assert result["case_level_details_emitted"] is False
     assert result["public_gate_archive_opened"] is False
     assert result["public_gate_evaluations"] == 0
-    assert result["selection_metrics"]["false_positives"] == 1
+    assert result["selection_metrics"]["false_positives"] == 0
     assert result["selection_metrics"]["false_negatives"] == 0
-    assert result["selection_metrics"]["prohibited_structure_hits"] == 1
+    assert result["selection_metrics"]["prohibited_structure_hits"] == 0
+    assert result["selection_metrics"]["exact_scene_count"] == 128
     assert result["passing_threshold_window"] == []
     assert p1_result["status"] == "failed_selection"
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert p2_result["status"] == "failed_selection"
+    assert entry["status"] == "exhausted_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["p1_result_sha256"] == sha256_file(MODULE / "P1_RESULT.json")
     assert entry["p2_result_sha256"] == sha256_file(MODULE / "P2_RESULT.json")
+    assert entry["p3_result_sha256"] == sha256_file(MODULE / "P3_RESULT.json")
     assert entry["candidate_config_sha256"]["P3"] == sha256_file(MODULE / "training/p3.json")
     assert not (MODULE / "PUBLIC_GATE_REPORT.json").exists()
-    assert not (MODULE / "P3_RESULT.json").exists()
-    local_report = MODULE / "artifacts/P2-run/candidate-report.json"
+    local_report = MODULE / "artifacts/P3-run/candidate-report.json"
     if local_report.exists():
-        assert sha256_file(local_report) == sha256_file(MODULE / "P2_RESULT.json")
+        assert sha256_file(local_report) == sha256_file(MODULE / "P3_RESULT.json")
