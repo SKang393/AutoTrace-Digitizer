@@ -490,7 +490,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-margin-calibrator-v20",
-      "status": "candidate_2_failed_selection",
+      "status": "candidate_3_preregistered",
       "defect_class": "the exhausted V19 P3 calibrator had one zero-error operating threshold but no mandatory three-consecutive-threshold zero-error window",
       "prior_revision": "graph-text-proposal-confirmation-calibrator-v19",
       "trigger_result_path": "ml/ocr/proposal_confirmation_calibrator_v19/P3_RESULT.json",
@@ -506,14 +506,14 @@
       "recognizer_path": "ml/ocr/official_bakeoff/runs/conversion/en_PP-OCRv5_mobile_rec.onnx",
       "recognizer_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": [
+        "P3"
+      ],
       "consumed_candidate_ids": [
         "P1",
         "P2"
       ],
-      "remaining_unregistered_candidate_ids": [
-        "P3"
-      ],
+      "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/ocr/margin_calibrator_v20/PROTOCOL.json",
       "protocol_sha256": "920f114218dca60179c19e93c2ba16aba437e6a54d026e0d8a68213ad887706c",
       "split_materialized": true,
@@ -541,11 +541,13 @@
       "expected_public_evaluator_source_bundle_sha256": "c86dee281317d87909220dbcc12c61ed3fc04f080edb31d307256dc01eceded6",
       "candidate_config_paths": {
         "P1": "ml/ocr/margin_calibrator_v20/training/p1.json",
-        "P2": "ml/ocr/margin_calibrator_v20/training/p2.json"
+        "P2": "ml/ocr/margin_calibrator_v20/training/p2.json",
+        "P3": "ml/ocr/margin_calibrator_v20/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "51de16e69364bb54f2818713ee095333c88484e2597fd0ecb307edbcf6e9e56e",
-        "P2": "037186d0bbf5b5ea72c06ce2a59894cd525015e17cf94c57b6451546b8b2d4a0"
+        "P2": "037186d0bbf5b5ea72c06ce2a59894cd525015e17cf94c57b6451546b8b2d4a0",
+        "P3": "2cc71c827def6c3ad196041ca835a01956196d1c172f6361c0ea51a652bd21f2"
       },
       "p1_expected_runner_source_bundle_sha256": "f4a91b00f3483e5bc7b2b06fb0d0d17311aef2fc7ba3c4c20cffd2fd32fece69",
       "p1_expected_optimizer_steps": 288,
@@ -610,9 +612,24 @@
       "p2_minimum_role_accuracy": 0.5625,
       "p2_case_level_details_emitted": false,
       "p2_failure": "P2 executed the exact P1 model over every frozen validation proposal and passed CPU ONNX parity, recognition, aggregate role accuracy, and duplicate gates. It still retained four false and prohibited regions, missed four truths, failed YTick role accuracy at 0.5625, and produced no three-threshold passing window.",
+      "p3_isolated_change": "replace the consumed binary P1 calibrator with one complete-stream quadratic encoder that jointly calibrates proposal acceptance and text role from the unchanged frozen 31-feature evidence, using every stored V20 training proposal and no validation or public truth during optimization",
+      "p3_architecture": "complete-stream-quadratic-multitask-calibrator-v1",
+      "p3_expected_runner_source_bundle_sha256": "901dfd13c126b2ea6190625977644768e640f34f4e00b02dcb7dfb90e4a780c0",
+      "p3_expected_optimizer_steps": 1480,
+      "p3_training_proposal_count": 9373,
+      "p3_training_positive_proposal_count": 1536,
+      "p3_training_negative_proposal_count": 7837,
+      "p3_validation_proposal_count": 5384,
+      "p3_validation_positive_proposal_count": 1024,
+      "p3_validation_negative_proposal_count": 4360,
+      "p3_positive_logit_margin": 2.9444389791664403,
+      "p3_negative_logit_margin": -2.9444389791664403,
+      "p3_pairwise_logit_margin": 4.0,
+      "p3_role_head_calibrated": true,
+      "p3_validation_or_public_truth_used_for_optimization": false,
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "execution_blocker": "P2 is consumed after failed visible selection. P3 is the only remaining candidate and must be separately preregistered and committed before any authorization.",
+      "execution_blocker": "P3 is preregistered but not authorized. Its source-bound runner and configuration must be committed before a separate authorization checkpoint.",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,
