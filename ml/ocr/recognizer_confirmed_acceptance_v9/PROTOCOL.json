@@ -1,0 +1,89 @@
+{
+  "candidate": {
+    "detector_threshold": 0.95,
+    "model_bytes_unchanged": true,
+    "official_minimum_confidence": 0.65,
+    "other_v8_thresholds_unchanged": true
+  },
+  "candidate_id": "P1",
+  "chandler_included": false,
+  "composition_id": "graphreader-v10-recognizer-confirmed-acceptance-composition-v9",
+  "defect_class": "the consumed V4 direct composition found all 320 OCR truths but admitted 192 false regions because the high-confidence detector band did not require recognizer evidence",
+  "experiment_budget": 3,
+  "generalization_label_included": false,
+  "isolated_change": "require official recognizer confidence at or above 0.65 before accepting a proposal through the unchanged detector >=0.95 band",
+  "manifest_created": false,
+  "models": {
+    "ambiguity_recognizer": {
+      "provider": "CPUExecutionProvider",
+      "sha256": "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096"
+    },
+    "numeric_recognizer": {
+      "provider": "CPUExecutionProvider",
+      "sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84"
+    },
+    "ocr_detector": {
+      "provider": "CPUExecutionProvider",
+      "sha256": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db"
+    },
+    "official_recognizer": {
+      "provider": "CPUExecutionProvider",
+      "sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743"
+    }
+  },
+  "private_or_article_images": false,
+  "production_approval": false,
+  "public_gate_authorized": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "graphreader-v10-recognizer-confirmed-acceptance-v9",
+  "schema": "graphreader.ocr-recognizer-confirmed-acceptance-protocol.v1",
+  "selection_execution_authorized": false,
+  "selection_gates": {
+    "ambiguity_exact_match_minimum": 0.9,
+    "character_error_rate_maximum": 0.05,
+    "direct_fixture_byte_execution_required": true,
+    "direct_tensor_hash_per_model_call_required": true,
+    "duplicate_regions": 0,
+    "exact_region_count_every_fixture": true,
+    "false_regions": 0,
+    "missed_regions": 0,
+    "numeric_exact_match_minimum": 0.9,
+    "provider": "CPUExecutionProvider",
+    "recognition_exact_match_minimum": 0.9,
+    "role_accuracy_minimum": 0.9,
+    "word_exact_match_minimum": 0.9
+  },
+  "split": {
+    "degradation_families": [
+      "cross-axis-sinusoid-v9-selection",
+      "local-shelf-quantization-v9-selection",
+      "asymmetric-paper-fade-v9-selection",
+      "row-column-ripple-v9-selection"
+    ],
+    "full_eight_role_coverage_proven": false,
+    "name": "visible_selection",
+    "plot_bounds": [104, 48, 510, 256],
+    "predecessor_fixture_bytes_reused": false,
+    "predecessor_truth_or_scene_ids_reused": false,
+    "renderer_families": [
+      "recognizer-confirmed-structure-collision-v9-selection-a",
+      "recognizer-confirmed-structure-collision-v9-selection-b",
+      "recognizer-confirmed-structure-collision-v9-selection-c",
+      "recognizer-confirmed-structure-collision-v9-selection-d",
+      "recognizer-confirmed-structure-collision-v9-selection-e",
+      "recognizer-confirmed-structure-collision-v9-selection-f",
+      "recognizer-confirmed-structure-collision-v9-selection-g",
+      "recognizer-confirmed-structure-collision-v9-selection-h"
+    ],
+    "required_roles": ["y_tick", "x_tick", "phase_heading", "annotation", "legend_text"],
+    "scene_count": 96,
+    "scene_height": 320,
+    "scene_width": 640,
+    "secret_seed_generated_once_and_not_serialized": true,
+    "text_truths_per_scene": 5
+  },
+  "state": "p1_preregistered_before_selection_identity_materialization_or_model_execution",
+  "synthetic_only": true,
+  "task": "ocr-detection-recognition-composition"
+}

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Sungwoo Kang
 
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GraphReader.Ocr.Tests;
@@ -129,6 +131,87 @@ public sealed class OcrV8ProductionCompositionPipelineTests
     }
 
     [TestMethod]
+    public async Task V9CandidateRequiresRecognitionEvidenceForTheDetectorAcceptanceBand()
+    {
+        OcrDetectedRegion[] proposals =
+        [
+            Tick("strong", 42, 0.96),
+            Tick("weak", 55, 0.99),
+        ];
+        var detector = new StubProposalDetector(proposals);
+        OcrV8ProductionCompositionPipeline pipeline = Create(
+            detector,
+            Recognizer(("strong", "6", 0.91), ("weak", "8", 0.64)),
+            Recognizer(("strong", "6", 0.95), ("weak", "8", 0.98)),
+            new OcrV8ProductionCompositionOptions
+            {
+                CompositionId = OcrV8ProductionCompositionOptions.CandidateV9CompositionId,
+                StageVersion = "0.0.21-v9-p1",
+                OfficialMinimumConfidence = 0.65,
+            });
+
+        OcrResult result = await pipeline.RecognizeAsync(Request(), CancellationToken.None);
+
+        Assert.IsTrue(result.Succeeded, result.Failure?.TechnicalMessage);
+        Assert.HasCount(1, result.Regions);
+        Assert.AreEqual("strong", result.Regions[0].RegionId);
+        CollectionAssert.Contains(
+            result.Warnings.ToArray(),
+            "ocr_v9_candidate_acceptance_route:strong:recognizer_confirmed_detector");
+        CollectionAssert.Contains(result.Warnings.ToArray(), "ocr_v9_candidate_proposal_rejected:weak");
+        Assert.IsFalse(result.Warnings.Any(static warning =>
+            warning.StartsWith("ocr_v8", StringComparison.Ordinal)));
+    }
+
+    [TestMethod]
+    public void V9CandidateRejectsRecognitionThresholdDrift()
+    {
+        var detector = new StubProposalDetector(Array.Empty<OcrDetectedRegion>());
+
+        Assert.Throws<ArgumentException>(() => Create(
+            detector,
+            Recognizer(),
+            Recognizer(),
+            new OcrV8ProductionCompositionOptions
+            {
+                CompositionId = OcrV8ProductionCompositionOptions.CandidateV9CompositionId,
+                StageVersion = "0.0.21-v9-p1",
+                OfficialMinimumConfidence = 0.66,
+            }));
+    }
+
+    [TestMethod]
+    public void ReviewedV8FingerprintRemainsByteStableAfterCandidateExtension()
+    {
+        var detector = new StubProposalDetector(Array.Empty<OcrDetectedRegion>());
+        StubTextRecognizer official = Recognizer();
+        StubTextRecognizer numeric = Recognizer();
+        OcrV8ProductionCompositionPipeline pipeline = Create(detector, official, numeric);
+        string expected = HashStrings(
+        [
+            OcrV8ProductionCompositionOptions.ReviewedCompositionId,
+            "0.0.21-v8",
+            "0.95",
+            "0.9",
+            "0.85",
+            "0.82",
+            "0.65",
+            "1",
+            detector.ConfigurationFingerprint,
+            official.ModelId,
+            official.ModelVersion,
+            official.ModelSha256,
+            official.ConfigurationFingerprint,
+            numeric.ModelId,
+            numeric.ModelVersion,
+            numeric.ModelSha256,
+            numeric.ConfigurationFingerprint,
+        ]);
+
+        Assert.AreEqual(expected, pipeline.ConfigurationFingerprint);
+    }
+
+    [TestMethod]
     public async Task ProposalBelowFrozenFloorFailsClosedBeforeRecognition()
     {
         var detector = new StubProposalDetector([Tick("below", 50, 0.819)]);
@@ -229,6 +312,19 @@ public sealed class OcrV8ProductionCompositionPipelineTests
                     0.1);
             }).ToArray());
         });
+    }
+
+    private static string HashStrings(IEnumerable<string> values)
+    {
+        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        foreach (string value in values)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(value);
+            hash.AppendData(BitConverter.GetBytes(bytes.Length));
+            hash.AppendData(bytes);
+        }
+
+        return Convert.ToHexStringLower(hash.GetHashAndReset());
     }
 
     private sealed class StubProposalDetector : ITextRegionProposalDetector

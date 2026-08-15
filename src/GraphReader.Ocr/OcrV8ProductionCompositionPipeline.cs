@@ -14,6 +14,8 @@ public sealed record OcrV8ProductionCompositionOptions
         "graphreader-v10-bounded-zero-consensus-ambiguity-alias-composition-v8";
     public const string CandidateV11CompositionId =
         "graphreader-v11-composite-proposal-role-candidate-composition-v1";
+    public const string CandidateV9CompositionId =
+        "graphreader-v10-recognizer-confirmed-acceptance-composition-v9";
 
     public string CompositionId { get; init; } = ReviewedCompositionId;
 
@@ -28,6 +30,8 @@ public sealed record OcrV8ProductionCompositionOptions
     public double ZeroConsensusRescueThreshold { get; init; } = 0.82;
 
     public double NumericMinimumConfidence { get; init; } = 0.65;
+
+    public double OfficialMinimumConfidence { get; init; }
 
     public double MaskPaddingPixels { get; init; } = 1;
 }
@@ -83,26 +87,7 @@ public sealed class OcrV8ProductionCompositionPipeline
 
     public string CompositionId => options.CompositionId;
 
-    public string ConfigurationFingerprint => HashStrings(
-    [
-        options.CompositionId,
-        options.StageVersion,
-        options.DetectorThreshold.ToString("R", CultureInfo.InvariantCulture),
-        options.OfficialRescueThreshold.ToString("R", CultureInfo.InvariantCulture),
-        options.ConsensusRescueThreshold.ToString("R", CultureInfo.InvariantCulture),
-        options.ZeroConsensusRescueThreshold.ToString("R", CultureInfo.InvariantCulture),
-        options.NumericMinimumConfidence.ToString("R", CultureInfo.InvariantCulture),
-        options.MaskPaddingPixels.ToString("R", CultureInfo.InvariantCulture),
-        detector.ConfigurationFingerprint,
-        officialRecognizer.ModelId,
-        officialRecognizer.ModelVersion,
-        officialRecognizer.ModelSha256,
-        officialRecognizer.ConfigurationFingerprint,
-        numericRecognizer.ModelId,
-        numericRecognizer.ModelVersion,
-        numericRecognizer.ModelSha256,
-        numericRecognizer.ConfigurationFingerprint,
-    ]);
+    public string ConfigurationFingerprint => HashStrings(FingerprintComponents());
 
     public async ValueTask<OcrResult> RecognizeAsync(
         OcrRequest request,
@@ -280,7 +265,16 @@ public sealed class OcrV8ProductionCompositionPipeline
     {
         if (proposal.DetectionConfidence >= options.DetectorThreshold)
         {
-            return "detector";
+            if (options.OfficialMinimumConfidence > 0 &&
+                (official is null ||
+                 RecognitionConfidence(official) < options.OfficialMinimumConfidence))
+            {
+                return null;
+            }
+
+            return options.OfficialMinimumConfidence > 0
+                ? "recognizer_confirmed_detector"
+                : "detector";
         }
 
         if (proposal.DetectionConfidence < options.ZeroConsensusRescueThreshold ||
@@ -404,14 +398,22 @@ public sealed class OcrV8ProductionCompositionPipeline
             options.CompositionId,
             OcrV8ProductionCompositionOptions.CandidateV11CompositionId,
             StringComparison.Ordinal) &&
-            string.Equals(options.StageVersion, "0.0.21-v11", StringComparison.Ordinal);
-        if ((!reviewedV8 && !candidateV11) ||
+            string.Equals(options.StageVersion, "0.0.21-v11", StringComparison.Ordinal) &&
+            options.OfficialMinimumConfidence == 0;
+        bool candidateV9 = string.Equals(
+            options.CompositionId,
+            OcrV8ProductionCompositionOptions.CandidateV9CompositionId,
+            StringComparison.Ordinal) &&
+            string.Equals(options.StageVersion, "0.0.21-v9-p1", StringComparison.Ordinal) &&
+            options.OfficialMinimumConfidence == 0.65;
+        if ((!reviewedV8 && !candidateV11 && !candidateV9) ||
             string.IsNullOrWhiteSpace(options.StageVersion) ||
             options.DetectorThreshold != 0.95 ||
             options.OfficialRescueThreshold != 0.90 ||
             options.ConsensusRescueThreshold != 0.85 ||
             options.ZeroConsensusRescueThreshold != 0.82 ||
             options.NumericMinimumConfidence != 0.65 ||
+            (reviewedV8 && options.OfficialMinimumConfidence != 0) ||
             options.MaskPaddingPixels != 1)
         {
             throw new ArgumentException(
@@ -420,13 +422,41 @@ public sealed class OcrV8ProductionCompositionPipeline
         }
     }
 
-    private static string WarningPrefix(string compositionId) =>
-        string.Equals(
-            compositionId,
-            OcrV8ProductionCompositionOptions.CandidateV11CompositionId,
-            StringComparison.Ordinal)
-            ? "ocr_v11_candidate"
-            : "ocr_v8";
+    private static string WarningPrefix(string compositionId) => compositionId switch
+    {
+        OcrV8ProductionCompositionOptions.CandidateV11CompositionId => "ocr_v11_candidate",
+        OcrV8ProductionCompositionOptions.CandidateV9CompositionId => "ocr_v9_candidate",
+        _ => "ocr_v8",
+    };
+
+    private IEnumerable<string> FingerprintComponents()
+    {
+        yield return options.CompositionId;
+        yield return options.StageVersion;
+        yield return options.DetectorThreshold.ToString("R", CultureInfo.InvariantCulture);
+        yield return options.OfficialRescueThreshold.ToString("R", CultureInfo.InvariantCulture);
+        yield return options.ConsensusRescueThreshold.ToString("R", CultureInfo.InvariantCulture);
+        yield return options.ZeroConsensusRescueThreshold.ToString("R", CultureInfo.InvariantCulture);
+        yield return options.NumericMinimumConfidence.ToString("R", CultureInfo.InvariantCulture);
+
+        // Keep the reviewed V8 and existing V11 fingerprints byte-for-byte
+        // stable. The extra value belongs only to the new V9 candidate policy.
+        if (options.OfficialMinimumConfidence > 0)
+        {
+            yield return options.OfficialMinimumConfidence.ToString("R", CultureInfo.InvariantCulture);
+        }
+
+        yield return options.MaskPaddingPixels.ToString("R", CultureInfo.InvariantCulture);
+        yield return detector.ConfigurationFingerprint;
+        yield return officialRecognizer.ModelId;
+        yield return officialRecognizer.ModelVersion;
+        yield return officialRecognizer.ModelSha256;
+        yield return officialRecognizer.ConfigurationFingerprint;
+        yield return numericRecognizer.ModelId;
+        yield return numericRecognizer.ModelVersion;
+        yield return numericRecognizer.ModelSha256;
+        yield return numericRecognizer.ConfigurationFingerprint;
+    }
 
     private static string HashStrings(IEnumerable<string> values)
     {
