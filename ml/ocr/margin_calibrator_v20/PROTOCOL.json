@@ -1,0 +1,178 @@
+{
+  "architecture": "proposal-evidence-quadratic-margin-mlp-v1",
+  "calibrator": {
+    "activation": "ReLU",
+    "feature_groups": {
+      "ctc_statistics": 8,
+      "detector": 2,
+      "geometry": 9,
+      "morphology": 4,
+      "role_probabilities": 8
+    },
+    "hidden_width": 32,
+    "input": [
+      "proposal_count",
+      31
+    ],
+    "model_license": "Apache-2.0",
+    "output": [
+      "proposal_count",
+      2
+    ],
+    "quadratic_lift": true,
+    "role_logits_modified": false
+  },
+  "candidate_ids": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "currently_preregistered_candidate": "P1",
+  "data_scope": "fresh procedural scientific graph scenes only; no Chandler, Generalization, private or article images, external datasets, downloaded training data, predecessor fixture bytes, or V19 validation case identities",
+  "defect_class": "aggregate consumed V19 P3 evidence had a zero-error operating point at threshold 0.65 but no required three-consecutive-threshold zero-error window",
+  "execution_authorized": false,
+  "execution_blocker": "The V20 protocol, fresh stored splits, candidate configuration, source-bound runner, and one-use public gate must be committed before a separate P1 authorization.",
+  "experiment_budget": 3,
+  "fixed_inputs": {
+    "all_parameters_frozen": true,
+    "detector_floor": 0.56,
+    "detector_path": "ml/ocr/structural_veto_proposal_role_v17/artifacts/P3-run/graph-text-structural-veto-proposal-role-v17-p3.onnx",
+    "detector_sha256": "ca32487f1df2c3fea1b8c2f51daf7578ed9756e9140d1b0eaf2a16b283591262",
+    "provider": "CPUExecutionProvider",
+    "recognizer_inference_yaml_path": "ml/ocr/official_bakeoff/runs/extracted/en_PP-OCRv5_mobile_rec_infer/inference.yml",
+    "recognizer_inference_yaml_sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
+    "recognizer_path": "ml/ocr/official_bakeoff/runs/conversion/en_PP-OCRv5_mobile_rec.onnx",
+    "recognizer_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743"
+  },
+  "isolated_change": "train a new quadratic proposal calibrator from scratch on fresh stored V20 scenes using a preregistered symmetric large-margin loss around the unchanged two-class logit difference while retaining exact detector, recognizer, features, thresholds, role logits, and mandatory gates",
+  "license_path": "LICENSES/PaddlePaddle-PP-OCRv5-Models-Apache-2.0.txt",
+  "license_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+  "manifest_created": false,
+  "marker_creation_gate_required_before_approval": true,
+  "notice_path": "LICENSES/PaddlePaddle-PP-OCRv5-Models-Notice.txt",
+  "notice_sha256": "8d81f5d0c58547cce471c24f82efe768a9d907d06764f67e90cc680c6d777729",
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-margin-calibrator-v20",
+  "schema": "graphreader.ocr-margin-calibrator-protocol.v1",
+  "selection_gates": {
+    "all_three_model_tensor_stream_hashes_required": true,
+    "character_error_rate_maximum": 0.05,
+    "direct_fixture_byte_execution_required": true,
+    "duplicate_regions": 0,
+    "exact_region_and_role_every_scene": true,
+    "false_regions": 0,
+    "minimum_consecutive_passing_thresholds": 3,
+    "missed_regions": 0,
+    "onnx_parity_maximum_absolute_error": 1e-05,
+    "per_role_accuracy_minimum": 0.85,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "recognition_exact_minimum": 0.9,
+    "role_accuracy_minimum": 0.9,
+    "selected_threshold": "interior-midpoint-of-longest-passing-run"
+  },
+  "selection_thresholds": [
+    0.35,
+    0.45,
+    0.55,
+    0.65,
+    0.75
+  ],
+  "split_policy": {
+    "predecessor_fixture_bytes_reused": false,
+    "public_case_level_failure_analysis_permitted": false,
+    "sealed_public_truth_hidden_until_one_time_gate": true,
+    "train_validation_public_family_ids_disjoint": true,
+    "v19_fixture_bytes_scene_truth_or_case_identity_reused": false,
+    "validation_or_public_pixels_used_for_training": false
+  },
+  "splits": [
+    {
+      "degradation_family": "photometric-margin-pressure-v20-train",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "font_sha256": [
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0"
+      ],
+      "renderer_family": "margin-calibrator-multiband-v20-train",
+      "scene_count": 192,
+      "seed_offset": 6101000,
+      "split": "train"
+    },
+    {
+      "degradation_family": "blur-quantization-margin-v20-validation",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "font_sha256": [
+        "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      ],
+      "renderer_family": "margin-calibrator-offset-v20-validation",
+      "scene_count": 128,
+      "seed_offset": 6307000,
+      "split": "validation"
+    },
+    {
+      "degradation_family": "illumination-scanline-margin-v20-public",
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "font_sha256": [
+        "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+        "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      ],
+      "renderer_family": "margin-calibrator-interleave-v20-public",
+      "scene_count": 192,
+      "seed_offset": 6521000,
+      "split": "sealed_public"
+    }
+  ],
+  "state": "fresh_stored_splits_pending_freeze_candidate_p1_execution_blocked",
+  "task": "ocr-detection-recognition",
+  "training": {
+    "batch_size": 256,
+    "candidate": "P1",
+    "epochs": 24,
+    "learning_rate": 0.0008,
+    "margin_loss_weight": 0.25,
+    "negative_cap_per_scene": 8,
+    "negative_class_weight": 4.0,
+    "negative_logit_margin": -1.7346010553881064,
+    "negative_sampling": "highest-frozen-detector-probability-nontruth-v1",
+    "positive_logit_margin": 1.7346010553881064,
+    "seed": 20262220,
+    "validation_or_public_pixels_used": false,
+    "weight_decay": 0.0001
+  },
+  "trigger_evidence": {
+    "case_level_details_used": false,
+    "character_error_rate": 0.004033419763756842,
+    "consumed_v19_candidate_or_gate_rerun_authorized": false,
+    "duplicate_regions": 0,
+    "exact_scene_count_at_selected_threshold": 128,
+    "false_regions": 0,
+    "fixture_bytes_scene_truth_or_case_identity_used": false,
+    "lower_threshold_false_region_count": 1,
+    "missed_regions": 0,
+    "passing_threshold_window": [],
+    "prohibited_structure_hits": 0,
+    "recognition_exact": 0.97265625,
+    "result_path": "ml/ocr/proposal_confirmation_calibrator_v19/P3_RESULT.json",
+    "result_sha256": "fbbd30ce8f078e62eccdacd5fa178d4128619c214fa162146411f46f38eb6232",
+    "role_accuracy": 1.0,
+    "scene_count": 128,
+    "selected_threshold": 0.65,
+    "true_positives": 1024,
+    "truth_regions": 1024,
+    "upper_threshold_missed_region_count": 3
+  }
+}
