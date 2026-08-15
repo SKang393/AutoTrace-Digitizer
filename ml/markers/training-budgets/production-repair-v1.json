@@ -331,7 +331,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-proposal-confirmation-calibrator-v19",
-      "status": "candidate_1_failed_selection",
+      "status": "candidate_2_preregistered",
       "defect_class": "the consumed V18 scalar recognition-confidence veto retained one prohibited false region while missing three truths, so a fixed scalar could not jointly preserve recall and exclusion",
       "prior_revision": "graph-text-recognition-confirmed-proposal-role-v18",
       "trigger_result_path": "ml/ocr/recognition_confirmed_proposal_role_v18/P1_RESULT.json",
@@ -347,12 +347,13 @@
       "recognizer_path": "ml/ocr/official_bakeoff/runs/conversion/en_PP-OCRv5_mobile_rec.onnx",
       "recognizer_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": [
+        "P2"
+      ],
       "consumed_candidate_ids": [
         "P1"
       ],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "protocol_path": "ml/ocr/proposal_confirmation_calibrator_v19/PROTOCOL.json",
@@ -381,10 +382,12 @@
       "public_gate_config_sha256": "30902636190d65b4f3f00260a4b2bf74d1a76a7131f992faa917d6dbf0bfe5be",
       "expected_public_evaluator_source_bundle_sha256": "b3df645bf698c72894f7c82984a1b538d08220aebb8e3805516963c3f982d1e3",
       "candidate_config_paths": {
-        "P1": "ml/ocr/proposal_confirmation_calibrator_v19/training/p1.json"
+        "P1": "ml/ocr/proposal_confirmation_calibrator_v19/training/p1.json",
+        "P2": "ml/ocr/proposal_confirmation_calibrator_v19/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "749b51f4328b912f4ceb9ea836c2e448f11ae680c3b0efea83a01847393139d3"
+        "P1": "749b51f4328b912f4ceb9ea836c2e448f11ae680c3b0efea83a01847393139d3",
+        "P2": "036acd90f8120539564a9ba37044a8004b8c7c675b52a0444e33e65f99017536"
       },
       "p1_expected_runner_source_bundle_sha256": "3f38d4cb595452f09752de25b3b05bd04ca3613761bd533baab90b121da58b2f",
       "p1_expected_optimizer_steps": 180,
@@ -411,9 +414,14 @@
       "p1_validation_character_error_rate": 0.004033419763756842,
       "p1_validation_role_accuracy": 1.0,
       "p1_failure": "P1 preserved all 1,024 validation truths and passed recognition, role, and CPU ONNX parity gates, but one prohibited false region remained at thresholds 0.45 through 0.65 and no required three-threshold zero-error window existed.",
+      "p2_isolated_change": "increase only the negative-class loss weight from 2.0 to 4.0 based on aggregate P1 false-positive and false-negative counts; retain the exact architecture, seed, splits, payloads, features, thresholds, and 180 optimizer-step budget",
+      "p2_aggregate_p1_metrics_only_used_for_design": true,
+      "p2_p1_case_details_fixture_bytes_scene_truth_or_case_identity_used": false,
+      "p2_expected_runner_source_bundle_sha256": "cc4ef8cb15c17e2e566555b55bb2d3847c7b47f85420b42a33a59cdfef2f8792",
+      "p2_expected_optimizer_steps": 180,
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "execution_blocker": "P1 is consumed and failed selection. P2 requires a separately preregistered isolated candidate based only on aggregate P1 evidence before any execution.",
+      "execution_blocker": "P2 is preregistered but not authorized. Commit the isolated P2 configuration, runner source binding, tests, and fail-closed status before a separate authorization commit.",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,

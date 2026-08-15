@@ -17,6 +17,7 @@ from ml.ocr.proposal_confirmation_calibrator_v19.protocol import (
 )
 from ml.ocr.proposal_confirmation_calibrator_v19.sealed_gate import EVALUATOR_SOURCE_PATHS
 from ml.ocr.proposal_confirmation_calibrator_v19.train_p1 import RUNNER_SOURCE_PATHS
+from ml.ocr.proposal_confirmation_calibrator_v19.train_p2 import RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS
 
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -52,6 +53,12 @@ def test_stored_splits_and_source_bundles_match_frozen_manifests() -> None:
     assert source_bundle_sha256(ROOT, EVALUATOR_SOURCE_PATHS) == gate["expected_evaluator_source_bundle_sha256"]
     assert config["expected_optimizer_steps"] == 180
     assert config["proposal_count"] == 2304
+    p2 = _read("training/p2.json")
+    assert source_bundle_sha256(ROOT, P2_RUNNER_SOURCE_PATHS) == p2["expected_runner_source_bundle_sha256"]
+    assert p2["p1_aggregate_metrics_only_used_for_design"] is True
+    assert p2["p1_case_details_fixture_bytes_scene_truth_or_case_identity_used"] is False
+    assert p2["negative_class_weight"] == 4.0
+    assert p2["expected_optimizer_steps"] == 180
 
 
 def test_calibrator_contract_is_small_and_deterministic() -> None:
@@ -86,7 +93,8 @@ def test_public_gate_and_production_remain_fail_closed() -> None:
     assert result["selection_metrics"]["false_negatives"] == 0
     assert result["selection_metrics"]["prohibited_structure_hits"] == 1
     assert result["passing_threshold_window"] == []
-    assert entry["status"] == "candidate_1_failed_selection"
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["execution_authorized"] is False
     assert entry["public_gate_authorized"] is False
