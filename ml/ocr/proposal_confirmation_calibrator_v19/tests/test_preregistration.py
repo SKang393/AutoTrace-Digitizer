@@ -115,8 +115,8 @@ def test_public_gate_and_production_remain_fail_closed() -> None:
     assert entry["preregistered_candidate_ids"] == ["P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["public_gate_authorized"] is False
     assert entry["p1_result_sha256"] == sha256_file(MODULE / "P1_RESULT.json")
     assert entry["p2_result_sha256"] == sha256_file(MODULE / "P2_RESULT.json")

@@ -18,17 +18,17 @@ threshold and passed recognition, role, and CPU ONNX parity gates, but each left
 one prohibited false region and no required three-threshold zero-error window.
 P2's only isolated change was to increase negative-class loss weight from `2.0`
 to `4.0` based on aggregate P1 counts. At threshold `0.65`, P2 removed the false
-region while missing six truths. P1 and P2 are consumed. P3 is now
-preregistered but not execution-authorized. The public archive is unopened with
-zero evaluations.
+region while missing six truths. P1 and P2 are consumed. P3 is now separately
+authorized for exactly one execution from its committed source binding. The
+public archive is unopened with zero evaluations.
 
 P3 uses only the aggregate committed P1 and P2 results. It retains P2's data,
 payloads, seed, negative-class weight, thresholds, optimizer, and 180-step
 budget. Its only change is a deterministic quadratic lift that supplies each of
 the 31 frozen features and its square to the same 32-unit hidden layer. This
 tests whether the aggregate FP/FN tradeoff reflects missing generic nonlinear
-separation rather than insufficient class weighting. P3 must receive a later
-separate execution authorization. A passing selection and public run would
-still require independent marker-stage composition, manifests, model-store
-discovery, packaging, clean-machine, and private validation evidence before any
-production approval.
+separation rather than insufficient class weighting. P3 cannot rerun after its
+single execution. A passing selection would still require an additional
+separate public-gate authorization plus independent marker-stage composition,
+manifests, model-store discovery, packaging, clean-machine, and private
+validation evidence before any production approval.
