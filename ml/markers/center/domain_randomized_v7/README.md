@@ -18,8 +18,8 @@ conflict, and every prohibited hard point is present in artifact truth.
 P1 preserves the V6 model capacity, three-channel dense input/output contract,
 loss, postprocessing, threshold set, exact-count gate, prohibited-structure
 gate, artifact precision/recall gate, and CPU ONNX parity gate. This isolates
-domain breadth as the intervention. The candidate is preregistered but execution
-is blocked. P2 and P3 remain unregistered. Public evaluation stays locked until
+domain breadth as the intervention. Exactly one checksum-bound P1 run is now
+authorized. P2 and P3 remain unregistered. Public evaluation stays locked until
 a separately committed candidate selection and public evaluator authorization.
 No manifest, model-store entry, package payload, private validation, production
 approval, or release eligibility exists.

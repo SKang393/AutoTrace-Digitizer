@@ -115,7 +115,7 @@ def test_model_preserves_frozen_dense_three_head_contract() -> None:
     assert torch.all((output[:, 2] >= 0) & (output[:, 2] <= 1))
 
 
-def test_protocol_config_and_budget_are_checksum_bound_and_blocked() -> None:
+def test_protocol_config_and_budget_are_checksum_bound_and_p1_only() -> None:
     protocol = _json(ROOT / "PROTOCOL.json")
     config = _json(ROOT / "training/p1.json")
     ledger = _json(LEDGER_PATH)
@@ -130,14 +130,14 @@ def test_protocol_config_and_budget_are_checksum_bound_and_blocked() -> None:
     assert sha256_file(ROOT / "SPLIT_FREEZE_REPORT.json") == protocol["split_freeze_report_sha256"]
     assert sha256_file(REPO_ROOT / protocol["trigger_public_result_path"]) == protocol["trigger_public_result_sha256"]
     assert config["selection_thresholds"] == list(THRESHOLDS)
-    assert protocol["execution_authorized"] is False
+    assert protocol["execution_authorized"] is True
     assert protocol["public_gate_authorized"] is False
     assert protocol["public_gate_archive_opened"] is False
     assert protocol["public_gate_evaluations"] == 0
     assert protocol["trigger_case_detail_or_pixels_used"] is False
     assert entry["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
     assert entry["public_gate_authorized"] is False
     assert entry["manifest_created"] is False
     assert entry["model_store_promoted"] is False
