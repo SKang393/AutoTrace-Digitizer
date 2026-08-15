@@ -30,7 +30,8 @@ checksum-bound training-corpus diagnostic reached at most 303/384 exact scenes,
 confirming underfitting without public evidence. Final candidate P3 is
 preregistered to continue the exact P1 checkpoint for 32 lower-rate epochs with
 all data, contracts, loss weights, postprocessing, thresholds, and gates fixed.
-P3 execution remains blocked pending a separate authorization. Public
-evaluation stays locked. No manifest, model-store entry,
+P3 is authorized for exactly one execution. P1 and P2 cannot rerun, and P3
+becomes consumed when that execution begins. Public evaluation stays locked.
+No manifest, model-store entry,
 package payload, private validation, production approval, or release eligibility
 exists.

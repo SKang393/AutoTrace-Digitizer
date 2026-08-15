@@ -12,7 +12,7 @@
     "ml/markers/center/domain_randomized_v7/prepare_split.py"
   ],
   "defect_class": "V6 passed its narrow visible selection but collapsed on the one-time public domain with 190 false positives, 297 false negatives, four prohibited hits, artifact precision 0.6145023044357781, and artifact recall 0.6914750693739623",
-  "execution_authorized": false,
+  "execution_authorized": true,
   "experiment_budget": 3,
   "expected_runner_source_bundle_sha256": "78b433dafa2da65e17449fc133e910d34170547392fa70def360fc9f00877882",
   "input_channels": [
@@ -85,7 +85,7 @@
   "split_freeze_report_path": "ml/markers/center/domain_randomized_v7/SPLIT_FREEZE_REPORT.json",
   "split_freeze_report_sha256": "6bbad5ed9b5d9a34f931de6a9269d1c19fd2aeb65e257c9d6fa4e5f2714621c7",
   "split_materialized": true,
-  "state": "candidate_3_preregistered_execution_blocked",
+  "state": "candidate_3_authorized",
   "task": "marker-center",
   "train_archive_sha256": "accdc7117821d0e27900988262ff09c5730b31016a02ec4c651c5ebdc4042fa6",
   "train_scene_count": 384,

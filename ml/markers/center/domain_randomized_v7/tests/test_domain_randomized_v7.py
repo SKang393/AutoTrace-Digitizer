@@ -143,7 +143,7 @@ def test_protocol_config_and_budget_are_checksum_bound_and_p3_blocked() -> None:
     assert p2_result["selection_exact_scene_count"] == 49
     assert p2_result["public_gate_archive_opened"] is False
     assert p2_result["public_gate_evaluations"] == 0
-    assert protocol["execution_authorized"] is False
+    assert protocol["execution_authorized"] is True
     assert protocol["public_gate_authorized"] is False
     assert protocol["public_gate_archive_opened"] is False
     assert protocol["public_gate_evaluations"] == 0
@@ -152,8 +152,8 @@ def test_protocol_config_and_budget_are_checksum_bound_and_p3_blocked() -> None:
     assert entry["status"] == "candidate_3_preregistered"
     assert entry["preregistered_candidate_ids"] == ["P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["public_gate_authorized"] is False
     assert entry["manifest_created"] is False
     assert entry["model_store_promoted"] is False
