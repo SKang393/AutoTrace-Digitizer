@@ -48,8 +48,10 @@ prefilter before the learned calibrator. P2 runner source SHA-256 is
 `cc807390733eb7e9b6cd245c76f35ce2ca6c58e3f4e0b3b0a8d6331ffe3d8e6a`;
 configuration SHA-256 is
 `037186d0bbf5b5ea72c06ce2a59894cd525015e17cf94c57b6451546b8b2d4a0`.
-Execution remains blocked until this checkpoint is committed and a separate
-single-use authorization is recorded. The public archive remains unopened with
+The committed canonical ledger now authorizes P2 for one zero-optimizer
+execution. The runner requires the authorization, configuration, exact P1
+payloads, and every bound source to be committed before it opens the P2 seal.
+P2 cannot rerun after that seal opens. The public archive remains unopened with
 zero evaluations, and marker composition, manifest, model-store, packaging,
 clean-machine, private validation, approval, and release evidence remain
 blocked.
