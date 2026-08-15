@@ -1,0 +1,51 @@
+{
+  "architecture": "domain-randomized-expanded-compact-fpn-v7",
+  "artifact_gate": {
+    "maximum_marker_artifact_hits": 0,
+    "minimum_precision": 0.9,
+    "minimum_recall": 0.95,
+    "threshold": 0.35
+  },
+  "batch_size": 8,
+  "candidate_id": "P3",
+  "center_loss_weight": 2.5,
+  "chandler_used": false,
+  "epochs": 32,
+  "expected_optimizer_steps": 1536,
+  "expected_runner_source_bundle_sha256": "78b433dafa2da65e17449fc133e910d34170547392fa70def360fc9f00877882",
+  "hard_negative_margin_loss_weight": 1.25,
+  "inference_graph_transform": "fuse_conv_batch_norm_eval_v1",
+  "isolated_change": "continue convergence from the exact P1 checkpoint for 32 fixed lower-rate epochs while preserving all data, model capacity, loss weights, tensor contracts, postprocessing, thresholds, and gates",
+  "learning_rate": 0.0005,
+  "minimum_consecutive_passing_thresholds": 3,
+  "onnx_parity_tolerance": 0.00001,
+  "p1_checkpoint_sha256": "4170b542c048d0a1f1ca711694240d995d9e8b5dd1ec22484edc6759d9c79159",
+  "p1_result_sha256": "8f2fa3e88409b40efccc616861b1f6c38d65ed78a49d04caca5e90efbaa2257d",
+  "p2_result_sha256": "1e96842539994bfb84a24810cda2113f8a221427a339388b27d73051606edf3d",
+  "p2_selection_diagnosis_sha256": "fb17a3b03ea85bdecd08420c0bcf3dcc8dee80d0850d90b7b12a724d42d9655f",
+  "positive_margin_loss_weight": 0.75,
+  "predecessor_checkpoint_reused": true,
+  "private_data": false,
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "required_disjoint_clearance_px": 11.0,
+  "revision": "marker-center-domain-randomized-v7",
+  "seed": 20267493,
+  "selection_manifest_sha256": "0b7c2abf33fc8a03510f4953ad39766c32a0904c1ba44fb7bd61de557650abbc",
+  "selection_thresholds": [
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6
+  ],
+  "task": "marker-center",
+  "tensor_contract": {
+    "input": ["N", 3, "H", "W"],
+    "input_channels": ["ink_probability", "text_mask", "artifact_mask"],
+    "output": ["N", 3, "H", "W"],
+    "output_channels": ["center_probability", "radius_pixels", "artifact_probability"]
+  }
+}

@@ -4501,7 +4501,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-domain-randomized-v7",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_3_preregistered",
       "defect_class": "V6 passed its narrow visible selection but collapsed on the one-time public domain with 190 false positives, 297 false negatives, four prohibited hits, artifact precision 0.6145023044357781, and artifact recall 0.6914750693739623",
       "prior_revision": "marker-center-feasible-dense-v6",
       "trigger_public_result_path": "ml/markers/center/feasible_dense_v6/PUBLIC_GATE_RESULT.json",
@@ -4517,21 +4517,21 @@
       "trigger_public_artifact_recall": 0.6914750693739623,
       "prior_fixture_bytes_reused": false,
       "p1_isolated_change": "replace V6's narrow single-family selection domain with fresh multi-layout, multi-shape, mask-imperfection, illumination, blur, compression, stroke, quantization, scanline, and noise families while preserving the model capacity, dense tensor contract, objective, postprocessing, thresholds, and gates",
-      "isolated_change": "reuse the exact completed P1 checkpoint and ONNX with zero optimizer steps, normalize the P2 output directory before report assembly, and execute only the previously lost visible selection and parity report",
+      "p2_isolated_change": "reuse the exact completed P1 checkpoint and ONNX with zero optimizer steps, normalize the P2 output directory before report assembly, and execute only the previously lost visible selection and parity report",
+      "isolated_change": "continue convergence from the exact P1 checkpoint for 32 fixed lower-rate epochs while preserving all data, model capacity, loss weights, tensor contracts, postprocessing, thresholds, and gates",
       "architecture": "domain-randomized-expanded-compact-fpn-v7",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P2"
-      ],
-      "consumed_candidate_ids": [
-        "P1"
-      ],
-      "remaining_unregistered_candidate_ids": [
         "P3"
       ],
+      "consumed_candidate_ids": [
+        "P1",
+        "P2"
+      ],
+      "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/markers/center/domain_randomized_v7/PROTOCOL.json",
-      "protocol_sha256": "23ec0a30f33a23b9eb21dc1701f4189a13cc3e886d9762c6637c38aee092532e",
+      "protocol_sha256": "cef5d75bdc172df5e94fd337d5d0ea26ec64020b3fddd677beb9b499b6d7147c",
       "design_source_paths": [
         "ml/markers/center/domain_randomized_v7/dataset.py",
         "ml/markers/center/domain_randomized_v7/model.py",
@@ -4606,11 +4606,13 @@
       "public_dataset_manifest_sha256": "d97499c004623f6fa0792c87ea60c297ca8eb9fa1a604734480ee9b4a48fbf38",
       "candidate_config_paths": {
         "P1": "ml/markers/center/domain_randomized_v7/training/p1.json",
-        "P2": "ml/markers/center/domain_randomized_v7/training/p2.json"
+        "P2": "ml/markers/center/domain_randomized_v7/training/p2.json",
+        "P3": "ml/markers/center/domain_randomized_v7/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "bafefe41fcfb70c8716548c1c051f1a52ac90507e94f6388ea182d9c60f55788",
-        "P2": "ab0a05916ceb54300e41ae4ae4d151196896848715c01a5b6fff45839fd0e3a0"
+        "P2": "ab0a05916ceb54300e41ae4ae4d151196896848715c01a5b6fff45839fd0e3a0",
+        "P3": "c2c16e93d11f85d4a2c4bc7e59f47e0f498e36beb7defab483c0f108c59acc47"
       },
       "p1_expected_runner_source_bundle_sha256": "daafcaecce83cfbbd37e6ee7843a40e4cb1e0ef8513d7c42e6ae228485080af6",
       "p1_expected_optimizer_steps": 2304,
@@ -4626,9 +4628,32 @@
       "p1_training_result_seal_sha256": "4e4e0f9ab1b1f6f50c17e0a8afd6e1ed28628035a26ebc2e7bf432275f3b633c",
       "p2_expected_runner_source_bundle_sha256": "0bdff4e9b416b3724c5135316202c940e4275d25c407ea74aaf9ea0cc1285d10",
       "p2_expected_optimizer_steps": 0,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P2",
-      "execution_blocker": "Exactly one checksum-bound zero-optimizer P2 selection recovery is authorized. P1 is consumed, P3 is unregistered, and every public evaluation remains blocked.",
+      "p2_result_path": "ml/markers/center/domain_randomized_v7/P2_RESULT.json",
+      "p2_result_sha256": "1e96842539994bfb84a24810cda2113f8a221427a339388b27d73051606edf3d",
+      "p2_candidate_report_sha256": "be0545b4029fd7825912bb04524198ed75e003417e5a8d52fa0935bd7f37c478",
+      "p2_status": "failed_selection_consumed",
+      "p2_optimizer_steps": 0,
+      "p2_selection_scene_count": 96,
+      "p2_selection_exact_scene_count": 49,
+      "p2_selection_true_positives": 780,
+      "p2_selection_false_positives": 21,
+      "p2_selection_false_negatives": 82,
+      "p2_selection_duplicate_count": 0,
+      "p2_selection_prohibited_structure_hits": 3,
+      "p2_selection_artifact_precision": 0.8340070217582113,
+      "p2_selection_artifact_recall": 0.9549122476437939,
+      "p2_selection_marker_artifact_hits": 1,
+      "p2_onnx_parity_maximum_absolute_error": 0.000009298324584960938,
+      "p2_onnx_parity_passed": true,
+      "p2_training_opened_seal_sha256": "ba35472043b6c27b6ff62335b671904398d4acfc7a0360f0016ee196bd0f0090",
+      "p2_training_result_seal_sha256": "57f3a4394d73438311639b589a3fdcffd55d67bbb80716d599cb35f41492e549",
+      "p2_selection_diagnosis_path": "ml/markers/center/domain_randomized_v7/P2_SELECTION_DIAGNOSIS.json",
+      "p2_selection_diagnosis_sha256": "fb17a3b03ea85bdecd08420c0bcf3dcc8dee80d0850d90b7b12a724d42d9655f",
+      "p3_expected_runner_source_bundle_sha256": "78b433dafa2da65e17449fc133e910d34170547392fa70def360fc9f00877882",
+      "p3_expected_optimizer_steps": 1536,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1 and P2 are consumed. P3 is preregistered as the final convergence candidate but requires a separate clean committed authorization. Public evaluation remains blocked.",
       "public_gate_authorized": false,
       "public_gate_evaluator_preregistered": false,
       "public_gate_evaluations": 0,
