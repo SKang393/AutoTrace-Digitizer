@@ -331,7 +331,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-proposal-confirmation-calibrator-v19",
-      "status": "candidate_2_failed_selection",
+      "status": "candidate_3_preregistered",
       "defect_class": "the consumed V18 scalar recognition-confidence veto retained one prohibited false region while missing three truths, so a fixed scalar could not jointly preserve recall and exclusion",
       "prior_revision": "graph-text-recognition-confirmed-proposal-role-v18",
       "trigger_result_path": "ml/ocr/recognition_confirmed_proposal_role_v18/P1_RESULT.json",
@@ -347,14 +347,14 @@
       "recognizer_path": "ml/ocr/official_bakeoff/runs/conversion/en_PP-OCRv5_mobile_rec.onnx",
       "recognizer_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": [
+        "P3"
+      ],
       "consumed_candidate_ids": [
         "P1",
         "P2"
       ],
-      "remaining_unregistered_candidate_ids": [
-        "P3"
-      ],
+      "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/ocr/proposal_confirmation_calibrator_v19/PROTOCOL.json",
       "protocol_sha256": "3da3871850eeadff12c103a1264f9feaa9545003ce6e651c56f9b29e88d1a39c",
       "split_materialized": true,
@@ -382,11 +382,13 @@
       "expected_public_evaluator_source_bundle_sha256": "b3df645bf698c72894f7c82984a1b538d08220aebb8e3805516963c3f982d1e3",
       "candidate_config_paths": {
         "P1": "ml/ocr/proposal_confirmation_calibrator_v19/training/p1.json",
-        "P2": "ml/ocr/proposal_confirmation_calibrator_v19/training/p2.json"
+        "P2": "ml/ocr/proposal_confirmation_calibrator_v19/training/p2.json",
+        "P3": "ml/ocr/proposal_confirmation_calibrator_v19/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "749b51f4328b912f4ceb9ea836c2e448f11ae680c3b0efea83a01847393139d3",
-        "P2": "036acd90f8120539564a9ba37044a8004b8c7c675b52a0444e33e65f99017536"
+        "P2": "036acd90f8120539564a9ba37044a8004b8c7c675b52a0444e33e65f99017536",
+        "P3": "02edb1dceae062ae2066c60d52af9839cc0c5e60dc56592b627eecc844d83814"
       },
       "p1_expected_runner_source_bundle_sha256": "3f38d4cb595452f09752de25b3b05bd04ca3613761bd533baab90b121da58b2f",
       "p1_expected_optimizer_steps": 180,
@@ -441,9 +443,14 @@
       "p2_validation_character_error_rate": 0.004033419763756842,
       "p2_validation_role_accuracy": 1.0,
       "p2_failure": "P2 preserved all 1,024 validation truths and passed recognition, role, and CPU ONNX parity gates, but one prohibited false region remained at thresholds 0.45 and 0.55. Threshold 0.65 removed the false region while missing six truths, so no required three-threshold zero-error window existed.",
+      "p3_isolated_change": "replace only the 31-feature first linear projection with a deterministic 62-feature lift containing each frozen feature and its square; retain P2 negative-class weight 4.0 and every seed, split, payload, threshold, optimizer, and step count",
+      "p3_p1_p2_aggregate_metrics_only_used_for_design": true,
+      "p3_p1_p2_case_details_fixture_bytes_scene_truth_or_case_identity_used": false,
+      "p3_expected_runner_source_bundle_sha256": "1b03ec97a086d33ec8e4246d71a249185103e0fd29a3a8f89ef341e2b71ee019",
+      "p3_expected_optimizer_steps": 180,
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "execution_blocker": "P2 is consumed and failed exact visible selection with one prohibited false region. P3 remains unregistered and requires a separately committed aggregate-only preregistration before any execution authorization.",
+      "execution_blocker": "P3 is preregistered from aggregate P1 and P2 evidence only. A separate committed authorization is required before its one permitted execution.",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,

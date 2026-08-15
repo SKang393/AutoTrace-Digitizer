@@ -11,6 +11,7 @@ import torch
 
 from ml.markers.gate_seal import canonical_json_bytes, sha256_file, source_bundle_sha256
 from ml.ocr.proposal_confirmation_calibrator_v19.model import ProposalConfirmationCalibrator
+from ml.ocr.proposal_confirmation_calibrator_v19.model_p3 import QuadraticProposalConfirmationCalibrator
 from ml.ocr.proposal_confirmation_calibrator_v19.protocol import (
     DETECTOR_PATH, DETECTOR_SHA256, FEATURE_COUNT, RECOGNIZER_PATH, RECOGNIZER_SHA256,
     REVISION, TRIGGER_RESULT_PATH, TRIGGER_RESULT_SHA256, protocol_configuration,
@@ -18,6 +19,7 @@ from ml.ocr.proposal_confirmation_calibrator_v19.protocol import (
 from ml.ocr.proposal_confirmation_calibrator_v19.sealed_gate import EVALUATOR_SOURCE_PATHS
 from ml.ocr.proposal_confirmation_calibrator_v19.train_p1 import RUNNER_SOURCE_PATHS
 from ml.ocr.proposal_confirmation_calibrator_v19.train_p2 import RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS
+from ml.ocr.proposal_confirmation_calibrator_v19.train_p3 import RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS
 
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -59,6 +61,12 @@ def test_stored_splits_and_source_bundles_match_frozen_manifests() -> None:
     assert p2["p1_case_details_fixture_bytes_scene_truth_or_case_identity_used"] is False
     assert p2["negative_class_weight"] == 4.0
     assert p2["expected_optimizer_steps"] == 180
+    p3 = _read("training/p3.json")
+    assert source_bundle_sha256(ROOT, P3_RUNNER_SOURCE_PATHS) == p3["expected_runner_source_bundle_sha256"]
+    assert p3["p1_p2_aggregate_metrics_only_used_for_design"] is True
+    assert p3["p1_p2_case_details_fixture_bytes_scene_truth_or_case_identity_used"] is False
+    assert p3["negative_class_weight"] == 4.0
+    assert p3["expected_optimizer_steps"] == 180
 
 
 def test_calibrator_contract_is_small_and_deterministic() -> None:
@@ -70,6 +78,14 @@ def test_calibrator_contract_is_small_and_deterministic() -> None:
         second_output = second(values)
     assert first_output.shape == (3, 2)
     assert torch.equal(first_output, second_output)
+
+    quadratic_first = QuadraticProposalConfirmationCalibrator(seed=20262219)
+    quadratic_second = QuadraticProposalConfirmationCalibrator(seed=20262219)
+    with torch.inference_mode():
+        quadratic_first_output = quadratic_first(values)
+        quadratic_second_output = quadratic_second(values)
+    assert quadratic_first_output.shape == (3, 2)
+    assert torch.equal(quadratic_first_output, quadratic_second_output)
 
 
 def test_public_gate_and_production_remain_fail_closed() -> None:
@@ -95,16 +111,18 @@ def test_public_gate_and_production_remain_fail_closed() -> None:
     assert result["selection_metrics"]["prohibited_structure_hits"] == 1
     assert result["passing_threshold_window"] == []
     assert p1_result["status"] == "failed_selection"
-    assert entry["status"] == "candidate_2_failed_selection"
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["p1_result_sha256"] == sha256_file(MODULE / "P1_RESULT.json")
     assert entry["p2_result_sha256"] == sha256_file(MODULE / "P2_RESULT.json")
+    assert entry["candidate_config_sha256"]["P3"] == sha256_file(MODULE / "training/p3.json")
     assert not (MODULE / "PUBLIC_GATE_REPORT.json").exists()
+    assert not (MODULE / "P3_RESULT.json").exists()
     local_report = MODULE / "artifacts/P2-run/candidate-report.json"
     if local_report.exists():
         assert sha256_file(local_report) == sha256_file(MODULE / "P2_RESULT.json")
