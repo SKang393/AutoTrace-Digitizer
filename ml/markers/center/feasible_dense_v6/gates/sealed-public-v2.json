@@ -1,0 +1,20 @@
+{
+  "candidate_id": "P1",
+  "evaluation_limit": 1,
+  "expected_candidate_hash_keys": [
+    "candidate_report_sha256",
+    "onnx_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "720a0c4060940739a2d03566252d19c8a50ec85bf0fe828ea2e57736a5c45b36",
+  "expected_evaluator_source_bundle_sha256": "79ac6db0fc0c23b411648e112bc6fdf03d47880d4986699866c8e1ca836d29f1",
+  "expected_gate_config_sha256": "2cce2921f95041fcf5b768689c9f8d12d997c78879d51e8efabc631298899197",
+  "expected_public_fixture_archive_sha256": "1dac2ce1fd6404493e46749632cfa5f8818104d4817e7b1735565fb477abb741",
+  "profile": "marker-center-artifact-mask-public-gate-v1",
+  "production_approval": false,
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "marker-center-feasible-dense-v6-public-v2",
+  "schema": "graphreader.marker-center-feasible-public-gate-config.v2",
+  "task": "marker-center"
+}

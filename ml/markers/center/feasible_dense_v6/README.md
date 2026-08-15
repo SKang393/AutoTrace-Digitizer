@@ -25,8 +25,10 @@ postprocessing, thresholds, and all artifact, exclusion, and CPU ONNX parity
 gates. P1 consumed its single 1,152-step execution and passed all 48 visible
 selection scenes with 432/432 markers, zero false positives, misses, duplicates,
 or prohibited hits, plus CPU ONNX parity at `6.16908073425293e-06`. The
-truth-hidden public archive is now separately authorized for exactly one run,
-but remains unopened and at zero evaluations. The committed authorization binds
-the selected candidate report and ONNX checksums. No manifest, model-store
-promotion, packaging, private validation, production approval, or release
-eligibility is authorized.
+truth-hidden public V1 command failed before seal creation or archive parsing
+because its frozen split configuration omitted the canonical task identity. The
+V1 attempt is consumed and cannot rerun. The archive remains unopened at zero
+evaluations. A corrected V2 wrapper and complete gate identity are separately
+preregistered but execution-blocked pending a later commit. No public result,
+manifest, model-store promotion, packaging, private validation, production
+approval, or release eligibility exists.
