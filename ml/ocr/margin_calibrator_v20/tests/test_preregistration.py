@@ -74,7 +74,7 @@ def test_model_is_small_deterministic_and_export_shaped() -> None:
     assert sum(parameter.numel() for parameter in first.parameters()) < 2_200
 
 
-def test_candidate_is_single_use_authorized_while_public_gate_remains_blocked() -> None:
+def test_consumed_p1_result_is_bound_while_public_gate_remains_blocked() -> None:
     config = _read("training/p1.json")
     gate = _read("gates/sealed-public-v1.json")
     seal = _read("SEALED_PUBLIC_TEST_SEAL.json")
@@ -86,13 +86,17 @@ def test_candidate_is_single_use_authorized_while_public_gate_remains_blocked() 
     assert gate["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(ROOT, EVALUATOR_SOURCE_PATHS)
     assert seal["truth_hidden_from_candidate_runner"] is True
     assert seal["public_gate_evaluations"] == 0
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
-    assert entry["execution_blocker"] is None
+    assert entry["status"] == "candidate_1_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(MODULE / "training/p1.json")
-    assert not (MODULE / "P1_RESULT.json").exists()
+    assert entry["p1_result_sha256"] == sha256_file(MODULE / "P1_RESULT.json")
+    assert entry["p1_result_sha256"] == "a9fc28e963efd0a88cf8168a026778fd50a7dcaff0b7672f848261bb60313d91"
+    assert entry["p1_passing_threshold_window"] == []
+    assert entry["p1_false_negatives"] == 201
+    assert entry["p1_false_positives"] == 0
     assert not (MODULE / "PUBLIC_GATE_RESULT.json").exists()

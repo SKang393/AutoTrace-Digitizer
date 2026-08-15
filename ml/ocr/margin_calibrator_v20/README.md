@@ -28,10 +28,20 @@ P1 configuration SHA-256 is
 `51de16e69364bb54f2818713ee095333c88484e2597fd0ecb307edbcf6e9e56e`;
 runner source bundle SHA-256 is
 `f4a91b00f3483e5bc7b2b06fb0d0d17311aef2fc7ba3c4c20cffd2fd32fece69`.
-The committed canonical budget ledger now authorizes P1 for one execution. The
-runner requires the authorization, candidate configuration, and every bound
-source file to be committed before it creates an opened seal or training output.
-P1 cannot rerun after that seal is opened. A selected candidate would still
-require a separate public-gate authorization, independent marker-stage
-composition, manifest, model-store, packaging, clean-machine, private
-validation, and release evidence.
+P1 executed exactly once from the committed authorization and is consumed. It
+passed CPU ONNX parity at `4.76837158203125e-7` but failed selection at every
+threshold. The best aggregate operating point retained 823 of 1,024 truths,
+missed 201, and produced zero false regions, duplicates, or prohibited hits.
+Recognition exact was `0.798828125`, CER was `0.07375396139441083`, role
+accuracy was `0.783203125`, and the minimum role accuracy was `0.2421875` after
+unmatched truths were counted. Report SHA-256 is
+`a9fc28e963efd0a88cf8168a026778fd50a7dcaff0b7672f848261bb60313d91`;
+rejected ONNX SHA-256 is
+`802eed6d18f8d032d5ef5b9383cb562631da2ac6f137f9356d6e8481115073f5`.
+
+The aggregate result isolates the fixed detector floor as a recall bottleneck:
+the calibrator never received 201 truth proposals and therefore could not
+recover them. P1 cannot rerun. P2 is not preregistered or authorized. The public
+archive remains unopened with zero evaluations, and marker composition,
+manifest, model-store, packaging, clean-machine, private validation, approval,
+and release evidence remain blocked.
