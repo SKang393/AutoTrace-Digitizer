@@ -1,0 +1,33 @@
+{
+  "candidate_id": "P3",
+  "marker_creation_evaluated": false,
+  "model_execution_count_at_freeze": 0,
+  "production_approval": false,
+  "public_archive_path": "artifacts/production-validation/ocr-v9-p3-public.zip",
+  "public_archive_sha256": "4bc651d731c86198b15271c445ae260519bd6c12fd7fdc0bfece246c51c0bca6",
+  "public_evaluations": 0,
+  "public_execution_authorized": false,
+  "public_manifest_sha256": "0a5c31a8df11e70ced21355dee5d4362e64ade8bf41d8bf5f65157a96c19210d",
+  "public_scene_count": 256,
+  "public_truth_region_count": 2048,
+  "release_eligible": false,
+  "schema": "graphreader.ocr-cross-model-consensus-split-seal.v1",
+  "secret_seeds_serialized": false,
+  "selection_archive_path": "artifacts/production-validation/ocr-v9-p3-selection.zip",
+  "selection_archive_sha256": "e8691349879eb6861aaa231154ab73e9aec9c048f4b52ec5ca6de28b67179e6e",
+  "selection_evaluations": 0,
+  "selection_execution_authorized": false,
+  "selection_manifest_sha256": "9cec2c378a4df6949598e8163c7ddb132e1ff920f3f2c269073b8e55da644759",
+  "selection_scene_count": 192,
+  "selection_truth_region_count": 1536,
+  "source_sha256": {
+    "ml/ocr/composite_proposal_role_v11/PUBLIC_GATE_RESULT.json": "3e1da361972b8bd67677db333d55b0b3ad2b5c2f4ef79edcda058167d0a66986",
+    "ml/ocr/cross_model_consensus_v9_p3/PROTOCOL.json": "1908b160b0aa157205d24a49c7a26fce1eff87c9522093a086dfd54e24fa35bc",
+    "ml/ocr/cross_model_consensus_v9_p3/dataset.py": "918b9c9f0ccd778783563828711dc5338d067d699bad2d594747a7b04d7e65ce",
+    "ml/ocr/cross_model_consensus_v9_p3/prepare_split.py": "5c51929c5f5abee8d477d44fcc7fbab93940960ea22efc3e5e2e46bf9ff857b0",
+    "ml/ocr/cross_model_consensus_v9_p3/protocol.py": "a5f80bd3da04ae0bd419e152425d96821f56407000eae3edb96361857a36607f",
+    "ml/ocr/selected_confidence_public_gate_v9_p2/PUBLIC_GATE_RESULT.json": "11d448e69b5aa972139d518d8e920e3eeeec78ca7d66d2b0a9b0f7fe35c7be78",
+    "src/GraphReader.Ocr/OcrV9P3CrossModelConsensusPipeline.cs": "219550e7871d359c3d66e493122c4e969121f23c1dc3707c07239080a43e06ac",
+    "tests/GraphReader.Ocr.Tests/OcrV9P3DirectCorpusTests.cs": "89bf3680c54bf5a95848495804e0c2252993bcbfcf5aa2003b82891aeddaba5a"
+  }
+}
