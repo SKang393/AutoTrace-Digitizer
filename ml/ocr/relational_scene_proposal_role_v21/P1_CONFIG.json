@@ -1,0 +1,31 @@
+{
+  "candidate_id": "P1",
+  "checkpoint_output": "artifacts/production-validation/ocr-v21-p1-checkpoint.pt",
+  "epochs": 4,
+  "expected_optimizer_steps": 1536,
+  "learning_rate": 0.00035,
+  "onnx_output": "artifacts/production-validation/ocr-v21-p1.onnx",
+  "optimizer": "AdamW",
+  "public_execution_authorized": false,
+  "report_output": "artifacts/production-validation/ocr-v21-p1-selection-report.json",
+  "revision": "graph-text-relational-scene-proposal-role-v21",
+  "role_loss_weight": 0.75,
+  "schema": "graphreader.ocr-relational-scene-proposal-role-candidate.v1",
+  "seed": 2608152101,
+  "selection_archive_sha256": "9d3831f31cdb097f0ec4a2d174ed8d9653d76472394fb5f42c44a17e99990371",
+  "selection_evaluation_limit": 1,
+  "split_seal_sha256": "085c93c73731ca97bc85d4eed52841547e6faab28effa56ca14db90d999b3047",
+  "thresholds": [
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8
+  ],
+  "train_archive_sha256": "c82c527daa4afdadaa477895cd58a93072d73c6ece12b39318f5b6b5f951563d",
+  "training_authorized": false,
+  "weight_decay": 0.0001
+}

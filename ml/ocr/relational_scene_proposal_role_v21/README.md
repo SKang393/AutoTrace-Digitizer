@@ -30,6 +30,15 @@ and `b4ae7547731949ac6df1f9afe3fd83178b3cf9c55c81dbd017592a71d90ddab8`.
 The freeze records zero optimizer steps, zero selection evaluations, zero public
 evaluations, and no training or public authorization.
 
+`P1_CONFIG.json` and `train_p1.py` fix the one-run P1 training and selection
+procedure without authorizing it. The runner rehashes every sealed generator,
+dependency, and font source, both non-public archives, its own source bundle,
+the candidate configuration, the split seal, and an ancestor source commit
+before it can create the consumed-attempt record. It refuses any pre-existing
+attempt, checkpoint, ONNX, report, or tracked result. The public archive is not
+referenced by the runner. A separately committed checksum-bound authorization
+is still required before the first optimizer step.
+
 Even a public pass cannot approve recognition composition, the marker stage,
 an artifact-mask provider, manifests, the model store, packaging, private
 Chandler validation, production, or release.

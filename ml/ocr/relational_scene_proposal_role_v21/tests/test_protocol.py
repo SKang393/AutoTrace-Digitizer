@@ -8,6 +8,7 @@ from pathlib import Path
 
 import numpy as np
 import onnxruntime as ort
+import pytest
 import torch
 
 from ml.ocr.relational_scene_proposal_role_v21.dataset import (
@@ -19,10 +20,17 @@ from ml.ocr.relational_scene_proposal_role_v21.dataset import (
 )
 from ml.ocr.relational_scene_proposal_role_v21.model import RelationalSceneProposalRoleNet
 from ml.ocr.relational_scene_proposal_role_v21.prepare_split import SOURCE_PATHS
+from ml.ocr.relational_scene_proposal_role_v21.train_p1 import (
+    _choose_threshold,
+    _evaluate_threshold,
+    _gate_passed,
+    source_bundle_sha256,
+)
 from ml.ocr.relational_scene_proposal_role_v21.protocol import (
     CANDIDATE_LIMIT,
     ENCODED_WIDTH,
     ROLE_ORDER,
+    THRESHOLDS,
     protocol_configuration,
     split_registration,
 )
@@ -50,6 +58,27 @@ def test_protocol_json_matches_the_executable_preregistration() -> None:
     path = Path(__file__).resolve().parents[1] / "PROTOCOL.json"
     expected = json.loads(json.dumps(protocol_configuration()))
     assert json.loads(path.read_text(encoding="utf-8")) == expected
+
+
+def test_p1_config_is_fixed_but_does_not_authorize_training() -> None:
+    root = Path(__file__).resolve().parents[1]
+    config = json.loads((root / "P1_CONFIG.json").read_text(encoding="utf-8"))
+    assert config["candidate_id"] == "P1"
+    assert config["expected_optimizer_steps"] == 1536
+    assert config["epochs"] == 4
+    assert config["thresholds"] == list(THRESHOLDS)
+    assert config["split_seal_sha256"] == "085c93c73731ca97bc85d4eed52841547e6faab28effa56ca14db90d999b3047"
+    assert config["training_authorized"] is False
+    assert config["public_execution_authorized"] is False
+    assert not (root / "P1_TRAINING_AUTHORIZATION.json").exists()
+
+
+def test_runner_source_bundle_is_order_independent_and_path_bound() -> None:
+    left = source_bundle_sha256({"b.py": "2" * 64, "a.py": "1" * 64})
+    right = source_bundle_sha256({"a.py": "1" * 64, "b.py": "2" * 64})
+    different_path = source_bundle_sha256({"c.py": "1" * 64, "b.py": "2" * 64})
+    assert left == right
+    assert left != different_path
 
 
 def test_split_vocabularies_are_disjoint_and_exclude_private_labels() -> None:
@@ -135,6 +164,28 @@ def test_dynamic_relational_model_exports_and_matches_cpu_onnx(tmp_path: Path) -
         actual = session.run(["logits"], {"proposals": value.numpy()})[0]
         assert actual.shape == expected.shape
         assert float(np.max(np.abs(expected - actual))) <= 0.00001
+
+
+def test_selection_metrics_require_every_role_and_reject_structure_acceptance() -> None:
+    proposal_truth = (np.asarray([1] * len(ROLE_ORDER) + [0], dtype=np.int64),)
+    role_truth = (np.asarray(list(range(len(ROLE_ORDER))) + [-1], dtype=np.int64),)
+    predicted_roles = (np.asarray(list(range(len(ROLE_ORDER))) + [0], dtype=np.int64),)
+    passing_probabilities = (np.asarray([0.9] * len(ROLE_ORDER) + [0.1], dtype=np.float32),)
+    passing = _evaluate_threshold(passing_probabilities, predicted_roles, proposal_truth, role_truth, 0.5)
+    assert passing.exact_scene_count == 1
+    assert passing.true_positives == len(ROLE_ORDER)
+    assert passing.false_positives == 0
+    assert passing.false_negatives == 0
+    assert passing.role_accuracy == pytest.approx(1.0)
+    assert min(passing.per_role_accuracy.values()) == pytest.approx(1.0)
+    assert _gate_passed(passing)
+
+    failing_probabilities = (np.asarray([0.9] * (len(ROLE_ORDER) + 1), dtype=np.float32),)
+    failing = _evaluate_threshold(failing_probabilities, predicted_roles, proposal_truth, role_truth, 0.5)
+    assert failing.false_positives == 1
+    assert failing.prohibited_structure_hits == 1
+    assert not _gate_passed(failing)
+    assert _choose_threshold((failing, passing)) == passing
 
 
 def test_fresh_probe_scenes_use_production_proposals_and_all_roles() -> None:
