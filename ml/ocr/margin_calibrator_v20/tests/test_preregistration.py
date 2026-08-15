@@ -114,7 +114,7 @@ def test_p3_role_targets_and_calibrated_records_are_explicit() -> None:
     assert [record.predicted_role for record in calibrated] == ["YTick", "Annotation", "Other"]
 
 
-def test_consumed_p1_and_p2_and_preregistered_p3_are_bound_while_public_remains_blocked() -> None:
+def test_all_v20_candidates_are_consumed_while_public_remains_blocked() -> None:
     config = _read("training/p1.json")
     p2_config = _read("training/p2.json")
     p3_config = _read("training/p3.json")
@@ -128,13 +128,13 @@ def test_consumed_p1_and_p2_and_preregistered_p3_are_bound_while_public_remains_
     assert gate["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(ROOT, EVALUATOR_SOURCE_PATHS)
     assert seal["truth_hidden_from_candidate_runner"] is True
     assert seal["public_gate_evaluations"] == 0
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["status"] == "exhausted_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
-    assert entry["execution_blocker"] is None
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert "three-candidate V20 budget is exhausted" in entry["execution_blocker"]
     assert entry["public_gate_authorized"] is False
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(MODULE / "training/p1.json")
     assert entry["p1_result_sha256"] == sha256_file(MODULE / "P1_RESULT.json")
@@ -166,6 +166,14 @@ def test_consumed_p1_and_p2_and_preregistered_p3_are_bound_while_public_remains_
     assert p3_config["expected_optimizer_steps"] == 1480
     assert p3_config["training_counts"]["proposal_count"] == 9373
     assert p3_config["validation_counts"]["proposal_count"] == 5384
-    assert not (MODULE / "P3_RESULT.json").exists()
-    assert not (MODULE / "artifacts/P3-run").exists()
+    p3_result = _read("P3_RESULT.json")
+    assert entry["p3_result_sha256"] == sha256_file(MODULE / "P3_RESULT.json")
+    assert entry["p3_candidate_report_sha256"] == p3_result["candidate_report_sha256"]
+    assert entry["p3_status"] == "failed_selection_consumed"
+    assert p3_result["case_level_details_emitted"] is False
+    assert p3_result["public_gate_archive_opened"] is False
+    assert p3_result["selection_metrics"]["false_positives"] == 2
+    assert p3_result["selection_metrics"]["false_negatives"] == 3
+    assert p3_result["selection_metrics"]["minimum_role_accuracy"] == 0.984375
+    assert p3_result["passing_threshold_window"] == []
     assert not (MODULE / "PUBLIC_GATE_RESULT.json").exists()
