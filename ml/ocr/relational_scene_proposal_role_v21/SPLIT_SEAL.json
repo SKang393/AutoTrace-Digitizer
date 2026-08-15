@@ -1,0 +1,103 @@
+{
+  "artifact_mask_production_approval": false,
+  "candidate_id": "P1",
+  "marker_creation_evaluated": false,
+  "optimizer_steps_at_freeze": 0,
+  "production_approval": false,
+  "public_evaluations": 0,
+  "public_execution_authorized": false,
+  "release_eligible": false,
+  "schema": "graphreader.ocr-relational-scene-proposal-role-split-seal.v1",
+  "sealed_public": {
+    "archive_path": "artifacts/production-validation/ocr-v21-public.zip",
+    "archive_sha256": "b4ae7547731949ac6df1f9afe3fd83178b3cf9c55c81dbd017592a71d90ddab8",
+    "manifest_sha256": "9692cad2c6be7dfb4fa128cd6316d14236c49ad37d007a9fd4d7e451390df75f",
+    "proposal_summary": {
+      "exactly_one_production_proposal_per_truth": true,
+      "negative_proposal_count": 4746,
+      "positive_proposal_count": 1536,
+      "proposal_count": 6282,
+      "proposal_label_stream_sha256": "e4093abea29a9f896c6ad483f7833315c37e71c9c068c110e1bde9421013f852",
+      "role_truth_counts": {
+        "Annotation": 192,
+        "AxisTitle": 192,
+        "LegendText": 192,
+        "Other": 192,
+        "Participant": 192,
+        "PhaseHeading": 192,
+        "XTick": 192,
+        "YTick": 192
+      },
+      "scene_count": 192
+    },
+    "split_fingerprint": "05fc04bf78ed981ca6f6ba00e69b32d07778800021371e3bc11b095228b52b2d"
+  },
+  "selection": {
+    "archive_path": "artifacts/production-validation/ocr-v21-selection.zip",
+    "archive_sha256": "9d3831f31cdb097f0ec4a2d174ed8d9653d76472394fb5f42c44a17e99990371",
+    "manifest_sha256": "08a8418edf9a6a7509ed541f956da969b6bac30a981b9bf76275fb417bedf8fb",
+    "proposal_summary": {
+      "exactly_one_production_proposal_per_truth": true,
+      "negative_proposal_count": 2699,
+      "positive_proposal_count": 1024,
+      "proposal_count": 3723,
+      "proposal_label_stream_sha256": "0e4279bdc6d1a04f03b8b7e7daa22757ecb667a1695ce77224c173ddbe73f15c",
+      "role_truth_counts": {
+        "Annotation": 128,
+        "AxisTitle": 128,
+        "LegendText": 128,
+        "Other": 128,
+        "Participant": 128,
+        "PhaseHeading": 128,
+        "XTick": 128,
+        "YTick": 128
+      },
+      "scene_count": 128
+    },
+    "split_fingerprint": "bff0102af0fc6788e7a2962e8c81c0ca6fb12250a2c2645f478130eb59462672"
+  },
+  "selection_evaluations": 0,
+  "source_sha256": {
+    "ml/markers/gate_seal.py": "8b01113d0881dc2b89df3763f4c66fe311cffa48520e72963d2bd6366372122a",
+    "ml/ocr/component_context_detector_v7/dataset.py": "96bebccedc58404e369a1ac3ef6fe3d4d8baa657872543f8958ed73e902d595f",
+    "ml/ocr/component_context_detector_v7/protocol.py": "b454fa09fb7bd0b25090f59004012ae40326f5ea1780d5c608fb2f8aee85401d",
+    "ml/ocr/component_region_detector_v6/dataset.py": "cfc1760cfe0f5231d34960100bed3b24bbd54bab6ab69919c3eae43fddc22f59",
+    "ml/ocr/component_region_detector_v6/protocol.py": "5ca41e131c5bd86a63e33b154dd23b3ace4ab6479eafbc25a9363c907b039c33",
+    "ml/ocr/cross_model_consensus_v9_p3/P3_SELECTION_RESULT.json": "f7935a64de07f1187a4ca854c01a90b4fcd004c533f57c6f464d98c5e59105e2",
+    "ml/ocr/layout_conditioned_proposal_role_v15/dataset.py": "5531597719e33d8f08076d5a7307b95b6e47a602aa908118ca3f585e2d461641",
+    "ml/ocr/layout_conditioned_proposal_role_v15/protocol.py": "cdd5008feeec7496982079f0115c7205a8c03861db9bc72e9bebb0d12b17d831",
+    "ml/ocr/relational_scene_proposal_role_v21/PROTOCOL.json": "a033f6f8d2ed52398b8cd781363b64b1d7c53f090de63bc70fe1ef4fe0b98ccb",
+    "ml/ocr/relational_scene_proposal_role_v21/dataset.py": "5e453ca512f96a7f9b318cd183006020006dad8e8a5ef8fa53b270fc21b638f5",
+    "ml/ocr/relational_scene_proposal_role_v21/model.py": "4d92e891e5c4ac887c8b335881e1da05f6e0b93ab07835f8643eb231d2687614",
+    "ml/ocr/relational_scene_proposal_role_v21/prepare_split.py": "2af3700766a300eae55ccfdfdd152c3c86084434da32f72c9a347987cc61a684",
+    "ml/ocr/relational_scene_proposal_role_v21/protocol.py": "3a26c86aca49eea2731ad32fdf98ff6489871e480a4d52f3492f1931bdd4e5ed",
+    "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf": "635d93d1131d791f2576de90b3bb0f7cdf61929906e8420a61b5f7f8e76420bb",
+    "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+    "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf": "a4e91fd530ac2b4ef5367240144ff37d7d65d66cf76f2e9a2187b93c676f92d0"
+  },
+  "train": {
+    "archive_path": "artifacts/production-validation/ocr-v21-train.zip",
+    "archive_sha256": "c82c527daa4afdadaa477895cd58a93072d73c6ece12b39318f5b6b5f951563d",
+    "manifest_sha256": "d091e199f7365c6797b7b6e95b0d7306ec87dfdc9e5670df4784d8c390a41259",
+    "proposal_summary": {
+      "exactly_one_production_proposal_per_truth": true,
+      "negative_proposal_count": 21419,
+      "positive_proposal_count": 3072,
+      "proposal_count": 24491,
+      "proposal_label_stream_sha256": "bd570c8c8c139662483c36da813d981c9dd1a2444679db335294d707b8bda3bc",
+      "role_truth_counts": {
+        "Annotation": 384,
+        "AxisTitle": 384,
+        "LegendText": 384,
+        "Other": 384,
+        "Participant": 384,
+        "PhaseHeading": 384,
+        "XTick": 384,
+        "YTick": 384
+      },
+      "scene_count": 384
+    },
+    "split_fingerprint": "479128e0993705ea973835db4add28a26defb9f47123c324c3c0a08d2c04a935"
+  },
+  "training_authorized": false
+}
