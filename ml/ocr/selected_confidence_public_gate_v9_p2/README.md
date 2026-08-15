@@ -14,3 +14,11 @@ at least `0.90`, and each numeric, word, and ambiguity family at least `0.90`.
 Even a public-gate pass cannot authorize the marker stage, an artifact-mask
 provider, manifests, the production model store, packaging, private Chandler
 validation, production approval, or release.
+
+The single authorized execution is consumed and failed closed. It passed direct
+CPU runtime evidence but reached only 87/160 exact scenes with 1,206/1,280
+truths, one false and prohibited region, 74 misses, zero duplicates, recognition
+exact match `0.85625`, CER `0.02385599653003687`, and role accuracy `0.6921875`.
+No case-level result is tracked or authorized for tuning. The candidate cannot
+rerun, be repaired against this corpus, enter a manifest or model store, reach
+private validation, or receive production or release approval.

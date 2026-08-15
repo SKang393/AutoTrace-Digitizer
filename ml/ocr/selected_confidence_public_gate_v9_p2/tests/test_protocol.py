@@ -98,3 +98,40 @@ def test_authorization_binds_frozen_public_identity_and_remains_fail_closed() ->
     assert authorization["private_validation_authorized"] is False
     assert authorization["production_approval"] is False
     assert authorization["release_eligible"] is False
+
+
+def test_consumed_result_records_aggregate_failure_and_cannot_promote() -> None:
+    result_path = ROOT / "PUBLIC_GATE_RESULT.json"
+    authorization_path = ROOT / "PUBLIC_GATE_AUTHORIZATION.json"
+    assert result_path.exists()
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+
+    assert result["schema"] == "graphreader.ocr-selected-confidence-public-result.v1"
+    assert result["candidate_id"] == "P2"
+    assert result["execution_consumed"] is True
+    assert result["execution_count"] == 1
+    assert result["authorization_sha256"] == sha256(authorization_path.read_bytes()).hexdigest()
+    assert result["report_contains_aggregate_only"] is True
+    assert result["case_level_evidence_used"] is False
+    assert result["direct_runtime_evidence_passed"] is True
+    assert result["public_gate_passed"] is False
+    assert result["full_eight_role_coverage_proven"] is False
+    assert result["metrics"]["scene_count"] == 160
+    assert result["metrics"]["truth_region_count"] == 1280
+    assert result["metrics"]["exact_detection_scene_count"] == 87
+    assert result["metrics"]["false_positives"] == 1
+    assert result["metrics"]["false_negatives"] == 74
+    assert result["metrics"]["duplicate_region_count"] == 0
+    assert result["metrics"]["prohibited_structure_hits"] == 1
+    assert result["rerun_or_repair_authorized"] is False
+    assert result["marker_stage_authorized"] is False
+    assert result["artifact_mask_production_approval"] is False
+    assert result["manifest_creation_authorized"] is False
+    assert result["model_store_promotion_authorized"] is False
+    assert result["private_validation_authorized"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
+
+    local_report = REPO_ROOT / result["report_path"]
+    if local_report.exists():
+        assert sha256(local_report.read_bytes()).hexdigest() == result["report_sha256"]
