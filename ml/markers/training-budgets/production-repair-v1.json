@@ -4501,7 +4501,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-domain-randomized-v7",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_2_preregistered",
       "defect_class": "V6 passed its narrow visible selection but collapsed on the one-time public domain with 190 false positives, 297 false negatives, four prohibited hits, artifact precision 0.6145023044357781, and artifact recall 0.6914750693739623",
       "prior_revision": "marker-center-feasible-dense-v6",
       "trigger_public_result_path": "ml/markers/center/feasible_dense_v6/PUBLIC_GATE_RESULT.json",
@@ -4516,20 +4516,22 @@
       "trigger_public_artifact_precision": 0.6145023044357781,
       "trigger_public_artifact_recall": 0.6914750693739623,
       "prior_fixture_bytes_reused": false,
-      "isolated_change": "replace V6's narrow single-family selection domain with fresh multi-layout, multi-shape, mask-imperfection, illumination, blur, compression, stroke, quantization, scanline, and noise families while preserving the model capacity, dense tensor contract, objective, postprocessing, thresholds, and gates",
+      "p1_isolated_change": "replace V6's narrow single-family selection domain with fresh multi-layout, multi-shape, mask-imperfection, illumination, blur, compression, stroke, quantization, scanline, and noise families while preserving the model capacity, dense tensor contract, objective, postprocessing, thresholds, and gates",
+      "isolated_change": "reuse the exact completed P1 checkpoint and ONNX with zero optimizer steps, normalize the P2 output directory before report assembly, and execute only the previously lost visible selection and parity report",
       "architecture": "domain-randomized-expanded-compact-fpn-v7",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
+        "P2"
+      ],
+      "consumed_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "protocol_path": "ml/markers/center/domain_randomized_v7/PROTOCOL.json",
-      "protocol_sha256": "b2c6860cb676a606354b04a7c6c4344b34a7dc89cbfc8fa5bb899c28956e42fe",
+      "protocol_sha256": "88da0f1d828d2fd19d6249141f4d613956b9c0ab84998e109a904e1df7818d6f",
       "design_source_paths": [
         "ml/markers/center/domain_randomized_v7/dataset.py",
         "ml/markers/center/domain_randomized_v7/model.py",
@@ -4603,16 +4605,30 @@
       "public_dataset_manifest_path": "ml/markers/center/domain_randomized_v7/PUBLIC_DATASET_MANIFEST.json",
       "public_dataset_manifest_sha256": "d97499c004623f6fa0792c87ea60c297ca8eb9fa1a604734480ee9b4a48fbf38",
       "candidate_config_paths": {
-        "P1": "ml/markers/center/domain_randomized_v7/training/p1.json"
+        "P1": "ml/markers/center/domain_randomized_v7/training/p1.json",
+        "P2": "ml/markers/center/domain_randomized_v7/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "bafefe41fcfb70c8716548c1c051f1a52ac90507e94f6388ea182d9c60f55788"
+        "P1": "bafefe41fcfb70c8716548c1c051f1a52ac90507e94f6388ea182d9c60f55788",
+        "P2": "ab0a05916ceb54300e41ae4ae4d151196896848715c01a5b6fff45839fd0e3a0"
       },
       "p1_expected_runner_source_bundle_sha256": "daafcaecce83cfbbd37e6ee7843a40e4cb1e0ef8513d7c42e6ae228485080af6",
       "p1_expected_optimizer_steps": 2304,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P1",
-      "execution_blocker": "Exactly one checksum-bound P1 training run is authorized. P2, P3, and every public evaluation remain blocked.",
+      "p1_result_path": "ml/markers/center/domain_randomized_v7/P1_RESULT.json",
+      "p1_result_sha256": "8f2fa3e88409b40efccc616861b1f6c38d65ed78a49d04caca5e90efbaa2257d",
+      "p1_candidate_report_sha256": "0ffecb074295603c7ea089724677b885372109744a16096e55b98fa7e626d0d4",
+      "p1_checkpoint_sha256": "4170b542c048d0a1f1ca711694240d995d9e8b5dd1ec22484edc6759d9c79159",
+      "p1_onnx_sha256": "78c378dc95d20c49bf2daebbf7b60cb2fe93185482745e7a80c4d26585a43b55",
+      "p1_optimizer_steps": 2304,
+      "p1_failure_phase": "selection",
+      "p1_status": "failed_runner_consumed",
+      "p1_training_opened_seal_sha256": "4441ce30f14342c61fb86f4e1143e8ae463a008483a7821749ab2ff36e6322bf",
+      "p1_training_result_seal_sha256": "4e4e0f9ab1b1f6f50c17e0a8afd6e1ed28628035a26ebc2e7bf432275f3b633c",
+      "p2_expected_runner_source_bundle_sha256": "0bdff4e9b416b3724c5135316202c940e4275d25c407ea74aaf9ea0cc1285d10",
+      "p2_expected_optimizer_steps": 0,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1 is consumed after a final report-path failure. P2 is preregistered to reuse the exact completed P1 bytes with zero optimizer steps but requires a separate clean committed authorization. Public evaluation remains blocked.",
       "public_gate_authorized": false,
       "public_gate_evaluator_preregistered": false,
       "public_gate_evaluations": 0,

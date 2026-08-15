@@ -26,7 +26,7 @@ from ml.markers.center.domain_randomized_v7.dataset import (
     validate_scene_feasibility,
 )
 from ml.markers.center.domain_randomized_v7.model import create_model
-from ml.markers.center.domain_randomized_v7.train_p1 import RUNNER_SOURCE_PATHS, THRESHOLDS
+from ml.markers.center.domain_randomized_v7.train_p2 import RUNNER_SOURCE_PATHS, THRESHOLDS
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 
 
@@ -115,29 +115,39 @@ def test_model_preserves_frozen_dense_three_head_contract() -> None:
     assert torch.all((output[:, 2] >= 0) & (output[:, 2] <= 1))
 
 
-def test_protocol_config_and_budget_are_checksum_bound_and_p1_only() -> None:
+def test_protocol_config_and_budget_are_checksum_bound_and_p2_blocked() -> None:
     protocol = _json(ROOT / "PROTOCOL.json")
-    config = _json(ROOT / "training/p1.json")
+    config = _json(ROOT / "training/p2.json")
     ledger = _json(LEDGER_PATH)
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol["revision"])
     assert source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
     design_paths = tuple(REPO_ROOT / path for path in protocol["design_source_paths"])
     design_hash = source_bundle_sha256(REPO_ROOT, tuple(path.relative_to(REPO_ROOT) for path in design_paths))
     assert design_hash == protocol["design_source_bundle_sha256"]
-    assert sha256_file(ROOT / "training/p1.json") == protocol["candidate_config_sha256"]
+    assert sha256_file(ROOT / "training/p2.json") == protocol["candidate_config_sha256"]
     assert sha256_file(ROOT / "SELECTION_MANIFEST.json") == protocol["selection_manifest_sha256"]
     assert sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json") == protocol["sealed_public_test_seal_sha256"]
     assert sha256_file(ROOT / "SPLIT_FREEZE_REPORT.json") == protocol["split_freeze_report_sha256"]
     assert sha256_file(REPO_ROOT / protocol["trigger_public_result_path"]) == protocol["trigger_public_result_sha256"]
     assert config["selection_thresholds"] == list(THRESHOLDS)
-    assert protocol["execution_authorized"] is True
+    p1_result = _json(ROOT / "P1_RESULT.json")
+    assert sha256_file(ROOT / "P1_RESULT.json") == protocol["p1_result_sha256"]
+    assert p1_result["status"] == "failed_runner_consumed"
+    assert p1_result["optimizer_steps"] == 2304
+    assert p1_result["failure_phase"] == "selection"
+    assert p1_result["public_gate_archive_opened"] is False
+    assert p1_result["public_gate_evaluations"] == 0
+    assert protocol["execution_authorized"] is False
     assert protocol["public_gate_authorized"] is False
     assert protocol["public_gate_archive_opened"] is False
     assert protocol["public_gate_evaluations"] == 0
     assert protocol["trigger_case_detail_or_pixels_used"] is False
     assert entry["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["manifest_created"] is False
     assert entry["model_store_promoted"] is False

@@ -18,8 +18,13 @@ conflict, and every prohibited hard point is present in artifact truth.
 P1 preserves the V6 model capacity, three-channel dense input/output contract,
 loss, postprocessing, threshold set, exact-count gate, prohibited-structure
 gate, artifact precision/recall gate, and CPU ONNX parity gate. This isolates
-domain breadth as the intervention. Exactly one checksum-bound P1 run is now
-authorized. P2 and P3 remain unregistered. Public evaluation stays locked until
-a separately committed candidate selection and public evaluator authorization.
-No manifest, model-store entry, package payload, private validation, production
-approval, or release eligibility exists.
+domain breadth as the intervention. P1 completed all 2,304 optimizer steps and
+produced checkpoint and ONNX bytes, but failed during final report assembly
+because the explicitly supplied relative output path could not be normalized
+against the absolute repository root. P1 is consumed and cannot rerun. P2 is
+preregistered to reuse the exact P1 bytes with zero optimizer steps, normalize
+its output path, and recover only the lost visible selection and parity report.
+P2 execution remains blocked pending a separate committed authorization. P3 is
+unregistered. Public evaluation stays locked. No manifest, model-store entry,
+package payload, private validation, production approval, or release eligibility
+exists.
