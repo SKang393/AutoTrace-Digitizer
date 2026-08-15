@@ -1,0 +1,26 @@
+{
+  "schema": "graphreader.ocr-selected-confidence-selection-authorization.v1",
+  "candidate_id": "P2",
+  "execution_authorized": true,
+  "execution_count_authorized": 1,
+  "provider": "CPUExecutionProvider",
+  "sealed_identity_commit": "848dd274aa2e48bf0da39aa8825fe82dbe9f01c6",
+  "fixture_archive_sha256": "8dd61664870725f896bacc37d3593a0891c1b465a6b848a8a2083f20cf9b4133",
+  "fixture_manifest_sha256": "4b0b4c948ebf814a464ff6f8b6df06645b3436e262fc6336daf65ed5b7d4fdea",
+  "split_seal_sha256": "0859af7f79953e5ffe5b6f8e676f3a0bc38e27c1dd4b6ae80ce0c4ce6d46ff60",
+  "candidate_sha256": [
+    "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+    "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+    "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+    "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096"
+  ],
+  "exact_test": "OcrV9P2CandidateSelectionTests.FreshP2SelectionExecutesOnceThroughCSharpCpuCandidate",
+  "result_path": "artifacts/production-validation/ocr-v9-p2-selection-report.json",
+  "rerun_or_repair_authorized": false,
+  "public_gate_authorized": false,
+  "manifest_creation_authorized": false,
+  "model_store_promotion_authorized": false,
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "release_eligible": false
+}
