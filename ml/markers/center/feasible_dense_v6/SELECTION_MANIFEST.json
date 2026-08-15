@@ -1,0 +1,61 @@
+{
+  "revision": "marker-center-feasible-dense-v6",
+  "schema": "graphreader.marker-center-feasible-selection.v6",
+  "sealed_public": {
+    "archive_path": "ml/markers/center/feasible_dense_v6/artifacts/splits/sealed-public.npz",
+    "archive_sha256": "1dac2ce1fd6404493e46749632cfa5f8818104d4817e7b1735565fb477abb741",
+    "count": 64,
+    "degradation_family": "hidden-quantized-anisotropic-v6-public",
+    "feasibility": {
+      "hard_negative_count": 640,
+      "hard_point_missing_from_artifact_truth_count": 0,
+      "minimum_center_separation_px": 12.041594505310059,
+      "minimum_truth_to_hard_negative_distance_px": 11.5108642578125,
+      "required_disjoint_clearance_px": 11.0,
+      "scene_count": 64,
+      "truth_center_count": 575,
+      "truth_hard_acceptance_overlap_count": 0,
+      "truth_mask_conflict_count": 0
+    },
+    "renderer_family": "feasible-hidden-composite-v6-public",
+    "seed_offset": 2110393
+  },
+  "train": {
+    "archive_path": "ml/markers/center/feasible_dense_v6/artifacts/splits/train.npz",
+    "archive_sha256": "b091acd699046d75862fb4d9579d5eb0269ebb79a79e972f9db068d1a6028c43",
+    "count": 192,
+    "degradation_family": "mixed-blur-noise-contrast-v6-train",
+    "feasibility": {
+      "hard_negative_count": 1920,
+      "hard_point_missing_from_artifact_truth_count": 0,
+      "minimum_center_separation_px": 12.041594505310059,
+      "minimum_truth_to_hard_negative_distance_px": 11.280513763427734,
+      "required_disjoint_clearance_px": 11.0,
+      "scene_count": 192,
+      "truth_center_count": 1728,
+      "truth_hard_acceptance_overlap_count": 0,
+      "truth_mask_conflict_count": 0
+    },
+    "renderer_family": "feasible-multicurve-structure-v6-train",
+    "seed_offset": 1310393
+  },
+  "validation": {
+    "archive_path": "ml/markers/center/feasible_dense_v6/artifacts/splits/validation.npz",
+    "archive_sha256": "24a5169c9d200f25780bde4c7b033cac4f0861bedc4e4c552efde1f855ebe829",
+    "count": 48,
+    "degradation_family": "heldout-stroke-drop-lowcontrast-v6-validation",
+    "feasibility": {
+      "hard_negative_count": 480,
+      "hard_point_missing_from_artifact_truth_count": 0,
+      "minimum_center_separation_px": 12.041594505310059,
+      "minimum_truth_to_hard_negative_distance_px": 11.5108642578125,
+      "required_disjoint_clearance_px": 11.0,
+      "scene_count": 48,
+      "truth_center_count": 432,
+      "truth_hard_acceptance_overlap_count": 0,
+      "truth_mask_conflict_count": 0
+    },
+    "renderer_family": "feasible-heldout-piecewise-v6-validation",
+    "seed_offset": 1730393
+  }
+}

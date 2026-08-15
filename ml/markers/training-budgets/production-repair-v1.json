@@ -4312,6 +4312,130 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "marker-center",
+      "revision": "marker-center-feasible-dense-v6",
+      "status": "candidate_1_preregistered",
+      "defect_class": "V5 selection fixtures overlapped required marker truth and prohibited acceptance regions and cleared prohibited hard points from artifact-mask truth, making its training targets and fixed gates internally conflicting",
+      "prior_revision": "marker-center-dense-contract-v5",
+      "trigger_diagnosis_path": "ml/markers/center/dense_contract_v5/V5_FEASIBILITY_DIAGNOSIS.json",
+      "trigger_diagnosis_sha256": "e2639d78b6941cf992e0edb50b2587369d454556b6380cefc45b81ef088f070b",
+      "trigger_evidence_scope_used_for_design": "aggregate feasibility counts and source-contract inspection only",
+      "trigger_case_detail_or_pixels_used": false,
+      "prior_fixture_bytes_reused": false,
+      "isolated_change": "replace V5's conflicting fixtures with fresh mutually feasible multi-family train, validation, and truth-hidden public scenes while preserving the dense tensor contract, spatial margin objective, two-pass composition, postprocessing, thresholds, and gates",
+      "architecture": "feasible-dense-expanded-compact-fpn-v6",
+      "model_license": "Apache-2.0",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P2",
+        "P3"
+      ],
+      "protocol_path": "ml/markers/center/feasible_dense_v6/PROTOCOL.json",
+      "protocol_sha256": "c5a13ecffd3e8572eca76f31696af87a28106462e4a3e3b7d3202a5845483c17",
+      "design_source_paths": [
+        "ml/markers/center/feasible_dense_v6/dataset.py",
+        "ml/markers/center/feasible_dense_v6/model.py",
+        "ml/markers/center/feasible_dense_v6/prepare_split.py"
+      ],
+      "design_source_bundle_sha256": "c72e556eeca5f1a03f5164600f294afceba15f44a4ffff1fcc9e3b03be5ff334",
+      "input_shape": [
+        "N",
+        3,
+        "H",
+        "W"
+      ],
+      "input_channels": [
+        "ink_probability",
+        "text_mask",
+        "artifact_mask"
+      ],
+      "output_shape": [
+        "N",
+        3,
+        "H",
+        "W"
+      ],
+      "output_channels": [
+        "center_probability",
+        "radius_pixels",
+        "artifact_probability"
+      ],
+      "two_pass_artifact_composition": true,
+      "required_disjoint_clearance_px": 11.0,
+      "selection_thresholds": [
+        0.3,
+        0.35,
+        0.4,
+        0.45,
+        0.5,
+        0.55,
+        0.6
+      ],
+      "minimum_consecutive_passing_thresholds": 3,
+      "artifact_threshold": 0.35,
+      "minimum_artifact_precision": 0.9,
+      "minimum_artifact_recall": 0.95,
+      "maximum_marker_artifact_hits": 0,
+      "onnx_parity_tolerance": 0.00001,
+      "split_materialized": true,
+      "selection_manifest_path": "ml/markers/center/feasible_dense_v6/SELECTION_MANIFEST.json",
+      "selection_manifest_sha256": "12d6ba9f6aa5b80a8052ea43ba4971d573b1de08cf338d9e92120ff20079a99d",
+      "split_freeze_report_path": "ml/markers/center/feasible_dense_v6/SPLIT_FREEZE_REPORT.json",
+      "split_freeze_report_sha256": "87435e93c8c3a63b702526fa36af5ddeac73a647568716ac37bc40a0bf0d34aa",
+      "train_scene_count": 192,
+      "train_archive_sha256": "b091acd699046d75862fb4d9579d5eb0269ebb79a79e972f9db068d1a6028c43",
+      "train_truth_center_count": 1728,
+      "train_hard_negative_count": 1920,
+      "train_minimum_truth_to_hard_negative_distance_px": 11.280513763427734,
+      "validation_scene_count": 48,
+      "validation_archive_sha256": "24a5169c9d200f25780bde4c7b033cac4f0861bedc4e4c552efde1f855ebe829",
+      "validation_truth_center_count": 432,
+      "validation_hard_negative_count": 480,
+      "validation_minimum_truth_to_hard_negative_distance_px": 11.5108642578125,
+      "sealed_public_scene_count": 64,
+      "sealed_public_fixture_archive_sha256": "1dac2ce1fd6404493e46749632cfa5f8818104d4817e7b1735565fb477abb741",
+      "sealed_public_truth_center_count": 575,
+      "sealed_public_hard_negative_count": 640,
+      "sealed_public_minimum_truth_to_hard_negative_distance_px": 11.5108642578125,
+      "feasibility_truth_hard_acceptance_overlap_count": 0,
+      "feasibility_truth_mask_conflict_count": 0,
+      "feasibility_hard_point_missing_from_artifact_truth_count": 0,
+      "sealed_public_test_seal_path": "ml/markers/center/feasible_dense_v6/SEALED_PUBLIC_TEST_SEAL.json",
+      "sealed_public_test_seal_sha256": "58f19f35c597e9bec69cbba25b38fd7fa497ef5e7e719e9d5836bbcc841fd9d8",
+      "public_dataset_manifest_path": "ml/markers/center/feasible_dense_v6/PUBLIC_DATASET_MANIFEST.json",
+      "public_dataset_manifest_sha256": "720a0c4060940739a2d03566252d19c8a50ec85bf0fe828ea2e57736a5c45b36",
+      "candidate_config_paths": {
+        "P1": "ml/markers/center/feasible_dense_v6/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "760c3e32e745c7f1be04413b6d84ad217b803e93b792ae6f9eb348a677fa54e4"
+      },
+      "p1_expected_runner_source_bundle_sha256": "651a25f94a6262fc5301dbb5f246fe102c01ebbb193cc55f3701b1c95c040757",
+      "p1_expected_optimizer_steps": 1152,
+      "public_gate_config_path": "ml/markers/center/feasible_dense_v6/gates/sealed-public-v1.json",
+      "public_gate_config_sha256": "c21faf376f687b37061d662f4f4ab0ef858fc88d7d21a58351df20ab77a81393",
+      "expected_public_evaluator_source_bundle_sha256": "216c6fb4382350b67c15f34dd7934bf4fe86fb10abaf6adcf09990caa6bfa83f",
+      "expected_public_gate_configuration_sha256": "2cce2921f95041fcf5b768689c9f8d12d997c78879d51e8efabc631298899197",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1 is preregistered and source-bound but requires a separate committed authorization before training may execute.",
+      "public_gate_authorized": false,
+      "public_gate_authorized_candidate_id": null,
+      "public_gate_evaluations": 0,
+      "public_gate_archive_opened": false,
+      "manifest_created": false,
+      "model_store_promoted": false,
+      "packaging_discovery": false,
+      "private_validation": false,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
     }
   ]
 }

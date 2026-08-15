@@ -1,0 +1,12 @@
+{
+  "expected_dataset_manifest_sha256": "720a0c4060940739a2d03566252d19c8a50ec85bf0fe828ea2e57736a5c45b36",
+  "expected_evaluator_source_bundle_sha256": "216c6fb4382350b67c15f34dd7934bf4fe86fb10abaf6adcf09990caa6bfa83f",
+  "expected_gate_config_sha256": "2cce2921f95041fcf5b768689c9f8d12d997c78879d51e8efabc631298899197",
+  "expected_public_fixture_archive_sha256": "1dac2ce1fd6404493e46749632cfa5f8818104d4817e7b1735565fb477abb741",
+  "expected_split_seal_sha256": "58f19f35c597e9bec69cbba25b38fd7fa497ef5e7e719e9d5836bbcc841fd9d8",
+  "profile": "marker-center-artifact-mask-public-gate-v1",
+  "provider": "CPUExecutionProvider",
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "revision": "marker-center-feasible-dense-v6-public-v1"
+}

@@ -1,0 +1,55 @@
+{
+  "chandler_used": false,
+  "generator_source_bundle_sha256": "78cae51d29c90e610328917875d7117cfb9db0cafce98bcf394958eeb24c2c6d",
+  "generator_source_paths": [
+    "ml/markers/center/feasible_dense_v6/dataset.py",
+    "ml/markers/center/feasible_dense_v6/prepare_split.py"
+  ],
+  "materialized_utc": "2026-08-15T00:20:40.143382+00:00",
+  "private_data": false,
+  "production_approval": false,
+  "public_dataset_manifest_sha256": "720a0c4060940739a2d03566252d19c8a50ec85bf0fe828ea2e57736a5c45b36",
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "marker-center-feasible-dense-v6",
+  "schema": "graphreader.marker-center-feasible-split-freeze.v6",
+  "sealed_public_feasibility": {
+    "hard_negative_count": 640,
+    "hard_point_missing_from_artifact_truth_count": 0,
+    "minimum_center_separation_px": 12.041594505310059,
+    "minimum_truth_to_hard_negative_distance_px": 11.5108642578125,
+    "required_disjoint_clearance_px": 11.0,
+    "scene_count": 64,
+    "truth_center_count": 575,
+    "truth_hard_acceptance_overlap_count": 0,
+    "truth_mask_conflict_count": 0
+  },
+  "sealed_public_fixture_archive_sha256": "1dac2ce1fd6404493e46749632cfa5f8818104d4817e7b1735565fb477abb741",
+  "sealed_public_test_seal_sha256": "58f19f35c597e9bec69cbba25b38fd7fa497ef5e7e719e9d5836bbcc841fd9d8",
+  "selection_manifest_sha256": "12d6ba9f6aa5b80a8052ea43ba4971d573b1de08cf338d9e92120ff20079a99d",
+  "train_archive_sha256": "b091acd699046d75862fb4d9579d5eb0269ebb79a79e972f9db068d1a6028c43",
+  "train_feasibility": {
+    "hard_negative_count": 1920,
+    "hard_point_missing_from_artifact_truth_count": 0,
+    "minimum_center_separation_px": 12.041594505310059,
+    "minimum_truth_to_hard_negative_distance_px": 11.280513763427734,
+    "required_disjoint_clearance_px": 11.0,
+    "scene_count": 192,
+    "truth_center_count": 1728,
+    "truth_hard_acceptance_overlap_count": 0,
+    "truth_mask_conflict_count": 0
+  },
+  "validation_archive_sha256": "24a5169c9d200f25780bde4c7b033cac4f0861bedc4e4c552efde1f855ebe829",
+  "validation_feasibility": {
+    "hard_negative_count": 480,
+    "hard_point_missing_from_artifact_truth_count": 0,
+    "minimum_center_separation_px": 12.041594505310059,
+    "minimum_truth_to_hard_negative_distance_px": 11.5108642578125,
+    "required_disjoint_clearance_px": 11.0,
+    "scene_count": 48,
+    "truth_center_count": 432,
+    "truth_hard_acceptance_overlap_count": 0,
+    "truth_mask_conflict_count": 0
+  }
+}

@@ -1,0 +1,472 @@
+{
+  "case_truth_values_emitted": false,
+  "chandler_used": false,
+  "feasibility": {
+    "hard_negative_count": 640,
+    "hard_point_missing_from_artifact_truth_count": 0,
+    "minimum_center_separation_px": 12.041594505310059,
+    "minimum_truth_to_hard_negative_distance_px": 11.5108642578125,
+    "required_disjoint_clearance_px": 11.0,
+    "scene_count": 64,
+    "truth_center_count": 575,
+    "truth_hard_acceptance_overlap_count": 0,
+    "truth_mask_conflict_count": 0
+  },
+  "fixture_count": 64,
+  "fixture_pixels_emitted": false,
+  "fixtures": [
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0000",
+      "ground_truth_sha256": "f356955ba92ae1756781a394bd94ff34f3a65c50571de1d35ec6078bad1cf603",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "c1dd6d1c5023f17cd7e985367e862038fa6a3c734f81e3ea79434973e927cd94"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0001",
+      "ground_truth_sha256": "a3c214e151628a7a521844c2f80fb5bfee91f35e277258d3085cc4aff85faa83",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "d4655f4ac8ee55583d18b9311c2537eb7e401d1780d17f37734ea339f7ae05c8"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0002",
+      "ground_truth_sha256": "2ed04cfa172f159ea506b5539420dbb7485d13a72eff769e37117a7fc922c6d1",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "69c1caf68cd3e690048bc80102c3536eeee6c49ab41101be61d82ed1ae23d0da"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0003",
+      "ground_truth_sha256": "c32715a56fa143546c031b79df15cc7e54f6e69c6acf31a24e20f8ea646e1908",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "b9b73e83f85fceb065dcee51fc51f91ccff0020d0bb421a5582e467f1652045f"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0004",
+      "ground_truth_sha256": "3b4a9fd0b0cf98c80409e784f991c6737d4f781ffe98e2c49da451ee4a9fa946",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "48347f30f2da325acada2a0a3f5b9e8e1415f2bce4130984df4c7d32971d3b30"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0005",
+      "ground_truth_sha256": "08dac28e6a846332a2b6d5af094f907de3be4770b11c8e09ad3ae0e2b64c7293",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "4369395a20e67d2e277af0fc869f5592e9d5e4ae767d8cba81a3321adb0df250"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0006",
+      "ground_truth_sha256": "c66a33b1360ad4e3e90df89f870b020ff99e1132f95d0e254e348b7d83c6d9de",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "2eb405aca33783057af6c6ea6d87a009dd71449467e4167e8198058620f06ce6"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0007",
+      "ground_truth_sha256": "e10ca6eac7fac8ea1662de7a8d199aa51616dbca0b73b6987dd701fe04e874de",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "6141a10aed4cc46be41f8fe6f1c7e53d5a65eaff4d035b92c565711015b1f2b8"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0008",
+      "ground_truth_sha256": "2f95bd240f1ff3eda6da683afa3ff8b0be2eb841e06eca21494ec08a0739c128",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "c68672eff1b0c8902b3f90b1c3342c309ffd747f650f28882cf42874082daf6e"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0009",
+      "ground_truth_sha256": "905aae285bf545cabee1a9e2717fe53dcb56b6a9facfdb2d486429a47d739926",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "8fad33400b16afc8ee79b71bc3c20696115d4c649650179d2249a7b5569292c8"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0010",
+      "ground_truth_sha256": "325e6d606fa4a4177ca919ca75c1066b294149ecdfdb87f881ca761b733d7e30",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "274fb40710555966e4a5846e84c62eca2c071656929bf1f615a9f6eca5e14dbf"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0011",
+      "ground_truth_sha256": "39e204a8fcea73fd4d320a052f9d0b2e815276de48c41ea8caeade8c22a55eec",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "52f2aa6e3d46cd537c8cf1c640156c2feb5e502def837bf7fdca0b8e997e1eba"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0012",
+      "ground_truth_sha256": "0d32103f0a2c4c384a84b4fe33e8014a0f379438a6d772f4a0d6f32383dded58",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "70b5d2c6810f3925a5ab93b693d0572b4f6c6649138f53446cc40198fe592008"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0013",
+      "ground_truth_sha256": "531eec01a294bda7d8cd186c383b0c0f93f447ba150bd2fee5651df5e93d649a",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "5492f13efc5e0d0ed56fbf8c450de809d89c7142861c7cff4b89cd346f9723b1"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0014",
+      "ground_truth_sha256": "0beef184a2ec318ad7ff25013213ac63827e0c0612d99fa1aae9081e2b6c02a2",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "1ed65a3bb92aa2446806440aa89f5b82137c4983b433f590e887c1c0c98b18ff"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0015",
+      "ground_truth_sha256": "93d8db003d58c5fe5259812c5f0e6cbdc10c2dc002e25473bb33428362ee3e9a",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "ac1bdce78256fa7f5b832687facc982bca363fdda0e907f9f85ccc2d4e460c54"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0016",
+      "ground_truth_sha256": "bc27a1ed62e33a00aca3c5625ac6776553e91936ae6b1461986906678f1297c5",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "b74d3ea8b23163836dd06991e2e908608dd53f7d47e7f1fba926203e625fb7fa"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0017",
+      "ground_truth_sha256": "ae2a93f69e0ed11c07981605e0a180e9a5e78c4dfe1716767b98ebbabc59be42",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "bc5ffe07f46bfd40866d4c012cc836777ed63aa030a969521b4a3c1bb22793ad"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0018",
+      "ground_truth_sha256": "0188e54bf2385ebee66a350df98ca4b22925d302d5c62aa4e31ceac5c245bfc5",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "4327b296c86b3cadc6da4c2b0779db89643a570050ff453a12a38a6b4168e3fe"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0019",
+      "ground_truth_sha256": "a6ebba16c48699344ccc195b182b5d75c2e94b580c7b6fdd513b5fde821a7a0d",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "7338722b44372badc3f73647af3bb6b477848702a1ac523c4cdf8a93e651f3f1"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0020",
+      "ground_truth_sha256": "1321ad25235b239d3c4123c52d55d4ce398323a8a54c6c64a7a0a00861c51b6f",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "ac4e49d65627321e7ed54ddf509c7557c7358e58a5a7c7f726ccfbb641e17d33"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0021",
+      "ground_truth_sha256": "3b996d4acd2fcb50aedb1f45630bff43c41a308681172d1af1cf8a0e7b55ed57",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "ff1ce983e254668c918038222eb1891f2da921da822efc41751268feb1ccfd2d"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0022",
+      "ground_truth_sha256": "6b9c5c0441f47e2a385838a9bc3946b67cadcbf8849d119d806cf03c9e35c90c",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "f1d4de780a57d7bc981bdb42444212534d6802d2e8d9c67b1e6eea028b52190c"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0023",
+      "ground_truth_sha256": "df1b245b8a2e7745c94978fe0d3176b576f8533bbf464024dc4d8d40ec2180b2",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "6dd4c123e5be667f9a149cd5c16082099ecd682bd0d37cfec4649d2f984b4791"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0024",
+      "ground_truth_sha256": "10b8166a33e494e681b6a166a36759cd5de94c8fec121224829163c0535fd181",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "0a287faf7f1b89a54e93553edfe729c4bf09759932cf490a197e14d17855fd87"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0025",
+      "ground_truth_sha256": "ef9cda089ad73c5577f6cf6a794fd175b3d5e3489a6bcbd04fcd108c43c49a76",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "533f38dcc25f5eac8eb4b9dadbb245aa35cb2e90da6c633ba51b4c6c644ecbc7"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0026",
+      "ground_truth_sha256": "7b7c8f51527643fc3012f07ae61dd0da8551da2a2accac81c42c85bbf3ff58a8",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "28484f3d265fa6a2133d044b59610fe3840b8545f9ff81d017f3f19190bf5a7b"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0027",
+      "ground_truth_sha256": "f2983fa2dab31b0d189e0d7e0e46c027c42212df2e30fa40b9b0dee5184afd24",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "e89949f2810fa6ad65b6b3d88d447b3e2987979c1a37f8892019cdc9ce66964d"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0028",
+      "ground_truth_sha256": "1d84143dcc139210af0a597db22b193bcb58f8ca2f2954e00bef82083a0e70c1",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "8b8a097f744fd3e858b5b4044e3c32d0d14c5796b841fca15d850d1daae40287"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0029",
+      "ground_truth_sha256": "184ef83e57861fbd0667229cdd081b176c338d6c5b93086c0eedac48a9b00b31",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "807289ec947b54526e1f66b6f7d4a9d087a551354d1ba36ebaa6d7a8c0d63fa5"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0030",
+      "ground_truth_sha256": "9e160a5e1b8f74b25d59f6339c6fc0c2202d750bca57e9317983a33544bc8150",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "696b12332f64123620c24c1625fc62f13b4d565c66a4a4cb8d02e42ae5c080c6"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0031",
+      "ground_truth_sha256": "9815f1943efc96de3d0c82aa58f4f48693d1afb354a1a18c623096f0d103c1c3",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "389340d7d4a86cb242ff8eb813b92113de9ec1523fc30cace013ce3d87cc2503"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0032",
+      "ground_truth_sha256": "0c52adce7fe81d19fe7bc01f2610df439efe777d5cea1aaaeaddef79da33e6a5",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "3d4f4319d99cc723c7bd8c2b725a90bb097280c2863c38a8a5dadbe3b8b33c8d"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0033",
+      "ground_truth_sha256": "a176b520d7b0d92a43ade177f295fcce7f46cdbbb6bee0057ca3b818a26f2ba6",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "9b7731ef8ae58f18f09ee4b012100dcda2699cf5815de76bb6a63e7f5fc46a15"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0034",
+      "ground_truth_sha256": "890289052774afb4939025142da8e75622e99d7da4f7d7e4c2d05fe24c636b7f",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "258e5a025f5815f5a6bb904199b875ec91a30e42e021416a88a0de11018aa518"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0035",
+      "ground_truth_sha256": "5d3d4b12f2b731f00b0e06a1ca19fb3875719bfd1cfd68f85f84e8e484b64778",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "712aed7c3c904ffa9a8c3342f639014b37b2f7ef8782e0f9df3c9cbfbae0fdb7"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0036",
+      "ground_truth_sha256": "fb372963dc92ddeef92171782861f30d6e96341c0185d949f285053af5fa2a29",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "187e44e0e9ad668a27873d17dcab02c489bdaf785187185e479e48a1bff3a2a4"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0037",
+      "ground_truth_sha256": "7c66a8278856c8bc020bb47c80f7720f19d1901d1f033b107315b36386c963e9",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "5ed9c42eb163f4b7d066f410709a66f64fda4b00e75fafe226f1bd5a8045a2b4"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0038",
+      "ground_truth_sha256": "376bc29d333105834a2d66b6a24016597e44f0681d8690819801c1a4b488b655",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "641e7631d0e627b2e37767f8a7564ef6906ceec2f5b035de3b2cd7c5bb39b84c"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0039",
+      "ground_truth_sha256": "16af4d4cf31e37dfe424badcbc9d3e270d83d56fd1c47f4615a85edeb62d9f80",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "d640e705e8eaee25b965a5d40792e5e541a344892213c8f7677ec767405191d7"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0040",
+      "ground_truth_sha256": "a7b78ddcd9b4042afb0e20d052860590f490599cbaac6f29333515d740754c3f",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "7e7452209781063d771bef05bf88038866be5b771fd63b316220266f2d546410"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0041",
+      "ground_truth_sha256": "35350f839de4819f2d0d27f259b18ad05e3312b632aea65636699bf2c8abc9b1",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "0e77d93e9ab76742de10d327041ad1c7b7368fd56c61510b5f360d28168bb1af"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0042",
+      "ground_truth_sha256": "f99d19921cd520af19c47dc12c9123398d1decde836c99174f4645f22a918387",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "98c7c2e41ec19a48c94adff43bd41d5f694261bf68f94d122764ef9db77cd8e6"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0043",
+      "ground_truth_sha256": "34b05d25797265aa179dd5b36dd20ae412078e5325ce779ed80fd1fd40cec401",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "cad18b96eb5825faba8011731b0418ece4c64cfbfe8883777fdd52e09f78b432"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0044",
+      "ground_truth_sha256": "6d9b0af7ac9d21ed86c4af0381a6f094331ea7129d66cbec4780e2ae52387903",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "5c3a8f17eb701e62415702bb04424463b75abd86cec7fc998966e0b77d97100c"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0045",
+      "ground_truth_sha256": "fa581afdd0c392e3985e800ee1f25f67dbe96895b90466a94d26f7cd71b3dc39",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "c156b599d8b427b0af787ba029af7b88b79d79c9d59c0938a83e592202763ee3"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0046",
+      "ground_truth_sha256": "024494bccbebde5d0eeaf118972ffae7836c100e1b6d9114679cb51326f33e56",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "acd814386ee2f534129c4295ee930be73cbf659701e9f70af5af5a93130cdfc0"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0047",
+      "ground_truth_sha256": "f07c10fc24aaa2f5dc9fa89dd5ac2cb3d2280d3008a263ab3a5c365c633bbd73",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "4c21c359aedaa69ed9ea8dee6968175361f07241f5f2910a53994b8535e6f7da"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0048",
+      "ground_truth_sha256": "7dbef2cb819ad4b09cd90bac527751b70da7a035abb733cb59f9f44866a03730",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "fb75b81f348aef7feb994700e7946f5c510365f06e5950f0658057224223ed27"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0049",
+      "ground_truth_sha256": "a52017688e41ad3625b3820fac00793e8b196b6717cdb48f03e0ee9dbcee7900",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "3018a77e74f7d522d31fd9427d7a23a73b1d72e08e4571a041a1645b32ad822d"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0050",
+      "ground_truth_sha256": "2e938fc82786be3ff817c0467ed05ae9a3707cb5009401b432b7a34ad536cb9c",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "054e01645ffc6dd1e2e702c50b7524ac72729a82eb1fd93c2d6893dbebc185de"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0051",
+      "ground_truth_sha256": "49cecf9c327fe397e5d099da04eca0b7106dc1c0853b40958ccc3ef233b4c98e",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "53ac54bff5553459bba34a79da48820368b7d46a1cd3c1da79b2bbba8752d6ee"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0052",
+      "ground_truth_sha256": "53d079242b271f46a1fc21461ee2c775d6cefd444475fbf7f6bcb8da23329010",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "f5eef2528fb1a4dee1c3bf2afabf4101f4de583a47f7c91dd5f8ef244fb56ec5"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0053",
+      "ground_truth_sha256": "eec46e746ea3372b631b9d48a45886c8a1a5569a9cfbf18cfa54b145bc89998d",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "94df3130e5b031df10d31528dc62a617c60de4d4b276730950039375cc21f349"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0054",
+      "ground_truth_sha256": "048777a344ebdc6ac98dfb7d14e2cbf6734fd72de0283d09d75061ad2160d32a",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "5d1b38f720d08bf3f73243fa6db57d0b562393c8463c459b89e1d932f0f8ea74"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0055",
+      "ground_truth_sha256": "ff73bf9ee61c405d6a4a84f6e462aa82168bf4a8420a0baadad8e30aa62604f2",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "04aa6704f78010639e9ff714063823fb04472810e8f26b9f9bc891db29b8f13e"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0056",
+      "ground_truth_sha256": "0f44972559c126dfa04444efeda218751bdd8c2335214cd8a0cf76ccb31d5e79",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "ada295deff90248125ceeb2325255c04a0ef4ddea468fd3533e118ecd7ca1998"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0057",
+      "ground_truth_sha256": "75b9efed72e2902c75767fc5e90e3747e45daf447e84e7040ca2cf6f27eb9c1a",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "e450cbdfdd6e8d3b20ea1c30c1a76bcab4438c3bca2e76904d6c2089f403b188"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0058",
+      "ground_truth_sha256": "c4de2fc97c8a9a7c5ef1d0044118b0d7c6eab3a97eeaa60e3a94a7f2938d7d7d",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "4977287f995012567e02a4fef267c102521667edc04ee6fe9891748311d771d7"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0059",
+      "ground_truth_sha256": "6afa96001c9452ab461917008c521a95183f7b23c0cd5d938c7b247b71439076",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "c784db556eb79f095f6ab445b4c64dbf8fa0d96bb31bd3f7cd5b8f483c71f04f"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0060",
+      "ground_truth_sha256": "e26db51f915421ef6278f2d41c7d9436f2fc02cb8b6bd49ae7963cd69ec323e5",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "78c2aafae0d77766700514a708fde938aae66536e01ed0f5dfa5b1e43245f93c"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0061",
+      "ground_truth_sha256": "7a7dc0cfa12be24f6a33682375576c453ff6e4f4744ac4058fa7f35b466619e0",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "3df811541e655b22a050df2d0f6376b7b67c4ff6ebfed84383ad449ead87b63d"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0062",
+      "ground_truth_sha256": "f342c99dd227d20cc968754c9901bc294ecfa53bf0d18916105ce12a16de6a65",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "072c0830170464d1bf7a75181a219d7f45ef2d288fa14ce766fa680d99ceb9c5"
+    },
+    {
+      "degradation_family": "hidden-quantized-anisotropic-v6-public",
+      "fixture_id": "marker-feasible-dense-v6-sealed_public-0063",
+      "ground_truth_sha256": "22e3eb1b4eedffb97ca66efbf6557e9033b31ef3ad72f8c89d62cead728475f0",
+      "renderer_family": "feasible-hidden-composite-v6-public",
+      "source_sha256": "f0f1786f5cf191506d35921f9fadd47476dc338d9c791e4e557f58c18548f66c"
+    }
+  ],
+  "private_data": false,
+  "revision": "marker-center-feasible-dense-v6",
+  "schema": "graphreader.marker-center-feasible-public-dataset.v6",
+  "scope": "public_synthetic_truth_hidden",
+  "seed": 6393
+}
