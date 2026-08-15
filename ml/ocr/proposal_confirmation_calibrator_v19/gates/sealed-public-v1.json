@@ -1,0 +1,19 @@
+{
+  "evaluation_limit": 1,
+  "expected_candidate_hash_keys": [
+    "calibrator_onnx_sha256",
+    "detector_onnx_sha256",
+    "recognizer_onnx_sha256",
+    "selection_report_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "55d8b74aad812f44160e7c2534f1f83ba3d8570b50f76151e4157742e61d7c5e",
+  "expected_evaluator_source_bundle_sha256": "b3df645bf698c72894f7c82984a1b538d08220aebb8e3805516963c3f982d1e3",
+  "expected_gate_config_sha256": "cfafeb1dc2e15185e8d20424db5fa04c279924c1e9d402b177b82defb3c5b27b",
+  "production_approval": false,
+  "release_eligible": false,
+  "revision": "graph-text-proposal-confirmation-calibrator-v19-public-v1",
+  "schema": "graphreader.ocr-proposal-confirmation-calibrator-gate-config.v1",
+  "sealed_public_test_seal_path": "ml/ocr/proposal_confirmation_calibrator_v19/SEALED_PUBLIC_TEST_SEAL.json",
+  "sealed_public_test_seal_sha256": "5421239f8fd18eaa50c2e9018152ccc73f1c5aa872684702dbf17821c9d6df1e",
+  "task": "ocr-detection-recognition"
+}
