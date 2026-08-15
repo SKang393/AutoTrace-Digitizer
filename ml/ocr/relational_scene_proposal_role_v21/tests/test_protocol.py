@@ -18,6 +18,7 @@ from ml.ocr.relational_scene_proposal_role_v21.dataset import (
     split_fingerprint,
 )
 from ml.ocr.relational_scene_proposal_role_v21.model import RelationalSceneProposalRoleNet
+from ml.ocr.relational_scene_proposal_role_v21.prepare_split import SOURCE_PATHS
 from ml.ocr.relational_scene_proposal_role_v21.protocol import (
     CANDIDATE_LIMIT,
     ENCODED_WIDTH,
@@ -75,6 +76,28 @@ def test_split_families_and_seed_offsets_are_disjoint() -> None:
     assert all(renderer_sets[left].isdisjoint(renderer_sets[right]) for left in range(3) for right in range(left + 1, 3))
     assert all(degradation_sets[left].isdisjoint(degradation_sets[right]) for left in range(3) for right in range(left + 1, 3))
     assert all(item.scene_count > 0 for item in registrations)
+
+
+def test_split_seal_binds_transitive_generator_sources_and_renderer_fonts() -> None:
+    expected = {
+        "ml/ocr/relational_scene_proposal_role_v21/PROTOCOL.json",
+        "ml/ocr/relational_scene_proposal_role_v21/dataset.py",
+        "ml/ocr/relational_scene_proposal_role_v21/model.py",
+        "ml/ocr/relational_scene_proposal_role_v21/prepare_split.py",
+        "ml/ocr/relational_scene_proposal_role_v21/protocol.py",
+        "ml/ocr/cross_model_consensus_v9_p3/P3_SELECTION_RESULT.json",
+        "ml/ocr/layout_conditioned_proposal_role_v15/dataset.py",
+        "ml/ocr/layout_conditioned_proposal_role_v15/protocol.py",
+        "ml/ocr/component_context_detector_v7/dataset.py",
+        "ml/ocr/component_context_detector_v7/protocol.py",
+        "ml/ocr/component_region_detector_v6/dataset.py",
+        "ml/ocr/component_region_detector_v6/protocol.py",
+        "ml/markers/gate_seal.py",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+    }
+    assert {path.as_posix() for path in SOURCE_PATHS} == expected
 
 
 def test_dynamic_relational_model_preserves_proposal_order_and_output_contract() -> None:

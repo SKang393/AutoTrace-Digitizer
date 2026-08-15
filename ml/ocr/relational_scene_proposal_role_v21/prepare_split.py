@@ -11,17 +11,29 @@ from pathlib import Path
 
 from ml.markers.gate_seal import canonical_json_bytes, sha256_file
 from .dataset import build_split, save_archive
+from .protocol import protocol_configuration
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+PROTOCOL_PATH = Path("ml/ocr/relational_scene_proposal_role_v21/PROTOCOL.json")
+TRIGGER_RESULT_PATH = Path("ml/ocr/cross_model_consensus_v9_p3/P3_SELECTION_RESULT.json")
 SOURCE_PATHS = (
-    Path("ml/ocr/relational_scene_proposal_role_v21/PROTOCOL.json"),
+    PROTOCOL_PATH,
     Path("ml/ocr/relational_scene_proposal_role_v21/protocol.py"),
     Path("ml/ocr/relational_scene_proposal_role_v21/dataset.py"),
     Path("ml/ocr/relational_scene_proposal_role_v21/model.py"),
     Path("ml/ocr/relational_scene_proposal_role_v21/prepare_split.py"),
-    Path("ml/ocr/cross_model_consensus_v9_p3/P3_SELECTION_RESULT.json"),
+    TRIGGER_RESULT_PATH,
     Path("ml/ocr/layout_conditioned_proposal_role_v15/dataset.py"),
+    Path("ml/ocr/layout_conditioned_proposal_role_v15/protocol.py"),
+    Path("ml/ocr/component_context_detector_v7/dataset.py"),
+    Path("ml/ocr/component_context_detector_v7/protocol.py"),
+    Path("ml/ocr/component_region_detector_v6/dataset.py"),
+    Path("ml/ocr/component_region_detector_v6/protocol.py"),
+    Path("ml/markers/gate_seal.py"),
+    Path("src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"),
+    Path("src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf"),
+    Path("src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"),
 )
 
 
@@ -29,6 +41,12 @@ def freeze_identities(train_output: Path, selection_output: Path, public_output:
     for path in (train_output, selection_output, public_output, seal_output):
         if path.exists():
             raise FileExistsError(f"OCR V21 identity exists; refusing regeneration: {path}")
+    configuration = protocol_configuration()
+    if (REPO_ROOT / PROTOCOL_PATH).read_bytes() != canonical_json_bytes(configuration):
+        raise RuntimeError("OCR V21 committed protocol is not canonical")
+    expected_trigger_sha256 = configuration["predecessor_aggregate_only"]["p3_selection_result_sha256"]
+    if sha256_file(REPO_ROOT / TRIGGER_RESULT_PATH) != expected_trigger_sha256:
+        raise RuntimeError("OCR V21 aggregate-only trigger result changed before identity freeze")
     train = save_archive(build_split("train"), "train", train_output)
     selection = save_archive(build_split("validation"), "validation", selection_output)
     public = save_archive(build_split("sealed_public"), "sealed_public", public_output)
