@@ -36,6 +36,12 @@ gate. P3 ran exactly once from committed source for 1,152 optimizer steps. CPU
 ONNX parity passed, but checkpoint-to-fused-graph semantic error exceeded the
 same `1e-5` limit. It remained at 200/216 markers and 8/24 exact scenes, with
 16 misses and seven prohibited hits. P1 through P3 are consumed, V5 is
-exhausted, and its public gate remains locked and unopened. Production
+exhausted, and its public gate remains locked and unopened. A post-exhaustion
+aggregate-only feasibility check found seven truth centers inside the fixed
+six-pixel prohibited radius, 18 overlaps between the five-pixel matching and
+six-pixel prohibited acceptance regions across 14/24 scenes, and eight
+prohibited hard points cleared from artifact-mask truth. V5 cannot be repaired
+or rerun. A new defect class must freeze mutually disjoint truth, exclusion,
+and artifact-mask targets before training. Production
 approval, model-store
 promotion, packaging, private validation, and release eligibility remain false.

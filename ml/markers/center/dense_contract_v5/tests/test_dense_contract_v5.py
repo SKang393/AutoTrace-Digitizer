@@ -16,6 +16,7 @@ import ml.markers.center.dense_contract_v5.train_p1 as train_p1_module
 import ml.markers.center.dense_contract_v5.train_p2 as train_p2_module
 import ml.markers.center.dense_contract_v5.train_p3 as train_p3_module
 
+from ml.markers.center.dense_contract_v5.diagnose_feasibility import diagnose
 from ml.markers.center.dense_contract_v5.dataset import (
     HEIGHT,
     PROHIBITED_KINDS,
@@ -147,6 +148,19 @@ def test_p3_fused_inference_graph_preserves_activated_three_head_values() -> Non
         actual = fused(value)
     assert not any(isinstance(module, torch.nn.BatchNorm2d) for module in fused.modules())
     assert float(torch.max(torch.abs(expected - actual))) <= train_p3_module.FUSION_SEMANTIC_TOLERANCE
+
+
+def test_exhausted_v5_feasibility_diagnosis_is_aggregate_only_and_reproducible() -> None:
+    report = json.loads((ROOT / "V5_FEASIBILITY_DIAGNOSIS.json").read_text(encoding="utf-8"))
+    assert diagnose() == report
+    assert report["exact_center_conflict_pair_count"] == 7
+    assert report["acceptance_radius_overlap_pair_count"] == 18
+    assert report["artifact_truth_cleared_hard_point_count"] == 8
+    assert report["case_level_details_emitted"] is False
+    assert report["fixture_pixels_emitted"] is False
+    assert report["public_archive_opened"] is False
+    assert report["public_gate_evaluations"] == 0
+    assert "scene_ids" not in report
 
 
 def test_source_bindings_and_gate_configuration_are_frozen() -> None:
