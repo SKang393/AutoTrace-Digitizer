@@ -130,23 +130,35 @@ def test_source_protocol_and_public_gate_bindings_are_exact() -> None:
     assert sha256_file(ROOT / "SELECTION_MANIFEST.json") == protocol["selection_manifest_sha256"]
     assert sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json") == protocol["sealed_public_test_seal_sha256"]
     assert config["selection_thresholds"] == list(THRESHOLDS)
-    assert protocol["execution_authorized"] is True
+    assert protocol["execution_authorized"] is False
+    assert protocol["p1_selection_gate_passed"] is True
+    assert protocol["p1_result_sha256"] == sha256_file(ROOT / "P1_RESULT.json")
     assert protocol["public_gate_authorized"] is False
     assert protocol["public_gate_archive_opened"] is False
     assert protocol["public_gate_evaluations"] == 0
 
 
-def test_canonical_budget_records_preregistered_p1_and_sealed_public_gate() -> None:
+def test_canonical_budget_records_selected_p1_and_sealed_public_gate() -> None:
     ledger = _json(LEDGER_PATH)
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-feasible-dense-v6")
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert entry["status"] == "candidate_1_selected_public_blocked"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
     assert entry["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
     assert entry["p1_expected_runner_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    result = _json(ROOT / "P1_RESULT.json")
+    assert sha256_file(ROOT / "P1_RESULT.json") == entry["p1_result_sha256"]
+    assert result["selection_gate_passed"] is True
+    assert result["selection_exact_scene_count"] == result["selection_scene_count"] == 48
+    assert result["selection_true_positives"] == 432
+    assert result["selection_false_positives"] == 0
+    assert result["selection_false_negatives"] == 0
+    assert result["selection_duplicate_count"] == 0
+    assert sum(result["prohibited_structure_hits"].values()) == 0
+    assert result["onnx_parity_passed"] is True
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False

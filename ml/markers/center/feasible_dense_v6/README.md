@@ -22,8 +22,10 @@ The frozen 192 training, 48 visible validation, and 64 truth-hidden public
 scenes have zero feasibility conflicts. P1 preserves the dense three-head
 tensor contract, two-pass composition, spatial margin objective,
 postprocessing, thresholds, and all artifact, exclusion, and CPU ONNX parity
-gates. P1 is source-bound, preregistered, and separately authorized for exactly
-one 1,152-step execution. The truth-hidden public archive remains separately
-locked, unopened, and at zero evaluations. No public run, manifest, model-store
-promotion, packaging, private validation, production approval, or release
-eligibility is authorized.
+gates. P1 consumed its single 1,152-step execution and passed all 48 visible
+selection scenes with 432/432 markers, zero false positives, misses, duplicates,
+or prohibited hits, plus CPU ONNX parity at `6.16908073425293e-06`. The
+truth-hidden public archive remains separately locked, unopened, and at zero
+evaluations until a later committed authorization. No public run, manifest,
+model-store promotion, packaging, private validation, production approval, or
+release eligibility is authorized.
