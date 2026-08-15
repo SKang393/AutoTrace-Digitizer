@@ -24,6 +24,7 @@ from ml.ocr.margin_calibrator_v20.protocol import (
 )
 from ml.ocr.margin_calibrator_v20.sealed_gate import EVALUATOR_SOURCE_PATHS
 from ml.ocr.margin_calibrator_v20.train_p1 import RUNNER_SOURCE_PATHS
+from ml.ocr.margin_calibrator_v20.train_p2 import RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS
 
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -74,8 +75,9 @@ def test_model_is_small_deterministic_and_export_shaped() -> None:
     assert sum(parameter.numel() for parameter in first.parameters()) < 2_200
 
 
-def test_consumed_p1_result_is_bound_while_public_gate_remains_blocked() -> None:
+def test_consumed_p1_and_preregistered_p2_are_bound_while_public_remains_blocked() -> None:
     config = _read("training/p1.json")
+    p2_config = _read("training/p2.json")
     gate = _read("gates/sealed-public-v1.json")
     seal = _read("SEALED_PUBLIC_TEST_SEAL.json")
     ledger = json.loads(
@@ -86,10 +88,10 @@ def test_consumed_p1_result_is_bound_while_public_gate_remains_blocked() -> None
     assert gate["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(ROOT, EVALUATOR_SOURCE_PATHS)
     assert seal["truth_hidden_from_candidate_runner"] is True
     assert seal["public_gate_evaluations"] == 0
-    assert entry["status"] == "candidate_1_failed_selection"
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
@@ -99,4 +101,13 @@ def test_consumed_p1_result_is_bound_while_public_gate_remains_blocked() -> None
     assert entry["p1_passing_threshold_window"] == []
     assert entry["p1_false_negatives"] == 201
     assert entry["p1_false_positives"] == 0
+    assert p2_config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        ROOT, P2_RUNNER_SOURCE_PATHS
+    )
+    assert entry["candidate_config_sha256"]["P2"] == sha256_file(MODULE / "training/p2.json")
+    assert p2_config["expected_optimizer_steps"] == 0
+    assert p2_config["weights_changed"] is False
+    assert p2_config["proposal_count"] == 5384
+    assert not (MODULE / "P2_RESULT.json").exists()
+    assert not (MODULE / "artifacts/P2-run").exists()
     assert not (MODULE / "PUBLIC_GATE_RESULT.json").exists()

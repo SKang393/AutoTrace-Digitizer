@@ -490,7 +490,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-margin-calibrator-v20",
-      "status": "candidate_1_failed_selection",
+      "status": "candidate_2_preregistered",
       "defect_class": "the exhausted V19 P3 calibrator had one zero-error operating threshold but no mandatory three-consecutive-threshold zero-error window",
       "prior_revision": "graph-text-proposal-confirmation-calibrator-v19",
       "trigger_result_path": "ml/ocr/proposal_confirmation_calibrator_v19/P3_RESULT.json",
@@ -506,12 +506,13 @@
       "recognizer_path": "ml/ocr/official_bakeoff/runs/conversion/en_PP-OCRv5_mobile_rec.onnx",
       "recognizer_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": [
+        "P2"
+      ],
       "consumed_candidate_ids": [
         "P1"
       ],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "protocol_path": "ml/ocr/margin_calibrator_v20/PROTOCOL.json",
@@ -540,10 +541,12 @@
       "public_gate_config_sha256": "5e252f7d9d878d97300a9f5d30b874a72d1cf2b2352077076e9519720021e8cd",
       "expected_public_evaluator_source_bundle_sha256": "c86dee281317d87909220dbcc12c61ed3fc04f080edb31d307256dc01eceded6",
       "candidate_config_paths": {
-        "P1": "ml/ocr/margin_calibrator_v20/training/p1.json"
+        "P1": "ml/ocr/margin_calibrator_v20/training/p1.json",
+        "P2": "ml/ocr/margin_calibrator_v20/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "51de16e69364bb54f2818713ee095333c88484e2597fd0ecb307edbcf6e9e56e"
+        "P1": "51de16e69364bb54f2818713ee095333c88484e2597fd0ecb307edbcf6e9e56e",
+        "P2": "037186d0bbf5b5ea72c06ce2a59894cd525015e17cf94c57b6451546b8b2d4a0"
       },
       "p1_expected_runner_source_bundle_sha256": "f4a91b00f3483e5bc7b2b06fb0d0d17311aef2fc7ba3c4c20cffd2fd32fece69",
       "p1_expected_optimizer_steps": 288,
@@ -575,9 +578,18 @@
       "p1_minimum_role_accuracy": 0.2421875,
       "p1_case_level_details_emitted": false,
       "p1_failure": "P1 passed CPU ONNX parity and rejected every false and prohibited proposal, but the unchanged detector floor exposed only 823 of 1024 truths. All five calibrator thresholds therefore missed at least 201 truths, no robust window existed, and the downstream recognition and role gates failed only after unmatched truths were counted.",
+      "p2_isolated_change": "remove the fixed 0.56 detector prefilter and execute the exact consumed P1 calibrator over every frozen validation proposal without changing any model byte, proposal generator, feature, threshold, or gate",
+      "p2_expected_runner_source_bundle_sha256": "cc807390733eb7e9b6cd245c76f35ce2ca6c58e3f4e0b3b0a8d6331ffe3d8e6a",
+      "p2_expected_optimizer_steps": 0,
+      "p2_weights_changed": false,
+      "p2_base_checkpoint_sha256": "d5779d3ec139b33d238873ed897e1c91768186a783191c3a88d7923e74188f83",
+      "p2_base_onnx_sha256": "802eed6d18f8d032d5ef5b9383cb562631da2ac6f137f9356d6e8481115073f5",
+      "p2_expected_validation_proposal_count": 5384,
+      "p2_expected_validation_positive_proposal_count": 1024,
+      "p2_expected_validation_negative_proposal_count": 4360,
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "execution_blocker": "P1 is consumed and cannot rerun. P2 requires a separately committed preregistration that addresses the aggregate detector-floor recall bottleneck without inspecting P1 case details or opening the public archive.",
+      "execution_blocker": "P2 source, exact P1 payload bindings, floor-free all-proposal contract, and zero-optimizer configuration must be committed and verified before a separate single-use execution authorization.",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,
