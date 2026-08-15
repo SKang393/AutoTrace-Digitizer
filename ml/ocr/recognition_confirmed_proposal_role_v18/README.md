@@ -24,9 +24,14 @@ hits, recognition exact match at least `0.90`, CER at most `0.05`, overall role
 accuracy at least `0.90`, and every role at least `0.85`. Tensor input and
 output streams for both models are hashed.
 
-P1 is a single zero-optimizer candidate. Its exact source-bound visible-selection
-execution is authorized once by the canonical ledger. The public archive is
-unopened with zero evaluations. Even a public pass cannot
-create a production manifest or approval until direct marker-stage composition,
-reviewed model-store discovery, packaging, clean-machine, and private gates also
-pass. Release eligibility remains false.
+P1 is consumed and failed visible selection after its single zero-optimizer
+execution. It passed the recognition thresholds with exact match `0.96875`, CER
+`0.004607852548718441`, role accuracy `0.998046875`, and minimum per-role
+accuracy `0.9895833333333334`. It failed the exact region gates with 189/192
+exact scenes, 1,533/1,536 truths retained, one prohibited false region, three
+misses, and zero duplicates.
+
+The one-candidate budget is exhausted. No rerun, threshold tuning, or public
+access is authorized. The public archive remains unopened with zero evaluations.
+Production manifest creation, model-store promotion, packaging, marker-stage
+composition, private validation, approval, and release eligibility remain false.

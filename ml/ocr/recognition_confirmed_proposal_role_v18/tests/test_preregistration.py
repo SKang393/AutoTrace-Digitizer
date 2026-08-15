@@ -85,7 +85,9 @@ def test_fresh_stored_splits_and_gate_remain_closed() -> None:
     assert config["marker_creation_evaluated"] is False
     assert source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
     assert source_bundle_sha256(ROOT, EVALUATOR_SOURCE_PATHS) == gate["expected_evaluator_source_bundle_sha256"]
-    assert not (V18_ROOT / "artifacts/P1-run/candidate-report.json").exists()
+    candidate_report = V18_ROOT / "artifacts/P1-run/candidate-report.json"
+    if candidate_report.is_file():
+        assert sha256_file(candidate_report) == sha256_file(V18_ROOT / "P1_RESULT.json")
     assert not (V18_ROOT / "artifacts/public-gate-report.json").exists()
 
 
@@ -106,22 +108,33 @@ def test_mean_collapsed_ctc_confidence_is_fixed_and_rejects_blank() -> None:
     assert RECOGNITION_CONFIDENCE_THRESHOLD == 0.60
 
 
-def test_canonical_ledger_authorizes_only_unconsumed_p1_selection() -> None:
+def test_canonical_ledger_records_consumed_failed_p1_and_keeps_public_closed() -> None:
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text())
     entry = next(
         item for item in ledger["revisions"]
         if item["revision"] == protocol_configuration()["revision"]
     )
-    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["status"] == "exhausted_failed_selection"
     assert entry["experiment_budget"] == 1
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
     assert entry["marker_creation_evaluated"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
+    result_path = V18_ROOT / "P1_RESULT.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert sha256_file(result_path) == entry["p1_result_sha256"]
+    assert result["status"] == "failed_selection"
+    assert result["selection_gate_passed"] is False
+    assert result["metrics"]["exact_scene_count"] == 189
+    assert result["metrics"]["false_positives"] == 1
+    assert result["metrics"]["false_negatives"] == 3
+    assert result["metrics"]["duplicate_region_count"] == 0
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
