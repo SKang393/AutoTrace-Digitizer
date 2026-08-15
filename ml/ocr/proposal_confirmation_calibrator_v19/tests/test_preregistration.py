@@ -68,10 +68,30 @@ def test_calibrator_contract_is_small_and_deterministic() -> None:
 def test_public_gate_and_production_remain_fail_closed() -> None:
     seal = _read("SEALED_PUBLIC_TEST_SEAL.json")
     gate = _read("gates/sealed-public-v1.json")
+    result = _read("P1_RESULT.json")
+    ledger = json.loads(
+        (ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(encoding="utf-8")
+    )
+    entry = next(item for item in ledger["revisions"] if item.get("revision") == REVISION)
     assert seal["truth_hidden_from_candidate_runner"] is True
     assert seal["public_gate_evaluations"] == 0
     assert gate["production_approval"] is False
     assert gate["release_eligible"] is False
-    assert not (MODULE / "P1_RESULT.json").exists()
+    assert result["status"] == "failed_selection"
+    assert result["selection_gate_passed"] is False
+    assert result["case_level_details_emitted"] is False
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert result["selection_metrics"]["false_positives"] == 1
+    assert result["selection_metrics"]["false_negatives"] == 0
+    assert result["selection_metrics"]["prohibited_structure_hits"] == 1
+    assert result["passing_threshold_window"] == []
+    assert entry["status"] == "candidate_1_failed_selection"
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["execution_authorized"] is False
+    assert entry["public_gate_authorized"] is False
+    assert entry["p1_result_sha256"] == sha256_file(MODULE / "P1_RESULT.json")
     assert not (MODULE / "PUBLIC_GATE_REPORT.json").exists()
-    assert not (MODULE / "artifacts/P1-run").exists()
+    local_report = MODULE / "artifacts/P1-run/candidate-report.json"
+    if local_report.exists():
+        assert sha256_file(local_report) == sha256_file(MODULE / "P1_RESULT.json")
