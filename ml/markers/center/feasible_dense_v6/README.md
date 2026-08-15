@@ -29,6 +29,6 @@ truth-hidden public V1 command failed before seal creation or archive parsing
 because its frozen split configuration omitted the canonical task identity. The
 V1 attempt is consumed and cannot rerun. The archive remains unopened at zero
 evaluations. A corrected V2 wrapper and complete gate identity are separately
-preregistered but execution-blocked pending a later commit. No public result,
-manifest, model-store promotion, packaging, private validation, production
-approval, or release eligibility exists.
+authorized for exactly one checksum-bound execution. V1 remains consumed. No
+public result, manifest, model-store promotion, packaging, private validation,
+production approval, or release eligibility exists before V2 passes.

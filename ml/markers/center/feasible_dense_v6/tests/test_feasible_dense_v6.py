@@ -143,7 +143,8 @@ def test_source_protocol_and_public_gate_bindings_are_exact() -> None:
     assert protocol["execution_authorized"] is False
     assert protocol["p1_selection_gate_passed"] is True
     assert protocol["p1_result_sha256"] == sha256_file(ROOT / "P1_RESULT.json")
-    assert protocol["public_gate_authorized"] is False
+    assert protocol["public_gate_authorized"] is True
+    assert protocol["public_gate_authorized_revision"] == public_gate_v2_module.REVISION
     assert protocol["public_gate_v1_attempt_consumed"] is True
     assert protocol["public_gate_v1_rerun_authorized"] is False
     assert protocol["public_gate_v2_preregistered"] is True
@@ -154,7 +155,7 @@ def test_source_protocol_and_public_gate_bindings_are_exact() -> None:
 def test_canonical_budget_records_selected_p1_and_sealed_public_gate() -> None:
     ledger = _json(LEDGER_PATH)
     entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-feasible-dense-v6")
-    assert entry["status"] == "candidate_1_selected_public_v2_preregistered"
+    assert entry["status"] == "candidate_1_selected_public_v2_authorized"
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
@@ -178,8 +179,11 @@ def test_canonical_budget_records_selected_p1_and_sealed_public_gate() -> None:
     assert attempt["public_archive_parsed"] is False
     assert attempt["gate_opened_seal_created"] is False
     assert attempt["public_gate_evaluations"] == 0
-    assert entry["public_gate_authorized"] is False
-    assert entry["public_gate_authorized_candidate_id"] is None
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_revision"] == public_gate_v2_module.REVISION
+    assert entry["public_gate_authorized_candidate_id"] == "P1"
+    assert entry["public_gate_authorized_candidate_report_sha256"] == result["candidate_report_sha256"]
+    assert entry["public_gate_authorized_onnx_sha256"] == result["onnx_sha256"]
     assert entry["public_gate_v1_rerun_authorized"] is False
     assert entry["public_gate_v2_preregistered"] is True
     assert entry["public_gate_evaluations"] == 0
@@ -206,7 +210,7 @@ def test_public_runner_refuses_nonpassing_candidate_before_archive_read(
     assert not (tmp_path / "public-report.json").exists()
 
 
-def test_public_v2_runner_refuses_before_seal_or_archive_when_unauthorized(
+def test_public_v2_runner_refuses_mismatched_report_before_seal_or_archive(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -217,6 +221,6 @@ def test_public_v2_runner_refuses_before_seal_or_archive_when_unauthorized(
         "_run_opened_gate",
         lambda *_args, **_kwargs: pytest.fail("public V2 evaluator ran before authorization"),
     )
-    with pytest.raises(RuntimeError, match="not separately authorized"):
+    with pytest.raises(RuntimeError, match="candidate report identity changed"):
         public_gate_v2_module.run(candidate_path, tmp_path / "public-v2-report.json")
     assert not (tmp_path / "public-v2-report.json").exists()

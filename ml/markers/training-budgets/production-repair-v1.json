@@ -4316,7 +4316,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-feasible-dense-v6",
-      "status": "candidate_1_selected_public_v2_preregistered",
+      "status": "candidate_1_selected_public_v2_authorized",
       "defect_class": "V5 selection fixtures overlapped required marker truth and prohibited acceptance regions and cleared prohibited hard points from artifact-mask truth, making its training targets and fixed gates internally conflicting",
       "prior_revision": "marker-center-dense-contract-v5",
       "trigger_diagnosis_path": "ml/markers/center/dense_contract_v5/V5_FEASIBILITY_DIAGNOSIS.json",
@@ -4337,7 +4337,7 @@
         "P3"
       ],
       "protocol_path": "ml/markers/center/feasible_dense_v6/PROTOCOL.json",
-      "protocol_sha256": "38f1285836cc7bf18eefc26bbba1983e3722ad065e5929a4654b35e4aef1e2e8",
+      "protocol_sha256": "f1cddf2eb9216a2eb495ec5d532ad81475a8ff04cd7c67aaf619f1f19436d320",
       "design_source_paths": [
         "ml/markers/center/feasible_dense_v6/dataset.py",
         "ml/markers/center/feasible_dense_v6/model.py",
@@ -4449,9 +4449,11 @@
       "execution_authorized": false,
       "authorized_candidate_id": null,
       "execution_blocker": "P1 is consumed and passed visible selection. No candidate rerun or P2/P3 execution is authorized while the separate truth-hidden public decision is pending.",
-      "public_gate_authorized": false,
-      "public_gate_authorized_revision": null,
-      "public_gate_authorized_candidate_id": null,
+      "public_gate_authorized": true,
+      "public_gate_authorized_revision": "marker-center-feasible-dense-v6-public-v2",
+      "public_gate_authorized_candidate_id": "P1",
+      "public_gate_authorized_candidate_report_sha256": "342c1a18276603ef05e5e68a53a5c4e8f372183142cef9846293058a4d854e09",
+      "public_gate_authorized_onnx_sha256": "f2e4c209250101ba7c6c1aecec529602d565c3526af4b569a5dd645a2623268c",
       "public_gate_v1_authorized_candidate_id": "P1",
       "public_gate_v1_authorized_candidate_report_sha256": "342c1a18276603ef05e5e68a53a5c4e8f372183142cef9846293058a4d854e09",
       "public_gate_v1_authorized_onnx_sha256": "f2e4c209250101ba7c6c1aecec529602d565c3526af4b569a5dd645a2623268c",
