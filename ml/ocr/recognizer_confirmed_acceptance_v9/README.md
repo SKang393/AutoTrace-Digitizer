@@ -22,3 +22,10 @@ the archive and hash-only seal without model execution, commit that identity,
 then add one authorization binding the exact seal, payload hashes, C# test, and
 ignored report path. The authorization permits one P1 selection execution and
 never permits repair or rerun.
+
+P1 is consumed and failed closed. Direct CPU execution retained all 480 text
+truths with zero recognition or role error, but accepted four false structure
+regions in four of 96 scenes. Only that aggregate was used after the run. Case
+details are not recorded in the tracked result and are not authorized for
+tuning. P1 cannot be rerun, repaired, manifested, promoted, packaged, or used
+on private data.

@@ -108,3 +108,41 @@ def test_future_selection_seal_and_authorization_remain_fail_closed() -> None:
     assert authorization["private_validation_authorized"] is False
     assert authorization["production_approval"] is False
     assert authorization["release_eligible"] is False
+
+
+def test_consumed_p1_result_records_only_aggregate_failure() -> None:
+    result_path = ROOT / "P1_SELECTION_RESULT.json"
+    if not result_path.exists():
+        return
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert result["schema"] == "graphreader.ocr-recognizer-confirmed-selection-result.v1"
+    assert result["candidate_id"] == "P1"
+    assert result["selection_report_sha256"] == (
+        "49c4c84ca4667e2263a0b66a9ae054ec00a7e3ecb542a8d66d871ce36ff643b0"
+    )
+    assert result["metrics"] == {
+        "scene_count": 96,
+        "truth_region_count": 480,
+        "exact_detection_scene_count": 92,
+        "true_positives": 480,
+        "false_positives": 4,
+        "false_negatives": 0,
+        "duplicate_region_count": 0,
+        "recognition_exact_match": 1.0,
+        "character_error_rate": 0.0,
+        "role_accuracy": 1.0,
+        "numeric_exact_match": 1.0,
+        "word_exact_match": 1.0,
+        "ambiguity_exact_match": 1.0,
+        "prohibited_structure_hits": 4,
+    }
+    assert "cases" not in result
+    assert "predictions" not in result
+    assert result["selection_gates_passed"] is False
+    assert result["execution_consumed"] is True
+    assert result["rerun_or_repair_authorized"] is False
+    assert result["case_level_tuning_authorized"] is False
+    assert result["public_gate_authorized"] is False
+    assert result["private_validation_authorized"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
