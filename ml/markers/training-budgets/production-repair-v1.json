@@ -5472,6 +5472,58 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "ocr-detection-recognition",
+      "revision": "graph-text-crop-evidence-role-anchor-v24",
+      "status": "preregistered",
+      "defect_class": "V23 P1 and proposal-head-only P3 retained the same three false and prohibited regions while preserving all 1024 truths, indicating that the 31 aggregate evidence values cannot distinguish the remaining structures",
+      "prior_revision": "graph-text-role-anchor-set-v23",
+      "trigger_result_path": "ml/ocr/role_anchor_set_v23/P3_RESULT.json",
+      "trigger_result_sha256": "83d7a3be46e082be3550144cb4bb1b0a287ada29fadbdcca231d2e27d7ad7422",
+      "trigger_evidence_scope_used_for_design": "aggregate terminal metrics only",
+      "trigger_case_detail_or_pixels_used": false,
+      "prior_fixture_bytes_reused": false,
+      "isolated_change": "train a new project-owned model from scratch that fuses each proposal's production tight and context raster crops with the existing 31 evidence values before the unchanged role-anchor set context and separate proposal and role heads",
+      "architecture": "crop-evidence-role-conditioned-scene-anchor-set-v1",
+      "model_license": "Apache-2.0",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": [
+        "P1",
+        "P2",
+        "P3"
+      ],
+      "protocol_path": "ml/ocr/crop_evidence_role_anchor_v24/PROTOCOL.json",
+      "protocol_sha256": "8de3aa5f9ba49544bc67a3acb2e2fa320b9cfbe40e103ae8e04ff7ae52cb13fe",
+      "split_materialized": false,
+      "split_seal_path": null,
+      "split_seal_sha256": null,
+      "selection_thresholds": [
+        0.35,
+        0.45,
+        0.55,
+        0.65,
+        0.75
+      ],
+      "minimum_consecutive_passing_thresholds": 3,
+      "selection_evaluations": 0,
+      "public_gate_authorized": false,
+      "public_gate_evaluator_preregistered": false,
+      "public_gate_evaluations": 0,
+      "public_gate_archive_opened": false,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "Fresh V24 fixture identities must be generated once from committed preregistration sources, frozen, and bound to a committed P1 runner and config before optimizer execution.",
+      "marker_creation_evaluated": false,
+      "manifest_created": false,
+      "model_store_promoted": false,
+      "packaging_discovery": false,
+      "private_validation": false,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
     }
   ]
 }
