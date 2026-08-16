@@ -1,0 +1,124 @@
+{
+  "architecture": {
+    "dynamic_proposal_count": true,
+    "id": "recognition-conditioned-complete-proposal-set-attention-v1",
+    "input": [1, "proposal_count", 31],
+    "model_license": "Apache-2.0",
+    "ordinary_production_reachable": false,
+    "output": [1, "proposal_count", 10],
+    "proposal_and_role_heads": "separate binary proposal and eight-role heads",
+    "quadratic_feature_lift": true,
+    "scene_context": "two learned permutation-equivariant all-proposal attention blocks"
+  },
+  "candidate_budget": {
+    "candidate_limit": 3,
+    "candidate_number": 1,
+    "optimizer_steps_maximum": 1280,
+    "public_execution_limit": 1,
+    "selection_execution_limit_per_candidate": 1
+  },
+  "data_scope": "fresh project-owned procedural graph scenes only; no Chandler, Generalization, private or article images, external datasets, pretrained calibrator weights, or predecessor fixture bytes",
+  "defect_class": "aggregate V20 P3 left three misses and two prohibited false regions while aggregate V21 P3 left ten misses and two prohibited false regions",
+  "fixed_inputs": {
+    "detector_path": "ml/ocr/structural_veto_proposal_role_v17/artifacts/P3-run/graph-text-structural-veto-proposal-role-v17-p3.onnx",
+    "detector_sha256": "ca32487f1df2c3fea1b8c2f51daf7578ed9756e9140d1b0eaf2a16b283591262",
+    "feature_groups": {"ctc_statistics": 8, "detector": 2, "geometry": 9, "morphology": 4, "role_probabilities": 8},
+    "provider": "CPUExecutionProvider",
+    "recognizer_inference_yaml_path": "ml/ocr/official_bakeoff/runs/extracted/en_PP-OCRv5_mobile_rec_infer/inference.yml",
+    "recognizer_inference_yaml_sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
+    "recognizer_path": "ml/ocr/official_bakeoff/runs/conversion/en_PP-OCRv5_mobile_rec.onnx",
+    "recognizer_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743"
+  },
+  "fixture_identity_frozen": false,
+  "isolated_change": "train a new project-owned complete-proposal-set attention calibrator from scratch over the unchanged frozen detector, recognizer, 31 evidence features, and role order",
+  "manifest_created": false,
+  "marker_creation_evaluated": false,
+  "model_store_promoted": false,
+  "predecessor_aggregate_only": {
+    "case_level_evidence_used": false,
+    "fixture_bytes_truth_scene_or_case_identity_reused": false,
+    "v20_exact_scenes": 124,
+    "v20_false_regions": 2,
+    "v20_missed_regions": 3,
+    "v20_result_path": "ml/ocr/margin_calibrator_v20/P3_RESULT.json",
+    "v20_result_sha256": "b4dd2feb483c12d83f827a30f003a691875737e2ea1bb8600a02a5a1f1114377",
+    "v20_scene_count": 128,
+    "v21_exact_scenes": 116,
+    "v21_false_regions": 2,
+    "v21_missed_regions": 10,
+    "v21_result_path": "ml/ocr/relational_scene_proposal_role_v21/P3_SELECTION_RESULT.json",
+    "v21_result_sha256": "8aa11cc5cce0d255a9cce16e880c37c0b5868e6d47550cb09004fcd260ed1bac",
+    "v21_scene_count": 128
+  },
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "public_execution_authorized": false,
+  "release_eligible": false,
+  "revision": "graph-text-scene-evidence-attention-v22",
+  "schema": "graphreader.ocr-scene-evidence-attention-protocol.v1",
+  "selection_gates": {
+    "all_three_model_tensor_stream_hashes_required": true,
+    "character_error_rate_maximum": 0.05,
+    "direct_fixture_byte_execution_required": true,
+    "duplicate_regions": 0,
+    "exact_region_and_role_every_scene": true,
+    "false_regions": 0,
+    "minimum_consecutive_passing_thresholds": 3,
+    "missed_regions": 0,
+    "onnx_parity_maximum_absolute_error": 0.00001,
+    "per_role_accuracy_minimum": 0.85,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "recognition_exact_minimum": 0.9,
+    "role_accuracy_minimum": 0.9
+  },
+  "selection_thresholds": [0.35, 0.45, 0.55, 0.65, 0.75],
+  "split_policy": {
+    "predecessor_case_identities_reused": false,
+    "predecessor_fixture_bytes_reused": false,
+    "public_case_level_failure_analysis_permitted": false,
+    "sealed_public_truth_hidden_until_one_time_gate": true,
+    "train_validation_public_family_ids_disjoint": true,
+    "validation_or_public_pixels_used_for_training": false
+  },
+  "splits": [
+    {
+      "degradation_families": ["row-gain-lattice-v22-train", "column-ink-tilt-v22-train", "quantized-paper-wave-v22-train", "sparse-softening-v22-train"],
+      "font_paths": ["src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf", "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf", "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"],
+      "name": "train",
+      "renderer_families": ["evidence-attention-ledger-v22-train-a", "evidence-attention-offset-v22-train-b", "evidence-attention-inset-v22-train-c", "evidence-attention-caption-v22-train-d"],
+      "scene_count": 256,
+      "seed_offset": 7101000
+    },
+    {
+      "degradation_families": ["cross-axis-blur-v22-selection", "localized-tone-step-v22-selection", "paired-scan-band-v22-selection", "weak-block-rounding-v22-selection"],
+      "font_paths": ["src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf", "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"],
+      "name": "validation",
+      "renderer_families": ["evidence-attention-wide-v22-selection-e", "evidence-attention-floating-v22-selection-f", "evidence-attention-staggered-v22-selection-g", "evidence-attention-compact-v22-selection-h"],
+      "scene_count": 128,
+      "seed_offset": 7407000
+    },
+    {
+      "degradation_families": ["off-axis-tone-wave-v22-public", "cross-channel-roundtrip-v22-public", "sparse-speckle-shelf-v22-public", "localized-contrast-fold-v22-public"],
+      "font_paths": ["src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf", "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"],
+      "name": "sealed_public",
+      "renderer_families": ["evidence-attention-tall-v22-public-i", "evidence-attention-lateral-v22-public-j", "evidence-attention-multiphase-v22-public-k", "evidence-attention-asymmetric-v22-public-l"],
+      "scene_count": 192,
+      "seed_offset": 7809000
+    }
+  ],
+  "state": "preregistered_before_fixture_freeze_or_optimizer_execution",
+  "task": "ocr-detection-recognition",
+  "training": {
+    "candidate": "P1",
+    "epochs": 5,
+    "learning_rate": 0.00035,
+    "scene_batch_size": 1,
+    "seed": 2608162201,
+    "synthetic_only": true,
+    "training_authorized": false,
+    "validation_or_public_pixels_used": false,
+    "weight_decay": 0.0001
+  },
+  "training_authorized": false
+}
