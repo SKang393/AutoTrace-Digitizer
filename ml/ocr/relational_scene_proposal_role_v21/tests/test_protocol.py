@@ -26,6 +26,9 @@ from ml.ocr.relational_scene_proposal_role_v21.train_p1 import (
     _gate_passed,
     source_bundle_sha256,
 )
+from ml.ocr.relational_scene_proposal_role_v21.train_p2 import (
+    _proposal_class_weights,
+)
 from ml.ocr.relational_scene_proposal_role_v21.protocol import (
     CANDIDATE_LIMIT,
     ENCODED_WIDTH,
@@ -97,6 +100,32 @@ def test_p1_config_and_separate_authorization_are_fixed_and_fail_closed() -> Non
     assert result["public_evaluation_count"] == 0
     assert result["production_approval"] is False
     assert result["release_eligible"] is False
+
+
+def test_p2_is_preregistered_as_one_asymmetric_continuation_and_not_authorized() -> None:
+    root = Path(__file__).resolve().parents[1]
+    config = json.loads((root / "P2_CONFIG.json").read_text(encoding="utf-8"))
+    assert config["candidate_id"] == "P2"
+    assert config["candidate_type"] == "bounded-checkpoint-continuation"
+    assert config["continuation_epochs"] == 1
+    assert config["expected_candidate_optimizer_steps"] == 384
+    assert config["expected_total_optimizer_steps"] == 1920
+    assert config["positive_proposal_loss_multiplier"] == 2.0
+    assert config["p1_checkpoint_sha256"] == "9c279efbb5980091d30b25def3aa99147e7faa04655e1e194aa093ba112f7a28"
+    assert config["p1_report_sha256"] == "f4f5f24ea01148b311c89639e4e76040b8728cb96c667ca1d794e586092d9dc8"
+    assert config["p1_selection_result_sha256"] == "d6f55fd369e4aade05f449de6431fb1c94ee15cbaa28c2898bfe6dcdd8c5c967"
+    assert config["thresholds"] == list(THRESHOLDS)
+    assert config["training_authorized"] is False
+    assert config["public_execution_authorized"] is False
+    assert not (root / "P2_TRAINING_AUTHORIZATION.json").exists()
+
+
+def test_p2_positive_multiplier_changes_only_the_positive_class_pressure() -> None:
+    labels = torch.tensor([0, 0, 0, 1], dtype=torch.int64)
+    baseline = _proposal_class_weights(labels, 1.000001)
+    asymmetric = _proposal_class_weights(labels, 2.0)
+    assert asymmetric[1] / asymmetric[0] > baseline[1] / baseline[0]
+    assert asymmetric.sum() == pytest.approx(2.0)
 
 
 def test_runner_source_bundle_is_order_independent_and_path_bound() -> None:

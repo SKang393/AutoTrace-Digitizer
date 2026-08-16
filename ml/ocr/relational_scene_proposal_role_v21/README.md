@@ -51,6 +51,18 @@ rejected ONNX SHA-256 is
 `ac27ebb25913c2b6da4161d0c3ca34f03110f34a54073d9135076c3718d18c70`.
 P1 cannot rerun. The public archive remains unopened with zero evaluations.
 
+P2 is preregistered from P1 aggregate evidence only. It does not inspect P1
+case identities, crops, truth records, runtime calls, threshold-by-threshold
+case results, or the sealed public archive. The isolated change continues the
+exact rejected P1 checkpoint and optimizer state for one additional 384-step
+epoch while multiplying only the positive proposal class weight by `2.0`.
+Architecture, learning rate, role loss, train and selection archives,
+thresholds, exact-count gates, role gates, CPU provider, and `1e-5` ONNX
+parity limit stay fixed. P2 has one training execution and one selection
+execution available only after a separate checksum-bound authorization is
+committed. P2 does not authorize public execution, manifests, model-store
+promotion, private validation, production, or release.
+
 Even a public pass cannot approve recognition composition, the marker stage,
 an artifact-mask provider, manifests, the model store, packaging, private
 Chandler validation, production, or release.
