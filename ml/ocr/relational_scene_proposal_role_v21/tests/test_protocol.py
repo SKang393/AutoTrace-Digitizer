@@ -29,6 +29,10 @@ from ml.ocr.relational_scene_proposal_role_v21.train_p1 import (
 from ml.ocr.relational_scene_proposal_role_v21.train_p2 import (
     _proposal_class_weights,
 )
+from ml.ocr.relational_scene_proposal_role_v21.train_p3 import (
+    ScaledRelationalSceneProposalRoleNet,
+    _role_supported_score,
+)
 from ml.ocr.relational_scene_proposal_role_v21.protocol import (
     CANDIDATE_LIMIT,
     ENCODED_WIDTH,
@@ -153,6 +157,37 @@ def test_p2_positive_multiplier_changes_only_the_positive_class_pressure() -> No
     asymmetric = _proposal_class_weights(labels, 2.0)
     assert asymmetric[1] / asymmetric[0] > baseline[1] / baseline[0]
     assert asymmetric.sum() == pytest.approx(2.0)
+
+
+def test_p3_is_preregistered_as_zero_training_role_supported_calibration() -> None:
+    root = Path(__file__).resolve().parents[1]
+    config = json.loads((root / "P3_CONFIG.json").read_text(encoding="utf-8"))
+    assert config["candidate_id"] == "P3"
+    assert config["candidate_type"] == "zero-training-role-supported-calibration"
+    assert config["expected_optimizer_steps"] == 0
+    assert config["optimizer_steps_authorized"] == 0
+    assert config["output_logit_scale"] == 0.5
+    assert config["p2_checkpoint_sha256"] == "d46927836e8f1fcc8cb68bd5d42c94ef2af2289364b304592f513c98db8b4035"
+    assert config["p2_report_sha256"] == "c116dbd66dd81d24e3f7db667322c2907ce70eb9781e28771a48b0973f970e50"
+    assert config["p2_selection_result_sha256"] == "8058dd5322244f364567d488c64216a045967548697e2f36d1a5bd62ca2c0833"
+    assert config["thresholds"] == list(THRESHOLDS)
+    assert config["training_authorized"] is False
+    assert config["selection_authorized"] is False
+    assert config["public_execution_authorized"] is False
+    assert not (root / "P3_SELECTION_AUTHORIZATION.json").exists()
+
+
+def test_p3_role_supported_score_rewards_role_evidence_and_scale_is_exact() -> None:
+    proposal_logits = np.asarray([[0.0, -0.2], [0.0, 1.0]], dtype=np.float32)
+    weak_role = np.zeros((1, len(ROLE_ORDER)), dtype=np.float32)
+    strong_role = np.asarray([[6.0] + [0.0] * (len(ROLE_ORDER) - 1)], dtype=np.float32)
+    scores = _role_supported_score(proposal_logits, np.concatenate((strong_role, weak_role), axis=0))
+    assert scores[0] > scores[1]
+    base = RelationalSceneProposalRoleNet().eval()
+    scaled = ScaledRelationalSceneProposalRoleNet(base, 0.5).eval()
+    value = torch.rand((1, 3, 2, 32, ENCODED_WIDTH), dtype=torch.float32)
+    with torch.inference_mode():
+        assert torch.equal(scaled(value), base(value) * 0.5)
 
 
 def test_runner_source_bundle_is_order_independent_and_path_bound() -> None:

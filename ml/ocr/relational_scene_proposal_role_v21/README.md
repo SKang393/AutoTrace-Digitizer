@@ -79,6 +79,17 @@ The tracked aggregate result SHA-256 is
 `8058dd5322244f364567d488c64216a045967548697e2f36d1a5bd62ca2c0833`.
 P2 cannot rerun. The public archive remains unopened with zero evaluations.
 
+P3 is the final preregistered candidate. It uses zero optimizer steps and the
+exact rejected P2 checkpoint. The isolated calibration multiplies all output
+logits by `0.5` and ranks proposals by the geometric mean of proposal-positive
+probability and maximum eight-role probability. The scale gives the fixed
+`1e-5` parity gate numerical margin while role support can reject a
+high-proposal/low-role structure and retain a low-proposal/high-role text
+region. Architecture weights, sealed data, thresholds, truth matching, exact
+count, role, provider, and parity gates remain fixed. P3 has no authorization
+until a separate checksum-bound commit. It does not authorize public execution,
+manifests, model-store promotion, private validation, production, or release.
+
 Even a public pass cannot approve recognition composition, the marker stage,
 an artifact-mask provider, manifests, the model store, packaging, private
 Chandler validation, production, or release.

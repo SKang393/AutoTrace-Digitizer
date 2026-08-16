@@ -1,0 +1,33 @@
+{
+  "candidate_id": "P3",
+  "candidate_type": "zero-training-role-supported-calibration",
+  "expected_optimizer_steps": 0,
+  "isolated_change": "reuse the exact P2 checkpoint with zero optimizer steps, multiply all output logits by 0.5 for numerical parity margin, and rank proposals by the geometric mean of proposal-positive probability and maximum role probability",
+  "onnx_output": "artifacts/production-validation/ocr-v21-p3.onnx",
+  "optimizer_steps_authorized": 0,
+  "output_logit_scale": 0.5,
+  "p2_checkpoint_sha256": "d46927836e8f1fcc8cb68bd5d42c94ef2af2289364b304592f513c98db8b4035",
+  "p2_report_sha256": "c116dbd66dd81d24e3f7db667322c2907ce70eb9781e28771a48b0973f970e50",
+  "p2_selection_result_sha256": "8058dd5322244f364567d488c64216a045967548697e2f36d1a5bd62ca2c0833",
+  "proposal_score": "sqrt(proposal_positive_probability * maximum_role_probability)",
+  "public_execution_authorized": false,
+  "report_output": "artifacts/production-validation/ocr-v21-p3-selection-report.json",
+  "revision": "graph-text-relational-scene-proposal-role-v21",
+  "schema": "graphreader.ocr-relational-scene-proposal-role-calibration-candidate.v1",
+  "selection_archive_sha256": "9d3831f31cdb097f0ec4a2d174ed8d9653d76472394fb5f42c44a17e99990371",
+  "selection_authorized": false,
+  "selection_evaluation_limit": 1,
+  "split_seal_sha256": "085c93c73731ca97bc85d4eed52841547e6faab28effa56ca14db90d999b3047",
+  "thresholds": [
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8
+  ],
+  "train_archive_sha256": "c82c527daa4afdadaa477895cd58a93072d73c6ece12b39318f5b6b5f951563d",
+  "training_authorized": false
+}
