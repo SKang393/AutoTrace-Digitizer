@@ -58,10 +58,17 @@ Recognition exact was `0.978515625`, CER was `0.0038148946757339524`, overall
 role accuracy was `0.9716796875`, and Annotation accuracy fell to `0.828125`.
 The public archive remains unopened.
 
-P3 remains unregistered and no execution is authorized. Public execution,
-marker composition, manifest
-creation, model-store promotion, private validation, production approval, and
-release eligibility remain unauthorized.
+P3 is preregistered from only the aggregate P2 result. It retains the exact P2
+checkpoint, architecture, stored fixtures, proposal stream, scene-extrema
+objective, thresholds, and gates. Its single isolated change is a constrained
+five-epoch continuation schedule. Three lower-rate proposal-only epochs keep
+the role head frozen. Two role-repair epochs then freeze the encoder,
+attention, and proposal head so role optimization cannot change proposal
+acceptance. The complete schedule is capped at 1,280 optimizer steps.
+
+P3 is the final candidate in this defect-class budget. Public execution,
+marker composition, manifest creation, model-store promotion, private
+validation, production approval, and release eligibility remain unauthorized.
 
 Synthetic fixtures are training and public-test inputs only and are never
 application graph data.

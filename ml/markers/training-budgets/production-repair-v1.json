@@ -5154,7 +5154,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-scene-evidence-attention-v22",
-      "status": "candidate_2_failed_selection",
+      "status": "candidate_3_preregistered",
       "defect_class": "aggregate V20 P3 retained two prohibited false regions and three misses while aggregate V21 P3 retained two prohibited false regions and ten misses",
       "prior_revisions": [
         "graph-text-margin-calibrator-v20",
@@ -5167,14 +5167,14 @@
       "architecture": "recognition-conditioned-complete-proposal-set-attention-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": [
+        "P3"
+      ],
       "consumed_candidate_ids": [
         "P1",
         "P2"
       ],
-      "remaining_unregistered_candidate_ids": [
-        "P3"
-      ],
+      "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/ocr/scene_evidence_attention_v22/PROTOCOL.json",
       "protocol_sha256": "fa6eec76686e4034bfe3a337ed0af1f658b0d550e8d491d26bad537d51396d43",
       "split_seal_path": "ml/ocr/scene_evidence_attention_v22/SPLIT_SEAL.json",
@@ -5189,11 +5189,13 @@
       "cross_split_source_overlap_count": 0,
       "candidate_config_paths": {
         "P1": "ml/ocr/scene_evidence_attention_v22/training/p1.json",
-        "P2": "ml/ocr/scene_evidence_attention_v22/training/p2.json"
+        "P2": "ml/ocr/scene_evidence_attention_v22/training/p2.json",
+        "P3": "ml/ocr/scene_evidence_attention_v22/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "bef12ea625d2fb5e878ddf65d81a762e68ba2421fd0efb00856d330732bab367",
-        "P2": "75455789f956264b8d1e6c049e0c38c27051061af0c1a8861d64e26d569b52ec"
+        "P2": "75455789f956264b8d1e6c049e0c38c27051061af0c1a8861d64e26d569b52ec",
+        "P3": "2eed3a7765dce4b7b39a1eca415f60f9b0bb95ee605b7afba16fa2a34bdc0284"
       },
       "p1_expected_runner_source_bundle_sha256": "b7cf9ef42fdc50de51c61aba03a79de506fe1c65d22ec02b1acfcacff52f160b",
       "p1_expected_optimizer_steps": 1280,
@@ -5250,6 +5252,13 @@
       "p2_onnx_parity_passed": true,
       "p2_training_opened_seal_sha256": "42c03bf846f5b389e0bdea6caacece0c9f3955190a0f9999d79420522bf739c5",
       "p2_training_result_seal_sha256": "ba024b998e4d444c458f161eeabdfe8117f3179fe536b132efa225345dcabc7c",
+      "p3_protocol_path": "ml/ocr/scene_evidence_attention_v22/P3_PROTOCOL.json",
+      "p3_protocol_sha256": "55fbc053902965829a70e43ab5c8e28873a90efcb68fa35dae27864c365cb994",
+      "p3_isolated_change": "continue the exact P2 checkpoint for three lower-rate proposal-only epochs under the unchanged scene-extrema objective, then freeze encoder, attention, and proposal-head parameters while repairing only the role head for two epochs",
+      "p3_trigger_evidence_scope_used_for_design": "P2 aggregate terminal metrics only",
+      "p3_trigger_case_detail_or_pixels_used": false,
+      "p3_expected_runner_source_bundle_sha256": "858d199d30685f7ba985bb87bfcdd9620cb50ee83cf86e7bf98a6626c114a971",
+      "p3_expected_optimizer_steps": 1280,
       "selection_thresholds": [
         0.35,
         0.45,
@@ -5258,9 +5267,9 @@
         0.75
       ],
       "minimum_consecutive_passing_thresholds": 3,
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "P1 and P2 are consumed. P2 failed fixed visible selection with three false positives, one false negative, three prohibited-structure hits, and no passing threshold window. P3 remains unregistered and the truth-hidden public archive must remain unopened.",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P3",
+      "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_evaluator_preregistered": false,
       "public_gate_evaluations": 0,

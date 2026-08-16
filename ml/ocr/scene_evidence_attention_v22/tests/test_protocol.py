@@ -40,6 +40,12 @@ from ml.ocr.scene_evidence_attention_v22.train_p2 import (
     _proposal_objective,
     preflight as p2_preflight,
 )
+from ml.ocr.scene_evidence_attention_v22.train_p3 import (
+    CONFIG_PATH as P3_CONFIG_PATH,
+    RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS,
+    _set_trainable,
+    preflight as p3_preflight,
+)
 from ml.ocr.margin_calibrator_v20.pipeline import ProposalRecord
 from ml.markers.gate_seal import source_bundle_sha256
 
@@ -216,7 +222,7 @@ def test_p1_config_binds_runner_fixtures_and_fail_closed_outputs() -> None:
         assert evidence["seal"]["public_evaluations"] == 0
 
 
-def test_canonical_budget_locks_consumed_p2_and_leaves_p3_unregistered() -> None:
+def test_canonical_budget_authorizes_only_preregistered_p3_after_consumed_p2() -> None:
     ledger = json.loads(
         (
             REPO_ROOT
@@ -234,15 +240,17 @@ def test_canonical_budget_locks_consumed_p2_and_leaves_p3_unregistered() -> None
     p2_config_path = REPO_ROOT / P2_CONFIG_PATH
     p2_result_path = REPO_ROOT / "ml/ocr/scene_evidence_attention_v22/P2_RESULT.json"
     p2_result = json.loads(p2_result_path.read_text(encoding="utf-8"))
-    assert entry["status"] == "candidate_2_failed_selection"
-    assert entry["preregistered_candidate_ids"] == []
+    p3_config_path = REPO_ROOT / P3_CONFIG_PATH
+    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
-    assert "P3 remains unregistered" in entry["execution_blocker"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_blocker"] is None
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(config_path)
     assert entry["candidate_config_sha256"]["P2"] == sha256_file(p2_config_path)
+    assert entry["candidate_config_sha256"]["P3"] == sha256_file(p3_config_path)
     assert entry["p1_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, RUNNER_SOURCE_PATHS,
     )
@@ -265,6 +273,10 @@ def test_canonical_budget_locks_consumed_p2_and_leaves_p3_unregistered() -> None
     assert entry["p2_selection_prohibited_structure_hits"] == 3
     assert entry["p2_training_opened_seal_sha256"] == p2_result["training_opened_seal_sha256"]
     assert entry["p2_training_result_seal_sha256"] == p2_result["training_result_seal_sha256"]
+    assert entry["p3_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, P3_RUNNER_SOURCE_PATHS,
+    )
+    assert entry["p3_expected_optimizer_steps"] == 1280
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
@@ -325,6 +337,38 @@ def test_p2_config_binds_aggregate_trigger_margin_objective_and_locked_public_ga
     if (REPO_ROOT / P2_CANONICAL_OUTPUT).exists():
         with pytest.raises(RuntimeError, match="P2 output already exists"):
             p2_preflight()
+
+
+def test_p3_config_binds_two_phase_repair_and_locked_public_gate() -> None:
+    config = json.loads((REPO_ROOT / P3_CONFIG_PATH).read_text(encoding="utf-8"))
+    assert config["candidate_id"] == "P3"
+    assert config["objective"] == "two_phase_proposal_continuation_then_frozen_role_head_repair_v1"
+    assert config["proposal_continuation_epochs"] == 3
+    assert config["role_head_repair_epochs"] == 2
+    assert config["expected_optimizer_steps"] == 1280
+    assert config["p2_result_sha256"] == sha256_file(
+        REPO_ROOT / "ml/ocr/scene_evidence_attention_v22/P2_RESULT.json"
+    )
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, P3_RUNNER_SOURCE_PATHS,
+    )
+    assert config["public_execution_authorized"] is False
+    assert config["public_gate_evaluations"] == 0
+    assert config["production_approval"] is False
+    assert config["release_eligible"] is False
+    p2_checkpoint = REPO_ROOT / config["p2_checkpoint_path"]
+    p2_onnx = REPO_ROOT / config["p2_onnx_path"]
+    if p2_checkpoint.exists() and p2_onnx.exists():
+        evidence = p3_preflight()
+        assert evidence["config"] == config
+        assert evidence["p2_result"]["status"] == "failed_selection"
+
+
+def test_p3_role_repair_freezes_every_non_role_parameter() -> None:
+    model = SceneEvidenceAttentionNet()
+    _set_trainable(model, "role_head.")
+    for name, parameter in model.named_parameters():
+        assert parameter.requires_grad is name.startswith("role_head.")
 
 
 def test_p2_scene_extrema_objective_penalizes_worst_negative_and_preserves_truth() -> None:
