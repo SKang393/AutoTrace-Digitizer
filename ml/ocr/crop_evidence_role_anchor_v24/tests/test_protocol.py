@@ -10,7 +10,7 @@ import numpy as np
 import onnxruntime as ort
 import torch
 
-from ml.markers.gate_seal import sha256_file
+from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 from ml.ocr.crop_evidence_role_anchor_v24.dataset import (
     encode_scene, proposal_summary, render_scene,
 )
@@ -29,6 +29,13 @@ from ml.ocr.crop_evidence_role_anchor_v24.protocol import (
     split_registration,
 )
 from ml.ocr.margin_calibrator_v20.pipeline import ProposalRecord
+from ml.ocr.crop_evidence_role_anchor_v24.train_p1 import (
+    CONFIG_PATH,
+    RUNNER_SOURCE_PATHS,
+    _balanced_class_weights,
+    _proposal_objective,
+    preflight,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -72,7 +79,7 @@ def test_v23_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_preregisters_v24_without_opening_execution() -> None:
+def test_canonical_budget_binds_one_unused_p1_authorization() -> None:
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -84,14 +91,22 @@ def test_canonical_budget_preregisters_v24_without_opening_execution() -> None:
         and item["revision"] == "graph-text-crop-evidence-role-anchor-v24"
     )
     protocol_path = REPO_ROOT / "ml/ocr/crop_evidence_role_anchor_v24/PROTOCOL.json"
-    assert entry["status"] == "preregistered"
+    config_path = REPO_ROOT / CONFIG_PATH
+    seal_path = REPO_ROOT / "ml/ocr/crop_evidence_role_anchor_v24/SPLIT_SEAL.json"
+    assert entry["status"] == "candidate_1_preregistered"
     assert entry["protocol_sha256"] == sha256_file(protocol_path)
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
-    assert entry["remaining_unregistered_candidate_ids"] == ["P1", "P2", "P3"]
-    assert entry["split_materialized"] is False
+    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["split_materialized"] is True
+    assert entry["split_seal_sha256"] == sha256_file(seal_path)
+    assert entry["candidate_config_sha256"]["P1"] == sha256_file(config_path)
+    assert entry["p1_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, RUNNER_SOURCE_PATHS,
+    )
     assert entry["selection_evaluations"] == 0
-    assert entry["execution_authorized"] is False
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
@@ -189,11 +204,63 @@ def test_crop_evidence_model_exports_with_dynamic_cpu_parity(tmp_path: Path) -> 
         assert float(np.max(np.abs(expected - actual))) <= 1e-5
 
 
-def test_v24_has_not_materialized_or_opened_any_gate() -> None:
+def test_p1_balanced_losses_and_scene_extrema_margins_are_bound() -> None:
+    config = json.loads((REPO_ROOT / CONFIG_PATH).read_text(encoding="utf-8"))
+    targets = torch.tensor([0, 0, 0, 1], dtype=torch.int64)
+    assert torch.allclose(
+        _balanced_class_weights(targets, 2, "proposal"), torch.tensor([0.5, 1.5]),
+    )
+    objective_targets = torch.tensor([0, 0, 1, 1], dtype=torch.int64)
+    passing = torch.tensor([[2.0, -2.0], [1.5, -1.5], [-2.0, 2.0], [-1.5, 1.5]])
+    failing_negative = passing.clone()
+    failing_negative[1] = torch.tensor([-2.0, 2.0])
+    failing_positive = passing.clone()
+    failing_positive[3] = torch.tensor([2.0, -2.0])
+    _, passing_negative, passing_positive = _proposal_objective(
+        passing, objective_targets, torch.ones(2), config,
+    )
+    _, bad_negative, _ = _proposal_objective(
+        failing_negative, objective_targets, torch.ones(2), config,
+    )
+    _, _, bad_positive = _proposal_objective(
+        failing_positive, objective_targets, torch.ones(2), config,
+    )
+    assert float(passing_negative) == 0.0
+    assert float(passing_positive) == 0.0
+    assert float(bad_negative) > 0.0
+    assert float(bad_positive) > 0.0
+
+
+def test_v24_frozen_split_and_p1_remain_fail_closed_before_execution() -> None:
     root = REPO_ROOT / "ml/ocr/crop_evidence_role_anchor_v24"
-    assert not (root / "SPLIT_SEAL.json").exists()
-    assert not (root / "training").exists()
+    seal = json.loads((root / "SPLIT_SEAL.json").read_text(encoding="utf-8"))
+    config = json.loads((REPO_ROOT / CONFIG_PATH).read_text(encoding="utf-8"))
+    assert seal["optimizer_steps_at_freeze"] == 0
+    assert seal["selection_evaluations"] == 0
+    assert seal["public_evaluations"] == 0
+    assert seal["cross_split_source_overlap_counts"] == {
+        "train_validation": 0,
+        "train_sealed_public": 0,
+        "validation_sealed_public": 0,
+    }
+    assert config["split_seal_sha256"] == sha256_file(root / "SPLIT_SEAL.json")
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, RUNNER_SOURCE_PATHS,
+    )
+    evidence = preflight()
+    assert evidence["seal"] == seal
     assert not (root / "artifacts").exists()
-    assert not (REPO_ROOT / "artifacts/production-validation/ocr-v24-train.zip").exists()
-    assert not (REPO_ROOT / "artifacts/production-validation/ocr-v24-selection.zip").exists()
-    assert not (REPO_ROOT / "artifacts/production-validation/ocr-v24-public.zip").exists()
+    assert sha256_file(REPO_ROOT / "artifacts/production-validation/ocr-v24-train.zip") == config[
+        "train_fixture_archive_sha256"
+    ]
+    assert sha256_file(REPO_ROOT / "artifacts/production-validation/ocr-v24-selection.zip") == config[
+        "selection_fixture_archive_sha256"
+    ]
+    assert sha256_file(REPO_ROOT / "artifacts/production-validation/ocr-v24-public.zip") == config[
+        "public_fixture_archive_sha256"
+    ]
+    assert config["public_execution_authorized"] is False
+    assert config["public_gate_evaluations"] == 0
+    assert config["marker_creation_evaluated"] is False
+    assert config["production_approval"] is False
+    assert config["release_eligible"] is False

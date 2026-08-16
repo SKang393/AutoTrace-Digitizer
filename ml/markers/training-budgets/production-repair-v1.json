@@ -5476,7 +5476,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-crop-evidence-role-anchor-v24",
-      "status": "preregistered",
+      "status": "candidate_1_preregistered",
       "defect_class": "V23 P1 and proposal-head-only P3 retained the same three false and prohibited regions while preserving all 1024 truths, indicating that the 31 aggregate evidence values cannot distinguish the remaining structures",
       "prior_revision": "graph-text-role-anchor-set-v23",
       "trigger_result_path": "ml/ocr/role_anchor_set_v23/P3_RESULT.json",
@@ -5488,18 +5488,36 @@
       "architecture": "crop-evidence-role-conditioned-scene-anchor-set-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": [
+        "P1"
+      ],
       "consumed_candidate_ids": [],
       "remaining_unregistered_candidate_ids": [
-        "P1",
         "P2",
         "P3"
       ],
       "protocol_path": "ml/ocr/crop_evidence_role_anchor_v24/PROTOCOL.json",
       "protocol_sha256": "8de3aa5f9ba49544bc67a3acb2e2fa320b9cfbe40e103ae8e04ff7ae52cb13fe",
-      "split_materialized": false,
-      "split_seal_path": null,
-      "split_seal_sha256": null,
+      "split_materialized": true,
+      "split_seal_path": "ml/ocr/crop_evidence_role_anchor_v24/SPLIT_SEAL.json",
+      "split_seal_sha256": "0f2acbe8320e3e5b2f2997fe3b93388213bd7c790bee7f026c54f95a51c1b42d",
+      "split_source_commit": "41702515c1b13a550f04cbfefe1d393a4e2e13e5",
+      "split_source_bundle_sha256": "d82ec502bb9ff8f84929bafc14eab752958bc0958a479c99600e92a0ea43e288",
+      "train_scene_count": 256,
+      "train_archive_sha256": "1ecb29fbfa4093ad3d53acb8feeb1b22c595bc23022b782f8c5a25a330d7d85a",
+      "validation_scene_count": 128,
+      "validation_archive_sha256": "17a130eca261bd00352e7245281e671c6243d65b683cf05e572b2bf4ffa46d99",
+      "sealed_public_scene_count": 192,
+      "sealed_public_fixture_archive_sha256": "bf9bdde05eada9890d455f9596f2c4794c59ccefc1db8061d03180335b55bb95",
+      "cross_split_source_overlap_count": 0,
+      "candidate_config_paths": {
+        "P1": "ml/ocr/crop_evidence_role_anchor_v24/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "94732d1a2ccf839db3637b0b94e870692c0882ad0ac16f83495f5ebccdc2714d"
+      },
+      "p1_expected_runner_source_bundle_sha256": "8fd827dec299077176efb84f3b07c3dcfb53ef3bbb3a1086e10d8aae21c78477",
+      "p1_expected_optimizer_steps": 1280,
       "selection_thresholds": [
         0.35,
         0.45,
@@ -5513,9 +5531,9 @@
       "public_gate_evaluator_preregistered": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "Fresh V24 fixture identities must be generated once from committed preregistration sources, frozen, and bound to a committed P1 runner and config before optimizer execution.",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "execution_blocker": null,
       "marker_creation_evaluated": false,
       "manifest_created": false,
       "model_store_promoted": false,
