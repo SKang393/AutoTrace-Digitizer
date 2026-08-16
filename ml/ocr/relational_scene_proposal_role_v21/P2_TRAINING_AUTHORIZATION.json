@@ -1,0 +1,30 @@
+{
+  "authorization_scope": "one fixed P2 CPU continuation run and one visible-selection evaluation only",
+  "authorized_source_commit": "4d3ef2437a84e4cf25fbff7fdcc24c4f263c21f0",
+  "candidate_config_sha256": "f166d9e7424e098b0c3e2770f061b3f2625f035f3aa14dd6ebc9aa1fbcc2c740",
+  "candidate_id": "P2",
+  "execution_count": 0,
+  "execution_limit": 1,
+  "p1_checkpoint_sha256": "9c279efbb5980091d30b25def3aa99147e7faa04655e1e194aa093ba112f7a28",
+  "p1_report_sha256": "f4f5f24ea01148b311c89639e4e76040b8728cb96c667ca1d794e586092d9dc8",
+  "p1_selection_result_sha256": "d6f55fd369e4aade05f449de6431fb1c94ee15cbaa28c2898bfe6dcdd8c5c967",
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "public_archive_sha256": "b4ae7547731949ac6df1f9afe3fd83178b3cf9c55c81dbd017592a71d90ddab8",
+  "public_execution_authorized": false,
+  "release_eligible": false,
+  "runner_source_bundle_sha256": "b0ce806a67ea16e757ab9bd695e43ec479c7edd8117adc3bb6525562b9bac0a6",
+  "runner_source_sha256": {
+    "ml/ocr/relational_scene_proposal_role_v21/P2_CONFIG.json": "f166d9e7424e098b0c3e2770f061b3f2625f035f3aa14dd6ebc9aa1fbcc2c740",
+    "ml/ocr/relational_scene_proposal_role_v21/dataset.py": "5e453ca512f96a7f9b318cd183006020006dad8e8a5ef8fa53b270fc21b638f5",
+    "ml/ocr/relational_scene_proposal_role_v21/model.py": "4d92e891e5c4ac887c8b335881e1da05f6e0b93ab07835f8643eb231d2687614",
+    "ml/ocr/relational_scene_proposal_role_v21/protocol.py": "3a26c86aca49eea2731ad32fdf98ff6489871e480a4d52f3492f1931bdd4e5ed",
+    "ml/ocr/relational_scene_proposal_role_v21/train_p1.py": "951801f6e587036324bcce867a10fe0c6188d327772664a047a017fe8eb4b664",
+    "ml/ocr/relational_scene_proposal_role_v21/train_p2.py": "919a88cdcdea115e54652eb29ba5029f446845cd9f4f4680b7486a4f51ae15c3"
+  },
+  "schema": "graphreader.ocr-relational-scene-proposal-role-training-authorization.v1",
+  "selection_archive_sha256": "9d3831f31cdb097f0ec4a2d174ed8d9653d76472394fb5f42c44a17e99990371",
+  "split_seal_sha256": "085c93c73731ca97bc85d4eed52841547e6faab28effa56ca14db90d999b3047",
+  "train_archive_sha256": "c82c527daa4afdadaa477895cd58a93072d73c6ece12b39318f5b6b5f951563d",
+  "training_authorized": true
+}

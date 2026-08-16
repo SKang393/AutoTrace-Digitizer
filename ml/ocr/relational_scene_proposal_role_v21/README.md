@@ -59,8 +59,10 @@ epoch while multiplying only the positive proposal class weight by `2.0`.
 Architecture, learning rate, role loss, train and selection archives,
 thresholds, exact-count gates, role gates, CPU provider, and `1e-5` ONNX
 parity limit stay fixed. P2 has one training execution and one selection
-execution available only after a separate checksum-bound authorization is
-committed. P2 does not authorize public execution, manifests, model-store
+execution. The separate authorization binds source commit `4d3ef2437a84e4cf25fbff7fdcc24c4f263c21f0`,
+the exact P1 checkpoint and failed result, every runner source, and both
+non-public archives before the first P2 optimizer step. P2 does not authorize
+public execution, manifests, model-store
 promotion, private validation, production, or release.
 
 Even a public pass cannot approve recognition composition, the marker stage,

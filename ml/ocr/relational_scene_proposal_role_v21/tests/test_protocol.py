@@ -102,7 +102,7 @@ def test_p1_config_and_separate_authorization_are_fixed_and_fail_closed() -> Non
     assert result["release_eligible"] is False
 
 
-def test_p2_is_preregistered_as_one_asymmetric_continuation_and_not_authorized() -> None:
+def test_p2_is_preregistered_as_one_checksum_bound_asymmetric_continuation() -> None:
     root = Path(__file__).resolve().parents[1]
     config = json.loads((root / "P2_CONFIG.json").read_text(encoding="utf-8"))
     assert config["candidate_id"] == "P2"
@@ -117,7 +117,17 @@ def test_p2_is_preregistered_as_one_asymmetric_continuation_and_not_authorized()
     assert config["thresholds"] == list(THRESHOLDS)
     assert config["training_authorized"] is False
     assert config["public_execution_authorized"] is False
-    assert not (root / "P2_TRAINING_AUTHORIZATION.json").exists()
+    authorization = json.loads((root / "P2_TRAINING_AUTHORIZATION.json").read_text(encoding="utf-8"))
+    assert authorization["authorized_source_commit"] == "4d3ef2437a84e4cf25fbff7fdcc24c4f263c21f0"
+    assert authorization["candidate_config_sha256"] == "f166d9e7424e098b0c3e2770f061b3f2625f035f3aa14dd6ebc9aa1fbcc2c740"
+    assert authorization["runner_source_bundle_sha256"] == "b0ce806a67ea16e757ab9bd695e43ec479c7edd8117adc3bb6525562b9bac0a6"
+    assert authorization["execution_limit"] == 1
+    assert authorization["execution_count"] == 0
+    assert authorization["training_authorized"] is True
+    assert authorization["public_execution_authorized"] is False
+    assert authorization["private_validation_authorized"] is False
+    assert authorization["production_approval"] is False
+    assert authorization["release_eligible"] is False
 
 
 def test_p2_positive_multiplier_changes_only_the_positive_class_pressure() -> None:
