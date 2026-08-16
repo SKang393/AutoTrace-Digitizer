@@ -238,6 +238,20 @@ Verification proved zero prior source-hash and case-ID overlap.
 
 `STRUCTURE_CONSENSUS_V2_EVALUATION_CONFIG.json` now binds that freeze, the
 exact model pair, evaluator source bundle, gate configuration, and canonical
-one-run seal inputs. Official model execution remains at zero until this
-post-freeze authorization is committed.
+one-run seal inputs. The single authorized official CPU execution is consumed
+and must not be rerun or tuned. `STRUCTURE_CONSENSUS_V2_RESULT.json` binds the
+terminal fail report at SHA-256
+`fbd0d960a9a996bbf2dbaba28d004234118bab4ecbf556d8a25e0a2dfde54d10`
+and result seal at SHA-256
+`e9aff70383e4ea30bec62fedd6c64483d103b0467518d07e07a34c77e02498ca`.
+
+The bounded activation worked as preregistered: all 500 detector calls were
+finite, one value drifted above 1 by `1.1920928955078125e-7`, and only that
+value was clamped. OCR still fails the production thresholds. Validation exact
+match is `0.205`, CER is `0.7094339622641509`, and role accuracy is `0.34`.
+Sealed-test exact match is `0.21`, CER is `0.6842105263157895`, and role
+accuracy is `0.355`. Detection exact rate is `0.49`; duplicate regions are
+zero, but 10 exclusion fixtures produced false regions. ONNX parity passes at
+`2.205371856689453e-6`. No independent marker-stage evidence exists.
+Production approval and release eligibility remain false.
 Chandler and every private image remain prohibited.

@@ -16,6 +16,7 @@ from ml.ocr.official_bakeoff import structure_consensus_v2_evaluate as gate
 REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 PROTOCOL = Path(gate.__file__).with_name("STRUCTURE_CONSENSUS_V2_GATE_PROTOCOL.json")
 CONFIG = Path(gate.__file__).with_name("STRUCTURE_CONSENSUS_V2_EVALUATION_CONFIG.json")
+RESULT = Path(gate.__file__).with_name("STRUCTURE_CONSENSUS_V2_RESULT.json")
 METRICS = REPOSITORY_ROOT / "ml" / "ocr" / "production_gate.py"
 
 
@@ -91,6 +92,34 @@ def test_post_freeze_authorization_binds_exact_disjoint_fixture_and_seal_inputs(
     )
     assert config["production_approval"] is False
     assert config["release_eligible"] is False
+
+
+def test_terminal_result_consumes_the_gate_and_remains_fail_closed() -> None:
+    result = gate.load_strict_json(RESULT)
+
+    assert result["status"] == "fail"
+    assert result["evaluation_count"] == 1
+    assert result["rerun_permitted"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
+    assert result["private_data"] is False
+    assert result["chandler_used"] is False
+    assert result["metrics"]["validation_exact_match"] == 0.205
+    assert result["metrics"]["sealed_test_exact_match"] == 0.21
+    assert result["metrics"]["detection_exact_rate"] == 0.49
+    assert result["metrics"]["duplicate_region_count"] == 0
+    assert result["metrics"]["exclusion_false_region_count"] == 10
+    assert result["metrics"]["marker_creation_evaluated"] is False
+    assert result["bounded_activation"]["detector_call_count"] == 500
+    assert result["bounded_activation"]["clamped_value_count"] == 1
+
+    evidence_root = Path(gate.__file__).with_name("runs") / "structure-consensus-v2" / "evaluation"
+    report_path = evidence_root / "report.json"
+    if report_path.is_file():
+        assert gate.hash_file(report_path) == result["report_sha256"]
+        assert gate.hash_file(evidence_root / "core-predictions.json") == result["core_predictions_sha256"]
+        assert gate.hash_file(evidence_root / "predictions.json") == result["predictions_sha256"]
+        assert gate.hash_file(evidence_root / "runtime-results.json") == result["runtime_results_sha256"]
 
 
 def test_bounded_activation_clamps_only_finite_drift_and_hashes_raw_output(monkeypatch: pytest.MonkeyPatch) -> None:

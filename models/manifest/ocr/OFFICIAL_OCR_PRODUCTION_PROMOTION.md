@@ -127,9 +127,13 @@ bound at split SHA-256 `a7f407aa...f998`, archive SHA-256 `a1f978cf...961d`,
 and source-inventory SHA-256 `3cd3033a...d34`; both prior source and case-ID
 overlap counts are zero. The post-freeze authorization config binds those bytes,
 the exact model pair, evaluator bundle, runtime gate configuration, and
-canonical one-run seal inputs. No canonical seal has been opened, no official
-model call or report exists, and no manifest, store entry, or package evidence
-exists at this checkpoint. Promotion remains unavailable.
+canonical one-run seal inputs. That one execution is consumed and the terminal
+result is fail. Exact-match, CER, role, detection, exclusion, and independent
+marker-stage gates remain blocked. The probability-boundary repair itself is
+confirmed: one of the 500 detector calls required a `1.1920928955078125e-7`
+clamp and no output exceeded the fixed tolerance. No manifest, store entry, or
+package evidence exists. Promotion remains unavailable and the exposed V2 split
+must not be reused for tuning or another model call.
 
 ## Evidence that must exist before approval
 

@@ -171,7 +171,7 @@ public sealed class OfficialOcrProductionStatusTests
     }
 
     [TestMethod]
-    public void BoundedV2AuthorizationBindsTheSingleVerifiedFreezeWithoutApprovingModels()
+    public void BoundedV2ConsumesOneVerifiedPublicEvaluationAndRemainsUnapproved()
     {
         string root = FindRepositoryRoot();
         string protocolPath = Path.Combine(
@@ -186,6 +186,12 @@ public sealed class OfficialOcrProductionStatusTests
             "ocr",
             "official_bakeoff",
             "STRUCTURE_CONSENSUS_V2_EVALUATION_CONFIG.json");
+        string resultPath = Path.Combine(
+            root,
+            "ml",
+            "ocr",
+            "official_bakeoff",
+            "STRUCTURE_CONSENSUS_V2_RESULT.json");
         using System.Text.Json.JsonDocument document = System.Text.Json.JsonDocument.Parse(
             File.ReadAllText(protocolPath));
         System.Text.Json.JsonElement protocol = document.RootElement;
@@ -225,6 +231,28 @@ public sealed class OfficialOcrProductionStatusTests
         Assert.IsFalse(config.GetProperty("production_approval").GetBoolean());
         Assert.IsFalse(config.GetProperty("release_eligible").GetBoolean());
 
+        using System.Text.Json.JsonDocument resultDocument = System.Text.Json.JsonDocument.Parse(
+            File.ReadAllText(resultPath));
+        System.Text.Json.JsonElement result = resultDocument.RootElement;
+        Assert.AreEqual("fail", result.GetProperty("status").GetString());
+        Assert.AreEqual(1, result.GetProperty("evaluation_count").GetInt32());
+        Assert.IsFalse(result.GetProperty("rerun_permitted").GetBoolean());
+        Assert.IsFalse(result.GetProperty("production_approval").GetBoolean());
+        Assert.IsFalse(result.GetProperty("release_eligible").GetBoolean());
+        Assert.IsFalse(result.GetProperty("private_data").GetBoolean());
+        Assert.IsFalse(result.GetProperty("chandler_used").GetBoolean());
+        Assert.AreEqual(
+            "fbd0d960a9a996bbf2dbaba28d004234118bab4ecbf556d8a25e0a2dfde54d10",
+            result.GetProperty("report_sha256").GetString());
+        Assert.AreEqual(
+            "e9aff70383e4ea30bec62fedd6c64483d103b0467518d07e07a34c77e02498ca",
+            result.GetProperty("result_seal_sha256").GetString());
+        Assert.AreEqual(0.205, result.GetProperty("metrics").GetProperty("validation_exact_match").GetDouble());
+        Assert.AreEqual(10, result.GetProperty("metrics").GetProperty("exclusion_false_region_count").GetInt32());
+        Assert.AreEqual(
+            1,
+            result.GetProperty("bounded_activation").GetProperty("clamped_value_count").GetInt32());
+
         string readme = File.ReadAllText(Path.Combine(
             root,
             "ml",
@@ -235,7 +263,8 @@ public sealed class OfficialOcrProductionStatusTests
             readme,
             "0ee2ec0ef4a9f2f7f7f373da7389b84513f254c8642e4ddd5fd5427518d5e133");
         StringAssert.Contains(readme, "single V2 fixture freeze produced 500 new public synthetic cases");
-        StringAssert.Contains(readme, "Official model execution remains at zero");
+        StringAssert.Contains(readme, "single authorized official CPU execution is consumed");
+        StringAssert.Contains(readme, "Production approval and release eligibility remain false");
         StringAssert.Contains(readme, "Chandler and every private image remain prohibited");
     }
 
