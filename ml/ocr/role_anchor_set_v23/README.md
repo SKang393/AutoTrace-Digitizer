@@ -34,8 +34,22 @@ The three-candidate budget, single public execution, three-threshold robustness
 window, zero false/missed/duplicate/prohibited regions, recognition, CER,
 overall role, and per-role gates remain mandatory.
 
-Only committed P1 training and its one visible selection are authorized. The
-truth-hidden public archive remains unopened. Public execution, marker
+P1 consumed all five epochs and exactly 1,280 optimizer steps. Direct stored
+fixture-byte execution and all detector, recognizer, and candidate tensor
+hashes were recorded. CPU ONNX parity passed at
+`9.5367431640625e-06`. The selected `0.35` threshold retained all 1,024
+truths with zero misses and duplicates, recognition exact `0.96875`, CER
+`0.005302402651201326`, role accuracy `0.99609375`, and lowest per-role
+accuracy `0.9765625`. Three false and prohibited regions remained at thresholds
+`0.35`, `0.45`, and `0.55`, so no passing robustness window existed. P1 is
+consumed and cannot be rerun.
+
+P2 changes only the worst-negative scene margin from probability `0.10` at
+weight `1.5` to probability `0.01` at weight `4.0`. It preserves the P1
+architecture, from-scratch policy, fixtures, positive margin, balanced role
+objective, thresholds, and gates. Only committed P2 training and its one
+visible selection are authorized. The truth-hidden public archive remains
+unopened. Public execution, marker
 composition, manifest creation, model-store promotion, private validation,
 production approval, and release eligibility remain unauthorized.
 
