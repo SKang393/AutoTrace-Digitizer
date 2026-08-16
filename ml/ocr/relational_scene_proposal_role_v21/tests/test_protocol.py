@@ -175,7 +175,14 @@ def test_p3_is_preregistered_as_zero_training_role_supported_calibration() -> No
     assert config["training_authorized"] is False
     assert config["selection_authorized"] is False
     assert config["public_execution_authorized"] is False
-    assert not (root / "P3_SELECTION_AUTHORIZATION.json").exists()
+    authorization = json.loads((root / "P3_SELECTION_AUTHORIZATION.json").read_text(encoding="utf-8"))
+    assert authorization["authorized_source_commit"] == "809a466b8e88dce3553aea3acc83079dd266d6e5"
+    assert authorization["candidate_config_sha256"] == "cea787332315bc6b42557bf22cff6e2d60f7c88a88f4a9fe3bd84561c3501b7a"
+    assert authorization["runner_source_bundle_sha256"] == "738bd867961a2f576e4c7aed45b490e9a31dd0447244a5b5cb6df621f920a06f"
+    assert authorization["optimizer_steps_authorized"] == 0
+    assert authorization["training_authorized"] is False
+    assert authorization["selection_authorized"] is True
+    assert authorization["public_execution_authorized"] is False
 
 
 def test_p3_role_supported_score_rewards_role_evidence_and_scale_is_exact() -> None:

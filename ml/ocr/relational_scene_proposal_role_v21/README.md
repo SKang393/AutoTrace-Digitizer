@@ -86,9 +86,10 @@ probability and maximum eight-role probability. The scale gives the fixed
 `1e-5` parity gate numerical margin while role support can reject a
 high-proposal/low-role structure and retain a low-proposal/high-role text
 region. Architecture weights, sealed data, thresholds, truth matching, exact
-count, role, provider, and parity gates remain fixed. P3 has no authorization
-until a separate checksum-bound commit. It does not authorize public execution,
-manifests, model-store promotion, private validation, production, or release.
+count, role, provider, and parity gates remain fixed. The checksum-bound P3
+authorization permits exactly one zero-training export and visible-selection
+evaluation. It does not authorize public execution, manifests, model-store
+promotion, private validation, production, or release.
 
 Even a public pass cannot approve recognition composition, the marker stage,
 an artifact-mask provider, manifests, the model store, packaging, private

@@ -1,0 +1,32 @@
+{
+  "authorization_scope": "one fixed P3 zero-training calibration export and one visible-selection evaluation only",
+  "authorized_source_commit": "809a466b8e88dce3553aea3acc83079dd266d6e5",
+  "candidate_config_sha256": "cea787332315bc6b42557bf22cff6e2d60f7c88a88f4a9fe3bd84561c3501b7a",
+  "candidate_id": "P3",
+  "execution_count": 0,
+  "execution_limit": 1,
+  "optimizer_steps_authorized": 0,
+  "p2_checkpoint_sha256": "d46927836e8f1fcc8cb68bd5d42c94ef2af2289364b304592f513c98db8b4035",
+  "p2_report_sha256": "c116dbd66dd81d24e3f7db667322c2907ce70eb9781e28771a48b0973f970e50",
+  "p2_selection_result_sha256": "8058dd5322244f364567d488c64216a045967548697e2f36d1a5bd62ca2c0833",
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "public_archive_sha256": "b4ae7547731949ac6df1f9afe3fd83178b3cf9c55c81dbd017592a71d90ddab8",
+  "public_execution_authorized": false,
+  "release_eligible": false,
+  "runner_source_bundle_sha256": "738bd867961a2f576e4c7aed45b490e9a31dd0447244a5b5cb6df621f920a06f",
+  "runner_source_sha256": {
+    "ml/ocr/relational_scene_proposal_role_v21/P3_CONFIG.json": "cea787332315bc6b42557bf22cff6e2d60f7c88a88f4a9fe3bd84561c3501b7a",
+    "ml/ocr/relational_scene_proposal_role_v21/dataset.py": "5e453ca512f96a7f9b318cd183006020006dad8e8a5ef8fa53b270fc21b638f5",
+    "ml/ocr/relational_scene_proposal_role_v21/model.py": "4d92e891e5c4ac887c8b335881e1da05f6e0b93ab07835f8643eb231d2687614",
+    "ml/ocr/relational_scene_proposal_role_v21/protocol.py": "3a26c86aca49eea2731ad32fdf98ff6489871e480a4d52f3492f1931bdd4e5ed",
+    "ml/ocr/relational_scene_proposal_role_v21/train_p1.py": "951801f6e587036324bcce867a10fe0c6188d327772664a047a017fe8eb4b664",
+    "ml/ocr/relational_scene_proposal_role_v21/train_p3.py": "1f8ea874da89acc4a7c9c55b3a60b7c77f0a2d5af66463f049a10f23f1be90d2"
+  },
+  "schema": "graphreader.ocr-relational-scene-proposal-role-selection-authorization.v1",
+  "selection_archive_sha256": "9d3831f31cdb097f0ec4a2d174ed8d9653d76472394fb5f42c44a17e99990371",
+  "selection_authorized": true,
+  "split_seal_sha256": "085c93c73731ca97bc85d4eed52841547e6faab28effa56ca14db90d999b3047",
+  "train_archive_sha256": "c82c527daa4afdadaa477895cd58a93072d73c6ece12b39318f5b6b5f951563d",
+  "training_authorized": false
+}
