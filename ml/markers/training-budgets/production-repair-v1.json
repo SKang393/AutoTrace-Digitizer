@@ -5154,7 +5154,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-scene-evidence-attention-v22",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_2_failed_selection",
       "defect_class": "aggregate V20 P3 retained two prohibited false regions and three misses while aggregate V21 P3 retained two prohibited false regions and ten misses",
       "prior_revisions": [
         "graph-text-margin-calibrator-v20",
@@ -5167,11 +5167,10 @@
       "architecture": "recognition-conditioned-complete-proposal-set-attention-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [
-        "P2"
-      ],
+      "preregistered_candidate_ids": [],
       "consumed_candidate_ids": [
-        "P1"
+        "P1",
+        "P2"
       ],
       "remaining_unregistered_candidate_ids": [
         "P3"
@@ -5228,6 +5227,29 @@
       "p2_trigger_case_detail_or_pixels_used": false,
       "p2_expected_runner_source_bundle_sha256": "5db0b0b11e665ca9c2cc24a94f7e07dc019d3228f7b1d72ca874423900c67d89",
       "p2_expected_optimizer_steps": 1280,
+      "p2_result_path": "ml/ocr/scene_evidence_attention_v22/P2_RESULT.json",
+      "p2_result_sha256": "ab5942d4f4d42531897f95ca2fe949101d8c46ad7f9a54c8fcc66a6687ed8f46",
+      "p2_candidate_report_sha256": "5d6bab1cb16dffa18df3ae1a494cdf37adc542f95ad2017ce6f8f1b7446bdd68",
+      "p2_checkpoint_sha256": "9b59243f72a03b91fad646a5b3408fb9e47b8682131771c4afeca9ccacb5d8ad",
+      "p2_onnx_sha256": "d7c8c3ddddc99cf6685609437224536a44f5557f65411e123f1b17c63e081638",
+      "p2_optimizer_steps": 1280,
+      "p2_elapsed_ms": 2937834.931,
+      "p2_selected_threshold": 0.75,
+      "p2_selection_scene_count": 128,
+      "p2_selection_exact_scene_count": 98,
+      "p2_selection_true_positives": 1023,
+      "p2_selection_false_positives": 3,
+      "p2_selection_false_negatives": 1,
+      "p2_selection_duplicate_count": 0,
+      "p2_selection_prohibited_structure_hits": 3,
+      "p2_selection_recognition_exact": 0.978515625,
+      "p2_selection_character_error_rate": 0.0038148946757339524,
+      "p2_selection_role_accuracy": 0.9716796875,
+      "p2_selection_annotation_accuracy": 0.828125,
+      "p2_onnx_parity_maximum_absolute_error": 0.000005364418029785156,
+      "p2_onnx_parity_passed": true,
+      "p2_training_opened_seal_sha256": "42c03bf846f5b389e0bdea6caacece0c9f3955190a0f9999d79420522bf739c5",
+      "p2_training_result_seal_sha256": "ba024b998e4d444c458f161eeabdfe8117f3179fe536b132efa225345dcabc7c",
       "selection_thresholds": [
         0.35,
         0.45,
@@ -5236,9 +5258,9 @@
         0.75
       ],
       "minimum_consecutive_passing_thresholds": 3,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P2",
-      "execution_blocker": null,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1 and P2 are consumed. P2 failed fixed visible selection with three false positives, one false negative, three prohibited-structure hits, and no passing threshold window. P3 remains unregistered and the truth-hidden public archive must remain unopened.",
       "public_gate_authorized": false,
       "public_gate_evaluator_preregistered": false,
       "public_gate_evaluations": 0,

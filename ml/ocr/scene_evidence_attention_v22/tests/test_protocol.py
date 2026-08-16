@@ -8,6 +8,7 @@ from pathlib import Path
 
 import numpy as np
 import onnxruntime as ort
+import pytest
 import torch
 
 from ml.markers.gate_seal import sha256_file
@@ -33,6 +34,7 @@ from ml.ocr.scene_evidence_attention_v22.train_p1 import (
     preflight,
 )
 from ml.ocr.scene_evidence_attention_v22.train_p2 import (
+    CANONICAL_OUTPUT as P2_CANONICAL_OUTPUT,
     CONFIG_PATH as P2_CONFIG_PATH,
     RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
     _proposal_objective,
@@ -214,7 +216,7 @@ def test_p1_config_binds_runner_fixtures_and_fail_closed_outputs() -> None:
         assert evidence["seal"]["public_evaluations"] == 0
 
 
-def test_canonical_budget_authorizes_only_preregistered_p2_after_consumed_p1() -> None:
+def test_canonical_budget_locks_consumed_p2_and_leaves_p3_unregistered() -> None:
     ledger = json.loads(
         (
             REPO_ROOT
@@ -230,13 +232,15 @@ def test_canonical_budget_authorizes_only_preregistered_p2_after_consumed_p1() -
     result_path = REPO_ROOT / "ml/ocr/scene_evidence_attention_v22/P1_RESULT.json"
     result = json.loads(result_path.read_text(encoding="utf-8"))
     p2_config_path = REPO_ROOT / P2_CONFIG_PATH
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
+    p2_result_path = REPO_ROOT / "ml/ocr/scene_evidence_attention_v22/P2_RESULT.json"
+    p2_result = json.loads(p2_result_path.read_text(encoding="utf-8"))
+    assert entry["status"] == "candidate_2_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
-    assert entry["execution_blocker"] is None
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert "P3 remains unregistered" in entry["execution_blocker"]
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(config_path)
     assert entry["candidate_config_sha256"]["P2"] == sha256_file(p2_config_path)
     assert entry["p1_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
@@ -251,10 +255,54 @@ def test_canonical_budget_authorizes_only_preregistered_p2_after_consumed_p1() -
     assert entry["p2_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, P2_RUNNER_SOURCE_PATHS,
     )
+    assert entry["p2_result_sha256"] == sha256_file(p2_result_path)
+    assert entry["p2_candidate_report_sha256"] == p2_result["report_sha256"]
+    assert entry["p2_checkpoint_sha256"] == p2_result["checkpoint_sha256"]
+    assert entry["p2_onnx_sha256"] == p2_result["onnx_sha256"]
+    assert entry["p2_optimizer_steps"] == p2_result["optimizer_steps"] == 1280
+    assert entry["p2_selection_false_positives"] == 3
+    assert entry["p2_selection_false_negatives"] == 1
+    assert entry["p2_selection_prohibited_structure_hits"] == 3
+    assert entry["p2_training_opened_seal_sha256"] == p2_result["training_opened_seal_sha256"]
+    assert entry["p2_training_result_seal_sha256"] == p2_result["training_result_seal_sha256"]
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
+
+
+def test_p2_result_records_consumed_failed_selection_without_public_execution() -> None:
+    result_path = REPO_ROOT / "ml/ocr/scene_evidence_attention_v22/P2_RESULT.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert result["candidate_id"] == "P2"
+    assert result["candidate_consumed"] is True
+    assert result["status"] == "failed_selection"
+    assert result["optimizer_steps"] == 1280
+    assert result["selection_gate_passed"] is False
+    assert result["passing_threshold_window"] == []
+    assert result["selection_metrics"]["direct_stored_fixture_byte_execution"] is True
+    assert result["selection_metrics"]["false_positives"] == 3
+    assert result["selection_metrics"]["false_negatives"] == 1
+    assert result["selection_metrics"]["duplicate_region_count"] == 0
+    assert result["selection_metrics"]["prohibited_structure_hits"] == 3
+    assert result["onnx_parity_passed"] is True
+    assert result["onnx_parity_maximum_absolute_error"] <= 1e-5
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert result["marker_creation_evaluated"] is False
+    assert result["private_or_article_images"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
+    output = REPO_ROOT / P2_CANONICAL_OUTPUT
+    if output.exists():
+        report_path = output / "candidate-report.json"
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        assert sha256_file(report_path) == result["report_sha256"]
+        assert report["status"] == result["status"]
+        assert report["checkpoint_sha256"] == result["checkpoint_sha256"]
+        assert report["onnx_sha256"] == result["onnx_sha256"]
+        assert report["public_gate_archive_opened"] is False
+        assert report["public_gate_evaluations"] == 0
 
 
 def test_p2_config_binds_aggregate_trigger_margin_objective_and_locked_public_gate() -> None:
@@ -274,9 +322,9 @@ def test_p2_config_binds_aggregate_trigger_margin_objective_and_locked_public_ga
     assert config["public_gate_evaluations"] == 0
     assert config["production_approval"] is False
     assert config["release_eligible"] is False
-    evidence = p2_preflight()
-    assert evidence["config"] == config
-    assert evidence["p1_result"]["status"] == "failed_selection"
+    if (REPO_ROOT / P2_CANONICAL_OUTPUT).exists():
+        with pytest.raises(RuntimeError, match="P2 output already exists"):
+            p2_preflight()
 
 
 def test_p2_scene_extrema_objective_penalizes_worst_negative_and_preserves_truth() -> None:

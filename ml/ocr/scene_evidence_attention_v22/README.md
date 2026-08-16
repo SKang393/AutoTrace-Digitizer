@@ -41,14 +41,25 @@ and missed one truth. Recognition exact was `0.978515625`, CER was
 `0.0036490296898324765`, overall role accuracy was `0.9931640625`, and the
 PhaseHeading class was only `0.9453125`. The public archive remains unopened.
 
-P2 is preregistered from only that aggregate P1 result. Its single isolated
-change adds a scene-extrema acceptance-margin objective: the highest-scoring
-training negative is penalized above probability `0.10`, and the lowest-scoring
-training truth is penalized below probability `0.90`. Architecture, sealed
-fixtures, feature extraction, role loss, thresholds, selection gates, and the
-1,280-step ceiling remain fixed. P1 is not reused as an initialization.
+P2 is consumed and must not run again. It was preregistered from only the
+aggregate P1 result. Its single isolated change added a scene-extrema
+acceptance-margin objective: the highest-scoring training negative was
+penalized above probability `0.10`, and the lowest-scoring training truth was
+penalized below probability `0.90`. Architecture, sealed fixtures, feature
+extraction, role loss, thresholds, selection gates, and the 1,280-step ceiling
+remained fixed. P1 was not reused as an initialization.
 
-P3 remains unregistered. Public execution, marker composition, manifest
+P2 executed all 16,595 training proposals and exactly 1,280 optimizer steps.
+CPU ONNX parity passed at `5.364418029785156e-06`, but visible selection again
+failed at every fixed threshold. The best fixed threshold, `0.75`, produced 98
+exact scenes out of 128, with 1,023 true positives, three false positives, one
+false negative, no duplicates, and three prohibited-structure hits.
+Recognition exact was `0.978515625`, CER was `0.0038148946757339524`, overall
+role accuracy was `0.9716796875`, and Annotation accuracy fell to `0.828125`.
+The public archive remains unopened.
+
+P3 remains unregistered and no execution is authorized. Public execution,
+marker composition, manifest
 creation, model-store promotion, private validation, production approval, and
 release eligibility remain unauthorized.
 
