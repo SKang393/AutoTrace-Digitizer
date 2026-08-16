@@ -55,18 +55,24 @@ objective, thresholds, and gates. P2 consumed all five epochs and exactly
 `0.019055509527754765`, overall role accuracy was `0.87890625`, and Annotation
 accuracy was `0.6640625`. P2 failed selection and cannot be rerun.
 
-Final candidate P3 loads the exact consumed P1 checkpoint, freezes every
+Final candidate P3 loaded the exact consumed P1 checkpoint, froze every
 encoder, role-anchor, scene-context, update, and role-head parameter, and
-fine-tunes only the four proposal-head tensors for two epochs and exactly 512
-optimizer steps. Its training-only relative objective forbids positive-logit
-decreases from the P1 teacher, targets lower negative logits, and separates
-each scene's worst negative from its weakest positive. The isolated change is
-based only on aggregate P1 and P2 metrics and preserves P1 role logits by
-construction and direct comparison. Only committed P3 training and its one
-visible selection are authorized. The truth-hidden public archive remains
-unopened. Public execution, marker
-composition, manifest creation, model-store promotion, private validation,
-production approval, and release eligibility remain unauthorized.
+fine-tuned only the four proposal-head tensors for two epochs and exactly 512
+optimizer steps. Its training-only relative objective forbade positive-logit
+decreases from the P1 teacher, targeted lower negative logits, and separated
+each scene's worst negative from its weakest positive. Direct hashes prove that
+all frozen parameters and every P1 teacher role logit remained unchanged. CPU
+ONNX parity passed at `9.5367431640625e-06`.
+
+P3 retained all 1,024 truths with zero misses and duplicates at thresholds
+`0.35` and `0.45`, recognition exact `0.96875`, CER
+`0.005302402651201326`, role accuracy `0.99609375`, and lowest per-role
+accuracy `0.9765625`. The same three false and prohibited regions remained at
+both thresholds, so no zero-error three-threshold window existed. P3 failed
+selection, all three V23 candidates are consumed, and the V23 budget is
+exhausted. The truth-hidden public archive remains unopened. Public execution,
+marker composition, manifest creation, model-store promotion, private
+validation, production approval, and release eligibility remain unauthorized.
 
 Synthetic fixtures are training and public-test inputs only and are never
 application graph data.

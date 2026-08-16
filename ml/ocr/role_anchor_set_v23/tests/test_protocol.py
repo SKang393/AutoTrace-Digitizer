@@ -54,6 +54,8 @@ from ml.ocr.role_anchor_set_v23.train_p3 import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
+P3_RESULT_PATH = Path("ml/ocr/role_anchor_set_v23/P3_RESULT.json")
+P3_RESULT_SHA256 = "83d7a3be46e082be3550144cb4bb1b0a287ada29fadbdcca231d2e27d7ad7422"
 
 
 def test_protocol_is_fresh_bounded_and_fail_closed() -> None:
@@ -94,7 +96,7 @@ def test_v22_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_records_consumed_p1_p2_and_authorizes_only_p3() -> None:
+def test_canonical_budget_records_exhausted_p1_p2_p3_and_locks_execution() -> None:
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -110,10 +112,10 @@ def test_canonical_budget_records_consumed_p1_p2_and_authorizes_only_p3() -> Non
     p2_config_path = REPO_ROOT / P2_CONFIG_PATH
     p3_config_path = REPO_ROOT / P3_CONFIG_PATH
     seal_path = REPO_ROOT / "ml/ocr/role_anchor_set_v23/SPLIT_SEAL.json"
-    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["status"] == "exhausted_selection_failed"
     assert entry["protocol_sha256"] == sha256_file(protocol_path)
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["split_materialized"] is True
     assert entry["split_seal_sha256"] == sha256_file(seal_path)
@@ -133,9 +135,10 @@ def test_canonical_budget_records_consumed_p1_p2_and_authorizes_only_p3() -> Non
     assert entry["p3_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, P3_RUNNER_SOURCE_PATHS,
     )
-    assert entry["selection_evaluations"] == 2
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["p3_result_sha256"] == P3_RESULT_SHA256
+    assert entry["selection_evaluations"] == 3
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
@@ -365,18 +368,47 @@ def test_p3_config_binds_parent_protocol_runner_fixtures_and_results() -> None:
     assert config["release_eligible"] is False
 
 
-def test_p3_preflight_validates_exact_frozen_inputs_without_execution() -> None:
-    evidence = p3_preflight()
-    assert evidence["results"]["P1"]["candidate_consumed"] is True
-    assert evidence["results"]["P2"]["candidate_consumed"] is True
-    assert evidence["seal"]["public_evaluations"] == 0
-    assert evidence["config"]["public_execution_authorized"] is False
-    assert not (REPO_ROOT / P3_CANONICAL_OUTPUT).exists()
-    assert not (
+def test_p3_preflight_refuses_consumed_output() -> None:
+    assert (REPO_ROOT / P3_CANONICAL_OUTPUT).exists()
+    with pytest.raises(RuntimeError, match="P3 output already exists"):
+        p3_preflight()
+
+
+def test_p3_terminal_result_binds_report_payload_and_single_use_seals() -> None:
+    result_path = REPO_ROOT / P3_RESULT_PATH
+    assert sha256_file(result_path) == P3_RESULT_SHA256
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert result["candidate_id"] == "P3"
+    assert result["candidate_consumed"] is True
+    assert result["status"] == "failed_selection"
+    assert result["selection_gate_passed"] is False
+    assert result["selection_metrics"]["direct_stored_fixture_byte_execution"] is True
+    assert result["selection_metrics"]["false_positives"] == 3
+    assert result["selection_metrics"]["false_negatives"] == 0
+    assert result["selection_metrics"]["duplicate_region_count"] == 0
+    assert result["selection_metrics"]["prohibited_structure_hits"] == 3
+    assert result["p1_teacher_role_maximum_absolute_error"] == 0.0
+    assert result["p1_teacher_role_preserved"] is True
+    assert (
+        result["frozen_parameter_stream_sha256_before"]
+        == result["frozen_parameter_stream_sha256_after"]
+    )
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert result["marker_creation_evaluated"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
+    assert "cases" not in result and "predictions" not in result
+
+    report_path = REPO_ROOT / "ml/ocr/role_anchor_set_v23/artifacts/P3-run/candidate-report.json"
+    assert sha256_file(report_path) == result["report_sha256"]
+    seal_root = (
         REPO_ROOT
         / "ml/markers/training-seals/ocr-detection-recognition"
         / "graph-text-role-anchor-set-v23/P3"
-    ).exists()
+    )
+    assert sha256_file(seal_root / "opened.json") == result["training_opened_seal_sha256"]
+    assert sha256_file(seal_root / "result.json") == result["training_result_seal_sha256"]
 
 
 def test_p3_teacher_signed_margin_and_scene_separation_are_fixed() -> None:
