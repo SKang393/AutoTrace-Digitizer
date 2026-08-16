@@ -91,6 +91,21 @@ authorization permits exactly one zero-training export and visible-selection
 evaluation. It does not authorize public execution, manifests, model-store
 promotion, private validation, production, or release.
 
+P3 executed exactly once from repository head
+`1061314f2bbe88f113f8b999243a0c09ee482e60` with zero optimizer steps.
+The fixed scale passed CPU ONNX parity at `0.00000512599945068359`, but the
+role-supported score passed only 116/128 scenes at threshold `0.45`. It retained
+1,014/1,024 truths with two prohibited false regions, ten misses, zero
+duplicates, role accuracy `0.98828125`, and every role above `0.94`. Report
+SHA-256 is
+`6eed9f7773e71f22ab397f01dd3676b011a65b4028e922111698f6e8d9a38a8b`;
+rejected ONNX SHA-256 is
+`3435b88c18d2c7d69d38d6863dc241683824b0ac4d4b3ebec48e9d2d2bd3e6cb`;
+tracked result SHA-256 is
+`8aa11cc5cce0d255a9cce16e880c37c0b5868e6d47550cb09004fcd260ed1bac`.
+P1 through P3 are consumed and V21 cannot rerun. The public archive remains
+unopened with zero evaluations.
+
 Even a public pass cannot approve recognition composition, the marker stage,
 an artifact-mask provider, manifests, the model store, packaging, private
 Chandler validation, production, or release.

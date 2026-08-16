@@ -113,6 +113,24 @@ public sealed class OcrV21ProductionStatusTests
         Assert.AreEqual(0, p2Result.GetProperty("public_evaluation_count").GetInt32());
         Assert.IsFalse(p2Result.GetProperty("production_approval").GetBoolean());
         Assert.IsFalse(p2Result.GetProperty("release_eligible").GetBoolean());
+        using JsonDocument p3ResultDocument = JsonDocument.Parse(
+            File.ReadAllBytes(Path.Combine(candidateRoot, "P3_SELECTION_RESULT.json")));
+        JsonElement p3Result = p3ResultDocument.RootElement;
+        Assert.IsTrue(p3Result.GetProperty("p3_consumed").GetBoolean());
+        Assert.AreEqual(0, p3Result.GetProperty("optimizer_steps").GetInt32());
+        Assert.IsFalse(p3Result.GetProperty("selection_gate_passed").GetBoolean());
+        Assert.AreEqual(128, p3Result.GetProperty("scene_count").GetInt32());
+        Assert.AreEqual(116, p3Result.GetProperty("exact_scene_count").GetInt32());
+        Assert.AreEqual(1014, p3Result.GetProperty("true_positives").GetInt32());
+        Assert.AreEqual(2, p3Result.GetProperty("false_positives").GetInt32());
+        Assert.AreEqual(10, p3Result.GetProperty("false_negatives").GetInt32());
+        Assert.AreEqual(0, p3Result.GetProperty("duplicate_regions").GetInt32());
+        Assert.AreEqual(2, p3Result.GetProperty("prohibited_structure_hits").GetInt32());
+        Assert.IsTrue(p3Result.GetProperty("onnx_parity_passed").GetBoolean());
+        Assert.IsFalse(p3Result.GetProperty("public_archive_opened").GetBoolean());
+        Assert.AreEqual(0, p3Result.GetProperty("public_evaluation_count").GetInt32());
+        Assert.IsFalse(p3Result.GetProperty("production_approval").GetBoolean());
+        Assert.IsFalse(p3Result.GetProperty("release_eligible").GetBoolean());
         Assert.IsFalse(File.Exists(Path.Combine(candidateRoot, "PUBLIC_GATE_AUTHORIZATION.json")));
         Assert.IsFalse(Directory.Exists(Path.Combine(root, "models", "manifest", "ocr", "relational_scene_proposal_role_v21")));
     }

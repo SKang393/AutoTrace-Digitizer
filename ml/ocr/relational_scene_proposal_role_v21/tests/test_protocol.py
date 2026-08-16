@@ -159,7 +159,7 @@ def test_p2_positive_multiplier_changes_only_the_positive_class_pressure() -> No
     assert asymmetric.sum() == pytest.approx(2.0)
 
 
-def test_p3_is_preregistered_as_zero_training_role_supported_calibration() -> None:
+def test_p3_is_consumed_as_failed_zero_training_role_supported_calibration() -> None:
     root = Path(__file__).resolve().parents[1]
     config = json.loads((root / "P3_CONFIG.json").read_text(encoding="utf-8"))
     assert config["candidate_id"] == "P3"
@@ -183,6 +183,21 @@ def test_p3_is_preregistered_as_zero_training_role_supported_calibration() -> No
     assert authorization["training_authorized"] is False
     assert authorization["selection_authorized"] is True
     assert authorization["public_execution_authorized"] is False
+    result = json.loads((root / "P3_SELECTION_RESULT.json").read_text(encoding="utf-8"))
+    assert result["p3_consumed"] is True
+    assert result["optimizer_steps"] == 0
+    assert result["selection_gate_passed"] is False
+    assert result["exact_scene_count"] == 116
+    assert result["true_positives"] == 1014
+    assert result["false_positives"] == 2
+    assert result["false_negatives"] == 10
+    assert result["duplicate_regions"] == 0
+    assert result["prohibited_structure_hits"] == 2
+    assert result["onnx_parity_passed"] is True
+    assert result["public_archive_opened"] is False
+    assert result["public_evaluation_count"] == 0
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
 
 
 def test_p3_role_supported_score_rewards_role_evidence_and_scale_is_exact() -> None:

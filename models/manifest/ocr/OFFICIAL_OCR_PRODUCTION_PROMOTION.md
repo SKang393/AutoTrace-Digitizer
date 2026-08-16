@@ -32,6 +32,13 @@ prohibited false region, so the truth-hidden 288-scene public archive remains
 unopened with zero evaluations. It cannot replace or approve the official
 detector, and no rerun is authorized.
 
+The newer project-owned relational-scene V21 budget is now exhausted as well.
+Final P3 reused the exact P2 checkpoint with zero optimizer steps and passed
+CPU parity, but its visible selection retained only 1,014/1,024 truths and
+admitted two prohibited false regions. All three candidates are consumed, its
+truth-hidden public archive remains unopened with zero evaluations, and it has
+no manifest, store entry, package, production approval, or release eligibility.
+
 | Task | Model | Converted ONNX SHA-256 | Current status |
 | --- | --- | --- | --- |
 | OCR detection | `PP-OCRv5_mobile_det` | `d4aa24d408cd70b8b9f66cc758e20f397fc31a9c69d8477cf8887fc53bd5fceb` | Conversion parity passed; public evaluation failed |
