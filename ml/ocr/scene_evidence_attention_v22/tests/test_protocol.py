@@ -24,6 +24,16 @@ from ml.ocr.scene_evidence_attention_v22.protocol import (
     protocol_configuration,
     split_registration,
 )
+from ml.ocr.scene_evidence_attention_v22.train_p1 import (
+    CANONICAL_OUTPUT,
+    CONFIG_PATH,
+    RUNNER_SOURCE_PATHS,
+    _calibrated_records,
+    _feature_groups,
+    preflight,
+)
+from ml.ocr.margin_calibrator_v20.pipeline import ProposalRecord
+from ml.markers.gate_seal import source_bundle_sha256
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -143,3 +153,79 @@ def test_freeze_state_remains_fail_closed_before_training() -> None:
         REPO_ROOT
         / "ml/ocr/scene_evidence_attention_v22/artifacts/P1-run"
     ).exists()
+
+
+def test_p1_config_binds_runner_fixtures_and_fail_closed_outputs() -> None:
+    config = json.loads((REPO_ROOT / CONFIG_PATH).read_text(encoding="utf-8"))
+    seal_path = REPO_ROOT / "ml/ocr/scene_evidence_attention_v22/SPLIT_SEAL.json"
+    assert config["expected_optimizer_steps"] == 1280
+    assert config["proposal_selection"] == "all_frozen_production_proposals_no_detector_prefilter"
+    assert config["complete_proposal_negative_cap_per_scene"] == 100000
+    assert config["detector_prefilter_applied"] is False
+    assert config["selection_evaluation_limit"] == 1
+    assert config["public_execution_authorized"] is False
+    assert config["public_gate_evaluations"] == 0
+    assert config["marker_creation_evaluated"] is False
+    assert config["production_approval"] is False
+    assert config["release_eligible"] is False
+    assert config["split_seal_sha256"] == sha256_file(seal_path)
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, RUNNER_SOURCE_PATHS,
+    )
+    evidence = preflight()
+    assert evidence["config"] == config
+    assert evidence["seal"]["public_evaluations"] == 0
+    if (REPO_ROOT / CANONICAL_OUTPUT).exists():
+        report = json.loads(
+            (REPO_ROOT / CANONICAL_OUTPUT / "candidate-report.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        assert report["public_gate_archive_opened"] is False
+        assert report["public_gate_evaluations"] == 0
+        assert report["production_approval"] is False
+        assert report["release_eligible"] is False
+
+
+def test_canonical_budget_authorizes_only_unused_p1() -> None:
+    ledger = json.loads(
+        (
+            REPO_ROOT
+            / "ml/markers/training-budgets/production-repair-v1.json"
+        ).read_text(encoding="utf-8")
+    )
+    entry = next(
+        item for item in ledger["revisions"]
+        if item["task"] == "ocr-detection-recognition"
+        and item["revision"] == "graph-text-scene-evidence-attention-v22"
+    )
+    config_path = REPO_ROOT / CONFIG_PATH
+    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P1"]
+    assert entry["consumed_candidate_ids"] == []
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["candidate_config_sha256"]["P1"] == sha256_file(config_path)
+    assert entry["p1_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, RUNNER_SOURCE_PATHS,
+    )
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_evaluations"] == 0
+    assert entry["production_approval"] is False
+    assert entry["release_eligible"] is False
+
+
+def test_scene_grouping_and_calibrated_role_projection_are_exact() -> None:
+    records = (
+        ProposalRecord(0, 0, 0, "1", "Other"),
+        ProposalRecord(0, 1, -1, "", "Other"),
+        ProposalRecord(1, 0, 0, "2", "Other"),
+    )
+    groups = _feature_groups(records, 2)
+    assert [group.tolist() for group in groups] == [[0, 1], [2]]
+    output = np.zeros((3, 2 + len(ROLE_ORDER)), dtype=np.float32)
+    output[0, 2 + ROLE_ORDER.index("XTick")] = 3.0
+    output[1, 2 + ROLE_ORDER.index("Other")] = 2.0
+    output[2, 2 + ROLE_ORDER.index("YTick")] = 4.0
+    projected = _calibrated_records(records, output)
+    assert [record.predicted_role for record in projected] == ["XTick", "Other", "YTick"]
