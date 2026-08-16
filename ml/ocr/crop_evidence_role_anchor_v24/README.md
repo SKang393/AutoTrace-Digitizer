@@ -22,9 +22,9 @@ pixels with the quadratic evidence encoding before the role-anchor set context
 and separate proposal and role heads. The model remains dynamic over proposal
 count, project-owned, and Apache-2.0.
 
-P1 is preregistered for five epochs and at most 1,280 optimizer steps on 256
+P1 executed once for five epochs and exactly 1,280 optimizer steps on 256
 fresh synthetic training scenes. Selection contains 128 fresh scenes and the
-truth-hidden public set contains 192. Source commit
+still-unopened truth-hidden public set contains 192. Source commit
 `41702515c1b13a550f04cbfefe1d393a4e2e13e5` froze all three archives exactly
 once. Their SHA-256 values are `1ecb29fb...d85a`, `17a130ec...6d99`, and
 `bf9bdde0...bb95`; cross-split source-byte overlap is zero and every truth has
@@ -33,14 +33,32 @@ exactly one production proposal. Split-seal SHA-256 is
 
 The checksum-bound P1 runner and config SHA-256
 `94732d1a2ccf839db3637b0b94e870692c0882ad0ac16f83495f5ebccdc2714d`
-retain the exact rejected detector, reviewed recognizer, thresholds, and
-zero-error gates. Detector, recognizer, evidence, crop, and candidate tensor
-streams must all be recorded, and CPU ONNX parity must be at most `1e-5`.
+retained the exact rejected detector, reviewed recognizer, thresholds, and
+zero-error gates. Its direct stored-byte selection produced zero false
+positives, zero prohibited hits, and zero duplicates at threshold `0.35`, but
+missed 22 of 1,024 truths. Recognition exact was `0.9521484375`, CER was
+`0.02102300943552392`, and role accuracy was `0.8818359375`; PhaseHeading was
+only `0.421875`. CPU ONNX parity also failed at
+`1.7821788787841797e-05`. Report SHA-256 is
+`a34d696e81facafe65b77697bf02c98cb03af6a3f19b8a571b55b70ded5d15f8`;
+tracked result SHA-256 is
+`79f4254287b687674e505961762433c99f309683963650ffed6b982cf71f0715`.
 
-No optimizer step or selection has run, and the public archive remains
-unopened. Marker composition, manifest creation, model-store promotion,
-private validation, production approval, and release eligibility remain
-unauthorized.
+P2 is preregistered from those aggregate metrics only. It replaces the
+from-scratch joint model with the exact frozen V23 P3 role-anchor backbone and
+trains only a compact crop-conditioned residual on the two proposal logits.
+The role outputs must remain byte-exact to the parent. Teacher-positive
+preservation, teacher-negative improvement, and scene-separation margins
+target the P1 recall regression while retaining its structural precision.
+The parent checkpoint is bound to SHA-256
+`83d7b47a6fa53ea7b5618acb4b0d4bebb9207594967c4e83ad7c1c62c7cc409d`.
+P2 retains the same five thresholds, 1,280-step ceiling, direct tensor-stream
+evidence, one visible selection, and `1e-5` CPU parity gate.
+
+P1 is consumed and cannot rerun. P2 has not executed. The public archive
+remains unopened. Marker composition, manifest creation, model-store
+promotion, private validation, production approval, and release eligibility
+remain unauthorized.
 
 Synthetic fixtures are training and public-test inputs only and are never
 application graph data.

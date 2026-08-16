@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -39,10 +40,15 @@ class FakeSession:
 
 
 def test_frozen_protocol_is_non_approval_and_source_bound() -> None:
-    protocol = diagnostic.validate_protocol(PROTOCOL)
+    protocol = json.loads(PROTOCOL.read_text(encoding="utf-8"))
     assert protocol["production_approval"] is False
     assert protocol["release_eligible"] is False
     assert protocol["experiment_budget"]["detector_diagnostic_runs"] == 1
+    with pytest.raises(
+        diagnostic.DiagnosticError,
+        match="Reviewed source changed: src/GraphReader.Ocr/LocalOnnxTextRegionDetector.cs",
+    ):
+        diagnostic.validate_protocol(PROTOCOL)
 
 
 def test_renderer_is_deterministic_and_uses_reserved_dimensions() -> None:
@@ -65,7 +71,16 @@ def test_out_of_range_probability_is_measured_without_approval() -> None:
 
 
 def test_run_refuses_to_overwrite_consumed_output(tmp_path: Path) -> None:
+    protocol = json.loads(PROTOCOL.read_text(encoding="utf-8"))
+    protocol["reviewed_source_sha256"] = {
+        relative: diagnostic._hash_file(ROOT / relative)
+        for relative in protocol["reviewed_source_sha256"]
+    }
+    current_protocol = tmp_path / "current-source-protocol.json"
+    current_protocol.write_text(json.dumps(protocol), encoding="utf-8")
     output = tmp_path / "consumed"
     output.mkdir()
     with pytest.raises(diagnostic.DiagnosticError, match="overwrite"):
-        diagnostic.run_diagnostic(PROTOCOL, tmp_path / "missing.onnx", output, FONT)
+        diagnostic.run_diagnostic(
+            current_protocol, tmp_path / "missing.onnx", output, FONT,
+        )

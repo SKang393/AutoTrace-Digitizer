@@ -15,6 +15,9 @@ from ml.ocr.crop_evidence_role_anchor_v24.dataset import (
     encode_scene, proposal_summary, render_scene,
 )
 from ml.ocr.crop_evidence_role_anchor_v24.model import CropEvidenceRoleAnchorNet
+from ml.ocr.crop_evidence_role_anchor_v24.model_p2 import (
+    FrozenRoleAnchorCropResidualNet,
+)
 from ml.ocr.crop_evidence_role_anchor_v24.pipeline import proposal_crops
 from ml.ocr.crop_evidence_role_anchor_v24.protocol import (
     CANDIDATE_LIMIT,
@@ -30,11 +33,16 @@ from ml.ocr.crop_evidence_role_anchor_v24.protocol import (
 )
 from ml.ocr.margin_calibrator_v20.pipeline import ProposalRecord
 from ml.ocr.crop_evidence_role_anchor_v24.train_p1 import (
-    CONFIG_PATH,
-    RUNNER_SOURCE_PATHS,
+    CONFIG_PATH as P1_CONFIG_PATH,
     _balanced_class_weights,
     _proposal_objective,
-    preflight,
+)
+from ml.ocr.crop_evidence_role_anchor_v24.train_p2 import (
+    CONFIG_PATH as P2_CONFIG_PATH,
+    P1_RESULT_PATH,
+    RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
+    _proposal_residual_objective,
+    preflight as p2_preflight,
 )
 
 
@@ -79,7 +87,7 @@ def test_v23_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_binds_one_unused_p1_authorization() -> None:
+def test_canonical_budget_consumes_p1_and_binds_one_unused_p2_authorization() -> None:
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -91,22 +99,25 @@ def test_canonical_budget_binds_one_unused_p1_authorization() -> None:
         and item["revision"] == "graph-text-crop-evidence-role-anchor-v24"
     )
     protocol_path = REPO_ROOT / "ml/ocr/crop_evidence_role_anchor_v24/PROTOCOL.json"
-    config_path = REPO_ROOT / CONFIG_PATH
+    p1_config_path = REPO_ROOT / P1_CONFIG_PATH
+    p2_config_path = REPO_ROOT / P2_CONFIG_PATH
     seal_path = REPO_ROOT / "ml/ocr/crop_evidence_role_anchor_v24/SPLIT_SEAL.json"
-    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["status"] == "candidate_2_preregistered"
     assert entry["protocol_sha256"] == sha256_file(protocol_path)
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["preregistered_candidate_ids"] == ["P2"]
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["split_materialized"] is True
     assert entry["split_seal_sha256"] == sha256_file(seal_path)
-    assert entry["candidate_config_sha256"]["P1"] == sha256_file(config_path)
-    assert entry["p1_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
-        REPO_ROOT, RUNNER_SOURCE_PATHS,
+    assert entry["candidate_config_sha256"]["P1"] == sha256_file(p1_config_path)
+    assert entry["candidate_config_sha256"]["P2"] == sha256_file(p2_config_path)
+    assert entry["p1_result_sha256"] == sha256_file(REPO_ROOT / P1_RESULT_PATH)
+    assert entry["p2_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, P2_RUNNER_SOURCE_PATHS,
     )
-    assert entry["selection_evaluations"] == 0
+    assert entry["selection_evaluations"] == 1
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["authorized_candidate_id"] == "P2"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
@@ -205,7 +216,7 @@ def test_crop_evidence_model_exports_with_dynamic_cpu_parity(tmp_path: Path) -> 
 
 
 def test_p1_balanced_losses_and_scene_extrema_margins_are_bound() -> None:
-    config = json.loads((REPO_ROOT / CONFIG_PATH).read_text(encoding="utf-8"))
+    config = json.loads((REPO_ROOT / P1_CONFIG_PATH).read_text(encoding="utf-8"))
     targets = torch.tensor([0, 0, 0, 1], dtype=torch.int64)
     assert torch.allclose(
         _balanced_class_weights(targets, 2, "proposal"), torch.tensor([0.5, 1.5]),
@@ -231,10 +242,90 @@ def test_p1_balanced_losses_and_scene_extrema_margins_are_bound() -> None:
     assert float(bad_positive) > 0.0
 
 
-def test_v24_frozen_split_and_p1_remain_fail_closed_before_execution() -> None:
+def test_p2_zero_residual_preserves_every_parent_output_and_freezes_backbone() -> None:
+    torch.manual_seed(2402)
+    model = FrozenRoleAnchorCropResidualNet().eval()
+    evidence = torch.randn(1, 6, FEATURE_COUNT)
+    crops = torch.randn(1, 6, CROP_CHANNELS, CROP_HEIGHT, CROP_WIDTH)
+    with torch.inference_mode():
+        parent = model.backbone(evidence)
+        actual = model(evidence, crops)
+    assert torch.equal(actual, parent)
+    assert all(not parameter.requires_grad for parameter in model.backbone.parameters())
+    assert model.trainable_parameters()
+
+
+def test_p2_model_exports_dynamic_cpu_with_parent_roles_preserved(tmp_path: Path) -> None:
+    model = FrozenRoleAnchorCropResidualNet().eval()
+    evidence = torch.linspace(-1.0, 1.0, 5 * FEATURE_COUNT).reshape(
+        1, 5, FEATURE_COUNT,
+    )
+    crops = torch.linspace(
+        -1.0, 1.0, 5 * CROP_CHANNELS * CROP_HEIGHT * CROP_WIDTH,
+    ).reshape(1, 5, CROP_CHANNELS, CROP_HEIGHT, CROP_WIDTH)
+    path = tmp_path / "frozen-role-anchor-crop-residual-v24.onnx"
+    torch.onnx.export(
+        model,
+        (evidence, crops),
+        path,
+        input_names=["proposal_evidence", "proposal_crops"],
+        output_names=["proposal_role_logits"],
+        dynamic_axes={
+            "proposal_evidence": {1: "proposal_count"},
+            "proposal_crops": {1: "proposal_count"},
+            "proposal_role_logits": {1: "proposal_count"},
+        },
+        opset_version=18,
+        dynamo=False,
+    )
+    session = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
+    for count in (3, 5):
+        evidence_values = evidence[:, :count].numpy().astype(np.float32)
+        crop_values = crops[:, :count].numpy().astype(np.float32)
+        with torch.inference_mode():
+            parent = model.backbone(torch.from_numpy(evidence_values)).numpy()
+            expected = model(
+                torch.from_numpy(evidence_values), torch.from_numpy(crop_values),
+            ).numpy()
+        actual = np.asarray(session.run(None, {
+            "proposal_evidence": evidence_values,
+            "proposal_crops": crop_values,
+        })[0], dtype=np.float32)
+        assert np.array_equal(expected[:, :, 2:], parent[:, :, 2:])
+        assert actual.shape == (1, count, 2 + len(ROLE_ORDER))
+        assert float(np.max(np.abs(expected - actual))) <= 1e-5
+
+
+def test_p2_teacher_residual_objective_penalizes_positive_drop_and_negative_regression() -> None:
+    config = json.loads((REPO_ROOT / P2_CONFIG_PATH).read_text(encoding="utf-8"))
+    targets = torch.tensor([0, 0, 1, 1], dtype=torch.int64)
+    teacher = torch.tensor([[2.0, -2.0], [1.0, -1.0], [-2.0, 2.0], [-1.0, 1.0]])
+    passing = teacher.clone()
+    passing[:2, 0] += 1.0
+    bad_positive = passing.clone()
+    bad_positive[3] = torch.tensor([2.0, -2.0])
+    bad_negative = passing.clone()
+    bad_negative[1] = torch.tensor([-2.0, 2.0])
+    _, positive, negative, _ = _proposal_residual_objective(
+        passing, teacher, targets, torch.ones(2), config,
+    )
+    _, bad_positive_margin, _, _ = _proposal_residual_objective(
+        bad_positive, teacher, targets, torch.ones(2), config,
+    )
+    _, _, bad_negative_margin, _ = _proposal_residual_objective(
+        bad_negative, teacher, targets, torch.ones(2), config,
+    )
+    assert float(positive) == 0.0
+    assert float(negative) == 0.0
+    assert float(bad_positive_margin) > 0.0
+    assert float(bad_negative_margin) > 0.0
+
+
+def test_v24_p1_result_and_p2_preregistration_remain_fail_closed() -> None:
     root = REPO_ROOT / "ml/ocr/crop_evidence_role_anchor_v24"
     seal = json.loads((root / "SPLIT_SEAL.json").read_text(encoding="utf-8"))
-    config = json.loads((REPO_ROOT / CONFIG_PATH).read_text(encoding="utf-8"))
+    config = json.loads((REPO_ROOT / P2_CONFIG_PATH).read_text(encoding="utf-8"))
+    p1 = json.loads((REPO_ROOT / P1_RESULT_PATH).read_text(encoding="utf-8"))
     assert seal["optimizer_steps_at_freeze"] == 0
     assert seal["selection_evaluations"] == 0
     assert seal["public_evaluations"] == 0
@@ -244,12 +335,20 @@ def test_v24_frozen_split_and_p1_remain_fail_closed_before_execution() -> None:
         "validation_sealed_public": 0,
     }
     assert config["split_seal_sha256"] == sha256_file(root / "SPLIT_SEAL.json")
+    assert p1["candidate_consumed"] is True
+    assert p1["status"] == "failed_selection"
+    assert p1["selection_metrics"]["false_positives"] == 0
+    assert p1["selection_metrics"]["false_negatives"] == 22
+    assert p1["selection_metrics"]["per_role_accuracy"]["PhaseHeading"] == 0.421875
+    assert p1["onnx_parity_passed"] is False
+    assert p1["public_gate_archive_opened"] is False
+    assert p1["case_level_details_emitted"] is False
     assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
-        REPO_ROOT, RUNNER_SOURCE_PATHS,
+        REPO_ROOT, P2_RUNNER_SOURCE_PATHS,
     )
-    evidence = preflight()
+    evidence = p2_preflight()
     assert evidence["seal"] == seal
-    assert not (root / "artifacts").exists()
+    assert not (root / "artifacts/P2-run").exists()
     assert sha256_file(REPO_ROOT / "artifacts/production-validation/ocr-v24-train.zip") == config[
         "train_fixture_archive_sha256"
     ]

@@ -5476,7 +5476,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-crop-evidence-role-anchor-v24",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_2_preregistered",
       "defect_class": "V23 P1 and proposal-head-only P3 retained the same three false and prohibited regions while preserving all 1024 truths, indicating that the 31 aggregate evidence values cannot distinguish the remaining structures",
       "prior_revision": "graph-text-role-anchor-set-v23",
       "trigger_result_path": "ml/ocr/role_anchor_set_v23/P3_RESULT.json",
@@ -5485,15 +5485,24 @@
       "trigger_case_detail_or_pixels_used": false,
       "prior_fixture_bytes_reused": false,
       "isolated_change": "train a new project-owned model from scratch that fuses each proposal's production tight and context raster crops with the existing 31 evidence values before the unchanged role-anchor set context and separate proposal and role heads",
-      "architecture": "crop-evidence-role-conditioned-scene-anchor-set-v1",
+      "architecture": "frozen-v23-role-anchor-plus-crop-proposal-residual-v1",
+      "p1_result_path": "ml/ocr/crop_evidence_role_anchor_v24/P1_RESULT.json",
+      "p1_result_sha256": "79f4254287b687674e505961762433c99f309683963650ffed6b982cf71f0715",
+      "p1_report_sha256": "a34d696e81facafe65b77697bf02c98cb03af6a3f19b8a571b55b70ded5d15f8",
+      "p1_status": "failed_selection",
+      "p1_aggregate_trigger": "zero false positives and prohibited hits but 22 false negatives, 0.8818359375 role accuracy, 0.421875 PhaseHeading accuracy, and failed 1e-5 CPU ONNX parity",
+      "p2_isolated_change": "freeze the exact V23 P3 role-anchor backbone and its role outputs, then train only a compact crop-conditioned proposal residual with teacher-positive preservation and teacher-negative improvement margins",
+      "p2_trigger_evidence_scope_used_for_design": "P1 aggregate terminal metrics only",
+      "p2_trigger_case_detail_or_pixels_used": false,
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
+        "P2"
+      ],
+      "consumed_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "protocol_path": "ml/ocr/crop_evidence_role_anchor_v24/PROTOCOL.json",
@@ -5511,13 +5520,21 @@
       "sealed_public_fixture_archive_sha256": "bf9bdde05eada9890d455f9596f2c4794c59ccefc1db8061d03180335b55bb95",
       "cross_split_source_overlap_count": 0,
       "candidate_config_paths": {
-        "P1": "ml/ocr/crop_evidence_role_anchor_v24/training/p1.json"
+        "P1": "ml/ocr/crop_evidence_role_anchor_v24/training/p1.json",
+        "P2": "ml/ocr/crop_evidence_role_anchor_v24/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "94732d1a2ccf839db3637b0b94e870692c0882ad0ac16f83495f5ebccdc2714d"
+        "P1": "94732d1a2ccf839db3637b0b94e870692c0882ad0ac16f83495f5ebccdc2714d",
+        "P2": "dee7ed7e86e16d2e4143c3ba4d074e4b542c6569c4720481640326a5ebb691c4"
       },
       "p1_expected_runner_source_bundle_sha256": "8fd827dec299077176efb84f3b07c3dcfb53ef3bbb3a1086e10d8aae21c78477",
       "p1_expected_optimizer_steps": 1280,
+      "p1_training_opened_seal_sha256": "2d4b8e16a959d99677f86af82f8fdc70d09855488bbfb8b0fc3296d73f8ba35d",
+      "p1_training_result_seal_sha256": "bcb3d85b1b05646ae266b2af30d389a52e8738bcdcd1a4658b18ca3a23982e3e",
+      "p2_expected_runner_source_bundle_sha256": "c6ff0520747d289d441edc64b1dd9a8fe7eca989e6444925473eafd009b05a6d",
+      "p2_expected_optimizer_steps": 1280,
+      "historical_gate_and_training_seal_file_count_after_p1": 276,
+      "historical_gate_and_training_seal_aggregate_sha256_after_p1": "3b769556d880aa0ef89b96417cbd176498165b2d370d65047d08a56d1d53acec",
       "selection_thresholds": [
         0.35,
         0.45,
@@ -5526,13 +5543,13 @@
         0.75
       ],
       "minimum_consecutive_passing_thresholds": 3,
-      "selection_evaluations": 0,
+      "selection_evaluations": 1,
       "public_gate_authorized": false,
       "public_gate_evaluator_preregistered": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
       "execution_authorized": true,
-      "authorized_candidate_id": "P1",
+      "authorized_candidate_id": "P2",
       "execution_blocker": null,
       "marker_creation_evaluated": false,
       "manifest_created": false,
