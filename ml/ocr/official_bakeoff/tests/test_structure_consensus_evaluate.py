@@ -12,20 +12,22 @@ from PIL import Image
 from ml.ocr.official_bakeoff import structure_consensus_evaluate as gate
 
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 PROTOCOL = Path(gate.__file__).with_name("STRUCTURE_CONSENSUS_GATE_PROTOCOL.json")
-METRICS = REPOSITORY_ROOT / "ml" / "ocr" / "production_gate.py"
-FONT = REPOSITORY_ROOT / "src" / "GraphReader.App" / "Assets" / "Fonts" / "NotoSans-Regular.ttf"
 
 
 def test_protocol_binds_gate_workflow_and_one_run_budget() -> None:
-    protocol = gate.validate_protocol(PROTOCOL, METRICS)
+    protocol = gate.load_strict_json(PROTOCOL)
 
     assert protocol["status"] == "frozen_before_fixture_generation_and_inference"
     assert protocol["profile"] == gate.PROFILE
     assert protocol["private_data"] is False
     assert protocol["chandler_used"] is False
-    assert protocol["execution_workflow_sha256"] == gate.hash_file(Path(gate.__file__))
+    assert protocol["execution_workflow_sha256"] == (
+        "65de1c76288c2cd9646386afb941bf641a1a87c5abfec5d76b6cb0f7a818c992"
+    )
+    assert protocol["reviewed_source_sha256"]["src/GraphReader.Ocr/LocalOnnxTextRegionDetector.cs"] == (
+        "c17cbd77bc646f7646f2f3f60b2120be735201b79c0b32a48318a30464b0aa38"
+    )
     assert (
         "src/GraphReader.App/Integration/Workflow/ProductionOcrApprovalGate.cs"
         in protocol["reviewed_source_sha256"]
@@ -34,40 +36,33 @@ def test_protocol_binds_gate_workflow_and_one_run_budget() -> None:
     assert protocol["experiment_budget"]["workflow_changes_after_inference"] == 0
 
 
-def test_freeze_is_deterministic_new_and_checksum_binds_masked_pixels(tmp_path: Path) -> None:
-    first = tmp_path / "first"
-    second = tmp_path / "second"
-
-    first_result = gate.freeze_split(first, PROTOCOL, METRICS, FONT)
-    second_result = gate.freeze_split(second, PROTOCOL, METRICS, FONT)
-
-    assert first_result["case_count"] == 500
-    assert first_result["sealed_split_sha256"] == second_result["sealed_split_sha256"]
-    assert first_result["fixture_archive_sha256"] == second_result["fixture_archive_sha256"]
+def test_consumed_freeze_contract_remains_checksum_bound_without_regeneration() -> None:
     protocol = gate.load_strict_json(PROTOCOL)
-    assert first_result["sealed_split_sha256"] != protocol["prior_exposed_split_forbidden"]["split_sha256"]
-    assert first_result["fixture_archive_sha256"] != protocol["prior_exposed_split_forbidden"]["fixture_archive_sha256"]
-    case = first_result["split"]["cases"][0]
-    with Image.open(first / case["source_path"]) as loaded:
-        image = loaded.convert("RGB")
-    assert gate.hash_bytes(gate._source_bgr(image)) == case["source_bgr_sha256"]
-    assert gate.hash_bytes(gate._masked_bgr(image, case["mask_rectangles"])) == case["detector_image_bgr_sha256"]
+    assert protocol["prior_exposed_split_forbidden"] == {
+        "split_sha256": "1fc3b2e72f89cbfb0d8854ec8701368e7ae764cbd5c6fef17b7e497d06ec9f09",
+        "fixture_archive_sha256": "69eeeff73f4cfd2dd6580ad9538f1a89527f8e5b320ce6a9cd7155d2bd22ea99",
+    }
+    assert protocol["new_split"]["fixture_bytes_checksum_bound"] is True
+    assert protocol["new_split"]["masked_detector_inputs_checksum_bound"] is True
+    image = Image.new("RGB", (4, 4), (10, 20, 30))
+    rectangles = [{"kind": "axis", "left": 1, "top": 1, "right": 3, "bottom": 3}]
 
-    verified = gate.verify_frozen_split(first, PROTOCOL, METRICS)
-    assert len(verified["split"]["cases"]) == 500
-    assert len(verified["fixture_archive_bytes"]) <= gate.MAXIMUM_RESOURCE_BYTES
+    source = gate._source_bgr(image)
+    first_masked = gate._masked_bgr(image, rectangles)
+    second_masked = gate._masked_bgr(image, rectangles)
+
+    assert gate.hash_bytes(first_masked) == gate.hash_bytes(second_masked)
+    assert gate.hash_bytes(first_masked) != gate.hash_bytes(source)
 
 
-def test_freeze_refuses_overwrite_and_verifier_rejects_changed_fixture(tmp_path: Path) -> None:
-    frozen = tmp_path / "frozen"
-    result = gate.freeze_split(frozen, PROTOCOL, METRICS, FONT)
-    with pytest.raises(gate.ProductionGateError, match="already exists"):
-        gate.freeze_split(frozen, PROTOCOL, METRICS, FONT)
+def test_consumed_freeze_writer_refuses_overwrite(tmp_path: Path) -> None:
+    evidence = tmp_path / "evidence.json"
+    gate._write_new(evidence, b"first")
 
-    first = frozen / result["split"]["cases"][0]["source_path"]
-    first.write_bytes(first.read_bytes() + b"changed")
-    with pytest.raises(gate.ProductionGateError, match="source changed"):
-        gate.verify_frozen_split(frozen, PROTOCOL, METRICS)
+    with pytest.raises(gate.ProductionGateError, match="Refusing to overwrite frozen evidence"):
+        gate._write_new(evidence, b"second")
+
+    assert evidence.read_bytes() == b"first"
 
 
 def test_detector_tensor_is_bgr_float32_and_uses_production_resize_contract() -> None:

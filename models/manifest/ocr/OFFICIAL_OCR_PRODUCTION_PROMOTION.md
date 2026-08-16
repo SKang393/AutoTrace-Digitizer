@@ -116,6 +116,17 @@ remains failed and cannot rerun. Any use of the new activation requires a new
 frozen protocol, disjoint fixture bytes, an exact source binding, and a new
 one-run authorization before inference.
 
+The distinct V2 bounded-probability composition is now preregistered at
+protocol SHA-256
+`0ee2ec0ef4a9f2f7f7f373da7389b84513f254c8642e4ddd5fd5427518d5e133`
+and workflow SHA-256
+`b2a52e925f9d06714d7a346ac929c60c8a81cf101893147657011e70325a18d7`.
+It binds both exposed predecessor split and source inventories, requires zero
+fixture-byte and case-ID overlap, and permits one freeze and one official CPU
+evaluation. No V2 fixture, authorization config, canonical opened seal, model
+call, report, manifest, store entry, or package evidence exists at this
+checkpoint. Promotion remains unavailable.
+
 ## Evidence that must exist before approval
 
 The following evidence is conjunctive. A passing item cannot waive or replace

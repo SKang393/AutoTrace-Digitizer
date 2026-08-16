@@ -170,6 +170,60 @@ public sealed class OfficialOcrProductionStatusTests
             "afcf28bd1209dd58810d33defb622b325d3cbe49dcd7a43a902982c33e5fad05");
     }
 
+    [TestMethod]
+    public void BoundedV2RemainsPreregisteredBeforeFixtureFreezeOrAuthorization()
+    {
+        string root = FindRepositoryRoot();
+        string protocolPath = Path.Combine(
+            root,
+            "ml",
+            "ocr",
+            "official_bakeoff",
+            "STRUCTURE_CONSENSUS_V2_GATE_PROTOCOL.json");
+        string evaluationConfigPath = Path.Combine(
+            root,
+            "ml",
+            "ocr",
+            "official_bakeoff",
+            "STRUCTURE_CONSENSUS_V2_EVALUATION_CONFIG.json");
+        using System.Text.Json.JsonDocument document = System.Text.Json.JsonDocument.Parse(
+            File.ReadAllText(protocolPath));
+        System.Text.Json.JsonElement protocol = document.RootElement;
+
+        Assert.AreEqual(
+            "frozen_before_fixture_generation_and_inference",
+            protocol.GetProperty("status").GetString());
+        Assert.AreEqual(
+            "bounded_probability_runtime_activation",
+            protocol.GetProperty("defect_class").GetString());
+        Assert.AreEqual(
+            "probability_with_1e-5_clamp",
+            protocol.GetProperty("candidate").GetProperty("output_activation").GetString());
+        Assert.AreEqual(
+            2,
+            protocol.GetProperty("prior_exposed_splits_forbidden").GetArrayLength());
+        Assert.AreEqual(
+            1,
+            protocol.GetProperty("experiment_budget")
+                .GetProperty("official_composition_evaluations")
+                .GetInt32());
+        Assert.IsFalse(
+            File.Exists(evaluationConfigPath),
+            "V2 evaluation was authorized before its single disjoint fixture freeze was recorded.");
+
+        string readme = File.ReadAllText(Path.Combine(
+            root,
+            "ml",
+            "ocr",
+            "official_bakeoff",
+            "README.md"));
+        StringAssert.Contains(
+            readme,
+            "0ee2ec0ef4a9f2f7f7f373da7389b84513f254c8642e4ddd5fd5427518d5e133");
+        StringAssert.Contains(readme, "Fixture generation remains at zero");
+        StringAssert.Contains(readme, "Chandler and every private image remain prohibited");
+    }
+
     private const string ProductionOcrProfile =
         "graphreader-ocr-structure-consensus-public-gate-v1";
 

@@ -1,0 +1,182 @@
+{
+  "schema": "graphreader.ocr-structure-consensus-bounded-gate-protocol.v2",
+  "profile": "graphreader-ocr-structure-consensus-bounded-public-gate-v2",
+  "status": "frozen_before_fixture_generation_and_inference",
+  "scope": "public_synthetic",
+  "private_data": false,
+  "chandler_used": false,
+  "selection_locked_before_inference": true,
+  "defect_class": "bounded_probability_runtime_activation",
+  "prior_exposed_splits_forbidden": [
+    {
+      "label": "official-dense-220-v1",
+      "split_sha256": "1fc3b2e72f89cbfb0d8854ec8701368e7ae764cbd5c6fef17b7e497d06ec9f09",
+      "fixture_archive_sha256": "69eeeff73f4cfd2dd6580ad9538f1a89527f8e5b320ce6a9cd7155d2bd22ea99",
+      "source_inventory_sha256": "7710108066ffdcebb84ec4fec1a63a16848c2f2720f62e932155be2ae6266a89"
+    },
+    {
+      "label": "official-structure-consensus-500-v1",
+      "split_sha256": "8685a3dfcb8212f612115c20d0f70437e0738fa1c4d86743cfd0e50bc5a41a8d",
+      "fixture_archive_sha256": "6bd83d6b05918a6829a99e4cfecbb5af0e0629c458242398429856baae5e02b2",
+      "source_inventory_sha256": "6f56f9f22b9bfff6180a45dd61ff5a671bca9c4ef77aa3d6032644004d205f17"
+    }
+  ],
+  "candidate": {
+    "composition_id": "graph-structure-consensus-bounded-v2",
+    "detector_model_id": "PP-OCRv5_mobile_det",
+    "detector_onnx_sha256": "d4aa24d408cd70b8b9f66cc758e20f397fc31a9c69d8477cf8887fc53bd5fceb",
+    "recognizer_model_id": "en_PP-OCRv5_mobile_rec",
+    "recognizer_onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+    "execution_provider": "CPUExecutionProvider",
+    "output_activation": "probability_with_1e-5_clamp",
+    "probability_tolerance": 0.00001,
+    "detector_postprocess": {
+      "algorithm": "db_postprocess_v1",
+      "score_mode": "fast",
+      "probability_threshold": 0.3,
+      "box_confidence_threshold": 0.6,
+      "unclip_ratio": 1.5,
+      "minimum_side_length": 3,
+      "maximum_regions": 1000
+    },
+    "structure_consensus": {
+      "minimum_overlap_coefficient": 0.5,
+      "minimum_text_likelihood": 0.45,
+      "truth_match_iou_minimum": 0.5,
+      "duplicate_region_iou_minimum": 0.7,
+      "one_model_region_per_structure_candidate": true,
+      "candidate_may_replace_model_region": false,
+      "explicit_non_structure_evidence_required": true
+    },
+    "connected_component_candidate": {
+      "minimum_component_area": 2,
+      "maximum_component_width_fraction": 0.15,
+      "maximum_component_height_fraction": 0.2,
+      "maximum_line_gap_height_ratio": 2.5,
+      "minimum_vertical_overlap_fraction": 0.35,
+      "foreground_threshold": "auto"
+    },
+    "detector_input": {
+      "immutable_original_dimensions": true,
+      "coordinate_space": "original_pixels",
+      "color_order": "BGR",
+      "axis_tick_divider_mask_half_width_pixels": 2,
+      "masked_pixel_value": 255,
+      "recognition_crops_use_unmasked_original": true
+    }
+  },
+  "metrics_evaluator_sha256": "cc354ec53e4d0ecc5eab7dcf6243e5538e39f043057a949fd3d6ce84a83d50ee",
+  "execution_workflow_sha256": "b2a52e925f9d06714d7a346ac929c60c8a81cf101893147657011e70325a18d7",
+  "reviewed_source_sha256": {
+    "ml/ocr/production_gate.py": "cc354ec53e4d0ecc5eab7dcf6243e5538e39f043057a949fd3d6ce84a83d50ee",
+    "ml/ocr/official_bakeoff/structure_consensus_evaluate.py": "65de1c76288c2cd9646386afb941bf641a1a87c5abfec5d76b6cb0f7a818c992",
+    "ml/ocr/official_bakeoff/structure_consensus_v2_evaluate.py": "b2a52e925f9d06714d7a346ac929c60c8a81cf101893147657011e70325a18d7",
+    "ml/markers/gate_seal.py": "8b01113d0881dc2b89df3763f4c66fe311cffa48520e72963d2bd6366372122a",
+    "src/GraphReader.Ocr/GraphStructureConsensusTextRegionDetector.cs": "496a2e674cc2ed9393aecbb8df9c95ec0f3e4183312f9857710eb303d1ba7c6e",
+    "src/GraphReader.Ocr/ConnectedComponentTextRegionDetector.cs": "c77e65eb53bb9d15bc94b2956a96b87cfdcdd79509cbf87d2beada3b29afc3c4",
+    "src/GraphReader.Ocr/LocalOnnxTextRegionDetector.cs": "61cbab62b77df27fefe577ee60dcb3dd4c48c860459f0279f078e25ac4289bf4",
+    "src/GraphReader.App/Integration/Workflow/ProductionOcrAdapter.cs": "821ce758b33fd36805ba0ab99fd4111b73952aef7759340a2fb8f3086ecd5520",
+    "src/GraphReader.App/Integration/Workflow/ProductionComponentOcrAdapterFactory.cs": "a16839b372aa844ae4823784c30e2fb2615c6356c5e6aa1172fb4f6c270922ea",
+    "src/GraphReader.App/Integration/Workflow/ProductionOcrApprovalGate.cs": "c55175ef6c32a5eaf76e99dea97351611daca953fa0cee354505b71804ea5093",
+    "src/GraphReader.App/Integration/Workflow/ProductionRasterFrameDecoder.cs": "29e93889ca0da9f98d2070aaa8a22d24d6b9975a7bb873a3c82832f8eff1a931"
+  },
+  "new_split": {
+    "renderer_seed": 2026081607,
+    "render_index_offset": 100003,
+    "validation": {
+      "text_cases": 200,
+      "exclusion_cases": 50
+    },
+    "sealed_test": {
+      "text_cases": 200,
+      "exclusion_cases": 50
+    },
+    "text_families": [
+      "integer",
+      "decimal",
+      "negative",
+      "percentage",
+      "ambiguity"
+    ],
+    "roles": [
+      "x_tick",
+      "y_tick",
+      "phase_header",
+      "annotation",
+      "participant"
+    ],
+    "graph_context_families": [
+      "axes_and_ticks",
+      "phase_divider",
+      "open_markers_and_connectors",
+      "filled_markers_and_connectors",
+      "legend_frame",
+      "bracket",
+      "arrow_shaft_and_head",
+      "line_intersection",
+      "mixed_graph_structures"
+    ],
+    "degradation_families": [
+      "clean",
+      "soft_blur",
+      "downsample_restore",
+      "jpeg_roundtrip"
+    ],
+    "fixture_bytes_checksum_bound": true,
+    "geometry_records_checksum_bound": true,
+    "masked_detector_inputs_checksum_bound": true,
+    "prior_source_hash_disjointness_required": true,
+    "prior_case_id_disjointness_required": true
+  },
+  "thresholds": {
+    "validation_exact_match_minimum": 0.9,
+    "validation_cer_maximum": 0.05,
+    "validation_role_accuracy_minimum": 0.9,
+    "sealed_test_exact_match_minimum": 0.9,
+    "sealed_test_cer_maximum": 0.05,
+    "sealed_test_role_accuracy_minimum": 0.9,
+    "detection_exact_rate": 1.0,
+    "duplicate_region_count": 0,
+    "exclusion_false_region_count": 0,
+    "onnx_parity_maximum_absolute_error": 0.0001,
+    "marker_creation_count": 0
+  },
+  "direct_evidence": {
+    "exact_fixture_bytes": true,
+    "exact_masked_detector_bytes": true,
+    "raw_detector_output_tensor_hashes": true,
+    "bounded_activation_summary": true,
+    "recognizer_input_and_output_tensors": true,
+    "model_and_workflow_sha256": true,
+    "provider_identity": true,
+    "independent_marker_stage_run": true,
+    "aggregate_metrics_rederived_by_csharp_gate": true
+  },
+  "evaluation_authorization": {
+    "required_config_path": "STRUCTURE_CONSENSUS_V2_EVALUATION_CONFIG.json",
+    "config_must_be_committed_after_single_freeze": true,
+    "canonical_gate_task": "ocr-detection",
+    "revision": "official-structure-consensus-bounded-v2",
+    "candidate_hash_key_schema": [
+      "detector_onnx_sha256",
+      "recognizer_onnx_sha256",
+      "protocol_sha256",
+      "sealed_split_sha256"
+    ],
+    "opened_seal_before_fixture_or_model_read": true,
+    "terminal_result_seal_required": true
+  },
+  "experiment_budget": {
+    "fixture_freezes": 1,
+    "official_composition_evaluations": 1,
+    "split_regeneration_after_inference": 0,
+    "threshold_changes_after_inference": 0,
+    "workflow_changes_after_inference": 0
+  },
+  "failure_policy": {
+    "manifest_created_on_failure": false,
+    "model_store_promotion_on_failure": false,
+    "package_discovery_on_failure": false,
+    "release_gate_on_failure": "blocked"
+  }
+}

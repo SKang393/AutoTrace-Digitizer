@@ -212,3 +212,25 @@ tolerance in cache and request provenance, and rejects non-finite or larger
 drift. The original strict `probability` activation is unchanged. This repair
 does not alter, reopen, or approve the consumed 500-case attempt. A new run
 requires a disjoint split, a new frozen protocol, and a new one-run seal.
+
+## Preregistered bounded-probability composition V2
+
+`STRUCTURE_CONSENSUS_V2_GATE_PROTOCOL.json` freezes the distinct
+`graph-structure-consensus-bounded-v2` defect class before any V2 fixture
+generation or official-model inference. Protocol SHA-256 is
+`0ee2ec0ef4a9f2f7f7f373da7389b84513f254c8642e4ddd5fd5427518d5e133`;
+workflow SHA-256 is
+`b2a52e925f9d06714d7a346ac929c60c8a81cf101893147657011e70325a18d7`.
+The frozen workflow retains the exact official model bytes, BGR preprocessing,
+DB postprocessing, structure consensus, thresholds, and CPU provider. Its only
+candidate change is the separately selected fixed `1e-5` probability-boundary
+activation.
+
+The protocol binds both exposed predecessor splits and their complete source
+hash inventories. V2 uses new case IDs and render index offset `100003`; its
+single freeze must prove zero prior source-hash and case-ID overlap.
+Fixture generation remains at zero until this preregistration is committed.
+Official evaluation remains at zero until a separately committed post-freeze
+`STRUCTURE_CONSENSUS_V2_EVALUATION_CONFIG.json` binds the exact split, archive,
+source bundle, model pair, gate configuration, and canonical one-run seal.
+Chandler and every private image remain prohibited.
