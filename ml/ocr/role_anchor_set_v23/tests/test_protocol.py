@@ -40,6 +40,17 @@ from ml.ocr.role_anchor_set_v23.train_p2 import (
     _proposal_objective as _p2_proposal_objective,
     preflight as p2_preflight,
 )
+from ml.ocr.role_anchor_set_v23.train_p3 import (
+    CANONICAL_OUTPUT as P3_CANONICAL_OUTPUT,
+    CONFIG_PATH as P3_CONFIG_PATH,
+    P2_RESULT_PATH,
+    P2_RESULT_SHA256,
+    PROTOCOL_PATH as P3_PROTOCOL_PATH,
+    RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS,
+    TRAINABLE_PARAMETER_NAMES,
+    _proposal_head_objective,
+    preflight as p3_preflight,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -83,7 +94,7 @@ def test_v22_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_records_consumed_p1_and_authorizes_only_p2() -> None:
+def test_canonical_budget_records_consumed_p1_p2_and_authorizes_only_p3() -> None:
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -97,16 +108,18 @@ def test_canonical_budget_records_consumed_p1_and_authorizes_only_p2() -> None:
     protocol_path = REPO_ROOT / "ml/ocr/role_anchor_set_v23/PROTOCOL.json"
     config_path = REPO_ROOT / CONFIG_PATH
     p2_config_path = REPO_ROOT / P2_CONFIG_PATH
+    p3_config_path = REPO_ROOT / P3_CONFIG_PATH
     seal_path = REPO_ROOT / "ml/ocr/role_anchor_set_v23/SPLIT_SEAL.json"
-    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["status"] == "candidate_3_preregistered"
     assert entry["protocol_sha256"] == sha256_file(protocol_path)
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["split_materialized"] is True
     assert entry["split_seal_sha256"] == sha256_file(seal_path)
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(config_path)
     assert entry["candidate_config_sha256"]["P2"] == sha256_file(p2_config_path)
+    assert entry["candidate_config_sha256"]["P3"] == sha256_file(p3_config_path)
     assert entry["p1_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, RUNNER_SOURCE_PATHS,
     )
@@ -115,9 +128,14 @@ def test_canonical_budget_records_consumed_p1_and_authorizes_only_p2() -> None:
     assert entry["p2_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, P2_RUNNER_SOURCE_PATHS,
     )
-    assert entry["selection_evaluations"] == 1
+    assert entry["p2_result_sha256"] == P2_RESULT_SHA256
+    assert entry["p3_protocol_sha256"] == sha256_file(REPO_ROOT / P3_PROTOCOL_PATH)
+    assert entry["p3_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, P3_RUNNER_SOURCE_PATHS,
+    )
+    assert entry["selection_evaluations"] == 2
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
@@ -231,18 +249,42 @@ def test_p2_config_binds_protocol_runner_fixtures_and_p1_result() -> None:
     assert config["release_eligible"] is False
 
 
-def test_p2_preflight_validates_exact_frozen_inputs_without_execution() -> None:
-    evidence = p2_preflight()
-    assert evidence["p1_result"]["candidate_consumed"] is True
-    assert evidence["p1_result"]["selection_gate_passed"] is False
-    assert evidence["seal"]["public_evaluations"] == 0
-    assert evidence["config"]["public_execution_authorized"] is False
-    assert not (REPO_ROOT / P2_CANONICAL_OUTPUT).exists()
-    assert not (
+def test_p2_preflight_refuses_consumed_output() -> None:
+    assert (REPO_ROOT / P2_CANONICAL_OUTPUT).exists()
+    with pytest.raises(RuntimeError, match="P2 output already exists"):
+        p2_preflight()
+
+
+def test_p2_terminal_result_binds_report_payload_and_single_use_seals() -> None:
+    result_path = REPO_ROOT / P2_RESULT_PATH
+    assert sha256_file(result_path) == P2_RESULT_SHA256
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert result["candidate_id"] == "P2"
+    assert result["candidate_consumed"] is True
+    assert result["status"] == "failed_selection"
+    assert result["selection_gate_passed"] is False
+    assert result["case_level_details_emitted"] is False
+    assert result["selection_metrics"]["direct_stored_fixture_byte_execution"] is True
+    assert result["selection_metrics"]["false_positives"] == 2
+    assert result["selection_metrics"]["false_negatives"] == 23
+    assert result["selection_metrics"]["prohibited_structure_hits"] == 2
+    assert result["selection_metrics"]["role_accuracy"] == 0.87890625
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert result["marker_creation_evaluated"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
+    assert "cases" not in result and "predictions" not in result
+
+    report_path = REPO_ROOT / "ml/ocr/role_anchor_set_v23/artifacts/P2-run/candidate-report.json"
+    assert sha256_file(report_path) == result["report_sha256"]
+    seal_root = (
         REPO_ROOT
         / "ml/markers/training-seals/ocr-detection-recognition"
         / "graph-text-role-anchor-set-v23/P2"
-    ).exists()
+    )
+    assert sha256_file(seal_root / "opened.json") == result["training_opened_seal_sha256"]
+    assert sha256_file(seal_root / "result.json") == result["training_result_seal_sha256"]
 
 
 def test_p2_tightens_only_preregistered_worst_negative_margin() -> None:
@@ -272,6 +314,95 @@ def test_p2_tightens_only_preregistered_worst_negative_margin() -> None:
     assert float(passing_positive) == 0.0
     assert float(bad_negative) > 0.0
     assert float(bad_positive) > 0.0
+
+
+def test_p3_protocol_uses_only_aggregate_p1_p2_triggers_and_remains_fail_closed() -> None:
+    protocol = json.loads((REPO_ROOT / P3_PROTOCOL_PATH).read_text(encoding="utf-8"))
+    trigger = protocol["trigger_aggregate"]
+    assert trigger["p1_result_sha256"] == P1_RESULT_SHA256
+    assert trigger["p2_result_sha256"] == P2_RESULT_SHA256
+    assert trigger["p1_false_negatives"] == 0
+    assert trigger["p1_false_positives"] == 3
+    assert trigger["p2_false_negatives"] == 23
+    assert trigger["p2_false_positives"] == 2
+    assert trigger["validation_case_identity_or_pixels_used"] is False
+    assert protocol["case_level_evidence_used_for_design"] is False
+    assert protocol["validation_or_public_pixels_used_for_design"] is False
+    assert protocol["training"]["proposal_head_only"] is True
+    assert protocol["public_execution_authorized"] is False
+    assert protocol["marker_creation_evaluated"] is False
+    assert protocol["production_approval"] is False
+    assert protocol["release_eligible"] is False
+    assert "cases" not in protocol and "predictions" not in protocol
+
+
+def test_p3_config_binds_parent_protocol_runner_fixtures_and_results() -> None:
+    config = json.loads((REPO_ROOT / P3_CONFIG_PATH).read_text(encoding="utf-8"))
+    seal = json.loads(
+        (REPO_ROOT / "ml/ocr/role_anchor_set_v23/SPLIT_SEAL.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert config["candidate_id"] == "P3"
+    assert config["p1_result_sha256"] == P1_RESULT_SHA256
+    assert config["p2_result_sha256"] == P2_RESULT_SHA256
+    assert config["protocol_sha256"] == sha256_file(REPO_ROOT / P3_PROTOCOL_PATH)
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, P3_RUNNER_SOURCE_PATHS,
+    )
+    assert config["trainable_parameter_names"] == list(TRAINABLE_PARAMETER_NAMES)
+    assert config["split_seal_sha256"] == sha256_file(
+        REPO_ROOT / "ml/ocr/role_anchor_set_v23/SPLIT_SEAL.json"
+    )
+    assert config["train_fixture_archive_sha256"] == seal["splits"]["train"]["archive_sha256"]
+    assert config["selection_fixture_archive_sha256"] == seal["splits"]["validation"]["archive_sha256"]
+    assert config["public_fixture_archive_sha256"] == seal["splits"]["sealed_public"]["archive_sha256"]
+    assert config["expected_optimizer_steps"] == 512
+    assert config["selection_evaluation_limit"] == 1
+    assert config["public_execution_authorized"] is False
+    assert config["marker_creation_evaluated"] is False
+    assert config["production_approval"] is False
+    assert config["release_eligible"] is False
+
+
+def test_p3_preflight_validates_exact_frozen_inputs_without_execution() -> None:
+    evidence = p3_preflight()
+    assert evidence["results"]["P1"]["candidate_consumed"] is True
+    assert evidence["results"]["P2"]["candidate_consumed"] is True
+    assert evidence["seal"]["public_evaluations"] == 0
+    assert evidence["config"]["public_execution_authorized"] is False
+    assert not (REPO_ROOT / P3_CANONICAL_OUTPUT).exists()
+    assert not (
+        REPO_ROOT
+        / "ml/markers/training-seals/ocr-detection-recognition"
+        / "graph-text-role-anchor-set-v23/P3"
+    ).exists()
+
+
+def test_p3_teacher_signed_margin_and_scene_separation_are_fixed() -> None:
+    config = json.loads((REPO_ROOT / P3_CONFIG_PATH).read_text(encoding="utf-8"))
+    targets = torch.tensor([0, 0, 1, 1], dtype=torch.int64)
+    teacher = torch.tensor([[0.0, -1.0], [0.0, -0.5], [0.0, 1.0], [0.0, 2.0]])
+    passing = torch.tensor([[0.0, -2.0], [0.0, -1.5], [0.0, 1.0], [0.0, 2.0]])
+    failing_positive = passing.clone()
+    failing_positive[2, 1] = 0.5
+    failing_negative = passing.clone()
+    failing_negative[1, 1] = 0.5
+    _, positive, negative, separation = _proposal_head_objective(
+        passing, teacher, targets, torch.ones(2), config,
+    )
+    _, bad_positive, _, _ = _proposal_head_objective(
+        failing_positive, teacher, targets, torch.ones(2), config,
+    )
+    _, _, bad_negative, bad_separation = _proposal_head_objective(
+        failing_negative, teacher, targets, torch.ones(2), config,
+    )
+    assert float(positive) == 0.0
+    assert float(negative) == 0.0
+    assert float(separation) == 0.0
+    assert float(bad_positive) > 0.0
+    assert float(bad_negative) > 0.0
+    assert float(bad_separation) > 0.0
 
 
 def test_p1_balanced_losses_and_scene_extrema_margins_are_preregistered() -> None:

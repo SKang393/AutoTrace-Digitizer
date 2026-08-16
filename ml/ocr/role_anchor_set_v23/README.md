@@ -47,7 +47,22 @@ consumed and cannot be rerun.
 P2 changes only the worst-negative scene margin from probability `0.10` at
 weight `1.5` to probability `0.01` at weight `4.0`. It preserves the P1
 architecture, from-scratch policy, fixtures, positive margin, balanced role
-objective, thresholds, and gates. Only committed P2 training and its one
+objective, thresholds, and gates. P2 consumed all five epochs and exactly
+1,280 optimizer steps. CPU ONNX parity passed at
+`6.198883056640625e-06`, but the selected `0.35` threshold retained only
+1,001 of 1,024 truths, left two false and prohibited regions, and reached 51 of
+128 exact scenes. Recognition exact was `0.953125`, CER was
+`0.019055509527754765`, overall role accuracy was `0.87890625`, and Annotation
+accuracy was `0.6640625`. P2 failed selection and cannot be rerun.
+
+Final candidate P3 loads the exact consumed P1 checkpoint, freezes every
+encoder, role-anchor, scene-context, update, and role-head parameter, and
+fine-tunes only the four proposal-head tensors for two epochs and exactly 512
+optimizer steps. Its training-only relative objective forbids positive-logit
+decreases from the P1 teacher, targets lower negative logits, and separates
+each scene's worst negative from its weakest positive. The isolated change is
+based only on aggregate P1 and P2 metrics and preserves P1 role logits by
+construction and direct comparison. Only committed P3 training and its one
 visible selection are authorized. The truth-hidden public archive remains
 unopened. Public execution, marker
 composition, manifest creation, model-store promotion, private validation,

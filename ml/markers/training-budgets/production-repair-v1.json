@@ -5309,7 +5309,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-role-anchor-set-v23",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_3_preregistered",
       "defect_class": "aggregate V22 P3 removed every false and prohibited region but retained one missed truth and 24 role errors across the fixed visible selection",
       "prior_revision": "graph-text-scene-evidence-attention-v22",
       "trigger_result_path": "ml/ocr/scene_evidence_attention_v22/P3_RESULT.json",
@@ -5322,14 +5322,13 @@
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P2"
-      ],
-      "consumed_candidate_ids": [
-        "P1"
-      ],
-      "remaining_unregistered_candidate_ids": [
         "P3"
       ],
+      "consumed_candidate_ids": [
+        "P1",
+        "P2"
+      ],
+      "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/ocr/role_anchor_set_v23/PROTOCOL.json",
       "protocol_sha256": "12194c6b7761e8e1068bc8cc087a319dff1e6a482340945281816b3a7874d847",
       "split_materialized": true,
@@ -5346,11 +5345,13 @@
       "cross_split_source_overlap_count": 0,
       "candidate_config_paths": {
         "P1": "ml/ocr/role_anchor_set_v23/training/p1.json",
-        "P2": "ml/ocr/role_anchor_set_v23/training/p2.json"
+        "P2": "ml/ocr/role_anchor_set_v23/training/p2.json",
+        "P3": "ml/ocr/role_anchor_set_v23/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "89b9a801f1f08223c8dc251ede56a52619464fab11d7438c6b231beb4f395763",
-        "P2": "182660ab33e5a2ede0f983a218660d6719f31cdad9e79ec44644fb9b734b2513"
+        "P2": "182660ab33e5a2ede0f983a218660d6719f31cdad9e79ec44644fb9b734b2513",
+        "P3": "5c881934131e303ae0b4ba420359fb54a3bff401b634f4a425af14dbda32c9a8"
       },
       "p1_expected_runner_source_bundle_sha256": "4a158e43cd01e5ecf0c2b07345f04c0c1cfd9cd8eb87d9ecef110eb5b6717bbf",
       "p1_expected_optimizer_steps": 1280,
@@ -5386,14 +5387,47 @@
       "p2_trigger_case_detail_or_pixels_used": false,
       "p2_expected_runner_source_bundle_sha256": "e74ccbea270e0cdd0efdca97e21bf3acb919568ff267c0dc6bd783aa09492719",
       "p2_expected_optimizer_steps": 1280,
-      "selection_evaluations": 1,
+      "p2_result_path": "ml/ocr/role_anchor_set_v23/P2_RESULT.json",
+      "p2_result_sha256": "652a5de934933b32757aae557fab43146d23d485620e36a75f7c5e906d0c1e7d",
+      "p2_candidate_report_sha256": "5ad0ffd8e2c30ab671ccc7ec57920b40e5e1ea1b7d1b2c36ba30b482560ba045",
+      "p2_checkpoint_sha256": "f18324c1b6915114499feacdf67c2440102f840a079864e6d8ca328efbc643e8",
+      "p2_onnx_sha256": "f9fe581611b7a29fc6a94b49dcb49093f2fa0e2f694d9c8415c06fe1d67aa012",
+      "p2_optimizer_steps": 1280,
+      "p2_elapsed_ms": 2825598.561,
+      "p2_selected_threshold": 0.35,
+      "p2_selection_scene_count": 128,
+      "p2_selection_exact_scene_count": 51,
+      "p2_selection_true_positives": 1001,
+      "p2_selection_false_positives": 2,
+      "p2_selection_false_negatives": 23,
+      "p2_selection_duplicate_count": 0,
+      "p2_selection_prohibited_structure_hits": 2,
+      "p2_selection_recognition_exact": 0.953125,
+      "p2_selection_character_error_rate": 0.019055509527754765,
+      "p2_selection_role_accuracy": 0.87890625,
+      "p2_selection_lowest_role": "Annotation",
+      "p2_selection_lowest_role_accuracy": 0.6640625,
+      "p2_onnx_parity_maximum_absolute_error": 0.000006198883056640625,
+      "p2_onnx_parity_passed": true,
+      "p2_training_opened_seal_sha256": "00c8d2025c9ccef4c7da3900b7f15e384cd097ae54131eeda2dcd973189ddd79",
+      "p2_training_result_seal_sha256": "f2541b998ed04c26f9292131863f0516c46e7e1557be5e95ef0458e8d36ecfe8",
+      "p2_status": "failed_selection_consumed",
+      "p3_protocol_path": "ml/ocr/role_anchor_set_v23/P3_PROTOCOL.json",
+      "p3_protocol_sha256": "ae43bb59e6c569718f8e7556e4002b146877b7fd8d55747cd1feee6a6825577a",
+      "p3_isolated_change": "load the exact consumed P1 checkpoint, freeze every encoder, role-anchor, scene-context, update, and role-head parameter, and fine-tune only the proposal head with a relative teacher-signed margin that forbids training-positive logit decreases, targets lower training-negative logits, and separates each scene's worst negative from its weakest positive",
+      "p3_trigger_evidence_scope_used_for_design": "P1 and P2 aggregate terminal metrics only",
+      "p3_trigger_case_detail_or_pixels_used": false,
+      "p3_parent_checkpoint_sha256": "632119b85958de6d0d2db29d19e518c62e2651bd876f129c06aa3846214e26a2",
+      "p3_expected_runner_source_bundle_sha256": "d8264d64cd886c80e360e8695c4874f615cec45f1ee7a7ee5c3f5cf480ef1993",
+      "p3_expected_optimizer_steps": 512,
+      "selection_evaluations": 2,
       "public_gate_authorized": false,
       "public_gate_evaluator_preregistered": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
       "execution_authorized": true,
-      "authorized_candidate_id": "P2",
-      "execution_blocker": "P1 is consumed and failed selection with three false and prohibited regions. Only the committed checksum-bound P2 runner may execute one 1280-step training run and one visible selection. Public execution remains locked.",
+      "authorized_candidate_id": "P3",
+      "execution_blocker": "P1 and P2 are consumed and failed selection. Only the committed checksum-bound P3 proposal-head repair may execute one 512-step training run and one visible selection. Public execution remains locked.",
       "marker_creation_evaluated": false,
       "manifest_created": false,
       "model_store_promoted": false,
