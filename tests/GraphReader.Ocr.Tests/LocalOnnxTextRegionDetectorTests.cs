@@ -123,6 +123,77 @@ public sealed class LocalOnnxTextRegionDetectorTests
     }
 
     [TestMethod]
+    public async Task ProbabilityParityToleranceClampsOnlyBoundedFiniteDrift()
+    {
+        string directory = CreateDirectory();
+        string modelPath = Path.Combine(directory, "probability-parity-tolerance.onnx");
+        await File.WriteAllBytesAsync(modelPath, [9, 1, 7]);
+        try
+        {
+            float[] boundedDrift = new float[32];
+            boundedDrift[10] = 1.000005f;
+            boundedDrift[11] = -0.000005f;
+            await using (InferenceRuntime boundedRuntime = CreateRuntime(
+                Path.Combine(directory, "bounded"),
+                new ProbabilityMapSessionFactory(boundedDrift)))
+            {
+                var detector = new LocalOnnxTextRegionDetector(
+                    boundedRuntime,
+                    Options(Identity(modelPath)) with
+                    {
+                        OutputActivation = OcrDetectionOutputActivation.ProbabilityWithParityTolerance,
+                    });
+                var strictDetector = new LocalOnnxTextRegionDetector(
+                    boundedRuntime,
+                    Options(Identity(modelPath)));
+
+                Assert.AreNotEqual(
+                    strictDetector.ConfigurationFingerprint,
+                    detector.ConfigurationFingerprint);
+                _ = await detector.DetectAsync(Image(), CancellationToken.None);
+            }
+
+            float[] materialDrift = new float[32];
+            materialDrift[10] = 1.00002f;
+            await using (InferenceRuntime materialRuntime = CreateRuntime(
+                Path.Combine(directory, "material"),
+                new ProbabilityMapSessionFactory(materialDrift)))
+            {
+                var detector = new LocalOnnxTextRegionDetector(
+                    materialRuntime,
+                    Options(Identity(modelPath)) with
+                    {
+                        OutputActivation = OcrDetectionOutputActivation.ProbabilityWithParityTolerance,
+                    });
+                InvalidDataException invalid = await Assert.ThrowsExactlyAsync<InvalidDataException>(
+                    () => detector.DetectAsync(Image(), CancellationToken.None).AsTask());
+                StringAssert.Contains(invalid.Message, "fixed 1e-5 parity tolerance");
+            }
+
+            float[] nonFinite = new float[32];
+            nonFinite[10] = float.NaN;
+            await using (InferenceRuntime nonFiniteRuntime = CreateRuntime(
+                Path.Combine(directory, "non-finite"),
+                new ProbabilityMapSessionFactory(nonFinite)))
+            {
+                var detector = new LocalOnnxTextRegionDetector(
+                    nonFiniteRuntime,
+                    Options(Identity(modelPath)) with
+                    {
+                        OutputActivation = OcrDetectionOutputActivation.ProbabilityWithParityTolerance,
+                    });
+                InvalidDataException invalid = await Assert.ThrowsExactlyAsync<InvalidDataException>(
+                    () => detector.DetectAsync(Image(), CancellationToken.None).AsTask());
+                StringAssert.Contains(invalid.Message, "non-finite");
+            }
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public async Task DetectorPreservesDeclaredBgrChannelOrder()
     {
         string directory = CreateDirectory();

@@ -15,6 +15,7 @@ public enum OcrDetectionOutputActivation
 {
     Probability,
     SigmoidLogit,
+    ProbabilityWithParityTolerance,
 }
 
 public enum OcrDetectionPostprocessAlgorithm
@@ -85,6 +86,8 @@ public sealed record LocalOnnxTextRegionDetectorOptions(ModelIdentity Model)
 /// </summary>
 public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
 {
+    public const float ProbabilityParityTolerance = 0.00001f;
+
     private readonly InferenceRuntime runtime;
     private readonly LocalOnnxTextRegionDetectorOptions options;
     private readonly string configurationFingerprint;
@@ -150,6 +153,10 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
                     ["channel_means"] = options.ChannelMeans.ToArray(),
                     ["channel_scales"] = options.ChannelScales.ToArray(),
                     ["output_activation"] = options.OutputActivation.ToString(),
+                    ["output_probability_parity_tolerance"] =
+                        options.OutputActivation == OcrDetectionOutputActivation.ProbabilityWithParityTolerance
+                            ? ProbabilityParityTolerance
+                            : null,
                     ["postprocess_algorithm"] = options.PostprocessAlgorithm.ToString(),
                     ["db_score_mode"] = options.PostprocessAlgorithm == OcrDetectionPostprocessAlgorithm.DbPostprocessV1
                         ? options.DbScoreMode.ToString()
@@ -937,6 +944,11 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
             OcrDetectionOutputActivation.Probability when value is >= 0 and <= 1 => value,
             OcrDetectionOutputActivation.Probability => throw new InvalidDataException(
                 "OCR detection probability output must remain within [0,1]."),
+            OcrDetectionOutputActivation.ProbabilityWithParityTolerance
+                when value is >= -ProbabilityParityTolerance and <= 1f + ProbabilityParityTolerance =>
+                Math.Clamp(value, 0f, 1f),
+            OcrDetectionOutputActivation.ProbabilityWithParityTolerance => throw new InvalidDataException(
+                "OCR detection probability output exceeded the fixed 1e-5 parity tolerance around [0,1]."),
             OcrDetectionOutputActivation.SigmoidLogit =>
                 (float)(1d / (1d + Math.Exp(-Math.Clamp(value, -80f, 80f)))),
             _ => throw new ArgumentOutOfRangeException(nameof(activation)),
@@ -1013,6 +1025,9 @@ public sealed class LocalOnnxTextRegionDetector : ITextRegionDetector
             options.OutputName,
             options.StageVersion,
             options.OutputActivation,
+            options.OutputActivation == OcrDetectionOutputActivation.ProbabilityWithParityTolerance
+                ? ProbabilityParityTolerance.ToString("R", CultureInfo.InvariantCulture)
+                : "not-applicable",
             options.PostprocessAlgorithm,
             options.PostprocessAlgorithm == OcrDetectionPostprocessAlgorithm.DbPostprocessV1
                 ? options.DbScoreMode

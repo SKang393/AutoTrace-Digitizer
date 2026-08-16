@@ -99,6 +99,23 @@ has SHA-256 `b14dd36632224254933fad9c826ab80298e25371a0e32040bcab66a4684fd4e0`.
 The one-run budget is consumed. Do not rerun, repair, or tune this composition
 against the exposed 500-case split.
 
+## Prospective bounded probability activation
+
+The runtime exposes a new manifest-selected
+`probability_with_1e-5_clamp` activation for a future preregistered
+composition. It accepts only finite detector outputs within `1e-5` of the
+closed interval `[0,1]`, clamps that bounded numerical drift to the interval,
+and rejects larger or non-finite values. Cache identity and runtime request
+provenance bind both the activation and its fixed tolerance. The existing
+`probability` activation remains strict and unchanged.
+
+Neutral generated-tensor probes and focused runtime tests establish only this
+boundary behavior. They are not detector-accuracy, public-gate, model-store,
+packaging, clean-machine, or release evidence. The consumed 500-case attempt
+remains failed and cannot rerun. Any use of the new activation requires a new
+frozen protocol, disjoint fixture bytes, an exact source binding, and a new
+one-run authorization before inference.
+
 ## Evidence that must exist before approval
 
 The following evidence is conjunctive. A passing item cannot waive or replace

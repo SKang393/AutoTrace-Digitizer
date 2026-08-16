@@ -177,6 +177,36 @@ public sealed class ProductionComponentOcrAdapterFactoryTests
     }
 
     [TestMethod]
+    public void DetectionManifestCanSelectFixedProbabilityParityTolerance()
+    {
+        string root = CreateTemporaryDirectory();
+        try
+        {
+            string modelPath = Path.Combine(root, "detector.onnx");
+            File.WriteAllBytes(modelPath, [0x01]);
+            string manifestPath = WriteDetectionManifest(
+                root,
+                activation: "probability_with_1e-5_clamp");
+            var identity = new ModelIdentity(
+                "pp-ocrv5-mobile-det",
+                "0.0.21-converted",
+                new string('b', 64),
+                modelPath);
+
+            LocalOnnxTextRegionDetectorOptions options =
+                ProductionComponentOcrAdapterFactory.ReadDetectionOptions(identity, manifestPath);
+
+            Assert.AreEqual(
+                OcrDetectionOutputActivation.ProbabilityWithParityTolerance,
+                options.OutputActivation);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public void DetectionManifestRejectsAnyChangedReviewedDbThreshold()
     {
         string root = CreateTemporaryDirectory();
@@ -271,7 +301,8 @@ public sealed class ProductionComponentOcrAdapterFactoryTests
 
     private static string WriteDetectionManifest(
         string root,
-        float boxConfidenceThreshold = 0.60f)
+        float boxConfidenceThreshold = 0.60f,
+        string activation = "probability")
     {
         var manifest = new Dictionary<string, object?>
         {
@@ -295,7 +326,7 @@ public sealed class ProductionComponentOcrAdapterFactoryTests
                     ["layout"] = "NCHW",
                     ["shape"] = new object[] { 1, 1, "H", "W" },
                     ["channels"] = new[] { "text_probability" },
-                    ["activation"] = "probability",
+                    ["activation"] = activation,
                 },
             },
             ["preprocessing"] = new Dictionary<string, object?>

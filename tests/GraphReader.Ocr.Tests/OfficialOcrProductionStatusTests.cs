@@ -16,6 +16,16 @@ public sealed class OfficialOcrProductionStatusTests
         "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4";
     private const string NoticeSha256 =
         "8d81f5d0c58547cce471c24f82efe768a9d907d06764f67e90cc680c6d777729";
+    private const string StructureConsensusExecutionSourceCommit =
+        "7fa6abee5deaf7c17ad19169928290b96a65ce2a";
+    private static readonly Dictionary<string, string> ReviewedSourcesChangedAfterConsumedRun =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["src/GraphReader.Ocr/LocalOnnxTextRegionDetector.cs"] =
+                "c17cbd77bc646f7646f2f3f60b2120be735201b79c0b32a48318a30464b0aa38",
+            ["src/GraphReader.App/Integration/Workflow/ProductionOcrAdapter.cs"] =
+                "e57550f89e7eff4656ea6b9d74f0f2f0473da852471c8dcfa9647bb2e9f9e1fd",
+        };
 
     [TestMethod]
     public void FailedOfficialCandidatesRemainUnmanifestedUntilEveryGatePasses()
@@ -55,6 +65,8 @@ public sealed class OfficialOcrProductionStatusTests
         StringAssert.Contains(promotion, "intentional fail-closed state");
         StringAssert.Contains(promotion, "status=fail");
         StringAssert.Contains(promotion, "cannot satisfy the strengthened gate");
+        StringAssert.Contains(promotion, "probability_with_1e-5_clamp");
+        StringAssert.Contains(promotion, "consumed 500-case attempt");
         StringAssert.Contains(promotion, "production_approval = true");
         StringAssert.Contains(promotion, "It must not emit release artifacts.");
         Assert.AreEqual(LicenseSha256, Sha256(licensePath));
@@ -107,10 +119,23 @@ public sealed class OfficialOcrProductionStatusTests
         {
             string sourcePath = Path.Combine(root, source.Name.Replace('/', Path.DirectorySeparatorChar));
             Assert.IsTrue(File.Exists(sourcePath), $"Preregistered OCR source is missing: {source.Name}");
-            Assert.AreEqual(
-                source.Value.GetString(),
-                Sha256(sourcePath),
-                $"Preregistered OCR source changed before the one-run gate: {source.Name}");
+            string protocolSha256 = source.Value.GetString()!;
+            if (ReviewedSourcesChangedAfterConsumedRun.TryGetValue(
+                source.Name,
+                out string? historicalSha256))
+            {
+                Assert.AreEqual(
+                    historicalSha256,
+                    protocolSha256,
+                    $"The consumed gate's historical source hash changed: {source.Name}");
+            }
+            else
+            {
+                Assert.AreEqual(
+                    protocolSha256,
+                    Sha256(sourcePath),
+                    $"Preregistered OCR source changed without an immutable post-run binding: {source.Name}");
+            }
         }
 
         string readme = File.ReadAllText(Path.Combine(
@@ -120,6 +145,7 @@ public sealed class OfficialOcrProductionStatusTests
             "official_bakeoff",
             "README.md"));
         StringAssert.Contains(readme, "The authoritative 500-case split was frozen once before inference");
+        StringAssert.Contains(readme, StructureConsensusExecutionSourceCommit);
         StringAssert.Contains(
             readme,
             "8685a3dfcb8212f612115c20d0f70437e0738fa1c4d86743cfd0e50bc5a41a8d");
@@ -127,6 +153,8 @@ public sealed class OfficialOcrProductionStatusTests
         StringAssert.Contains(readme, "The single authorized official composition execution then failed closed");
         StringAssert.Contains(readme, "BLOCKED: Detector output is not a probability tensor.");
         StringAssert.Contains(readme, "must not be rerun, repaired, or tuned");
+        StringAssert.Contains(readme, "probability_with_1e-5_clamp");
+        StringAssert.Contains(readme, "disjoint split, a new frozen protocol");
         StringAssert.Contains(readme, "release authorization therefore remain false");
 
         string evaluationRequirements = File.ReadAllText(Path.Combine(

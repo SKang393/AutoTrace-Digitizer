@@ -481,9 +481,10 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         OcrDetectionOutputActivation outputActivation = activation switch
         {
             "probability" => OcrDetectionOutputActivation.Probability,
+            "probability_with_1e-5_clamp" => OcrDetectionOutputActivation.ProbabilityWithParityTolerance,
             "sigmoid_logit" => OcrDetectionOutputActivation.SigmoidLogit,
             _ => throw new InvalidDataException(
-                "OCR detection output activation must be probability or sigmoid_logit."),
+                "OCR detection output activation must be probability, probability_with_1e-5_clamp, or sigmoid_logit."),
         };
 
         JsonElement preprocessing = RequiredObject(root, "preprocessing", "OCR detection manifest");

@@ -196,8 +196,19 @@ The single authorized official composition execution then failed closed on the
 first detector inference because the exact detector output violated the frozen
 probability-tensor range contract. The evaluator emitted
 `BLOCKED: Detector output is not a probability tensor.` before creating its
-output root or report. The consumed run must not be rerun, repaired, or tuned
-against these exposed fixtures. The ignored failure record has SHA-256
+output root or report. Exact execution-source commit
+`7fa6abee5deaf7c17ad19169928290b96a65ce2a` preserves every reviewed source
+hash used by that consumed attempt.
+The consumed run must not be rerun, repaired, or tuned against these exposed
+fixtures. The ignored failure record has SHA-256
 `b14dd36632224254933fad9c826ab80298e25371a0e32040bcab66a4684fd4e0`.
 Production approval, manifests, model-store promotion, package discovery, and
 release authorization therefore remain false.
+
+The production runtime now also supports a separately selected
+`probability_with_1e-5_clamp` activation for future preregistered compositions.
+It clamps only finite output drift within `1e-5` of `[0,1]`, records the fixed
+tolerance in cache and request provenance, and rejects non-finite or larger
+drift. The original strict `probability` activation is unchanged. This repair
+does not alter, reopen, or approve the consumed 500-case attempt. A new run
+requires a disjoint split, a new frozen protocol, and a new one-run seal.
