@@ -8,13 +8,14 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from ml.markers.gate_seal import GateSeal
+from ml.markers.gate_seal import GateSeal, canonical_json_bytes, sha256_bytes, source_bundle_sha256
 from ml.ocr.official_bakeoff import structure_consensus_evaluate as base
 from ml.ocr.official_bakeoff import structure_consensus_v2_evaluate as gate
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 PROTOCOL = Path(gate.__file__).with_name("STRUCTURE_CONSENSUS_V2_GATE_PROTOCOL.json")
+CONFIG = Path(gate.__file__).with_name("STRUCTURE_CONSENSUS_V2_EVALUATION_CONFIG.json")
 METRICS = REPOSITORY_ROOT / "ml" / "ocr" / "production_gate.py"
 
 
@@ -60,6 +61,36 @@ def test_protocol_binds_distinct_sources_activation_disjointness_and_one_run() -
     assert protocol["experiment_budget"]["official_composition_evaluations"] == 1
     assert protocol["private_data"] is False
     assert protocol["chandler_used"] is False
+
+
+def test_post_freeze_authorization_binds_exact_disjoint_fixture_and_seal_inputs() -> None:
+    config = gate._read_evaluation_config(CONFIG, PROTOCOL)
+
+    assert config["public_official_model_evaluations_completed"] == 0
+    assert config["source_freeze_commit"] == "6547466193483a3239127e1778cb66c6b26269fd"
+    assert config["sealed_split_sha256"] == (
+        "a7f407aa47e406348e1173ce0b30b3ef1d98a7ae1ec314deb618012f5127f998"
+    )
+    assert config["fixture_archive_sha256"] == (
+        "a1f978cf1154154bf72e1130bd943618dd0847f046fe56deb52e19466799361d"
+    )
+    assert config["source_inventory_sha256"] == (
+        "3cd3033acc80dd9362f2fdfc828c882dd4cca40d9f76e409b758ec6cf6c94d34"
+    )
+    assert config["expected_evaluator_source_bundle_sha256"] == (
+        "8e612557552af405e63475512c2b04d4ef05c8f13290f512e98dd61eba9cd585"
+    )
+    assert source_bundle_sha256(REPOSITORY_ROOT, gate.EVALUATOR_SOURCE_PATHS) == (
+        config["expected_evaluator_source_bundle_sha256"]
+    )
+    assert config["expected_gate_config_sha256"] == (
+        "0a9713abbb0428820442068b50e212a8031369aca8018a1afbd6e369ca604407"
+    )
+    assert sha256_bytes(canonical_json_bytes(gate._activation_gate_config())) == (
+        config["expected_gate_config_sha256"]
+    )
+    assert config["production_approval"] is False
+    assert config["release_eligible"] is False
 
 
 def test_bounded_activation_clamps_only_finite_drift_and_hashes_raw_output(monkeypatch: pytest.MonkeyPatch) -> None:

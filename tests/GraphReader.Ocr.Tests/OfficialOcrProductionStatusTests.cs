@@ -171,7 +171,7 @@ public sealed class OfficialOcrProductionStatusTests
     }
 
     [TestMethod]
-    public void BoundedV2RemainsPreregisteredBeforeFixtureFreezeOrAuthorization()
+    public void BoundedV2AuthorizationBindsTheSingleVerifiedFreezeWithoutApprovingModels()
     {
         string root = FindRepositoryRoot();
         string protocolPath = Path.Combine(
@@ -207,9 +207,23 @@ public sealed class OfficialOcrProductionStatusTests
             protocol.GetProperty("experiment_budget")
                 .GetProperty("official_composition_evaluations")
                 .GetInt32());
-        Assert.IsFalse(
-            File.Exists(evaluationConfigPath),
-            "V2 evaluation was authorized before its single disjoint fixture freeze was recorded.");
+        Assert.IsTrue(File.Exists(evaluationConfigPath));
+        using System.Text.Json.JsonDocument configDocument = System.Text.Json.JsonDocument.Parse(
+            File.ReadAllText(evaluationConfigPath));
+        System.Text.Json.JsonElement config = configDocument.RootElement;
+        Assert.AreEqual("authorized_after_single_freeze", config.GetProperty("status").GetString());
+        Assert.AreEqual(
+            "a7f407aa47e406348e1173ce0b30b3ef1d98a7ae1ec314deb618012f5127f998",
+            config.GetProperty("sealed_split_sha256").GetString());
+        Assert.AreEqual(
+            "a1f978cf1154154bf72e1130bd943618dd0847f046fe56deb52e19466799361d",
+            config.GetProperty("fixture_archive_sha256").GetString());
+        Assert.AreEqual(
+            "3cd3033acc80dd9362f2fdfc828c882dd4cca40d9f76e409b758ec6cf6c94d34",
+            config.GetProperty("source_inventory_sha256").GetString());
+        Assert.AreEqual(0, config.GetProperty("public_official_model_evaluations_completed").GetInt32());
+        Assert.IsFalse(config.GetProperty("production_approval").GetBoolean());
+        Assert.IsFalse(config.GetProperty("release_eligible").GetBoolean());
 
         string readme = File.ReadAllText(Path.Combine(
             root,
@@ -220,7 +234,8 @@ public sealed class OfficialOcrProductionStatusTests
         StringAssert.Contains(
             readme,
             "0ee2ec0ef4a9f2f7f7f373da7389b84513f254c8642e4ddd5fd5427518d5e133");
-        StringAssert.Contains(readme, "Fixture generation remains at zero");
+        StringAssert.Contains(readme, "single V2 fixture freeze produced 500 new public synthetic cases");
+        StringAssert.Contains(readme, "Official model execution remains at zero");
         StringAssert.Contains(readme, "Chandler and every private image remain prohibited");
     }
 

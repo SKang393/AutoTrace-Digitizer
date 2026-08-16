@@ -1,0 +1,50 @@
+{
+  "schema": "graphreader.ocr-structure-consensus-bounded-evaluation-config.v1",
+  "status": "authorized_after_single_freeze",
+  "task": "ocr-detection",
+  "revision": "official-structure-consensus-bounded-v2",
+  "private_data": false,
+  "chandler_used": false,
+  "evaluation_count": 1,
+  "public_official_model_evaluations_completed": 0,
+  "source_freeze_commit": "6547466193483a3239127e1778cb66c6b26269fd",
+  "protocol_sha256": "0ee2ec0ef4a9f2f7f7f373da7389b84513f254c8642e4ddd5fd5427518d5e133",
+  "sealed_split_sha256": "a7f407aa47e406348e1173ce0b30b3ef1d98a7ae1ec314deb618012f5127f998",
+  "fixture_archive_sha256": "a1f978cf1154154bf72e1130bd943618dd0847f046fe56deb52e19466799361d",
+  "source_inventory_sha256": "3cd3033acc80dd9362f2fdfc828c882dd4cca40d9f76e409b758ec6cf6c94d34",
+  "expected_dataset_manifest_sha256": "a7f407aa47e406348e1173ce0b30b3ef1d98a7ae1ec314deb618012f5127f998",
+  "expected_candidate_hash_keys": [
+    "detector_onnx_sha256",
+    "recognizer_onnx_sha256",
+    "protocol_sha256",
+    "sealed_split_sha256"
+  ],
+  "candidate_hashes": {
+    "detector_onnx_sha256": "d4aa24d408cd70b8b9f66cc758e20f397fc31a9c69d8477cf8887fc53bd5fceb",
+    "recognizer_onnx_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+    "protocol_sha256": "0ee2ec0ef4a9f2f7f7f373da7389b84513f254c8642e4ddd5fd5427518d5e133",
+    "sealed_split_sha256": "a7f407aa47e406348e1173ce0b30b3ef1d98a7ae1ec314deb618012f5127f998"
+  },
+  "evaluator_source_paths": [
+    "ml/ocr/official_bakeoff/structure_consensus_v2_evaluate.py",
+    "ml/ocr/official_bakeoff/structure_consensus_evaluate.py",
+    "ml/ocr/production_gate.py",
+    "ml/markers/gate_seal.py"
+  ],
+  "expected_evaluator_source_bundle_sha256": "8e612557552af405e63475512c2b04d4ef05c8f13290f512e98dd61eba9cd585",
+  "gate_config": {
+    "profile": "graphreader-ocr-structure-consensus-bounded-public-gate-v2",
+    "composition_id": "graph-structure-consensus-bounded-v2",
+    "execution_provider": "CPUExecutionProvider",
+    "output_activation": "probability_with_1e-5_clamp",
+    "probability_tolerance": 0.00001,
+    "detector_postprocess": "db_postprocess_v1",
+    "marker_stage_evidence_required": true,
+    "scope": "public_synthetic",
+    "private_data": false,
+    "chandler_used": false
+  },
+  "expected_gate_config_sha256": "0a9713abbb0428820442068b50e212a8031369aca8018a1afbd6e369ca604407",
+  "production_approval": false,
+  "release_eligible": false
+}

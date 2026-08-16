@@ -227,10 +227,17 @@ candidate change is the separately selected fixed `1e-5` probability-boundary
 activation.
 
 The protocol binds both exposed predecessor splits and their complete source
-hash inventories. V2 uses new case IDs and render index offset `100003`; its
-single freeze must prove zero prior source-hash and case-ID overlap.
-Fixture generation remains at zero until this preregistration is committed.
-Official evaluation remains at zero until a separately committed post-freeze
-`STRUCTURE_CONSENSUS_V2_EVALUATION_CONFIG.json` binds the exact split, archive,
-source bundle, model pair, gate configuration, and canonical one-run seal.
+hash inventories. V2 uses new case IDs and render index offset `100003`. The
+single V2 fixture freeze produced 500 new public synthetic cases at split
+SHA-256 `a7f407aa47e406348e1173ce0b30b3ef1d98a7ae1ec314deb618012f5127f998`,
+fixture archive SHA-256
+`a1f978cf1154154bf72e1130bd943618dd0847f046fe56deb52e19466799361d`,
+and source inventory SHA-256
+`3cd3033acc80dd9362f2fdfc828c882dd4cca40d9f76e409b758ec6cf6c94d34`.
+Verification proved zero prior source-hash and case-ID overlap.
+
+`STRUCTURE_CONSENSUS_V2_EVALUATION_CONFIG.json` now binds that freeze, the
+exact model pair, evaluator source bundle, gate configuration, and canonical
+one-run seal inputs. Official model execution remains at zero until this
+post-freeze authorization is committed.
 Chandler and every private image remain prohibited.
