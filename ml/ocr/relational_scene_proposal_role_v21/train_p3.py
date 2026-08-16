@@ -46,6 +46,7 @@ RESULT_PATH = CANDIDATE_ROOT / "P3_SELECTION_RESULT.json"
 ATTEMPT_PATH = Path("artifacts/production-validation/ocr-v21-p3-attempt.json")
 TRAIN_ARCHIVE_PATH = Path("artifacts/production-validation/ocr-v21-train.zip")
 SELECTION_ARCHIVE_PATH = Path("artifacts/production-validation/ocr-v21-selection.zip")
+PUBLIC_ARCHIVE_PATH = Path("artifacts/production-validation/ocr-v21-public.zip")
 P2_CHECKPOINT_PATH = Path("artifacts/production-validation/ocr-v21-p2-checkpoint.pt")
 P2_REPORT_PATH = Path("artifacts/production-validation/ocr-v21-p2-selection-report.json")
 RUNNER_SOURCE_PATHS = (
@@ -181,6 +182,13 @@ def preflight() -> dict[str, Any]:
             raise RuntimeError(f"OCR V21 {key} archive changed before P3")
         if authorization.get(f"{key}_archive_sha256") != expected_hash:
             raise RuntimeError(f"OCR V21 P3 authorization does not bind the {key} archive")
+    public_archive_sha256 = seal["public"]["archive_sha256"]
+    if (
+        sha256_file(REPO_ROOT / PUBLIC_ARCHIVE_PATH) != public_archive_sha256
+        or config["public_archive_sha256"] != public_archive_sha256
+        or authorization.get("public_archive_sha256") != public_archive_sha256
+    ):
+        raise RuntimeError("OCR V21 public archive changed before P3")
 
     prerequisite_paths = (
         (P2_CHECKPOINT_PATH, "p2_checkpoint_sha256"),

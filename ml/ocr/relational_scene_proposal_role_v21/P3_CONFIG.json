@@ -10,6 +10,7 @@
   "p2_report_sha256": "c116dbd66dd81d24e3f7db667322c2907ce70eb9781e28771a48b0973f970e50",
   "p2_selection_result_sha256": "8058dd5322244f364567d488c64216a045967548697e2f36d1a5bd62ca2c0833",
   "proposal_score": "sqrt(proposal_positive_probability * maximum_role_probability)",
+  "public_archive_sha256": "b4ae7547731949ac6df1f9afe3fd83178b3cf9c55c81dbd017592a71d90ddab8",
   "public_execution_authorized": false,
   "report_output": "artifacts/production-validation/ocr-v21-p3-selection-report.json",
   "revision": "graph-text-relational-scene-proposal-role-v21",

@@ -170,6 +170,7 @@ def test_p3_is_preregistered_as_zero_training_role_supported_calibration() -> No
     assert config["p2_checkpoint_sha256"] == "d46927836e8f1fcc8cb68bd5d42c94ef2af2289364b304592f513c98db8b4035"
     assert config["p2_report_sha256"] == "c116dbd66dd81d24e3f7db667322c2907ce70eb9781e28771a48b0973f970e50"
     assert config["p2_selection_result_sha256"] == "8058dd5322244f364567d488c64216a045967548697e2f36d1a5bd62ca2c0833"
+    assert config["public_archive_sha256"] == "b4ae7547731949ac6df1f9afe3fd83178b3cf9c55c81dbd017592a71d90ddab8"
     assert config["thresholds"] == list(THRESHOLDS)
     assert config["training_authorized"] is False
     assert config["selection_authorized"] is False
