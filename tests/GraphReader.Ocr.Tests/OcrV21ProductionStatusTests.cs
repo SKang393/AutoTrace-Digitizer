@@ -94,6 +94,25 @@ public sealed class OcrV21ProductionStatusTests
         Assert.AreEqual(0, result.GetProperty("public_evaluation_count").GetInt32());
         Assert.IsFalse(result.GetProperty("production_approval").GetBoolean());
         Assert.IsFalse(result.GetProperty("release_eligible").GetBoolean());
+        using JsonDocument p2ResultDocument = JsonDocument.Parse(
+            File.ReadAllBytes(Path.Combine(candidateRoot, "P2_SELECTION_RESULT.json")));
+        JsonElement p2Result = p2ResultDocument.RootElement;
+        Assert.IsTrue(p2Result.GetProperty("p2_consumed").GetBoolean());
+        Assert.AreEqual(384, p2Result.GetProperty("candidate_optimizer_steps").GetInt32());
+        Assert.AreEqual(1920, p2Result.GetProperty("total_optimizer_steps").GetInt32());
+        Assert.IsFalse(p2Result.GetProperty("selection_gate_passed").GetBoolean());
+        Assert.AreEqual(128, p2Result.GetProperty("scene_count").GetInt32());
+        Assert.AreEqual(109, p2Result.GetProperty("exact_scene_count").GetInt32());
+        Assert.AreEqual(1006, p2Result.GetProperty("true_positives").GetInt32());
+        Assert.AreEqual(1, p2Result.GetProperty("false_positives").GetInt32());
+        Assert.AreEqual(18, p2Result.GetProperty("false_negatives").GetInt32());
+        Assert.AreEqual(0, p2Result.GetProperty("duplicate_regions").GetInt32());
+        Assert.AreEqual(1, p2Result.GetProperty("prohibited_structure_hits").GetInt32());
+        Assert.IsFalse(p2Result.GetProperty("onnx_parity_passed").GetBoolean());
+        Assert.IsFalse(p2Result.GetProperty("public_archive_opened").GetBoolean());
+        Assert.AreEqual(0, p2Result.GetProperty("public_evaluation_count").GetInt32());
+        Assert.IsFalse(p2Result.GetProperty("production_approval").GetBoolean());
+        Assert.IsFalse(p2Result.GetProperty("release_eligible").GetBoolean());
         Assert.IsFalse(File.Exists(Path.Combine(candidateRoot, "PUBLIC_GATE_AUTHORIZATION.json")));
         Assert.IsFalse(Directory.Exists(Path.Combine(root, "models", "manifest", "ocr", "relational_scene_proposal_role_v21")));
     }

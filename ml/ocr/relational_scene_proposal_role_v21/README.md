@@ -62,8 +62,22 @@ parity limit stay fixed. P2 has one training execution and one selection
 execution. The separate authorization binds source commit `4d3ef2437a84e4cf25fbff7fdcc24c4f263c21f0`,
 the exact P1 checkpoint and failed result, every runner source, and both
 non-public archives before the first P2 optimizer step. P2 does not authorize
-public execution, manifests, model-store
-promotion, private validation, production, or release.
+public execution, manifests, model-store promotion, private validation,
+production, or release.
+
+P2 then executed exactly once from source commit
+`57125818d8fd4d646bf998fa20974b6745765a03` and consumed all 384 additional
+optimizer steps. At threshold `0.45`, the 128-scene CPU selection run improved
+to 109 exact scenes and 1,006/1,024 retained truths, but it still admitted one
+prohibited false region and missed 18 truths. Overall role accuracy was
+`0.98046875`; every role remained above `0.90`. CPU ONNX parity also remained
+outside the fixed gate at `0.000010251998901367188`. Report SHA-256 is
+`c116dbd66dd81d24e3f7db667322c2907ce70eb9781e28771a48b0973f970e50`;
+rejected ONNX SHA-256 is
+`14b415efffe5e2c6244543811515bef83e19a8bdd596e06f287a810105c87f97`.
+The tracked aggregate result SHA-256 is
+`8058dd5322244f364567d488c64216a045967548697e2f36d1a5bd62ca2c0833`.
+P2 cannot rerun. The public archive remains unopened with zero evaluations.
 
 Even a public pass cannot approve recognition composition, the marker stage,
 an artifact-mask provider, manifests, the model store, packaging, private

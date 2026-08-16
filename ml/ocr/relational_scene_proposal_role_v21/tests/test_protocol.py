@@ -84,6 +84,23 @@ def test_p1_config_and_separate_authorization_are_fixed_and_fail_closed() -> Non
     assert authorization["private_validation_authorized"] is False
     assert authorization["production_approval"] is False
     assert authorization["release_eligible"] is False
+    result = json.loads((root / "P2_SELECTION_RESULT.json").read_text(encoding="utf-8"))
+    assert result["p2_consumed"] is True
+    assert result["candidate_optimizer_steps"] == 384
+    assert result["total_optimizer_steps"] == 1920
+    assert result["selection_gate_passed"] is False
+    assert result["scene_count"] == 128
+    assert result["exact_scene_count"] == 109
+    assert result["true_positives"] == 1006
+    assert result["false_positives"] == 1
+    assert result["false_negatives"] == 18
+    assert result["duplicate_regions"] == 0
+    assert result["prohibited_structure_hits"] == 1
+    assert result["onnx_parity_passed"] is False
+    assert result["public_archive_opened"] is False
+    assert result["public_evaluation_count"] == 0
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
     result = json.loads((root / "P1_SELECTION_RESULT.json").read_text(encoding="utf-8"))
     assert result["p1_consumed"] is True
     assert result["optimizer_steps"] == 1536
