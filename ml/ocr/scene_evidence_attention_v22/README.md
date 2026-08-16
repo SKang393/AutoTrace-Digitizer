@@ -58,17 +58,28 @@ Recognition exact was `0.978515625`, CER was `0.0038148946757339524`, overall
 role accuracy was `0.9716796875`, and Annotation accuracy fell to `0.828125`.
 The public archive remains unopened.
 
-P3 is preregistered from only the aggregate P2 result. It retains the exact P2
-checkpoint, architecture, stored fixtures, proposal stream, scene-extrema
-objective, thresholds, and gates. Its single isolated change is a constrained
-five-epoch continuation schedule. Three lower-rate proposal-only epochs keep
-the role head frozen. Two role-repair epochs then freeze the encoder,
-attention, and proposal head so role optimization cannot change proposal
-acceptance. The complete schedule is capped at 1,280 optimizer steps.
+P3 is consumed and must not run again. It used only the aggregate P2 result and
+retained the exact P2 checkpoint, architecture, stored fixtures, proposal
+stream, scene-extrema objective, thresholds, and gates. Its single isolated
+change was the preregistered constrained five-epoch continuation schedule.
+Three lower-rate proposal-only epochs kept the role head frozen. Two
+role-repair epochs then froze the encoder, attention, and proposal head so role
+optimization could not change proposal acceptance. The run completed exactly
+1,280 optimizer steps.
 
-P3 is the final candidate in this defect-class budget. Public execution,
-marker composition, manifest creation, model-store promotion, private
-validation, production approval, and release eligibility remain unauthorized.
+CPU ONNX parity passed at `7.450580596923828e-06`. At thresholds `0.55`,
+`0.65`, and `0.75`, P3 removed every false proposal, duplicate, and prohibited
+structure hit, but retained one missed truth. It therefore passed only 107 of
+128 scenes exactly with 1,023 of 1,024 truths. Recognition exact remained
+`0.978515625`, CER remained `0.0038148946757339524`, overall role accuracy was
+`0.9765625`, and the lowest role accuracy was Annotation at `0.9296875`. The
+mandatory zero-error threshold window remained empty.
+
+P1 through P3 are consumed and the defect-class budget is exhausted. The
+truth-hidden public archive remains unopened with zero evaluations. Public
+execution, marker composition, manifest creation, model-store promotion,
+private validation, production approval, and release eligibility remain
+unauthorized.
 
 Synthetic fixtures are training and public-test inputs only and are never
 application graph data.

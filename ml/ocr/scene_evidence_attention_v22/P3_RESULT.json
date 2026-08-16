@@ -1,0 +1,178 @@
+{
+  "candidate_consumed": true,
+  "candidate_id": "P3",
+  "case_level_details_emitted": false,
+  "chandler_included": false,
+  "checkpoint_sha256": "fa1a54c89720618b2b340fd8634f202ef61ddfcaf056b7af9af9f53b6e398562",
+  "elapsed_ms": 2912425.071,
+  "loss_checkpoints": [
+    {
+      "epoch": 1,
+      "loss": 0.03748189862335494,
+      "negative_scene_extrema_margin": 0.019157555885612965,
+      "phase": "proposal_only_continuation",
+      "positive_scene_extrema_margin": 0.02027137391269207
+    },
+    {
+      "epoch": 2,
+      "loss": 0.006087520144319569,
+      "negative_scene_extrema_margin": 0.0,
+      "phase": "proposal_only_continuation",
+      "positive_scene_extrema_margin": 0.013670777436345816
+    },
+    {
+      "epoch": 3,
+      "loss": 0.0021131342018634314,
+      "negative_scene_extrema_margin": 0.0,
+      "phase": "proposal_only_continuation",
+      "positive_scene_extrema_margin": 0.0
+    },
+    {
+      "epoch": 1,
+      "loss": 0.15275933814700693,
+      "phase": "frozen_role_head_repair"
+    },
+    {
+      "epoch": 2,
+      "loss": 0.05928956205752911,
+      "phase": "frozen_role_head_repair"
+    }
+  ],
+  "manifest_creation_authorized": false,
+  "marker_creation_evaluated": false,
+  "model_store_promotion_authorized": false,
+  "objective": "two_phase_proposal_continuation_then_frozen_role_head_repair_v1",
+  "objective_configuration": {
+    "negative_acceptance_probability_maximum": 0.1,
+    "negative_scene_extrema_margin_weight": 1.5,
+    "positive_acceptance_probability_minimum": 0.9,
+    "positive_scene_extrema_margin_weight": 0.25,
+    "proposal_continuation_epochs": 3,
+    "proposal_learning_rate": 0.0001,
+    "role_head_repair_epochs": 2,
+    "role_learning_rate": 0.00035
+  },
+  "onnx_parity_maximum_absolute_error": 0.000007450580596923828,
+  "onnx_parity_passed": true,
+  "onnx_sha256": "7bd88232bdb4b78efa4caec530153efd38363f8da3208dcbf355ad9a312f4988",
+  "optimizer_steps": 1280,
+  "p2_checkpoint_sha256": "9b59243f72a03b91fad646a5b3408fb9e47b8682131771c4afeca9ccacb5d8ad",
+  "p2_onnx_sha256": "d7c8c3ddddc99cf6685609437224536a44f5557f65411e123f1b17c63e081638",
+  "p2_result_sha256": "ab5942d4f4d42531897f95ca2fe949101d8c46ad7f9a54c8fcc66a6687ed8f46",
+  "passing_threshold_window": [],
+  "private_or_article_images": false,
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "provider": "CPUExecutionProvider",
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "report_sha256": "490bd32d57d55a56b412f30133e58a7f93633f6aadfd1d4f3dd5d91bba004198",
+  "revision": "graph-text-scene-evidence-attention-v22",
+  "schema": "graphreader.ocr-scene-evidence-attention-selection-result.v1",
+  "selected_threshold": 0.55,
+  "selection_gate_passed": false,
+  "selection_metrics": {
+    "calibrator_inference_calls": 128,
+    "calibrator_input_tensor_stream_sha256": "bae9769524c2fa407cb639cce950d3e098b68e6b74eea194d1cbdaffea4aed5e",
+    "calibrator_output_tensor_stream_sha256": "c9cd16cb3f89effe76de8ee6efe2e0f9800516de945b4afe00ebfa6a70fb116e",
+    "character_error_count": 23,
+    "character_error_rate": 0.0038148946757339524,
+    "detector_inference_calls": 128,
+    "detector_input_tensor_stream_sha256": "fd3cc9e6736fcae703f9ace5846ab2a6e2cbf021e2404512af1d4f3766e8667f",
+    "detector_output_tensor_stream_sha256": "98d695457a049f96f1e68ce7b66493ef6bf6705fa03494c2419745a6e0c2978f",
+    "direct_stored_fixture_byte_execution": true,
+    "duplicate_region_count": 0,
+    "exact_scene_count": 107,
+    "false_negatives": 1,
+    "false_positives": 0,
+    "feature_label_stream_sha256": "1cc550492f145f4ed0984eb8646cb113ee55c817e9ba4569772c4756205b1e1c",
+    "negative_proposal_count": 1070,
+    "per_role_accuracy": {
+      "Annotation": 0.9296875,
+      "AxisTitle": 1.0,
+      "LegendText": 1.0,
+      "Other": 0.9375,
+      "Participant": 1.0,
+      "PhaseHeading": 0.9921875,
+      "XTick": 0.9921875,
+      "YTick": 0.9609375
+    },
+    "positive_proposal_count": 1024,
+    "prohibited_structure_hits": 0,
+    "proposal_count": 2094,
+    "recognition_exact": 0.978515625,
+    "recognition_exact_count": 1002,
+    "recognizer_batch_calls": 33,
+    "recognizer_input_tensor_stream_sha256": "040521b7717b43440097e5ac0552e08dba25ad7fecbcf75adb52212cf1dc79ff",
+    "recognizer_output_tensor_stream_sha256": "e66872cd28819a1c22a340f9f3bb9f992eaec51b54ae0e9c2109f9a1b596fa31",
+    "recognizer_region_calls": 2094,
+    "role_accuracy": 0.9765625,
+    "scene_count": 128,
+    "true_positives": 1023,
+    "truth_character_count": 6029,
+    "truth_region_count": 1024
+  },
+  "status": "failed_selection",
+  "synthetic_only": true,
+  "task": "ocr-detection-recognition",
+  "threshold_comparisons": [
+    {
+      "exact_scene_count": 106,
+      "false_negatives": 1,
+      "false_positives": 1,
+      "prohibited_structure_hits": 1,
+      "threshold": 0.35,
+      "true_positives": 1023
+    },
+    {
+      "exact_scene_count": 106,
+      "false_negatives": 1,
+      "false_positives": 1,
+      "prohibited_structure_hits": 1,
+      "threshold": 0.45,
+      "true_positives": 1023
+    },
+    {
+      "exact_scene_count": 107,
+      "false_negatives": 1,
+      "false_positives": 0,
+      "prohibited_structure_hits": 0,
+      "threshold": 0.55,
+      "true_positives": 1023
+    },
+    {
+      "exact_scene_count": 107,
+      "false_negatives": 1,
+      "false_positives": 0,
+      "prohibited_structure_hits": 0,
+      "threshold": 0.65,
+      "true_positives": 1023
+    },
+    {
+      "exact_scene_count": 107,
+      "false_negatives": 1,
+      "false_positives": 0,
+      "prohibited_structure_hits": 0,
+      "threshold": 0.75,
+      "true_positives": 1023
+    }
+  ],
+  "training_evidence": {
+    "detector_inference_calls": 256,
+    "detector_input_tensor_stream_sha256": "6864d1ba8b35c0b635e97a467a82c42b69595d24513cc3c9070dd1d4e27aca34",
+    "detector_output_tensor_stream_sha256": "7ed823a3292a4ed482cb67c884f4895fa61cd9945f689455e0c45dd7833635dc",
+    "direct_stored_fixture_byte_execution": true,
+    "feature_label_stream_sha256": "834bfff41b858378a95678a1f702ab096c766ae18be40e7495ebf8be9322e3fb",
+    "negative_proposal_count": 14547,
+    "positive_proposal_count": 2048,
+    "proposal_count": 16595,
+    "recognizer_batch_calls": 260,
+    "recognizer_input_tensor_stream_sha256": "2f3ec994c1411a6d52ab6226edbf35c2923108b796ffa413ff727e59239f218b",
+    "recognizer_output_tensor_stream_sha256": "c787840476388e06deaacddaceee8c9db67f8354e5ef635b8f6e3c36eea05eb4",
+    "recognizer_region_calls": 16595,
+    "scene_count": 256
+  },
+  "training_opened_seal_sha256": "504be3d60f9fd1670a5e9bc33a04a2f8ee11da385519b35754074af75ebd6cc7",
+  "training_result_seal_sha256": "85d821f96cb3f7eb8807d491ee6e917e46dac63e541f72b4fcfc8097fdce3f65"
+}
