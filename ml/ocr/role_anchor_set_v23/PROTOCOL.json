@@ -1,0 +1,125 @@
+{
+  "architecture": {
+    "dynamic_proposal_count": true,
+    "id": "role-conditioned-scene-anchor-set-v1",
+    "input": [1, "proposal_count", 31],
+    "model_license": "Apache-2.0",
+    "ordinary_production_reachable": false,
+    "output": [1, "proposal_count", 10],
+    "proposal_and_role_heads": "separate binary proposal and eight-role heads",
+    "quadratic_feature_lift": true,
+    "scene_context": "eight learned role queries pool permutation-invariant anchors over all proposals; each proposal then attends those anchors plus scene mean and maximum summaries"
+  },
+  "candidate_budget": {
+    "candidate_limit": 3,
+    "candidate_number": 1,
+    "optimizer_steps_maximum": 1280,
+    "public_execution_limit": 1,
+    "selection_execution_limit_per_candidate": 1
+  },
+  "data_scope": "fresh project-owned procedural graph scenes only; no Chandler, Generalization, private or article images, external datasets, pretrained calibrator weights, or predecessor fixture bytes",
+  "defect_class": "aggregate V22 P3 removed every false and prohibited region but retained one missed truth and 24 role errors across the fixed visible selection",
+  "fixed_inputs": {
+    "detector_path": "ml/ocr/structural_veto_proposal_role_v17/artifacts/P3-run/graph-text-structural-veto-proposal-role-v17-p3.onnx",
+    "detector_sha256": "ca32487f1df2c3fea1b8c2f51daf7578ed9756e9140d1b0eaf2a16b283591262",
+    "feature_groups": {"ctc_statistics": 8, "detector": 2, "geometry": 9, "morphology": 4, "role_probabilities": 8},
+    "provider": "CPUExecutionProvider",
+    "recognizer_inference_yaml_path": "ml/ocr/official_bakeoff/runs/extracted/en_PP-OCRv5_mobile_rec_infer/inference.yml",
+    "recognizer_inference_yaml_sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
+    "recognizer_path": "ml/ocr/official_bakeoff/runs/conversion/en_PP-OCRv5_mobile_rec.onnx",
+    "recognizer_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743"
+  },
+  "fixture_identity_frozen": false,
+  "isolated_change": "train a new project-owned role-anchor set model from scratch; learned role queries summarize the complete proposal set before each proposal is classified, replacing V22 all-proposal self-attention while retaining the frozen detector, recognizer, 31 evidence features, thresholds, and gates",
+  "manifest_created": false,
+  "marker_creation_evaluated": false,
+  "model_store_promoted": false,
+  "predecessor_aggregate_only": {
+    "case_level_evidence_used": false,
+    "fixture_bytes_truth_scene_or_case_identity_reused": false,
+    "v22_exact_scenes": 107,
+    "v22_false_regions": 0,
+    "v22_lowest_role": "Annotation",
+    "v22_lowest_role_accuracy": 0.9296875,
+    "v22_missed_regions": 1,
+    "v22_result_path": "ml/ocr/scene_evidence_attention_v22/P3_RESULT.json",
+    "v22_result_sha256": "cd8903db6ec7c9e46e2e49938b6552bf09521e53aa277d01f514f460f566afe9",
+    "v22_role_accuracy": 0.9765625,
+    "v22_scene_count": 128,
+    "v22_true_regions": 1023,
+    "v22_truth_regions": 1024
+  },
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "public_execution_authorized": false,
+  "release_eligible": false,
+  "revision": "graph-text-role-anchor-set-v23",
+  "schema": "graphreader.ocr-role-anchor-set-protocol.v1",
+  "selection_gates": {
+    "all_three_model_tensor_stream_hashes_required": true,
+    "character_error_rate_maximum": 0.05,
+    "direct_fixture_byte_execution_required": true,
+    "duplicate_regions": 0,
+    "exact_region_and_role_every_scene": true,
+    "false_regions": 0,
+    "minimum_consecutive_passing_thresholds": 3,
+    "missed_regions": 0,
+    "onnx_parity_maximum_absolute_error": 0.00001,
+    "per_role_accuracy_minimum": 0.85,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "recognition_exact_minimum": 0.9,
+    "role_accuracy_minimum": 0.9
+  },
+  "selection_thresholds": [0.35, 0.45, 0.55, 0.65, 0.75],
+  "split_policy": {
+    "predecessor_case_identities_reused": false,
+    "predecessor_fixture_bytes_reused": false,
+    "public_case_level_failure_analysis_permitted": false,
+    "sealed_public_truth_hidden_until_one_time_gate": true,
+    "train_validation_public_family_ids_disjoint": true,
+    "validation_or_public_pixels_used_for_training": false
+  },
+  "splits": [
+    {
+      "degradation_families": ["anisotropic-paper-v23-train", "column-tone-ramp-v23-train", "quantized-edge-v23-train", "sparse-softening-v23-train"],
+      "font_paths": ["src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf", "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf", "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"],
+      "name": "train",
+      "renderer_families": ["role-anchor-grid-v23-train-a", "role-anchor-offset-v23-train-b", "role-anchor-inset-v23-train-c", "role-anchor-caption-v23-train-d"],
+      "scene_count": 256,
+      "seed_offset": 8113000
+    },
+    {
+      "degradation_families": ["cross-axis-soften-v23-selection", "localized-gain-step-v23-selection", "paired-scan-stripe-v23-selection", "weak-level-rounding-v23-selection"],
+      "font_paths": ["src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf", "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"],
+      "name": "validation",
+      "renderer_families": ["role-anchor-wide-v23-selection-e", "role-anchor-floating-v23-selection-f", "role-anchor-staggered-v23-selection-g", "role-anchor-compact-v23-selection-h"],
+      "scene_count": 128,
+      "seed_offset": 8419000
+    },
+    {
+      "degradation_families": ["off-axis-tone-v23-public", "cross-channel-roundtrip-v23-public", "sparse-speckle-band-v23-public", "localized-contrast-fold-v23-public"],
+      "font_paths": ["src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf", "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"],
+      "name": "sealed_public",
+      "renderer_families": ["role-anchor-tall-v23-public-i", "role-anchor-lateral-v23-public-j", "role-anchor-multiphase-v23-public-k", "role-anchor-asymmetric-v23-public-l"],
+      "scene_count": 192,
+      "seed_offset": 8827000
+    }
+  ],
+  "state": "preregistered_before_fixture_freeze_or_optimizer_execution",
+  "task": "ocr-detection-recognition",
+  "training": {
+    "candidate": "P1",
+    "epochs": 5,
+    "learning_rate": 0.0003,
+    "proposal_objective": "class-balanced cross entropy plus scene-extrema margin",
+    "role_objective": "class-balanced cross entropy over every positive proposal",
+    "scene_batch_size": 1,
+    "seed": 2608162301,
+    "synthetic_only": true,
+    "training_authorized": false,
+    "validation_or_public_pixels_used": false,
+    "weight_decay": 0.0001
+  },
+  "training_authorized": false
+}
