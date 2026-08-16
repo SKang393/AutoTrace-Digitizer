@@ -41,11 +41,16 @@ and missed one truth. Recognition exact was `0.978515625`, CER was
 `0.0036490296898324765`, overall role accuracy was `0.9931640625`, and the
 PhaseHeading class was only `0.9453125`. The public archive remains unopened.
 
-P2 and P3 remain unregistered. Any later candidate must be preregistered from
-the aggregate P1 result without using validation case identities or pixels.
-Public execution, marker composition, manifest creation, model-store
-promotion, private validation, production approval, and release eligibility
-remain unauthorized.
+P2 is preregistered from only that aggregate P1 result. Its single isolated
+change adds a scene-extrema acceptance-margin objective: the highest-scoring
+training negative is penalized above probability `0.10`, and the lowest-scoring
+training truth is penalized below probability `0.90`. Architecture, sealed
+fixtures, feature extraction, role loss, thresholds, selection gates, and the
+1,280-step ceiling remain fixed. P1 is not reused as an initialization.
+
+P3 remains unregistered. Public execution, marker composition, manifest
+creation, model-store promotion, private validation, production approval, and
+release eligibility remain unauthorized.
 
 Synthetic fixtures are training and public-test inputs only and are never
 application graph data.

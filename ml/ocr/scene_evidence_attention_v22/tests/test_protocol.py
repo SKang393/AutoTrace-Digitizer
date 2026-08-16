@@ -32,6 +32,12 @@ from ml.ocr.scene_evidence_attention_v22.train_p1 import (
     _feature_groups,
     preflight,
 )
+from ml.ocr.scene_evidence_attention_v22.train_p2 import (
+    CONFIG_PATH as P2_CONFIG_PATH,
+    RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
+    _proposal_objective,
+    preflight as p2_preflight,
+)
 from ml.ocr.margin_calibrator_v20.pipeline import ProposalRecord
 from ml.markers.gate_seal import source_bundle_sha256
 
@@ -208,7 +214,7 @@ def test_p1_config_binds_runner_fixtures_and_fail_closed_outputs() -> None:
         assert evidence["seal"]["public_evaluations"] == 0
 
 
-def test_canonical_budget_records_consumed_p1_and_blocks_unregistered_candidates() -> None:
+def test_canonical_budget_authorizes_only_preregistered_p2_after_consumed_p1() -> None:
     ledger = json.loads(
         (
             REPO_ROOT
@@ -223,14 +229,16 @@ def test_canonical_budget_records_consumed_p1_and_blocks_unregistered_candidates
     config_path = REPO_ROOT / CONFIG_PATH
     result_path = REPO_ROOT / "ml/ocr/scene_evidence_attention_v22/P1_RESULT.json"
     result = json.loads(result_path.read_text(encoding="utf-8"))
-    assert entry["status"] == "candidate_1_failed_selection"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
+    p2_config_path = REPO_ROOT / P2_CONFIG_PATH
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
-    assert "P1 is consumed" in entry["execution_blocker"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["execution_blocker"] is None
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(config_path)
+    assert entry["candidate_config_sha256"]["P2"] == sha256_file(p2_config_path)
     assert entry["p1_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, RUNNER_SOURCE_PATHS,
     )
@@ -240,10 +248,55 @@ def test_canonical_budget_records_consumed_p1_and_blocks_unregistered_candidates
     assert entry["p1_onnx_sha256"] == result["onnx_sha256"]
     assert entry["p1_training_opened_seal_sha256"] == result["training_opened_seal_sha256"]
     assert entry["p1_training_result_seal_sha256"] == result["training_result_seal_sha256"]
+    assert entry["p2_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, P2_RUNNER_SOURCE_PATHS,
+    )
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
+
+
+def test_p2_config_binds_aggregate_trigger_margin_objective_and_locked_public_gate() -> None:
+    config = json.loads((REPO_ROOT / P2_CONFIG_PATH).read_text(encoding="utf-8"))
+    assert config["candidate_id"] == "P2"
+    assert config["objective"] == "class_balanced_cross_entropy_plus_scene_extrema_acceptance_margin_v1"
+    assert config["negative_acceptance_probability_maximum"] == 0.10
+    assert config["positive_acceptance_probability_minimum"] == 0.90
+    assert config["expected_optimizer_steps"] == 1280
+    assert config["p1_result_sha256"] == sha256_file(
+        REPO_ROOT / "ml/ocr/scene_evidence_attention_v22/P1_RESULT.json"
+    )
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, P2_RUNNER_SOURCE_PATHS,
+    )
+    assert config["public_execution_authorized"] is False
+    assert config["public_gate_evaluations"] == 0
+    assert config["production_approval"] is False
+    assert config["release_eligible"] is False
+    evidence = p2_preflight()
+    assert evidence["config"] == config
+    assert evidence["p1_result"]["status"] == "failed_selection"
+
+
+def test_p2_scene_extrema_objective_penalizes_worst_negative_and_preserves_truth() -> None:
+    config = json.loads((REPO_ROOT / P2_CONFIG_PATH).read_text(encoding="utf-8"))
+    weights = torch.ones(2, dtype=torch.float32)
+    targets = torch.tensor([0, 0, 1, 1], dtype=torch.int64)
+    passing = torch.tensor([[2.0, -2.0], [1.5, -1.5], [-2.0, 2.0], [-1.5, 1.5]])
+    failing_negative = passing.clone()
+    failing_negative[1] = torch.tensor([-2.0, 2.0])
+    failing_positive = passing.clone()
+    failing_positive[3] = torch.tensor([2.0, -2.0])
+    _, passing_negative, passing_positive = _proposal_objective(
+        passing, targets, weights, config,
+    )
+    _, bad_negative, _ = _proposal_objective(failing_negative, targets, weights, config)
+    _, _, bad_positive = _proposal_objective(failing_positive, targets, weights, config)
+    assert float(passing_negative) == 0.0
+    assert float(passing_positive) == 0.0
+    assert float(bad_negative) > 0.0
+    assert float(bad_positive) > 0.0
 
 
 def test_scene_grouping_and_calibrated_role_projection_are_exact() -> None:

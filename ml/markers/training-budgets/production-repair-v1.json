@@ -5154,7 +5154,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-scene-evidence-attention-v22",
-      "status": "candidate_1_failed_selection",
+      "status": "candidate_2_preregistered",
       "defect_class": "aggregate V20 P3 retained two prohibited false regions and three misses while aggregate V21 P3 retained two prohibited false regions and ten misses",
       "prior_revisions": [
         "graph-text-margin-calibrator-v20",
@@ -5168,13 +5168,12 @@
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P1"
+        "P2"
       ],
       "consumed_candidate_ids": [
         "P1"
       ],
       "remaining_unregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "protocol_path": "ml/ocr/scene_evidence_attention_v22/PROTOCOL.json",
@@ -5190,10 +5189,12 @@
       "sealed_public_fixture_archive_sha256": "89122db1bd76b827b75e4b68e00fb83d5f56d52e0ddf6ef40d9c921ad1560aaf",
       "cross_split_source_overlap_count": 0,
       "candidate_config_paths": {
-        "P1": "ml/ocr/scene_evidence_attention_v22/training/p1.json"
+        "P1": "ml/ocr/scene_evidence_attention_v22/training/p1.json",
+        "P2": "ml/ocr/scene_evidence_attention_v22/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "bef12ea625d2fb5e878ddf65d81a762e68ba2421fd0efb00856d330732bab367"
+        "P1": "bef12ea625d2fb5e878ddf65d81a762e68ba2421fd0efb00856d330732bab367",
+        "P2": "75455789f956264b8d1e6c049e0c38c27051061af0c1a8861d64e26d569b52ec"
       },
       "p1_expected_runner_source_bundle_sha256": "b7cf9ef42fdc50de51c61aba03a79de506fe1c65d22ec02b1acfcacff52f160b",
       "p1_expected_optimizer_steps": 1280,
@@ -5220,6 +5221,13 @@
       "p1_onnx_parity_passed": true,
       "p1_training_opened_seal_sha256": "36e6242a59b21b8a85b3749a5b2a441de3e90c34dd861f8321c17438d5a98380",
       "p1_training_result_seal_sha256": "8c093fc0a534d6fc5687312653467c30fe3345af78f46159ce76df3929b6c53d",
+      "p2_protocol_path": "ml/ocr/scene_evidence_attention_v22/P2_PROTOCOL.json",
+      "p2_protocol_sha256": "65061efe38c7d1e32c3ecc76b436acd8bff137a5882abb4d1485b1e98ec13644",
+      "p2_isolated_change": "add one scene-extrema acceptance-margin objective that penalizes the highest-scoring negative proposal above 0.10 and the lowest-scoring positive proposal below 0.90 while preserving the P1 architecture, initialization policy, fixtures, features, role objective, thresholds, and gates",
+      "p2_trigger_evidence_scope_used_for_design": "P1 aggregate terminal metrics only",
+      "p2_trigger_case_detail_or_pixels_used": false,
+      "p2_expected_runner_source_bundle_sha256": "5db0b0b11e665ca9c2cc24a94f7e07dc019d3228f7b1d72ca874423900c67d89",
+      "p2_expected_optimizer_steps": 1280,
       "selection_thresholds": [
         0.35,
         0.45,
@@ -5228,9 +5236,9 @@
         0.75
       ],
       "minimum_consecutive_passing_thresholds": 3,
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "P1 is consumed and failed the fixed visible-selection gate. P2 and P3 remain unregistered, so no V22 execution or rerun is authorized.",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P2",
+      "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_evaluator_preregistered": false,
       "public_gate_evaluations": 0,
