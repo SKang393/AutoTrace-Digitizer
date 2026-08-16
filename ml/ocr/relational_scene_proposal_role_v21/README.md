@@ -39,6 +39,18 @@ attempt, checkpoint, ONNX, report, or tracked result. The public archive is not
 referenced by the runner. A separately committed checksum-bound authorization
 is still required before the first optimizer step.
 
+P1 then executed exactly once from source commit
+`a8631be8f0531bcf217a1b9c6f1cc7d0121143de` and consumed all 1,536 fixed
+optimizer steps. The 128-scene CPU selection run passed 107 scenes exactly,
+retained 1,004 of 1,024 truths, admitted one prohibited false region, missed 20
+truths, and produced zero duplicates at threshold `0.45`. Overall role accuracy
+was `0.9775390625`; every role passed `0.90`. CPU ONNX parity failed at
+`0.000011444091796875`, above the fixed `0.00001` limit. Report SHA-256 is
+`f4f5f24ea01148b311c89639e4e76040b8728cb96c667ca1d794e586092d9dc8`;
+rejected ONNX SHA-256 is
+`ac27ebb25913c2b6da4161d0c3ca34f03110f34a54073d9135076c3718d18c70`.
+P1 cannot rerun. The public archive remains unopened with zero evaluations.
+
 Even a public pass cannot approve recognition composition, the marker stage,
 an artifact-mask provider, manifests, the model store, packaging, private
 Chandler validation, production, or release.
