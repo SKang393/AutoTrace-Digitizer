@@ -5154,7 +5154,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-scene-evidence-attention-v22",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_1_failed_selection",
       "defect_class": "aggregate V20 P3 retained two prohibited false regions and three misses while aggregate V21 P3 retained two prohibited false regions and ten misses",
       "prior_revisions": [
         "graph-text-margin-calibrator-v20",
@@ -5170,7 +5170,9 @@
       "preregistered_candidate_ids": [
         "P1"
       ],
-      "consumed_candidate_ids": [],
+      "consumed_candidate_ids": [
+        "P1"
+      ],
       "remaining_unregistered_candidate_ids": [
         "P2",
         "P3"
@@ -5195,6 +5197,29 @@
       },
       "p1_expected_runner_source_bundle_sha256": "b7cf9ef42fdc50de51c61aba03a79de506fe1c65d22ec02b1acfcacff52f160b",
       "p1_expected_optimizer_steps": 1280,
+      "p1_result_path": "ml/ocr/scene_evidence_attention_v22/P1_RESULT.json",
+      "p1_result_sha256": "7b73c15b2f6b81e0db5bf9b7825f8a59613d099b340c4cd0a3d82591e687d903",
+      "p1_candidate_report_sha256": "9e8adf310e58550c9e24814559b028fa318381e82cd38b8fb6fb395c9837333c",
+      "p1_checkpoint_sha256": "9e435fc9638a788a440c1c3b82c093821fdcfe111e2b87c06013d7fb0f702a96",
+      "p1_onnx_sha256": "cf83e300c6c2efcb797d81de959a62744dec76e08aadec72b520bc923b2963b9",
+      "p1_optimizer_steps": 1280,
+      "p1_elapsed_ms": 2936749.526,
+      "p1_selected_threshold": 0.35,
+      "p1_selection_scene_count": 128,
+      "p1_selection_exact_scene_count": 113,
+      "p1_selection_true_positives": 1024,
+      "p1_selection_false_positives": 8,
+      "p1_selection_false_negatives": 0,
+      "p1_selection_duplicate_count": 0,
+      "p1_selection_prohibited_structure_hits": 8,
+      "p1_selection_recognition_exact": 0.978515625,
+      "p1_selection_character_error_rate": 0.0036490296898324765,
+      "p1_selection_role_accuracy": 0.9931640625,
+      "p1_selection_phase_heading_accuracy": 0.9453125,
+      "p1_onnx_parity_maximum_absolute_error": 0.00000667572021484375,
+      "p1_onnx_parity_passed": true,
+      "p1_training_opened_seal_sha256": "36e6242a59b21b8a85b3749a5b2a441de3e90c34dd861f8321c17438d5a98380",
+      "p1_training_result_seal_sha256": "8c093fc0a534d6fc5687312653467c30fe3345af78f46159ce76df3929b6c53d",
       "selection_thresholds": [
         0.35,
         0.45,
@@ -5203,9 +5228,9 @@
         0.75
       ],
       "minimum_consecutive_passing_thresholds": 3,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P1",
-      "execution_blocker": null,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1 is consumed and failed the fixed visible-selection gate. P2 and P3 remain unregistered, so no V22 execution or rerun is authorized.",
       "public_gate_authorized": false,
       "public_gate_evaluator_preregistered": false,
       "public_gate_evaluations": 0,

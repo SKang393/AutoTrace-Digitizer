@@ -135,7 +135,7 @@ def test_attention_model_exports_with_dynamic_cpu_parity(tmp_path: Path) -> None
         assert float(np.max(np.abs(expected - actual))) <= 1e-5
 
 
-def test_freeze_state_remains_fail_closed_before_training() -> None:
+def test_p1_result_records_consumed_failed_selection_without_public_execution() -> None:
     seal_path = REPO_ROOT / "ml/ocr/scene_evidence_attention_v22/SPLIT_SEAL.json"
     if seal_path.exists():
         seal = json.loads(seal_path.read_text(encoding="utf-8"))
@@ -148,11 +148,21 @@ def test_freeze_state_remains_fail_closed_before_training() -> None:
         assert seal["chandler_used"] is False
         assert seal["production_approval"] is False
         assert seal["release_eligible"] is False
-    assert not (REPO_ROOT / "ml/ocr/scene_evidence_attention_v22/P1_RESULT.json").exists()
-    assert not (
-        REPO_ROOT
-        / "ml/ocr/scene_evidence_attention_v22/artifacts/P1-run"
-    ).exists()
+    result = json.loads(
+        (
+            REPO_ROOT / "ml/ocr/scene_evidence_attention_v22/P1_RESULT.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert result["candidate_id"] == "P1"
+    assert result["candidate_consumed"] is True
+    assert result["status"] == "failed_selection"
+    assert result["selection_gate_passed"] is False
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert result["marker_creation_evaluated"] is False
+    assert result["private_or_article_images"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
 
 
 def test_p1_config_binds_runner_fixtures_and_fail_closed_outputs() -> None:
@@ -172,22 +182,33 @@ def test_p1_config_binds_runner_fixtures_and_fail_closed_outputs() -> None:
     assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, RUNNER_SOURCE_PATHS,
     )
-    evidence = preflight()
-    assert evidence["config"] == config
-    assert evidence["seal"]["public_evaluations"] == 0
+    result = json.loads(
+        (
+            REPO_ROOT / "ml/ocr/scene_evidence_attention_v22/P1_RESULT.json"
+        ).read_text(encoding="utf-8")
+    )
     if (REPO_ROOT / CANONICAL_OUTPUT).exists():
         report = json.loads(
             (REPO_ROOT / CANONICAL_OUTPUT / "candidate-report.json").read_text(
                 encoding="utf-8"
             )
         )
+        assert sha256_file(REPO_ROOT / CANONICAL_OUTPUT / "candidate-report.json") == result["report_sha256"]
+        assert report["status"] == result["status"]
+        assert report["selected_threshold"] == result["selected_threshold"]
+        assert report["selection_metrics"]["false_positives"] == 8
+        assert report["selection_metrics"]["prohibited_structure_hits"] == 8
         assert report["public_gate_archive_opened"] is False
         assert report["public_gate_evaluations"] == 0
         assert report["production_approval"] is False
         assert report["release_eligible"] is False
+    else:
+        evidence = preflight()
+        assert evidence["config"] == config
+        assert evidence["seal"]["public_evaluations"] == 0
 
 
-def test_canonical_budget_authorizes_only_unused_p1() -> None:
+def test_canonical_budget_records_consumed_p1_and_blocks_unregistered_candidates() -> None:
     ledger = json.loads(
         (
             REPO_ROOT
@@ -200,15 +221,25 @@ def test_canonical_budget_authorizes_only_unused_p1() -> None:
         and item["revision"] == "graph-text-scene-evidence-attention-v22"
     )
     config_path = REPO_ROOT / CONFIG_PATH
-    assert entry["status"] == "candidate_1_preregistered"
+    result_path = REPO_ROOT / "ml/ocr/scene_evidence_attention_v22/P1_RESULT.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert entry["status"] == "candidate_1_failed_selection"
     assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert "P1 is consumed" in entry["execution_blocker"]
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(config_path)
     assert entry["p1_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, RUNNER_SOURCE_PATHS,
     )
+    assert entry["p1_result_sha256"] == sha256_file(result_path)
+    assert entry["p1_candidate_report_sha256"] == result["report_sha256"]
+    assert entry["p1_checkpoint_sha256"] == result["checkpoint_sha256"]
+    assert entry["p1_onnx_sha256"] == result["onnx_sha256"]
+    assert entry["p1_training_opened_seal_sha256"] == result["training_opened_seal_sha256"]
+    assert entry["p1_training_result_seal_sha256"] == result["training_result_seal_sha256"]
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False

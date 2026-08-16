@@ -28,22 +28,24 @@ direct CPU tensor hashing, `1e-5` ONNX parity, three-threshold robustness window
 zero false/missed/duplicate/prohibited regions, recognition, CER, overall role,
 and per-role gates remain mandatory.
 
-The fixture identity is now frozen from source commit `1111aeb` with zero
+The fixture identity is frozen from source commit `1111aeb` with zero
 cross-split source-byte overlap. The ignored train, visible-selection, and
-truth-hidden public archives are checksum-bound by `SPLIT_SEAL.json`. P1 is the
-only authorized candidate. Its runner executes the exact V17 detector and
-official recognizer directly over stored fixture bytes, trains one scene at a
-time for exactly 1,280 optimizer steps, evaluates the visible selection once,
-and leaves the public archive unopened. Public execution, marker composition,
-manifest creation, model-store promotion, private validation, production
-approval, and release eligibility remain unauthorized.
+truth-hidden public archives are checksum-bound by `SPLIT_SEAL.json`.
 
-After the runner source, P1 config, and canonical budget authorization are
-committed unchanged, execute the single candidate with:
+P1 is consumed and must not run again. It executed all 16,595 training
+proposals and exactly 1,280 optimizer steps. CPU ONNX parity passed at
+`6.67572021484375e-06`, but visible selection failed at every fixed threshold.
+Thresholds `0.35` and `0.45` retained all 1,024 truths but also retained eight
+prohibited false regions. Higher thresholds retained the same false regions
+and missed one truth. Recognition exact was `0.978515625`, CER was
+`0.0036490296898324765`, overall role accuracy was `0.9931640625`, and the
+PhaseHeading class was only `0.9453125`. The public archive remains unopened.
 
-```powershell
-python -m ml.ocr.scene_evidence_attention_v22.train_p1 --execute
-```
+P2 and P3 remain unregistered. Any later candidate must be preregistered from
+the aggregate P1 result without using validation case identities or pixels.
+Public execution, marker composition, manifest creation, model-store
+promotion, private validation, production approval, and release eligibility
+remain unauthorized.
 
 Synthetic fixtures are training and public-test inputs only and are never
 application graph data.
