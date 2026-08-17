@@ -46,7 +46,15 @@ from ml.markers.center.decoupled_heads_v10.train_p2 import (
     RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
     _reflect_point,
     _reflect_tensor,
+    _specificity_artifact_loss as p2_specificity_artifact_loss,
     _verify_config_and_inputs as verify_p2_config_and_inputs,
+)
+from ml.markers.center.decoupled_heads_v10.train_p3 import (
+    ARTIFACT_FALSE_NEGATIVE_WEIGHT as P3_ARTIFACT_FALSE_NEGATIVE_WEIGHT,
+    ARTIFACT_FALSE_POSITIVE_WEIGHT as P3_ARTIFACT_FALSE_POSITIVE_WEIGHT,
+    RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS,
+    _precision_artifact_loss,
+    _verify_config_and_inputs as verify_p3_config_and_inputs,
 )
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 
@@ -110,21 +118,22 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     freeze = _json(ROOT / "SPLIT_FREEZE_REPORT.json")
     selection = _json(ROOT / "SELECTION_MANIFEST.json")
     public_seal = _json(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
-    config = _json(ROOT / "training/p2.json")
+    p2_config = _json(ROOT / "training/p2.json")
+    config = _json(ROOT / "training/p3.json")
     gate = _json(ROOT / "gates/sealed-public-v1.json")
     ledger = _json(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol["revision"])
-    assert protocol["state"] == "candidate_2_authorized_once_not_executed"
-    assert protocol["execution_authorized"] is True
-    assert protocol["authorized_candidate_id"] == "P2"
-    assert protocol["execution_blocker"] is None
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
-    assert entry["execution_blocker"] is None
+    assert protocol["state"] == "candidate_3_preregistered_execution_blocked"
+    assert protocol["execution_authorized"] is False
+    assert protocol["authorized_candidate_id"] is None
+    assert "separate committed checkpoint" in protocol["execution_blocker"]
+    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert "separate committed checkpoint" in entry["execution_blocker"]
     assert protocol["preregistration_commit"] == "d4a3987d96a0763730fb9db840ee6c31c4da1abb"
     assert protocol["preregistration_tree"] == "bff1a927922ed9e3e50b315b1f6a1a82cf160c68"
     assert entry["preregistration_commit"] == protocol["preregistration_commit"]
@@ -156,12 +165,15 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     assert sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json") == protocol["sealed_public_test_seal_sha256"]
     assert sha256_file(ROOT / "PUBLIC_DATASET_MANIFEST.json") == protocol["public_dataset_manifest_sha256"]
     assert sha256_file(ROOT / "P1_RESULT.json") == protocol["p1_result_sha256"]
-    assert sha256_file(ROOT / "training/p2.json") == protocol["candidate_config_sha256"]
+    assert sha256_file(ROOT / "P2_RESULT.json") == protocol["p2_result_sha256"]
+    assert sha256_file(ROOT / "training/p2.json") == protocol["p2_candidate_config_sha256"]
+    assert sha256_file(ROOT / "training/p3.json") == protocol["candidate_config_sha256"]
     assert sha256_file(ROOT / "gates/sealed-public-v1.json") == protocol["public_gate_config_sha256"]
     assert source_bundle_sha256(REPO_ROOT, DESIGN_SOURCE_PATHS) == freeze["generator_source_bundle_sha256"]
     p1_config = _json(ROOT / "training/p1.json")
     assert source_bundle_sha256(REPO_ROOT, P1_RUNNER_SOURCE_PATHS) == p1_config["expected_runner_source_bundle_sha256"]
-    assert source_bundle_sha256(REPO_ROOT, P2_RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
+    assert source_bundle_sha256(REPO_ROOT, P2_RUNNER_SOURCE_PATHS) == p2_config["expected_runner_source_bundle_sha256"]
+    assert source_bundle_sha256(REPO_ROOT, P3_RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
     assert source_bundle_sha256(REPO_ROOT, EVALUATOR_SOURCE_PATHS) == gate["expected_evaluator_source_bundle_sha256"]
     for name in ("train", "validation", "sealed_public"):
         archive_path = REPO_ROOT / selection[name]["archive_path"]
@@ -192,8 +204,22 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     assert sha256_file(REPO_ROOT / p1_result["candidate_report_path"]) == p1_result["candidate_report_sha256"]
     assert sha256_file(REPO_ROOT / p1_result["checkpoint_path"]) == p1_result["checkpoint_sha256"]
     assert sha256_file(REPO_ROOT / p1_result["onnx_path"]) == p1_result["onnx_sha256"]
-    assert not (ROOT / "P2_RESULT.json").exists()
-    assert not (REPO_ROOT / "ml/markers/center/artifacts/decoupled-heads-v10/P2-run").exists()
+    p2_result = _json(ROOT / "P2_RESULT.json")
+    assert p2_result["status"] == "failed_selection_consumed"
+    assert p2_result["optimizer_steps"] == 1792
+    assert p2_result["selection_exact_scene_count"] == 121
+    assert p2_result["selection_false_positives"] == 3
+    assert p2_result["selection_false_negatives"] == 28
+    assert p2_result["selection_marker_artifact_hits"] == 1
+    assert p2_result["artifact_precision"] == 0.7819652572390059
+    assert p2_result["artifact_recall"] == 0.9677843660304165
+    assert p2_result["onnx_parity_passed"] is True
+    assert p2_result["aggregate_only_evidence"] is True
+    assert p2_result["case_detail_or_pixels_inspected"] is False
+    assert sha256_file(REPO_ROOT / p2_result["candidate_report_path"]) == p2_result["candidate_report_sha256"]
+    assert sha256_file(REPO_ROOT / p2_result["checkpoint_path"]) == p2_result["checkpoint_sha256"]
+    assert sha256_file(REPO_ROOT / p2_result["onnx_path"]) == p2_result["onnx_sha256"]
+    assert not (REPO_ROOT / "ml/markers/center/artifacts/decoupled-heads-v10/P3-run").exists()
 
 
 def test_p2_preflight_binds_consumed_p1_aggregate_and_frozen_v10_split() -> None:
@@ -206,6 +232,31 @@ def test_p2_preflight_binds_consumed_p1_aggregate_and_frozen_v10_split() -> None
     assert config["p1_checkpoint_reused"] is False
     assert config["frozen_v10_split_reused"] is True
     assert config["augmentation_schedule"] == list(REFLECTION_SCHEDULE)
+
+
+def test_p3_preflight_binds_consumed_p2_aggregate_and_frozen_v10_split() -> None:
+    config = _json(ROOT / "training/p3.json")
+    selection, train_path, validation_path = verify_p3_config_and_inputs(config)
+    assert sha256_file(train_path) == selection["train"]["archive_sha256"]
+    assert sha256_file(validation_path) == selection["validation"]["archive_sha256"]
+    assert config["aggregate_only_evidence"] is True
+    assert config["case_detail_or_pixels_inspected"] is False
+    assert config["p2_checkpoint_reused"] is False
+    assert config["frozen_v10_split_reused"] is True
+    assert config["augmentation_schedule"] == list(REFLECTION_SCHEDULE)
+    assert P3_ARTIFACT_FALSE_POSITIVE_WEIGHT == 0.95
+    assert P3_ARTIFACT_FALSE_NEGATIVE_WEIGHT == 0.05
+
+
+def test_p3_changes_only_the_artifact_tversky_precision_balance() -> None:
+    target = torch.zeros((1, 1, 2, 3), dtype=torch.float32)
+    target[0, 0, 0, 0] = 1.0
+    prediction = torch.full_like(target, 0.01)
+    prediction[0, 0, 0, 0] = 0.99
+    prediction[0, 0, 1, 1] = 0.9
+    assert _precision_artifact_loss(prediction, target) > p2_specificity_artifact_loss(
+        prediction, target
+    )
 
 
 def test_p2_reflections_transform_tensors_targets_and_coordinates_exactly() -> None:
