@@ -123,17 +123,17 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     gate = _json(ROOT / "gates/sealed-public-v1.json")
     ledger = _json(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol["revision"])
-    assert protocol["state"] == "candidate_3_preregistered_execution_blocked"
-    assert protocol["execution_authorized"] is False
-    assert protocol["authorized_candidate_id"] is None
-    assert "separate committed checkpoint" in protocol["execution_blocker"]
+    assert protocol["state"] == "candidate_3_authorized_once_not_executed"
+    assert protocol["execution_authorized"] is True
+    assert protocol["authorized_candidate_id"] == "P3"
+    assert protocol["execution_blocker"] is None
     assert entry["status"] == "candidate_3_preregistered"
     assert entry["preregistered_candidate_ids"] == ["P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
-    assert "separate committed checkpoint" in entry["execution_blocker"]
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_blocker"] is None
     assert protocol["preregistration_commit"] == "d4a3987d96a0763730fb9db840ee6c31c4da1abb"
     assert protocol["preregistration_tree"] == "bff1a927922ed9e3e50b315b1f6a1a82cf160c68"
     assert entry["preregistration_commit"] == protocol["preregistration_commit"]
@@ -158,6 +158,18 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
         text=True,
     ).stdout.strip()
     assert committed_p2_tree == protocol["p2_preregistration_tree"]
+    assert protocol["p3_preregistration_commit"] == "1e5316aba72771a0275339f2806b213d3097dbce"
+    assert protocol["p3_preregistration_tree"] == "5d15188227fa2b8e27ab0f0331af8e56c971f05f"
+    assert entry["p3_preregistration_commit"] == protocol["p3_preregistration_commit"]
+    assert entry["p3_preregistration_tree"] == protocol["p3_preregistration_tree"]
+    committed_p3_tree = subprocess.run(
+        ["git", "show", "-s", "--format=%T", str(protocol["p3_preregistration_commit"])],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert committed_p3_tree == protocol["p3_preregistration_tree"]
     assert entry["refusal_required_before_output"] is True
     assert sha256_file(ROOT / "PROTOCOL.json") == entry["protocol_sha256"]
     assert sha256_file(ROOT / "SPLIT_FREEZE_REPORT.json") == protocol["split_freeze_report_sha256"]

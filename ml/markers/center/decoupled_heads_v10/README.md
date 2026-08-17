@@ -46,9 +46,10 @@ loss form, and 1,792-step budget while changing only the artifact Tversky
 false-positive and false-negative balance from `0.80/0.20` to `0.95/0.05`.
 This targets P2's aggregate artifact-precision and marker-masking failures
 without using fixture detail or pixels. It retrains from scratch, reuses no P2
-checkpoint, and remains blocked until a separate commit binds and authorizes
-its exact bytes once. The fixed selection thresholds and zero-error gates are
-unchanged.
+checkpoint. Preregistration commit `1e5316aba72771a0275339f2806b213d3097dbce`
+and tree `5d15188227fa2b8e27ab0f0331af8e56c971f05f` bind its exact
+bytes, and this separate checkpoint authorizes one execution. The fixed
+selection thresholds and zero-error gates are unchanged.
 
 No V10 payload is approved, stored, packaged, privately validated, or release
 eligible.
