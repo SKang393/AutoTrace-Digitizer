@@ -39,19 +39,36 @@ unmatched truths were counted. Report SHA-256 is
 rejected ONNX SHA-256 is
 `802eed6d18f8d032d5ef5b9383cb562631da2ac6f137f9356d6e8481115073f5`.
 
-The aggregate result isolates the fixed detector floor as a recall bottleneck:
-the calibrator never received 201 truth proposals and therefore could not
-recover them. P1 cannot rerun. P2 is now preregistered as a zero-optimizer,
-byte-preserving evaluation of the exact P1 checkpoint and ONNX over all 5,384
-frozen validation proposals. Its sole change is removing the fixed `0.56`
-prefilter before the learned calibrator. P2 runner source SHA-256 is
-`cc807390733eb7e9b6cd245c76f35ce2ca6c58e3f4e0b3b0a8d6331ffe3d8e6a`;
-configuration SHA-256 is
-`037186d0bbf5b5ea72c06ce2a59894cd525015e17cf94c57b6451546b8b2d4a0`.
-The committed canonical ledger now authorizes P2 for one zero-optimizer
-execution. The runner requires the authorization, configuration, exact P1
-payloads, and every bound source to be committed before it opens the P2 seal.
-P2 cannot rerun after that seal opens. The public archive remains unopened with
-zero evaluations, and marker composition, manifest, model-store, packaging,
-clean-machine, private validation, approval, and release evidence remain
-blocked.
+The aggregate P1 result isolated the fixed detector floor as a recall
+bottleneck: the calibrator never received 201 truth proposals and therefore
+could not recover them. P1 cannot rerun. P2 then executed exactly once as the
+preregistered zero-optimizer, byte-preserving evaluation of the exact P1
+checkpoint and ONNX over all 5,384 frozen validation proposals. Its sole change
+removed the fixed `0.56` prefilter before the learned calibrator. At its best
+threshold `0.45`, P2 retained 1,020/1,024 truths, produced four false
+prohibited regions, missed four truths, and passed only 68/128 scenes exactly.
+CPU ONNX parity passed at `4.76837158203125e-7`. Candidate report, opened-seal,
+and result-seal SHA-256 values are
+`678c6e021682e331789a12213650c3f7b3f2292083e8a8338431f96cdcc1892e`,
+`fcb0e573364d918fe5c814c69c8a2ff92f4e2140cad6e89caad0cfc84dda0798`,
+and `b6a454c22483cf951084c3840fff815b0a262ad1a03a38950b740a3441f3e0c7`.
+
+P3 was specified only from those aggregate P2 metrics and consumed the final
+candidate slot. Its complete-stream quadratic multitask calibrator completed
+all 1,480 optimizer steps and passed CPU ONNX parity at
+`2.384185791015625e-6`. At its best threshold `0.65`, it passed 124/128 scenes
+with 1,021 true positives, two false prohibited regions, three misses, and zero
+duplicates. Recognition exact was `0.990234375`, CER was
+`0.0014405070584845865`, role accuracy was `0.9970703125`, and minimum role
+accuracy was `0.984375`. No required three-consecutive-threshold zero-error
+window existed. Candidate report, rejected ONNX, checkpoint, opened-seal, and
+result-seal SHA-256 values are
+`be94ae54be1c85a3170add648eb78dd06af065d42d999af4b5cb989b78ebdeb6`,
+`431c7677c5536ac66c60180425c8bfce31fabd71d652c65ab22b0749527c9b5f`,
+`edccbb021fb8fa39bcfe5225fb5db04a559b80bc28b97497a14109c18c2a488e`,
+`559d2dd7960b5fc443f0771def716eb17bb3dd5b8c877c23599ae8bd59b1da01`,
+and `fb1b2ff464dabcd828c7857920e4c29dd6603679fcd7686448bbe692e3b5dc6b`.
+P1 through P3 are consumed and the V20 budget is exhausted. The public archive
+remains unopened with zero evaluations. No rerun, public gate, marker
+composition, manifest, model-store promotion, packaging, clean-machine,
+private validation, production approval, or release is authorized.

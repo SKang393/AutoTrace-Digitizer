@@ -1,0 +1,1144 @@
+{
+  "case_truth_values_emitted": false,
+  "chandler_used": false,
+  "feasibility": {
+    "hard_negative_count": 1440,
+    "hard_point_missing_from_artifact_truth_count": 0,
+    "minimum_center_separation_px": 12.083045959472656,
+    "minimum_truth_to_hard_negative_distance_px": 11.045360565185547,
+    "required_disjoint_clearance_px": 11.0,
+    "scene_count": 160,
+    "truth_center_count": 1520,
+    "truth_hard_acceptance_overlap_count": 0,
+    "truth_mask_conflict_count": 0
+  },
+  "fixture_count": 160,
+  "fixture_pixels_emitted": false,
+  "fixtures": [
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0000",
+      "ground_truth_sha256": "da06845a937c8ccf38cfcc65e58919e5ea92849e526256c07d46ab0fe81c8882",
+      "image_sha256": "dcd92ee8432d6d9a532ef0efb3863f1767d733f29cff661fe962d06ebf3553f2",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0001",
+      "ground_truth_sha256": "c621e6060696503fb60fcf78af981065b7c9fdbedbafb88a93507a1b477bf565",
+      "image_sha256": "cdef8654bc6ee91e8689cabd503afd2a0079eb8d893af608cfb0907b1b22a463",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0002",
+      "ground_truth_sha256": "5efddbef7ac4409d9e6afc7129b998e1eee95d2ccb261cb5ddb3b14063dbe87b",
+      "image_sha256": "2b36262ab737c8b2030c7c9787aa42563cd1fc4c4798591bda11c4e69bf2e1e9",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0003",
+      "ground_truth_sha256": "2d4f20ca52957b1f3256fef9772f650bcd3e7735e0db4491349f4424d0dabfad",
+      "image_sha256": "1fc151694f2b63124e62cee4e74091cf7ee73ceebbaa16eda9b2b145f24f1f8b",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0004",
+      "ground_truth_sha256": "496026659e0b3817c2b34fb2e67bb61626e3c6a88ac7641406ad84ceb0da555e",
+      "image_sha256": "04dcc336254cc15f114c84c84a5a673e49c91016dca8308d484bb7655534bb9c",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0005",
+      "ground_truth_sha256": "21c807b4db74738dff2c91908b8bca71c7a6569abab52a6db3be1c31bea54f85",
+      "image_sha256": "c5520ee2a9f49e5aadff7e8fd57f40c5a1b3b1f258b2af577582e1f9f14208ff",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0006",
+      "ground_truth_sha256": "6ce05aaf687fcec88e0ce1f4b35f6dd8160219d65f2aa4049a667100fec2e851",
+      "image_sha256": "0cdc9ede0ce3e3f7ff174dacf51606f00046f8fec79ff95bd66995e4a14bf675",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0007",
+      "ground_truth_sha256": "79e5232d486bac7213c050ecedc5b7c288d888e84b8f4276c996a78663d09fe1",
+      "image_sha256": "9a8f73133522fcf72a2c55566ceaaa7aaffe21d970a82d3f4e6aafab25bc4e8a",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0008",
+      "ground_truth_sha256": "0f6c0caefc9ee2ab2a5c8178a7709233e345425c00fd115116797d91287d07c1",
+      "image_sha256": "fa8c4bf1149d9e6f5c01f2618b74824f9e8bc2ff2b4485a01976b20648db587f",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0009",
+      "ground_truth_sha256": "8245228c558347e1be7a57f0f1895d1d5d74ec01f21562c43c08e8c34daa9c77",
+      "image_sha256": "e4f1a69a0239bad6be696f9806a0e1bec4165a5734eab3e8f6b752f6c565d0f1",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0010",
+      "ground_truth_sha256": "049372c45d6acde49480ecdb578e132bf5f02ed8b7ad656aeafa22af0f2967c0",
+      "image_sha256": "43b80efb404e2edf1e8eab07e69f949d005102e64abec51cdcb18dd62f4457bf",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0011",
+      "ground_truth_sha256": "406e0356a757b68dde0fe12ad53bfe39e3652f7739b0cdff69ada9a6b21f7553",
+      "image_sha256": "160496c51e7b6f653baa84b5503536dff20e8ee1ab308e6d27896f2e1611c4ed",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0012",
+      "ground_truth_sha256": "2727223679d6c02e76afc71e5f63da1f04dab2681222fe7a818f3f0165d9bca0",
+      "image_sha256": "df6feee4a79e3bacc88de01d956b15c4802c27b96a486674b8742b7740967193",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0013",
+      "ground_truth_sha256": "61ef46a2e602c1af986b71e2004b31ca05cc6fdc9586e2e47e1028ce339a8e61",
+      "image_sha256": "4f7efd318925532c68d915075d55e861e01cff3e913aff84bac7e69e4903185e",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0014",
+      "ground_truth_sha256": "f4f8f91bffbd03f8f7775d7fdab424638463ec4a9cc4c920e7f1d5089f73e000",
+      "image_sha256": "b704cf7603adf0b63818cd0c67eefca8ac74d8ca6623bac58cb282268662ce66",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0015",
+      "ground_truth_sha256": "4624e40ad96a2f7f580dfb019b821f3f26c4e8dd3b3a8a15e85384860da1709c",
+      "image_sha256": "6578ed7f203914059262344e7e0ca049b3e053cd446588639a3ff3274ee0d58d",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0016",
+      "ground_truth_sha256": "769e4eb910b165498e61e2dd89733ef3208585acbcaaebe912166ea7ab8338f5",
+      "image_sha256": "89156db12a37498593e4bff8a7b664534b14f290b848baf9722e05c319b7d574",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0017",
+      "ground_truth_sha256": "d9b56c822af8273ef41c9b982ae08be165fe9d4f7c682fc2264be96c896229cb",
+      "image_sha256": "b7ea86cda745d5367936ab3f47fdb4eb79c2a5458d2ca4ccb9ada9357917d51e",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0018",
+      "ground_truth_sha256": "3bc4f70b310c639c463c9da736156adbb9c39fb77ea8e70a5b237bc549ac0ded",
+      "image_sha256": "d4a8ae5438d65eafede5ccd1e2c80182e966052a3b0e498e8a5fb133b78bf57f",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0019",
+      "ground_truth_sha256": "f20fa88de9094d2ac87283f4b26e6aaf318dd9a638c2de44db2c6aa8f71d7485",
+      "image_sha256": "2c5fa92218dc1a16947a0a442bc0ab0c5cb7aee975cf4af3e17c817bc557a9c6",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0020",
+      "ground_truth_sha256": "35b52083409fd7b968acb21f785d32cb8718c6213074255c63c1430ee92bf620",
+      "image_sha256": "148881e05a90b4d867fcfc9e43924a2acdc0826791da4228b6230aa0aa72ec41",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0021",
+      "ground_truth_sha256": "31111a77e2c0a2758789942197e91a47dd5d4a1bdf1ef4c85c67a4611347adde",
+      "image_sha256": "2c6e1fa3fb35f4d0269c3025bf88f992a6d36d8eeb50e51c9b298c587a918629",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0022",
+      "ground_truth_sha256": "4926047633c1bede2e2d2e872810b3d98c37a5e803731d3ce87d72688e0d8687",
+      "image_sha256": "57d144a5e85e4b53abe90af3eb85ec10e42a3b16f87b3d96059fd37da35989f4",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0023",
+      "ground_truth_sha256": "8f152b446f394e6febc06c1a0399185b96899be066036c22ffd5de5e3a2d17c4",
+      "image_sha256": "61cd0d8e24deb011150a4c51bca74cec1e4daa1bdb16f9fcb75b80426192d4a4",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0024",
+      "ground_truth_sha256": "0deda0d6def201b23db7a421911caf3c7c3a6c777ef4b5d2b38e05f10934d65f",
+      "image_sha256": "ee000cf87ec523a09a572cff64077afb67b8d618ee1f7d2d56cddb9378dc7e8c",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0025",
+      "ground_truth_sha256": "d65f442623376ef0058723771c081765f53909c4b7d041bb172441273d64ff6c",
+      "image_sha256": "53d5dc97e91fca5117de387678a60604a133d64cbadc39df6a54d70bcb3a7629",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0026",
+      "ground_truth_sha256": "cc78761110efe3f81d3a2714154d9f69dca6c38af8cc5062a967778e2feb91be",
+      "image_sha256": "c90f8329d990e6cf3794d166ac487a5c210474434bd0b73161466b98add58600",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0027",
+      "ground_truth_sha256": "f08a1840f4545b30b727a435ad197d02a83bd57e716dc12c097e4afc7e99ef56",
+      "image_sha256": "d759f64777b877f92ff8ca8f34189b0a773fc1fb565854816f018addf8be21e9",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0028",
+      "ground_truth_sha256": "192b0238d3eee789b61068952705e3b885b1aa504c480b8cdd26c57e81874fd4",
+      "image_sha256": "5b8b714afe21a10c93927c0fff2a8bccec9b48478834280e5311cc7c7e994d30",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0029",
+      "ground_truth_sha256": "afb7e3940f12470c1eca146f8d6fded8645f5e5b9fb3230fd4ee96c5630ee965",
+      "image_sha256": "c7b8d6de939b09f40f0ca050aa1e6730a160277baa1e2a4237f7fc2c5012d8bc",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0030",
+      "ground_truth_sha256": "3a887d8b3bb30b7accc67d731a16a5dde8eee5568bb8476eb01a91699b4a4060",
+      "image_sha256": "200597cbc4e4a726a489fdedb8a8c5d0395e1d153eabbe0a4ffa8c12a88494ff",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0031",
+      "ground_truth_sha256": "c2d49fe76007d986fd03b85aed9de11537d9ec1996e2ccc016a4d5a1e4d7ec90",
+      "image_sha256": "d0565c3b6813a1f4c20348ada5e3859bb270eb7dc2e2112a5e61a154fd7abf70",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0032",
+      "ground_truth_sha256": "21784812607b1ed046e1a8c75cb276c1d38f64271e569233184401ff0da905a2",
+      "image_sha256": "de64340f41e3657f8b0c105eba259fe94b0e556a101de5961728c55c96fb6bc9",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0033",
+      "ground_truth_sha256": "bbb9b64549c1720760c2456212ba6fdc3a822ea84693da7ac8e746aeab95020a",
+      "image_sha256": "b11322415d5cbda755a264442ae76808b9b94cfaaddebe6c25d72f01363be145",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0034",
+      "ground_truth_sha256": "54bdb23248c76669d6e348c789e7609713da5b64cbc3a60d855c15670a70844e",
+      "image_sha256": "4b87af5b86552d3a92c7bdc673d3f301e92def2fc98ad0467563e6aa3ed581ac",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0035",
+      "ground_truth_sha256": "f242e580c3bf39d59559ca4c06cfd0014a429198e22eb0ee9d143a42dbeaf0a7",
+      "image_sha256": "35222b5c6ae347c6dd96bd4b9523fa923772d457ba4be670c5889618b95d428e",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0036",
+      "ground_truth_sha256": "989f6f252249f4aadf908f915b54382eee09a4c811e5049988a7fad85442406c",
+      "image_sha256": "ed6d02fdf069e72e3f877f27e66e3b8a250db46d6d3cb0a1d8ddfa507ffba536",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0037",
+      "ground_truth_sha256": "cc047e4df4d0d9a2d7ab7228547484f74a24867ba76500b7effe45c9cda5dfa3",
+      "image_sha256": "5866612a42a846a7bb7d453f3f15e8a513e51a90be4804b2258eb2163049389e",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0038",
+      "ground_truth_sha256": "9e8e88d99ec7c427e4b74a0fb97109a5a617f4f11e191dffaf8f440ae0451b79",
+      "image_sha256": "8c8bb399f04c6b3efeec8a3e1130ff78e594e121c4ef34f05cfbb637f7d5bc4a",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0039",
+      "ground_truth_sha256": "dbfbfc0d5155ca8d71bbc199d3869c60502705ef95532b81b2a03f9c4c5ca4a4",
+      "image_sha256": "4294cb6e616d140d47745ce09a27c9fa75ce81ae6ebcb0ae440cbe9c55d7b63e",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0040",
+      "ground_truth_sha256": "1edd54c72c35e2834a8555689bb95e232f6c57547bbd3eb2740ad835c97f8246",
+      "image_sha256": "7823fae1f335c4291a43f254aa28f5bbd26d34b82eb4a0449cb6ea4ae1a1df13",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0041",
+      "ground_truth_sha256": "55e0cc73a0afca9d592c12ffdb59db0de0f209c24d887d656b631ae4f108168a",
+      "image_sha256": "9907cbc4b65f72a70a2dc4850e9445edea26eb73709c19c5724e09234e0160e6",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0042",
+      "ground_truth_sha256": "356daddbc06cd6e0b5ac22feac0f6c4a82677f02fbd4fa048c51fb865aa7401c",
+      "image_sha256": "96577cb8514df9c90a9977fd1301431a56af3da9b19df24a96f6ac062a4f444e",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0043",
+      "ground_truth_sha256": "853c674da9c61ee8c08fc966e5a2e8fc60f270398879b2e74585757defa0fa6a",
+      "image_sha256": "f2989785a45f0e196c2cdc56e0ad0de9ab25cae6d9d18f47d8228ce9c5dc4720",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0044",
+      "ground_truth_sha256": "b136fe023a15919aabce12dc1991ae1ecac8f3af7c3dea422261c9584037cf59",
+      "image_sha256": "1b65db1eaf7be425b014e6ce8c519479253dc1f2b1ce9f292f4471db827abc62",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0045",
+      "ground_truth_sha256": "193ae3c905bab0fcf3217daecab6133c884fbf0bc988ff7fc08d90e64d349ff7",
+      "image_sha256": "8ed2c3cae2415012de14415cd84af0d672a9f1f021bb59b8062b3dcfdf7b8540",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0046",
+      "ground_truth_sha256": "e0da9ec53d16cb6cc5d38fdf8fef6399134ceb60f9b8ea24167892b9fa241cc8",
+      "image_sha256": "62b437627ccd98281ecd4f06009f263a69cfef9dbd27c53c3a8447e1bde3e9e3",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0047",
+      "ground_truth_sha256": "23c8fddf8a6e6d6556c74c6b977725b88aee5d32605a494e8234fad08fc4a700",
+      "image_sha256": "546ae8b9dc5d70d25b94147a12169c7fb94a8cfc549e263aa76faf3d68ada843",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0048",
+      "ground_truth_sha256": "0f78ca4f9c9ae6accdf4b564aa029c5dce7c8ead4ff7da8f676c7837921d9e4f",
+      "image_sha256": "fdbbec2e214315976a33e0b6f274d2d76669ad8ea939937902d5c5f4f8d3cb68",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0049",
+      "ground_truth_sha256": "2dde389612dfed1fbf268accf2e2df84d24ea85c40f22f505d42eb8cf7c741ad",
+      "image_sha256": "8b97890b686f926fa30c761871bf2c17bcd9953cc8edbdc312f202568c14bcf7",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0050",
+      "ground_truth_sha256": "2a739cef6d21a2802c1c5557aac2e5162fd1db21bc2143a9154ace53dfe4e095",
+      "image_sha256": "f86732b5ec3439f4208ad989c1b06fb2213a93486b72b5f5c2d673c951eb0636",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0051",
+      "ground_truth_sha256": "ef07fa2a79a9c74ef378ab288c3acf8efc973bc035ca8eee4aff1875838097d0",
+      "image_sha256": "a2e64837548d70ebbd6ce2deef9999d0ed3a7001b9e8f4cfa1632ba5edd73f19",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0052",
+      "ground_truth_sha256": "fe107c20bcda68ae36a705874a2bf7ef638237e805f5a511452e7436e38b8d1e",
+      "image_sha256": "73551650af159637bb59a14936d0e99772a205801190e4b7d7cada5be8a938e5",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0053",
+      "ground_truth_sha256": "e55235d947356a1020776a84f778629eafbc6033f92e9f414b931c1728338909",
+      "image_sha256": "4e467d7d47ad48bbb3cd59247ffe3aed985c5ab1fb242b1bfa13d2452f1bca24",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0054",
+      "ground_truth_sha256": "51d710b0bd96a820b3c3e9f0b1bcc0fe51b709a5dacc69a6cfa11b129ccde0d4",
+      "image_sha256": "c560776a6e0d5f8b26b99bacdf95b49971a94e9477173b09cec143ffa99a0795",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0055",
+      "ground_truth_sha256": "ddfa5cdfd77f95273036447257985a2cdd592fd3aedf05071d5f94862deaa3d4",
+      "image_sha256": "2da30ceae7fc33f2f5d1f58b9a1d9dbbac1739be4bbba1bcb7917b40acce61d8",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0056",
+      "ground_truth_sha256": "893c0bb49cf155875f84f825181d41de81673c3af2221a1a51ec33605b415a0a",
+      "image_sha256": "f9acc3d86f53bad2f9fe5a5dc6960c100ba6808b0029d154dd1ca67c35b39677",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0057",
+      "ground_truth_sha256": "1e1dfd40225083f44a18ea9f32e3cac435058e5e046082ae266931dac3a6729b",
+      "image_sha256": "548607eb6d73ca4cfb1c2b5071cfa4dc99c091f1b17df23c1acf0377481f9c60",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0058",
+      "ground_truth_sha256": "a9ffd5bbe2f23c1736a1f5b0b7ae932a0f0c8984d75a72108d2195717ee05864",
+      "image_sha256": "f178ee4657c303bb43295c03209b97782e47da5a255cdf59ab101ca86cbf0be7",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0059",
+      "ground_truth_sha256": "332e87ba3dff841e28740ee23ca170224b5258fc859e1caa4af0a974faed28ee",
+      "image_sha256": "378971886cb34cad62743c7dc66fd566e78e9d211876d6b2ceaa1d5de5aba1ab",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0060",
+      "ground_truth_sha256": "002b43bbda57ffdf7bd1faeb0ecae47f837893ad4980ccbd7e40a636f44fbca9",
+      "image_sha256": "bf2054f2e63fa0e65b479600130502da36f4c9b5f63bdf036b870c0e1fbebd8e",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0061",
+      "ground_truth_sha256": "e57b3206c83f81b1ac5bfc47810462a4f3460bc08b349e4d5129e7e02f453cfa",
+      "image_sha256": "f6bfcc1e39c21c3aad208a01dc734803d258095e17aae8cbd966b5a95bae886d",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0062",
+      "ground_truth_sha256": "0a5b5c50d66dbbf4cea49cb968ff9317d17b44e845b8a2853b6ac98a48ae743a",
+      "image_sha256": "f05be9b5246e0952826f0ddd7aef4150a853100b48d9c38dddeb1e96e3c3f4b0",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0063",
+      "ground_truth_sha256": "90f3c6afd2db806547ade9a26656064eb44caac55941ff018feefec27eead367",
+      "image_sha256": "2a680998da1378dbcd2b5c20c05e3acd8d97c0ed3ddab33bd6d8e89144cd7059",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0064",
+      "ground_truth_sha256": "5973f33826b630babd7e713f7944a94d36fc14e8c5039a458203e8d5b20e321d",
+      "image_sha256": "0b3c174580f0bfded82f2b76d04de86e41909aabbf1a2dd452053ddee0e37ec6",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0065",
+      "ground_truth_sha256": "ae21896c42271a6420729d84280d3d20f7d828be904a309c2424dd4a38fd4a42",
+      "image_sha256": "a27aae05d0264c451229bd99fb78b2c9a60beaae0c7efc739c4ab6a29c387b36",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0066",
+      "ground_truth_sha256": "0dcc51ef8f44ed1f8c3e736e492a993f706d6c0d6b08b50f6f4ebc629336600a",
+      "image_sha256": "56702fb850fde066bf1c03d6eb1fc28825a6d0f30897e1f818a737368f19d080",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0067",
+      "ground_truth_sha256": "7c7d8d0cdd6e6fd3af22a8e0a815de55df0dd5c48124545cac5f0e3641e8b478",
+      "image_sha256": "9941eaf44d0e913205256963702a03572e3fa4535b27785bf3f52648ddd31d9c",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0068",
+      "ground_truth_sha256": "361b58c02bef2736240b4e2e8108189aa0235c498e8263ccf8e09d0f74162ceb",
+      "image_sha256": "aac9e17d664e132db61413fc9130fed1338fe83f793000af1c9b1250488990c9",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0069",
+      "ground_truth_sha256": "d5a15912a2aca9b0bfea5584d623bccd806eb463d320f92c99595807c7a40ee2",
+      "image_sha256": "ac331ba8d357b4b3f935669fc85f04bda6aed2795be1de1cb445404acf2a5e25",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0070",
+      "ground_truth_sha256": "93b7ed58dd215df1ca5ff4f0852e448e9a64c1715939605fba878b6f9102880d",
+      "image_sha256": "d5d23cf4e36fff4820f4b500ee99dc933139297e9bd0a5112b866b711c02cc11",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0071",
+      "ground_truth_sha256": "3697e0074e677628a572346b02e46acc37a3453c5b9f1543aed85bc78c2f0941",
+      "image_sha256": "94c4001b4c75bc7bad3f2eb2ce20c6544f6fec863dbaf082e7242a2b7de3c63f",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0072",
+      "ground_truth_sha256": "c2751b309553bbd1b04c1cc418ae4e5b9dc97935802b7cafacc34becc9970c0e",
+      "image_sha256": "6149819c387c991da862e2ec8db6ac5c15056ac706752a9e55e53ed1534707bc",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0073",
+      "ground_truth_sha256": "245e33801ab0474afc7025cbe3a43330094a4f267f0e406380ec64bc3af6c458",
+      "image_sha256": "049f1b5120190da082ebd85dd995ca018fc1b2a8a00163c0e98970bddd85479d",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0074",
+      "ground_truth_sha256": "9ae677269f8698315341a465f231ded6b8591a89e9200ad0ecba71b6d5280b6f",
+      "image_sha256": "3a6c11705baf1ffda97648f767f8ed8d51d096b481f648cb50ea3eca8929cf67",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0075",
+      "ground_truth_sha256": "0e2bd467ef208f0618769d044f3d6cac8d1b71ed7faf14ca3135ba029ef72ba9",
+      "image_sha256": "e5d4818e79b94178a8c05ea5f8e17b7a46df64e251e581a9e829489478925db7",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0076",
+      "ground_truth_sha256": "23bdb0f8ca9bc9511a990028a14456c9abd592ad74c461a54285fb602c4ae927",
+      "image_sha256": "712f5ef94605674001b571010a5da8867a51215e015b968c3a39fe650a6bd7ff",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0077",
+      "ground_truth_sha256": "e381e753df3786c73941df33020206e8c10358a0c4a43880469caeab2899167b",
+      "image_sha256": "a0a2e64db3c648b56d26b935bdcaddc91d125b89882194dfb5f46bb4547cfd4a",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0078",
+      "ground_truth_sha256": "0b88cfa05f4cd8583b7dc51f1d5ebc08c2ef7057945920e049b38aa5735803d8",
+      "image_sha256": "68fe89c93dd88a311ecbdde31543f86a65d1f55fc038283f42afe40cc2048b4c",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0079",
+      "ground_truth_sha256": "0c4602cd8813019a3f08a23e5288c85acaa43498b9817f41a3d3f25f21fe26b0",
+      "image_sha256": "a9734035f25969beb08f0e5b8279e5432f457d4356f91f8730d563594cad95d4",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0080",
+      "ground_truth_sha256": "9759c0129e2ebe36b9b4ccf712c9fc76a268264f93186c22991aa630fb9c6108",
+      "image_sha256": "80a8b81172b712cfa250f64e1e2ffa4c7b0a28a36075ca352ce09c8aa025265b",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0081",
+      "ground_truth_sha256": "86157a4d7166cc0dbf47bb711e4b36a4e46f78dcb548ce46110c2803cbdf6a39",
+      "image_sha256": "c2fa1ba7de36ff43795472b4a6986ebf5c5b9c0fef5d5e7b50f8bce433222f9d",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0082",
+      "ground_truth_sha256": "ce5254f647cbf6bdcde4da8ef35666a934caedc7c044d0586b70adff4af74ca2",
+      "image_sha256": "766a45d840e3b9e1715d807835cf51f7da993c0da2c869623dcce2edf237bca2",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0083",
+      "ground_truth_sha256": "2e417ae0caad4eaf19728b570a992989c3f789b70be03fd9d3cfee57e8af7c9e",
+      "image_sha256": "736663eed0d0786089900d21e2c2abcecd4bfa001170281d05b47d2dbc6a2475",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0084",
+      "ground_truth_sha256": "1fe661e0e8842773f4135dd005a507e875186a5e2c676cd4e44639bf092aa263",
+      "image_sha256": "1c86ca347be1d54b93aea6d5f0ff035bc95284a888203e39e99d4d6c60ab1882",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0085",
+      "ground_truth_sha256": "d73be1c9c2256ebcde9d1d0914a24864622c0711dde05563f51b51f111571e67",
+      "image_sha256": "d488cb8eabf3714decf39bf4ebf5be33b98e4c12a7db13d94851fad6ee6c4a6d",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0086",
+      "ground_truth_sha256": "f4b650dd996cda5d861563fe38d8f2d47005520834bd1ffb839af63623bd02a8",
+      "image_sha256": "87d3a142c1b7477b0ea39e51415b566f01e06db7a9f9f382f1b2ac45653a6cc8",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0087",
+      "ground_truth_sha256": "55a5e74f778a9810b6ac2245c645316ef8131be92704e69cf974c803dc1d32ef",
+      "image_sha256": "91831ef88f430a615c2645789a8092eba2aecf56c4a0626e81e34065ed9cd4ba",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0088",
+      "ground_truth_sha256": "5ae3ef7b6d2ea6d811bed22e9cd7a0f56c731c65eda6533c21884bf1dced0f74",
+      "image_sha256": "a38bc1de5425c245847acbaad763e0a16c6da89227aeb9fb6b185c5e86acf834",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0089",
+      "ground_truth_sha256": "d6103e9e329b3a2f1042fc125230a33d5bbf707eca2292a1843e9f17dfc49e10",
+      "image_sha256": "fc0ce6ddf262e227b7a4a9d26addcf4ad00f987d19419e2cbf03c7467f6aa6ae",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0090",
+      "ground_truth_sha256": "99306ba567639099c3a22eee2fc6f16a25688165f87419c9cc45404e936c8144",
+      "image_sha256": "5bb2876d694142aaed6f26c39c4147b73b41cd023529a7f2b3bd767c57cec8bf",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0091",
+      "ground_truth_sha256": "63d9a40e274a52790c93d6b8db3dd65615976099f1908f6e44d225c4e06ebc83",
+      "image_sha256": "c713ce28c8f2d5734d4ae0a88077490e9925a6f55bceb7bdd917a20d2a1e06d4",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0092",
+      "ground_truth_sha256": "890121ba363c6b4dd35d33c43db1dcb148fc0a5464b16c9f5faae8fb09088dc0",
+      "image_sha256": "fe5619612ef0c105c197f5b6f979f13372b8145325bdc110ffd01b96468af6e5",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0093",
+      "ground_truth_sha256": "232aa527924ab4356b402ac597f8383dba921ea861778bd12ccecb7db8c55574",
+      "image_sha256": "adeaeec486e3a8a234b20a324452fa360677f8e6ec016c95e1f3f8463a527fd1",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0094",
+      "ground_truth_sha256": "672cb973a5cd2acef1f6d79d15518c56a4d6fba5fa12e77fb4be3b9c76e6bff1",
+      "image_sha256": "7d28f962c9358bdee914734cc14345541e87b9860f711e25280fce646c503b3f",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0095",
+      "ground_truth_sha256": "3e393bc05537a5bd8e80b307f05c4eec4be6827f09afd360dd1b76598c0642dc",
+      "image_sha256": "75bc32d1f561fae6d5d34b94353d9f12ebc0cb7f43c870b31166edf4250c599a",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0096",
+      "ground_truth_sha256": "3c673a723592109fead7645daf07c726b70bd180e4deef2d2f6cdf3183fa8b2e",
+      "image_sha256": "b1fa0de27fca92052e6188c1905269974ae5191c93d63034aecf79171336eb3b",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0097",
+      "ground_truth_sha256": "c5556b732e0c5df9d8174ad7ec91e6334d498d2c2df0cae36c57cd0a664a03b6",
+      "image_sha256": "2deaf5b258a455cbe9330850a7af7ae9e2c927d496504cb6d2db11e74f910948",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0098",
+      "ground_truth_sha256": "36c18d7b4914cddb1d68cadf31909183e8dafa08aa475e4cb517d309c544df81",
+      "image_sha256": "fdc82f39c86a3f51bb1b8d884211da7c9c8e46053591f1b3af48802ffed26f43",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0099",
+      "ground_truth_sha256": "94bb9c7812323dab87f2bb000bb28156997d0252f05b6e9768fac8e5a2b07fc0",
+      "image_sha256": "356cf00fdf8eef257fd1db98a97354134251ae5960f82f8eb3eebf49f8697b87",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0100",
+      "ground_truth_sha256": "019010c7f8311b70751ec343cc6b89364c1cbc421112557eff2c2e8d89c5dd24",
+      "image_sha256": "a58ee256c936222013ab68c2fb5f11164a0008374bf17f26edbc9bfe800d9e86",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0101",
+      "ground_truth_sha256": "adc32f8717c401eb2ce31c4fd985ed91ded4ac056761cfcb3259c57a6c37abae",
+      "image_sha256": "77dba16dd3384e90f7245acfefe6afccccbcdef0a885bc4cc4939df1b8bd12bf",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0102",
+      "ground_truth_sha256": "9e398447f277e283e020ebfd1aaa39b66f189261431e74645d7d7d439d068204",
+      "image_sha256": "c22c037b99169942b193d812b6484de213cc7357e55f974b9811a70204380c1a",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0103",
+      "ground_truth_sha256": "b00c4703d02d1c75eb35359472af3affd8709681dcc65b2f45231266c07384c0",
+      "image_sha256": "96672f6e149c7102e6fa83411b644b2f2265ea84741a15a5ec4b366ce46afb81",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0104",
+      "ground_truth_sha256": "4b5c92c43b5dfb1e9daa60f2fa416b7b10d8833839eadd0339d623236b754830",
+      "image_sha256": "c7cca8c50ad3fa070bcda76e5feed766d7997f65e6932f572b1fb7aa148b4a27",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0105",
+      "ground_truth_sha256": "cc208d0b454fd248d908f96a27d2763238bc2efae2277629ab613d9c4d340194",
+      "image_sha256": "5f35c696a58d950639ac716d72c102ddf6b8cf77757ec5841c99cdc5434cd243",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0106",
+      "ground_truth_sha256": "5a8265e5aadcede779c3de3b63b2f3f912c4a3ba9f1e9fe6c078a10425801055",
+      "image_sha256": "9a0db66b6c5b00aa076aaa60314ea7f80e544b0eb601e49e0fb5b677e86d0fd1",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0107",
+      "ground_truth_sha256": "387403be7acf0ccbb1a2ea2fbb5fb1f72f2c5cab318ab4e8a71a9772ac1a8787",
+      "image_sha256": "851fde0ca9bc35bb32a50c5ccd6e20a076670cff68134943f9c1a0d19e1a3c62",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0108",
+      "ground_truth_sha256": "4e75abc18ed6b10d207774d2a50d36fdf2291a58a3d24a0e400ccf75af8b9e20",
+      "image_sha256": "d56274369a424ebf0246b500d283b0b91146a8c7f69b887b0d44a12402100a96",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0109",
+      "ground_truth_sha256": "2e7f1e814a1fdefd15785ce4d3a501ebdfd91df0ab91868e653a5e2765222e48",
+      "image_sha256": "976868020ea735da5b7e0f7e1ea478cb3b0aa6551de3976f5b152ab506731395",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0110",
+      "ground_truth_sha256": "88aa7ccdb35ed22e50dcfeeff5d07cdaaf7168814daf7ead7753498192608595",
+      "image_sha256": "271c145a3e6d88130fe5a3a00a5e47df5f7e9e5bd844ab37d29c91048bd60994",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0111",
+      "ground_truth_sha256": "8cd937f20b3a86fcd3576674862ee782b7514515cd99e60a5c02b051a7d6e2f9",
+      "image_sha256": "64179b7b4fed856ec1038b5534938cbcfa8b2448a74ed99d449944997e5e15b8",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0112",
+      "ground_truth_sha256": "6e0e10af30d9047683a569a80b4ddd1b0cf12b534a817e0b2f4806ad905fd59d",
+      "image_sha256": "e87ab9af3fb9cd2253949fa74ccf00e4c10a8612c1b24d655b9ec662c2cd0ed4",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0113",
+      "ground_truth_sha256": "01a45483d21d362aec3ad82ceb860e16ca630d2cefa55b8cb2ca1c6c2e38c7fa",
+      "image_sha256": "c8cc1e01df1d172d117f78b4fe1d11bd389b138868060202f4dee00d840d6eaf",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0114",
+      "ground_truth_sha256": "3f6ee702f12e33c15017aedc55178a7d389a6b80d9e8c62b69781493d56309b0",
+      "image_sha256": "27f978d56d6371c53b1c82e97b5445138208897470d526758c8d8754751da085",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0115",
+      "ground_truth_sha256": "36e5fbab1629b5442a3352552733a37b2f856fcac82017de230b6e5bcfb5f9fc",
+      "image_sha256": "f00438234e167a1428584e66b1bde19b38b1a74a5d677197c0381287b0824eb4",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0116",
+      "ground_truth_sha256": "c9e310a489b3e9ecf52cc181c14b0c0c715b8f95621ed6ab51d6d03d72d25862",
+      "image_sha256": "7fbe64f4af7819402d2e0f9419eb80970f6dd660cb2620eae8edbb7974c8cb05",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0117",
+      "ground_truth_sha256": "deefe6cd4f5688d2d104d66ebfbdad5a7a05289b2766aa2a2ce4675f759eb9bb",
+      "image_sha256": "95fa068b385e274ada541d0d074c8b48cc3257567a76e188b0e0347c2c9ba92d",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0118",
+      "ground_truth_sha256": "9c4f5798e6b89b0fd370d777bd85572b6cda4cbf0a7511f7efb9e7e5e33a28e8",
+      "image_sha256": "6545865355e5c6f656004422cd970b826369220a6571cb5bfe6be4b1bba5f923",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0119",
+      "ground_truth_sha256": "b4206bb835ddfb8744f044c1826222b9a7be5f775c92c965495195cc06872b88",
+      "image_sha256": "87f404effdd413e6b0243166fb457b42a5eb8d65c96981aced40dbb9871d788a",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0120",
+      "ground_truth_sha256": "cfeee9f0a36e3f757cee606daa9562fe0b4c0b44c506237078caf3c2afd241f7",
+      "image_sha256": "5d00c9213b9fff11e2e3d4067d8a2c134f6f39863f8ab4f1ee2376eeee05f1aa",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0121",
+      "ground_truth_sha256": "509aece60f7a775e0c0ba4d53ea0b47190c33194ac14fbc49ba8d5291eb1012e",
+      "image_sha256": "a84d436c3847ee9b203c9ac20170aa73890c4898621cd9e4f0447fba79581a30",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0122",
+      "ground_truth_sha256": "98f49c73efbb99bdc20d41e6a5edc465339d0c32b0fd828bd6232c2740056558",
+      "image_sha256": "b9941f7750ec1a2bcaa79002c6a8e7c232431c0096f362bf1c5621483ce97524",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0123",
+      "ground_truth_sha256": "a898fafabee3e7f13af8c724bfd81f05293748a7f45c07033ab29dd4a086a397",
+      "image_sha256": "3012f3929117e21d139b8f06ce18350fd13859afaa432d24853b9752cadf902c",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0124",
+      "ground_truth_sha256": "43ccaa5944e2c577b33465b649d068129acd598545c8864a993b4a3ac3d46b3b",
+      "image_sha256": "ceffa34ef819865fa36e3bd30dcf7978e080eb96e40fa72fb0da5ab1eed7bf60",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0125",
+      "ground_truth_sha256": "7bb6c0e7c18cc389adb2c0e276d7679ba0eef146ffb8f5b5ab1a82b9e465638f",
+      "image_sha256": "bebff19f6fb4c2b65bd0e360958dc705e4e3ef69906591466d183aa2125faccd",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0126",
+      "ground_truth_sha256": "460171d7896075a760fcd6082d767af0091e5dbb6620f594db763b7c3a91fac6",
+      "image_sha256": "e228f2c7cb38b87d7d132e150e63bec2f94765b92fc3a868d1c3a1fbab8dcc72",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0127",
+      "ground_truth_sha256": "e138f72358e4285fa816440ed4dca3d7cc130776b646446e6b1a0396f8b5adca",
+      "image_sha256": "7a5e5b241a69163760fe52712122b91110353528270d0bcd9ce86aaf14f8d2ae",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0128",
+      "ground_truth_sha256": "f1e79ad0eedf6c0e3c36dab70a420440d4e2705c8cb2b1c31d7570d8eb19e7b3",
+      "image_sha256": "084fb2410ed4c25c4385c7df9a4c0cd42319f5acf9c6c8006370c5d0fb82efa7",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0129",
+      "ground_truth_sha256": "66ba7d3d8ee9eca5474aa0bf2e476c4cd495228210b644ca5108dc2ec45bb99d",
+      "image_sha256": "90a66e4104a30a03199c455f95d8a5c3c6525356f5df1ad849a993a50ea8d8bb",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0130",
+      "ground_truth_sha256": "49259f3b59d17371233be1e117ab063823f852fcfdf6eef6d681da27c98f0873",
+      "image_sha256": "d072ac5072823f1e3beb2a4aa066b05667e4dbfc40121f1427db71867e11faf2",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0131",
+      "ground_truth_sha256": "32b96992628f1eedcd5451cd2d2b62d2aa190a8b436e3f4647155ae740e4c95d",
+      "image_sha256": "7dc454fc959e19026c80ba9c98284e9b4043de46d78dafad1d8dfc5b487cbf31",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0132",
+      "ground_truth_sha256": "743eecff44c5293e419b16c0e2550028569dda6fffaa7b279de3ab97a3741f4d",
+      "image_sha256": "7f642b0fdc8db61ebace4daf8c6d53dabc956e4264414906b0fc14c970f65a01",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0133",
+      "ground_truth_sha256": "05cde3cf5670477b9009f3e88a054c8ee8dc7a1612889020c089cc48e5848450",
+      "image_sha256": "73e50f51b0ef248dd3ef3d5885b38dcbdbda8074348948162f6fe623ada1e6bf",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0134",
+      "ground_truth_sha256": "119a59fbf681516aa9fad4855298dd7a06d43f1a600e0c903694541e52078f7f",
+      "image_sha256": "5e915f1f2ba4343622e57a54edd92f22b869963a069de6ec6faa4e0ff031a913",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0135",
+      "ground_truth_sha256": "4134f53b87935bf9465d13b080143a5d3df90f6f1f5c75747c3d8932cd2c194f",
+      "image_sha256": "0cdadff14d336f7e55b58ed72a239a466892387742df55616054ff714c7abca9",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0136",
+      "ground_truth_sha256": "11ce0b04e658011d535a9c213843ba71dcc7ac862a115f907ea689a63a0ac9d1",
+      "image_sha256": "9d90faf919db470ffa3a40919e63ee0c9a63a21ed41c077d8c675b0afb9d3220",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0137",
+      "ground_truth_sha256": "6c03834bdea934d02d7f4c53acc99600116b59d1cd37ef3f164684c55c5aa16d",
+      "image_sha256": "d093aac51aa948d56584ac2c6541cf5f53bc1d9eed7c7602408e9e5fcc76d2b1",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0138",
+      "ground_truth_sha256": "3ca3fba56e0aca1b7201ed69c1e7fd98b2bfe034c054cbd29327b13b9dfe44bc",
+      "image_sha256": "2f0883d204a2bb9f4b09fe507b9bc5be5b09ff98967531220dc5bc9ec13fc1c8",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0139",
+      "ground_truth_sha256": "347570e22632b98fe24f05e1145f2ff2fb361246b23c3226bf1737091b466ca4",
+      "image_sha256": "6cc98c81814da102d425d19e26c70c16d8509efc86e0228163772b2e3d5efde4",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0140",
+      "ground_truth_sha256": "1dd85dbe97557d8ec2966b0f30ed4837d1caa9fe1f8ca1a39e9f8b0a57b19b6f",
+      "image_sha256": "690d935fe40204c0208207e14a999b8ae15e7f0cfe9e61116e1538d21faf58be",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0141",
+      "ground_truth_sha256": "3f838e5b1ce573d992d5b986e46060f1368bd5e7145a93df43d34b37a89e3076",
+      "image_sha256": "a9a070385c1230087bd0a0e7845d355f7dea135a1e4e9384b582026aabe8cd33",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0142",
+      "ground_truth_sha256": "fdc03d1609c24f991e3e4805e2d23a31797c6fb90c36c23ba986818e73af1b2e",
+      "image_sha256": "4a610098f00d014ca16eee632f5099c4648a397eb8b385968eaae9f724a87664",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0143",
+      "ground_truth_sha256": "a80d0a95d8494a4e0d81d0798051e60c378daeb059a97eb97b8a6974d91882e0",
+      "image_sha256": "533717e133c691ffca8f5ed6af929759ad7423df27cc8c3c2fcf1d634b0a680b",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0144",
+      "ground_truth_sha256": "998882a8473c64a6ac12774299f96d4dd5cadc52fb2978a6fa91cd807f0076a6",
+      "image_sha256": "b41c226aaaa5525319ded54e2848ad2af562c976075684d7f4f6e22dfe78b526",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0145",
+      "ground_truth_sha256": "c425656023f43e6b50482d046a4d505ca391544ed3080df777ad7838b57786d5",
+      "image_sha256": "00955f67c40c726f158ebbfabdfb22eec7e68762ecd1f89e42ceacb14428cfb5",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0146",
+      "ground_truth_sha256": "ef1c29647b4a6a231d884d6bea17ef16937019add77c0baa6f68a3d3d668d994",
+      "image_sha256": "1077e03098c8d82b32c161236d39eb8c28ead81e40ba51337b9464aa8f3ad468",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0147",
+      "ground_truth_sha256": "eb53cb00409827d94f3d67847bbcf66dc98fe52c9a8224d06b245ddc92285479",
+      "image_sha256": "86767f04107092300139d28d94e7725c12eb142f58c866b32b14f98e641b3d4e",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0148",
+      "ground_truth_sha256": "560973396731234fb171150375be96075760b8a52244c51e239bae969e349a4b",
+      "image_sha256": "553f310a20394bf37896fbc71f7e03522776cd209dcd65679f32ce3d05115499",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0149",
+      "ground_truth_sha256": "ac1b0ea54235486e2c2cb1ec147daafbaa337ee002c5a8ce888eb85a982250a4",
+      "image_sha256": "e35836161a5938d64bf77d8671e7c57ee9b3d4bac59ae89faeb24bbac057e529",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0150",
+      "ground_truth_sha256": "daa2ca82b89529fa4b0dcb87f766d0a1035a2093df5ba3e25596abda10641c4a",
+      "image_sha256": "ef49c1cb5fde884cf4e531677e837ac4034be5380f6ad52975133636e5565fce",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0151",
+      "ground_truth_sha256": "ce620a995558a5295671703ed6c6cf516be849b41fcf0e91aed4ddd7bdf29b7e",
+      "image_sha256": "bc7f216bf22090c6214b325a63cce54be060d7e508e07b37908545481846e998",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0152",
+      "ground_truth_sha256": "2866597eb16ba26b64bbd285204d39d5313245e4b3376753e2059ca4f6169b2a",
+      "image_sha256": "0704a8afed2158a70feca60d557de079408c6b0d3396d5c9bb9515a12d218946",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0153",
+      "ground_truth_sha256": "f13a1162958941cd2debeacba4886a30269d086da02a274fc91a91ed05c6d9c1",
+      "image_sha256": "c35c7715f3261d872ea7a206ac0b549612711d20539c9ba3cad8f86cf45f3f9b",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0154",
+      "ground_truth_sha256": "c6467bbd540f2a476452aed4ddd59583c1b7c2c05b2965b4e91a90f3bc314fe9",
+      "image_sha256": "2f631928021f5f0e14154dd3c855b21b407b565fcbe0fe8e9619846ad085b104",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0155",
+      "ground_truth_sha256": "c8fd14c64583748f797e55b8f4aee34ae6fc38a7817c0ca5e44089af66ccb280",
+      "image_sha256": "f395510e4b83c8c16857e855377722ca97616ccc63f4aa68ccb14be9b46e2e15",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0156",
+      "ground_truth_sha256": "280ff7cd27fe0ff4fcfcae657e11fb7ccf8d337ef9cde17bba5d27bf1e48aac9",
+      "image_sha256": "1e19ed0e6ffe6f01f60e0ce13579c6e8600d57ccdf722b8341f16d397957ecbe",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0157",
+      "ground_truth_sha256": "17e18e4992f460fc9ed4edbae8a36621ab97c133015a5fead401f9983b0e0787",
+      "image_sha256": "07f1aedd08ab2fd75254693be5d6e2e15cd97092ece9c5dcc42d42190851ccc5",
+      "renderer_family": "hidden-reverse-tail-v8-public"
+    },
+    {
+      "degradation_family": "hidden-document-noise-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0158",
+      "ground_truth_sha256": "989a17136fa539fd1301c208d3ebda036d6a1eacdea42dbe5934ecdce981cac8",
+      "image_sha256": "ae6f49fabebf08e919f0e812bf624b9b0efb0ffd85a42162e1e0be38ae11a55c",
+      "renderer_family": "hidden-multiphase-fan-v8-public"
+    },
+    {
+      "degradation_family": "hidden-photocopy-chain-v8-public",
+      "fixture_id": "marker-mask-consensus-v8-sealed_public-0159",
+      "ground_truth_sha256": "2b07daea041ea4516fccf4bd65e39b1212c82ec768618cb1857879dd9d112571",
+      "image_sha256": "9a75d2d1c7d5fa01e0f48fd9e0806495238b07e55cb8943783335364a1087ae9",
+      "renderer_family": "hidden-broken-slope-v8-public"
+    }
+  ],
+  "private_data": false,
+  "revision": "marker-center-mask-consensus-v8",
+  "schema": "graphreader.marker-center-mask-consensus-public-dataset.v8",
+  "scope": "public_synthetic_truth_hidden",
+  "seed": 8117
+}
