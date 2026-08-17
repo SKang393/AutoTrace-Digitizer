@@ -47,12 +47,12 @@ def _json(path: Path) -> dict[str, object]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def test_protocol_consumes_p2_and_authorizes_only_final_p3_once() -> None:
+def test_protocol_exhausts_p3_after_fail_closed_parity_preflight() -> None:
     protocol = _json(ROOT / "PROTOCOL.json")
-    assert protocol["state"] == "candidate_3_authorized_once_not_executed"
+    assert protocol["state"] == "exhausted_failed_runner_before_training"
     assert protocol["experiment_budget"] == 3
-    assert protocol["preregistered_candidate_ids"] == ["P3"]
-    assert protocol["consumed_candidate_ids"] == ["P1", "P2"]
+    assert protocol["preregistered_candidate_ids"] == []
+    assert protocol["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert protocol["remaining_unregistered_candidate_ids"] == []
     assert protocol["selection_gates"]["selection_thresholds"] == list(THRESHOLDS)
     assert protocol["split_materialized"] is True
@@ -63,8 +63,8 @@ def test_protocol_consumes_p2_and_authorizes_only_final_p3_once() -> None:
     assert protocol["p2_preregistration_tree"] == "60ba3da228ee369dcc2b1b27c3b6e2306b2acd63"
     assert protocol["p3_preregistration_commit"] == "ac22709bae98c91d7480b93f455f4c6fa66da2cc"
     assert protocol["p3_preregistration_tree"] == "952a54df56044671d0439d4dfb5c713184c102f5"
-    assert protocol["authorized_candidate_id"] == "P3"
-    assert protocol["execution_authorized"] is True
+    assert protocol["authorized_candidate_id"] is None
+    assert protocol["execution_authorized"] is False
     assert protocol["p1_status"] == "failed_selection_consumed"
     assert protocol["p1_selection_exact_scene_count"] == 122
     assert protocol["p1_selection_false_positives"] == 6
@@ -75,6 +75,25 @@ def test_protocol_consumes_p2_and_authorizes_only_final_p3_once() -> None:
     assert protocol["p2_selection_false_positives"] == 6
     assert protocol["p2_selection_false_negatives"] == 23
     assert protocol["p2_case_detail_or_pixels_inspected"] is False
+    assert protocol["p3_status"] == "failed_runner_consumed"
+    assert protocol["p3_optimizer_steps"] == 0
+    assert protocol["p3_failure_phase"] == "p2_parity_localization"
+    assert protocol["p3_expected_parity_by_output_channel"] == [
+        0.0000033080577850341797,
+        0.00001621246337890625,
+        0.000008970499038696289,
+    ]
+    assert protocol["p3_observed_parity_by_output_channel"] == [
+        0.000003874301910400391,
+        0.00001621246337890625,
+        0.000008970499038696289,
+    ]
+    assert protocol["historical_gate_and_training_seal_file_count_after_p3"] == 286
+    assert (
+        protocol["historical_gate_and_training_seal_aggregate_sha256_after_p3"]
+        == "d77220d7d1ad27b3930b4c8d516ea753e054fc42192804a60d9fe28d80f71fc4"
+    )
+    assert protocol["p3_case_detail_or_pixels_inspected"] is False
     assert protocol["public_gate_authorized"] is False
     assert protocol["public_gate_archive_opened"] is False
     assert protocol["public_gate_evaluations"] == 0
@@ -98,6 +117,7 @@ def test_frozen_archives_and_source_bindings_match_exact_bytes() -> None:
     assert sha256_file(ROOT / "PUBLIC_DATASET_MANIFEST.json") == protocol["public_dataset_manifest_sha256"]
     assert sha256_file(ROOT / "P1_RESULT.json") == protocol["p1_result_sha256"]
     assert sha256_file(ROOT / "P2_RESULT.json") == protocol["p2_result_sha256"]
+    assert sha256_file(ROOT / "P3_RESULT.json") == protocol["p3_result_sha256"]
     assert sha256_file(ROOT / "training/p3.json") == protocol["candidate_config_sha256"]
     assert source_bundle_sha256(REPO_ROOT, DESIGN_SOURCE_PATHS) == protocol["design_source_bundle_sha256"]
     assert source_bundle_sha256(REPO_ROOT, P1_RUNNER_SOURCE_PATHS) == p1_config["expected_runner_source_bundle_sha256"]
@@ -114,17 +134,18 @@ def test_frozen_archives_and_source_bindings_match_exact_bytes() -> None:
     assert freeze["optimizer_step_count_at_freeze"] == 0
     assert public_seal["public_gate_archive_opened"] is False
     assert public_seal["public_gate_evaluations"] == 0
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["status"] == "exhausted_failed_runner"
+    assert entry["protocol_sha256"] == sha256_file(ROOT / "PROTOCOL.json")
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["preregistration_commit"] == "4e20674d0d7a15896005a066c2054753dbf5d7dd"
     assert entry["preregistration_tree"] == "0e51075b8cd082b9ce48e0232fa008fee9e9627a"
     assert entry["p2_preregistration_commit"] == "483dce39bae5c5285edc85469939f585e3618d4b"
     assert entry["p2_preregistration_tree"] == "60ba3da228ee369dcc2b1b27c3b6e2306b2acd63"
     assert entry["p3_preregistration_commit"] == "ac22709bae98c91d7480b93f455f4c6fa66da2cc"
     assert entry["p3_preregistration_tree"] == "952a54df56044671d0439d4dfb5c713184c102f5"
-    assert entry["authorized_candidate_id"] == "P3"
-    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is False
     assert entry["public_gate_authorized"] is False
 
 
@@ -277,7 +298,7 @@ def test_p3_is_aggregate_only_bounded_final_candidate() -> None:
     assert config["public_gate_evaluations"] == 0
     assert protocol["p3_expected_optimizer_steps"] == 768
     assert protocol["p3_fixed_radius_pixels"] == 2.5
-    assert protocol["execution_authorized"] is True
+    assert protocol["execution_authorized"] is False
 
 
 def test_p3_photometric_change_preserves_masks_and_fixed_radius_contract() -> None:

@@ -5606,7 +5606,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-mask-consensus-v8",
-      "status": "candidate_3_preregistered",
+      "status": "exhausted_failed_runner",
       "defect_class": "aggregate V7 evidence showed joint marker and artifact underfitting with 50 of 96 exact scenes, 11 false positives, 85 false negatives, four arrowhead hits, one marker-artifact hit, artifact precision 0.8523057467207811, artifact recall 0.9580230017289313, and failed 1e-5 CPU parity",
       "prior_revision": "marker-center-domain-randomized-v7",
       "trigger_result_path": "ml/markers/center/domain_randomized_v7/P3_RESULT.json",
@@ -5619,16 +5619,15 @@
       "architecture": "mask-consensus-residual-unet-v8",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [
-        "P3"
-      ],
+      "preregistered_candidate_ids": [],
       "consumed_candidate_ids": [
         "P1",
-        "P2"
+        "P2",
+        "P3"
       ],
       "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/markers/center/mask_consensus_v8/PROTOCOL.json",
-      "protocol_sha256": "ae9895354865441ce67319629e174582f1724f384b02eda67caab354e27d8b3c",
+      "protocol_sha256": "136cc15bddc3aed25ee11654fb75099853407372776d6dcacbf7100ce64813e4",
       "split_materialized": true,
       "split_freeze_report_path": "ml/markers/center/mask_consensus_v8/SPLIT_FREEZE_REPORT.json",
       "split_freeze_report_sha256": "79263032da33b9119078ee645e41f9a5bea3f1a9103ecaee404d5139f0934938",
@@ -5690,6 +5689,28 @@
       "expected_runner_source_bundle_sha256": "2d752f791afef681c610aac03d23d4299d4c2c7612716a06693242ba3674a5c4",
       "expected_optimizer_steps": 768,
       "fixed_radius_pixels": 2.5,
+      "p3_result_path": "ml/markers/center/mask_consensus_v8/P3_RESULT.json",
+      "p3_result_sha256": "fd2dfa1a196e4ddbb63d5099fbc44e734630370e211e7917509286b5ee3204f8",
+      "p3_status": "failed_runner_consumed",
+      "p3_candidate_report_sha256": "a40cbdee8a332f639cfee68df974b77c53c55f5e57847f72e3fc0854cd4b9f9b",
+      "p3_optimizer_steps": 0,
+      "p3_failure_phase": "p2_parity_localization",
+      "p3_expected_parity_by_output_channel": [
+        0.0000033080577850341797,
+        0.00001621246337890625,
+        0.000008970499038696289
+      ],
+      "p3_observed_parity_by_output_channel": [
+        0.000003874301910400391,
+        0.00001621246337890625,
+        0.000008970499038696289
+      ],
+      "p3_training_opened_seal_sha256": "ca153280e4cbee2ef335c53390f54d209cf2058bd17d6de6fbebdc17303247b4",
+      "p3_training_result_seal_sha256": "e676945f68616de32d8de6e1d255e881e1849064853ebd19320f4db372bac91d",
+      "historical_gate_and_training_seal_file_count_after_p3": 286,
+      "historical_gate_and_training_seal_aggregate_sha256_after_p3": "d77220d7d1ad27b3930b4c8d516ea753e054fc42192804a60d9fe28d80f71fc4",
+      "p3_case_detail_or_pixels_inspected": false,
+      "p3_failure": "P3 acquired its single-use committed authorization and failed closed during P2 per-channel parity localization before training. Center-channel parity reproduced as 0.000003874301910400391 instead of the exact preregistered 0.0000033080577850341797; radius and artifact values matched exactly. Zero optimizer steps ran.",
       "artifact_threshold": 0.35,
       "selection_thresholds": [
         0.3,
@@ -5711,9 +5732,9 @@
       "p2_preregistration_tree": "60ba3da228ee369dcc2b1b27c3b6e2306b2acd63",
       "p3_preregistration_commit": "ac22709bae98c91d7480b93f455f4c6fa66da2cc",
       "p3_preregistration_tree": "952a54df56044671d0439d4dfb5c713184c102f5",
-      "execution_authorized": true,
-      "authorized_candidate_id": "P3",
-      "execution_blocker": null,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1, P2, and P3 are consumed. P3 failed the exact committed per-channel parity-reproduction preflight before training with zero optimizer steps. V8 cannot rerun; a future attempt requires a new preregistered defect class and fresh splits.",
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,

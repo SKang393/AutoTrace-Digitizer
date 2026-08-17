@@ -1,0 +1,41 @@
+{
+  "schema": "graphreader.marker-center-mask-consensus-result.v8",
+  "task": "marker-center",
+  "revision": "marker-center-mask-consensus-v8",
+  "candidate_id": "P3",
+  "status": "failed_runner_consumed",
+  "candidate_report_path": "ml/markers/center/artifacts/mask-consensus-v8/P3-run/candidate-report.json",
+  "candidate_report_sha256": "a40cbdee8a332f639cfee68df974b77c53c55f5e57847f72e3fc0854cd4b9f9b",
+  "failure_phase": "p2_parity_localization",
+  "failure_type": "RuntimeError",
+  "failure_message": "Marker-center V8 P2 per-channel parity evidence changed",
+  "optimizer_steps": 0,
+  "expected_optimizer_steps": 768,
+  "p2_expected_parity_by_output_channel": [
+    0.0000033080577850341797,
+    0.00001621246337890625,
+    0.000008970499038696289
+  ],
+  "p2_observed_parity_by_output_channel": [
+    0.000003874301910400391,
+    0.00001621246337890625,
+    0.000008970499038696289
+  ],
+  "p2_center_parity_reproduction_difference": 0.0000005662441253662109,
+  "p2_radius_parity_reproduced_exactly": true,
+  "p2_artifact_parity_reproduced_exactly": true,
+  "training_opened_seal_sha256": "ca153280e4cbee2ef335c53390f54d209cf2058bd17d6de6fbebdc17303247b4",
+  "training_result_seal_sha256": "e676945f68616de32d8de6e1d255e881e1849064853ebd19320f4db372bac91d",
+  "historical_gate_and_training_seal_file_count_after_p3": 286,
+  "historical_gate_and_training_seal_aggregate_sha256_after_p3": "d77220d7d1ad27b3930b4c8d516ea753e054fc42192804a60d9fe28d80f71fc4",
+  "aggregate_only_evidence": true,
+  "case_detail_or_pixels_inspected": false,
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "manifest_created": false,
+  "model_store_promoted": false,
+  "packaging_discovery": false,
+  "private_validation": false,
+  "production_approval": false,
+  "release_eligible": false
+}

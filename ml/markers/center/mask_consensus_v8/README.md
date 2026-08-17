@@ -43,16 +43,23 @@ checkpoint, and ONNX SHA-256 values are `223201e3...0f7e`,
 with zero evaluations, and no manifest, store, package, private validation,
 approval, or release state changed.
 
-P2 is now preregistered from those aggregate values only. It reuses the exact
-consumed P1 checkpoint and ONNX with zero optimizer steps and changes only the
-artifact decision threshold from `0.35` to `0.45`, using the available artifact
-recall margin to address insufficient precision and center suppression. Its
-config and runner bundle SHA-256 values are `d3b24a0...4f14` and
-`d57bce0c...f870`. Commit `483dce39bae5c5285edc85469939f585e3618d4b`,
-tree `60ba3da228ee369dcc2b1b27c3b6e2306b2acd63`, contains those exact
-preregistered bytes. The canonical ledger now authorizes only P2 for one
-execution from that identity. P3 remains unregistered. The truth-hidden
-public archive can be opened once only after a candidate passes a
-three-threshold zero-error selection window and direct CPU parity. A public pass
-still does not authorize a manifest, model store, packaging, private Chandler
-validation, production approval, or release.
+P2 reused the exact consumed P1 checkpoint and ONNX with zero optimizer steps
+and changed only the artifact decision threshold from `0.35` to `0.45`. It
+still passed only 122 of 128 visible scenes, with 1,193 true positives, six
+false positives, 23 misses, artifact precision `0.7872885671271697`, artifact
+recall `0.9829926331356857`, and failed CPU parity
+`0.00001621246337890625`. Its report and result seal SHA-256 values are
+`14d02a58...af9` and `15b3b8c8...cb3`.
+
+Final P3 acquired its single-use committed authorization, then failed closed
+before training during the exact P2 per-channel parity-reproduction preflight.
+Center-channel parity reproduced as `0.000003874301910400391` instead of the
+preregistered `0.0000033080577850341797`; radius and artifact values matched
+exactly. Zero optimizer steps ran. Candidate report, tracked result, opened
+seal, and result seal SHA-256 values are `a40cbdee...9f9b`,
+`fd2dfa1a...04f8`, `ca153280...47b4`, and `e676945f...c91d`. P1, P2, and P3
+are consumed, V8 is exhausted, and it cannot rerun. The truth-hidden public
+archive remains unopened at zero evaluations. No manifest, model store,
+packaging, private Chandler validation, production approval, or release is
+authorized. A future attempt requires a new preregistered defect class and
+fresh splits.
