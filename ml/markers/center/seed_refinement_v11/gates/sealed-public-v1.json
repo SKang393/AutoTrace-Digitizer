@@ -1,0 +1,27 @@
+{
+  "schema": "graphreader.marker-center-seed-refinement-public-gate-config.v11",
+  "task": "marker-center",
+  "revision": "marker-center-seed-refinement-v11",
+  "split": "sealed_public",
+  "expected_candidate_hash_keys": [
+    "candidate_report_sha256",
+    "onnx_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "552558d3ba48de596788527607ebdd01dabf467fd29255b8175e6b9640f22c39",
+  "expected_public_fixture_archive_sha256": "046c5269104b15f3921ec7bdd3f5305cc4a4cb61a15d86f2ae7fcae8b74e4ca9",
+  "expected_split_seal_sha256": "7235642eb97c194d9be71ba839e1df6e53b9a6bdfeb4b238645519c12839daa5",
+  "expected_evaluator_source_bundle_sha256": "7811cd087f5d99ca0f702b73f1412fcd973750e7b18700dd6a979ad56e5d6aa0",
+  "expected_gate_config_sha256": "57915a97bbace8e99e6820335e78240de49a55a4d126deb2a03bb0163289e1a8",
+  "provider": "CPUExecutionProvider",
+  "runtime_pass_count": 1,
+  "runtime_postprocess_profile": "nonmonotonic_seed_refinement_v1",
+  "execution_limit": 1,
+  "selection_must_pass_before_open": true,
+  "public_gate_authorized": false,
+  "public_gate_evaluations": 0,
+  "public_gate_archive_opened": false,
+  "private_data": false,
+  "chandler_used": false,
+  "production_approval": false,
+  "release_eligible": false
+}

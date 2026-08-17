@@ -1,0 +1,61 @@
+{
+  "revision": "marker-center-seed-refinement-v11",
+  "schema": "graphreader.marker-center-seed-refinement-selection.v11",
+  "sealed_public": {
+    "archive_path": "ml/markers/center/artifacts/seed-refinement-v11/split-freeze-r2/sealed-public.npz",
+    "archive_sha256": "046c5269104b15f3921ec7bdd3f5305cc4a4cb61a15d86f2ae7fcae8b74e4ca9",
+    "count": 160,
+    "degradation_family": "seed-refinement-capture-v11-public",
+    "feasibility": {
+      "hard_negative_count": 1440,
+      "hard_point_missing_from_artifact_truth_count": 0,
+      "minimum_center_separation_px": 12.083045959472656,
+      "minimum_truth_to_hard_negative_distance_px": 11.045360565185547,
+      "required_disjoint_clearance_px": 11.0,
+      "scene_count": 160,
+      "truth_center_count": 1520,
+      "truth_hard_acceptance_overlap_count": 0,
+      "truth_mask_conflict_count": 0
+    },
+    "renderer_family": "seed-refinement-layout-v11-public",
+    "seed_offset": 16011411
+  },
+  "train": {
+    "archive_path": "ml/markers/center/artifacts/seed-refinement-v11/split-freeze-r2/train.npz",
+    "archive_sha256": "2039ca41c27eee65f561780c93fcb2a64b726567e1e86679423033a805abb058",
+    "count": 512,
+    "degradation_family": "seed-refinement-capture-v11-train",
+    "feasibility": {
+      "hard_negative_count": 4608,
+      "hard_point_missing_from_artifact_truth_count": 0,
+      "minimum_center_separation_px": 12.041594505310059,
+      "minimum_truth_to_hard_negative_distance_px": 11.045360565185547,
+      "required_disjoint_clearance_px": 11.0,
+      "scene_count": 512,
+      "truth_center_count": 4864,
+      "truth_hard_acceptance_overlap_count": 0,
+      "truth_mask_conflict_count": 0
+    },
+    "renderer_family": "seed-refinement-layout-v11-train",
+    "seed_offset": 24411411
+  },
+  "validation": {
+    "archive_path": "ml/markers/center/artifacts/seed-refinement-v11/split-freeze-r2/validation.npz",
+    "archive_sha256": "d3f2cdbcfd9872e066b6935f7c8464a19e06f16d94bc5ca262dc9ebf15762868",
+    "count": 128,
+    "degradation_family": "seed-refinement-capture-v11-validation",
+    "feasibility": {
+      "hard_negative_count": 1152,
+      "hard_point_missing_from_artifact_truth_count": 0,
+      "minimum_center_separation_px": 12.041594505310059,
+      "minimum_truth_to_hard_negative_distance_px": 11.045360565185547,
+      "required_disjoint_clearance_px": 11.0,
+      "scene_count": 128,
+      "truth_center_count": 1216,
+      "truth_hard_acceptance_overlap_count": 0,
+      "truth_mask_conflict_count": 0
+    },
+    "renderer_family": "seed-refinement-layout-v11-validation",
+    "seed_offset": 15211411
+  }
+}

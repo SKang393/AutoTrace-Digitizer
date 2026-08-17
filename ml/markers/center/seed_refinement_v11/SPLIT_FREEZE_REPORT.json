@@ -1,0 +1,61 @@
+{
+  "chandler_used": false,
+  "cross_split_source_overlap_count": 0,
+  "generator_source_bundle_sha256": "7d32f2615bd05bbfa2345d78f7bc172425107a8ccfcaa18e976e41842a39109f",
+  "generator_source_paths": [
+    "ml/markers/center/mask_consensus_v8/dataset.py",
+    "ml/markers/center/decoupled_heads_v10/AGGREGATE_FEASIBILITY.json",
+    "ml/markers/center/seed_refinement_v11/dataset.py",
+    "ml/markers/center/seed_refinement_v11/prepare_split.py",
+    "ml/markers/center/seed_refinement_v11/protocol.py"
+  ],
+  "materialized_utc": "2026-08-17T17:25:22.266164+00:00",
+  "model_execution_count_at_freeze": 0,
+  "optimizer_step_count_at_freeze": 0,
+  "private_data": false,
+  "production_approval": false,
+  "public_dataset_manifest_sha256": "552558d3ba48de596788527607ebdd01dabf467fd29255b8175e6b9640f22c39",
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "release_eligible": false,
+  "revision": "marker-center-seed-refinement-v11",
+  "schema": "graphreader.marker-center-seed-refinement-split-freeze.v11",
+  "sealed_public_feasibility": {
+    "hard_negative_count": 1440,
+    "hard_point_missing_from_artifact_truth_count": 0,
+    "minimum_center_separation_px": 12.083045959472656,
+    "minimum_truth_to_hard_negative_distance_px": 11.045360565185547,
+    "required_disjoint_clearance_px": 11.0,
+    "scene_count": 160,
+    "truth_center_count": 1520,
+    "truth_hard_acceptance_overlap_count": 0,
+    "truth_mask_conflict_count": 0
+  },
+  "sealed_public_fixture_archive_sha256": "046c5269104b15f3921ec7bdd3f5305cc4a4cb61a15d86f2ae7fcae8b74e4ca9",
+  "sealed_public_test_seal_sha256": "7235642eb97c194d9be71ba839e1df6e53b9a6bdfeb4b238645519c12839daa5",
+  "selection_manifest_sha256": "0a1d4b47739ad7b4d961ed77e1bd47dfd3909071c378ba041ba7cd62c9f41721",
+  "train_archive_sha256": "2039ca41c27eee65f561780c93fcb2a64b726567e1e86679423033a805abb058",
+  "train_feasibility": {
+    "hard_negative_count": 4608,
+    "hard_point_missing_from_artifact_truth_count": 0,
+    "minimum_center_separation_px": 12.041594505310059,
+    "minimum_truth_to_hard_negative_distance_px": 11.045360565185547,
+    "required_disjoint_clearance_px": 11.0,
+    "scene_count": 512,
+    "truth_center_count": 4864,
+    "truth_hard_acceptance_overlap_count": 0,
+    "truth_mask_conflict_count": 0
+  },
+  "validation_archive_sha256": "d3f2cdbcfd9872e066b6935f7c8464a19e06f16d94bc5ca262dc9ebf15762868",
+  "validation_feasibility": {
+    "hard_negative_count": 1152,
+    "hard_point_missing_from_artifact_truth_count": 0,
+    "minimum_center_separation_px": 12.041594505310059,
+    "minimum_truth_to_hard_negative_distance_px": 11.045360565185547,
+    "required_disjoint_clearance_px": 11.0,
+    "scene_count": 128,
+    "truth_center_count": 1216,
+    "truth_hard_acceptance_overlap_count": 0,
+    "truth_mask_conflict_count": 0
+  }
+}
