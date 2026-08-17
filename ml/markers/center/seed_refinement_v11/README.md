@@ -24,11 +24,23 @@ offsets, scene identities, archives, and source hashes are new. The split is
 synthetic only. It contains no Chandler, article, private, external dataset, or
 prior fixture bytes.
 
-P1 is authorized exactly once from preregistration commit
-`729d51e916c8433e4c3ccadccd28d7038007ce12` and tree
-`66054ffe3f52814c3ccb30b3ada7ec1b4d2d4980`. No optimizer step, candidate
-selection inference, public evaluation, manifest, model-store promotion,
-packaging, private validation, or production approval has occurred at this
-authorization checkpoint. The single-use training seal must refuse a rerun.
-The public archive remains locked even if visible selection later passes,
-until a further candidate-specific public-gate authorization is committed.
+P1 consumed its single authorized 1,792-step CPU run and failed visible
+selection. It passed ONNX parity at `6.377696990966797e-06`, retained zero
+false-positive centers, duplicates, marker-artifact hits, or prohibited
+structure hits at its selected threshold, and passed artifact recall at
+`0.9687703003413912`. It reached 122 of 128 exact scenes with 26 missed
+centers, but artifact precision was only `0.7815472274567087` against the
+unchanged `0.90` gate. The aggregate refined mask added 250,166 seed-negative
+pixels and removed 1,175 seed-positive pixels. No case detail or fixture pixels
+were inspected, and the public archive remains unopened at zero evaluations.
+
+P2 is preregistered from that aggregate-only result. It reuses no P1 model
+bytes and retrains the exact architecture, frozen split, optimizer, seed,
+four-way reflection schedule, existing losses, 1,792-step budget, thresholds,
+CPU provider, parity limit, and zero-error gates from scratch. Its only change
+adds a weight-3.0 binary-cross-entropy term on artifact pixels that are both
+seed-negative and truth-negative. This penalizes unsupported seed additions
+without penalizing additions supported by training truth. P2 execution is not
+authorized at this checkpoint. It requires a separate committed authorization;
+the public archive remains separately locked even if P2 visible selection
+later passes.

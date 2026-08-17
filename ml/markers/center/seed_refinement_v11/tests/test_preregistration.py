@@ -11,6 +11,7 @@ import numpy as np
 import onnxruntime as ort
 import pytest
 import torch
+import torch.nn.functional as functional
 
 from ml.markers.center.decoupled_heads_v10.dataset import (
     DEGRADATION_FAMILIES as V10_DEGRADATION_FAMILIES,
@@ -37,12 +38,18 @@ from ml.markers.center.seed_refinement_v11.public_gate import (
     run as run_public_gate,
 )
 from ml.markers.center.seed_refinement_v11.train_p1 import (
-    RUNNER_SOURCE_PATHS,
+    RUNNER_SOURCE_PATHS as P1_RUNNER_SOURCE_PATHS,
     _evaluate,
     _export,
     _onnx_output,
     _torch_output,
-    _verify_config_and_inputs,
+    _verify_config_and_inputs as verify_p1_config_and_inputs,
+)
+from ml.markers.center.seed_refinement_v11.train_p2 import (
+    P1_RESULT_SHA256,
+    RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
+    _unsupported_seed_addition_loss,
+    _verify_config_and_inputs as verify_p2_config_and_inputs,
 )
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 
@@ -156,31 +163,34 @@ def test_refined_artifact_output_drives_selection_without_seed_union() -> None:
 def test_frozen_sources_configs_and_ledger_match_exact_bytes() -> None:
     protocol = _json(ROOT / "PROTOCOL.json")
     freeze = _json(ROOT / "SPLIT_FREEZE_REPORT.json")
-    config = _json(ROOT / "training/p1.json")
+    p1_config = _json(ROOT / "training/p1.json")
+    p2_config = _json(ROOT / "training/p2.json")
     gate = _json(ROOT / "gates/sealed-public-v1.json")
     ledger = _json(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol["revision"])
-    assert protocol["state"] == "p1_execution_authorized_public_gate_blocked"
+    assert protocol["state"] == "p2_preregistered_execution_blocked_public_gate_blocked"
     assert protocol["preregistration_commit"] == "729d51e916c8433e4c3ccadccd28d7038007ce12"
     assert protocol["preregistration_tree"] == "66054ffe3f52814c3ccb30b3ada7ec1b4d2d4980"
-    assert protocol["execution_authorized"] is True
-    assert protocol["authorized_candidate_id"] == "P1"
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert protocol["execution_authorized"] is False
+    assert protocol["authorized_candidate_id"] is None
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
+    assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["preregistration_commit"] == protocol["preregistration_commit"]
     assert entry["preregistration_tree"] == protocol["preregistration_tree"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert sha256_file(ROOT / "PROTOCOL.json") == entry["protocol_sha256"]
     assert sha256_file(ROOT / "SPLIT_FREEZE_REPORT.json") == protocol["split_freeze_report_sha256"]
     assert sha256_file(ROOT / "SELECTION_MANIFEST.json") == protocol["selection_manifest_sha256"]
     assert sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json") == protocol["sealed_public_test_seal_sha256"]
     assert sha256_file(ROOT / "PUBLIC_DATASET_MANIFEST.json") == protocol["public_dataset_manifest_sha256"]
-    assert sha256_file(ROOT / "training/p1.json") == protocol["candidate_config_sha256"]
+    assert sha256_file(ROOT / "training/p1.json") == "05c8a1f41fa435c9158273a22fc5516dd032ab83d068094e4f5d5a67f1fdd083"
+    assert sha256_file(ROOT / "training/p2.json") == protocol["candidate_config_sha256"]
     assert sha256_file(ROOT / "gates/sealed-public-v1.json") == protocol["public_gate_config_sha256"]
     assert source_bundle_sha256(REPO_ROOT, DESIGN_SOURCE_PATHS) == freeze["generator_source_bundle_sha256"]
-    assert source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
+    assert source_bundle_sha256(REPO_ROOT, P1_RUNNER_SOURCE_PATHS) == p1_config["expected_runner_source_bundle_sha256"]
+    assert source_bundle_sha256(REPO_ROOT, P2_RUNNER_SOURCE_PATHS) == p2_config["expected_runner_source_bundle_sha256"]
     assert source_bundle_sha256(REPO_ROOT, EVALUATOR_SOURCE_PATHS) == gate["expected_evaluator_source_bundle_sha256"]
     assert freeze["model_execution_count_at_freeze"] == 0
     assert freeze["optimizer_step_count_at_freeze"] == 0
@@ -190,7 +200,7 @@ def test_frozen_sources_configs_and_ledger_match_exact_bytes() -> None:
 
 def test_p1_preflight_binds_v10_feasibility_and_frozen_v11_archives() -> None:
     config = _json(ROOT / "training/p1.json")
-    selection, train_path, validation_path = _verify_config_and_inputs(config)
+    selection, train_path, validation_path = verify_p1_config_and_inputs(config)
     assert sha256_file(train_path) == selection["train"]["archive_sha256"]
     assert sha256_file(validation_path) == selection["validation"]["archive_sha256"]
     assert config["aggregate_only_evidence"] is True
@@ -198,6 +208,62 @@ def test_p1_preflight_binds_v10_feasibility_and_frozen_v11_archives() -> None:
     assert config["prior_checkpoint_reused"] is False
     assert config["prior_fixture_bytes_reused"] is False
     assert config["runtime_postprocess_profile"] == "nonmonotonic_seed_refinement_v1"
+
+
+def test_p1_result_binds_exact_aggregate_report_and_single_use_seals() -> None:
+    result = _json(ROOT / "P1_RESULT.json")
+    assert sha256_file(ROOT / "P1_RESULT.json") == P1_RESULT_SHA256
+    seal_root = REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-seed-refinement-v11/P1"
+    assert result["status"] == "failed_selection_consumed"
+    assert result["selection_exact_scene_count"] == 122
+    assert result["selection_false_positives"] == 0
+    assert result["selection_false_negatives"] == 26
+    assert result["artifact_precision"] == 0.7815472274567087
+    assert result["artifact_recall"] == 0.9687703003413912
+    assert result["seed_added_pixels"] == 250166
+    assert result["seed_removed_pixels"] == 1175
+    assert result["case_detail_or_pixels_inspected"] is False
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
+    direct_paths = (
+        REPO_ROOT / result["candidate_report_path"],
+        REPO_ROOT / result["checkpoint_path"],
+        REPO_ROOT / result["onnx_path"],
+        seal_root / "opened.json",
+        seal_root / "result.json",
+    )
+    if not all(path.is_file() for path in direct_paths):
+        pytest.skip("Ignored local P1 payload and seal evidence is not present")
+    assert sha256_file(direct_paths[0]) == result["candidate_report_sha256"]
+    assert sha256_file(direct_paths[1]) == result["checkpoint_sha256"]
+    assert sha256_file(direct_paths[2]) == result["onnx_sha256"]
+    assert sha256_file(direct_paths[3]) == result["training_opened_seal_sha256"]
+    assert sha256_file(direct_paths[4]) == result["training_result_seal_sha256"]
+
+
+def test_p2_preflight_reuses_no_checkpoint_and_binds_aggregate_p1_only() -> None:
+    config = _json(ROOT / "training/p2.json")
+    selection, train_path, validation_path = verify_p2_config_and_inputs(config)
+    assert sha256_file(train_path) == selection["train"]["archive_sha256"]
+    assert sha256_file(validation_path) == selection["validation"]["archive_sha256"]
+    assert config["p1_result_sha256"] == P1_RESULT_SHA256
+    assert config["aggregate_only_evidence"] is True
+    assert config["case_detail_or_pixels_inspected"] is False
+    assert config["p1_checkpoint_reused"] is False
+    assert config["frozen_v11_split_reused"] is True
+    assert config["unsupported_seed_addition_loss_weight"] == 3.0
+
+
+def test_p2_addition_loss_penalizes_only_seed_negative_truth_negative_pixels() -> None:
+    prediction = torch.tensor([[[[0.8, 0.8, 0.8, 0.2]]]], dtype=torch.float32)
+    seed = torch.tensor([[[[0.0, 1.0, 0.0, 0.0]]]], dtype=torch.float32)
+    truth = torch.tensor([[[[0.0, 0.0, 1.0, 0.0]]]], dtype=torch.float32)
+    loss = _unsupported_seed_addition_loss(prediction, seed, truth)
+    expected = functional.binary_cross_entropy(
+        torch.tensor([0.8, 0.2]), torch.zeros(2)
+    )
+    assert torch.allclose(loss, expected)
+    assert _unsupported_seed_addition_loss(prediction, torch.ones_like(seed), truth).item() == 0.0
 
 
 def test_public_gate_refuses_unapproved_candidate_before_model_or_archive_execution(
