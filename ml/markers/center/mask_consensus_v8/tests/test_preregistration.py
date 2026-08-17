@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import subprocess
 
 import numpy as np
 import torch
@@ -37,16 +38,19 @@ def _json(path: Path) -> dict[str, object]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def test_protocol_is_frozen_and_fail_closed_before_execution() -> None:
+def test_protocol_is_frozen_and_authorizes_only_p1_before_execution() -> None:
     protocol = _json(ROOT / "PROTOCOL.json")
-    assert protocol["state"] == "split_frozen_runner_and_public_evaluator_preregistered_execution_blocked"
+    assert protocol["state"] == "candidate_1_authorized_once_not_executed"
     assert protocol["experiment_budget"] == 3
     assert protocol["preregistered_candidate_ids"] == ["P1"]
     assert protocol["consumed_candidate_ids"] == []
     assert protocol["selection_gates"]["selection_thresholds"] == list(THRESHOLDS)
     assert protocol["split_materialized"] is True
     assert protocol["public_gate_evaluator_preregistered"] is True
-    assert protocol["execution_authorized"] is False
+    assert protocol["preregistration_commit"] == "4e20674d0d7a15896005a066c2054753dbf5d7dd"
+    assert protocol["preregistration_tree"] == "0e51075b8cd082b9ce48e0232fa008fee9e9627a"
+    assert protocol["authorized_candidate_id"] == "P1"
+    assert protocol["execution_authorized"] is True
     assert protocol["public_gate_authorized"] is False
     assert protocol["public_gate_archive_opened"] is False
     assert protocol["public_gate_evaluations"] == 0
@@ -80,11 +84,38 @@ def test_frozen_archives_and_source_bindings_match_exact_bytes() -> None:
     assert freeze["optimizer_step_count_at_freeze"] == 0
     assert public_seal["public_gate_archive_opened"] is False
     assert public_seal["public_gate_evaluations"] == 0
-    assert entry["status"] == "candidate_1_preregistered_execution_blocked"
+    assert entry["status"] == "candidate_1_preregistered"
     assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
-    assert entry["execution_authorized"] is False
+    assert entry["preregistration_commit"] == "4e20674d0d7a15896005a066c2054753dbf5d7dd"
+    assert entry["preregistration_tree"] == "0e51075b8cd082b9ce48e0232fa008fee9e9627a"
+    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["execution_authorized"] is True
     assert entry["public_gate_authorized"] is False
+
+
+def test_authorization_binds_the_unchanged_preregistration_sources() -> None:
+    protocol = _json(ROOT / "PROTOCOL.json")
+    preregistration_commit = str(protocol["preregistration_commit"])
+    tree = subprocess.run(
+        ["git", "show", "-s", "--format=%T", preregistration_commit],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        check=True,
+        text=True,
+    ).stdout.strip()
+    assert tree == protocol["preregistration_tree"]
+    bound_paths = {
+        Path("ml/markers/center/mask_consensus_v8/training/p1.json"),
+        *RUNNER_SOURCE_PATHS,
+        *EVALUATOR_SOURCE_PATHS,
+    }
+    unchanged = subprocess.run(
+        ["git", "diff", "--quiet", preregistration_commit, "--", *(path.as_posix() for path in sorted(bound_paths))],
+        cwd=REPO_ROOT,
+        check=False,
+    )
+    assert unchanged.returncode == 0
 
 
 def test_split_counts_and_family_names_are_preregistered_and_disjoint() -> None:

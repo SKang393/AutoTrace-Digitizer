@@ -19,8 +19,10 @@ Train, validation, and sealed-public archive SHA-256 values are
 `17a81be5...42d7`, `533b32a7...8412`, and `0f39a5ae...4002`. The tracked
 selection manifest, split-freeze report, and public seal SHA-256 values are
 `48f888ac...1a32`, `79263032...4938`, and `d1376f99...00b0`. The exact P1
-runner and single-use public evaluator are preregistered but execution remains
-blocked until a separate authorization commit binds the committed identities.
+runner and single-use public evaluator were preregistered in commit
+`4e20674d0d7a15896005a066c2054753dbf5d7dd`, tree
+`0e51075b8cd082b9ce48e0232fa008fee9e9627a`. The canonical ledger now
+authorizes only P1 for one execution from those exact committed identities.
 
 P1 changes one defect class: model capacity and explicit mask consensus. A new
 full-resolution residual U-Net predicts missing artifact structure, retains the
