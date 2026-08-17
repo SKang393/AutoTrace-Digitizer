@@ -40,7 +40,6 @@ from ml.markers.center.mask_consensus_v9.train_p1 import (
 from ml.markers.center.mask_consensus_v9.train_p2 import (
     RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
     _verify_config_and_inputs as verify_p2_config_and_inputs,
-    run as run_p2,
 )
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 
@@ -106,13 +105,13 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     gate = _json(ROOT / "gates/sealed-public-v1.json")
     ledger = _json(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol["revision"])
-    assert protocol["state"] == "candidate_2_preregistered_execution_blocked"
-    assert protocol["execution_authorized"] is False
-    assert protocol["authorized_candidate_id"] is None
-    assert protocol["execution_blocker"]
-    assert entry["status"] == "candidate_2_preregistered_execution_blocked"
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert protocol["state"] == "candidate_2_authorized_once_not_executed"
+    assert protocol["execution_authorized"] is True
+    assert protocol["authorized_candidate_id"] == "P2"
+    assert protocol["execution_blocker"] is None
+    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P2"
     assert entry["execution_blocker"] == protocol["execution_blocker"]
     assert protocol["preregistration_commit"] == "20b803ae8b0f6562c22142029cdcb46eaf4de0cf"
     assert protocol["preregistration_tree"] == "49c15cc1d583589ad1f52fdc81e13d83387958d4"
@@ -126,6 +125,18 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
         text=True,
     ).stdout.strip()
     assert committed_tree == protocol["preregistration_tree"]
+    assert protocol["p2_preregistration_commit"] == "f9416060111a696ca866fc496dab243fdf287c04"
+    assert protocol["p2_preregistration_tree"] == "d47a095abb9dc92f55ad80b4cddad9db6df0294a"
+    assert entry["p2_preregistration_commit"] == protocol["p2_preregistration_commit"]
+    assert entry["p2_preregistration_tree"] == protocol["p2_preregistration_tree"]
+    committed_p2_tree = subprocess.run(
+        ["git", "show", "-s", "--format=%T", str(protocol["p2_preregistration_commit"])],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert committed_p2_tree == protocol["p2_preregistration_tree"]
     assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
@@ -175,11 +186,11 @@ def test_p2_input_preflight_binds_consumed_p1_predecessor_and_fresh_selection_wi
     assert config["p1_output_reused"] is False
 
 
-def test_p2_runner_refuses_before_output_while_separate_authorization_is_blocked(tmp_path: Path) -> None:
-    output_path = tmp_path / "p2-output"
-    with pytest.raises(RuntimeError, match="Evidence source must be committed|not authorized"):
-        run_p2(output_path)
-    assert not output_path.exists()
+def test_p2_one_time_authorization_has_not_created_output_or_a_training_seal() -> None:
+    assert not (REPO_ROOT / "ml/markers/center/artifacts/mask-consensus-v9/P2-run").exists()
+    assert not (
+        REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-mask-consensus-v9/P2"
+    ).exists()
 
 
 def test_public_gate_refuses_unapproved_candidate_before_model_or_archive_execution(tmp_path: Path) -> None:

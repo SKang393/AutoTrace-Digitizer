@@ -36,9 +36,11 @@ No checkpoint or ONNX was created.
 
 P2 changes only that runner contract by supplying both names with identical
 checksum-bound values. It repeats the exact unexecuted P1 training and
-selection design. P2 is preregistered but not authorized; a separate committed
-and pushed authorization checkpoint is mandatory before its one execution. P3
-remains unregistered. The truth-hidden public archive remains unopened with
+selection design. Its preregistration is committed and pushed at
+`f9416060111a696ca866fc496dab243fdf287c04` with tree
+`d47a095abb9dc92f55ad80b4cddad9db6df0294a`. This separate checkpoint
+authorizes exactly one P2 execution. P2 has not executed and P3 remains
+unregistered. The truth-hidden public archive remains unopened with
 zero evaluations and is not authorized to open. No model manifest, production
 model-store entry, packaging, private Chandler validation, production
 approval, or release is authorized.

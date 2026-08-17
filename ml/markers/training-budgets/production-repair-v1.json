@@ -5749,7 +5749,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-mask-consensus-v9",
-      "status": "candidate_2_preregistered_execution_blocked",
+      "status": "candidate_2_preregistered",
       "defect_class": "V8 P3 runner reproducibility rejected a 5.662441253662109e-7 center-channel predecessor parity drift before training even though it was below the new 1e-6 diagnostic tolerance and the unchanged 1e-5 production model parity limit",
       "prior_revision": "marker-center-mask-consensus-v8",
       "trigger_result_path": "ml/markers/center/mask_consensus_v8/P3_RESULT.json",
@@ -5773,7 +5773,7 @@
         "P3"
       ],
       "protocol_path": "ml/markers/center/mask_consensus_v9/PROTOCOL.json",
-      "protocol_sha256": "a96613d8b20e5df2361334ef281c36bb7a5d187925b21215d4c4b1d9ec58be84",
+      "protocol_sha256": "bed2b2216060efaeeae362a0d07a0b6f474c2023193303e9511bc0e360f0390e",
       "split_materialized": true,
       "split_freeze_report_path": "ml/markers/center/mask_consensus_v9/SPLIT_FREEZE_REPORT.json",
       "split_freeze_report_sha256": "75fdcb45124bd75da2102590c5e2f4e58aceef20b2227c8d7a0114250607de65",
@@ -5806,6 +5806,8 @@
       "expected_runner_source_bundle_sha256": "a3130f4781ec2e96053672d3e3d46824a192a0898f83815e410539a4f95e1206",
       "preregistration_commit": "20b803ae8b0f6562c22142029cdcb46eaf4de0cf",
       "preregistration_tree": "49c15cc1d583589ad1f52fdc81e13d83387958d4",
+      "p2_preregistration_commit": "f9416060111a696ca866fc496dab243fdf287c04",
+      "p2_preregistration_tree": "d47a095abb9dc92f55ad80b4cddad9db6df0294a",
       "expected_optimizer_steps": 768,
       "predecessor_checkpoint_sha256": "46eb64a923ff571db14156ca31cdac69adf639b27144e56d4ccf02198ed44122",
       "predecessor_onnx_sha256": "13b6204bec1129490a871987123bc03416c67cac3150c0efbc5c3d8dadce9f8c",
@@ -5828,9 +5830,9 @@
       "public_gate_config_sha256": "d0b97cfa645e6e501d8ce0898a0aa002189e3f8d6de62ae635a25b736359b242",
       "public_gate_evaluator_preregistered": true,
       "public_gate_evaluator_source_bundle_sha256": "6331f91e69b022b1e4974131ecedf16f4db75ed680f3975ee7bc4d391a99312d",
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "Commit and push the consumed P1 result, exact P2 alias-repair runner, candidate configuration, and source hashes before a separate P2 authorization commit.",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P2",
+      "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
@@ -5840,7 +5842,7 @@
       "private_validation": false,
       "production_approval": false,
       "release_eligible": false,
-      "refusal_required_before_output": true
+      "refusal_required_before_output": false
     }
   ]
 }
