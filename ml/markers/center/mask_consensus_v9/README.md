@@ -54,8 +54,13 @@ contraction is preregistered to bound the localized artifact-channel parity
 drift without changing the strict parity tolerance. The exact P3 runner,
 configuration, aggregate P2 basis, and source hashes were committed and pushed
 at `46f19785196a7fc9e902c9545a4d31540a7663eb` with tree
-`e4e80eb14699509811bfcac49c2fb995a8133cdc`. P3 is authorized exactly once
-but has not executed. The truth-hidden public archive remains unopened with
-zero evaluations and is not authorized to open. No model manifest, production
+`e4e80eb14699509811bfcac49c2fb995a8133cdc`. P3 consumed that one execution,
+completed 768 optimizer steps, and passed predecessor reproduction and strict
+CPU ONNX parity at `5.841255187988281e-6`. It failed the fixed selection gate
+at 121/128 exact scenes, 12 false positives, 18 misses, artifact precision
+`0.7897035539741141`, artifact recall `0.980064776805665`, and no passing
+threshold window. All three candidates are exhausted. The truth-hidden public
+archive remains unopened with zero evaluations and is not authorized to open.
+No model manifest, production
 model-store entry, packaging, private Chandler validation, production
 approval, or release is authorized.

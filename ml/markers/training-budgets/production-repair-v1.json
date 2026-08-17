@@ -5749,7 +5749,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-mask-consensus-v9",
-      "status": "candidate_3_preregistered",
+      "status": "exhausted",
       "defect_class": "V8 P3 runner reproducibility rejected a 5.662441253662109e-7 center-channel predecessor parity drift before training even though it was below the new 1e-6 diagnostic tolerance and the unchanged 1e-5 production model parity limit",
       "prior_revision": "marker-center-mask-consensus-v8",
       "trigger_result_path": "ml/markers/center/mask_consensus_v8/P3_RESULT.json",
@@ -5763,16 +5763,15 @@
       "architecture": "mask-consensus-residual-unet-v9-runner-reproducible-finetune",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [
-        "P3"
-      ],
+      "preregistered_candidate_ids": [],
       "consumed_candidate_ids": [
         "P1",
-        "P2"
+        "P2",
+        "P3"
       ],
       "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/markers/center/mask_consensus_v9/PROTOCOL.json",
-      "protocol_sha256": "e3df354e9b2d89160c971796132ad0fd06836cdd828d5cd2708c204c7d5bf293",
+      "protocol_sha256": "351c47be0cd918203ca974ab04313d41948aa7e4f76a0a3254dc32d6a8bdae3e",
       "split_materialized": true,
       "split_freeze_report_path": "ml/markers/center/mask_consensus_v9/SPLIT_FREEZE_REPORT.json",
       "split_freeze_report_sha256": "75fdcb45124bd75da2102590c5e2f4e58aceef20b2227c8d7a0114250607de65",
@@ -5819,6 +5818,19 @@
       "p2_training_result_seal_sha256": "d237653516273c671a3e205c160f384d24c8f0a248b61e9febe2fe005d5b76f1",
       "p2_case_detail_or_pixels_inspected": false,
       "p3_design_evidence_scope": "P2 aggregate selection counts, artifact precision and recall, aggregate threshold and erosion diagnostics, and per-output parity maxima only",
+      "p3_result_path": "ml/markers/center/mask_consensus_v9/P3_RESULT.json",
+      "p3_result_sha256": "542c6093415c251256ef0cbb3e25ac97251d08b1ca1e259317352117943c6f79",
+      "p3_status": "failed_selection_consumed",
+      "p3_optimizer_steps": 768,
+      "p3_selection_exact_scene_count": 121,
+      "p3_selection_false_positives": 12,
+      "p3_selection_false_negatives": 18,
+      "p3_artifact_precision": 0.7897035539741141,
+      "p3_artifact_recall": 0.980064776805665,
+      "p3_onnx_parity_maximum_absolute_error": 0.000005841255187988281,
+      "p3_training_opened_seal_sha256": "e49e87e8a7102042cc18f5b3a600080c6b28a40f3383c98ba0e6d7f863922854",
+      "p3_training_result_seal_sha256": "a8720a2320bae5d7c0539912e9e2ef77667748506373ffd2dba7e74ec9f97fba",
+      "p3_case_detail_or_pixels_inspected": false,
       "candidate_config_path": "ml/markers/center/mask_consensus_v9/training/p3.json",
       "candidate_config_sha256": "cd3196f4e2d9bac5fd4a53944c78abd76fdb6b2dd52d1d96a283318a35af5b1a",
       "expected_runner_source_bundle_sha256": "32b6933792ef727db5c70d018541dc21776e25a1fcf4634827bd740f1e770064",
@@ -5850,9 +5862,9 @@
       "public_gate_config_sha256": "d0b97cfa645e6e501d8ce0898a0aa002189e3f8d6de62ae635a25b736359b242",
       "public_gate_evaluator_preregistered": true,
       "public_gate_evaluator_source_bundle_sha256": "6331f91e69b022b1e4974131ecedf16f4db75ed680f3975ee7bc4d391a99312d",
-      "execution_authorized": true,
-      "authorized_candidate_id": "P3",
-      "execution_blocker": null,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "All three V9 candidates are consumed. P3 passed predecessor reproduction and strict CPU ONNX parity but failed fixed visible selection with 121/128 exact scenes, 12 false positives, 18 false negatives, artifact precision 0.7897035539741141 below 0.90, and no passing threshold window.",
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
@@ -5862,7 +5874,7 @@
       "private_validation": false,
       "production_approval": false,
       "release_eligible": false,
-      "refusal_required_before_output": false
+      "refusal_required_before_output": true
     }
   ]
 }
