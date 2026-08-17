@@ -47,7 +47,6 @@ from ml.markers.center.decoupled_heads_v10.train_p2 import (
     _reflect_point,
     _reflect_tensor,
     _verify_config_and_inputs as verify_p2_config_and_inputs,
-    run as run_p2,
 )
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 
@@ -115,17 +114,17 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     gate = _json(ROOT / "gates/sealed-public-v1.json")
     ledger = _json(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol["revision"])
-    assert protocol["state"] == "candidate_1_failed_selection_candidate_2_preregistered"
-    assert protocol["execution_authorized"] is False
-    assert protocol["authorized_candidate_id"] is None
-    assert protocol["execution_blocker"]
+    assert protocol["state"] == "candidate_2_authorized_once_not_executed"
+    assert protocol["execution_authorized"] is True
+    assert protocol["authorized_candidate_id"] == "P2"
+    assert protocol["execution_blocker"] is None
     assert entry["status"] == "candidate_2_preregistered"
     assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
-    assert entry["execution_blocker"] == protocol["execution_blocker"]
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["execution_blocker"] is None
     assert protocol["preregistration_commit"] == "d4a3987d96a0763730fb9db840ee6c31c4da1abb"
     assert protocol["preregistration_tree"] == "bff1a927922ed9e3e50b315b1f6a1a82cf160c68"
     assert entry["preregistration_commit"] == protocol["preregistration_commit"]
@@ -138,6 +137,18 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
         text=True,
     ).stdout.strip()
     assert committed_tree == protocol["preregistration_tree"]
+    assert protocol["p2_preregistration_commit"] == "898d46ce99acfe9c24ef6e55f5af7aaac36fea6b"
+    assert protocol["p2_preregistration_tree"] == "3ebfbfa9affddbdcec4ff0f63d9388c9a94e8120"
+    assert entry["p2_preregistration_commit"] == protocol["p2_preregistration_commit"]
+    assert entry["p2_preregistration_tree"] == protocol["p2_preregistration_tree"]
+    committed_p2_tree = subprocess.run(
+        ["git", "show", "-s", "--format=%T", str(protocol["p2_preregistration_commit"])],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert committed_p2_tree == protocol["p2_preregistration_tree"]
     assert entry["refusal_required_before_output"] is True
     assert sha256_file(ROOT / "PROTOCOL.json") == entry["protocol_sha256"]
     assert sha256_file(ROOT / "SPLIT_FREEZE_REPORT.json") == protocol["split_freeze_report_sha256"]
@@ -207,13 +218,6 @@ def test_p2_reflections_transform_tensors_targets_and_coordinates_exactly() -> N
     assert _reflect_point(1.25, 0.5, width=4, height=3, transform_index=1) == (1.75, 0.5)
     assert _reflect_point(1.25, 0.5, width=4, height=3, transform_index=2) == (1.25, 1.5)
     assert _reflect_point(1.25, 0.5, width=4, height=3, transform_index=3) == (1.75, 1.5)
-
-
-def test_p2_refuses_execution_before_separate_authorization(tmp_path: Path) -> None:
-    output_path = tmp_path / "P2-run"
-    with pytest.raises(RuntimeError, match="must be committed before use|not authorized"):
-        run_p2(output_path)
-    assert not output_path.exists()
 
 
 def test_public_gate_refuses_unapproved_candidate_before_model_or_archive_execution(

@@ -26,13 +26,15 @@ artifact precision `0.7857918313961029`, artifact recall
 `0.9770655093456437`, and no passing threshold window. Only aggregate metrics
 were inspected. The truth-hidden public archive remains locked and unopened.
 
-P2 is preregistered but blocked until a later commit binds its exact
-preregistration commit and tree and explicitly authorizes it once. P2 retrains
-the exact P1 architecture, loss, optimizer, seed, frozen split, and 1,792-step
-budget from scratch. Its only change is an exact four-way reflection schedule
-applied consistently to every training tensor, target, center, and hard-negative
-coordinate. It reuses no P1 checkpoint and performs no interpolation. The fixed
-selection thresholds and zero-error gates are unchanged.
+P2 preregistration commit `898d46ce99acfe9c24ef6e55f5af7aaac36fea6b`
+and tree `3ebfbfa9affddbdcec4ff0f63d9388c9a94e8120` bind its exact
+configuration and runner bytes. This separate checkpoint authorizes P2 once.
+P2 retrains the exact P1 architecture, loss, optimizer, seed, frozen split, and
+1,792-step budget from scratch. Its only change is an exact four-way reflection
+schedule applied consistently to every training tensor, target, center, and
+hard-negative coordinate. It reuses no P1 checkpoint and performs no
+interpolation. The fixed selection thresholds and zero-error gates are
+unchanged.
 
 No V10 payload is approved, stored, packaged, privately validated, or release
 eligible.
