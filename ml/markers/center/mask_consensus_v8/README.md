@@ -32,9 +32,25 @@ the exact text and composed artifact planes. It preserves the production
 postprocessing, thresholds, artifact threshold, zero-error scene gates, and
 `1e-5` CPU parity limit.
 
-The experiment budget is three candidates. Only P1 is preregistered. P2 and P3
-may be specified from aggregate selection evidence only after a failure. The
-truth-hidden public archive can be opened once only after a candidate passes a
+P1 executed exactly once for 3,584 optimizer steps and failed closed. It passed
+122 of 128 visible scenes with 1,193 true positives, six false positives, 23
+false negatives, zero duplicates, zero prohibited-structure hits, and zero
+marker-artifact hits. Artifact precision was `0.7864128234384776`, artifact
+recall was `0.9843701768692439`, and CPU ONNX parity was
+`0.00002002716064453125`, above the fixed `1e-5` limit. Candidate report,
+checkpoint, and ONNX SHA-256 values are `223201e3...0f7e`,
+`46eb64a9...122`, and `13b6204b...9f8c`. The public archive remained unopened
+with zero evaluations, and no manifest, store, package, private validation,
+approval, or release state changed.
+
+P2 is now preregistered from those aggregate values only. It reuses the exact
+consumed P1 checkpoint and ONNX with zero optimizer steps and changes only the
+artifact decision threshold from `0.35` to `0.45`, using the available artifact
+recall margin to address insufficient precision and center suppression. Its
+config and runner bundle SHA-256 values are `d3b24a0...4f14` and
+`d57bce0c...f870`. P2 is not authorized until a separate committed single-use
+authorization binds these bytes. P3 remains unregistered. The truth-hidden
+public archive can be opened once only after a candidate passes a
 three-threshold zero-error selection window and direct CPU parity. A public pass
 still does not authorize a manifest, model store, packaging, private Chandler
 validation, production approval, or release.
