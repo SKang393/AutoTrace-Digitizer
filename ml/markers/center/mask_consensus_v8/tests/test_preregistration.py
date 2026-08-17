@@ -27,6 +27,14 @@ from ml.markers.center.mask_consensus_v8.protocol import DESIGN_SOURCE_PATHS, TH
 from ml.markers.center.mask_consensus_v8.public_gate import EVALUATOR_SOURCE_PATHS
 from ml.markers.center.mask_consensus_v8.train_p1 import RUNNER_SOURCE_PATHS as P1_RUNNER_SOURCE_PATHS
 from ml.markers.center.mask_consensus_v8.train_p2 import RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS
+from ml.markers.center.mask_consensus_v8.train_p3 import (
+    ARTIFACT_POSITIVE_WEIGHT,
+    EXPECTED_OPTIMIZER_STEPS,
+    FIXED_RADIUS_PIXELS,
+    RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS,
+    FixedRadiusInferenceModel,
+    _photometric_batch,
+)
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 
 
@@ -39,13 +47,13 @@ def _json(path: Path) -> dict[str, object]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def test_protocol_consumes_p1_and_authorizes_only_p2_once() -> None:
+def test_protocol_consumes_p2_and_preregisters_final_p3_fail_closed() -> None:
     protocol = _json(ROOT / "PROTOCOL.json")
-    assert protocol["state"] == "candidate_2_authorized_once_not_executed"
+    assert protocol["state"] == "candidate_3_preregistered_execution_blocked"
     assert protocol["experiment_budget"] == 3
-    assert protocol["preregistered_candidate_ids"] == ["P2"]
-    assert protocol["consumed_candidate_ids"] == ["P1"]
-    assert protocol["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert protocol["preregistered_candidate_ids"] == ["P2", "P3"]
+    assert protocol["consumed_candidate_ids"] == ["P1", "P2"]
+    assert protocol["remaining_unregistered_candidate_ids"] == []
     assert protocol["selection_gates"]["selection_thresholds"] == list(THRESHOLDS)
     assert protocol["split_materialized"] is True
     assert protocol["public_gate_evaluator_preregistered"] is True
@@ -53,13 +61,18 @@ def test_protocol_consumes_p1_and_authorizes_only_p2_once() -> None:
     assert protocol["preregistration_tree"] == "0e51075b8cd082b9ce48e0232fa008fee9e9627a"
     assert protocol["p2_preregistration_commit"] == "483dce39bae5c5285edc85469939f585e3618d4b"
     assert protocol["p2_preregistration_tree"] == "60ba3da228ee369dcc2b1b27c3b6e2306b2acd63"
-    assert protocol["authorized_candidate_id"] == "P2"
-    assert protocol["execution_authorized"] is True
+    assert protocol["authorized_candidate_id"] is None
+    assert protocol["execution_authorized"] is False
     assert protocol["p1_status"] == "failed_selection_consumed"
     assert protocol["p1_selection_exact_scene_count"] == 122
     assert protocol["p1_selection_false_positives"] == 6
     assert protocol["p1_selection_false_negatives"] == 23
     assert protocol["p1_case_detail_or_pixels_inspected"] is False
+    assert protocol["p2_status"] == "failed_selection_consumed"
+    assert protocol["p2_selection_exact_scene_count"] == 122
+    assert protocol["p2_selection_false_positives"] == 6
+    assert protocol["p2_selection_false_negatives"] == 23
+    assert protocol["p2_case_detail_or_pixels_inspected"] is False
     assert protocol["public_gate_authorized"] is False
     assert protocol["public_gate_archive_opened"] is False
     assert protocol["public_gate_evaluations"] == 0
@@ -74,6 +87,7 @@ def test_frozen_archives_and_source_bindings_match_exact_bytes() -> None:
     public_seal = _json(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
     p1_config = _json(ROOT / "training/p1.json")
     p2_config = _json(ROOT / "training/p2.json")
+    p3_config = _json(ROOT / "training/p3.json")
     ledger = _json(LEDGER_PATH)
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol["revision"])
     assert sha256_file(ROOT / "SELECTION_MANIFEST.json") == protocol["selection_manifest_sha256"]
@@ -81,10 +95,12 @@ def test_frozen_archives_and_source_bindings_match_exact_bytes() -> None:
     assert sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json") == protocol["sealed_public_test_seal_sha256"]
     assert sha256_file(ROOT / "PUBLIC_DATASET_MANIFEST.json") == protocol["public_dataset_manifest_sha256"]
     assert sha256_file(ROOT / "P1_RESULT.json") == protocol["p1_result_sha256"]
-    assert sha256_file(ROOT / "training/p2.json") == protocol["candidate_config_sha256"]
+    assert sha256_file(ROOT / "P2_RESULT.json") == protocol["p2_result_sha256"]
+    assert sha256_file(ROOT / "training/p3.json") == protocol["candidate_config_sha256"]
     assert source_bundle_sha256(REPO_ROOT, DESIGN_SOURCE_PATHS) == protocol["design_source_bundle_sha256"]
     assert source_bundle_sha256(REPO_ROOT, P1_RUNNER_SOURCE_PATHS) == p1_config["expected_runner_source_bundle_sha256"]
     assert source_bundle_sha256(REPO_ROOT, P2_RUNNER_SOURCE_PATHS) == p2_config["expected_runner_source_bundle_sha256"]
+    assert source_bundle_sha256(REPO_ROOT, P3_RUNNER_SOURCE_PATHS) == p3_config["expected_runner_source_bundle_sha256"]
     assert source_bundle_sha256(REPO_ROOT, EVALUATOR_SOURCE_PATHS) == protocol["public_gate_evaluator_source_bundle_sha256"]
     for name in ("train", "validation", "sealed_public"):
         assert sha256_file(REPO_ROOT / selection[name]["archive_path"]) == selection[name]["archive_sha256"]
@@ -96,15 +112,15 @@ def test_frozen_archives_and_source_bindings_match_exact_bytes() -> None:
     assert freeze["optimizer_step_count_at_freeze"] == 0
     assert public_seal["public_gate_archive_opened"] is False
     assert public_seal["public_gate_evaluations"] == 0
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["status"] == "candidate_3_preregistered_execution_blocked"
+    assert entry["preregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["preregistration_commit"] == "4e20674d0d7a15896005a066c2054753dbf5d7dd"
     assert entry["preregistration_tree"] == "0e51075b8cd082b9ce48e0232fa008fee9e9627a"
     assert entry["p2_preregistration_commit"] == "483dce39bae5c5285edc85469939f585e3618d4b"
     assert entry["p2_preregistration_tree"] == "60ba3da228ee369dcc2b1b27c3b6e2306b2acd63"
-    assert entry["authorized_candidate_id"] == "P2"
-    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is False
     assert entry["public_gate_authorized"] is False
 
 
@@ -212,4 +228,41 @@ def test_p2_is_aggregate_only_zero_optimizer_artifact_threshold_calibration() ->
     assert config["public_gate_evaluations"] == 0
     assert protocol["p2_artifact_threshold"] == 0.45
     assert protocol["p2_expected_optimizer_steps"] == 0
-    assert protocol["execution_authorized"] is True
+    assert protocol["p2_status"] == "failed_selection_consumed"
+
+
+def test_p3_is_aggregate_only_bounded_final_candidate() -> None:
+    protocol = _json(ROOT / "PROTOCOL.json")
+    config = _json(ROOT / "training/p3.json")
+    result = _json(ROOT / "P2_RESULT.json")
+    assert result["status"] == "failed_selection_consumed"
+    assert result["aggregate_only_evidence"] is True
+    assert result["case_detail_or_pixels_inspected"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert config["expected_optimizer_steps"] == EXPECTED_OPTIMIZER_STEPS == 768
+    assert config["artifact_positive_weight"] == ARTIFACT_POSITIVE_WEIGHT == 1.0
+    assert config["fixed_radius_pixels"] == FIXED_RADIUS_PIXELS == 2.5
+    assert config["p2_result_sha256"] == sha256_file(ROOT / "P2_RESULT.json")
+    assert config["aggregate_only_evidence"] is True
+    assert config["case_detail_or_pixels_inspected"] is False
+    assert config["public_gate_archive_opened"] is False
+    assert config["public_gate_evaluations"] == 0
+    assert protocol["p3_expected_optimizer_steps"] == 768
+    assert protocol["p3_fixed_radius_pixels"] == 2.5
+    assert protocol["execution_authorized"] is False
+
+
+def test_p3_photometric_change_preserves_masks_and_fixed_radius_contract() -> None:
+    value = torch.zeros((1, 3, 8, 8), dtype=torch.float32)
+    value[:, 0] = 0.75
+    value[:, 1, 2, 3] = 1.0
+    value[:, 2, 4, 5] = 1.0
+    adjusted = _photometric_batch(value, epoch=2, batch_ordinal=4)
+    assert not torch.equal(adjusted[:, 0], value[:, 0])
+    assert torch.equal(adjusted[:, 1:], value[:, 1:])
+    model = FixedRadiusInferenceModel(create_model().eval()).eval()
+    with torch.inference_mode():
+        output = model(value)
+    assert torch.all(output[:, 1] == FIXED_RADIUS_PIXELS)
+    assert output[0, 0, 2, 3] == 0
+    assert output[0, 0, 4, 5] == 0
