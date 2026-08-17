@@ -1,0 +1,1144 @@
+{
+  "case_truth_values_emitted": false,
+  "chandler_used": false,
+  "feasibility": {
+    "hard_negative_count": 1440,
+    "hard_point_missing_from_artifact_truth_count": 0,
+    "minimum_center_separation_px": 12.083045959472656,
+    "minimum_truth_to_hard_negative_distance_px": 11.045360565185547,
+    "required_disjoint_clearance_px": 11.0,
+    "scene_count": 160,
+    "truth_center_count": 1520,
+    "truth_hard_acceptance_overlap_count": 0,
+    "truth_mask_conflict_count": 0
+  },
+  "fixture_count": 160,
+  "fixture_pixels_emitted": false,
+  "fixtures": [
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0000",
+      "ground_truth_sha256": "57c8f8932d883aee7068e0273264d6bb0716760f9c055850edad30807f86b843",
+      "image_sha256": "36e0f105d750b26093863e71f4e783072712a9a39d7ca7218a74186725deb065",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0001",
+      "ground_truth_sha256": "f868346781ebe31535b5e4b2ffb8f33a77e4aaf819f20eb7784ec80699519e65",
+      "image_sha256": "450e605adfeb752d274e2de1ba3b56837c02ba9c6345285cf37b58208794d4ae",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0002",
+      "ground_truth_sha256": "2b5c8c4e04b4bad92b9e4db84be19d7b11fe84d03a043f785b022894ec43d196",
+      "image_sha256": "e6559eb8662e6f6c451f5c812e5216e5cee9273f9c2e6f6a6c16e47a127dbc64",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0003",
+      "ground_truth_sha256": "065fe0918b32e4a8f23b42f8c9d36ebd50303259669fe9f2408e576d9aedc442",
+      "image_sha256": "13a051bb3e72b6e9bd5eb0ff0efe1232cf6dc575a852d713d26b01f448cabe65",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0004",
+      "ground_truth_sha256": "953b878e68e3bfc8a90a0b32c37865c556662b7342ed38806f1e7e26abf71302",
+      "image_sha256": "1bc01f8f519f0a346b7ba65d4c17800abfc782b5573e9d3136ff2837ae1371c8",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0005",
+      "ground_truth_sha256": "8eed031bba2a589b140729f417cf9e3532923318deec26f9e7e22d0c433ecfe5",
+      "image_sha256": "67f0b09658526882057c5b50f19693edc079e3b458484a7038dc9e7fdf273ea6",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0006",
+      "ground_truth_sha256": "4eda36795897b4510ae1c3b70d44af8acd31c32c8ae541cf4b2f0aa511b80d28",
+      "image_sha256": "893a72b7f73b6a7eef5d8acf79a934c25194eb0b371204be36d19791a6f982e5",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0007",
+      "ground_truth_sha256": "112a2143f9e8ae2dfd4ae67a9def263e0e419e4d09d318bf0010845ad20dbc57",
+      "image_sha256": "8d42fa838fe0f4c136363d739daa171ec50ac3807244cb48cdc7b061f81df41d",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0008",
+      "ground_truth_sha256": "3b51fd4703d69c5120919c5fb737b19bcbc18fa5cd2b2f025cb720113d8d2150",
+      "image_sha256": "05b0e498c5e7a8365a09baec7a0af229b368c8d4ced66fdbef28c9853114a682",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0009",
+      "ground_truth_sha256": "270289f4d567cda3fee28ee7e2b0bff41a2ae4ae9c052eb047b016e370c29159",
+      "image_sha256": "a971ae37751c7975c29fe5331b88c36b692236763b678fa30b67f1b0287366eb",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0010",
+      "ground_truth_sha256": "22f55019200e6712413b006c242a019d412cb8fb7dce4dbc43642810c57d8e43",
+      "image_sha256": "08bd7a075a3ba6e2d2676dc154035e248d9303c179f2a8fdc156d5b9d5b254ed",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0011",
+      "ground_truth_sha256": "2e89767e5395ef7f32d23c12f09c110bc078fe4be5c3acb0fbe1f35f6d2fd4de",
+      "image_sha256": "73ab36c38ff121e403a1b627dcd00cb9d16fab960c9b550d04e3da7a6859e6d4",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0012",
+      "ground_truth_sha256": "39c17377eeb5c3d5bc9a6265204c04e97305e175de250e8b55869532ea47c2a9",
+      "image_sha256": "c2a9da10af6dc9182438147a9824ee7bd79652a79e1a7ba24ace59e315420a98",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0013",
+      "ground_truth_sha256": "1827c5872d466e94eea922b672e3cbe588cc27c434f2bd3ad4771d4dd97d5927",
+      "image_sha256": "8f114d9109555db6df8be2e9331e68c6c98d52d6f2684c16b5c7b2f0b0ec16a7",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0014",
+      "ground_truth_sha256": "cdaf4db0faf48c1e43afa5e6f4ffe13513992ab2c63bbf4bb177c49635d78db1",
+      "image_sha256": "1864f2a44b4daf643b0218bfbe58fcc64bc7af3e7368bcadf81bf7117ba12bc4",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0015",
+      "ground_truth_sha256": "a5157b555bebef11afe47a3f7a81046b33c98e6b5eaadde5b2997e8206c64c83",
+      "image_sha256": "4e5b3c1680b124029b628c5909aceccedd7881db33c603b6733c04c7728b2f9f",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0016",
+      "ground_truth_sha256": "ede86708d73383034900d802519b974aa4a89897602e77cb41e188e69ae24949",
+      "image_sha256": "103fa7432e4e072bf7e8981755f339e6612332f5ead37a1ce235c165c80cc74f",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0017",
+      "ground_truth_sha256": "db9bd5a6e3ff40dd5e10e56ffd794b013761b1dd1cb9fe3fdc03c3516475dc44",
+      "image_sha256": "fd3122d267b31afb894f54a2530c6c1c421cfc16f281bbcc58c9490a87a00736",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0018",
+      "ground_truth_sha256": "c7ab23a48c09bc321f44e8210b7b0a7c34b44ac5b8e2d05224d6a61051f43c8a",
+      "image_sha256": "c12f6a17df3d26a04a4a4ab344d81d5e48d6587bf02b3006928f64257b9ff431",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0019",
+      "ground_truth_sha256": "82963e8a724e166d8deedaf62876b95e3b05611e06a27d209d84c5dbd768f329",
+      "image_sha256": "03e83e9fbad6c6a43cc69414b989608664ac5448d4cb5bed46492ba4024bc7a5",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0020",
+      "ground_truth_sha256": "7fc0a7ab698e5d17b8b935e409c4b74c63fd3405f0c7b086f8da2e472363da14",
+      "image_sha256": "4b84436305a5a6bee07d4755f781b5d4d4c653a258336a4b8ddb63969281bf81",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0021",
+      "ground_truth_sha256": "493a11b4e3b2bfdb31280cbef0fcb83683a39bd93ed663341be02c2e7807e20f",
+      "image_sha256": "2cd66e1c493ae4707e4c940098bd152cf6e8f3307b866cf7262ff7fbfea3d74c",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0022",
+      "ground_truth_sha256": "89f3c31d1916f69611c99636215640a6b6865d0bd0d98e350c6851965521e946",
+      "image_sha256": "04eb8834cb060bfa64ad8b7e1b1ef79122b15977f98e37ce8d377fae9fd84903",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0023",
+      "ground_truth_sha256": "c65f97cfe5427bc659ce54d0cbc6ebef5daee8e02d899ca2fb6d419567a77c0d",
+      "image_sha256": "af79fcced07661e955fdb3ba0ef64fc1e13e2691fa64d0de1deeaeb9e456b6ad",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0024",
+      "ground_truth_sha256": "f6999b389400f781c3dc6f2eca1e83e5316963c410b6c0f7f2b513c8b71f986c",
+      "image_sha256": "a1dcac80a08232fcb86cc4d8c76a10d367aaeef164090d1032070b6db2d5ad06",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0025",
+      "ground_truth_sha256": "d72b38ca7d4a80b4d2514da6f0bce4bee2e4802c403be0b37996f0a17704df4b",
+      "image_sha256": "5dc4efb12406c383f6631ff4f48439463f852cdc984d962a73b570ba49c4060d",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0026",
+      "ground_truth_sha256": "2b76f2739b8026ef54fc17a12e18fcc24f4a80e0ecab9b74a3b8651d832f158c",
+      "image_sha256": "eb112bd1b3aa5a45e9b120d4da9cc23372d5652ecbafb50654816460f76d9d44",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0027",
+      "ground_truth_sha256": "0aec47113efb8c579be6350a169254cc7dde888afa8d1b94e0a414364561d43d",
+      "image_sha256": "baea9721e43d6c9420870181fe0eaab8a0238aa9991e8c2e4f732a57fd9241ee",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0028",
+      "ground_truth_sha256": "e6203b96a6c1f083b8d52b832b53e2012f12c11b1f5eb6a0a6fa42346536f8bb",
+      "image_sha256": "628bff0b38a7854d7e83528e2055b3a87cfed17d4ac2b36612293d1831421398",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0029",
+      "ground_truth_sha256": "f5e85101252c2e505fcd91e49caa9f50bddba5f430ee2ff8c8b2f8aa9c76fee6",
+      "image_sha256": "e8a4dbf9ff5611ca80b88cb806b9f3a911758e468d64a22850af678bc6bb5b85",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0030",
+      "ground_truth_sha256": "592225ff64119f48b5bf6078c1ff73d5e6f00a348c3ef649fdff5c815b349bb1",
+      "image_sha256": "7aa3cfe5740645705a3f12d70e21c03f71fb56cc4db6ed212bffc3a48d35355e",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0031",
+      "ground_truth_sha256": "de76c7ae462a4e4271f1e8060eca41fb2a5e9486db60bd757dedc4ceb5430300",
+      "image_sha256": "86b063d551b7c6ff93bd1609180758b6566bcfc31e886aa2cce02870614ca1ad",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0032",
+      "ground_truth_sha256": "d64538b4d098929a0ff5668ed0b82b44e1a09379eb07f6773c623ee015a3476d",
+      "image_sha256": "518e94609d24778a0554b1eaf9e269977806400773e4820129962bda9f06387a",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0033",
+      "ground_truth_sha256": "87f447c0da414ddc1f1af1222e9133d75142b35dfb9383517d06ed89bd5a7e2a",
+      "image_sha256": "dc4ec7359bdda06b086992f6184e5bdc8d2b1ac120abab80fb240cd4eaaea7d5",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0034",
+      "ground_truth_sha256": "e419402e5b40b378d070db8d957ff94f71962ec46766afad9ad7d84b0b3eebfd",
+      "image_sha256": "7a35d9d1eb2e031a33746e007997e9cfc9bf149641cff14435d5e4b843b05b57",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0035",
+      "ground_truth_sha256": "5d2488162fef471ea809f6506ac4e295e9dcf329975d1a2368d8567c391adeb5",
+      "image_sha256": "a7f0286012e6575b93ec9a8f1b5fcd50e4f6d9bc1add2fba0f4d029a769604a2",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0036",
+      "ground_truth_sha256": "2b15f3ebb7fed87e63603a94f642b23ad6ffca6767f6853c911baadaba8dac38",
+      "image_sha256": "151bc923d6e652cc96d4b7d7528020edf869a040d97a4a2ddcf423b4966e07e2",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0037",
+      "ground_truth_sha256": "30f99d64b02eff06926623c23d8fbfd5b99740f711255184df52f0cc45038617",
+      "image_sha256": "2a6b0f2be4b25de93dd10c3228078f7d12973368475f97568303a06783d736cf",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0038",
+      "ground_truth_sha256": "51d8f6e22ac8ef18742b1cdd61499847ce9e9f84aa5e5bf8e6c9e6f99218ff2f",
+      "image_sha256": "b7e0e7b107b9f1b28547895fd0b08a4dcdcdd02823d32e52113ae24a172953f9",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0039",
+      "ground_truth_sha256": "aba849eaad4b6c4f3bd0741df83c27562248ed5493ae76cd03f8ba1890531511",
+      "image_sha256": "f5144f1911404a22198fe299dab45f23723ffe2791f8e45bee8d888fb68f2415",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0040",
+      "ground_truth_sha256": "e083b0d09bdc337eae3c2d41c1689c58bbe958bac77c34980b99d072679ebb27",
+      "image_sha256": "e90d44a594faae582e5127a1d928f19040523b335afd2d22cce314e79b75d713",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0041",
+      "ground_truth_sha256": "531c509d4d4c9526c06aad98b27a9b84751838935fbdd3b3bcc3fe7feac700db",
+      "image_sha256": "aab940b842232225fa43bf756c7910e6fb487c94e37635e6b5e0795f6af5425a",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0042",
+      "ground_truth_sha256": "abaa0a899b6abde841011ed2f0d40b88bf1bac3d98e42d378dd24cb3f1938dbf",
+      "image_sha256": "96c2fe8d22b6225ce4fb67b73dc4f31552cc88e0704628da482515f94cae0fd3",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0043",
+      "ground_truth_sha256": "df9d9aab58c9c4401b9e903fba9cf438241db6fcd5cdcf186abcf0ea5867639c",
+      "image_sha256": "04d719a69bbdf96dc5055c0741f5c5f8fb22d7838f5f7cccd8d335d069471214",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0044",
+      "ground_truth_sha256": "481a506f7b3186f4159b594e3395c0198fd00b0434ef4b54ed672f3c42acc765",
+      "image_sha256": "93979b71f19c1393fe121ced7c499a7f3b66b03fbb85af7137f7e360625d3411",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0045",
+      "ground_truth_sha256": "8392f474aa31e53e2c018483870f4331ba3fae0a2d3551a59c635ce04ea6a78e",
+      "image_sha256": "8b7e32d410acbb403371af27f70be56d016b3fb74aa7be2c8f46c16284eb80f0",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0046",
+      "ground_truth_sha256": "699a2539bb7dbcd15f684e815e15241a83032ac16000e37b3dc2f23aec1acdde",
+      "image_sha256": "4cf2b473b1ed33d88de07872abe9cb46d476b51b51882cfe3464df540b89e62e",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0047",
+      "ground_truth_sha256": "6e016a1e4fb055b73da1b363bc4775e2fb649be1b38b4fe4b5f81f0b47176ff2",
+      "image_sha256": "e92166b864456e3adf29d607d8b33dc6c74d9b63dd6109c760976a344079b776",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0048",
+      "ground_truth_sha256": "1264ded1808fecd2e0ac17b5dedf22b03b16bf0f3b816fe1a9afabfcda86dff0",
+      "image_sha256": "c1ce6c2c4776bca24392abcf28af9453cc214eb0216891a85a7f6e930917e164",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0049",
+      "ground_truth_sha256": "93b1d8f4a4cda938ab8ccea8310dd1e5f81a082b7b41ca0f59f7a69fa4afb3af",
+      "image_sha256": "1ad47be524eb69aea8ed0897ca2bfaf3172a9d27118e2b28e1785ca0308e6255",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0050",
+      "ground_truth_sha256": "36d1a770d06253a86209005842251f924a3f28a990ba414c719d05c965de6692",
+      "image_sha256": "92c3feac5586b5bdc70756586a305a7610b6e66f758834a73fd520ab8052fb4f",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0051",
+      "ground_truth_sha256": "bacf3e64082bbdf2b343c80520be94427c3d4ec52ae6b2a549d8c2e27b3f4143",
+      "image_sha256": "156a2e9b4068904822ab63d5ac684513de27cb58bb354ea5abf8c54d2283fd6a",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0052",
+      "ground_truth_sha256": "8a34f876f801d62635f5690675819cf3ba6367b3d75907117aca1c0e50606fce",
+      "image_sha256": "fe47a4999caf037f4c7c137230f1c5ffe977182c36c01a11265235b0a771bc41",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0053",
+      "ground_truth_sha256": "806fe85ed7ca85d3ab0fc85198be7c9ffe41aafea3f757f1ab319b46978c2694",
+      "image_sha256": "dc88deb52d5e0981699f05f1d6ce368cee01a1972e774394a0c9f24070480a37",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0054",
+      "ground_truth_sha256": "7335a205cf325f66c39a0de2b02f85e0640ba8beae1e1b81bf795a67ee14c789",
+      "image_sha256": "51d63ef0db9f465a91a110e5194a0e3376afc6b5f3337660b593f772122f2bbe",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0055",
+      "ground_truth_sha256": "f3899e2c3f9edf2c9a49772e7ba6a676da27d60d34339f41cfce557a6a37efdf",
+      "image_sha256": "fc0d6ecf23d81aad2c81e1a68f85e953c815ff6f69260c4a3aa0e3ab462c0fc0",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0056",
+      "ground_truth_sha256": "b39e7f3981214e926e4623e7693b27c80fb361411070797c20cfce93e7d39816",
+      "image_sha256": "8454c4a99abecdb84871c3bf7cf2b0d2a73f60b492cae8a0b744eef9e4117334",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0057",
+      "ground_truth_sha256": "b174cc18c3e9696fd71f3b2b1c139f13ab89fb9fcf86c7c72f530e91faa08e04",
+      "image_sha256": "b4e49ceda3a7857dec080fdae41f90ca5bfdb3206265a9c7e5e9762254733a6c",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0058",
+      "ground_truth_sha256": "4552d33f081c80b4e11963bcc2eea3f00ab02ce2ac23f8adcdb7c421ab354f59",
+      "image_sha256": "54efe4ea849838e63d85c3d6f4953e5bfac7fc9970a8bac49533a0fad3049a21",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0059",
+      "ground_truth_sha256": "b95bdc887a81ae538a2ddcdd2823e51115d08b4cf75571e40ebc26f13b72e104",
+      "image_sha256": "e4b4586396bcdfbf965a1e4db315d2436f61c100072107c90ffc1cfb1d494971",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0060",
+      "ground_truth_sha256": "c284ee86bd775b8e2f399a3a486a2e814230c6558e63cc19cd8e8338e5faa8d4",
+      "image_sha256": "2360a1302915f5a79f9ad46493cefc1b35a0e86259a81620654bdb985c460f55",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0061",
+      "ground_truth_sha256": "368431cb6c2ed04bb98851028e7b91dd5f2ad2e8633b08a88a84841cdef5b193",
+      "image_sha256": "5f77e243b86165df8be8e6fd44d2a35bafde5ec3944fc654cf1e4fe46b543e5b",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0062",
+      "ground_truth_sha256": "caffae9c1d73fdcf6774c1a9b1d8a71ba23f888a8a3f373ad16150c4ab2f7b96",
+      "image_sha256": "9792a3f91d2ea29c89876c38e45b75ee60092d8645d05fcdbffa9c550ebb7915",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0063",
+      "ground_truth_sha256": "88fcda9f80fc0e079c87116e0f31aed256eca65bbd5623ab9ac352030a174201",
+      "image_sha256": "80ebc41fdb618763de467e7196968576c3063573a45270a93ec4073afba6f8bf",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0064",
+      "ground_truth_sha256": "2f9e321c7616d525fa3b8011063dae35fee0f8814884f06c4291bf2c4564eb58",
+      "image_sha256": "f10e737cf5aa63840e3a499e35606736de53303d6af9d42cafaae348937ab75a",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0065",
+      "ground_truth_sha256": "9e849ecd49b815501be3783b75580af3dca89a45a999ebff073c9481836284d2",
+      "image_sha256": "619c2eef685903c4585508621fd3af0fdf89f8ae295ed985a3a03391063ca50c",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0066",
+      "ground_truth_sha256": "82805bd8584b2f9f71052e37f65b284e6dbb909e219a4d5307b9a1bed7eb1d34",
+      "image_sha256": "fa3d66d5cf180c0d38096ca74c8b35c7c55eb573463f50651ec7bc932330db87",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0067",
+      "ground_truth_sha256": "470bd37157a68d4665530df0ff71e9fc1fe99c00ca92d02e01124b0aa949c2e9",
+      "image_sha256": "17060b8b1b79be4d823de17e92aac6909b7452e66e7eec5b9726b9243792ea66",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0068",
+      "ground_truth_sha256": "794797d108cda2476cace8bf317563c53dae3fb4ef7c1226562b2cec3b7f5074",
+      "image_sha256": "8ef29e1c50ea65c330856a11e690f8a60232ae11f3de29f31404ad1a2422a7c7",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0069",
+      "ground_truth_sha256": "a2bc3a8e7778986d0a0be1e1afa40db2e0b215a5018eab368772ac8847db6c5f",
+      "image_sha256": "25091291d6cb41107cee74083b8a060847e5cdb39e5a42a37f6f5295f5878149",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0070",
+      "ground_truth_sha256": "45e7ce8555f90b72cabee34d79f4880dbcbb5199404af9d737eab41b1b1458f6",
+      "image_sha256": "d7c4ad68d396773587abd18fb7753c4e3d9998d5d5e015c11d8242db570470b5",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0071",
+      "ground_truth_sha256": "14398b4db076537ab8c601534fa0df011c47d50ca912492b28c7317cfb4efc8f",
+      "image_sha256": "0646a1fe01978b4782b9d2cfab14d19c4e4fc0c885a7d93358970c2de509f176",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0072",
+      "ground_truth_sha256": "f377fe4cdf4efe510937f1bc8f172325ecaa0210d5880aa7e0df3f1adec596e9",
+      "image_sha256": "2a7d8f1d073cc55bbec42b58ae14291e1bb4e1c1e52570f9c17d79b98843f923",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0073",
+      "ground_truth_sha256": "3423626b1a2ab075b0162e92458157f9c9c7c87e4ac721d2845640fc2af02240",
+      "image_sha256": "5b0057ed6dfef1c63c5810aafe977c83a5cfebb93bf1c65cc72f62e79efdadf9",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0074",
+      "ground_truth_sha256": "745f911566028ad3e4c9a28d70403953507b518375e7ddd6da78e2498600829a",
+      "image_sha256": "70557f2d538503cc832e7ea1db4010ad1155900072c9ae3e4bbf66f4b2da2d5a",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0075",
+      "ground_truth_sha256": "d774cd71e190f4342f8c4c7d1c507019f77ea8f0551e9cae068a8bb718c168a4",
+      "image_sha256": "a32ca937ae36db477f00e9c024dcaaaa1ebe0a67d97332c6286e77020e46e201",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0076",
+      "ground_truth_sha256": "138a3d83b0b1506e90f4f85aef56be568d4acf0a070414b56a1020f41f280f03",
+      "image_sha256": "a725cf9342e603d85adb04ab98f338a659039ff40fe3ffc903a8b910ec435670",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0077",
+      "ground_truth_sha256": "fbfabe4c23eb99d427a018f37e8ad80816c1999694f891e98686cc60964c93d7",
+      "image_sha256": "4b24baa6bfe44d7d99f6f805cc82a42f979d47a02ec5a866dd16068238c31881",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0078",
+      "ground_truth_sha256": "b3378f56a665a5259e1d91ca903b68da26b029fbf4b2154b94643e50cb9bfc28",
+      "image_sha256": "ca1329002cdf9f8487409782d2a3a7f465c18feeb91788d7b7541166cb7b603a",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0079",
+      "ground_truth_sha256": "7517d6200ef52f71ce7e868a57d8bb8ed0a85439d0c019ee089653bcbf19cf17",
+      "image_sha256": "d6862f8d688a5192a619b5a0e83c1eabee2d0e1246b15a94ee5cca96ce1c6f9b",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0080",
+      "ground_truth_sha256": "c1f39062a581e4aaa2670e8eab4f64ffaa95227f38264bc782d9d4b7aef37a1f",
+      "image_sha256": "81fc0b70dabd32d9c07e202ff9ff9ee59630a635aba4652c5d6f75164fb12e9b",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0081",
+      "ground_truth_sha256": "dad9d3fbfc3c7882fcd02f9f1a12530beb24739ca1d0070894bce7612186165d",
+      "image_sha256": "cf996bd1e00bdc98651baecb941137ffc145456a8b61497615d32351c4a3ce0d",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0082",
+      "ground_truth_sha256": "33665cf8ae54a1f13b34922bd192361f1a4842bd2bcee32856890c599fe75f86",
+      "image_sha256": "39c5f6fefd055cca0e6779861086d490be3f53185c11083709b21b9830806248",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0083",
+      "ground_truth_sha256": "1ee741aea553d65dc962856d2fc8914ebd2350113b2690b2c7de820edf91013a",
+      "image_sha256": "89ac004580480b1e09aee925e0794f23d5ae47aace6b2caac0cd16489d4176d6",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0084",
+      "ground_truth_sha256": "48e4879c6eead98b9d379503b27f9a6b49a84eafb2f9845e6c99d4b3885a5311",
+      "image_sha256": "dae5acbb23bd2c910f091c971c0239f3f8433cc76b8c35df6eddc8efafe8d84f",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0085",
+      "ground_truth_sha256": "db9acc984e063e450f33c72f61b7c3d58cbcd0933eff362a9806dcab7e4c1ab0",
+      "image_sha256": "7740411cb4e6f0fcaaeeacc6d4174da9b4a1e461697e221b32942a07f448a246",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0086",
+      "ground_truth_sha256": "f1478343e28d5d2a5646863b2d103b3fb13ed46e2841cff8f50524b4a12a05df",
+      "image_sha256": "0ec0e082885d983d49ef2f6ec0292cc6e067de476a00d4d4c5068ae82a6f52a1",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0087",
+      "ground_truth_sha256": "8c54270e2930fbc9e10963e3eb25aaee1edf25d10b24ee66fe29e98c7de7be2f",
+      "image_sha256": "6224d2a5e61047a58074107ea7dfc60514961886d6c8acbe1702441acf9a5cd2",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0088",
+      "ground_truth_sha256": "d41d429c4f13241d87094eabb901d775b816b31db141f6edcb87df8da009ab08",
+      "image_sha256": "e272f0eb5e7a8b94e67a940ce6015594b75373d56822fb50ae1d5eb9f3cef349",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0089",
+      "ground_truth_sha256": "15a72fb19b03e0adeeb82aa2056e0e61e25181fbe401ac43fd1a21b6e2bd8f8c",
+      "image_sha256": "4cfce4fb7eb676ad5c3084e5efec334a7938426203000b8bb4caae73713811ae",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0090",
+      "ground_truth_sha256": "fb76f2e611b11bc939b514387d404d4e8c6503e500f582bd03a819f82760191a",
+      "image_sha256": "8a6bd400eb408c09d83ddb94b0085098f4815f88ad56f501cfb7dd2beece8458",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0091",
+      "ground_truth_sha256": "0c693f836ea83e1c45ded9d000688ac873b158c09f1fd0eed51350300ac05aca",
+      "image_sha256": "7061bbfc47c6f7295daad8e8894be34943071434b7d6de9ed1c903eafb1d211b",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0092",
+      "ground_truth_sha256": "fa50fdea5292c872ea48873113e36ca4b09c6ba7618f3850bb142e4398e295ac",
+      "image_sha256": "b8597b706e2e4def994cc882229e78ddce736bc23e38ab6da2979ad14597e8b9",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0093",
+      "ground_truth_sha256": "d0595f769f4761effd0e803c8ec79727fcc40e2c39c7f7cb4514309675968f34",
+      "image_sha256": "c3b11c00e295473b3170eb7394d532fd359135c66b7bbb891e7b47dfe67cb182",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0094",
+      "ground_truth_sha256": "063cfa7ac96d7e22d7179a408964ee13a235303a11554255067e7347bff36e1d",
+      "image_sha256": "8acac4446ce370cb9cd647c55c53f87f3e714ef35895dcbf24414ed0c1899d70",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0095",
+      "ground_truth_sha256": "c62633a1f494ce436ae20a7860e81e1d97cd297a99966537e3933d4b11cd4ca3",
+      "image_sha256": "e007185d7ce3dc822f8804e9ee8378075b726dd300f3428cca6f7c8be9b64d5f",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0096",
+      "ground_truth_sha256": "5147e5daf54692e68d612cbcd16474e3d316f8e9c259dad26490aff5407efd6b",
+      "image_sha256": "060d93d833e64631fc2f6402e9bea80171b93f4ad985eddbea6a68765fd9fceb",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0097",
+      "ground_truth_sha256": "85865c40d3496aaade3474bd5c96e34989bcf990881a01f836d5034c4b251690",
+      "image_sha256": "80a7fb7cb4545011657c732b46a3c7927b586fbb96ec53522cb3d51142307a2a",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0098",
+      "ground_truth_sha256": "e1066b8eff3d7a27a7033a0477734a530c8f7db2146f71970fafa81e93b6655e",
+      "image_sha256": "6d7a8afceefc1f3e0838ba0a6ba03824f69707b2d64d23d80da57bb7d5c0eeb0",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0099",
+      "ground_truth_sha256": "048938fb4567cee46cdb7d0892bc0bec2ebf49383a14a1c90efea18be0c8ca61",
+      "image_sha256": "5198e1e2ac7bc20cfb44f2d3627e32fd55c55ca474b22403dbeabd74d3863bf5",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0100",
+      "ground_truth_sha256": "c8aab2103060b45d649603b3864ca2bf24ebcaf21b1c4a7c7d45c15b582755f9",
+      "image_sha256": "5d1f1dffd3bcc576dd6759675988b737c58c1ded55889e17ea5a8b9047031cb2",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0101",
+      "ground_truth_sha256": "f43651801b4608e0a917dfa2a7ae44cef60b0cbda66dfc5504d87438daaea65e",
+      "image_sha256": "544707b69c7466645ed226c02d4adc50de3711125b8668776f7748477da6f34c",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0102",
+      "ground_truth_sha256": "eb4b5553d4992bf6ac686d190f868487ab07723df659f102b5eac55cc51d0563",
+      "image_sha256": "1da931e01b708d67d659c5a8ba8425fa1cedd1f0e26128368e171742fae0c786",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0103",
+      "ground_truth_sha256": "5697c6538f45d81f303b66bc9053fe744e6ea8e770f2535668c8e0a3cdbe41bf",
+      "image_sha256": "d813b9974cc46c544dc9d60fb1e67e27b00303374b18ad57696a83e25a9ae6ea",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0104",
+      "ground_truth_sha256": "b06d7257c062d6eee8f4c27add55cec65d959be90b53e36fd17ba69e202da6d6",
+      "image_sha256": "9d511c3f7249b088e7225ecd46beb129b824cd3e3cb9daf18385d2ef95af2e55",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0105",
+      "ground_truth_sha256": "2a15de8f3e7088c766b4703761e92be0c4a43a7340a310f9c9b41b5ef08599f9",
+      "image_sha256": "3bea3281e9d0798f07c17651dd83ab4c2b086ff9fdd5879af380b950980ff63f",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0106",
+      "ground_truth_sha256": "cc78d9aebc2842dc805d41e7c26032fe7698334b08731979b016bde462e5efbf",
+      "image_sha256": "ea4d47b432f8ece944200a943dcca0a0ff59a977aa0f6b7581011be8d37f6c98",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0107",
+      "ground_truth_sha256": "33c500951d73435a8d4a1fc8c77e815d79ca8701be5fb26a75497734d53e7cad",
+      "image_sha256": "284c1114903476a7fa21d4d701fb2cd8e206083e57ee159c1f4587051223ee8d",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0108",
+      "ground_truth_sha256": "75c0eefe171d761466b3511db6fb3e642ab6e3893f9197d2af2344b476b811dc",
+      "image_sha256": "50a16b5c10835541ea2b3722130f24104eb99d4d47e1d369664512efcf2a73c5",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0109",
+      "ground_truth_sha256": "67666e47c9f488adaa2cb4190ccc5c2713f31b0ac34e25c85cedd23277083ccd",
+      "image_sha256": "6f76b806afc7f03df792da8267f39aa86612485b05ddbda3c4b28d972d9b81f3",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0110",
+      "ground_truth_sha256": "49f60fb22fca71ca1eb147ed17380916ec46e34a851bf727b5f21e1fdcfd8293",
+      "image_sha256": "4cae1450fe5e52b8e8bcebf3e90a310aba10cb0ef038378fbe6548ca517844b5",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0111",
+      "ground_truth_sha256": "23b377bab73555c547f9910b7318eb958ea0471853b331f2944d3756222d498d",
+      "image_sha256": "7e688f5665288ca859304dc443e3704d901af745e036b39bf4c3803b2e094e06",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0112",
+      "ground_truth_sha256": "d49b641785796e9431e8ea678e3b6336d0ab5139255d72ed7b3a2adf5e26a6a1",
+      "image_sha256": "a102a00d10e905c86d509aca941108c79b99f48adb9a172fde3876ec37ccd47f",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0113",
+      "ground_truth_sha256": "cb58a43e07c38cf1a1a8ed4f2af9c19576906f525e37f6c0892227ef49c87a69",
+      "image_sha256": "57f2b6fb5b1f0fb5ae69c4e6163ffbc5eb1d0ef0a91db25dbcee3a0b627b9a81",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0114",
+      "ground_truth_sha256": "f81cf1398971ca2786b00261aee6995e57d0f38383d0e54fdc42b5def8319140",
+      "image_sha256": "69f7125e91f5193d8e392391947cc2385e6f5254f1ba83915fd82b5e2aaa0b0b",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0115",
+      "ground_truth_sha256": "da504eb7224a2082018d49c99651c1d104a74ab06a33138d5bd56b8a7a3c8f3f",
+      "image_sha256": "967c68b9b60126354aea542b70d4b3b32a6bd3eb813ad7500583eaa811337981",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0116",
+      "ground_truth_sha256": "f47e4025acdbef670c7926e8b36787e34ac526047f351ece6828a83b248935b6",
+      "image_sha256": "2ec48c7734f892cb6c05d24e2a1a4001da34d24b4359fd5d47a619513fcc87ba",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0117",
+      "ground_truth_sha256": "a197c1b3870df9000101c8878cfa760c91f4a87f9cad83a066408cf34bb2f4c2",
+      "image_sha256": "d50e18ec86d2a78bd92c4136bb69bd9e8e4b2a00686e8e250a2966c0dd8f4cc9",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0118",
+      "ground_truth_sha256": "d52967a5f4b3df3f2ec07d241c6b9f6d1ca3c5fecf0643a93359b06c5fc9ef8e",
+      "image_sha256": "cd8c776f8ee4a8d9cd24c48823c01757f277beb01eb1a31f36107ff9a0f6a62e",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0119",
+      "ground_truth_sha256": "b36064206646cf08914490e9bc606019b2028bce2a13c9dbab0d23cc3e45dc08",
+      "image_sha256": "098970dd7c6ed1962988b27aa40d98ea71c237b6a3138d9ce2685271a6bfb998",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0120",
+      "ground_truth_sha256": "c17f7e99781c3072466ed6e60b855fa60a9da267a60f1a504e712bddeb608ce1",
+      "image_sha256": "459ba5abc39022225b66d7012e71c766b635e81e1aae136b12a4945ddcc93676",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0121",
+      "ground_truth_sha256": "466f1342e4c801f6f667be4f733f59e4b631f6f4bff222448f054e23e10f1600",
+      "image_sha256": "b74f5c7ad83c9281ba80f4402d9b3e2453b4af0bffcd1b6c6acbf02b01c4e1bf",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0122",
+      "ground_truth_sha256": "bd05861e37daa22bc7a0811936f63f48dc8cf40049d19513e5f5ad725b3b2b1a",
+      "image_sha256": "57d68cb0fef8614650e40903703a147825712af011f40bc753846effe738c311",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0123",
+      "ground_truth_sha256": "dbf37e7e9057a875f693922f615d73e37e3b23eb95d42b7d2e030c24d7086e95",
+      "image_sha256": "aef1101999374eb9feb37921d016a5a1c06a2512db08c2747fcac283f31911dc",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0124",
+      "ground_truth_sha256": "344d5f94b5c28d4d1eda6467c0fb310b8f59c51bf8f846b9786ad539077fd9ed",
+      "image_sha256": "08cd9cc5fa6f2f5285948c72b745cbc20f255e9450873a6622a51d060a6ef76c",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0125",
+      "ground_truth_sha256": "b7d3f8dc43f1cebe72b76c3766dd7e378be2aec051247691a1cfa990b2ee310b",
+      "image_sha256": "7805c21c498a69c823eb3b0c2072ccd52b75b439e00d6d85dbb53c60ab880727",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0126",
+      "ground_truth_sha256": "32c0b7d9ff204f1d92c94551fd3a6bc2fe5c0a70cd0105cd03823e0afd491e73",
+      "image_sha256": "b8a22d060cddf2a1a695450031c67bcf9a81fd2a436b93f76c34a573212ef43c",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0127",
+      "ground_truth_sha256": "0333f12f5fe0ff3884656209d7cdd6a8846849154a1efe688611f98b028e9e07",
+      "image_sha256": "9fdacce4b13207b41b41c193a6c182be702deaa4524d1b2f4de15888cef12d70",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0128",
+      "ground_truth_sha256": "3bfa2f337a0d0eb9efbdadc908122b45d7714a8eab955cf004a1e7497d0a4c42",
+      "image_sha256": "2c8cd4eecf7888f8378fa436865d366dd8d32d3f6e3e4fac28989ed8176c752d",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0129",
+      "ground_truth_sha256": "8fd0f4755f52541fab00204abe9d1cc41498a02b530dfee9a0c58fb1a53b0bbf",
+      "image_sha256": "f4f9719b00700e0d06136e0f595616dd4632a0ccc80858b06c3e515c00dd7a8b",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0130",
+      "ground_truth_sha256": "dac77b33f342b9fcdde3f725879cd14b721076896602ec1bc8c2110e0528562d",
+      "image_sha256": "ede37702ab5fef7fb22c187aad541d0ee281694db022e181bb810d47be8b85cd",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0131",
+      "ground_truth_sha256": "af53a36db42dadc23a406a357994cd5f7587e2b8a20d08374d85a801e8f94740",
+      "image_sha256": "8197eadca1a3693884c1fa9ded6866c381b51c9f347b6e41c0a9ec882ded40c2",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0132",
+      "ground_truth_sha256": "ab3b5d317fe2aa6586d2d0e1bb07cac68b2893d6df010b0695eaaa01538ae6d0",
+      "image_sha256": "b0622c601bbc8667f2d7dcc09b4ed098e7f0775ca7e49d653cf4641a5b316dd3",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0133",
+      "ground_truth_sha256": "6ddd60713714abc2e46a8802edc3086e7d1834ab6997129c946f5629cdb298e7",
+      "image_sha256": "911c96a25936a012d136d825ceca0dac9f8940b23f54c04d4ce4c94cbcc28bcd",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0134",
+      "ground_truth_sha256": "9131b78bc9526e452a38086eb8ea94c72b5bc4268543e1f4dbce4b8f34f94f39",
+      "image_sha256": "459ff3a27069cf6d9ca01c695289c74dbeb8c59f3a4ba1b466b63a301454de95",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0135",
+      "ground_truth_sha256": "09a609c87b2f1cf0402ff1d6a7d48f2f5361c24ec7b4296799f00cf2a4554735",
+      "image_sha256": "d4e73b90d4dcba94db100ea0b13dccfe6c36f39e065659de24d32bbd5d1d7d7b",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0136",
+      "ground_truth_sha256": "15038f25b319ce1310339871c7cf53d5544ed91b9a8c65dabda5b86a71d942df",
+      "image_sha256": "22703581a9a42636aedd31eed4666e5a1537b21bd59fe461dfcb6593e1f574ed",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0137",
+      "ground_truth_sha256": "ff9080480e6dcc73f546ca3b7d98e3ae5526014ff8078852002e393c55c33215",
+      "image_sha256": "6753008e86ee27eef4ad5eff64f381c4c1655aa3088ebcbac8bc2f70b12391d7",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0138",
+      "ground_truth_sha256": "1e5473ea4f6b1e3e9687ed42a3ab430cebcd56e54d88654443f5317b964d25ad",
+      "image_sha256": "cbc6f95366e37f4ea9d80066fd91e2f6d908a3dbcb813bb9e3002052c2b79e21",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0139",
+      "ground_truth_sha256": "b94dc6ee6af25dc7a694aaed227c3d1e603b7152a5a683ef8bdb096ec3e01220",
+      "image_sha256": "d2703a70874679ac86ea65647e388e6a939260def1f117737c7eeec627eef242",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0140",
+      "ground_truth_sha256": "2c26a3469d49e5ae2a1756437bbefcc86417fb71b73bed716468dc3051ac6590",
+      "image_sha256": "2ba641c94b8cc3d63c6b877a30e7da4ba5a2618b0bc81b2e9350715a0da2475c",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0141",
+      "ground_truth_sha256": "5708977b3b07b7a34e51627b2847c9736c313b02789bba0b6498256b9e552ce0",
+      "image_sha256": "41324fe4a531c78106ffb104f28fa60e0c70c1019dafe08848ffb4dbd3139dbb",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0142",
+      "ground_truth_sha256": "c2d0b19fec22c32492fad64145c0538b5361a600a94690b5dd27cf457cfd50e1",
+      "image_sha256": "6a311997d16f1e75704638183a60fbf4596caf79b71755a65de150983c7fd9ce",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0143",
+      "ground_truth_sha256": "39665f597caa73735a2c75fc15f9f4b0a64cca713dd9af4cb86a4006428c6221",
+      "image_sha256": "9e6cf8eec8199f7121691eca001f661365206ee6252bd6add0d5eaaee321df07",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0144",
+      "ground_truth_sha256": "c1dd71c512cc9f94963a522290878bd3032a71c70e684dfb63995dbf99cb0f27",
+      "image_sha256": "1e1e5828ac5588bb534f315b3ae7fb5a0abb63bc904505522c9f99bc5c1b5504",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0145",
+      "ground_truth_sha256": "f4994ca205a68a12fcb71d1230e4b5a02de689aec6f37af317664eb788d01f98",
+      "image_sha256": "8727462d2a1827d3278dacc67bc244d08895c1c56deb6163b974a196412c2700",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0146",
+      "ground_truth_sha256": "897cca658dd896c6bab17ca7dee5be679c27a11ffd7215a4c5780d1135c224e3",
+      "image_sha256": "a4da7da9632c6c87158e4ab90bda53173079360555d33e1596b60c8873681c0d",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0147",
+      "ground_truth_sha256": "9c6c90c2b0b5b0bb7a59ccdf662e55343f2b4e60015e970e3d3e2ba933c3b360",
+      "image_sha256": "c20680f0691a4e2d893185a9d94c33e83b3c337a3828a52e55f5735779da3250",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0148",
+      "ground_truth_sha256": "63534dcea1fba6091802d1d7c74425519632eec89fcba43f35d0ff3c4fdc8160",
+      "image_sha256": "6c848255043684bf7f5e098892615d7955c177e301da02d7c6f8221055e66e14",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0149",
+      "ground_truth_sha256": "31e216e75158aa7acb90247ffcf2140fce9aeeea1497123611148f7e73ccc577",
+      "image_sha256": "a7909fbb0fb21fc277d34c2826edd95b6fbbda4b2d5c4747a7cccfb3a99088f7",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0150",
+      "ground_truth_sha256": "6d3030a58c85b3e0547587126362b0e732cf3de082572d7227dfb568d2866db2",
+      "image_sha256": "a2873d77e3643ca5bfc65ea38fce66852e5a1b54e6299d5672999cc1f0963c7e",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0151",
+      "ground_truth_sha256": "0230f7512af1f6e4a09a23c5a89c85665d90201b5d5210f8be161ff536cdaff6",
+      "image_sha256": "dca9c271841e66421bb68236575d97b050e685a4e109d6384522d7184feaec8e",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0152",
+      "ground_truth_sha256": "68a6cd3e044f819c37ff821410f0211baa14cda5849d597963754e281214f4d1",
+      "image_sha256": "51f3cd2a0cc99c408424284a95715f803ad2bb6db9b3eb30c610f4531f8421f5",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0153",
+      "ground_truth_sha256": "9062752539dc5bede74fd19248a52f3fb3ad60ca6e5c944889afe056fe31dcb3",
+      "image_sha256": "328c42b0f73cafd205dcc4ab5011ba663c296552f35e556ed001f7e0b2ad55b1",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0154",
+      "ground_truth_sha256": "4091fb0019b7df65ec092c66baa4edfcc3d52722f8e7db6081feae1f1335c11d",
+      "image_sha256": "5f348a03f6261fbc3e943f8349b8a42c736afb27bad788c4970935ba795e80d1",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0155",
+      "ground_truth_sha256": "3d98dbbcbf8209e69816263146755da78255bff09422bbc1c06882acea522b64",
+      "image_sha256": "d792552943350077f456987a483d3b6abe7e012e9fdf12bf6fab4a23e803ccaf",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0156",
+      "ground_truth_sha256": "51862762588e33845897172ee073bb44bc9bb544831b87010bf1a886693e0ed7",
+      "image_sha256": "2cdb64fc88f967c3c9dd660f981ef7479ea51e635e8a09132f82e0a5b64bea0d",
+      "renderer_family": "hidden-early-slope-v10-public"
+    },
+    {
+      "degradation_family": "hidden-display-capture-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0157",
+      "ground_truth_sha256": "9e8e41a03a1996a76a497cd0b2601bf31d59d3cf4d02aa585a8882e8194bfe8c",
+      "image_sha256": "f82635adaef769e8ab4d42362ab68b3bf954cc05cc8eaf48751ce0c6a6c527d3",
+      "renderer_family": "hidden-reverse-tail-v10-public"
+    },
+    {
+      "degradation_family": "hidden-paper-grain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0158",
+      "ground_truth_sha256": "3787bb8db919d8f02cf5aa478ae00423e5df7b446d032075d9cc49ae94edbd6b",
+      "image_sha256": "8042cd14faa1561ba6ca5c6c1e6f728fda648bd6994c603434d0b8020da1b018",
+      "renderer_family": "hidden-staggered-fan-v10-public"
+    },
+    {
+      "degradation_family": "hidden-copy-chain-v10-public",
+      "fixture_id": "marker-decoupled-heads-v10-sealed_public-0159",
+      "ground_truth_sha256": "b7a3416f45b2bd33782b1db389a64891b5aba543d1424940ebdf068f45b526e4",
+      "image_sha256": "3b4d002a08a39eecdcb9ea05d74b82cfe22354f7b74dcd6c841f4826b2593f16",
+      "renderer_family": "hidden-early-slope-v10-public"
+    }
+  ],
+  "private_data": false,
+  "revision": "marker-center-decoupled-heads-v10",
+  "schema": "graphreader.marker-center-decoupled-heads-public-dataset.v10",
+  "scope": "public_synthetic_truth_hidden",
+  "seed": 10317
+}
