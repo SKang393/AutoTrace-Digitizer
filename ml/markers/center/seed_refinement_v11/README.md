@@ -24,10 +24,11 @@ offsets, scene identities, archives, and source hashes are new. The split is
 synthetic only. It contains no Chandler, article, private, external dataset, or
 prior fixture bytes.
 
-P1 is preregistered but not authorized in this checkpoint. No optimizer step,
-candidate selection inference, public evaluation, manifest, model-store promotion, packaging,
-private validation, or production approval has occurred. Execution requires a
-separate commit that binds the committed preregistration tree and authorizes
-only P1. The public archive remains locked even if visible selection later
-passes, until a further candidate-specific public-gate authorization is
-committed.
+P1 is authorized exactly once from preregistration commit
+`729d51e916c8433e4c3ccadccd28d7038007ce12` and tree
+`66054ffe3f52814c3ccb30b3ada7ec1b4d2d4980`. No optimizer step, candidate
+selection inference, public evaluation, manifest, model-store promotion,
+packaging, private validation, or production approval has occurred at this
+authorization checkpoint. The single-use training seal must refuse a rerun.
+The public archive remains locked even if visible selection later passes,
+until a further candidate-specific public-gate authorization is committed.
