@@ -52,6 +52,9 @@ losses, 1,792-step budget, thresholds, CPU provider, parity limit, and all
 zero-error gates from scratch. Its only change adds a weight-6.0
 binary-cross-entropy term on artifact pixels that are seed-positive and
 truth-negative. This directly trains removal of false seed pixels without
-penalizing truth-supported seed pixels. P3 reuses no P2 checkpoint and remains
-blocked until this preregistration is committed, pushed, and separately
-authorized. The public archive remains separately locked at zero evaluations.
+penalizing truth-supported seed pixels. P3 reuses no P2 checkpoint and is
+authorized exactly once from preregistration commit
+`be6a6a33cc42d7ac6fc3d3de8b7f6b1e70ebefbb` and tree
+`70b603dbc2a7f53846027b1bfc1ebbd58057588f`. Its single-use training seal
+must refuse any rerun. The public archive remains separately locked at zero
+evaluations.
