@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import subprocess
 
 import numpy as np
 import pytest
@@ -102,12 +103,26 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     gate = _json(ROOT / "gates/sealed-public-v1.json")
     ledger = _json(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol["revision"])
-    assert protocol["state"] == "split_frozen_runner_and_public_evaluator_preregistered_execution_blocked"
-    assert protocol["execution_authorized"] is False
-    assert protocol["authorized_candidate_id"] is None
-    assert entry["status"] == "candidate_1_preregistered_execution_blocked"
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert protocol["state"] == "candidate_1_authorized_once_not_executed"
+    assert protocol["execution_authorized"] is True
+    assert protocol["authorized_candidate_id"] == "P1"
+    assert protocol["execution_blocker"] is None
+    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["execution_blocker"] is None
+    assert protocol["preregistration_commit"] == "20b803ae8b0f6562c22142029cdcb46eaf4de0cf"
+    assert protocol["preregistration_tree"] == "49c15cc1d583589ad1f52fdc81e13d83387958d4"
+    assert entry["preregistration_commit"] == protocol["preregistration_commit"]
+    assert entry["preregistration_tree"] == protocol["preregistration_tree"]
+    committed_tree = subprocess.run(
+        ["git", "show", "-s", "--format=%T", str(protocol["preregistration_commit"])],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert committed_tree == protocol["preregistration_tree"]
     assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
     assert sha256_file(ROOT / "PROTOCOL.json") == entry["protocol_sha256"]

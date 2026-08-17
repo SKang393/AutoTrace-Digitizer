@@ -25,8 +25,11 @@ thresholds, artifact gates, zero-error marker gates, two-pass mask composition,
 fixed 2.5-pixel NMS radius, CPU provider, and strict model parity gate. P2 and
 P3 remain unregistered.
 
-P1 is preregistered but not authorized. A separate committed and pushed
-authorization checkpoint is mandatory before its one allowed execution. The
-truth-hidden public archive remains unopened with zero evaluations. No model
-manifest, production model-store entry, packaging, private Chandler
-validation, production approval, or release is authorized.
+The frozen split, exact P1 runner, candidate configuration, and one-use public
+evaluator are committed and pushed at `20b803ae8b0f6562c22142029cdcb46eaf4de0cf`
+with tree `49c15cc1d583589ad1f52fdc81e13d83387958d4`. P1 is now authorized for
+exactly one execution and has not executed. P2 and P3 remain unregistered. The
+truth-hidden public archive remains unopened with zero evaluations and is not
+authorized to open. No model manifest, production model-store entry,
+packaging, private Chandler validation, production approval, or release is
+authorized.
