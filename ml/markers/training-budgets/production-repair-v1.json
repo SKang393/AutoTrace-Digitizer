@@ -5476,7 +5476,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-crop-evidence-role-anchor-v24",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_3_preregistered",
       "defect_class": "V23 P1 and proposal-head-only P3 retained the same three false and prohibited regions while preserving all 1024 truths, indicating that the 31 aggregate evidence values cannot distinguish the remaining structures",
       "prior_revision": "graph-text-role-anchor-set-v23",
       "trigger_result_path": "ml/ocr/role_anchor_set_v23/P3_RESULT.json",
@@ -5485,7 +5485,7 @@
       "trigger_case_detail_or_pixels_used": false,
       "prior_fixture_bytes_reused": false,
       "isolated_change": "train a new project-owned model from scratch that fuses each proposal's production tight and context raster crops with the existing 31 evidence values before the unchanged role-anchor set context and separate proposal and role heads",
-      "architecture": "frozen-v23-role-anchor-plus-crop-proposal-residual-v1",
+      "architecture": "p2-parent-recall-crop-residual-veto-v1",
       "p1_result_path": "ml/ocr/crop_evidence_role_anchor_v24/P1_RESULT.json",
       "p1_result_sha256": "79f4254287b687674e505961762433c99f309683963650ffed6b982cf71f0715",
       "p1_report_sha256": "a34d696e81facafe65b77697bf02c98cb03af6a3f19b8a571b55b70ded5d15f8",
@@ -5494,17 +5494,24 @@
       "p2_isolated_change": "freeze the exact V23 P3 role-anchor backbone and its role outputs, then train only a compact crop-conditioned proposal residual with teacher-positive preservation and teacher-negative improvement margins",
       "p2_trigger_evidence_scope_used_for_design": "P1 aggregate terminal metrics only",
       "p2_trigger_case_detail_or_pixels_used": false,
+      "p2_result_path": "ml/ocr/crop_evidence_role_anchor_v24/P2_RESULT.json",
+      "p2_result_sha256": "c102bf6e2ccc26f401cd23666c81f5d8cdff8c9f2ab530b153dcc50b2f6ce317",
+      "p2_report_sha256": "88d5f7d07e629b9f8fc33121fb180a3f6756f24ff803a74133c512466bdf4f95",
+      "p2_status": "failed_selection",
+      "p2_aggregate_trigger": "zero false positives and prohibited hits but two false negatives at threshold 0.35, no three-threshold zero-error window, exact parent role preservation, 0.9931640625 role accuracy, and passing 9.5367431640625e-06 CPU ONNX parity",
+      "p3_isolated_change": "reuse the exact P2 weights with zero optimizer steps; require the V23 parent probability to be at least 0.35 and the P2-minus-parent crop residual margin to be at least -0.25, then emit a fixed high-margin proposal decision while preserving all P2 role outputs",
+      "p3_trigger_evidence_scope_used_for_design": "V23 P3 and V24 P2 aggregate terminal metrics and the preregistered P2 teacher-margin contract only",
+      "p3_trigger_case_detail_or_pixels_used": false,
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P2"
-      ],
-      "consumed_candidate_ids": [
-        "P1"
-      ],
-      "remaining_unregistered_candidate_ids": [
         "P3"
       ],
+      "consumed_candidate_ids": [
+        "P1",
+        "P2"
+      ],
+      "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/ocr/crop_evidence_role_anchor_v24/PROTOCOL.json",
       "protocol_sha256": "8de3aa5f9ba49544bc67a3acb2e2fa320b9cfbe40e103ae8e04ff7ae52cb13fe",
       "split_materialized": true,
@@ -5521,11 +5528,13 @@
       "cross_split_source_overlap_count": 0,
       "candidate_config_paths": {
         "P1": "ml/ocr/crop_evidence_role_anchor_v24/training/p1.json",
-        "P2": "ml/ocr/crop_evidence_role_anchor_v24/training/p2.json"
+        "P2": "ml/ocr/crop_evidence_role_anchor_v24/training/p2.json",
+        "P3": "ml/ocr/crop_evidence_role_anchor_v24/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "94732d1a2ccf839db3637b0b94e870692c0882ad0ac16f83495f5ebccdc2714d",
-        "P2": "dee7ed7e86e16d2e4143c3ba4d074e4b542c6569c4720481640326a5ebb691c4"
+        "P2": "dee7ed7e86e16d2e4143c3ba4d074e4b542c6569c4720481640326a5ebb691c4",
+        "P3": "c81f9532eef7dc181b7a27165360cc9a53568e33ca6765b41137b9657c4d52fb"
       },
       "p1_expected_runner_source_bundle_sha256": "8fd827dec299077176efb84f3b07c3dcfb53ef3bbb3a1086e10d8aae21c78477",
       "p1_expected_optimizer_steps": 1280,
@@ -5533,8 +5542,14 @@
       "p1_training_result_seal_sha256": "bcb3d85b1b05646ae266b2af30d389a52e8738bcdcd1a4658b18ca3a23982e3e",
       "p2_expected_runner_source_bundle_sha256": "c6ff0520747d289d441edc64b1dd9a8fe7eca989e6444925473eafd009b05a6d",
       "p2_expected_optimizer_steps": 1280,
+      "p2_training_opened_seal_sha256": "b8084a846f62dfe1044cd2a0f3d8af23e72f2ea601c02b80b30b24ccba5f6bb4",
+      "p2_training_result_seal_sha256": "6d7b91d3232dd2c3bf0a468b156d103cdb7e92f956026f97b6a47749a407686c",
+      "p3_expected_runner_source_bundle_sha256": "97041fe40e2a5a50c7a9b53292058b24e78b9b1bededd4b75d98de18a3349295",
+      "p3_expected_optimizer_steps": 0,
       "historical_gate_and_training_seal_file_count_after_p1": 276,
       "historical_gate_and_training_seal_aggregate_sha256_after_p1": "3b769556d880aa0ef89b96417cbd176498165b2d370d65047d08a56d1d53acec",
+      "historical_gate_and_training_seal_file_count_after_p2": 278,
+      "historical_gate_and_training_seal_aggregate_sha256_after_p2": "e11d6882626abb00d4cbaac017013d85dc98dd0bf7b1b4c72755fabc306527e3",
       "selection_thresholds": [
         0.35,
         0.45,
@@ -5543,13 +5558,13 @@
         0.75
       ],
       "minimum_consecutive_passing_thresholds": 3,
-      "selection_evaluations": 1,
+      "selection_evaluations": 2,
       "public_gate_authorized": false,
       "public_gate_evaluator_preregistered": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
       "execution_authorized": true,
-      "authorized_candidate_id": "P2",
+      "authorized_candidate_id": "P3",
       "execution_blocker": null,
       "marker_creation_evaluated": false,
       "manifest_created": false,

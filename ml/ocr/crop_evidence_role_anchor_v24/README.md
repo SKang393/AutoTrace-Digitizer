@@ -44,19 +44,29 @@ only `0.421875`. CPU ONNX parity also failed at
 tracked result SHA-256 is
 `79f4254287b687674e505961762433c99f309683963650ffed6b982cf71f0715`.
 
-P2 is preregistered from those aggregate metrics only. It replaces the
-from-scratch joint model with the exact frozen V23 P3 role-anchor backbone and
-trains only a compact crop-conditioned residual on the two proposal logits.
-The role outputs must remain byte-exact to the parent. Teacher-positive
-preservation, teacher-negative improvement, and scene-separation margins
-target the P1 recall regression while retaining its structural precision.
-The parent checkpoint is bound to SHA-256
-`83d7b47a6fa53ea7b5618acb4b0d4bebb9207594967c4e83ad7c1c62c7cc409d`.
-P2 retains the same five thresholds, 1,280-step ceiling, direct tensor-stream
-evidence, one visible selection, and `1e-5` CPU parity gate.
+P2 executed exactly once from its committed preregistration. It used the exact
+frozen V23 P3 role-anchor backbone and trained only the compact crop-conditioned
+proposal residual for 1,280 optimizer steps. At threshold `0.35`, direct stored
+selection execution retained 1,022/1,024 truths with zero false regions,
+duplicates, or prohibited hits. Recognition exact was `0.9697265625`, CER was
+`0.005793742757821553`, role accuracy was `0.9931640625`, and every role passed.
+The parent role outputs were preserved exactly and CPU ONNX parity passed at
+`9.5367431640625e-06`. The two misses and empty three-threshold passing window
+still failed selection. Report SHA-256 is
+`88d5f7d07e629b9f8fc33121fb180a3f6756f24ff803a74133c512466bdf4f95`;
+tracked result SHA-256 is
+`c102bf6e2ccc26f401cd23666c81f5d8cdff8c9f2ab530b153dcc50b2f6ce317`.
 
-P1 is consumed and cannot rerun. P2 has not executed. The public archive
-remains unopened. Marker composition, manifest creation, model-store
+P3 is the final preregistered candidate and uses only those aggregate metrics
+plus the already frozen P2 teacher-margin contract. It performs zero optimizer
+steps, reuses the exact P2 weights, and emits a high-margin proposal decision
+only when the V23 parent probability is at least `0.35` and the P2-minus-parent
+crop residual margin is at least `-0.25`. This midpoint rule is fixed before P3
+selection execution. It uses no P2 case detail, scene identity, truth record,
+or fixture inspection and preserves every P2 role output.
+
+P1 and P2 are consumed and cannot rerun. P3 may execute once. The public
+archive remains unopened. Marker composition, manifest creation, model-store
 promotion, private validation, production approval, and release eligibility
 remain unauthorized.
 
