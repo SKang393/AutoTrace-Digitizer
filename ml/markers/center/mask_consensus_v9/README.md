@@ -51,9 +51,11 @@ false-positive-weighted Tversky objective, doubles the positive and
 hard-negative center-margin weights, and contracts only learned artifact
 output by `0.5` while preserving seed artifacts and the fixed radius. The
 contraction is preregistered to bound the localized artifact-channel parity
-drift without changing the strict parity tolerance. P3 is preregistered but
-not authorized; a separate committed and pushed authorization checkpoint is
-mandatory before its one execution. The truth-hidden public archive remains unopened with
+drift without changing the strict parity tolerance. The exact P3 runner,
+configuration, aggregate P2 basis, and source hashes were committed and pushed
+at `46f19785196a7fc9e902c9545a4d31540a7663eb` with tree
+`e4e80eb14699509811bfcac49c2fb995a8133cdc`. P3 is authorized exactly once
+but has not executed. The truth-hidden public archive remains unopened with
 zero evaluations and is not authorized to open. No model manifest, production
 model-store entry, packaging, private Chandler validation, production
 approval, or release is authorized.

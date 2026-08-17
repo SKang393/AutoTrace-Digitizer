@@ -45,7 +45,6 @@ from ml.markers.center.mask_consensus_v9.train_p3 import (
     TVERSKY_FALSE_NEGATIVE_WEIGHT,
     TVERSKY_FALSE_POSITIVE_WEIGHT,
     _verify_config_and_inputs as verify_p3_config_and_inputs,
-    run as run_p3,
 )
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 
@@ -111,14 +110,15 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     gate = _json(ROOT / "gates/sealed-public-v1.json")
     ledger = _json(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol["revision"])
-    assert protocol["state"] == "candidate_3_preregistered_execution_blocked"
-    assert protocol["execution_authorized"] is False
-    assert protocol["authorized_candidate_id"] is None
-    assert protocol["execution_blocker"]
-    assert entry["status"] == "candidate_3_preregistered_execution_blocked"
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert protocol["state"] == "candidate_3_authorized_once_not_executed"
+    assert protocol["execution_authorized"] is True
+    assert protocol["authorized_candidate_id"] == "P3"
+    assert protocol["execution_blocker"] is None
+    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["execution_blocker"] == protocol["execution_blocker"]
+    assert entry["refusal_required_before_output"] is False
     assert protocol["preregistration_commit"] == "20b803ae8b0f6562c22142029cdcb46eaf4de0cf"
     assert protocol["preregistration_tree"] == "49c15cc1d583589ad1f52fdc81e13d83387958d4"
     assert entry["preregistration_commit"] == protocol["preregistration_commit"]
@@ -143,6 +143,18 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
         text=True,
     ).stdout.strip()
     assert committed_p2_tree == protocol["p2_preregistration_tree"]
+    assert protocol["p3_preregistration_commit"] == "46f19785196a7fc9e902c9545a4d31540a7663eb"
+    assert protocol["p3_preregistration_tree"] == "e4e80eb14699509811bfcac49c2fb995a8133cdc"
+    assert entry["p3_preregistration_commit"] == protocol["p3_preregistration_commit"]
+    assert entry["p3_preregistration_tree"] == protocol["p3_preregistration_tree"]
+    committed_p3_tree = subprocess.run(
+        ["git", "show", "-s", "--format=%T", str(protocol["p3_preregistration_commit"])],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert committed_p3_tree == protocol["p3_preregistration_tree"]
     assert entry["preregistered_candidate_ids"] == ["P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == []
@@ -221,14 +233,9 @@ def test_p3_inference_transform_preserves_seed_artifacts_and_contracts_only_lear
     assert output[0, 2, 1, 1].item() == pytest.approx(0.4)
 
 
-def test_p3_runner_refuses_before_output_while_separate_authorization_is_blocked(tmp_path: Path) -> None:
-    output_path = tmp_path / "p3-output"
-    with pytest.raises(RuntimeError, match="Evidence source must be committed|not authorized"):
-        run_p3(output_path)
-    assert not output_path.exists()
-    assert not (
-        REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-mask-consensus-v9/P3"
-    ).exists()
+def test_p3_authorization_checkpoint_has_not_created_output_or_opened_the_single_use_seal() -> None:
+    assert not (REPO_ROOT / "ml/markers/center/artifacts/mask-consensus-v9/P3-run").exists()
+    assert not (REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-mask-consensus-v9/P3").exists()
 
 
 def test_public_gate_refuses_unapproved_candidate_before_model_or_archive_execution(tmp_path: Path) -> None:

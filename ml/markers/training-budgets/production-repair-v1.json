@@ -5749,7 +5749,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-mask-consensus-v9",
-      "status": "candidate_3_preregistered_execution_blocked",
+      "status": "candidate_3_preregistered",
       "defect_class": "V8 P3 runner reproducibility rejected a 5.662441253662109e-7 center-channel predecessor parity drift before training even though it was below the new 1e-6 diagnostic tolerance and the unchanged 1e-5 production model parity limit",
       "prior_revision": "marker-center-mask-consensus-v8",
       "trigger_result_path": "ml/markers/center/mask_consensus_v8/P3_RESULT.json",
@@ -5772,7 +5772,7 @@
       ],
       "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/markers/center/mask_consensus_v9/PROTOCOL.json",
-      "protocol_sha256": "e568c4f7cd5a49756e8d25d75e68e3db71728ff535ffe283c2580c64670af63d",
+      "protocol_sha256": "e3df354e9b2d89160c971796132ad0fd06836cdd828d5cd2708c204c7d5bf293",
       "split_materialized": true,
       "split_freeze_report_path": "ml/markers/center/mask_consensus_v9/SPLIT_FREEZE_REPORT.json",
       "split_freeze_report_sha256": "75fdcb45124bd75da2102590c5e2f4e58aceef20b2227c8d7a0114250607de65",
@@ -5826,6 +5826,8 @@
       "preregistration_tree": "49c15cc1d583589ad1f52fdc81e13d83387958d4",
       "p2_preregistration_commit": "f9416060111a696ca866fc496dab243fdf287c04",
       "p2_preregistration_tree": "d47a095abb9dc92f55ad80b4cddad9db6df0294a",
+      "p3_preregistration_commit": "46f19785196a7fc9e902c9545a4d31540a7663eb",
+      "p3_preregistration_tree": "e4e80eb14699509811bfcac49c2fb995a8133cdc",
       "expected_optimizer_steps": 768,
       "predecessor_checkpoint_sha256": "46eb64a923ff571db14156ca31cdac69adf639b27144e56d4ccf02198ed44122",
       "predecessor_onnx_sha256": "13b6204bec1129490a871987123bc03416c67cac3150c0efbc5c3d8dadce9f8c",
@@ -5848,9 +5850,9 @@
       "public_gate_config_sha256": "d0b97cfa645e6e501d8ce0898a0aa002189e3f8d6de62ae635a25b736359b242",
       "public_gate_evaluator_preregistered": true,
       "public_gate_evaluator_source_bundle_sha256": "6331f91e69b022b1e4974131ecedf16f4db75ed680f3975ee7bc4d391a99312d",
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "Commit and push the consumed P2 aggregate result, exact P3 specificity-parity runner, candidate configuration, and source hashes before a separate final-candidate authorization commit.",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P3",
+      "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
@@ -5860,7 +5862,7 @@
       "private_validation": false,
       "production_approval": false,
       "release_eligible": false,
-      "refusal_required_before_output": true
+      "refusal_required_before_output": false
     }
   ]
 }
