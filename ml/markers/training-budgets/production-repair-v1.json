@@ -5749,7 +5749,7 @@
     {
       "task": "marker-center",
       "revision": "marker-center-mask-consensus-v9",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_3_preregistered_execution_blocked",
       "defect_class": "V8 P3 runner reproducibility rejected a 5.662441253662109e-7 center-channel predecessor parity drift before training even though it was below the new 1e-6 diagnostic tolerance and the unchanged 1e-5 production model parity limit",
       "prior_revision": "marker-center-mask-consensus-v8",
       "trigger_result_path": "ml/markers/center/mask_consensus_v8/P3_RESULT.json",
@@ -5764,16 +5764,15 @@
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P2"
-      ],
-      "consumed_candidate_ids": [
-        "P1"
-      ],
-      "remaining_unregistered_candidate_ids": [
         "P3"
       ],
+      "consumed_candidate_ids": [
+        "P1",
+        "P2"
+      ],
+      "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/markers/center/mask_consensus_v9/PROTOCOL.json",
-      "protocol_sha256": "bed2b2216060efaeeae362a0d07a0b6f474c2023193303e9511bc0e360f0390e",
+      "protocol_sha256": "e568c4f7cd5a49756e8d25d75e68e3db71728ff535ffe283c2580c64670af63d",
       "split_materialized": true,
       "split_freeze_report_path": "ml/markers/center/mask_consensus_v9/SPLIT_FREEZE_REPORT.json",
       "split_freeze_report_sha256": "75fdcb45124bd75da2102590c5e2f4e58aceef20b2227c8d7a0114250607de65",
@@ -5801,9 +5800,28 @@
       "p1_training_result_seal_sha256": "2b999cc4f6df6f06fb5996a1e6c3c79215010aa601519b344b165d5b70d240a4",
       "p1_case_detail_or_pixels_inspected": false,
       "p2_design_evidence_scope": "P1 aggregate failure phase, exception key, optimizer count, and payload count only",
-      "candidate_config_path": "ml/markers/center/mask_consensus_v9/training/p2.json",
-      "candidate_config_sha256": "9e376dde14151d38bc94edaa3862e6baba1b297f6f8edbd28f01eda76137b5e0",
-      "expected_runner_source_bundle_sha256": "a3130f4781ec2e96053672d3e3d46824a192a0898f83815e410539a4f95e1206",
+      "p2_result_path": "ml/markers/center/mask_consensus_v9/P2_RESULT.json",
+      "p2_result_sha256": "5c4e98e2cbf79ccb7543f15969b98820e84b1dcf8272d9a29886074fc30c5530",
+      "p2_status": "failed_selection_consumed",
+      "p2_optimizer_steps": 768,
+      "p2_selection_exact_scene_count": 121,
+      "p2_selection_false_positives": 8,
+      "p2_selection_false_negatives": 23,
+      "p2_artifact_precision": 0.7855042494371971,
+      "p2_artifact_recall": 0.9870400316973273,
+      "p2_onnx_parity_maximum_absolute_error": 0.000016629695892333984,
+      "p2_onnx_parity_by_output_channel": [
+        0.0000038743019104003906,
+        0.0,
+        0.000015199184417724609
+      ],
+      "p2_training_opened_seal_sha256": "977361641ec82874ba1a8cb7e35524d699ba090b65f14092d75c772463cdb2ab",
+      "p2_training_result_seal_sha256": "d237653516273c671a3e205c160f384d24c8f0a248b61e9febe2fe005d5b76f1",
+      "p2_case_detail_or_pixels_inspected": false,
+      "p3_design_evidence_scope": "P2 aggregate selection counts, artifact precision and recall, aggregate threshold and erosion diagnostics, and per-output parity maxima only",
+      "candidate_config_path": "ml/markers/center/mask_consensus_v9/training/p3.json",
+      "candidate_config_sha256": "cd3196f4e2d9bac5fd4a53944c78abd76fdb6b2dd52d1d96a283318a35af5b1a",
+      "expected_runner_source_bundle_sha256": "32b6933792ef727db5c70d018541dc21776e25a1fcf4634827bd740f1e770064",
       "preregistration_commit": "20b803ae8b0f6562c22142029cdcb46eaf4de0cf",
       "preregistration_tree": "49c15cc1d583589ad1f52fdc81e13d83387958d4",
       "p2_preregistration_commit": "f9416060111a696ca866fc496dab243fdf287c04",
@@ -5830,9 +5848,9 @@
       "public_gate_config_sha256": "d0b97cfa645e6e501d8ce0898a0aa002189e3f8d6de62ae635a25b736359b242",
       "public_gate_evaluator_preregistered": true,
       "public_gate_evaluator_source_bundle_sha256": "6331f91e69b022b1e4974131ecedf16f4db75ed680f3975ee7bc4d391a99312d",
-      "execution_authorized": true,
-      "authorized_candidate_id": "P2",
-      "execution_blocker": null,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "Commit and push the consumed P2 aggregate result, exact P3 specificity-parity runner, candidate configuration, and source hashes before a separate final-candidate authorization commit.",
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
@@ -5842,7 +5860,7 @@
       "private_validation": false,
       "production_approval": false,
       "release_eligible": false,
-      "refusal_required_before_output": false
+      "refusal_required_before_output": true
     }
   ]
 }

@@ -34,13 +34,26 @@ the predecessor field `predecessor_parity_by_output_channel` while the
 inherited V8 parent runner reads the legacy `p2_parity_by_output_channel` key.
 No checkpoint or ONNX was created.
 
-P2 changes only that runner contract by supplying both names with identical
-checksum-bound values. It repeats the exact unexecuted P1 training and
-selection design. Its preregistration is committed and pushed at
+P2 changed only that runner contract by supplying both names with identical
+checksum-bound values. It repeated the exact unexecuted P1 training and
+selection design. Its preregistration was committed and pushed at
 `f9416060111a696ca866fc496dab243fdf287c04` with tree
-`d47a095abb9dc92f55ad80b4cddad9db6df0294a`. This separate checkpoint
-authorizes exactly one P2 execution. P2 has not executed and P3 remains
-unregistered. The truth-hidden public archive remains unopened with
+`d47a095abb9dc92f55ad80b4cddad9db6df0294a`. P2 consumed its one
+authorization, completed 768 optimizer steps, and failed selection. Its best
+threshold passed 121 of 128 scenes with eight false positives, 23 false
+negatives, zero duplicates or prohibited hits, artifact precision
+`0.7855042494371971`, artifact recall `0.9870400316973273`, and CPU ONNX
+parity `1.6629695892333984e-5`, above the unchanged `1e-5` limit.
+
+Final candidate P3 starts from the exact consumed P2 checkpoint. Based only on
+those aggregates, it replaces the dice-heavy artifact objective with a
+false-positive-weighted Tversky objective, doubles the positive and
+hard-negative center-margin weights, and contracts only learned artifact
+output by `0.5` while preserving seed artifacts and the fixed radius. The
+contraction is preregistered to bound the localized artifact-channel parity
+drift without changing the strict parity tolerance. P3 is preregistered but
+not authorized; a separate committed and pushed authorization checkpoint is
+mandatory before its one execution. The truth-hidden public archive remains unopened with
 zero evaluations and is not authorized to open. No model manifest, production
 model-store entry, packaging, private Chandler validation, production
 approval, or release is authorized.

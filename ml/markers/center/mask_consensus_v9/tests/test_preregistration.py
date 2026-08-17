@@ -10,6 +10,7 @@ import subprocess
 
 import numpy as np
 import pytest
+import torch
 
 from ml.markers.center.mask_consensus_v8.dataset import (
     DEGRADATION_FAMILIES as V8_DEGRADATION_FAMILIES,
@@ -37,9 +38,14 @@ from ml.markers.center.mask_consensus_v9.public_gate import EVALUATOR_SOURCE_PAT
 from ml.markers.center.mask_consensus_v9.train_p1 import (
     _parity_reproduction_within_tolerance,
 )
-from ml.markers.center.mask_consensus_v9.train_p2 import (
-    RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
-    _verify_config_and_inputs as verify_p2_config_and_inputs,
+from ml.markers.center.mask_consensus_v9.train_p3 import (
+    ARTIFACT_OUTPUT_CONTRACTION,
+    RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS,
+    SpecificityParityInferenceModel,
+    TVERSKY_FALSE_NEGATIVE_WEIGHT,
+    TVERSKY_FALSE_POSITIVE_WEIGHT,
+    _verify_config_and_inputs as verify_p3_config_and_inputs,
+    run as run_p3,
 )
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 
@@ -101,17 +107,17 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     freeze = _json(ROOT / "SPLIT_FREEZE_REPORT.json")
     selection = _json(ROOT / "SELECTION_MANIFEST.json")
     public_seal = _json(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
-    config = _json(ROOT / "training/p2.json")
+    config = _json(ROOT / "training/p3.json")
     gate = _json(ROOT / "gates/sealed-public-v1.json")
     ledger = _json(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol["revision"])
-    assert protocol["state"] == "candidate_2_authorized_once_not_executed"
-    assert protocol["execution_authorized"] is True
-    assert protocol["authorized_candidate_id"] == "P2"
-    assert protocol["execution_blocker"] is None
-    assert entry["status"] == "candidate_2_preregistered"
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert protocol["state"] == "candidate_3_preregistered_execution_blocked"
+    assert protocol["execution_authorized"] is False
+    assert protocol["authorized_candidate_id"] is None
+    assert protocol["execution_blocker"]
+    assert entry["status"] == "candidate_3_preregistered_execution_blocked"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["execution_blocker"] == protocol["execution_blocker"]
     assert protocol["preregistration_commit"] == "20b803ae8b0f6562c22142029cdcb46eaf4de0cf"
     assert protocol["preregistration_tree"] == "49c15cc1d583589ad1f52fdc81e13d83387958d4"
@@ -137,19 +143,20 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
         text=True,
     ).stdout.strip()
     assert committed_p2_tree == protocol["p2_preregistration_tree"]
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
     assert sha256_file(ROOT / "PROTOCOL.json") == entry["protocol_sha256"]
     assert sha256_file(ROOT / "SPLIT_FREEZE_REPORT.json") == protocol["split_freeze_report_sha256"]
     assert sha256_file(ROOT / "SELECTION_MANIFEST.json") == protocol["selection_manifest_sha256"]
     assert sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json") == protocol["sealed_public_test_seal_sha256"]
     assert sha256_file(ROOT / "PUBLIC_DATASET_MANIFEST.json") == protocol["public_dataset_manifest_sha256"]
     assert sha256_file(ROOT / "P1_RESULT.json") == protocol["p1_result_sha256"]
-    assert sha256_file(ROOT / "training/p2.json") == protocol["candidate_config_sha256"]
+    assert sha256_file(ROOT / "P2_RESULT.json") == protocol["p2_result_sha256"]
+    assert sha256_file(ROOT / "training/p3.json") == protocol["candidate_config_sha256"]
     assert sha256_file(ROOT / "gates/sealed-public-v1.json") == protocol["public_gate_config_sha256"]
     assert source_bundle_sha256(REPO_ROOT, DESIGN_SOURCE_PATHS) == freeze["generator_source_bundle_sha256"]
-    assert source_bundle_sha256(REPO_ROOT, P2_RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
+    assert source_bundle_sha256(REPO_ROOT, P3_RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
     assert source_bundle_sha256(REPO_ROOT, EVALUATOR_SOURCE_PATHS) == gate["expected_evaluator_source_bundle_sha256"]
     for name in ("train", "validation", "sealed_public"):
         archive_path = REPO_ROOT / selection[name]["archive_path"]
@@ -171,25 +178,56 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     assert sha256_file(REPO_ROOT / p1_result["candidate_report_path"]) == p1_result["candidate_report_sha256"]
     assert sha256_file(REPO_ROOT / p1_result["training_opened_seal_path"]) == p1_result["training_opened_seal_sha256"]
     assert sha256_file(REPO_ROOT / p1_result["training_result_seal_path"]) == p1_result["training_result_seal_sha256"]
-    assert not (REPO_ROOT / "ml/markers/center/artifacts/mask-consensus-v9/P2-run").exists()
+    p2_result = _json(ROOT / "P2_RESULT.json")
+    assert p2_result["status"] == "failed_selection_consumed"
+    assert p2_result["optimizer_steps"] == 768
+    assert p2_result["selection_exact_scene_count"] == 121
+    assert p2_result["selection_false_positives"] == 8
+    assert p2_result["selection_false_negatives"] == 23
+    assert p2_result["onnx_parity_passed"] is False
+    assert sha256_file(REPO_ROOT / p2_result["candidate_report_path"]) == p2_result["candidate_report_sha256"]
+    assert sha256_file(REPO_ROOT / p2_result["checkpoint_path"]) == p2_result["checkpoint_sha256"]
+    assert sha256_file(REPO_ROOT / p2_result["onnx_path"]) == p2_result["onnx_sha256"]
+    assert not (REPO_ROOT / "ml/markers/center/artifacts/mask-consensus-v9/P3-run").exists()
 
 
-def test_p2_input_preflight_binds_consumed_p1_predecessor_and_fresh_selection_without_execution() -> None:
-    config = _json(ROOT / "training/p2.json")
-    predecessor, checkpoint_path, onnx_path = verify_p2_config_and_inputs(config)
-    assert predecessor["status"] == "failed_selection_consumed"
-    assert sha256_file(checkpoint_path) == config["predecessor_checkpoint_sha256"]
-    assert sha256_file(onnx_path) == config["predecessor_onnx_sha256"]
-    assert config["predecessor_fixture_bytes_used_for_training_or_selection"] is False
-    assert config["predecessor_validation_used_for_diagnostic_only"] is True
-    assert config["p2_parity_by_output_channel"] == config["predecessor_parity_by_output_channel"]
-    assert config["p1_output_reused"] is False
+def test_p3_input_preflight_binds_consumed_p2_and_fixed_specificity_parity_design() -> None:
+    config = _json(ROOT / "training/p3.json")
+    p2_result, checkpoint_path, onnx_path = verify_p3_config_and_inputs(config)
+    assert p2_result["status"] == "failed_selection_consumed"
+    assert sha256_file(checkpoint_path) == config["p2_checkpoint_sha256"]
+    assert sha256_file(onnx_path) == config["p2_onnx_sha256"]
+    assert config["artifact_output_contraction"] == ARTIFACT_OUTPUT_CONTRACTION == 0.5
+    assert config["tversky_false_positive_weight"] == TVERSKY_FALSE_POSITIVE_WEIGHT == 0.9
+    assert config["tversky_false_negative_weight"] == TVERSKY_FALSE_NEGATIVE_WEIGHT == 0.1
+    assert config["p2_checkpoint_reused"] is True
+    assert config["case_detail_or_pixels_inspected"] is False
 
 
-def test_p2_one_time_authorization_has_not_created_output_or_a_training_seal() -> None:
-    assert not (REPO_ROOT / "ml/markers/center/artifacts/mask-consensus-v9/P2-run").exists()
+def test_p3_inference_transform_preserves_seed_artifacts_and_contracts_only_learned_output() -> None:
+    class ConstantHeads(torch.nn.Module):
+        def forward(self, value: torch.Tensor) -> torch.Tensor:
+            center = torch.full_like(value[:, 0:1], 0.4)
+            radius = torch.full_like(value[:, 0:1], 7.0)
+            artifact = torch.full_like(value[:, 0:1], 0.8)
+            return torch.cat((center, radius, artifact), dim=1)
+
+    value = torch.zeros((1, 3, 2, 2), dtype=torch.float32)
+    value[:, 2, 0, 0] = 0.9
+    output = SpecificityParityInferenceModel(ConstantHeads())(value)
+    assert torch.equal(output[:, 0:1], torch.full_like(value[:, 0:1], 0.4))
+    assert torch.equal(output[:, 1:2], torch.full_like(value[:, 0:1], 2.5))
+    assert output[0, 2, 0, 0].item() == pytest.approx(0.9)
+    assert output[0, 2, 1, 1].item() == pytest.approx(0.4)
+
+
+def test_p3_runner_refuses_before_output_while_separate_authorization_is_blocked(tmp_path: Path) -> None:
+    output_path = tmp_path / "p3-output"
+    with pytest.raises(RuntimeError, match="Evidence source must be committed|not authorized"):
+        run_p3(output_path)
+    assert not output_path.exists()
     assert not (
-        REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-mask-consensus-v9/P2"
+        REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-mask-consensus-v9/P3"
     ).exists()
 
 
