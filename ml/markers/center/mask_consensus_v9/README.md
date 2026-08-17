@@ -26,10 +26,19 @@ fixed 2.5-pixel NMS radius, CPU provider, and strict model parity gate. P2 and
 P3 remain unregistered.
 
 The frozen split, exact P1 runner, candidate configuration, and one-use public
-evaluator are committed and pushed at `20b803ae8b0f6562c22142029cdcb46eaf4de0cf`
-with tree `49c15cc1d583589ad1f52fdc81e13d83387958d4`. P1 is now authorized for
-exactly one execution and has not executed. P2 and P3 remain unregistered. The
-truth-hidden public archive remains unopened with zero evaluations and is not
-authorized to open. No model manifest, production model-store entry,
-packaging, private Chandler validation, production approval, or release is
-authorized.
+evaluator were committed and pushed at
+`20b803ae8b0f6562c22142029cdcb46eaf4de0cf` with tree
+`49c15cc1d583589ad1f52fdc81e13d83387958d4`. P1 consumed its single
+authorization and failed before any optimizer step because its wrapper named
+the predecessor field `predecessor_parity_by_output_channel` while the
+inherited V8 parent runner reads the legacy `p2_parity_by_output_channel` key.
+No checkpoint or ONNX was created.
+
+P2 changes only that runner contract by supplying both names with identical
+checksum-bound values. It repeats the exact unexecuted P1 training and
+selection design. P2 is preregistered but not authorized; a separate committed
+and pushed authorization checkpoint is mandatory before its one execution. P3
+remains unregistered. The truth-hidden public archive remains unopened with
+zero evaluations and is not authorized to open. No model manifest, production
+model-store entry, packaging, private Chandler validation, production
+approval, or release is authorized.

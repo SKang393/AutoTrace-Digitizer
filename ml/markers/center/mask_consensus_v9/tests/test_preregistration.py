@@ -35,9 +35,12 @@ from ml.markers.center.mask_consensus_v9.protocol import (
 )
 from ml.markers.center.mask_consensus_v9.public_gate import EVALUATOR_SOURCE_PATHS, run as run_public_gate
 from ml.markers.center.mask_consensus_v9.train_p1 import (
-    RUNNER_SOURCE_PATHS,
     _parity_reproduction_within_tolerance,
-    _verify_config_and_inputs,
+)
+from ml.markers.center.mask_consensus_v9.train_p2 import (
+    RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
+    _verify_config_and_inputs as verify_p2_config_and_inputs,
+    run as run_p2,
 )
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 
@@ -99,18 +102,18 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     freeze = _json(ROOT / "SPLIT_FREEZE_REPORT.json")
     selection = _json(ROOT / "SELECTION_MANIFEST.json")
     public_seal = _json(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
-    config = _json(ROOT / "training/p1.json")
+    config = _json(ROOT / "training/p2.json")
     gate = _json(ROOT / "gates/sealed-public-v1.json")
     ledger = _json(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol["revision"])
-    assert protocol["state"] == "candidate_1_authorized_once_not_executed"
-    assert protocol["execution_authorized"] is True
-    assert protocol["authorized_candidate_id"] == "P1"
-    assert protocol["execution_blocker"] is None
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
-    assert entry["execution_blocker"] is None
+    assert protocol["state"] == "candidate_2_preregistered_execution_blocked"
+    assert protocol["execution_authorized"] is False
+    assert protocol["authorized_candidate_id"] is None
+    assert protocol["execution_blocker"]
+    assert entry["status"] == "candidate_2_preregistered_execution_blocked"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_blocker"] == protocol["execution_blocker"]
     assert protocol["preregistration_commit"] == "20b803ae8b0f6562c22142029cdcb46eaf4de0cf"
     assert protocol["preregistration_tree"] == "49c15cc1d583589ad1f52fdc81e13d83387958d4"
     assert entry["preregistration_commit"] == protocol["preregistration_commit"]
@@ -123,17 +126,19 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
         text=True,
     ).stdout.strip()
     assert committed_tree == protocol["preregistration_tree"]
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == ["P2"]
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert sha256_file(ROOT / "PROTOCOL.json") == entry["protocol_sha256"]
     assert sha256_file(ROOT / "SPLIT_FREEZE_REPORT.json") == protocol["split_freeze_report_sha256"]
     assert sha256_file(ROOT / "SELECTION_MANIFEST.json") == protocol["selection_manifest_sha256"]
     assert sha256_file(ROOT / "SEALED_PUBLIC_TEST_SEAL.json") == protocol["sealed_public_test_seal_sha256"]
     assert sha256_file(ROOT / "PUBLIC_DATASET_MANIFEST.json") == protocol["public_dataset_manifest_sha256"]
-    assert sha256_file(ROOT / "training/p1.json") == protocol["candidate_config_sha256"]
+    assert sha256_file(ROOT / "P1_RESULT.json") == protocol["p1_result_sha256"]
+    assert sha256_file(ROOT / "training/p2.json") == protocol["candidate_config_sha256"]
     assert sha256_file(ROOT / "gates/sealed-public-v1.json") == protocol["public_gate_config_sha256"]
     assert source_bundle_sha256(REPO_ROOT, DESIGN_SOURCE_PATHS) == freeze["generator_source_bundle_sha256"]
-    assert source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
+    assert source_bundle_sha256(REPO_ROOT, P2_RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
     assert source_bundle_sha256(REPO_ROOT, EVALUATOR_SOURCE_PATHS) == gate["expected_evaluator_source_bundle_sha256"]
     for name in ("train", "validation", "sealed_public"):
         archive_path = REPO_ROOT / selection[name]["archive_path"]
@@ -147,18 +152,34 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     assert freeze["public_gate_evaluations"] == 0
     assert public_seal["public_gate_archive_opened"] is False
     assert public_seal["public_gate_evaluations"] == 0
-    assert not (ROOT / "P1_RESULT.json").exists()
-    assert not (REPO_ROOT / "ml/markers/center/artifacts/mask-consensus-v9/P1-run").exists()
+    p1_result = _json(ROOT / "P1_RESULT.json")
+    assert p1_result["status"] == "failed_runner_consumed"
+    assert p1_result["failure_message"] == "'p2_parity_by_output_channel'"
+    assert p1_result["optimizer_steps"] == 0
+    assert p1_result["model_payload_created"] is False
+    assert sha256_file(REPO_ROOT / p1_result["candidate_report_path"]) == p1_result["candidate_report_sha256"]
+    assert sha256_file(REPO_ROOT / p1_result["training_opened_seal_path"]) == p1_result["training_opened_seal_sha256"]
+    assert sha256_file(REPO_ROOT / p1_result["training_result_seal_path"]) == p1_result["training_result_seal_sha256"]
+    assert not (REPO_ROOT / "ml/markers/center/artifacts/mask-consensus-v9/P2-run").exists()
 
 
-def test_candidate_input_preflight_binds_predecessor_and_fresh_selection_without_execution() -> None:
-    config = _json(ROOT / "training/p1.json")
-    predecessor, checkpoint_path, onnx_path = _verify_config_and_inputs(config)
+def test_p2_input_preflight_binds_consumed_p1_predecessor_and_fresh_selection_without_execution() -> None:
+    config = _json(ROOT / "training/p2.json")
+    predecessor, checkpoint_path, onnx_path = verify_p2_config_and_inputs(config)
     assert predecessor["status"] == "failed_selection_consumed"
     assert sha256_file(checkpoint_path) == config["predecessor_checkpoint_sha256"]
     assert sha256_file(onnx_path) == config["predecessor_onnx_sha256"]
     assert config["predecessor_fixture_bytes_used_for_training_or_selection"] is False
     assert config["predecessor_validation_used_for_diagnostic_only"] is True
+    assert config["p2_parity_by_output_channel"] == config["predecessor_parity_by_output_channel"]
+    assert config["p1_output_reused"] is False
+
+
+def test_p2_runner_refuses_before_output_while_separate_authorization_is_blocked(tmp_path: Path) -> None:
+    output_path = tmp_path / "p2-output"
+    with pytest.raises(RuntimeError, match="Evidence source must be committed|not authorized"):
+        run_p2(output_path)
+    assert not output_path.exists()
 
 
 def test_public_gate_refuses_unapproved_candidate_before_model_or_archive_execution(tmp_path: Path) -> None:
