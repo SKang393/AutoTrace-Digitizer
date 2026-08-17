@@ -123,17 +123,17 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     gate = _json(ROOT / "gates/sealed-public-v1.json")
     ledger = _json(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol["revision"])
-    assert protocol["state"] == "candidate_3_authorized_once_not_executed"
-    assert protocol["execution_authorized"] is True
-    assert protocol["authorized_candidate_id"] == "P3"
-    assert protocol["execution_blocker"] is None
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert protocol["state"] == "exhausted_failed_selection"
+    assert protocol["execution_authorized"] is False
+    assert protocol["authorized_candidate_id"] is None
+    assert "three-candidate budget is exhausted" in protocol["execution_blocker"]
+    assert entry["status"] == "exhausted_failed_selection"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
-    assert entry["execution_blocker"] is None
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_blocker"] == protocol["execution_blocker"]
     assert protocol["preregistration_commit"] == "d4a3987d96a0763730fb9db840ee6c31c4da1abb"
     assert protocol["preregistration_tree"] == "bff1a927922ed9e3e50b315b1f6a1a82cf160c68"
     assert entry["preregistration_commit"] == protocol["preregistration_commit"]
@@ -178,6 +178,7 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     assert sha256_file(ROOT / "PUBLIC_DATASET_MANIFEST.json") == protocol["public_dataset_manifest_sha256"]
     assert sha256_file(ROOT / "P1_RESULT.json") == protocol["p1_result_sha256"]
     assert sha256_file(ROOT / "P2_RESULT.json") == protocol["p2_result_sha256"]
+    assert sha256_file(ROOT / "P3_RESULT.json") == protocol["p3_result_sha256"]
     assert sha256_file(ROOT / "training/p2.json") == protocol["p2_candidate_config_sha256"]
     assert sha256_file(ROOT / "training/p3.json") == protocol["candidate_config_sha256"]
     assert sha256_file(ROOT / "gates/sealed-public-v1.json") == protocol["public_gate_config_sha256"]
@@ -231,7 +232,25 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     assert sha256_file(REPO_ROOT / p2_result["candidate_report_path"]) == p2_result["candidate_report_sha256"]
     assert sha256_file(REPO_ROOT / p2_result["checkpoint_path"]) == p2_result["checkpoint_sha256"]
     assert sha256_file(REPO_ROOT / p2_result["onnx_path"]) == p2_result["onnx_sha256"]
-    assert not (REPO_ROOT / "ml/markers/center/artifacts/decoupled-heads-v10/P3-run").exists()
+    p3_result = _json(ROOT / "P3_RESULT.json")
+    assert p3_result["status"] == "failed_selection_consumed"
+    assert p3_result["optimizer_steps"] == 1792
+    assert p3_result["selection_exact_scene_count"] == 119
+    assert p3_result["selection_false_positives"] == 2
+    assert p3_result["selection_false_negatives"] == 29
+    assert p3_result["selection_duplicate_count"] == 0
+    assert p3_result["selection_prohibited_structure_hits"] == 0
+    assert p3_result["selection_marker_artifact_hits"] == 1
+    assert p3_result["artifact_precision"] == 0.7822080285166708
+    assert p3_result["artifact_recall"] == 0.9665081800297624
+    assert p3_result["onnx_parity_passed"] is True
+    assert p3_result["aggregate_only_evidence"] is True
+    assert p3_result["case_detail_or_pixels_inspected"] is False
+    assert p3_result["public_gate_archive_opened"] is False
+    assert p3_result["public_gate_evaluations"] == 0
+    assert sha256_file(REPO_ROOT / p3_result["candidate_report_path"]) == p3_result["candidate_report_sha256"]
+    assert sha256_file(REPO_ROOT / p3_result["checkpoint_path"]) == p3_result["checkpoint_sha256"]
+    assert sha256_file(REPO_ROOT / p3_result["onnx_path"]) == p3_result["onnx_sha256"]
 
 
 def test_p2_preflight_binds_consumed_p1_aggregate_and_frozen_v10_split() -> None:

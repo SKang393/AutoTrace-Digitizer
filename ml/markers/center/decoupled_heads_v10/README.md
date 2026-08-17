@@ -40,16 +40,27 @@ checkpoint, and ONNX SHA-256 values are
 and `bce86a20624802539b428a349e13710c88e8e8c6329175f758ed846023435b24`.
 Only aggregate metrics were inspected.
 
-P3 is the final preregistered V10 candidate. It retains the exact P2
+P3 was the final preregistered V10 candidate. It retained the exact P2
 architecture, optimizer, seed, frozen split, four-way reflection schedule,
 loss form, and 1,792-step budget while changing only the artifact Tversky
 false-positive and false-negative balance from `0.80/0.20` to `0.95/0.05`.
 This targets P2's aggregate artifact-precision and marker-masking failures
-without using fixture detail or pixels. It retrains from scratch, reuses no P2
+without using fixture detail or pixels. It retrained from scratch and reused no P2
 checkpoint. Preregistration commit `1e5316aba72771a0275339f2806b213d3097dbce`
 and tree `5d15188227fa2b8e27ab0f0331af8e56c971f05f` bind its exact
-bytes, and this separate checkpoint authorizes one execution. The fixed
-selection thresholds and zero-error gates are unchanged.
+bytes. Its one authorized execution completed all 1,792 steps and passed CPU
+ONNX parity at `7.092952728271484e-06`, but failed fixed visible selection with
+119 of 128 exact scenes, 2 false positives, 29 false negatives, zero duplicates
+or prohibited-structure hits, one marker-artifact hit, artifact precision
+`0.7822080285166708`, artifact recall `0.9665081800297624`, and no passing
+threshold window. Report, checkpoint, ONNX, and tracked-result SHA-256 values
+are `06f7641c68e7a1c01909237c1795337ac59a0a4c7fd08326108914c4bae762a9`,
+`a838cdd67a215883678289347000b1038942dc3328cfbceac576f02be6364db6`,
+`8ea3288c0828722286f61b883e1c8b421a18d0fffcf9d03a5732d7f93511ad32`,
+and `e55b0279c4736d791fdf8b51f422852d845d5e5aea2a5bd51606a3da7e65fddf`.
+Only aggregate metrics were inspected.
 
-No V10 payload is approved, stored, packaged, privately validated, or release
-eligible.
+P1, P2, and P3 are consumed and the V10 budget is exhausted. The truth-hidden
+public archive remains locked and unopened at zero evaluations. No rerun,
+tuning, V10 payload approval, model-store promotion, packaging, private
+validation, or release is authorized.
