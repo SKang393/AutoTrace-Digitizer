@@ -8,7 +8,7 @@ positives.
 
 V11 is a new three-candidate defect class. P1 keeps the independent
 full-resolution center and artifact towers, scratch training, exact four-way
-reflection schedule, P3 precision-weighted artifact loss, fixed 2.5-pixel
+reflection schedule, V10 P3 precision-weighted artifact loss, fixed 2.5-pixel
 radius, CPU provider, `1e-5` ONNX parity limit, and all zero-error selection
 gates. Its isolated architectural change treats the checksum-bound artifact
 seed as a proposal prior. A bounded learned logit correction can add missing
@@ -34,15 +34,24 @@ unchanged `0.90` gate. The aggregate refined mask added 250,166 seed-negative
 pixels and removed 1,175 seed-positive pixels. No case detail or fixture pixels
 were inspected, and the public archive remains unopened at zero evaluations.
 
-P2 is preregistered from that aggregate-only result. It reuses no P1 model
-bytes and retrains the exact architecture, frozen split, optimizer, seed,
-four-way reflection schedule, existing losses, 1,792-step budget, thresholds,
-CPU provider, parity limit, and zero-error gates from scratch. Its only change
-adds a weight-3.0 binary-cross-entropy term on artifact pixels that are both
-seed-negative and truth-negative. This penalizes unsupported seed additions
-without penalizing additions supported by training truth. P2 is authorized
-exactly once from preregistration commit
-`589e8892718feaa011849132313c1eb6e71f534e` and tree
-`8b70c750ca256de7ba5d5a04bf7408089afb4e52`. The single-use training seal
-must refuse a rerun. The public archive remains separately locked even if P2
-visible selection later passes.
+P2 consumed its single authorized from-scratch run and failed visible
+selection. It passed CPU ONNX parity at `9.566545486450195e-06` and retained
+zero false-positive centers, duplicates, marker-artifact hits, or prohibited
+structure hits. It still reached only 122 of 128 exact scenes with 29 missed
+centers. Artifact precision was `0.782828150056521` and artifact recall was
+`0.9603460905861702`. Relative to P1, its targeted seed-addition loss removed
+only 5,474 additions and 78 additional seed pixels, while exact-scene count did
+not change. The candidate report, checkpoint, ONNX, opening seal, and result
+seal SHA-256 values are `b886281d...24ec`, `d6c22bb1...03af`,
+`8ad7439d...2a9`, `ff7bca7b...bb7`, and `bcbf3a72...195e`. Only aggregate
+evidence was used. No case detail or fixture pixels were inspected.
+
+P3 is the final preregistered candidate. It retrains the exact P2
+architecture, frozen split, optimizer, seed, four-way reflection schedule, P2
+losses, 1,792-step budget, thresholds, CPU provider, parity limit, and all
+zero-error gates from scratch. Its only change adds a weight-6.0
+binary-cross-entropy term on artifact pixels that are seed-positive and
+truth-negative. This directly trains removal of false seed pixels without
+penalizing truth-supported seed pixels. P3 reuses no P2 checkpoint and remains
+blocked until this preregistration is committed, pushed, and separately
+authorized. The public archive remains separately locked at zero evaluations.
