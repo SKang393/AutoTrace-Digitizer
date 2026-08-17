@@ -57,18 +57,26 @@ still failed selection. Report SHA-256 is
 tracked result SHA-256 is
 `c102bf6e2ccc26f401cd23666c81f5d8cdff8c9f2ab530b153dcc50b2f6ce317`.
 
-P3 is the final preregistered candidate and uses only those aggregate metrics
-plus the already frozen P2 teacher-margin contract. It performs zero optimizer
-steps, reuses the exact P2 weights, and emits a high-margin proposal decision
-only when the V23 parent probability is at least `0.35` and the P2-minus-parent
-crop residual margin is at least `-0.25`. This midpoint rule is fixed before P3
-selection execution. It uses no P2 case detail, scene identity, truth record,
-or fixture inspection and preserves every P2 role output.
+P3 executed exactly once from its committed preregistration. It used only the
+V23 P3 and V24 P2 aggregate terminal metrics plus the already frozen P2
+teacher-margin contract. It performed zero optimizer steps, reused the exact P2
+weights, and required both V23 parent probability at least `0.35` and
+P2-minus-parent crop residual margin at least `-0.25` before emitting a fixed
+high-margin proposal decision. It preserved every P2 role output and passed CPU
+ONNX parity at `9.5367431640625e-06`, but retained only 1,013/1,024 truths with
+zero false regions, duplicates, or prohibited hits. Eleven misses left only
+114/128 exact scenes and no three-threshold zero-error window. Report SHA-256 is
+`36f44860509583adcb8f762d1fb276e0cc5948b19ad070264ef0205144652556`;
+rejected ONNX SHA-256 is
+`f97f8c7d85413c1c0d0bf04626e2a94df863b99a9ffca6f9db576c380e6dcacc`;
+tracked result SHA-256 is
+`42a0da2849c05914543d2a12c84a56d1e3e702f7562adc2dec7fc68865f48766`.
 
-P1 and P2 are consumed and cannot rerun. P3 may execute once. The public
-archive remains unopened. Marker composition, manifest creation, model-store
-promotion, private validation, production approval, and release eligibility
-remain unauthorized.
+P1 through P3 are consumed and cannot rerun. V24 is exhausted before the
+public gate, and its 192-scene public archive remains unopened with zero
+evaluations. Marker composition, manifest creation, model-store promotion,
+private validation, production approval, and release eligibility remain
+unauthorized.
 
 Synthetic fixtures are training and public-test inputs only and are never
 application graph data.

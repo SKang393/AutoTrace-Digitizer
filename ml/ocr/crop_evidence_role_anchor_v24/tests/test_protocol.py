@@ -50,11 +50,11 @@ from ml.ocr.crop_evidence_role_anchor_v24.train_p3 import (
     CONFIG_PATH as P3_CONFIG_PATH,
     P2_RESULT_PATH,
     RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS,
-    preflight as p3_preflight,
 )
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
+P3_RESULT_PATH = Path("ml/ocr/crop_evidence_role_anchor_v24/P3_RESULT.json")
 
 
 def test_protocol_is_fresh_bounded_and_fail_closed() -> None:
@@ -95,7 +95,7 @@ def test_v23_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_consumes_p1_p2_and_binds_final_p3_authorization() -> None:
+def test_canonical_budget_consumes_all_candidates_and_locks_public_gate() -> None:
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -111,10 +111,10 @@ def test_canonical_budget_consumes_p1_p2_and_binds_final_p3_authorization() -> N
     p2_config_path = REPO_ROOT / P2_CONFIG_PATH
     p3_config_path = REPO_ROOT / P3_CONFIG_PATH
     seal_path = REPO_ROOT / "ml/ocr/crop_evidence_role_anchor_v24/SPLIT_SEAL.json"
-    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["status"] == "exhausted_selection_failed"
     assert entry["protocol_sha256"] == sha256_file(protocol_path)
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["split_materialized"] is True
     assert entry["split_seal_sha256"] == sha256_file(seal_path)
@@ -123,12 +123,14 @@ def test_canonical_budget_consumes_p1_p2_and_binds_final_p3_authorization() -> N
     assert entry["candidate_config_sha256"]["P3"] == sha256_file(p3_config_path)
     assert entry["p1_result_sha256"] == sha256_file(REPO_ROOT / P1_RESULT_PATH)
     assert entry["p2_result_sha256"] == sha256_file(REPO_ROOT / P2_RESULT_PATH)
+    assert entry["p3_result_sha256"] == sha256_file(REPO_ROOT / P3_RESULT_PATH)
     assert entry["p3_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, P3_RUNNER_SOURCE_PATHS,
     )
-    assert entry["selection_evaluations"] == 2
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["selection_evaluations"] == 3
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert "budget is exhausted" in entry["execution_blocker"]
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
@@ -405,13 +407,14 @@ def test_p3_consensus_gate_exports_dynamic_cpu_with_p2_roles_preserved(
         assert float(np.max(np.abs(expected - actual))) <= 1e-5
 
 
-def test_v24_p1_p2_results_and_final_p3_preregistration_remain_fail_closed() -> None:
+def test_v24_all_candidate_results_are_consumed_and_fail_closed() -> None:
     root = REPO_ROOT / "ml/ocr/crop_evidence_role_anchor_v24"
     seal = json.loads((root / "SPLIT_SEAL.json").read_text(encoding="utf-8"))
     config = json.loads((REPO_ROOT / P2_CONFIG_PATH).read_text(encoding="utf-8"))
     p3_config = json.loads((REPO_ROOT / P3_CONFIG_PATH).read_text(encoding="utf-8"))
     p1 = json.loads((REPO_ROOT / P1_RESULT_PATH).read_text(encoding="utf-8"))
     p2 = json.loads((REPO_ROOT / P2_RESULT_PATH).read_text(encoding="utf-8"))
+    p3 = json.loads((REPO_ROOT / P3_RESULT_PATH).read_text(encoding="utf-8"))
     assert seal["optimizer_steps_at_freeze"] == 0
     assert seal["selection_evaluations"] == 0
     assert seal["public_evaluations"] == 0
@@ -444,9 +447,20 @@ def test_v24_p1_p2_results_and_final_p3_preregistration_remain_fail_closed() -> 
     assert p3_config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, P3_RUNNER_SOURCE_PATHS,
     )
-    evidence = p3_preflight()
-    assert evidence["seal"] == seal
-    assert not (root / "artifacts/P3-run").exists()
+    assert p3["candidate_consumed"] is True
+    assert p3["status"] == "failed_selection"
+    assert p3["optimizer_steps"] == 0
+    assert p3["weights_changed"] is False
+    assert p3["selection_metrics"]["false_positives"] == 0
+    assert p3["selection_metrics"]["false_negatives"] == 11
+    assert p3["selection_metrics"]["prohibited_structure_hits"] == 0
+    assert p3["p2_role_maximum_absolute_error"] == 0.0
+    assert p3["onnx_parity_passed"] is True
+    assert p3["passing_threshold_window"] == []
+    assert p3["public_gate_archive_opened"] is False
+    assert p3["public_gate_evaluations"] == 0
+    assert p3["case_level_details_emitted"] is False
+    assert "cases" not in p3 and "predictions" not in p3
     assert sha256_file(REPO_ROOT / "artifacts/production-validation/ocr-v24-train.zip") == config[
         "train_fixture_archive_sha256"
     ]
