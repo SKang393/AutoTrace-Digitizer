@@ -18,14 +18,21 @@ seed, scene identity, truth, prohibited, and artifact families are disjoint.
 The split contains procedural data only and excludes Chandler, private or
 article images, external datasets, and prior fixture bytes.
 
-P1 is preregistered but blocked until a later commit binds the preregistration
-commit and tree and explicitly authorizes it. A passing candidate must produce
-exact counts in every visible scene, zero false positives, false negatives,
-duplicates, prohibited hits, or marker-artifact hits across three consecutive
-thresholds, artifact precision at least `0.90`, artifact recall at least
-`0.95`, and CPU ONNX parity at most `1e-5`. The public gate remains separately
-locked, one-use, and truth-hidden.
+P1 executed once and is consumed. It completed all 1,792 optimizer steps and
+passed CPU ONNX parity at `9.894371032714844e-06`, with zero duplicates,
+prohibited-structure hits, or marker-artifact hits. It failed fixed visible
+selection with 120 of 128 exact scenes, 11 false positives, 23 false negatives,
+artifact precision `0.7857918313961029`, artifact recall
+`0.9770655093456437`, and no passing threshold window. Only aggregate metrics
+were inspected. The truth-hidden public archive remains locked and unopened.
+
+P2 is preregistered but blocked until a later commit binds its exact
+preregistration commit and tree and explicitly authorizes it once. P2 retrains
+the exact P1 architecture, loss, optimizer, seed, frozen split, and 1,792-step
+budget from scratch. Its only change is an exact four-way reflection schedule
+applied consistently to every training tensor, target, center, and hard-negative
+coordinate. It reuses no P1 checkpoint and performs no interpolation. The fixed
+selection thresholds and zero-error gates are unchanged.
 
 No V10 payload is approved, stored, packaged, privately validated, or release
-eligible at preregistration.
-
+eligible.
