@@ -186,8 +186,9 @@ def test_frozen_sources_configs_and_ledger_match_exact_bytes() -> None:
     assert protocol["p3_preregistration_tree"] == "70b603dbc2a7f53846027b1bfc1ebbd58057588f"
     assert protocol["execution_authorized"] is True
     assert protocol["authorized_candidate_id"] == "P3"
+    assert protocol["preregistered_candidate_ids"] == ["P3"]
     assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["preregistered_candidate_ids"] == ["P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["preregistration_commit"] == protocol["preregistration_commit"]
     assert entry["preregistration_tree"] == protocol["preregistration_tree"]
