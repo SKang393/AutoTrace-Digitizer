@@ -1,0 +1,1144 @@
+{
+  "case_truth_values_emitted": false,
+  "chandler_used": false,
+  "feasibility": {
+    "hard_negative_count": 1440,
+    "hard_point_missing_from_artifact_truth_count": 0,
+    "minimum_center_separation_px": 12.083045959472656,
+    "minimum_truth_to_hard_negative_distance_px": 11.045360565185547,
+    "required_disjoint_clearance_px": 11.0,
+    "scene_count": 160,
+    "truth_center_count": 1520,
+    "truth_hard_acceptance_overlap_count": 0,
+    "truth_mask_conflict_count": 0
+  },
+  "fixture_count": 160,
+  "fixture_pixels_emitted": false,
+  "fixtures": [
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0000",
+      "ground_truth_sha256": "5849dcb8ab37c9fa157641d564afa84c9b3a38381df927ddfae59fb025d55aad",
+      "image_sha256": "6c1841bb0021b20289776a407b992efc2e661ef1803e61bb2771163fdd36e03d",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0001",
+      "ground_truth_sha256": "954600b919832838ef7318d797a43fd24adfe9c9e6fd7782a8ea89f40a0e89ab",
+      "image_sha256": "84e7fa4c50291ec758f62461778eb214e7000608faa6843e82937aaa029193fa",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0002",
+      "ground_truth_sha256": "dcbf14bcd50f7d5dbd967927818dba47ad558f4719c774a0f411335e3854e730",
+      "image_sha256": "2f6d78bf61ea8ac428d46d558f10c5e5e17c15195acf9be60792190741241fca",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0003",
+      "ground_truth_sha256": "f3103d8bb962238236b4431067c3de941d030ecf9ba0dc63bdb8969998d987bd",
+      "image_sha256": "805526a40ea2b5b8fec6de53d8bfc95d799b344b1a312654b1144a2d429e260a",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0004",
+      "ground_truth_sha256": "b5ae851a448b5d3a3b37c42a5861f72f0e0496492254af56d295b6c6f2bac0fd",
+      "image_sha256": "9696a5b7fcaf8d3e9d755a368cffe4cc0186a86ab8628759a8eaf083f1527a89",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0005",
+      "ground_truth_sha256": "36817aaba39cd7e0e33990de134a2829a798efdbcdccd071d93af3ad3c010078",
+      "image_sha256": "05215a79b03bf7a472f99d90f1969d0b875712aa093eb35c9596595b057798ad",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0006",
+      "ground_truth_sha256": "0b2ac54fad5c07149281b121440b83f7add4e804c4716ac4c78f6e5ea1d6edaa",
+      "image_sha256": "5edcea7f13ed8cd87a989f2165341d3f4bfd2974a7bfdefb408713a39e783d7b",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0007",
+      "ground_truth_sha256": "5630904a19eed4bfbfbef55eaa111687c079443ccb8f2dbfd6d646f363cf8896",
+      "image_sha256": "550dbea7710b20e80312ba69ee97fb2e7fc4cbcb91e4ed65ca5caf610a1ba7b9",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0008",
+      "ground_truth_sha256": "b93cb5fd3f898c0c43e9ce0c4b1d45e71385f0a00642a5f287d6daf8733951b6",
+      "image_sha256": "b9e039ac8c09d60124e0fbd5028fbf18327882bed88cc8f37b3d6db0ef2ab89c",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0009",
+      "ground_truth_sha256": "da24e34b5f1dcc675c144fd089b76ed6db12a313b7e9a333622dde5dbcf516e9",
+      "image_sha256": "2074ce63bece1cec38865bab0af2c93233a5572545314f54e5ddcee1fce7b597",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0010",
+      "ground_truth_sha256": "2808af672a5db6d7fa7a4b82f42ef02fa1e099e4f0543c048c00863bf04e214f",
+      "image_sha256": "9689be55c0769a027cab861d190ab08d1ab3af739ce388486020e680c635dd14",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0011",
+      "ground_truth_sha256": "0e9b4c1a0ab1e1a70f65f851613987209cad65ff2d91e6d969ddd08578c0904c",
+      "image_sha256": "85ca80c2431278f8172ee82063ddb5be72d04b99097b6eebd4db9d3568495b7b",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0012",
+      "ground_truth_sha256": "80606cc3b48bb58cb53e386a372caf25c925228e88dff2a2f33a1d27c591822c",
+      "image_sha256": "6a41c9b7b5cb64e2f7fce43deb1738d2a534b45cf3862f1224708499067c1351",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0013",
+      "ground_truth_sha256": "003853715578c32cf39c9b78ddb81a31d09bc3a6c07264bb9ec91c266fa66d98",
+      "image_sha256": "977720be9f2dee9501893175265614aeabf86ce9bb2014ce284f7c9c2c5ba2cd",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0014",
+      "ground_truth_sha256": "f20a10e53ca59b8c64d79b2f9a985040f212544d3ef22b71910f2df60e96f2e2",
+      "image_sha256": "9bae2e7082700beb7b32ef36bf972f3af96434290714d790d8b43e8aee53f97f",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0015",
+      "ground_truth_sha256": "e76d44b5cdabd06f8e47ff1f5b0dc5ed6671b89a13de4a07f8e8a867ec40d3d4",
+      "image_sha256": "81223fa1d302e22148f866f62632e07c748316737e7209b4adc6d47cbb75f7ac",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0016",
+      "ground_truth_sha256": "de89dd4bf5b8059063ab3e8da2f2b9181bb906790ce76f9b745ccd321ae86d09",
+      "image_sha256": "8537327228d2e39c062d4ea7c375659397bb276dff90ee1cbc4342af78b02d2e",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0017",
+      "ground_truth_sha256": "37a48ceb62ac71e8a895f1e0fcf3298cf290f4dcc4c8408a7168965270090d7e",
+      "image_sha256": "70d6641b5738747e7e34bab6f8be9db31932ef4db6273989c634bdc2e1d1c2f4",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0018",
+      "ground_truth_sha256": "558c4d7a355f69bbae47934fdb32c77d1194c9c47ff084152c1b68be16820a0e",
+      "image_sha256": "f9f8dc2eba0fbee4d271d3bbe41d51bcf162afe5e7ba613af0f07df7807117fa",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0019",
+      "ground_truth_sha256": "9a93686f355394cee78855d496a3b31fe6f3786a19e5a45fa9a999fb0f73565d",
+      "image_sha256": "07951e6562917b2f4cd39a301ccd603ad390f4c373910b0eb5c71dbe9e435716",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0020",
+      "ground_truth_sha256": "8e653dcfc79429c7387938924587ba2d8b93f96053e255627dea7bf91349a0c4",
+      "image_sha256": "9f5b1a8ca9644bbd7a1b9c40f991517a09a91f84a60b7fb8d192a6ae01dc1f25",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0021",
+      "ground_truth_sha256": "4ec462c6fef57337ced23dd6ab08259665ee8526169f6bc8f25c7c78e6033274",
+      "image_sha256": "a4f70d727c9f9b78e3a5f9928fc59fadafd48f9ad6f58ee604c9d65a5a5d0c21",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0022",
+      "ground_truth_sha256": "b8c02b9f08a542cfe6fc851b4e4cc5f7e73912f6247f5308c808c9d4115a1cdb",
+      "image_sha256": "3290e41df383bca7833611a87712594ddcc63480b3cd64e37aadfaeae466ac17",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0023",
+      "ground_truth_sha256": "866e38b3a418856c88e52e7accb47a73729e3a85e54f69f5b28938bc0c31051f",
+      "image_sha256": "c3b6178a388bb49f203c678cd04cb6a94f61f97f68ee786cea872ea72583e2ea",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0024",
+      "ground_truth_sha256": "f018c02d41a7df675eaa001d9816f8261c001e4dcad047bbbee6eed8aeaadd2b",
+      "image_sha256": "d0f65a85405396bb383f099163952490cd22fc7e732e3441ecfd5fd70ee3290f",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0025",
+      "ground_truth_sha256": "c9e37e2b1b62633b06bc5a2090ee9ddd24cdef79cccb171f7e35a4272e7c44d3",
+      "image_sha256": "201423684268ad158048fc73492de776e2f9a6b31d8d49e376ec193d1ecee45b",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0026",
+      "ground_truth_sha256": "7d1ec197eebeb8fd808165c4a27ffbf7ff1ddebc3b3194cb0dd106d8e843d557",
+      "image_sha256": "3bde20f3f2b3f42c39b54e8beb1a27510cdbe1276adeace89f9d9bdd9349c9fd",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0027",
+      "ground_truth_sha256": "d3562265bd79eb1b64b893068f52cbe29c90e1164de86c681683eb319c0914bc",
+      "image_sha256": "1de96040ef7ea387cc3b4eafca588a2bd49f68b9a6e83c3638c9b74be9a05eac",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0028",
+      "ground_truth_sha256": "c51cc824baa8079b28b10e73ee315cdfee345e6f1c824a431a1097d3b7a073d7",
+      "image_sha256": "92386d371ef8600a6762b8fb72edaab52cd6b782cff5cfc8fec1e75d86ffe449",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0029",
+      "ground_truth_sha256": "5925842907e5736279656edf646ef16f048142e9888e1e35f2db411ffc1cca49",
+      "image_sha256": "453a976e2baaf9b5803dbaa88251cd064628326f74ecb6c0712baf256cb22fc8",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0030",
+      "ground_truth_sha256": "06a78d1251a12c715ae808b7921d772592e23612246caac4ccf28f08a87de8f4",
+      "image_sha256": "9f0149433acae53ea7da42f034b709c9a15a39697e22e4d51500cdb6cc58826f",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0031",
+      "ground_truth_sha256": "6014ecc1a7874d9b724bf64e2b5ddabd8aaff68a1a9ab80339f0ecd083537626",
+      "image_sha256": "7161ede958b48f1e2c398ac9eb2b7d92a7aba635b5b2552cdc46fa6c80bd6c1a",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0032",
+      "ground_truth_sha256": "bacbd5fc6993737ec0c9b6072836caa3cd688f5cc9ed9ba3f9b660bcf771086d",
+      "image_sha256": "3a8be3cc2aba610951aac144b70164bf483996c2393d99695004e10d77082758",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0033",
+      "ground_truth_sha256": "1422e2339e098642dfffd7f85763e07495529d8167ffc7b9d8583ba2f2d0deb2",
+      "image_sha256": "f4bb05ac3927c25ce612f2b70bdae3534eddf3215dd72600cb2bdf7c227a854a",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0034",
+      "ground_truth_sha256": "df1839cee97ecfb4e9f1c4e826bd3bbab118f71d83881e54ac3d4a62974cc6ac",
+      "image_sha256": "73211605cfbcca759c01fa23ad28c939fa66f41ac4133ddf919cd4d6fd93f3ec",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0035",
+      "ground_truth_sha256": "c635831c10f7f4e5c0275cc54dfa3a092fedceb551cfaa649bef0d6bebf140d1",
+      "image_sha256": "f10250bc4620ccb2b48ae097ddd1ec0e4cdb723567bc916eef173e764f093202",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0036",
+      "ground_truth_sha256": "7c7db9771a033a92acbc16f1184d847401961c4681aba7f2c5d1cdfda799c56a",
+      "image_sha256": "9c75b6aba1a72b320b3f4b72583c5c30766aec16f9cda427bb4c33414e1a756c",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0037",
+      "ground_truth_sha256": "3df3119f3603370fdffd2ecc943f855447b22b512ff3e8b14796caedbac9ccc4",
+      "image_sha256": "47e01df71c438fdd8cf9c8fff106a465e443c9addb9786e308c9e6f47e5bc302",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0038",
+      "ground_truth_sha256": "eea077224d1a2f1cc11a06586c6597a624b9f6dc316cdf63e3740c800de28c7a",
+      "image_sha256": "68b1cd2ae8a6ed28da9f86595032f19391dd6654abc48a36f60bfc00074a71a7",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0039",
+      "ground_truth_sha256": "a76879b6ccc76962c80e744e9de50389fe487a7ef773c706743680d933f08337",
+      "image_sha256": "999fe56ead8a89d73d3952c28f5b5d8206cb9592a827e35995667bab46424809",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0040",
+      "ground_truth_sha256": "af7ba1d3049fa0427a332b08dc181dab5756705c9de8297ff002f18d259a1da1",
+      "image_sha256": "1cef4997bc06bdce721d4fbb149d8c8de92d8fe632657fd23155dccc7cc6e205",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0041",
+      "ground_truth_sha256": "a04ea7ac25e7d8a84ee7abca122078da4629f0489382dde7b5979512d05364ad",
+      "image_sha256": "d1557eee45b988763f96a501480484edca956df4019e31a488dee645a693f04e",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0042",
+      "ground_truth_sha256": "134deaa302fea1597bc10c08fc288d507569abf729b372f643f5ca208fd5a25f",
+      "image_sha256": "b5919a6f73c82a763af8740207e70d74a41fd313658eb5b763e9e9202e4c2bcd",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0043",
+      "ground_truth_sha256": "b9b006a12a9acb6476bc2ceac15d28977737b46bb726607e6fc66a7c0e84aff6",
+      "image_sha256": "69a57519d47b291792cdf25baaf26905459678025e6f25e2b417254571ea487f",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0044",
+      "ground_truth_sha256": "feb7983002395ba0e8822d689c373d9548d8263aaa6ed1865d59dca4bcaa48df",
+      "image_sha256": "7364900536ec20d3c7278280030c9da9a4d3ea4b8113014f57aff7ae9dc04ec8",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0045",
+      "ground_truth_sha256": "02dd923b02356d45ce3f040f749ebe61da9a20bae0718e395ddceec5e276ac53",
+      "image_sha256": "46858d76b149b3d78746e526a21cadee226ce4fcc0ab2d5b60792e12243b1c35",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0046",
+      "ground_truth_sha256": "a6bd1e7a154ee2f7d7e52d2c1b700afd789be28d8ce1ed05df80611f72d5f692",
+      "image_sha256": "ede41ee044f20a6045e2a3978086862b5e088e7dc1da4f8debb7188e8c6fd9e0",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0047",
+      "ground_truth_sha256": "9147bcf7c84d639bd14cd422aea6c16f506ad05ede11a64352e7edc4017dae6e",
+      "image_sha256": "402d244c3049ceef332bb11631fc2b23734c30ad0392356c141f6046bf7f053c",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0048",
+      "ground_truth_sha256": "f5c577678e852687139d5a2a22e235aa11429226750763142b1dad88d2669596",
+      "image_sha256": "909ab3769a1acc2a423a3360c77cb621bec7cb0b23733a7e7987dec8b6747e9b",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0049",
+      "ground_truth_sha256": "5b7b47ef5bbebb014687866ec10cba03370c041c9dfe1e5c1db0eaaa9905809d",
+      "image_sha256": "e92e7620c36af06623d698504ab099cafa3f39032a22c4e07f67f6cae12da8d8",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0050",
+      "ground_truth_sha256": "92ff8670918331161ab69f8f87a2c9bd7c34d36042052d4ff542e255ac153d1c",
+      "image_sha256": "323bfbdac8707c7273f13665b677876c29ff7cdb8f59e772faf1ad7b2f06d243",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0051",
+      "ground_truth_sha256": "7b8b2480d5fb2ecaaf36f25a88bc96bd7f24b88e7e50f93071f70cb74f2d1f4b",
+      "image_sha256": "4b7a3c6e70c8b7cd08f381ea754933807c29cb8f05511e4f5568f302daa484fe",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0052",
+      "ground_truth_sha256": "ec297e6f5cbd39d9327aee4aa6ce13e33db07492ed87a416df1997c3a1373eaa",
+      "image_sha256": "a86098bdb88d927d4e38b4994fc50dbb7dca71546fbb21f6cd75de2c71047303",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0053",
+      "ground_truth_sha256": "6f738e62c53d7075b82c342f01c43f54c2c97f7062eb7c6eb0c19d7d9277bc08",
+      "image_sha256": "452824d64ba51c11421ce4d05804ad7da533eb1cd1e32dc2d83dda0a2bf89648",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0054",
+      "ground_truth_sha256": "4eee38b2b7950e900f57589a69b6cbd6862a31b017d489994312cc34cc4740f6",
+      "image_sha256": "e1260923b065509a5f67f0a4639ce25e68af2aec9f23380a68baa05cf2f11ada",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0055",
+      "ground_truth_sha256": "c8af4ad9fef3d945915bc7139909fcba9b6c754de96320d62102c6e618db6c7f",
+      "image_sha256": "0bd3705a25be5e88bb65c023ff97747929c4c106061c6bfcc21dd1c75cc2576e",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0056",
+      "ground_truth_sha256": "f31163ee4736d9b3c37c7401d4dbb1c403e8dafde643de8bb5426013683e1cef",
+      "image_sha256": "f9abca9b8fc3584f45fb3af024174318b5793dcb4f8cf15ba95cee9049e3cb4b",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0057",
+      "ground_truth_sha256": "67f0d6c0faa0a0a453467e14b044f2d449911108e03faaa2ab66e16c65a7e065",
+      "image_sha256": "5af17c74e53afd2a975b03b7843a21891c07ce9ca24c14b0c0d230dce9012221",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0058",
+      "ground_truth_sha256": "2958a348e61887e7f97070c76fea8cc93c781d9fec0c5a6942cff0124f7d68c5",
+      "image_sha256": "35131b33c8c38f858be59f36cc56e985e8bc509e58539635826b59ad3da26056",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0059",
+      "ground_truth_sha256": "b900e0911f72966852b99f9c3e41f7f4fb96ad0d44a738e2620a4ad2e4f18590",
+      "image_sha256": "893cea62508e865f78a8a7fbcbf938e0e078decb78512457eada0d65a7e24bd8",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0060",
+      "ground_truth_sha256": "63e5e2ca75b6e355eabb3bf4b353ece4f9d148e8def9defaab3de9329fbefff9",
+      "image_sha256": "11f282c198da2cd82a45239e63262acf7e8960632534f31c4745c00b39332153",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0061",
+      "ground_truth_sha256": "757b0c88e5dbf5df690211ec631f059116b947ec85ffbfb28d2be2c10baea89d",
+      "image_sha256": "f61af869890a3ac288b77eb5c0f9d40f8c7231686846af6733e8ff1e3fa3a712",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0062",
+      "ground_truth_sha256": "2b3e8bd5417edbbe3f2d0046de87e274e02708cbc455255cf42127fc0ef66134",
+      "image_sha256": "a17ea6fa200c5a5425f7efbf28c0417d274cd0c705ed61f3989945134d04748d",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0063",
+      "ground_truth_sha256": "46ee51f9e1c2722660b47adb9fff4b26e1f31ba081d4364aa4fd26157954f870",
+      "image_sha256": "917241b35ce5d9d31322b2936f02c13de2fe5000b1530745021a5be89a0ff0ce",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0064",
+      "ground_truth_sha256": "07deecb19df5b72fa9a848228a39b86544567a9bc9142b594f317c621c966599",
+      "image_sha256": "1134eb75a69a538721efa3d475ef7e1340eeda5dd5f08431f0d0ba9e18f95a81",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0065",
+      "ground_truth_sha256": "b67b515d4b62cb6750bb00264c51ac79927e332289500d33768544c34a41a3c1",
+      "image_sha256": "6ba52ad186f448f74f6d4d0c723d03117ba39060eec7715eb767f37ab2ad24d0",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0066",
+      "ground_truth_sha256": "f9104961de89616e49f06cd733763e252ab8e85dd3321b669e5a1555e90a03de",
+      "image_sha256": "807eb0f74bf24021e3b53da30f0917aa1b39720760515c1e18210bbcaf52d46b",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0067",
+      "ground_truth_sha256": "a0dc78120c4ce3f9dae488d1bcf7c9f49b3f315c41cae8605acbf28149139d08",
+      "image_sha256": "3b09ea220ab55274eb998c73b50a759fe455c6ba4dc84b00a3b01b0ba62c5ef4",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0068",
+      "ground_truth_sha256": "1e4a38037c95371a328ccb231eb2f8a6f131eae5a52d6c67180a23f472eb7270",
+      "image_sha256": "97fef1ac9c0b8c6f7b97bf4891f5cf06de7a3bb6b4a52de108b9dff702f3fa8a",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0069",
+      "ground_truth_sha256": "0d6f737c062fa5a0c000831553872721abbf1932c0fa3a1cd4d66a97c18c8e41",
+      "image_sha256": "3e7372e8208d6c2e95768aac1b4c3e3cc07a5f29559c3f933a3fe65bc05b8f6e",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0070",
+      "ground_truth_sha256": "f8c8128301461a451a4bed811f578e021c0fbe5007c31d22a91d4a21f8d3031c",
+      "image_sha256": "5e41a411ef15f7cfa94511474407f87518725b0b44880022f3638eb6b9514a5f",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0071",
+      "ground_truth_sha256": "5dfa92d8df79a32bbf8e2c5501266156e352804ae12d3c0ba830fa7b51f42582",
+      "image_sha256": "e920720c247dda8ff71f9af8cffb6fe106fbecc2255fbf15c98b53def78625cc",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0072",
+      "ground_truth_sha256": "45d06e3d8a5427121aaae01edd061c9a74e879c997a795788fb8055e04b51ef9",
+      "image_sha256": "15006b11833093c0a49cf422e9e1dedf38cd592c124eacf359be0fde5c517438",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0073",
+      "ground_truth_sha256": "ca71de66a4ebf0d9ace5c94d4e5048397ee958c445d327b1954f3fa626035078",
+      "image_sha256": "468ee848c7ecd1fe6b6e3182d0b540258b957de6d3e8abcf5ff109e72beb9b87",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0074",
+      "ground_truth_sha256": "b55f06f1ddf240679d78eca20642d2aa962c0eb552f872a3a8a2d67c0e4aa7cd",
+      "image_sha256": "ab4c9cf53053a0a5b47280119b81cc1b76d4e47702400ab059faaf89e830b918",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0075",
+      "ground_truth_sha256": "436a3ddcef72a457a57e55d00e34b6a4e88de862f770ebb65add45b9df7faa5d",
+      "image_sha256": "eeb0a909567d22493e8691d13d1c5b669077afd4c5cc6c918605d10b15d3331b",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0076",
+      "ground_truth_sha256": "3af5626f01588f5b93292148c13a04abc434f1bfd79ae543a3d26a7232d9fd9a",
+      "image_sha256": "7cb992ff6d864dd608412dab7a1810cca85f5a5267a4b7926e29d22a84469cd7",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0077",
+      "ground_truth_sha256": "4fa2f7216dbffe780f2a042a1d5ad7a3c428d132c8dd4df07a0ba0d17a7ba419",
+      "image_sha256": "c5cda35415047471ef235a05d96e8841ff1ed372b7ae957b40eee2a950a2e40e",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0078",
+      "ground_truth_sha256": "c1f09d4aa541e16b2f8df2fee7ca3b474cc8b6865661193573db968b4a18529e",
+      "image_sha256": "50b418fd094e5a80ac6f6187960b9aa398eeea5b574ee5823728358656ecd369",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0079",
+      "ground_truth_sha256": "d4c4c3d50966c1f239ae86c1ea0689e379987303315fb3fdcef84e7ea806d694",
+      "image_sha256": "b3c4854779ad8c8dad0e7ebef4daac6a100654510f6a8a9bd338b6d851216019",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0080",
+      "ground_truth_sha256": "b174b6c0e7eb2c6a91c04ddb1104c96b67654f5ca36cf0f76b71bc9528e70228",
+      "image_sha256": "695dca0839c39ccf31ea4db82341f2aa412d14323b070adaf1510d5ec36016ab",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0081",
+      "ground_truth_sha256": "956e6016ac71d1a957ee6f002e920672ed452df80c137a9e293dab1c6f778607",
+      "image_sha256": "b754a55e58f36a0e82ade8aa445125346923fbf75cb333ac446382d52b384059",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0082",
+      "ground_truth_sha256": "41e65bb69347bb67133f45b29c6ae99d0f9c7e2d7bd8354319a14247496159b3",
+      "image_sha256": "5e0b197d3f430f50695a69fe5edd7d1ab987780c1a4a9b3e43d01a1f4d26e4d0",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0083",
+      "ground_truth_sha256": "33f5b8e4897467cfac81e546842863b2b0ab3a62f2d00a2e7f5dd42922a49602",
+      "image_sha256": "2e3d964051249f3653bd48ace60a111d920e150b8ac2de4d5d91a6458445adc6",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0084",
+      "ground_truth_sha256": "1bd012b6ddfe680cb550b5a71c2e8e6131ddea2e7ee38924d6183d726c8fa9f1",
+      "image_sha256": "5d273bdff8cf144f40cae782f254026b9b1e6b2bc50dad78a48be963d4bb9d10",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0085",
+      "ground_truth_sha256": "676a687db90951e716e7392c56d6e4aa1155288d3f6d870dc20c6660830c115d",
+      "image_sha256": "be97b708a7ef62b0f4ebabfdb2b89fa30d12ca0526d66bbd821d5574fc8af4af",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0086",
+      "ground_truth_sha256": "38b34c6fd4c5174a857d9abefb0d1fbe95d734195bd75e3b70f74973b5bd9d67",
+      "image_sha256": "db30e03b861cd68b34a40596db814d947603891a32755abaee376a420b2a016d",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0087",
+      "ground_truth_sha256": "369d5e85b7be2d00c657821f5b9388981e30fc926f079f31fdab280766ed9135",
+      "image_sha256": "fb4a68eea3c130873e09d370270234504b38fdab9ca41ddfdc6be3951610f88d",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0088",
+      "ground_truth_sha256": "4b3425ef2d55aae1f40c6d0ceadfa93d0dfcec139f2f6a00394437533de154fc",
+      "image_sha256": "929289971f8048cd6abf0b84a11fc11ab440daa4e98c37d56b56c2b95d312747",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0089",
+      "ground_truth_sha256": "ac3ff3c08df2e669b15b28313e3289706b3bfe73e4562159186cd3e15f5a382a",
+      "image_sha256": "ff01648d337d6e7cae723f5525602eeab7959f3fdc7669532e0ff1d868ce1b45",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0090",
+      "ground_truth_sha256": "113aea5d895303b131bdd44c78cde6cd3f3a3e9f8ac0374912cf5e14e7ee166f",
+      "image_sha256": "3a6ee595e4416a3c7abd6e9ed9b65dc37bda718790fd7bab9457b8b9aff5faa9",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0091",
+      "ground_truth_sha256": "fb22deed61b37ee59dfa457a2f996a023af469de4d8f663f0acc97de3bd04454",
+      "image_sha256": "9904abb7774f95ccad099e920b260201291b1c7c3195761841735aef04201970",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0092",
+      "ground_truth_sha256": "987332ec98bb134e27f9bfb276aaea7c649ed5fb9c6254035155dead881efd9c",
+      "image_sha256": "2eccc0e186a72790e1b5439331cf72c1407e2276a31dbe043d609d2cbf27f7f7",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0093",
+      "ground_truth_sha256": "412da47679cb2ba5237a0f281fc1eb5331ee7b3f41093554a51aeeaf1376f603",
+      "image_sha256": "a5830d404611b7e2d55356a4549cf42b32b8a4b812b7f23a5abf8aee1730289c",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0094",
+      "ground_truth_sha256": "f8c9dab166767018eecc7e3cc4b3bb94b0a4462e73b9dd2bbafe383f135d8ae7",
+      "image_sha256": "01c9b29e7734bc82715893e846920385dd761b2618e8169d57bc41c7bde81a72",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0095",
+      "ground_truth_sha256": "dea765f094f6a7136ab304cc62451ccce1ac7a6fbd9ac37f5212dfcf3b472377",
+      "image_sha256": "45ec344ea116c902663153e47e122470272d6c89aa0d5de4979af8c1ebc1930d",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0096",
+      "ground_truth_sha256": "4c58654b4bd3a88334b91d9a295e58ca804bc7ab63b33f9630f908f9c7d9fb3f",
+      "image_sha256": "8e79308c53658285c49ff6539d0a14bb2173c5d63a8c5b965b261a9770e854c2",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0097",
+      "ground_truth_sha256": "df417e4690892de4ead00ef7076792713fda3752bfa849e31026668dd37176cf",
+      "image_sha256": "936bdea9166bba1232b89385f37d8f51a3936c98d49525f8de4fde63da2ad994",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0098",
+      "ground_truth_sha256": "131bfb6e3fb4e44ae07d0a9c347e6ec9a17709178ea1ad4c490ae5b9eb1dbf53",
+      "image_sha256": "b8bf542923ca24005c01f579d4ca2b6d652a6c624f1a242d7ffe609258d4e67a",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0099",
+      "ground_truth_sha256": "462abca81165110d1220308eb8fb5a1d47d0ada1e6e95bc69b93368424ccf815",
+      "image_sha256": "fb1ce9316f996ba2acbf187df2ba18577b1ab8377d33eda4d32f06b97629472f",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0100",
+      "ground_truth_sha256": "6633d48f5dcfe977e6676eef914c2fa8c25d41c1b393c4887a1b70b6afd83ecc",
+      "image_sha256": "5bbf09817fd4febcd7dd360cc224ba7351d389c6f11f518495890b0fa52b14e2",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0101",
+      "ground_truth_sha256": "5ec50c67c8ccde2e9898e459043aad6a9a337365c1c9f0e40bf5b0da0ea8f62c",
+      "image_sha256": "de91df26aa62435499c54558fe550c88b5f16929797886d2a2d1056058f05dcb",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0102",
+      "ground_truth_sha256": "b73a4366f86a9ef96cc15ff43906c625839c256e874e78ccfad42d59465ae206",
+      "image_sha256": "64095ebf0fb56f0917c18c566f2f03ebcb40814ec22da04f8c9ab6bc71f6ff62",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0103",
+      "ground_truth_sha256": "05473dc21e8a606a190c11518f12470f3754ba89f8e26056bb01b5af6e6cbc5c",
+      "image_sha256": "72a3d139edfce04b75e75259d06d41e6c99683e9f5979cd0cb86d14638de204d",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0104",
+      "ground_truth_sha256": "25498c0821ba928dfd4549fbe23f2ae0d9aec2040cb2460359c514c0c2fc0c31",
+      "image_sha256": "6002800ff3c0e71991bbfbd26a1ffc733b918472835f69441cd503a637767e45",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0105",
+      "ground_truth_sha256": "726507a40ab67dd36810d8353bc10cfd1a982f5b4d19d29e5f185b6a9336e644",
+      "image_sha256": "790f325bd08cc503f5c1309ade739d62c29be351e6ac7459eae858e83482ecdc",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0106",
+      "ground_truth_sha256": "4e18782c66a6408be27a8ae08fc45d354329d732fc5d7a7ffdafd1d8345fea71",
+      "image_sha256": "7eeb4a78ecf874aecb55c3ef16b28f28f54353e83d29af03e59d17703fa6c8d8",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0107",
+      "ground_truth_sha256": "62dc79171a10551e9ad7cd43aa44a3eceb0a820bb5d4d8dede68eccbf09eba39",
+      "image_sha256": "0b64a1368accf6c9ec21ce273527630a30714af874affb046914d99097078e14",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0108",
+      "ground_truth_sha256": "b7fde699aeffca895c9d1189569b349acf4d7334d4a35c53fdb5c43ecfdee6b3",
+      "image_sha256": "1c1469539ede80c9bb64e9d6f9aa66e99556f37fa9717db0cd188319b444b04a",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0109",
+      "ground_truth_sha256": "4cd6040fb9480cce64bdf032e23ad0d7a717acbe547090b8eaedaf5701350f8f",
+      "image_sha256": "962f082990a5ca9c063c32f119ea700aca4310f23bee5e8dea4c1994b9845390",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0110",
+      "ground_truth_sha256": "da8f9556662438b9349ca6ba48ebd136a76067bdae6bb7e746ef68a29182e700",
+      "image_sha256": "224cdc64e2ed648bd4e9394eb24f95a2ac0f4ef67131507c644981b79a7d53ec",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0111",
+      "ground_truth_sha256": "5141d3ffd77bbe52ac360f019fb50e1bae77ef571f39077b20ed1dbb8a1a93e4",
+      "image_sha256": "5f60908b37ea2aa6f854a4c7812441839c5bb0ad2733965e42c4528829b77300",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0112",
+      "ground_truth_sha256": "d82ad91885d952899cd35049c4762114ec4ebd90425e8575b143752274b42e3e",
+      "image_sha256": "687651d4fb87ece59c3d687cece678f1f768d7a6df7afc84090c61f5254a5ac5",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0113",
+      "ground_truth_sha256": "6458ecc809f9ad0106f9f4453012d6df989d8e82ca932c5d5c3a15193ad073d5",
+      "image_sha256": "6480b2ff82aab8673d015e500306f2550bef21a0e673c6b0a00e40153df73038",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0114",
+      "ground_truth_sha256": "64fe2c301a184283c8b7f50c022b62b7d00fe832f6a015db56c96f9eadb9da85",
+      "image_sha256": "e059442bf10bb508220d8b3b0b0aef518600d7b6343d5c2eab36547557ad7d96",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0115",
+      "ground_truth_sha256": "12e51276fd10b77b37c90ad1e46a4d469ec45193925b58fdc045be673747d05a",
+      "image_sha256": "a5f730dca9d0d412ea694b651f66b7074534a47fe0ddaf6da9693312269d88fc",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0116",
+      "ground_truth_sha256": "a3d3a39f652c6a4de9e2aa5cf45af15a3276a2c3cffdde67b1dbc3d81394a740",
+      "image_sha256": "204e81ac5eafdbc3370f72470a5a06d4fcb5f407f949601e52077180288b31d0",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0117",
+      "ground_truth_sha256": "15608ebbe8a966c156b1d4c9f6f794d607f75e3b26d2e22525067448a13274e8",
+      "image_sha256": "4129aad49dd430fee25226181de5d81d0c9867caa363920419819eaeda74b0eb",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0118",
+      "ground_truth_sha256": "545fd75e864650b5ef26beb38c5e51260e80d1ab41d28ab092fb3b64915e5e83",
+      "image_sha256": "62f54e8eaa14ec1eb58c97819ccd40fe9740a6387a4579d149e12a5c5d2592b3",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0119",
+      "ground_truth_sha256": "ce7f6456b1e2c2a2cb34937b6f741f68e124521b08959a3c27fab052a6634fe0",
+      "image_sha256": "0e8ca49895d188638d380f3a6cb5b3893f2c160b211880f384ebacfd76fc61f3",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0120",
+      "ground_truth_sha256": "dbde491a5a129b2091aec89ea0c701846138462bb70f1c89a32904b2f0e3aab4",
+      "image_sha256": "e1644baeb6ff9838a56fefdbbf37da6a882ef3b5fee3d1519bc385e10235103a",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0121",
+      "ground_truth_sha256": "32fdf35e3f23f39d151d2540fa0b187765e6fdf5f43e71632594905e606a8535",
+      "image_sha256": "3b574dfb01583a391718c4e3811fea341db9977a86c1d01ca8cb3f8f06b2877e",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0122",
+      "ground_truth_sha256": "7d804056168cab97188b55066048ab7a15db79b6e0ac6c52e2b1fd8bd05075d8",
+      "image_sha256": "feade7629c5272dedf47e3688310b48ffd3818371bc5bb48414c62a019906d0b",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0123",
+      "ground_truth_sha256": "e7645295ee403b2acfcfe600032d0722365a2d70196310322e88310b8c48f7d7",
+      "image_sha256": "565a374256bf34ba8b55ee2c4e01cc7466f8dd6e443dd37bcb1750ebc03d2f59",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0124",
+      "ground_truth_sha256": "4bc946c14a2cff56aaf9de303c737a598629eb81703b3bb586d4b9823c82e91a",
+      "image_sha256": "f6ee8eb7e3df1dc552077b51e0d52ab8b59ed2851cdfdcc309d46feb2094ec85",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0125",
+      "ground_truth_sha256": "580cf9416947965413c07ce30893dc9d2fd9f415472d93863b2f894794edb431",
+      "image_sha256": "e0b5df7821659834a0f1eb0d4e06e0646e640508f830bb963447b1d83969ae53",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0126",
+      "ground_truth_sha256": "48bce1cd29e98c2e4c7812cb3c8e50449ac3285072de7f9aff46572f0720f4bb",
+      "image_sha256": "ebbb7ec78117018270209d0bbf4ed37a558a84bfc6ce5e0227cf21e4ce1bdddc",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0127",
+      "ground_truth_sha256": "84b393c33eb6eeb8cd8a4a18fadcc325865288aca8a989a9b87696f9a2474644",
+      "image_sha256": "6ed135a38f6a9f69ac92f8532b6b36f908de43411a36af79540f375ab69d1bd0",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0128",
+      "ground_truth_sha256": "09164f21bd04cd6dd3101714cf3e8253131ad1bf08fd0b4b31a98bb35e4ffcb8",
+      "image_sha256": "9e1c9cdd48ba1ce9442f2d7fdad2d1c62d4f6d004606f1bace591a880dc91d63",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0129",
+      "ground_truth_sha256": "5b75aa3f9583daadcd9a345c6dacf2fc49d61b3a8a629c759e4f0855ff999f48",
+      "image_sha256": "41607fb029a7d9671fea9977e6cb405ed22ec93c80233223fb5d0b0b6e7dc9d1",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0130",
+      "ground_truth_sha256": "84141476e5651ff54e3b34a133df0343d448771c455495e3a59a379349f0dcc4",
+      "image_sha256": "311d7429238306ba28c97a0a06aea977d2e69527d2472882030a2916913fcc54",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0131",
+      "ground_truth_sha256": "81f0d7e2004b6634a1549cdec3cd972a8a48a8e4b60a3863bbc216770c304893",
+      "image_sha256": "e09bd13a385ec936a1e9dc90ee8eb23b9c3fb333c354c6428d96aa4256238665",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0132",
+      "ground_truth_sha256": "79c81863d3ca720dfe9ba6bd63f545d996f28578d2a2f38666ea727fb6554f80",
+      "image_sha256": "782b671683adb488fabb658c91ad2b56b906a787971313b12765a9f37ac320e4",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0133",
+      "ground_truth_sha256": "8c72551c872439941a9e91a4894a264669d9a816b8a1b40360f2fac5f919c1ae",
+      "image_sha256": "4e2134a093dd2429f985ab812206e52f4b3e714f69f65efb31e1c2385b318603",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0134",
+      "ground_truth_sha256": "f227cbf54c494a65f3a6476c5a0ac86f60526a245cd75318e61920ff3d0805da",
+      "image_sha256": "034c9a8a2c25084e563ec55ba5a28eb250120992997da1b00f1da688fa71d4e5",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0135",
+      "ground_truth_sha256": "908d9960e6495a456f4a3f507cf15fc981cd46ab6cac72f9e76fb59715f62a3c",
+      "image_sha256": "7433b23374ea145ee90c2cb8065461ca5d87b9fffb85ea5290914909090a74a6",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0136",
+      "ground_truth_sha256": "22d1d43b2bec8d374e789186e5fded0f932151bc2bf13278011602edf80c36f7",
+      "image_sha256": "278fde60aa577df0dcbea1096e6753a4b62051559d2631d239d7c727ebd788c8",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0137",
+      "ground_truth_sha256": "dc0c644cfd98cc2bf54c4475b2bf52ffb0bf885895a17f672497aa24ca634b5a",
+      "image_sha256": "c2bbc769d9aceffdd7caebd9b853b9499aee8ab092a887f3ef8a96ab19fdd787",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0138",
+      "ground_truth_sha256": "023ef914fb9994130ebcd9d7ec652712305d013ee48f82c30380894fd71df6a5",
+      "image_sha256": "9603545288c69a765092396b10af5c5304b9662f2e347510bc64dd6e1a56f621",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0139",
+      "ground_truth_sha256": "6ac5f618de70343eec596a2f6c2aaf939b2a13571e2eb09e553c6c2c5227da92",
+      "image_sha256": "8bf1566fc817d109683772492a257e85dda8154f45a2d37c22c6098cb8176332",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0140",
+      "ground_truth_sha256": "ee95088954243934268699ef7c6b7bd3d90a4e7f015fcc3849132f3c8f838ba8",
+      "image_sha256": "fc43ade7907b7635af21ab54afc75a507a4ec366c75ea7392e4504986af0d5fd",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0141",
+      "ground_truth_sha256": "cce604a0ee50267f95b354a1157812eb945c4bf4c9d313a95be2020d4b30a5ee",
+      "image_sha256": "78fe80d4a957d0da2aa3948707c3de96e61137e8756b1918f7d6bf7c414f1a4e",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0142",
+      "ground_truth_sha256": "20025ee6776239cfb733ce8dc6f1c62fe4717c6f0e21a929729df644ffde143c",
+      "image_sha256": "f609bd7850e99200298dcd917b5cca7f9d73a1c2da95387a9fc0b589459f4341",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0143",
+      "ground_truth_sha256": "a96beb264ad9c5be6321eff9eeaf7d165b8456c01b439db3e570607c8d1819c4",
+      "image_sha256": "31c2bab4ac75c669951561cfbed42a1de1c65a830aae6483462ecdb3fdefe984",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0144",
+      "ground_truth_sha256": "004522129b21c4047b9f0a773637d7c0d107ffccf78c3708cf5c48a48ebbe7e8",
+      "image_sha256": "22de8009f86922698ca39764f39e51707aebbf602f4448d3061d668406aa2c60",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0145",
+      "ground_truth_sha256": "9ff9af2b923ed257e6642e21ee2ca9a0bd88c6a9ab0fc4822aab172e97ef6dfd",
+      "image_sha256": "054e9a3177e599ad8250d446c8ebd4d472689e665d91dd0fd96fc8a9f68e8fc9",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0146",
+      "ground_truth_sha256": "bdafe7e42e057e16bc8e420f17cf775a7ffa197c5b7c1097c58ed2dbb8f3f01e",
+      "image_sha256": "97ca5188317f9e6a7c7305ecc63a68ad1ace92fefc38cd3e44a4ec031b944f93",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0147",
+      "ground_truth_sha256": "9515e417a1e62461686160415e01440ae8601f3663f142e0d61d650ed00a564a",
+      "image_sha256": "e090a21be7990ec33b4acb1dc9910b47f93be5e641ee8527483e2957aeb72635",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0148",
+      "ground_truth_sha256": "657d37f2244249e57287d85ef1a1331a3fa572652841211c210e3338998ef6cf",
+      "image_sha256": "d24def77d8db8c7de34c83ca8e99e2e1866b71442a7975191bbfba5f20e6ea7c",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0149",
+      "ground_truth_sha256": "acdf527d28afeb166cba1d1f07dac5b186aaa24d932864c5d29b5376a6806cd9",
+      "image_sha256": "b8dd2cac7a6dca09ae7ac97ac9a3eeef595486381c2a4a736e6d55d22dec3b35",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0150",
+      "ground_truth_sha256": "8830e814c2814f498f55f553fd263919cafca88b617ad4450c415b7312226394",
+      "image_sha256": "680247ae82f86140ca995517e914d5a0a811cd23a72e7559abace394d0e43df2",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0151",
+      "ground_truth_sha256": "86cf0784cdd41700a0ff97dd841922d718528014b7a859e0e364030dbda5c0b4",
+      "image_sha256": "5b46d6814e73817c106cca24d639ac16e35be519968f195e02f1b2acf24e1efa",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0152",
+      "ground_truth_sha256": "207f65a1e0d402ae8310481e7121c60b1b48f50b5941e067ac252378c8ef9aa1",
+      "image_sha256": "875ea9a9e2bc4149bb14fa8678dae28c2ef173cbd91ca41d0308f42826b9e3a4",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0153",
+      "ground_truth_sha256": "50d907dc9f4088eca46432f16f1808729d0122bb61d4ab4337c3b8b96d92da5d",
+      "image_sha256": "ca1a5514a3fd16d8e089e3a67dfe172b49d150e00a31eea44734a899c7e55631",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0154",
+      "ground_truth_sha256": "a6cb8b4b125cefabae50e342514b489b1459a20ce1b8a3a125ea0be464fd092d",
+      "image_sha256": "eed7e98e2e357ebb0520b48607e6fb606a4f0ce8277e773c17685e9e2bb7ce6b",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0155",
+      "ground_truth_sha256": "ae8098731fac870130ab0ce85203af05eef239024d195b1e391664d83683a725",
+      "image_sha256": "da26ccf563afe24c1959b532a457cd40120f72591cc18d3344c73cc312c82995",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0156",
+      "ground_truth_sha256": "b47aad6d5cfbe9da3da9b0f721883c79a3a73c2a8257807aa2195a719a0b5623",
+      "image_sha256": "875c8481fd0ee0b328329a1dcc1556ca41015785d97094ccc774992c266e4ab1",
+      "renderer_family": "hidden-late-slope-v9-public"
+    },
+    {
+      "degradation_family": "hidden-screen-capture-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0157",
+      "ground_truth_sha256": "6466e347b9aaf0e0e3555b00627aedcc33ae5acb0f6f9d563a2f6358d1869ca1",
+      "image_sha256": "d10c132b91785852fb7a0d532fa49285db93550f52dff26e997bfd39e17b7d20",
+      "renderer_family": "hidden-forward-tail-v9-public"
+    },
+    {
+      "degradation_family": "hidden-paper-noise-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0158",
+      "ground_truth_sha256": "0b9804780cd0e9797999b62d3022906e5356c878e83ec7ee1900d58542e485e1",
+      "image_sha256": "ff82e393f6d9a2f53980a65ba2e34f1da36ef4fc8fa9274db51492427489543c",
+      "renderer_family": "hidden-offset-fan-v9-public"
+    },
+    {
+      "degradation_family": "hidden-printer-chain-v9-public",
+      "fixture_id": "marker-mask-consensus-v9-sealed_public-0159",
+      "ground_truth_sha256": "99afe0fcadba99da6e3f8ba029e28edc1cc84425db66a84b37b2b52367917b6b",
+      "image_sha256": "6937e6c5419dc995b8563fadb1424b7b177c221d5129184ac4dd02b669adcb9f",
+      "renderer_family": "hidden-late-slope-v9-public"
+    }
+  ],
+  "private_data": false,
+  "revision": "marker-center-mask-consensus-v9",
+  "schema": "graphreader.marker-center-mask-consensus-public-dataset.v9",
+  "scope": "public_synthetic_truth_hidden",
+  "seed": 9173
+}

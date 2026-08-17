@@ -1,0 +1,61 @@
+{
+  "revision": "marker-center-mask-consensus-v9",
+  "schema": "graphreader.marker-center-mask-consensus-selection.v9",
+  "sealed_public": {
+    "archive_path": "ml/markers/center/artifacts/mask-consensus-v9/split-freeze/sealed-public.npz",
+    "archive_sha256": "b3867736ed0cbe6b9eccd66b6021d5cc5f5bdfca6c193f3aa9f011cb0686145e",
+    "count": 160,
+    "degradation_family": "mask-consensus-hidden-capture-v9-public",
+    "feasibility": {
+      "hard_negative_count": 1440,
+      "hard_point_missing_from_artifact_truth_count": 0,
+      "minimum_center_separation_px": 12.083045959472656,
+      "minimum_truth_to_hard_negative_distance_px": 11.045360565185547,
+      "required_disjoint_clearance_px": 11.0,
+      "scene_count": 160,
+      "truth_center_count": 1520,
+      "truth_hard_acceptance_overlap_count": 0,
+      "truth_mask_conflict_count": 0
+    },
+    "renderer_family": "mask-consensus-hidden-layout-v9-public",
+    "seed_offset": 11717173
+  },
+  "train": {
+    "archive_path": "ml/markers/center/artifacts/mask-consensus-v9/split-freeze/train.npz",
+    "archive_sha256": "1430642d188a18a70a57493f5f4eb154982ec6a0c0bba9434416eeffbe90dced",
+    "count": 512,
+    "degradation_family": "mask-consensus-capture-bank-v9-train",
+    "feasibility": {
+      "hard_negative_count": 4608,
+      "hard_point_missing_from_artifact_truth_count": 0,
+      "minimum_center_separation_px": 12.041594505310059,
+      "minimum_truth_to_hard_negative_distance_px": 11.045360565185547,
+      "required_disjoint_clearance_px": 11.0,
+      "scene_count": 512,
+      "truth_center_count": 4864,
+      "truth_hard_acceptance_overlap_count": 0,
+      "truth_mask_conflict_count": 0
+    },
+    "renderer_family": "mask-consensus-layout-bank-v9-train",
+    "seed_offset": 10117173
+  },
+  "validation": {
+    "archive_path": "ml/markers/center/artifacts/mask-consensus-v9/split-freeze/validation.npz",
+    "archive_sha256": "ba8de943330be2d1bcfaa10614f6d9d4794a982abf3b8647ab555058e3b70eba",
+    "count": 128,
+    "degradation_family": "mask-consensus-heldout-capture-v9-validation",
+    "feasibility": {
+      "hard_negative_count": 1152,
+      "hard_point_missing_from_artifact_truth_count": 0,
+      "minimum_center_separation_px": 12.041594505310059,
+      "minimum_truth_to_hard_negative_distance_px": 11.045360565185547,
+      "required_disjoint_clearance_px": 11.0,
+      "scene_count": 128,
+      "truth_center_count": 1216,
+      "truth_hard_acceptance_overlap_count": 0,
+      "truth_mask_conflict_count": 0
+    },
+    "renderer_family": "mask-consensus-heldout-layout-v9-validation",
+    "seed_offset": 10917173
+  }
+}
