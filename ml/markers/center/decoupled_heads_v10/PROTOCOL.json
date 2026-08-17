@@ -2,7 +2,7 @@
   "schema": "graphreader.marker-center-decoupled-heads-protocol.v10",
   "task": "marker-center",
   "revision": "marker-center-decoupled-heads-v10",
-  "state": "split_frozen_runner_and_public_evaluator_preregistered_execution_blocked",
+  "state": "candidate_1_authorized_once_not_executed",
   "defect_class": "the V9 shared encoder passed CPU parity and artifact recall but retained 12 false centers, 18 missed centers, artifact precision 0.7897035539741141, and no passing threshold window after its final candidate",
   "prior_revision": "marker-center-mask-consensus-v9",
   "trigger_result_path": "ml/markers/center/mask_consensus_v9/P3_RESULT.json",
@@ -14,6 +14,8 @@
   "isolated_change": "train independent full-resolution center and artifact towers from scratch so artifact specificity gradients cannot consume marker-center capacity while preserving the exact input, output, two-pass composition, fixed radius, postprocessing, thresholds, and gates",
   "architecture": "marker-center-decoupled-heads-v10",
   "model_license": "Apache-2.0",
+  "preregistration_commit": "d4a3987d96a0763730fb9db840ee6c31c4da1abb",
+  "preregistration_tree": "bff1a927922ed9e3e50b315b1f6a1a82cf160c68",
   "experiment_budget": 3,
   "preregistered_candidate_ids": ["P1"],
   "consumed_candidate_ids": [],
@@ -75,9 +77,9 @@
     "onnx_parity_maximum_absolute_error": 0.00001,
     "provider": "CPUExecutionProvider"
   },
-  "execution_authorized": false,
-  "authorized_candidate_id": null,
-  "execution_blocker": "Commit and push the frozen V10 split, exact P1 runner, candidate configuration, source hashes, and one-use public evaluator before a separate P1 authorization commit.",
+  "execution_authorized": true,
+  "authorized_candidate_id": "P1",
+  "execution_blocker": null,
   "public_gate_evaluator_preregistered": true,
   "public_gate_authorized": false,
   "public_gate_archive_opened": false,
@@ -89,4 +91,3 @@
   "production_approval": false,
   "release_eligible": false
 }
-
