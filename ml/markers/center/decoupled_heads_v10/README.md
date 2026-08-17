@@ -60,7 +60,22 @@ are `06f7641c68e7a1c01909237c1795337ac59a0a4c7fd08326108914c4bae762a9`,
 and `e55b0279c4736d791fdf8b51f422852d845d5e5aea2a5bd51606a3da7e65fddf`.
 Only aggregate metrics were inspected.
 
+A terminal aggregate-only feasibility check then bound the already exposed
+visible-validation archive to the tracked model source. At artifact threshold
+`0.35`, the seed contains 289,107 predicted pixels, 178,105 true intersections,
+111,002 false-positive pixels, and 256,001 missing truth pixels. Because V10
+defines `artifact = maximum(seed_artifact, learned_artifact)`, even the ideal
+union with every remaining truth pixel can reach only
+`0.796366958474284` precision. The fixed gate requires `0.90`. This proves that
+loss reweighting or threshold tuning cannot repair V10. The tracked feasibility
+report SHA-256 is
+`c0b580c68346124b878521dc6ef46f1e3ed4fe587c29be35be66d5bb8992b62f`.
+No case detail or pixels were inspected or emitted.
+
 P1, P2, and P3 are consumed and the V10 budget is exhausted. The truth-hidden
 public archive remains locked and unopened at zero evaluations. No rerun,
 tuning, V10 payload approval, model-store promotion, packaging, private
-validation, or release is authorized.
+validation, or release is authorized. A future defect class must permit
+checksum-bound non-monotonic seed refinement and freeze entirely fresh
+renderer, degradation, scene-ID, validation, and sealed-public families before
+training.

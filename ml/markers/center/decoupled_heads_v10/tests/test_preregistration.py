@@ -118,6 +118,7 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     freeze = _json(ROOT / "SPLIT_FREEZE_REPORT.json")
     selection = _json(ROOT / "SELECTION_MANIFEST.json")
     public_seal = _json(ROOT / "SEALED_PUBLIC_TEST_SEAL.json")
+    feasibility = _json(ROOT / "AGGREGATE_FEASIBILITY.json")
     p2_config = _json(ROOT / "training/p2.json")
     config = _json(ROOT / "training/p3.json")
     gate = _json(ROOT / "gates/sealed-public-v1.json")
@@ -179,6 +180,10 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     assert sha256_file(ROOT / "P1_RESULT.json") == protocol["p1_result_sha256"]
     assert sha256_file(ROOT / "P2_RESULT.json") == protocol["p2_result_sha256"]
     assert sha256_file(ROOT / "P3_RESULT.json") == protocol["p3_result_sha256"]
+    assert (
+        sha256_file(ROOT / "AGGREGATE_FEASIBILITY.json")
+        == protocol["aggregate_feasibility_report_sha256"]
+    )
     assert sha256_file(ROOT / "training/p2.json") == protocol["p2_candidate_config_sha256"]
     assert sha256_file(ROOT / "training/p3.json") == protocol["candidate_config_sha256"]
     assert sha256_file(ROOT / "gates/sealed-public-v1.json") == protocol["public_gate_config_sha256"]
@@ -251,6 +256,33 @@ def test_frozen_splits_and_preregistered_sources_match_exact_bytes() -> None:
     assert sha256_file(REPO_ROOT / p3_result["candidate_report_path"]) == p3_result["candidate_report_sha256"]
     assert sha256_file(REPO_ROOT / p3_result["checkpoint_path"]) == p3_result["checkpoint_sha256"]
     assert sha256_file(REPO_ROOT / p3_result["onnx_path"]) == p3_result["onnx_sha256"]
+    assert feasibility["status"] == "structurally_infeasible_exhausted"
+    assert feasibility["case_detail_or_pixels_inspected"] is False
+    assert feasibility["case_detail_or_pixels_emitted"] is False
+    assert feasibility["public_gate_archive_opened"] is False
+    assert feasibility["public_gate_evaluations"] == 0
+    assert feasibility["monotonic_seed_union_can_pass_precision"] is False
+    assert feasibility["maximum_precision_under_monotonic_seed_union"] == 0.796366958474284
+    validation_path = REPO_ROOT / feasibility["validation_archive_path"]
+    assert sha256_file(validation_path) == feasibility["validation_archive_sha256"]
+    with np.load(validation_path, allow_pickle=False) as validation:
+        seed = validation["inputs"][:, 2] >= feasibility["seed_threshold"]
+        truth = validation["artifact_targets"][:, 0] >= feasibility["truth_threshold"]
+        intersection = int(np.logical_and(seed, truth).sum())
+        seed_count = int(seed.sum())
+        truth_count = int(truth.sum())
+    missing_truth = truth_count - intersection
+    assert seed_count == feasibility["seed_predicted_pixels"]
+    assert truth_count == feasibility["artifact_truth_pixels"]
+    assert intersection == feasibility["intersection_pixels"]
+    assert seed_count - intersection == feasibility["seed_false_positive_pixels"]
+    assert missing_truth == feasibility["seed_false_negative_pixels"]
+    assert truth_count / (seed_count + missing_truth) == feasibility[
+        "maximum_precision_under_monotonic_seed_union"
+    ]
+    assert feasibility["maximum_precision_under_monotonic_seed_union"] < feasibility[
+        "required_artifact_precision"
+    ]
 
 
 def test_p2_preflight_binds_consumed_p1_aggregate_and_frozen_v10_split() -> None:
