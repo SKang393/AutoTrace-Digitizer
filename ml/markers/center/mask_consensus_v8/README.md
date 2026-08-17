@@ -48,8 +48,10 @@ consumed P1 checkpoint and ONNX with zero optimizer steps and changes only the
 artifact decision threshold from `0.35` to `0.45`, using the available artifact
 recall margin to address insufficient precision and center suppression. Its
 config and runner bundle SHA-256 values are `d3b24a0...4f14` and
-`d57bce0c...f870`. P2 is not authorized until a separate committed single-use
-authorization binds these bytes. P3 remains unregistered. The truth-hidden
+`d57bce0c...f870`. Commit `483dce39bae5c5285edc85469939f585e3618d4b`,
+tree `60ba3da228ee369dcc2b1b27c3b6e2306b2acd63`, contains those exact
+preregistered bytes. The canonical ledger now authorizes only P2 for one
+execution from that identity. P3 remains unregistered. The truth-hidden
 public archive can be opened once only after a candidate passes a
 three-threshold zero-error selection window and direct CPU parity. A public pass
 still does not authorize a manifest, model store, packaging, private Chandler
