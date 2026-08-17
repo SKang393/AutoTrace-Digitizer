@@ -51,7 +51,7 @@ def test_protocol_consumes_p2_and_authorizes_only_final_p3_once() -> None:
     protocol = _json(ROOT / "PROTOCOL.json")
     assert protocol["state"] == "candidate_3_authorized_once_not_executed"
     assert protocol["experiment_budget"] == 3
-    assert protocol["preregistered_candidate_ids"] == ["P2", "P3"]
+    assert protocol["preregistered_candidate_ids"] == ["P3"]
     assert protocol["consumed_candidate_ids"] == ["P1", "P2"]
     assert protocol["remaining_unregistered_candidate_ids"] == []
     assert protocol["selection_gates"]["selection_thresholds"] == list(THRESHOLDS)
@@ -115,7 +115,7 @@ def test_frozen_archives_and_source_bindings_match_exact_bytes() -> None:
     assert public_seal["public_gate_archive_opened"] is False
     assert public_seal["public_gate_evaluations"] == 0
     assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["preregistered_candidate_ids"] == ["P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["preregistration_commit"] == "4e20674d0d7a15896005a066c2054753dbf5d7dd"
     assert entry["preregistration_tree"] == "0e51075b8cd082b9ce48e0232fa008fee9e9627a"

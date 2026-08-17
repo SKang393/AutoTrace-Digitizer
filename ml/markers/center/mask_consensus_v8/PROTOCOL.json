@@ -15,7 +15,7 @@
   "architecture": "mask-consensus-residual-unet-v8",
   "model_license": "Apache-2.0",
   "experiment_budget": 3,
-  "preregistered_candidate_ids": ["P2", "P3"],
+  "preregistered_candidate_ids": ["P3"],
   "consumed_candidate_ids": ["P1", "P2"],
   "remaining_unregistered_candidate_ids": [],
   "split": {

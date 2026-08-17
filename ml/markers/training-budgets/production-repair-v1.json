@@ -5620,7 +5620,6 @@
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
       "preregistered_candidate_ids": [
-        "P2",
         "P3"
       ],
       "consumed_candidate_ids": [
@@ -5629,7 +5628,7 @@
       ],
       "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/markers/center/mask_consensus_v8/PROTOCOL.json",
-      "protocol_sha256": "214cc59239384a700978973171fd2e3a3ec3fe57d0022000a11f8a97efec1283",
+      "protocol_sha256": "ae9895354865441ce67319629e174582f1724f384b02eda67caab354e27d8b3c",
       "split_materialized": true,
       "split_freeze_report_path": "ml/markers/center/mask_consensus_v8/SPLIT_FREEZE_REPORT.json",
       "split_freeze_report_sha256": "79263032da33b9119078ee645e41f9a5bea3f1a9103ecaee404d5139f0934938",
