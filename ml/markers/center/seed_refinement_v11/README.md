@@ -40,7 +40,9 @@ four-way reflection schedule, existing losses, 1,792-step budget, thresholds,
 CPU provider, parity limit, and zero-error gates from scratch. Its only change
 adds a weight-3.0 binary-cross-entropy term on artifact pixels that are both
 seed-negative and truth-negative. This penalizes unsupported seed additions
-without penalizing additions supported by training truth. P2 execution is not
-authorized at this checkpoint. It requires a separate committed authorization;
-the public archive remains separately locked even if P2 visible selection
-later passes.
+without penalizing additions supported by training truth. P2 is authorized
+exactly once from preregistration commit
+`589e8892718feaa011849132313c1eb6e71f534e` and tree
+`8b70c750ca256de7ba5d5a04bf7408089afb4e52`. The single-use training seal
+must refuse a rerun. The public archive remains separately locked even if P2
+visible selection later passes.

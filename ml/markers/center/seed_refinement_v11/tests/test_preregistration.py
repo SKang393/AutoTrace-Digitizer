@@ -168,18 +168,22 @@ def test_frozen_sources_configs_and_ledger_match_exact_bytes() -> None:
     gate = _json(ROOT / "gates/sealed-public-v1.json")
     ledger = _json(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol["revision"])
-    assert protocol["state"] == "p2_preregistered_execution_blocked_public_gate_blocked"
+    assert protocol["state"] == "p2_execution_authorized_public_gate_blocked"
     assert protocol["preregistration_commit"] == "729d51e916c8433e4c3ccadccd28d7038007ce12"
     assert protocol["preregistration_tree"] == "66054ffe3f52814c3ccb30b3ada7ec1b4d2d4980"
-    assert protocol["execution_authorized"] is False
-    assert protocol["authorized_candidate_id"] is None
+    assert protocol["p2_preregistration_commit"] == "589e8892718feaa011849132313c1eb6e71f534e"
+    assert protocol["p2_preregistration_tree"] == "8b70c750ca256de7ba5d5a04bf7408089afb4e52"
+    assert protocol["execution_authorized"] is True
+    assert protocol["authorized_candidate_id"] == "P2"
     assert entry["status"] == "candidate_2_preregistered"
     assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["preregistration_commit"] == protocol["preregistration_commit"]
     assert entry["preregistration_tree"] == protocol["preregistration_tree"]
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["p2_preregistration_commit"] == protocol["p2_preregistration_commit"]
+    assert entry["p2_preregistration_tree"] == protocol["p2_preregistration_tree"]
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P2"
     assert sha256_file(ROOT / "PROTOCOL.json") == entry["protocol_sha256"]
     assert sha256_file(ROOT / "SPLIT_FREEZE_REPORT.json") == protocol["split_freeze_report_sha256"]
     assert sha256_file(ROOT / "SELECTION_MANIFEST.json") == protocol["selection_manifest_sha256"]
