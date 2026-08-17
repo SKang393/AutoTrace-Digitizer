@@ -47,9 +47,9 @@ def _json(path: Path) -> dict[str, object]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def test_protocol_consumes_p2_and_preregisters_final_p3_fail_closed() -> None:
+def test_protocol_consumes_p2_and_authorizes_only_final_p3_once() -> None:
     protocol = _json(ROOT / "PROTOCOL.json")
-    assert protocol["state"] == "candidate_3_preregistered_execution_blocked"
+    assert protocol["state"] == "candidate_3_authorized_once_not_executed"
     assert protocol["experiment_budget"] == 3
     assert protocol["preregistered_candidate_ids"] == ["P2", "P3"]
     assert protocol["consumed_candidate_ids"] == ["P1", "P2"]
@@ -61,8 +61,10 @@ def test_protocol_consumes_p2_and_preregisters_final_p3_fail_closed() -> None:
     assert protocol["preregistration_tree"] == "0e51075b8cd082b9ce48e0232fa008fee9e9627a"
     assert protocol["p2_preregistration_commit"] == "483dce39bae5c5285edc85469939f585e3618d4b"
     assert protocol["p2_preregistration_tree"] == "60ba3da228ee369dcc2b1b27c3b6e2306b2acd63"
-    assert protocol["authorized_candidate_id"] is None
-    assert protocol["execution_authorized"] is False
+    assert protocol["p3_preregistration_commit"] == "ac22709bae98c91d7480b93f455f4c6fa66da2cc"
+    assert protocol["p3_preregistration_tree"] == "952a54df56044671d0439d4dfb5c713184c102f5"
+    assert protocol["authorized_candidate_id"] == "P3"
+    assert protocol["execution_authorized"] is True
     assert protocol["p1_status"] == "failed_selection_consumed"
     assert protocol["p1_selection_exact_scene_count"] == 122
     assert protocol["p1_selection_false_positives"] == 6
@@ -112,15 +114,17 @@ def test_frozen_archives_and_source_bindings_match_exact_bytes() -> None:
     assert freeze["optimizer_step_count_at_freeze"] == 0
     assert public_seal["public_gate_archive_opened"] is False
     assert public_seal["public_gate_evaluations"] == 0
-    assert entry["status"] == "candidate_3_preregistered_execution_blocked"
+    assert entry["status"] == "candidate_3_preregistered"
     assert entry["preregistered_candidate_ids"] == ["P2", "P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["preregistration_commit"] == "4e20674d0d7a15896005a066c2054753dbf5d7dd"
     assert entry["preregistration_tree"] == "0e51075b8cd082b9ce48e0232fa008fee9e9627a"
     assert entry["p2_preregistration_commit"] == "483dce39bae5c5285edc85469939f585e3618d4b"
     assert entry["p2_preregistration_tree"] == "60ba3da228ee369dcc2b1b27c3b6e2306b2acd63"
-    assert entry["authorized_candidate_id"] is None
-    assert entry["execution_authorized"] is False
+    assert entry["p3_preregistration_commit"] == "ac22709bae98c91d7480b93f455f4c6fa66da2cc"
+    assert entry["p3_preregistration_tree"] == "952a54df56044671d0439d4dfb5c713184c102f5"
+    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_authorized"] is True
     assert entry["public_gate_authorized"] is False
 
 
@@ -163,6 +167,30 @@ def test_p2_authorization_binds_the_committed_preregistration_sources() -> None:
         Path("ml/markers/center/mask_consensus_v8/P1_RESULT.json"),
         Path("ml/markers/center/mask_consensus_v8/training/p2.json"),
         *P2_RUNNER_SOURCE_PATHS,
+    }
+    unchanged = subprocess.run(
+        ["git", "diff", "--quiet", commit, "--", *(path.as_posix() for path in sorted(bound_paths))],
+        cwd=REPO_ROOT,
+        check=False,
+    )
+    assert unchanged.returncode == 0
+
+
+def test_p3_authorization_binds_the_committed_preregistration_sources() -> None:
+    protocol = _json(ROOT / "PROTOCOL.json")
+    commit = str(protocol["p3_preregistration_commit"])
+    tree = subprocess.run(
+        ["git", "show", "-s", "--format=%T", commit],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        check=True,
+        text=True,
+    ).stdout.strip()
+    assert tree == protocol["p3_preregistration_tree"]
+    bound_paths = {
+        Path("ml/markers/center/mask_consensus_v8/P2_RESULT.json"),
+        Path("ml/markers/center/mask_consensus_v8/training/p3.json"),
+        *P3_RUNNER_SOURCE_PATHS,
     }
     unchanged = subprocess.run(
         ["git", "diff", "--quiet", commit, "--", *(path.as_posix() for path in sorted(bound_paths))],
@@ -249,7 +277,7 @@ def test_p3_is_aggregate_only_bounded_final_candidate() -> None:
     assert config["public_gate_evaluations"] == 0
     assert protocol["p3_expected_optimizer_steps"] == 768
     assert protocol["p3_fixed_radius_pixels"] == 2.5
-    assert protocol["execution_authorized"] is False
+    assert protocol["execution_authorized"] is True
 
 
 def test_p3_photometric_change_preserves_masks_and_fixed_radius_contract() -> None:
