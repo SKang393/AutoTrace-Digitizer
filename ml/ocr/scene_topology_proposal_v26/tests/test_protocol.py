@@ -92,7 +92,7 @@ def test_v25_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_records_p1_failure_and_authorizes_only_p2() -> None:
+def test_canonical_budget_records_p1_and_p2_failures_and_locks_execution() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(
             encoding="utf-8"
@@ -103,10 +103,10 @@ def test_canonical_budget_records_p1_failure_and_authorizes_only_p2() -> None:
         if item["task"] == "ocr-detection-recognition"
         and item["revision"] == "graph-text-scene-topology-proposal-v26"
     )
-    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["status"] == "candidate_2_selection_failed"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["split_materialized"] is True
     split_seal_path = REPO_ROOT / entry["split_seal_path"]
@@ -186,10 +186,38 @@ def test_canonical_budget_records_p1_failure_and_authorizes_only_p2() -> None:
     assert entry["candidate_runner_source_bundle_sha256"]["P2"] == (
         p2_config["expected_runner_source_bundle_sha256"]
     )
-    assert entry["selection_evaluations"] == 1
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
-    assert entry["execution_authorization"] is not None
+    p2_result_path = REPO_ROOT / entry["candidate_result_paths"]["P2"]
+    assert entry["candidate_result_sha256"]["P2"] == sha256_file(p2_result_path)
+    p2_result = json.loads(p2_result_path.read_text(encoding="utf-8"))
+    assert p2_result["candidate_consumed"] is True
+    assert p2_result["status"] == "failed_selection"
+    assert p2_result["optimizer_steps"] == 1152
+    assert p2_result["selection_metrics"]["true_positives"] == 1024
+    assert p2_result["selection_metrics"]["false_positives"] == 1
+    assert p2_result["selection_metrics"]["false_negatives"] == 0
+    assert p2_result["selection_metrics"]["duplicate_region_count"] == 0
+    assert p2_result["selection_metrics"]["prohibited_structure_hits"] == 1
+    assert p2_result["selection_metrics"]["exact_scene_count"] == 122
+    assert p2_result["onnx_parity_maximum_absolute_error"] > 1e-5
+    assert p2_result["parent_role_maximum_absolute_error"] == 0.0
+    assert p2_result["passing_threshold_window"] == []
+    assert p2_result["case_level_details_emitted"] is False
+    assert "cases" not in p2_result and "predictions" not in p2_result
+    assert entry["candidate_report_sha256"]["P2"] == p2_result["report_sha256"]
+    assert entry["candidate_checkpoint_sha256"]["P2"] == (
+        p2_result["checkpoint_sha256"]
+    )
+    assert entry["candidate_onnx_sha256"]["P2"] == p2_result["onnx_sha256"]
+    assert entry["candidate_training_opened_seal_sha256"]["P2"] == (
+        p2_result["training_opened_seal_sha256"]
+    )
+    assert entry["candidate_training_result_seal_sha256"]["P2"] == (
+        p2_result["training_result_seal_sha256"]
+    )
+    assert entry["selection_evaluations"] == 2
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorization"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False

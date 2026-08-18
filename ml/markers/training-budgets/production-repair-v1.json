@@ -6335,7 +6335,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-scene-topology-proposal-v26",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_2_selection_failed",
       "defect_class": "V25 P3 retained 1017 of 1024 visible-selection truths with one false prohibited region and seven misses at every fixed threshold despite passing recognition, role, and ONNX parity gates",
       "prior_revision": "graph-text-evidence-rescue-v25",
       "trigger_result_path": "ml/ocr/evidence_rescue_v25/P3_RESULT.json",
@@ -6347,8 +6347,8 @@
       "architecture": "frozen-role-axial-topology-proposal-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": ["P2"],
-      "consumed_candidate_ids": ["P1"],
+      "preregistered_candidate_ids": [],
+      "consumed_candidate_ids": ["P1", "P2"],
       "remaining_unregistered_candidate_ids": ["P3"],
       "protocol_path": "ml/ocr/scene_topology_proposal_v26/PROTOCOL.json",
       "protocol_sha256": "2aacbb75a7ef02c4f7de5c806681dcf33093ea21f67c2b6185a07807827f19ef",
@@ -6416,28 +6416,36 @@
         "P2": "e86b919a45e32558e1480b73587ab1f7511fd95fcc62ae73b45d9fd98f44cd5f"
       },
       "candidate_result_paths": {
-        "P1": "ml/ocr/scene_topology_proposal_v26/P1_RESULT.json"
+        "P1": "ml/ocr/scene_topology_proposal_v26/P1_RESULT.json",
+        "P2": "ml/ocr/scene_topology_proposal_v26/P2_RESULT.json"
       },
       "candidate_result_sha256": {
-        "P1": "1c1a3041320a4fbe6fcb917355f4b2c60b10b43ba4ce9bd7d1124d115c7e5338"
+        "P1": "1c1a3041320a4fbe6fcb917355f4b2c60b10b43ba4ce9bd7d1124d115c7e5338",
+        "P2": "cce83aa92123c56a263697e8c62c6b3ed6a3aa2ea499351ee3ce0ed4ef2e23fe"
       },
       "candidate_report_paths": {
-        "P1": "ml/ocr/scene_topology_proposal_v26/artifacts/P1-run/candidate-report.json"
+        "P1": "ml/ocr/scene_topology_proposal_v26/artifacts/P1-run/candidate-report.json",
+        "P2": "ml/ocr/scene_topology_proposal_v26/artifacts/P2-run/candidate-report.json"
       },
       "candidate_report_sha256": {
-        "P1": "d962cd133b943036d84d6221e8d8d647c8182b8bed6590a61afd1bc77d4ec32b"
+        "P1": "d962cd133b943036d84d6221e8d8d647c8182b8bed6590a61afd1bc77d4ec32b",
+        "P2": "eaf87de8b2b6e854aa9703b04d7f4268357e8706b1e325d2380e11763f9db4df"
       },
       "candidate_checkpoint_sha256": {
-        "P1": "29fe9349efe90216900ff6cc29de6374ae63a8f4b609a54d011ab5a2d6f66d89"
+        "P1": "29fe9349efe90216900ff6cc29de6374ae63a8f4b609a54d011ab5a2d6f66d89",
+        "P2": "ecd1cebc53089ab189d513375d2b565ec42ec5e83a9ed82698fcc11af00a0271"
       },
       "candidate_onnx_sha256": {
-        "P1": "d6cb6910faac97997f30f8e7f842aa63dca818bb102b601c4ba9545bdf88c241"
+        "P1": "d6cb6910faac97997f30f8e7f842aa63dca818bb102b601c4ba9545bdf88c241",
+        "P2": "04eea8a6550444c381da64a30a3190b480286b2cc6be58dfe2a37d668a297ce7"
       },
       "candidate_training_opened_seal_sha256": {
-        "P1": "fc613d795ab951ce037c4cef9ea6c5e7727bcf32197eff35f7fc34e512d7dd22"
+        "P1": "fc613d795ab951ce037c4cef9ea6c5e7727bcf32197eff35f7fc34e512d7dd22",
+        "P2": "8be9748ff767c99e4596a754b4e94fae87b58fa02e1399ecd61b0744360a4250"
       },
       "candidate_training_result_seal_sha256": {
-        "P1": "8f4ccebd5110fd4ba726addc32f69d170615311747b226873f4455ca5539fa03"
+        "P1": "8f4ccebd5110fd4ba726addc32f69d170615311747b226873f4455ca5539fa03",
+        "P2": "7d6dec5347401c24dab9ce5c9d1769b406181fb83bf8ec7bf029e9e61c4a0764"
       },
       "candidate_1_selection_metrics": {
         "optimizer_steps": 2304,
@@ -6455,14 +6463,31 @@
         "onnx_parity_maximum_absolute_error": 0.000011444091796875,
         "passing_threshold_window": []
       },
-      "selection_evaluations": 1,
+      "candidate_2_selection_metrics": {
+        "optimizer_steps": 1152,
+        "exact_scene_count": 122,
+        "scene_count": 128,
+        "true_positives": 1024,
+        "false_positives": 1,
+        "false_negatives": 0,
+        "duplicate_region_count": 0,
+        "prohibited_structure_hits": 1,
+        "recognition_exact": 0.97265625,
+        "character_error_rate": 0.004640371229698376,
+        "role_accuracy": 0.9951171875,
+        "parent_role_maximum_absolute_error": 0.0,
+        "frozen_p1_features_and_role_parent_preserved": true,
+        "onnx_parity_maximum_absolute_error": 0.000011444091796875,
+        "passing_threshold_window": []
+      },
+      "selection_evaluations": 2,
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P2",
-      "execution_blocker": null,
-      "execution_authorization": "P2 may execute once from its exact committed aggregate-only configuration, P1 payload binding, unchanged frozen split archives, and runner source bundle. P3, public, marker, private, manifest, model-store, packaging, approval, and release execution remain unauthorized.",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1 and P2 are consumed and failed selection. P2 retained all truths but one prohibited false region remained, no required zero-error threshold window existed, and CPU ONNX parity exceeded the fixed 1e-5 maximum. P3 requires separate aggregate-only preregistration before any execution; public remains locked.",
+      "execution_authorization": null,
       "marker_creation_evaluated": false,
       "manifest_created": false,
       "model_store_promoted": false,
