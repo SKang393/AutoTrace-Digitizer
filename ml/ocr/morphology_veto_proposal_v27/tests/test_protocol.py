@@ -68,11 +68,26 @@ from ml.ocr.morphology_veto_proposal_v27.train_p3 import (
     RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS,
     _load_p2_state,
     _objective as p3_objective,
-    preflight as p3_preflight,
 )
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
+P3_RESULT_PATH = Path("ml/ocr/morphology_veto_proposal_v27/P3_RESULT.json")
+P3_RESULT_SHA256 = "8989a7765d2f64b10039ef26359d95534281be0c788cb4dc20a28ac3067e566d"
+P3_REPORT_PATH = Path(
+    "ml/ocr/morphology_veto_proposal_v27/artifacts/P3-run/candidate-report.json"
+)
+P3_REPORT_SHA256 = "e7eda2ccc845ef2dd27bedc9d210d7e7900fb12668358251b310c9742499e862"
+P3_CHECKPOINT_PATH = Path(
+    "ml/ocr/morphology_veto_proposal_v27/artifacts/P3-run/"
+    "graph-text-morphology-veto-proposal-v27-p3.pt"
+)
+P3_CHECKPOINT_SHA256 = "33e8dbff01e69bc8a0b2b73219bdbac5ad628988852b79c0e95c1ffb8e0c4d89"
+P3_ONNX_PATH = Path(
+    "ml/ocr/morphology_veto_proposal_v27/artifacts/P3-run/"
+    "graph-text-morphology-veto-proposal-v27-p3.onnx"
+)
+P3_ONNX_SHA256 = "f3e2b97d0bc3857e7cb785bf8def2fc7c0660990f586215d37cfa7dad3a38839"
 
 
 def _png_sha256(raster: np.ndarray) -> str:
@@ -140,22 +155,23 @@ def test_canonical_budget_records_p1_p2_and_authorizes_only_checksum_bound_p3() 
         item for item in ledger["revisions"]
         if item["revision"] == "graph-text-morphology-veto-proposal-v27"
     )
-    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["status"] == "exhausted_failed_selection"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["protocol_sha256"] == sha256_file(REPO_ROOT / entry["protocol_path"])
     assert entry["split_materialized"] is True
     assert entry["split_seal_sha256"] == sha256_file(
         REPO_ROOT / entry["split_seal_path"]
     )
-    assert entry["selection_evaluations"] == 2
+    assert entry["selection_evaluations"] == 3
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_blocker"]
     assert entry["execution_authorization"]
     assert entry["manifest_created"] is False
     assert entry["model_store_promoted"] is False
@@ -195,6 +211,20 @@ def test_canonical_budget_records_p1_p2_and_authorizes_only_checksum_bound_p3() 
     assert entry["candidate_2_selection_metrics"]["passing_threshold_window"] == []
     assert entry["candidate_2_selection_metrics"]["false_positives"] == 3
     assert entry["candidate_2_selection_metrics"]["prohibited_structure_hits"] == 3
+    assert entry["p3_result_sha256"] == sha256_file(REPO_ROOT / P3_RESULT_PATH)
+    assert entry["p3_candidate_report_sha256"] == sha256_file(
+        REPO_ROOT / P3_REPORT_PATH
+    )
+    assert entry["p3_checkpoint_sha256"] == sha256_file(
+        REPO_ROOT / P3_CHECKPOINT_PATH
+    )
+    assert entry["p3_onnx_sha256"] == sha256_file(REPO_ROOT / P3_ONNX_PATH)
+    assert entry["candidate_3_selection_metrics"]["passing_threshold_window"] == []
+    assert entry["candidate_3_selection_metrics"]["false_positives"] == 3
+    assert entry["candidate_3_selection_metrics"]["prohibited_structure_hits"] == 3
+    assert entry["candidate_3_selection_metrics"][
+        "monotonic_acceptance_suppression_violation_count"
+    ] == 0
 
 
 def test_fresh_split_families_offsets_and_sample_bytes_are_disjoint() -> None:
@@ -605,15 +635,36 @@ def test_p3_objective_targets_max_hard_negative_and_positive_suppression() -> No
     assert config["monotonic_acceptance_suppression_only"] is True
 
 
-def test_p3_preflight_binds_exact_p2_and_keeps_public_archive_locked() -> None:
+def test_p3_result_is_exact_aggregate_only_failed_selection_evidence() -> None:
     config = json.loads((REPO_ROOT / P3_CONFIG_PATH).read_text(encoding="utf-8"))
     assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, P3_RUNNER_SOURCE_PATHS
     )
-    evidence = p3_preflight()
-    assert evidence["config"] == config
-    assert evidence["seal"]["public_evaluations"] == 0
-    assert evidence["seal"]["public_execution_authorized"] is False
+    assert sha256_file(REPO_ROOT / P3_RESULT_PATH) == P3_RESULT_SHA256
+    assert sha256_file(REPO_ROOT / P3_REPORT_PATH) == P3_REPORT_SHA256
+    assert sha256_file(REPO_ROOT / P3_CHECKPOINT_PATH) == P3_CHECKPOINT_SHA256
+    assert sha256_file(REPO_ROOT / P3_ONNX_PATH) == P3_ONNX_SHA256
+    result = json.loads((REPO_ROOT / P3_RESULT_PATH).read_text(encoding="utf-8"))
+    metrics = result["selection_metrics"]
+    assert result["status"] == "failed_selection"
+    assert result["candidate_id"] == "P3"
+    assert result["candidate_consumed"] is True
+    assert result["case_level_details_emitted"] is False
+    assert result["frozen_p2_weights_preserved"] is True
+    assert result["passing_threshold_window"] == []
+    assert result["onnx_parity_passed"] is True
+    assert result["parent_role_argmax_preserved"] is True
+    assert result["monotonic_acceptance_suppression_violation_count"] == 0
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert metrics["scene_count"] == 128
+    assert metrics["exact_scene_count"] == 123
+    assert metrics["true_positives"] == 1024
+    assert metrics["false_positives"] == 3
+    assert metrics["false_negatives"] == 0
+    assert metrics["duplicate_region_count"] == 0
+    assert metrics["prohibited_structure_hits"] == 3
+    assert "cases" not in result and "predictions" not in result
     assert config["selection_evaluation_limit"] == 1
     assert config["case_level_predecessor_evidence_used"] is False
     assert config["validation_or_public_pixels_used_for_training"] is False
