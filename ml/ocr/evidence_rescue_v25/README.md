@@ -61,7 +61,8 @@ and replaces P2's fixed 8-by-8 crop pooling with a trainable two-scale spatial
 encoder plus proposal residual. Fixed configuration SHA-256 is
 `4bc77850...821a`; runner source bundle SHA-256 is `fbddfcce...63bd`. It has a
 five-epoch, exactly 1,280-step budget with fixed weight decay, dropout, and
-gradient clipping. It is not yet authorized to execute.
+gradient clipping. The separately committed canonical ledger authorizes one
+execution from those exact bytes.
 
 The public evaluator source bundle remains frozen at `82467dcf...fb15`, but
 the public archive stays unauthorized and unopened with zero evaluations.

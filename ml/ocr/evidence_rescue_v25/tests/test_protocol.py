@@ -163,9 +163,12 @@ def test_canonical_budget_preregisters_p3_while_public_gate_stays_locked() -> No
     assert p2_result["optimizer_steps"] == 1280
     assert p2_result["report_sha256"] == entry["candidate_report_sha256"]["P2"]
     assert entry["selection_evaluations"] == 2
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
-    assert entry["execution_blocker"]
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_blocker"] is None
+    assert p3_config["expected_runner_source_bundle_sha256"] in (
+        entry["execution_authorization"]
+    )
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
