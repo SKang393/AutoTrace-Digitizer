@@ -6335,7 +6335,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-scene-topology-proposal-v26",
-      "status": "candidate_3_preregistered",
+      "status": "exhausted_selection_failed",
       "defect_class": "V25 P3 retained 1017 of 1024 visible-selection truths with one false prohibited region and seven misses at every fixed threshold despite passing recognition, role, and ONNX parity gates",
       "prior_revision": "graph-text-evidence-rescue-v25",
       "trigger_result_path": "ml/ocr/evidence_rescue_v25/P3_RESULT.json",
@@ -6347,8 +6347,8 @@
       "architecture": "frozen-role-axial-topology-proposal-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": ["P3"],
-      "consumed_candidate_ids": ["P1", "P2"],
+      "preregistered_candidate_ids": [],
+      "consumed_candidate_ids": ["P1", "P2", "P3"],
       "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/ocr/scene_topology_proposal_v26/PROTOCOL.json",
       "protocol_sha256": "2aacbb75a7ef02c4f7de5c806681dcf33093ea21f67c2b6185a07807827f19ef",
@@ -6426,35 +6426,43 @@
       },
       "candidate_result_paths": {
         "P1": "ml/ocr/scene_topology_proposal_v26/P1_RESULT.json",
-        "P2": "ml/ocr/scene_topology_proposal_v26/P2_RESULT.json"
+        "P2": "ml/ocr/scene_topology_proposal_v26/P2_RESULT.json",
+        "P3": "ml/ocr/scene_topology_proposal_v26/P3_RESULT.json"
       },
       "candidate_result_sha256": {
         "P1": "1c1a3041320a4fbe6fcb917355f4b2c60b10b43ba4ce9bd7d1124d115c7e5338",
-        "P2": "cce83aa92123c56a263697e8c62c6b3ed6a3aa2ea499351ee3ce0ed4ef2e23fe"
+        "P2": "cce83aa92123c56a263697e8c62c6b3ed6a3aa2ea499351ee3ce0ed4ef2e23fe",
+        "P3": "1b5f253c27e4e7a900c93264ebefbd5aa92f891a2472f9971f51da063057696f"
       },
       "candidate_report_paths": {
         "P1": "ml/ocr/scene_topology_proposal_v26/artifacts/P1-run/candidate-report.json",
-        "P2": "ml/ocr/scene_topology_proposal_v26/artifacts/P2-run/candidate-report.json"
+        "P2": "ml/ocr/scene_topology_proposal_v26/artifacts/P2-run/candidate-report.json",
+        "P3": "ml/ocr/scene_topology_proposal_v26/artifacts/P3-run/candidate-report.json"
       },
       "candidate_report_sha256": {
         "P1": "d962cd133b943036d84d6221e8d8d647c8182b8bed6590a61afd1bc77d4ec32b",
-        "P2": "eaf87de8b2b6e854aa9703b04d7f4268357e8706b1e325d2380e11763f9db4df"
+        "P2": "eaf87de8b2b6e854aa9703b04d7f4268357e8706b1e325d2380e11763f9db4df",
+        "P3": "185e2d68bdfbcb46fcc301ec8b80c541c2f0183c425d63c53e7ada3276ef7464"
       },
       "candidate_checkpoint_sha256": {
         "P1": "29fe9349efe90216900ff6cc29de6374ae63a8f4b609a54d011ab5a2d6f66d89",
-        "P2": "ecd1cebc53089ab189d513375d2b565ec42ec5e83a9ed82698fcc11af00a0271"
+        "P2": "ecd1cebc53089ab189d513375d2b565ec42ec5e83a9ed82698fcc11af00a0271",
+        "P3": "fcf8806107dd1881c596be66f209c62170a892586ebf75efc6381f9acc4eb6ae"
       },
       "candidate_onnx_sha256": {
         "P1": "d6cb6910faac97997f30f8e7f842aa63dca818bb102b601c4ba9545bdf88c241",
-        "P2": "04eea8a6550444c381da64a30a3190b480286b2cc6be58dfe2a37d668a297ce7"
+        "P2": "04eea8a6550444c381da64a30a3190b480286b2cc6be58dfe2a37d668a297ce7",
+        "P3": "9f4aa80722285207ec4be860782f5b443775d024817f035264eee07804aefe17"
       },
       "candidate_training_opened_seal_sha256": {
         "P1": "fc613d795ab951ce037c4cef9ea6c5e7727bcf32197eff35f7fc34e512d7dd22",
-        "P2": "8be9748ff767c99e4596a754b4e94fae87b58fa02e1399ecd61b0744360a4250"
+        "P2": "8be9748ff767c99e4596a754b4e94fae87b58fa02e1399ecd61b0744360a4250",
+        "P3": "72164f22727b41b5fc415a1adb78233e41ec5d94ef450cec40a205cf235866c0"
       },
       "candidate_training_result_seal_sha256": {
         "P1": "8f4ccebd5110fd4ba726addc32f69d170615311747b226873f4455ca5539fa03",
-        "P2": "7d6dec5347401c24dab9ce5c9d1769b406181fb83bf8ec7bf029e9e61c4a0764"
+        "P2": "7d6dec5347401c24dab9ce5c9d1769b406181fb83bf8ec7bf029e9e61c4a0764",
+        "P3": "6ae58f15117b8cb052cc9f803790422a036503cde1abb107a7d80d5b484c077f"
       },
       "candidate_1_selection_metrics": {
         "optimizer_steps": 2304,
@@ -6489,14 +6497,32 @@
         "onnx_parity_maximum_absolute_error": 0.000011444091796875,
         "passing_threshold_window": []
       },
-      "selection_evaluations": 2,
+      "candidate_3_selection_metrics": {
+        "optimizer_steps": 1152,
+        "exact_scene_count": 122,
+        "scene_count": 128,
+        "true_positives": 1024,
+        "false_positives": 1,
+        "false_negatives": 0,
+        "duplicate_region_count": 0,
+        "prohibited_structure_hits": 1,
+        "recognition_exact": 0.97265625,
+        "character_error_rate": 0.004640371229698376,
+        "role_accuracy": 0.9951171875,
+        "parent_role_maximum_absolute_error": 0.0,
+        "frozen_p2_weights_preserved": true,
+        "candidate_onnx_graph_optimization_level": "ORT_ENABLE_BASIC",
+        "onnx_parity_maximum_absolute_error": 0.000011444091796875,
+        "passing_threshold_window": []
+      },
+      "selection_evaluations": 3,
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P3",
-      "execution_blocker": null,
-      "execution_authorization": "P3 may execute once from its exact committed aggregate-only configuration, P2 payload binding, unchanged frozen split archives, and runner source bundle. The public archive, marker composition, private data, manifests, model store, packaging, approval, and release execution remain unauthorized.",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1, P2, and P3 are consumed and failed selection. P3 retained all 1,024 truths but left one prohibited false region at thresholds 0.65 and 0.75, produced no three-threshold zero-error window, and failed strict CPU ONNX parity at 1.1444091796875e-05 despite ORT_ENABLE_BASIC. V26 is exhausted and its public gate remains locked and unopened.",
+      "execution_authorization": null,
       "marker_creation_evaluated": false,
       "manifest_created": false,
       "model_store_promoted": false,

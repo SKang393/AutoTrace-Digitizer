@@ -56,27 +56,31 @@ output was preserved, but CPU ONNX parity again measured
 report, checkpoint, and ONNX SHA-256 values are `cce83aa9...e23fe`,
 `eaf87de8...db4df`, `ecd1cebc...a0271`, and `04eea8a6...97ce7`.
 
-P1 and P2 are consumed and cannot rerun. Final P3 is preregistered using only
-the aggregate P2 terminal metrics. It loads the exact P2 checkpoint, freezes
-the role parent, crop and evidence encoders, and the first two proposal layers,
-then trains only `proposal_head.5.weight` and `proposal_head.5.bias`. Its fixed
-three-epoch, 1,152-step objective combines positive and negative extrema,
-the hardest two percent of training negatives, target margins, and per-scene
-separation. No P2 case identity, truth row, prediction, or selection pixel was
-used to choose that repair.
+P3 then executed exactly once from only the aggregate P2 terminal metrics. It
+loaded the exact P2 checkpoint, froze the role parent, crop and evidence
+encoders, and the first two proposal layers, and trained only
+`proposal_head.5.weight` and `proposal_head.5.bias` for exactly 1,152 steps. The
+frozen parameter stream and exact parent role output were preserved. No P2 case
+identity, truth row, prediction, or selection pixel was used to choose or assess
+the repair.
 
-P2's parity excess was isolated on generated tensors to extended ONNX Runtime
-graph optimization in frozen role channels, not proposal output. P3 therefore
-binds candidate inference to deterministic CPU `ORT_ENABLE_BASIC`, which kept
-generated-tensor maximum error within the existing `1e-5` gate. The tolerance
-is unchanged, P2 is not rerun, and the policy must remain provider-compatible
-if this candidate later reaches production consideration.
+At thresholds `0.65` and `0.75`, P3 retained all 1,024 truths with zero misses
+or duplicates but still produced one prohibited false region, leaving 122 of
+128 scenes exact. No required three-threshold zero-error window existed.
+Recognition exact remained `0.97265625`, CER remained
+`0.004640371229698376`, and role accuracy remained `0.9951171875`. Deterministic
+CPU `ORT_ENABLE_BASIC` inference still measured a maximum absolute error of
+`1.1444091796875e-05`, above the unchanged `1e-5` limit. Aggregate result,
+ignored report, checkpoint, and ONNX SHA-256 values are
+`1b5f253c...7696f`, `185e2d68...7464`, `fcf88061...b6ae`, and
+`9f4aa807...fe17`.
 
-P3 may execute exactly once after its committed source binding. The
+P1, P2, and P3 are consumed. V26 is exhausted and cannot rerun or tune. The
 truth-hidden public archive remains unauthorized, unopened, and at zero
-evaluations. No manifest, model-store entry, package payload, public
-evaluation, marker composition, private validation, approval, or release has
-been created.
+evaluations. Any further repair requires a separately preregistered defect
+class with fresh unexposed splits. No manifest, model-store entry, package
+payload, public evaluation, marker composition, private validation, approval,
+or release has been created.
 
 Synthetic fixtures are training and public-test inputs only and are never
 application graph data.
