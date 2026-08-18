@@ -36,9 +36,18 @@ at least `0.90`, CER at most `0.05`, overall role accuracy at least `0.90`,
 every role at least `0.85`, direct stored-byte execution, input and output
 tensor hashes, CPU execution, and ONNX parity at most `1e-5`.
 
-No V28 fixture archive exists yet. Training, visible selection, truth-hidden
-public evaluation, marker composition, private validation, manifest creation,
-model-store promotion, packaging, production approval, and release remain
-unauthorized. Synthetic fixtures are training and public-test inputs only and
-are never application graph data.
+The split freeze at source commit
+`d49a7b469ea787d2c991383608dd93e6565e4439` materialized the exact fresh
+256/128/192 scene archives with zero source-byte overlap. The seal SHA-256 is
+`c968aeb5ec0a3440a9fa76b3a346d3652238230599043f801b4fa46ed9eef9bf`.
+Train, visible-selection, and truth-hidden public archive SHA-256 values are
+`224b5c4025d6ffccbd51b6c0a72aee85cc14e9fa5b2367a3aae4b614523045ba`,
+`2968e75bcb09b728785713c87a774bb58325fd9c8371a2bd921689520b697d35`,
+and `db00a6bffda5cefe3ecd747d89f930946782f05e7c5a5f013abf06d2a07e0946`.
+The public archive remains unopened and has zero evaluations.
 
+Only checksum-bound P1 training and its one visible-selection evaluation are
+authorized. Truth-hidden public evaluation, marker composition, private
+validation, manifest creation, model-store promotion, packaging, production
+approval, and release remain unauthorized. Synthetic fixtures are training and
+public-test inputs only and are never application graph data.

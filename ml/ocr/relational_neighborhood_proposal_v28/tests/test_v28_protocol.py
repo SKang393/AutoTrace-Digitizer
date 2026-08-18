@@ -14,7 +14,7 @@ import onnxruntime as ort
 from PIL import Image
 import torch
 
-from ml.markers.gate_seal import sha256_file
+from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 from ml.ocr.margin_calibrator_v20.pipeline import ProposalRecord
 from ml.ocr.morphology_veto_proposal_v27.dataset import render_scene as render_v27_scene
 from ml.ocr.relational_neighborhood_proposal_v28.dataset import (
@@ -42,6 +42,7 @@ from ml.ocr.relational_neighborhood_proposal_v28.relations import (
 from ml.ocr.relational_neighborhood_proposal_v28.train_p1 import (
     RUNNER_SOURCE_PATHS,
     _proposal_objective,
+    preflight,
 )
 
 
@@ -104,7 +105,7 @@ def test_v27_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_preregisters_only_unmaterialized_p1() -> None:
+def test_canonical_budget_authorizes_only_checksum_bound_materialized_p1() -> None:
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -114,7 +115,7 @@ def test_canonical_budget_preregisters_only_unmaterialized_p1() -> None:
         item for item in ledger["revisions"]
         if item["revision"] == "graph-text-relational-neighborhood-proposal-v28"
     )
-    assert entry["status"] == "protocol_preregistered_before_fixture_freeze"
+    assert entry["status"] == "candidate_1_preregistered"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
@@ -122,19 +123,71 @@ def test_canonical_budget_preregisters_only_unmaterialized_p1() -> None:
     assert entry["protocol_sha256"] == sha256_file(
         REPO_ROOT / entry["protocol_path"]
     )
-    assert entry["split_materialized"] is False
+    assert entry["split_materialized"] is True
+    seal_path = REPO_ROOT / entry["split_seal_path"]
+    assert sha256_file(seal_path) == entry["split_seal_sha256"]
+    assert entry["split_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, SOURCE_PATHS,
+    )
+    for split, archive_path in entry["split_archive_paths"].items():
+        assert sha256_file(REPO_ROOT / archive_path) == entry["split_archive_sha256"][split]
+    config_path = REPO_ROOT / entry["candidate_config_paths"]["P1"]
+    assert sha256_file(config_path) == entry["candidate_config_sha256"]["P1"]
     assert entry["selection_evaluations"] == 0
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
-    assert entry["execution_authorization"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
+    assert "exactly once" in entry["execution_authorization"]
+    assert "public archive remains unauthorized and unopened" in entry[
+        "execution_authorization"
+    ]
     assert entry["manifest_created"] is False
     assert entry["model_store_promoted"] is False
     assert entry["private_validation"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
+
+
+def test_frozen_split_and_candidate_preflight_remain_fail_closed() -> None:
+    seal_path = (
+        REPO_ROOT / "ml/ocr/relational_neighborhood_proposal_v28/SPLIT_SEAL.json"
+    )
+    config_path = (
+        REPO_ROOT / "ml/ocr/relational_neighborhood_proposal_v28/training/p1.json"
+    )
+    seal = json.loads(seal_path.read_text(encoding="utf-8"))
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    assert seal["schema"] == "graphreader.ocr-relational-neighborhood-split-seal.v1"
+    assert seal["source_commit"] == "d49a7b469ea787d2c991383608dd93e6565e4439"
+    assert seal["source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, SOURCE_PATHS,
+    )
+    assert seal["cross_split_source_overlap_counts"] == {
+        "train_sealed_public": 0,
+        "train_validation": 0,
+        "validation_sealed_public": 0,
+    }
+    assert seal["optimizer_steps_at_freeze"] == 0
+    assert seal["selection_evaluations"] == 0
+    assert seal["public_evaluations"] == 0
+    assert seal["training_authorized"] is False
+    assert seal["public_execution_authorized"] is False
+    assert seal["private_data"] is False
+    assert seal["chandler_used"] is False
+    assert seal["production_approval"] is False
+    assert seal["release_eligible"] is False
+    assert config["split_seal_sha256"] == sha256_file(seal_path)
+    assert config["expected_runner_source_bundle_sha256"] == seal[
+        "source_bundle_sha256"
+    ]
+    assert config["public_execution_authorized"] is False
+    assert config["public_gate_evaluations"] == 0
+    assert config["private_or_article_images"] is False
+    assert config["chandler_included"] is False
+    state = preflight()
+    assert state["seal"] == seal
 
 
 def test_freeze_inventory_binds_the_exact_candidate_runner_and_relational_sources() -> None:

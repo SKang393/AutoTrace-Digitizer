@@ -6715,7 +6715,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-relational-neighborhood-proposal-v28",
-      "status": "protocol_preregistered_before_fixture_freeze",
+      "status": "candidate_1_preregistered",
       "defect_class": "V27 P1, P2, and P3 each retained the same three prohibited false regions and produced no three-threshold zero-error window despite strict CPU ONNX parity and exact role preservation",
       "prior_revision": "graph-text-morphology-veto-proposal-v27",
       "trigger_result_path": "ml/ocr/morphology_veto_proposal_v27/P3_RESULT.json",
@@ -6732,7 +6732,11 @@
       "remaining_unregistered_candidate_ids": ["P2", "P3"],
       "protocol_path": "ml/ocr/relational_neighborhood_proposal_v28/PROTOCOL.json",
       "protocol_sha256": "bbab05ad7d8c991929a87493fff592027c55c0bf734f23c63df786cac23435c1",
-      "split_materialized": false,
+      "split_materialized": true,
+      "split_seal_path": "ml/ocr/relational_neighborhood_proposal_v28/SPLIT_SEAL.json",
+      "split_seal_sha256": "c968aeb5ec0a3440a9fa76b3a346d3652238230599043f801b4fa46ed9eef9bf",
+      "split_source_commit": "d49a7b469ea787d2c991383608dd93e6565e4439",
+      "split_source_bundle_sha256": "1cae684edd076fca18f367bc4ded229ade019f2038d0312de456c671cf11b831",
       "split_scene_counts": {
         "train": 256,
         "validation": 128,
@@ -6743,6 +6747,21 @@
         "validation": "artifacts/production-validation/ocr-v28-selection.zip",
         "sealed_public": "artifacts/production-validation/ocr-v28-public.zip"
       },
+      "split_archive_sha256": {
+        "train": "224b5c4025d6ffccbd51b6c0a72aee85cc14e9fa5b2367a3aae4b614523045ba",
+        "validation": "2968e75bcb09b728785713c87a774bb58325fd9c8371a2bd921689520b697d35",
+        "sealed_public": "db00a6bffda5cefe3ecd747d89f930946782f05e7c5a5f013abf06d2a07e0946"
+      },
+      "split_manifest_sha256": {
+        "train": "a297bb432aa1a19e6b8510a76af28aa7de3b1d89a1321542bea5b9d927181c54",
+        "validation": "196fb52c0af2d9a7ed85da874257a9d5d4fc4d89c1698e4aa49f6d9b9528fbf0",
+        "sealed_public": "1b4673389d32e898decb66389b473a6e536a779307950276c323a23ce7efd4f4"
+      },
+      "split_cross_overlap_counts": {
+        "train_validation": 0,
+        "train_sealed_public": 0,
+        "validation_sealed_public": 0
+      },
       "split_policy": "fresh renderer, degradation, seed, fixture-byte, and case identities; truth-hidden public archive; no V27 validation or public bytes used for training or tuning",
       "candidate_1_architecture": "pairwise-geometry-relational-neighborhood-v1",
       "candidate_1_objective": "relational-neighborhood-asymmetric-scene-margin-v1",
@@ -6751,14 +6770,20 @@
       "candidate_1_output_logit_scale": 0.5,
       "candidate_1_onnx_runtime_policy": "CPUExecutionProvider with ORT_DISABLE_ALL graph optimization and unchanged strict 1e-5 maximum absolute error",
       "candidate_1_aggregate_design_basis": "V27 P3 aggregate terminal metrics and aggregate loss checkpoints only; no case identity, truth row, prediction, tensor content, selection pixel, public pixel, private image, Chandler image, or Generalization label",
+      "candidate_config_paths": {
+        "P1": "ml/ocr/relational_neighborhood_proposal_v28/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "26cdda410c2c19efaf5dd1112e8aee91c3cb82210b0c1b7b875720be3a5a7b3c"
+      },
       "selection_evaluations": 0,
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "V28 source is preregistered, but fixture identity is not frozen and no checksum-bound candidate runner is authorized.",
-      "execution_authorization": null,
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "execution_blocker": null,
+      "execution_authorization": "Execute V28 P1 exactly once with the checksum-bound committed runner and candidate configuration against the frozen train and visible-selection archives. The truth-hidden public archive remains unauthorized and unopened; no private image, Chandler image, manifest, model-store promotion, packaging discovery, production approval, or release eligibility is authorized.",
       "marker_creation_evaluated": false,
       "manifest_created": false,
       "model_store_promoted": false,
