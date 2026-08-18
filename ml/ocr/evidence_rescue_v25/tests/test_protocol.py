@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Sungwoo Kang
-"""Fail-closed tests for OCR evidence-rescue V25 preregistration."""
+"""Fail-closed tests for OCR evidence-rescue V25 evidence."""
 
 from __future__ import annotations
 
@@ -75,7 +75,7 @@ def test_v24_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_authorizes_only_p1_while_public_gate_stays_locked() -> None:
+def test_canonical_budget_consumes_failed_p1_while_public_gate_stays_locked() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(
             encoding="utf-8"
@@ -86,12 +86,12 @@ def test_canonical_budget_authorizes_only_p1_while_public_gate_stays_locked() ->
         if item["task"] == "ocr-detection-recognition"
         and item["revision"] == "graph-text-evidence-rescue-v25"
     )
-    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["status"] == "candidate_1_consumed"
     assert entry["protocol_sha256"] == sha256_file(
         REPO_ROOT / "ml/ocr/evidence_rescue_v25/PROTOCOL.json"
     )
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
     assert entry["split_materialized"] is True
     split_seal = REPO_ROOT / entry["split_seal_path"]
@@ -101,9 +101,24 @@ def test_canonical_budget_authorizes_only_p1_while_public_gate_stays_locked() ->
     assert entry["public_evaluator_preregistered"] is True
     public_config = REPO_ROOT / entry["public_gate_config_path"]
     assert entry["public_gate_config_sha256"] == sha256_file(public_config)
-    assert entry["selection_evaluations"] == 0
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    result_path = REPO_ROOT / entry["candidate_result_paths"]["P1"]
+    assert entry["candidate_result_sha256"]["P1"] == sha256_file(result_path)
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert result["candidate_consumed"] is True
+    assert result["selection_gate_passed"] is False
+    assert result["status"] == "failed_selection"
+    assert result["selection_metrics"]["exact_scene_count"] == 112
+    assert result["selection_metrics"]["false_positives"] == 1
+    assert result["selection_metrics"]["false_negatives"] == 7
+    assert result["selection_metrics"]["prohibited_structure_hits"] == 1
+    assert result["selection_metrics"]["duplicate_region_count"] == 0
+    assert result["parent_roles_preserved"] is False
+    assert result["onnx_parity_passed"] is True
+    assert result["case_level_details_emitted"] is False
+    assert "cases" not in result and "predictions" not in result
+    assert entry["selection_evaluations"] == 1
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False

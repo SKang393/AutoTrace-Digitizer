@@ -26,14 +26,22 @@ available only for a later separately preregistered candidate if P1 fails.
 P1 configuration SHA-256 `4c96df20...bb6` and the public gate configuration
 SHA-256 `fc687363...7f18` bind the exact split seal, ignored fixture archives,
 detector, recognizer, frozen parent, candidate runner, and truth-hidden
-evaluator. P1 is authorized for one zero-optimizer selection execution from
-the exact committed configuration and runner source bundle. The public
-archive, marker composition, private validation, manifest creation, model
-store, packaging, approval, and release remain unauthorized. The public evaluator source
-bundle is frozen at `82467dcf...fb15`; it requires direct CPU execution of all
-four ONNX streams at three consecutive thresholds, aggregate-only output, and
-one canonical gate opening. The public archive remains unopened with zero
-evaluations.
+evaluator. P1 executed exactly once for zero optimizer steps. Direct stored-byte
+CPU selection retained 1,017/1,024 truths with one false prohibited region,
+seven misses, zero duplicates, and 112/128 exact scenes at every fixed
+threshold. Recognition exact was `0.96484375`, CER was
+`0.010632995514205018`, and role accuracy was `0.9833984375`. CPU ONNX parity
+passed at `9.5367431640625e-06`, but the same nonzero error meant the required
+exact parent-role preservation was not proven. No threshold window passed.
+Report SHA-256 is `c655ad88...48a5`; rejected ONNX SHA-256 is
+`ff9d0351...5acc`; tracked result SHA-256 is `700e1b65...dcf1`.
+
+P1 is consumed and cannot rerun. P2 and P3 remain unregistered, and any next
+candidate requires a separate aggregate-only preregistration. The public
+evaluator source bundle remains frozen at `82467dcf...fb15`, but the public
+archive stays unauthorized and unopened with zero evaluations. Marker
+composition, private validation, manifest creation, model store, packaging,
+approval, and release remain unauthorized.
 
 The candidate is not reachable from ordinary Auto Detect. It cannot become a
 manifest, production-model-store entry, package payload, approved model, or
