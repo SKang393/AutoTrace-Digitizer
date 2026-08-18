@@ -6186,7 +6186,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-evidence-rescue-v25",
-      "status": "candidate_3_preregistered",
+      "status": "exhausted_selection_failed",
       "defect_class": "V23 P3 retained all 1024 visible-selection truths with three false and prohibited regions, while V24 P2 removed every false region but missed two truths",
       "prior_revision": "graph-text-crop-evidence-role-anchor-v24",
       "trigger_result_path": "ml/ocr/crop_evidence_role_anchor_v24/P2_RESULT.json",
@@ -6198,8 +6198,8 @@
       "architecture": "frozen-crop-residual-ctc-evidence-rescue-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": ["P3"],
-      "consumed_candidate_ids": ["P1", "P2"],
+      "preregistered_candidate_ids": [],
+      "consumed_candidate_ids": ["P1", "P2", "P3"],
       "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/ocr/evidence_rescue_v25/PROTOCOL.json",
       "protocol_sha256": "7e1ab12c1e82bc78a0489f6d7db1abd5b8926667ad68ff1c23b30386c274de8d",
@@ -6265,37 +6265,42 @@
       },
       "candidate_result_paths": {
         "P1": "ml/ocr/evidence_rescue_v25/P1_RESULT.json",
-        "P2": "ml/ocr/evidence_rescue_v25/P2_RESULT.json"
+        "P2": "ml/ocr/evidence_rescue_v25/P2_RESULT.json",
+        "P3": "ml/ocr/evidence_rescue_v25/P3_RESULT.json"
       },
       "candidate_result_sha256": {
         "P1": "700e1b659a78bc48ebfd893dc66d5b23f082c340857c64da4f7fd752c5f7dcf1",
-        "P2": "266df7f7e70f767a455b92acb06adc43bec7763e9404256b84dc4e896cea45c1"
+        "P2": "266df7f7e70f767a455b92acb06adc43bec7763e9404256b84dc4e896cea45c1",
+        "P3": "010034ad8a38dbf2671f6ef5cd7fb8695b0accdf6b4cdb6d960811b2d2a9bca3"
       },
       "candidate_report_sha256": {
         "P1": "c655ad88ed7bae1c3f5ecfe3aa71c114a9a663a9f67524cff3a643b1ac6e48a5",
-        "P2": "057965da921ff6908c2836ab15f109cadf46692db1071fe78aaedd127a051768"
+        "P2": "057965da921ff6908c2836ab15f109cadf46692db1071fe78aaedd127a051768",
+        "P3": "cca90751dcf5832014484f8e9fc60a600ee6d4f1195465aecf616f94de072e6b"
       },
       "candidate_checkpoint_sha256": {
         "P1": "7b3443220ad17eee5daab1a314f1a0067690e3175da98fdaaada2d2712c9cd40",
-        "P2": "15beecac8243e5d324877933160355fc7973ac2a7c5a0ea6572f0431a25fd520"
+        "P2": "15beecac8243e5d324877933160355fc7973ac2a7c5a0ea6572f0431a25fd520",
+        "P3": "1f077e2dce4ccd025b0cf26d82306afc7b4695c294a8ad6e087b8bc94a43ef32"
       },
       "candidate_onnx_sha256": {
         "P1": "ff9d035136afe05947a0bf17005cad59a65b3265c48847308e036e9e2e5f5acc",
-        "P2": "f612fe00c7480c02eaf88d8c12b16dbcf8a020715b74cee3652ee9656519f552"
+        "P2": "f612fe00c7480c02eaf88d8c12b16dbcf8a020715b74cee3652ee9656519f552",
+        "P3": "a0f2fdcf28d42497f8e268d53e2c47a82ce26ceef0e83bc5973c3fb7416bdd59"
       },
       "expected_runner_source_bundle_sha256": "5f025e00a37d928469a8c890c0d279eeb9d9fda9fff15cbf513f63d77a920d46",
-      "selection_evaluations": 2,
+      "selection_evaluations": 3,
       "selection_status": "failed_selection",
       "selection_exact_scene_count": 112,
       "selection_scene_count": 128,
-      "selection_true_positives": 1016,
+      "selection_true_positives": 1017,
       "selection_false_positives": 1,
-      "selection_false_negatives": 8,
+      "selection_false_negatives": 7,
       "selection_duplicate_regions": 0,
       "selection_prohibited_structure_hits": 1,
-      "selection_recognition_exact": 0.9638671875,
-      "selection_character_error_rate": 0.011463698288752284,
-      "selection_role_accuracy": 0.982421875,
+      "selection_recognition_exact": 0.96484375,
+      "selection_character_error_rate": 0.010632995514205018,
+      "selection_role_accuracy": 0.9833984375,
       "selection_parent_roles_preserved": true,
       "selection_onnx_parity_maximum_absolute_error": 0.0000095367431640625,
       "selection_passing_threshold_window": [],
@@ -6307,9 +6312,9 @@
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P3",
-      "execution_blocker": null,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1, P2, and P3 are consumed and failed selection. The V25 budget is exhausted, and its public gate remains locked and unopened.",
       "preexecution_rejected_invocations": 1,
       "preexecution_rejection_path": "ml/ocr/evidence_rescue_v25/P3_PREEXECUTION_BLOCKER.json",
       "preexecution_rejection_sha256": "7409803c62758c075c2c3ff9d26769d230e09cdcbaa914354c112555ff499b4c",
@@ -6317,7 +6322,7 @@
       "preexecution_rejection_created_canonical_output": false,
       "preexecution_rejection_optimizer_steps": 0,
       "preexecution_rejection_selection_evaluations": 0,
-      "execution_authorization": "P3 may execute exactly once after its pre-seal authorization-validation defect from committed configuration a75fa413f22c377cab85328f1b2cafb261b8a8cd15be8720d6ed787b6439016b and runner source bundle 5f025e00a37d928469a8c890c0d279eeb9d9fda9fff15cbf513f63d77a920d46. The rejected invocation created no seal or output, ran zero optimizer steps, performed zero selection evaluations, and did not consume P3. Public, marker, private, manifest, model-store, packaging, approval, and release execution remain unauthorized.",
+      "execution_authorization": null,
       "marker_creation_evaluated": false,
       "manifest_created": false,
       "model_store_promoted": false,

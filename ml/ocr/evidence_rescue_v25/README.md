@@ -55,14 +55,28 @@ three-threshold window existed. Report, rejected ONNX, checkpoint, and tracked
 result SHA-256 values are `057965da...768`, `f612fe00...552`,
 `15beecac...520`, and `266df7f7...5c1`.
 
-Final P3 is preregistered from only the aggregate P1 and P2 results. It freezes
-the exact P1 proposal and role composition, preserves every parent role logit,
-and replaces P2's fixed 8-by-8 crop pooling with a trainable two-scale spatial
-encoder plus proposal residual. Fixed configuration SHA-256 is
-`4bc77850...821a`; runner source bundle SHA-256 is `fbddfcce...63bd`. It has a
-five-epoch, exactly 1,280-step budget with fixed weight decay, dropout, and
-gradient clipping. The separately committed canonical ledger authorizes one
-execution from those exact bytes.
+Final P3 is consumed and failed selection. It was designed from only the
+aggregate P1 and P2 results, froze the exact P1 proposal and role composition,
+preserved every parent role logit, and replaced P2's fixed 8-by-8 crop pooling
+with a trainable two-scale spatial encoder plus proposal residual. Its first
+command was rejected before a seal, output, optimizer step, or selection
+evaluation because the ledger incorrectly retained P2 in the current
+preregistration list. The fail-closed record is `7409803c...9b4c`. The corrected
+configuration and runner SHA-256 values are `a75fa413...016b` and
+`5f025e00...0d46`.
+
+The one consumed run completed all five epochs and exactly 1,280 optimizer
+steps. At every fixed threshold it retained 1,017/1,024 truths with one false
+prohibited region, seven misses, zero duplicates, and 112/128 exact scenes.
+Recognition exact was `0.96484375`, CER was `0.010632995514205018`, role
+accuracy was `0.9833984375`, exact parent roles were preserved, and CPU ONNX
+parity passed at `9.5367431640625e-06`. No threshold or required consecutive
+window passed. Report, rejected ONNX, checkpoint, and tracked result SHA-256
+values are `cca90751...72e6b`, `a0f2fdcf...bdd59`, `1f077e2d...3ef32`, and
+`010034ad...9bca3`.
+
+P1 through P3 are consumed. The V25 experiment budget is exhausted before the
+public gate and cannot be rerun or tuned against the visible selection bytes.
 
 The public evaluator source bundle remains frozen at `82467dcf...fb15`, but
 the public archive stays unauthorized and unopened with zero evaluations.

@@ -87,7 +87,7 @@ def test_v24_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_preregisters_p3_while_public_gate_stays_locked() -> None:
+def test_canonical_budget_exhausts_p3_while_public_gate_stays_locked() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(
             encoding="utf-8"
@@ -98,12 +98,12 @@ def test_canonical_budget_preregisters_p3_while_public_gate_stays_locked() -> No
         if item["task"] == "ocr-detection-recognition"
         and item["revision"] == "graph-text-evidence-rescue-v25"
     )
-    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["status"] == "exhausted_selection_failed"
     assert entry["protocol_sha256"] == sha256_file(
         REPO_ROOT / "ml/ocr/evidence_rescue_v25/PROTOCOL.json"
     )
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["split_materialized"] is True
     split_seal = REPO_ROOT / entry["split_seal_path"]
@@ -138,7 +138,7 @@ def test_canonical_budget_preregisters_p3_while_public_gate_stays_locked() -> No
     assert entry["public_evaluator_preregistered"] is True
     public_config = REPO_ROOT / entry["public_gate_config_path"]
     assert entry["public_gate_config_sha256"] == sha256_file(public_config)
-    for candidate_id in ("P1", "P2"):
+    for candidate_id in ("P1", "P2", "P3"):
         result_path = REPO_ROOT / entry["candidate_result_paths"][candidate_id]
         assert entry["candidate_result_sha256"][candidate_id] == sha256_file(result_path)
         result = json.loads(result_path.read_text(encoding="utf-8"))
@@ -161,10 +161,25 @@ def test_canonical_budget_preregisters_p3_while_public_gate_stays_locked() -> No
     assert p2_result["parent_roles_preserved"] is True
     assert p2_result["optimizer_steps"] == 1280
     assert p2_result["report_sha256"] == entry["candidate_report_sha256"]["P2"]
-    assert entry["selection_evaluations"] == 2
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
-    assert entry["execution_blocker"] is None
+    p3_result = json.loads(
+        (REPO_ROOT / entry["candidate_result_paths"]["P3"]).read_text(
+            encoding="utf-8"
+        )
+    )
+    assert p3_result["selection_metrics"]["false_negatives"] == 7
+    assert p3_result["selection_metrics"]["true_positives"] == 1017
+    assert p3_result["selection_metrics"]["recognition_exact"] == 0.96484375
+    assert p3_result["selection_metrics"]["role_accuracy"] == 0.9833984375
+    assert p3_result["parent_roles_preserved"] is True
+    assert p3_result["optimizer_steps"] == 1280
+    assert p3_result["report_sha256"] == entry["candidate_report_sha256"]["P3"]
+    assert p3_result["checkpoint_sha256"] == entry["candidate_checkpoint_sha256"]["P3"]
+    assert p3_result["onnx_sha256"] == entry["candidate_onnx_sha256"]["P3"]
+    assert p3_result["passing_threshold_window"] == []
+    assert entry["selection_evaluations"] == 3
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert "budget is exhausted" in entry["execution_blocker"]
     assert entry["preexecution_rejected_invocations"] == 1
     blocker_path = REPO_ROOT / entry["preexecution_rejection_path"]
     assert entry["preexecution_rejection_sha256"] == sha256_file(blocker_path)
@@ -174,9 +189,7 @@ def test_canonical_budget_preregisters_p3_while_public_gate_stays_locked() -> No
     assert blocker["canonical_output_created"] is False
     assert blocker["optimizer_steps"] == 0
     assert blocker["selection_evaluations"] == 0
-    assert p3_config["expected_runner_source_bundle_sha256"] in (
-        entry["execution_authorization"]
-    )
+    assert entry["execution_authorization"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
