@@ -21,6 +21,9 @@ from ml.ocr.morphology_veto_proposal_v27.model import FrozenV26MorphologyVetoNet
 from ml.ocr.morphology_veto_proposal_v27.model_p2 import (
     FrozenP1FinalVetoProposalNet,
 )
+from ml.ocr.morphology_veto_proposal_v27.model_p3 import (
+    FrozenP2MonotonicVetoProposalNet,
+)
 from ml.ocr.morphology_veto_proposal_v27.prepare_split import (
     ARCHIVE_PATHS,
     SOURCE_PATHS,
@@ -51,7 +54,21 @@ from ml.ocr.morphology_veto_proposal_v27.train_p2 import (
     RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
     _load_p1_state,
     _objective as p2_objective,
-    preflight as p2_preflight,
+)
+from ml.ocr.morphology_veto_proposal_v27.train_p3 import (
+    CONFIG_PATH as P3_CONFIG_PATH,
+    P2_CHECKPOINT_PATH,
+    P2_CHECKPOINT_SHA256,
+    P2_ONNX_PATH,
+    P2_ONNX_SHA256,
+    P2_REPORT_PATH,
+    P2_REPORT_SHA256,
+    P2_RESULT_PATH,
+    P2_RESULT_SHA256,
+    RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS,
+    _load_p2_state,
+    _objective as p3_objective,
+    preflight as p3_preflight,
 )
 
 
@@ -113,7 +130,7 @@ def test_v26_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_records_p1_and_authorizes_only_checksum_bound_p2() -> None:
+def test_canonical_budget_records_p1_p2_and_authorizes_only_checksum_bound_p3() -> None:
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -123,22 +140,22 @@ def test_canonical_budget_records_p1_and_authorizes_only_checksum_bound_p2() -> 
         item for item in ledger["revisions"]
         if item["revision"] == "graph-text-morphology-veto-proposal-v27"
     )
-    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["status"] == "candidate_3_preregistered"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["protocol_sha256"] == sha256_file(REPO_ROOT / entry["protocol_path"])
     assert entry["split_materialized"] is True
     assert entry["split_seal_sha256"] == sha256_file(
         REPO_ROOT / entry["split_seal_path"]
     )
-    assert entry["selection_evaluations"] == 1
+    assert entry["selection_evaluations"] == 2
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
     assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["execution_authorization"]
     assert entry["manifest_created"] is False
     assert entry["model_store_promoted"] is False
@@ -153,6 +170,9 @@ def test_canonical_budget_records_p1_and_authorizes_only_checksum_bound_p2() -> 
     assert entry["candidate_config_sha256"]["P2"] == sha256_file(
         REPO_ROOT / entry["candidate_config_paths"]["P2"]
     )
+    assert entry["candidate_config_sha256"]["P3"] == sha256_file(
+        REPO_ROOT / entry["candidate_config_paths"]["P3"]
+    )
     assert entry["p1_result_sha256"] == sha256_file(REPO_ROOT / P1_RESULT_PATH)
     assert entry["p1_candidate_report_sha256"] == sha256_file(
         REPO_ROOT / P1_REPORT_PATH
@@ -164,6 +184,17 @@ def test_canonical_budget_records_p1_and_authorizes_only_checksum_bound_p2() -> 
     assert entry["candidate_1_selection_metrics"]["passing_threshold_window"] == []
     assert entry["candidate_1_selection_metrics"]["false_positives"] == 3
     assert entry["candidate_1_selection_metrics"]["prohibited_structure_hits"] == 3
+    assert entry["p2_result_sha256"] == sha256_file(REPO_ROOT / P2_RESULT_PATH)
+    assert entry["p2_candidate_report_sha256"] == sha256_file(
+        REPO_ROOT / P2_REPORT_PATH
+    )
+    assert entry["p2_checkpoint_sha256"] == sha256_file(
+        REPO_ROOT / P2_CHECKPOINT_PATH
+    )
+    assert entry["p2_onnx_sha256"] == sha256_file(REPO_ROOT / P2_ONNX_PATH)
+    assert entry["candidate_2_selection_metrics"]["passing_threshold_window"] == []
+    assert entry["candidate_2_selection_metrics"]["false_positives"] == 3
+    assert entry["candidate_2_selection_metrics"]["prohibited_structure_hits"] == 3
 
 
 def test_fresh_split_families_offsets_and_sample_bytes_are_disjoint() -> None:
@@ -447,12 +478,139 @@ def test_p2_objective_targets_top_hard_negatives_and_anchors_positives() -> None
     assert config["positive_anchor_weight"] == 4.0
 
 
-def test_p2_preflight_binds_exact_p1_and_keeps_public_archive_locked() -> None:
+def test_p2_result_is_exact_aggregate_only_failed_selection_evidence() -> None:
     config = json.loads((REPO_ROOT / P2_CONFIG_PATH).read_text(encoding="utf-8"))
     assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, P2_RUNNER_SOURCE_PATHS
     )
-    evidence = p2_preflight()
+    assert sha256_file(REPO_ROOT / P2_RESULT_PATH) == P2_RESULT_SHA256
+    assert sha256_file(REPO_ROOT / P2_CHECKPOINT_PATH) == P2_CHECKPOINT_SHA256
+    assert sha256_file(REPO_ROOT / P2_ONNX_PATH) == P2_ONNX_SHA256
+    assert sha256_file(REPO_ROOT / P2_REPORT_PATH) == P2_REPORT_SHA256
+    result = json.loads((REPO_ROOT / P2_RESULT_PATH).read_text(encoding="utf-8"))
+    metrics = result["selection_metrics"]
+    assert result["status"] == "failed_selection"
+    assert result["candidate_id"] == "P2"
+    assert result["candidate_consumed"] is True
+    assert result["case_level_details_emitted"] is False
+    assert result["frozen_p1_weights_preserved"] is True
+    assert result["passing_threshold_window"] == []
+    assert result["onnx_parity_passed"] is True
+    assert result["parent_role_argmax_preserved"] is True
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert metrics["scene_count"] == 128
+    assert metrics["exact_scene_count"] == 123
+    assert metrics["true_positives"] == 1024
+    assert metrics["false_positives"] == 3
+    assert metrics["false_negatives"] == 0
+    assert metrics["duplicate_region_count"] == 0
+    assert metrics["prohibited_structure_hits"] == 3
+    assert "cases" not in result and "predictions" not in result
+    assert config["selection_evaluation_limit"] == 1
+    assert config["case_level_predecessor_evidence_used"] is False
+    assert config["validation_or_public_pixels_used_for_training"] is False
+    assert config["public_execution_authorized"] is False
+    assert config["public_gate_evaluations"] == 0
+    assert config["production_approval"] is False
+    assert config["release_eligible"] is False
+
+
+def test_p3_is_monotonic_veto_only_and_preserves_exact_p2_roles(
+    tmp_path: Path,
+) -> None:
+    model = FrozenP2MonotonicVetoProposalNet()
+    model.load_p2_state_dict(_load_p2_state())
+    trainable = sorted(
+        name for name, parameter in model.named_parameters() if parameter.requires_grad
+    )
+    assert trainable == [
+        "monotonic_veto.0.bias",
+        "monotonic_veto.0.weight",
+        "monotonic_veto.2.bias",
+        "monotonic_veto.2.weight",
+    ]
+    evidence = torch.linspace(-1.0, 1.0, 4 * FEATURE_COUNT).reshape(
+        1, 4, FEATURE_COUNT
+    )
+    crops = torch.linspace(0.0, 1.0, 4 * 2 * 32 * 128).reshape(
+        1, 4, 2, 32, 128
+    )
+    structure = torch.linspace(
+        0.0, 1.0, 4 * STRUCTURE_FEATURE_COUNT
+    ).reshape(1, 4, STRUCTURE_FEATURE_COUNT)
+    with torch.inference_mode():
+        output = model(evidence, crops, structure)
+        p2_output = model.frozen_p2_output(evidence, crops, structure)
+    assert torch.all(output[:, :, 0] >= p2_output[:, :, 0])
+    assert torch.all(output[:, :, 1] <= p2_output[:, :, 1])
+    assert torch.equal(output[:, :, 2:], p2_output[:, :, 2:])
+
+    path = tmp_path / "morphology-veto-v27-p3-preflight.onnx"
+    torch.onnx.export(
+        model.eval(),
+        (evidence, crops, structure),
+        path,
+        input_names=["proposal_evidence", "proposal_crops", "structure_features"],
+        output_names=["proposal_and_role_logits"],
+        dynamic_axes={
+            "proposal_evidence": {1: "proposal_count"},
+            "proposal_crops": {1: "proposal_count"},
+            "structure_features": {1: "proposal_count"},
+            "proposal_and_role_logits": {1: "proposal_count"},
+        },
+        opset_version=18,
+        do_constant_folding=True,
+        dynamo=False,
+    )
+    options = ort.SessionOptions()
+    options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_DISABLE_ALL
+    session = ort.InferenceSession(
+        path.read_bytes(), sess_options=options, providers=["CPUExecutionProvider"]
+    )
+    actual = session.run(None, {
+        "proposal_evidence": evidence.numpy(),
+        "proposal_crops": crops.numpy(),
+        "structure_features": structure.numpy(),
+    })[0]
+    assert float(np.max(np.abs(output.numpy() - actual))) <= 1e-5
+    assert np.all(actual[:, :, 0] >= p2_output.numpy()[:, :, 0] - 1e-5)
+    assert np.all(actual[:, :, 1] <= p2_output.numpy()[:, :, 1] + 1e-5)
+    assert np.array_equal(
+        np.argmax(actual[:, :, 2:], axis=2),
+        np.argmax(p2_output.numpy()[:, :, 2:], axis=2),
+    )
+
+
+def test_p3_objective_targets_max_hard_negative_and_positive_suppression() -> None:
+    config = json.loads((REPO_ROOT / P3_CONFIG_PATH).read_text(encoding="utf-8"))
+    p2_logits = torch.tensor([
+        [2.0, -2.0],
+        [1.0, -1.0],
+        [-2.0, 2.0],
+        [-1.0, 1.0],
+    ])
+    logits = p2_logits.clone()
+    logits[0] = torch.tensor([0.2, -0.2])
+    logits[2] = torch.tensor([-1.5, 1.5])
+    targets = torch.tensor([0, 0, 1, 1])
+    total, components = p3_objective(
+        logits, p2_logits, targets, torch.ones(2), config,
+    )
+    assert total > 0
+    assert components["hard_negative"] > 0
+    assert components["positive_suppression_ceiling"] > 0
+    assert config["hard_negative_weight"] == 32.0
+    assert config["positive_suppression_weight"] == 16.0
+    assert config["monotonic_acceptance_suppression_only"] is True
+
+
+def test_p3_preflight_binds_exact_p2_and_keeps_public_archive_locked() -> None:
+    config = json.loads((REPO_ROOT / P3_CONFIG_PATH).read_text(encoding="utf-8"))
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, P3_RUNNER_SOURCE_PATHS
+    )
+    evidence = p3_preflight()
     assert evidence["config"] == config
     assert evidence["seal"]["public_evaluations"] == 0
     assert evidence["seal"]["public_execution_authorized"] is False
