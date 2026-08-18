@@ -32,6 +32,8 @@
     "learning_rate": 0.0005,
     "negative_ceiling_weight": 4.0,
     "negative_logit_margin_ceiling": -2.0,
+    "objective": "morphology-veto-asymmetric-scene-margin-v1",
+    "objective_formula": "weighted proposal cross entropy with negative examples multiplied by false_positive_weight, plus positive-floor, negative-ceiling, and complete-scene separation max-margin penalties",
     "positive_floor_weight": 2.0,
     "positive_logit_margin_floor": 2.0,
     "proposal_cross_entropy_weight": 1.0,

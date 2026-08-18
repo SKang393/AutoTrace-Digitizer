@@ -18,6 +18,10 @@ from ml.markers.gate_seal import sha256_file
 from ml.ocr.morphology_veto_proposal_v27.dataset import proposal_summary, render_scene
 from ml.ocr.morphology_veto_proposal_v27.features import structure_features
 from ml.ocr.morphology_veto_proposal_v27.model import FrozenV26MorphologyVetoNet
+from ml.ocr.morphology_veto_proposal_v27.prepare_split import (
+    ARCHIVE_PATHS,
+    SOURCE_PATHS,
+)
 from ml.ocr.morphology_veto_proposal_v27.protocol import (
     CANDIDATE_LIMIT,
     FEATURE_COUNT,
@@ -28,6 +32,7 @@ from ml.ocr.morphology_veto_proposal_v27.protocol import (
     split_registration,
 )
 from ml.ocr.scene_topology_proposal_v26.dataset import render_scene as render_v26_scene
+from ml.ocr.morphology_veto_proposal_v27.train_p1 import _proposal_objective
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -170,7 +175,7 @@ def test_structure_features_are_deterministic_normalized_and_sensitive() -> None
     first = structure_features(crops)
     second = structure_features(crops.copy())
     assert first.shape == (2, STRUCTURE_FEATURE_COUNT)
-    assert first.dtype == np.float64
+    assert first.dtype == np.float32
     assert np.array_equal(first, second)
     assert np.all(first >= 0.0) and np.all(first <= 1.0)
     assert not np.array_equal(first[0], first[1])
@@ -232,3 +237,36 @@ def test_scaled_model_preserves_parent_role_argmax_and_strict_cpu_parity(
     )[0]
     assert actual.dtype == np.float32
     assert float(np.max(np.abs(expected.numpy() - actual))) <= 1e-5
+
+
+def test_freeze_source_inventory_and_archives_are_v27_owned() -> None:
+    assert set(ARCHIVE_PATHS) == {"train", "validation", "sealed_public"}
+    assert all("ocr-v27-" in path.name for path in ARCHIVE_PATHS.values())
+    paths = {path.as_posix() for path in SOURCE_PATHS}
+    assert {
+        "ml/ocr/morphology_veto_proposal_v27/PROTOCOL.json",
+        "ml/ocr/morphology_veto_proposal_v27/prepare_split.py",
+        "ml/ocr/morphology_veto_proposal_v27/sealed_gate.py",
+        "ml/ocr/morphology_veto_proposal_v27/train_p1.py",
+        "ml/ocr/scene_topology_proposal_v26/model_p3.py",
+    }.issubset(paths)
+    assert all((REPO_ROOT / path).is_file() for path in SOURCE_PATHS)
+
+
+def test_asymmetric_objective_weights_negative_errors_more_heavily() -> None:
+    config = protocol_configuration()["candidate_p1"]
+    weights = torch.ones(2)
+    targets = torch.tensor([0, 1])
+    false_positive_logits = torch.tensor([[-4.0, 4.0], [-4.0, 4.0]])
+    false_negative_logits = torch.tensor([[4.0, -4.0], [4.0, -4.0]])
+    _, false_positive_components = _proposal_objective(
+        false_positive_logits, targets, weights, config,
+    )
+    _, false_negative_components = _proposal_objective(
+        false_negative_logits, targets, weights, config,
+    )
+    assert (
+        false_positive_components["asymmetric_cross_entropy"]
+        > false_negative_components["asymmetric_cross_entropy"]
+    )
+    assert config["false_positive_weight"] == 4.0

@@ -193,6 +193,12 @@ def protocol_configuration() -> dict[str, object]:
             "public_execution_limit": 1,
         },
         "candidate_p1": {
+            "objective": "morphology-veto-asymmetric-scene-margin-v1",
+            "objective_formula": (
+                "weighted proposal cross entropy with negative examples multiplied "
+                "by false_positive_weight, plus positive-floor, negative-ceiling, "
+                "and complete-scene separation max-margin penalties"
+            ),
             "seed": SEED,
             "epochs": 4,
             "expected_optimizer_steps": 1024,

@@ -6551,7 +6551,7 @@
       "consumed_candidate_ids": [],
       "remaining_unregistered_candidate_ids": ["P2", "P3"],
       "protocol_path": "ml/ocr/morphology_veto_proposal_v27/PROTOCOL.json",
-      "protocol_sha256": "884aa7c53a58e12433528e8cf00a76b7d1ff5e0b329dd14575fbc2af410199c5",
+      "protocol_sha256": "5c73babf8741d6f6dff1238943608e34ba93d4bba899f42f8f71bebea186489a",
       "split_materialized": false,
       "split_scene_counts": {
         "train": 256,

@@ -71,7 +71,7 @@ def _channel_features(values: np.ndarray) -> np.ndarray:
 
 
 def structure_features(crops: np.ndarray) -> np.ndarray:
-    """Return 24 fixed float64 morphology values for each proposal crop."""
+    """Return 24 fixed float32 morphology values for each proposal crop."""
     values = np.asarray(crops)
     if values.ndim != 4 or values.shape[1:] != (
         CROP_CHANNELS,
@@ -84,7 +84,7 @@ def structure_features(crops: np.ndarray) -> np.ndarray:
     result = np.concatenate(
         tuple(_channel_features(values[:, channel]) for channel in range(CROP_CHANNELS)),
         axis=1,
-    ).astype(np.float64)
+    ).astype(np.float32)
     if result.shape != (len(values), STRUCTURE_FEATURE_COUNT):
         raise RuntimeError("OCR V27 structure feature width changed")
     if np.any(result < 0.0) or np.any(result > 1.0):
