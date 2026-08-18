@@ -21,6 +21,9 @@ from ml.ocr.scene_topology_proposal_v26.dataset import proposal_summary, render_
 from ml.ocr.scene_topology_proposal_v26.model import (
     FrozenRoleAxialTopologyProposalNet,
 )
+from ml.ocr.scene_topology_proposal_v26.model_p2 import (
+    FrozenP1BoundedMarginProposalNet,
+)
 from ml.ocr.scene_topology_proposal_v26.sealed_gate import (
     EVALUATOR_SOURCE_PATHS,
     GATE_CONFIG,
@@ -38,6 +41,10 @@ from ml.ocr.scene_topology_proposal_v26.protocol import (
 from ml.ocr.scene_topology_proposal_v26.train_p1 import (
     RUNNER_SOURCE_PATHS,
     _proposal_objective,
+)
+from ml.ocr.scene_topology_proposal_v26.train_p2 import (
+    RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
+    _proposal_objective as _p2_proposal_objective,
 )
 
 
@@ -85,7 +92,7 @@ def test_v25_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_records_consumed_failed_p1_and_locks_execution() -> None:
+def test_canonical_budget_records_p1_failure_and_authorizes_only_p2() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(
             encoding="utf-8"
@@ -96,11 +103,11 @@ def test_canonical_budget_records_consumed_failed_p1_and_locks_execution() -> No
         if item["task"] == "ocr-detection-recognition"
         and item["revision"] == "graph-text-scene-topology-proposal-v26"
     )
-    assert entry["status"] == "candidate_1_selection_failed"
+    assert entry["status"] == "candidate_2_preregistered"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["split_materialized"] is True
     split_seal_path = REPO_ROOT / entry["split_seal_path"]
     assert entry["split_seal_sha256"] == sha256_file(split_seal_path)
@@ -166,10 +173,23 @@ def test_canonical_budget_records_consumed_failed_p1_and_locks_execution() -> No
     assert entry["candidate_report_sha256"]["P1"] == result["report_sha256"]
     assert entry["candidate_checkpoint_sha256"]["P1"] == result["checkpoint_sha256"]
     assert entry["candidate_onnx_sha256"]["P1"] == result["onnx_sha256"]
+    p2_config_path = REPO_ROOT / entry["candidate_config_paths"]["P2"]
+    assert entry["candidate_config_sha256"]["P2"] == sha256_file(p2_config_path)
+    p2_config = json.loads(p2_config_path.read_text(encoding="utf-8"))
+    assert p2_config["candidate_id"] == "P2"
+    assert p2_config["expected_optimizer_steps"] == 1152
+    assert p2_config["trainable_scope"] == "proposal_head_only"
+    assert p2_config["p1_case_detail_or_pixels_used"] is False
+    assert p2_config["expected_runner_source_bundle_sha256"] == (
+        source_bundle_sha256(REPO_ROOT, P2_RUNNER_SOURCE_PATHS)
+    )
+    assert entry["candidate_runner_source_bundle_sha256"]["P2"] == (
+        p2_config["expected_runner_source_bundle_sha256"]
+    )
     assert entry["selection_evaluations"] == 1
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
-    assert entry["execution_authorization"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["execution_authorization"] is not None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
@@ -267,6 +287,51 @@ def test_objective_penalizes_both_error_sides_and_scene_overlap() -> None:
     assert float(bad["negative_ceiling"]) > 0.0
     assert float(bad["scene_separation"]) > 0.0
     assert float(bad_total) > float(good_total)
+
+
+def test_p2_freezes_p1_features_and_targets_bounded_hard_negative_margins() -> None:
+    parent = FrozenRoleAxialTopologyProposalNet(seed=2608182601)
+    model = FrozenP1BoundedMarginProposalNet(seed=2608182602)
+    model.load_p1_state_dict(parent.state_dict())
+    trainable_names = {
+        name for name, parameter in model.named_parameters() if parameter.requires_grad
+    }
+    assert trainable_names
+    assert all(name.startswith("proposal_head.") for name in trainable_names)
+    model.train()
+    assert model.proposal_head.training is True
+    assert model.role_parent.training is False
+    assert model.crop_stem.training is False
+    assert model.crop_projection.training is False
+    assert model.evidence_projection.training is False
+
+    config = json.loads(
+        (REPO_ROOT / "ml/ocr/scene_topology_proposal_v26/training/p2.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    targets = torch.tensor([1, 0, 0, 0])
+    weights = torch.ones(2)
+    bounded = torch.tensor([
+        [-0.75, 0.75],
+        [0.75, -0.75],
+        [0.75, -0.75],
+        [0.75, -0.75],
+    ])
+    unsafe = bounded.clone()
+    unsafe[1] = torch.tensor([-1.0, 1.0])
+    bounded_total, bounded_parts = _p2_proposal_objective(
+        bounded, targets, weights, config,
+    )
+    unsafe_total, unsafe_parts = _p2_proposal_objective(
+        unsafe, targets, weights, config,
+    )
+    assert float(bounded_parts["positive_floor"]) == 0.0
+    assert float(bounded_parts["negative_ceiling"]) == 0.0
+    assert float(bounded_parts["hard_negative"]) == 0.0
+    assert float(unsafe_parts["negative_ceiling"]) > 0.0
+    assert float(unsafe_parts["hard_negative"]) > 0.0
+    assert float(unsafe_total) > float(bounded_total)
 
 
 def test_public_gate_requires_a_selected_three_threshold_window() -> None:

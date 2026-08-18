@@ -6335,7 +6335,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-scene-topology-proposal-v26",
-      "status": "candidate_1_selection_failed",
+      "status": "candidate_2_preregistered",
       "defect_class": "V25 P3 retained 1017 of 1024 visible-selection truths with one false prohibited region and seven misses at every fixed threshold despite passing recognition, role, and ONNX parity gates",
       "prior_revision": "graph-text-evidence-rescue-v25",
       "trigger_result_path": "ml/ocr/evidence_rescue_v25/P3_RESULT.json",
@@ -6347,9 +6347,9 @@
       "architecture": "frozen-role-axial-topology-proposal-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": ["P2"],
       "consumed_candidate_ids": ["P1"],
-      "remaining_unregistered_candidate_ids": ["P2", "P3"],
+      "remaining_unregistered_candidate_ids": ["P3"],
       "protocol_path": "ml/ocr/scene_topology_proposal_v26/PROTOCOL.json",
       "protocol_sha256": "2aacbb75a7ef02c4f7de5c806681dcf33093ea21f67c2b6185a07807827f19ef",
       "split_materialized": true,
@@ -6399,14 +6399,21 @@
       "candidate_1_objective": "complete-proposal-scene-extrema-margin-v1",
       "candidate_1_optimizer_step_limit": 2304,
       "candidate_1_aggregate_design_basis": "V25 P3 aggregate terminal metrics only; no case identity, truth row, prediction, or selection pixel",
+      "candidate_2_architecture": "frozen-p1-features-bounded-margin-proposal-v1",
+      "candidate_2_objective": "bounded-margin-training-hard-negative-recalibration-v1",
+      "candidate_2_optimizer_step_limit": 1152,
+      "candidate_2_aggregate_design_basis": "P1 aggregate exact-scene, true-positive, false-positive, false-negative, prohibited-hit, duplicate, recognition, role, threshold-window, and parity metrics only; no case identity, truth row, prediction, or selection pixel",
       "candidate_config_paths": {
-        "P1": "ml/ocr/scene_topology_proposal_v26/training/p1.json"
+        "P1": "ml/ocr/scene_topology_proposal_v26/training/p1.json",
+        "P2": "ml/ocr/scene_topology_proposal_v26/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "27a94be0c0c6e1db6e711a3af85626b538b47e6a10270de0f08cdc5c6b3a5db3"
+        "P1": "27a94be0c0c6e1db6e711a3af85626b538b47e6a10270de0f08cdc5c6b3a5db3",
+        "P2": "300039f2d52db40eb0391a7c0069de136c4854598435d9064f6f5c4c7b7a3483"
       },
       "candidate_runner_source_bundle_sha256": {
-        "P1": "95fdb53b1092c3dcd100fb30597d72ce7432249579adddf4da6681c84fcdf643"
+        "P1": "95fdb53b1092c3dcd100fb30597d72ce7432249579adddf4da6681c84fcdf643",
+        "P2": "e86b919a45e32558e1480b73587ab1f7511fd95fcc62ae73b45d9fd98f44cd5f"
       },
       "candidate_result_paths": {
         "P1": "ml/ocr/scene_topology_proposal_v26/P1_RESULT.json"
@@ -6452,10 +6459,10 @@
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "P1 is consumed and failed selection with five prohibited false regions and CPU ONNX parity above the fixed 1e-5 maximum. P2 and P3 require separate aggregate-only preregistration before any execution; public remains locked.",
-      "execution_authorization": null,
+      "execution_authorized": true,
+      "authorized_candidate_id": "P2",
+      "execution_blocker": null,
+      "execution_authorization": "P2 may execute once from its exact committed aggregate-only configuration, P1 payload binding, unchanged frozen split archives, and runner source bundle. P3, public, marker, private, manifest, model-store, packaging, approval, and release execution remain unauthorized.",
       "marker_creation_evaluated": false,
       "manifest_created": false,
       "model_store_promoted": false,

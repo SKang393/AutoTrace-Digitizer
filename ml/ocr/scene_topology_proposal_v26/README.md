@@ -43,11 +43,21 @@ accuracy was `0.9951171875`. Aggregate result, ignored report, checkpoint, and
 ONNX SHA-256 values are `1c1a3041...e5338`, `d962cd13...ec32b`,
 `29fe9349...6d89`, and `d6cb6910...c241`.
 
-P1 is consumed and cannot rerun. P2 and P3 remain unregistered and require a
-separate aggregate-only preregistration before execution. The truth-hidden
-public archive remains unauthorized, unopened, and at zero evaluations. No
-manifest, model-store entry, package payload, public evaluation, marker
-composition, private validation, approval, or release has been created.
+P1 is consumed and cannot rerun. P2 is separately preregistered from only those
+aggregate P1 metrics. It loads the exact P1 checkpoint, freezes the role parent
+and all crop/evidence feature weights, and trains only the proposal head for
+three epochs and exactly 1,152 steps. Its bounded-margin objective retains the
+threshold-derived positive and negative safety margins while emphasizing the
+highest-scoring training-only negative tail. This directly targets P1's
+persistent false positives and excessive logit magnitude without using any
+selection case identity or pixels. P2 configuration and runner-bundle SHA-256
+values are `300039f2...a3483` and `e86b919a...cd5f`.
+
+P2 may execute once only after this preregistration is committed. P3 remains
+unregistered. The truth-hidden public archive remains unauthorized, unopened,
+and at zero evaluations. No manifest, model-store entry, package payload,
+public evaluation, marker composition, private validation, approval, or
+release has been created.
 
 Synthetic fixtures are training and public-test inputs only and are never
 application graph data.
