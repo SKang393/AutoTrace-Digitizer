@@ -25,6 +25,7 @@ from ml.ocr.relational_neighborhood_proposal_v28.dataset import (
 from ml.ocr.relational_neighborhood_proposal_v28.model import (
     RelationalNeighborhoodProposalNet,
 )
+from ml.ocr.relational_neighborhood_proposal_v28.prepare_split import SOURCE_PATHS
 from ml.ocr.relational_neighborhood_proposal_v28.protocol import (
     CANDIDATE_LIMIT,
     FEATURE_COUNT,
@@ -37,6 +38,10 @@ from ml.ocr.relational_neighborhood_proposal_v28.protocol import (
 )
 from ml.ocr.relational_neighborhood_proposal_v28.relations import (
     proposal_relation_features,
+)
+from ml.ocr.relational_neighborhood_proposal_v28.train_p1 import (
+    RUNNER_SOURCE_PATHS,
+    _proposal_objective,
 )
 
 
@@ -130,6 +135,40 @@ def test_canonical_budget_preregisters_only_unmaterialized_p1() -> None:
     assert entry["private_validation"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
+
+
+def test_freeze_inventory_binds_the_exact_candidate_runner_and_relational_sources() -> None:
+    assert RUNNER_SOURCE_PATHS == SOURCE_PATHS
+    assert len(SOURCE_PATHS) == len(set(SOURCE_PATHS))
+    required = {
+        "ml/ocr/relational_neighborhood_proposal_v28/model.py",
+        "ml/ocr/relational_neighborhood_proposal_v28/relations.py",
+        "ml/ocr/relational_neighborhood_proposal_v28/train_p1.py",
+        "ml/ocr/relational_neighborhood_proposal_v28/prepare_split.py",
+    }
+    assert required <= {path.as_posix() for path in SOURCE_PATHS}
+    assert all((REPO_ROOT / path).is_file() for path in SOURCE_PATHS)
+
+
+def test_p1_objective_directly_penalizes_hard_false_regions() -> None:
+    config = protocol_configuration()["candidate_p1"]
+    targets = torch.tensor([1, 1, 0, 0, 0], dtype=torch.int64)
+    class_weights = torch.ones(2, dtype=torch.float32)
+    safer = torch.tensor([
+        [-2.0, 3.0], [-1.5, 2.5], [3.0, -2.0], [2.5, -1.5], [2.0, -1.0],
+    ])
+    unsafe = safer.clone()
+    unsafe[2:, 0] = -2.0
+    unsafe[2:, 1] = 3.0
+    safe_loss, safe_parts = _proposal_objective(
+        safer, targets, class_weights, config,
+    )
+    unsafe_loss, unsafe_parts = _proposal_objective(
+        unsafe, targets, class_weights, config,
+    )
+    assert torch.isfinite(safe_loss) and torch.isfinite(unsafe_loss)
+    assert unsafe_loss > safe_loss
+    assert unsafe_parts["hard_negative"] > safe_parts["hard_negative"]
 
 
 def test_fresh_split_families_offsets_and_sample_bytes_are_disjoint() -> None:
