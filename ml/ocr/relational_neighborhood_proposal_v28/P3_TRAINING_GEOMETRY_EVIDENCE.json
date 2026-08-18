@@ -1,0 +1,40 @@
+{
+  "schema": "graphreader.ocr-relational-neighborhood-p3-training-geometry-evidence.v1",
+  "task": "ocr-detection-recognition",
+  "revision": "graph-text-relational-neighborhood-proposal-v28",
+  "candidate_id": "P3",
+  "source_split": "train",
+  "source_fixture_archive_path": "artifacts/production-validation/ocr-v28-train.zip",
+  "source_fixture_archive_sha256": "224b5c4025d6ffccbd51b6c0a72aee85cc14e9fa5b2367a3aae4b614523045ba",
+  "scene_count": 256,
+  "truth_region_count": 2048,
+  "feature_contract": {
+    "relative_center_x_index": 25,
+    "relative_center_y_index": 26,
+    "x_left_boundary": 0.0,
+    "x_right_boundary": 1.0,
+    "y_above_boundary": 0.0,
+    "y_below_boundary": 1.0,
+    "x_tick_axis_title_y_boundary": 1.15
+  },
+  "aggregate_role_ranges": {
+    "Annotation": {"count": 256, "x_min": 0.5044910311698914, "x_max": 0.6638417840003967, "y_min": 0.44117647409439087, "y_max": 0.8542713522911072},
+    "AxisTitle": {"count": 256, "x_min": 0.43808048963546753, "x_max": 0.48728814721107483, "y_min": 1.177884578704834, "y_max": 1.235119104385376},
+    "LegendText": {"count": 256, "x_min": 1.1745152473449707, "x_max": 1.232087254524231, "y_min": 0.2401960790157318, "y_max": 0.3757062256336212},
+    "Other": {"count": 256, "x_min": -0.32710281014442444, "x_max": -0.15112994611263275, "y_min": -0.3195266127586365, "y_max": -0.09900990128517151},
+    "Participant": {"count": 256, "x_min": 1.0595568418502808, "x_max": 1.1210691928863525, "y_min": 1.1127450466156006, "y_max": 1.1607142686843872},
+    "PhaseHeading": {"count": 256, "x_min": 0.31014493107795715, "x_max": 0.7444444298744202, "y_min": -0.17159762978553772, "y_max": -0.13414634764194489},
+    "XTick": {"count": 256, "x_min": 0.09939759224653244, "x_max": 0.4519519507884979, "y_min": 1.092682957649231, "y_max": 1.1264705657958984},
+    "YTick": {"count": 256, "x_min": -0.30156248807907104, "x_max": -0.23239436745643616, "y_min": 0.22524753212928772, "y_max": 0.8601036071777344}
+  },
+  "partition_matches": 2048,
+  "partition_mismatches": 0,
+  "case_level_details_emitted": false,
+  "validation_fixture_opened": false,
+  "public_fixture_opened": false,
+  "private_or_article_images": false,
+  "chandler_included": false,
+  "generalization_label_included": false,
+  "production_approval": false,
+  "release_eligible": false
+}

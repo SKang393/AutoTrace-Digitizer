@@ -29,6 +29,9 @@ from ml.ocr.relational_neighborhood_proposal_v28.model import (
 from ml.ocr.relational_neighborhood_proposal_v28.model_p2 import (
     FrozenP1RelationalRoleResidualNet,
 )
+from ml.ocr.relational_neighborhood_proposal_v28.model_p3 import (
+    FrozenP1GeometryRolePartitionNet,
+)
 from ml.ocr.relational_neighborhood_proposal_v28.prepare_split import SOURCE_PATHS
 from ml.ocr.relational_neighborhood_proposal_v28.protocol import (
     CANDIDATE_LIMIT,
@@ -63,6 +66,15 @@ from ml.ocr.relational_neighborhood_proposal_v28.train_p2 import (
     _p1_trigger_is_terminal,
     _role_residual_objective,
     preflight as p2_preflight,
+)
+from ml.ocr.relational_neighborhood_proposal_v28.train_p3 import (
+    CONFIG_PATH as P3_CONFIG_PATH,
+    P2_RESULT_PATH,
+    P2_RESULT_SHA256,
+    PREREGISTRATION_PATH as P3_PREREGISTRATION_PATH,
+    RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS,
+    TRAINING_GEOMETRY_EVIDENCE_PATH,
+    _p2_trigger_is_terminal,
 )
 
 
@@ -625,3 +637,140 @@ def test_p2_onnx_is_dynamic_and_preserves_exact_p1_proposal_stream(tmp_path: Pat
             ).numpy()
         assert np.array_equal(p2_output[:, :, :2], p1_output[:, :, :2])
         assert float(np.max(np.abs(expected - p2_output))) <= 1e-5
+
+
+def test_p3_preregistration_uses_only_aggregate_and_training_geometry_evidence() -> None:
+    preregistration = json.loads(
+        (REPO_ROOT / P3_PREREGISTRATION_PATH).read_text(encoding="utf-8")
+    )
+    geometry = json.loads(
+        (REPO_ROOT / TRAINING_GEOMETRY_EVIDENCE_PATH).read_text(encoding="utf-8")
+    )
+    trigger = json.loads((REPO_ROOT / P2_RESULT_PATH).read_text(encoding="utf-8"))
+    assert sha256_file(REPO_ROOT / P2_RESULT_PATH) == P2_RESULT_SHA256
+    assert _p2_trigger_is_terminal(trigger)
+    assert preregistration["candidate_id"] == "P3"
+    assert preregistration["candidate_ordinal"] == 3
+    assert preregistration["optimizer_steps"] == 0
+    assert preregistration["trainable_parameter_names"] == []
+    assert preregistration["training_geometry_evidence_sha256"] == sha256_file(
+        REPO_ROOT / TRAINING_GEOMETRY_EVIDENCE_PATH
+    )
+    assert geometry["truth_region_count"] == 2048
+    assert geometry["partition_matches"] == 2048
+    assert geometry["partition_mismatches"] == 0
+    assert geometry["case_level_details_emitted"] is False
+    assert geometry["validation_fixture_opened"] is False
+    assert geometry["public_fixture_opened"] is False
+    assert preregistration["execution_authorized"] is False
+    assert preregistration["public_execution_authorized"] is False
+    assert preregistration["private_validation_authorized"] is False
+    assert preregistration["production_approval"] is False
+    assert preregistration["release_eligible"] is False
+    assert not (REPO_ROOT / P3_CONFIG_PATH).exists()
+    assert {
+        P2_RESULT_PATH,
+        P3_PREREGISTRATION_PATH,
+        TRAINING_GEOMETRY_EVIDENCE_PATH,
+        Path("ml/ocr/relational_neighborhood_proposal_v28/model_p3.py"),
+        Path("ml/ocr/relational_neighborhood_proposal_v28/train_p3.py"),
+    } <= set(P3_RUNNER_SOURCE_PATHS)
+
+
+def test_p3_geometry_partition_is_exhaustive_and_preserves_exact_p1_proposals() -> None:
+    torch.manual_seed(59)
+    model = FrozenP1GeometryRolePartitionNet().eval()
+    assert model.trainable_parameters() == ()
+    assert all(not parameter.requires_grad for parameter in model.p1.parameters())
+    centers = torch.tensor([
+        [-0.2, 0.5],
+        [0.3, 1.10],
+        [0.5, 1.20],
+        [0.5, -0.10],
+        [1.2, 0.4],
+        [1.1, 1.1],
+        [0.5, 0.5],
+        [-0.2, -0.1],
+    ], dtype=torch.float32)
+    count = len(centers)
+    evidence = torch.randn(1, count, FEATURE_COUNT)
+    evidence[0, :, 25:27] = centers
+    crops = torch.randn(1, count, 2, 32, 128)
+    relations = torch.randn(1, count, count, RELATION_FEATURE_COUNT)
+    with torch.no_grad():
+        output = model(evidence, crops, relations)
+        parent = model.p1(evidence, crops, relations)
+    assert torch.equal(output[:, :, :2], parent[:, :, :2])
+    assert torch.equal(output[0, :, 2:].argmax(dim=1), torch.arange(len(ROLE_ORDER)))
+    assert torch.equal(
+        (output[0, :, 2:] == model.ROLE_LOGIT_MAGNITUDE).sum(dim=1),
+        torch.ones(count, dtype=torch.int64),
+    )
+    assert torch.all(
+        (output[0, :, 2:] == model.ROLE_LOGIT_MAGNITUDE)
+        | (output[0, :, 2:] == -model.ROLE_LOGIT_MAGNITUDE)
+    )
+
+
+def test_p3_onnx_is_dynamic_and_preserves_exact_p1_proposal_stream(
+    tmp_path: Path,
+) -> None:
+    torch.manual_seed(61)
+    model = FrozenP1GeometryRolePartitionNet().eval()
+    count = 8
+    evidence = torch.randn(1, count, FEATURE_COUNT)
+    evidence[0, :, 25:27] = torch.tensor([
+        [-0.2, 0.5], [0.3, 1.10], [0.5, 1.20], [0.5, -0.10],
+        [1.2, 0.4], [1.1, 1.1], [0.5, 0.5], [-0.2, -0.1],
+    ])
+    crops = torch.randn(1, count, 2, 32, 128)
+    relations = torch.randn(1, count, count, RELATION_FEATURE_COUNT)
+    paths = {
+        "p1": tmp_path / "v28-p1.onnx",
+        "p3": tmp_path / "v28-p3.onnx",
+    }
+    for name, exported in (("p1", model.p1), ("p3", model)):
+        torch.onnx.export(
+            exported,
+            (evidence, crops, relations),
+            paths[name],
+            input_names=["proposal_evidence", "proposal_crops", "proposal_relations"],
+            output_names=["proposal_role_logits"],
+            dynamic_axes={
+                "proposal_evidence": {1: "proposal_count"},
+                "proposal_crops": {1: "proposal_count"},
+                "proposal_relations": {1: "proposal_count", 2: "neighbor_count"},
+                "proposal_role_logits": {1: "proposal_count"},
+            },
+            opset_version=18,
+            dynamo=False,
+        )
+    options = ort.SessionOptions()
+    options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_DISABLE_ALL
+    sessions = {
+        name: ort.InferenceSession(
+            path.read_bytes(), sess_options=options, providers=["CPUExecutionProvider"],
+        )
+        for name, path in paths.items()
+    }
+    for dynamic_count in (3, 8):
+        values = evidence[:, :dynamic_count].numpy().astype(np.float32)
+        crop_values = crops[:, :dynamic_count].numpy().astype(np.float32)
+        relation_values = relations[:, :dynamic_count, :dynamic_count].numpy().astype(
+            np.float32
+        )
+        inputs = {
+            "proposal_evidence": values,
+            "proposal_crops": crop_values,
+            "proposal_relations": relation_values,
+        }
+        p1_output = sessions["p1"].run(None, inputs)[0]
+        p3_output = sessions["p3"].run(None, inputs)[0]
+        with torch.no_grad():
+            expected = model(
+                torch.from_numpy(values),
+                torch.from_numpy(crop_values),
+                torch.from_numpy(relation_values),
+            ).numpy()
+        assert np.array_equal(p3_output[:, :, :2], p1_output[:, :, :2])
+        assert float(np.max(np.abs(expected - p3_output))) <= 1e-5

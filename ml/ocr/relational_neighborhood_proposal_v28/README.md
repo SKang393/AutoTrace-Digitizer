@@ -87,8 +87,20 @@ per-role accuracy remained `0.9765625`, recognition exact remained
 result, ignored candidate report, checkpoint, and rejected ONNX SHA-256 values
 are `c66beaf6...c3c2`, `2fce04c6...39359`, `ab3b2fcd...67d56`, and
 `e3438bb3...bae4f`. No case identity or case-level result was emitted or
-inspected. P2 is consumed and cannot rerun. P3 remains unregistered and no
-V28 execution is currently authorized.
+inspected. P2 is consumed and cannot rerun.
+
+P3 is preregistered from the P1/P2 aggregates and a single aggregate-only
+probe of the frozen training split. The probe confirmed that proposal-center
+coordinates relative to the plot separate all 2,048 training truths into the
+eight source-declared roles with zero overlap: plot-side boundaries are fixed
+at `0.0` and `1.0`, and the disjoint X-tick/axis-title boundary is fixed at
+`1.15`. P3 freezes the exact P1 proposal model, performs zero optimizer steps,
+and replaces only the regressing learned role residual with that deterministic
+partition. It must still prove 2,048/2,048 training role matches, exact P1
+PyTorch and ONNX proposal logits, identical decisions at every threshold, one
+single visible-selection pass, and strict CPU ONNX parity. The runner source
+bundle and execution configuration are not yet bound to a committed checkpoint,
+so P3 execution remains unauthorized.
 
 Truth-hidden public evaluation, marker
 composition, private validation, manifest creation, model-store promotion,
