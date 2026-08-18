@@ -26,6 +26,9 @@ from ml.ocr.relational_neighborhood_proposal_v28.dataset import (
 from ml.ocr.relational_neighborhood_proposal_v28.model import (
     RelationalNeighborhoodProposalNet,
 )
+from ml.ocr.relational_neighborhood_proposal_v28.model_p2 import (
+    FrozenP1RelationalRoleResidualNet,
+)
 from ml.ocr.relational_neighborhood_proposal_v28.prepare_split import SOURCE_PATHS
 from ml.ocr.relational_neighborhood_proposal_v28.protocol import (
     CANDIDATE_LIMIT,
@@ -44,6 +47,22 @@ from ml.ocr.relational_neighborhood_proposal_v28.train_p1 import (
     RUNNER_SOURCE_PATHS,
     _proposal_objective,
     preflight,
+)
+from ml.ocr.relational_neighborhood_proposal_v28.train_p2 import (
+    P1_CHECKPOINT_PATH,
+    P1_CHECKPOINT_SHA256,
+    P1_ONNX_PATH,
+    P1_ONNX_SHA256,
+    P1_REPORT_PATH,
+    P1_REPORT_SHA256,
+    P1_RESULT_PATH,
+    P1_RESULT_SHA256,
+    PREREGISTRATION_PATH,
+    RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
+    TRAINABLE_PARAMETER_NAMES,
+    _p1_trigger_is_terminal,
+    _role_residual_objective,
+    preflight as p2_preflight,
 )
 
 
@@ -106,7 +125,7 @@ def test_v27_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_consumes_failed_p1_and_blocks_further_execution() -> None:
+def test_canonical_budget_consumes_failed_p1_and_keeps_p2_source_fail_closed() -> None:
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -116,11 +135,11 @@ def test_canonical_budget_consumes_failed_p1_and_blocks_further_execution() -> N
         item for item in ledger["revisions"]
         if item["revision"] == "graph-text-relational-neighborhood-proposal-v28"
     )
-    assert entry["status"] == "candidate_1_failed_selection"
+    assert entry["status"] == "candidate_2_source_preregistered"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P1"]
+    assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["protocol_sha256"] == sha256_file(
         REPO_ROOT / entry["protocol_path"]
     )
@@ -143,7 +162,11 @@ def test_canonical_budget_consumes_failed_p1_and_blocks_further_execution() -> N
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["execution_authorization"] is None
-    assert "P2 is not preregistered or authorized" in entry["execution_blocker"]
+    assert "P2 design and source are preregistered" in entry["execution_blocker"]
+    p2_preregistration = REPO_ROOT / entry["candidate_2_preregistration_path"]
+    assert sha256_file(p2_preregistration) == entry[
+        "candidate_2_preregistration_sha256"
+    ]
     assert entry["manifest_created"] is False
     assert entry["model_store_promoted"] is False
     assert entry["private_validation"] is False
@@ -363,3 +386,185 @@ def test_random_weight_onnx_contract_is_dynamic_and_within_strict_parity(tmp_pat
             "proposal_relations": relation_values,
         })[0]
         assert float(np.max(np.abs(expected - actual))) <= 1e-5
+
+
+def test_p2_preregistration_is_aggregate_only_bounded_and_unauthorized() -> None:
+    preregistration = json.loads(
+        (REPO_ROOT / PREREGISTRATION_PATH).read_text(encoding="utf-8")
+    )
+    assert preregistration["candidate_id"] == "P2"
+    assert preregistration["candidate_limit"] == 3
+    assert preregistration["expected_optimizer_steps"] == 1024
+    assert preregistration["aggregate_trigger"]["p1_result_sha256"] == P1_RESULT_SHA256
+    assert preregistration["aggregate_trigger"]["aggregate_role_error_count"] == 4
+    assert preregistration["aggregate_trigger"]["case_level_details_emitted"] is False
+    assert preregistration["proposal_preservation"] == {
+        "p1_acceptance_at_every_fixed_threshold_exact_required": True,
+        "p1_full_output_tensor_stream_reexecution_hash_required": True,
+        "p1_full_output_tensor_stream_sha256": (
+            "e1d51933f8711c0dc3b5408c6c24363a46375c66f07dedfbaea87877a5a0649e"
+        ),
+        "p1_onnx_proposal_logits_exact_required": True,
+        "p1_torch_proposal_logits_exact_required": True,
+    }
+    assert preregistration["execution_authorized"] is False
+    assert preregistration["public_execution_authorized"] is False
+    assert preregistration["private_validation_authorized"] is False
+    assert preregistration["production_approval"] is False
+    assert preregistration["release_eligible"] is False
+    assert "Chandler" in preregistration["data_scope"]
+    assert "Generalization" in preregistration["data_scope"]
+
+
+def test_p2_exact_p1_inputs_and_source_bundle_are_present_but_preflight_is_blocked() -> None:
+    exact_inputs = {
+        P1_RESULT_PATH: P1_RESULT_SHA256,
+        P1_CHECKPOINT_PATH: P1_CHECKPOINT_SHA256,
+        P1_ONNX_PATH: P1_ONNX_SHA256,
+        P1_REPORT_PATH: P1_REPORT_SHA256,
+    }
+    for relative, expected_hash in exact_inputs.items():
+        assert sha256_file(REPO_ROOT / relative) == expected_hash
+    assert _p1_trigger_is_terminal(
+        json.loads((REPO_ROOT / P1_RESULT_PATH).read_text(encoding="utf-8"))
+    )
+    assert len(P2_RUNNER_SOURCE_PATHS) == len(set(P2_RUNNER_SOURCE_PATHS))
+    assert {
+        PREREGISTRATION_PATH,
+        Path("ml/ocr/relational_neighborhood_proposal_v28/model_p2.py"),
+        Path("ml/ocr/relational_neighborhood_proposal_v28/train_p2.py"),
+    } <= set(P2_RUNNER_SOURCE_PATHS)
+    assert all((REPO_ROOT / path).is_file() for path in P2_RUNNER_SOURCE_PATHS)
+    with pytest.raises((FileNotFoundError, RuntimeError)):
+        p2_preflight()
+
+
+def test_p2_role_objective_rewards_correction_without_regressing_teacher_truths() -> None:
+    config = json.loads(
+        (REPO_ROOT / PREREGISTRATION_PATH).read_text(encoding="utf-8")
+    )
+    targets = torch.tensor([0, 1, 2], dtype=torch.int64)
+    teacher = torch.tensor([
+        [3.0, 0.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0],
+        [0.0, 3.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0],
+        [-1.0, -1.0, 0.0, 2.0, -1.0, -1.0, -1.0, -1.0],
+    ])
+    repaired = teacher.clone()
+    repaired[2, 2] = 3.0
+    regressed = teacher.clone()
+    regressed[0, 0] = -1.0
+    regressed[0, 1] = 3.0
+    weights = torch.ones(len(ROLE_ORDER), dtype=torch.float32)
+    repaired_loss, repaired_parts = _role_residual_objective(
+        repaired, teacher, targets, weights, config,
+    )
+    regressed_loss, regressed_parts = _role_residual_objective(
+        regressed, teacher, targets, weights, config,
+    )
+    assert torch.isfinite(repaired_loss) and torch.isfinite(regressed_loss)
+    assert repaired_loss < regressed_loss
+    assert repaired_parts["teacher_correct_preservation"] == 0
+    assert regressed_parts["teacher_correct_preservation"] > 0
+
+
+def test_p2_zero_initialization_and_training_preserve_exact_p1_proposals() -> None:
+    torch.manual_seed(47)
+    model = FrozenP1RelationalRoleResidualNet().train()
+    trainable_names = tuple(sorted(
+        name for name, parameter in model.named_parameters() if parameter.requires_grad
+    ))
+    assert trainable_names == TRAINABLE_PARAMETER_NAMES
+    assert all(not parameter.requires_grad for parameter in model.p1.parameters())
+    count = 6
+    evidence = torch.randn(1, count, FEATURE_COUNT)
+    crops = torch.randn(1, count, 2, 32, 128)
+    relations = torch.randn(1, count, count, RELATION_FEATURE_COUNT)
+    frozen_before = {
+        name: parameter.detach().clone() for name, parameter in model.p1.named_parameters()
+    }
+    with torch.no_grad():
+        initial = model(evidence, crops, relations)
+        teacher = model.p1(evidence, crops, relations)
+    assert torch.equal(initial, teacher)
+    targets = torch.arange(count, dtype=torch.int64) % len(ROLE_ORDER)
+    config = json.loads(
+        (REPO_ROOT / PREREGISTRATION_PATH).read_text(encoding="utf-8")
+    )
+    optimizer = torch.optim.AdamW(model.trainable_parameters(), lr=0.001)
+    output = model(evidence, crops, relations)[0]
+    with torch.no_grad():
+        teacher_roles = model.p1(evidence, crops, relations)[0, :, 2:]
+    loss, _ = _role_residual_objective(
+        output[:, 2:], teacher_roles, targets,
+        torch.ones(len(ROLE_ORDER)), config,
+    )
+    optimizer.zero_grad(set_to_none=True)
+    loss.backward()
+    optimizer.step()
+    with torch.no_grad():
+        trained = model(evidence, crops, relations)
+        teacher_after = model.p1(evidence, crops, relations)
+    assert torch.equal(trained[:, :, :2], teacher_after[:, :, :2])
+    assert any(
+        not torch.equal(trained[:, :, index], teacher_after[:, :, index])
+        for index in range(2, 2 + len(ROLE_ORDER))
+    )
+    assert all(
+        torch.equal(parameter, frozen_before[name])
+        for name, parameter in model.p1.named_parameters()
+    )
+
+
+def test_p2_onnx_is_dynamic_and_preserves_exact_p1_proposal_stream(tmp_path: Path) -> None:
+    torch.manual_seed(53)
+    model = FrozenP1RelationalRoleResidualNet().eval()
+    evidence = torch.randn(1, 5, FEATURE_COUNT)
+    crops = torch.randn(1, 5, 2, 32, 128)
+    relations = torch.randn(1, 5, 5, RELATION_FEATURE_COUNT)
+    paths = {
+        "p1": tmp_path / "v28-p1.onnx",
+        "p2": tmp_path / "v28-p2.onnx",
+    }
+    for name, exported in (("p1", model.p1), ("p2", model)):
+        torch.onnx.export(
+            exported,
+            (evidence, crops, relations),
+            paths[name],
+            input_names=["proposal_evidence", "proposal_crops", "proposal_relations"],
+            output_names=["proposal_role_logits"],
+            dynamic_axes={
+                "proposal_evidence": {1: "proposal_count"},
+                "proposal_crops": {1: "proposal_count"},
+                "proposal_relations": {1: "proposal_count", 2: "neighbor_count"},
+                "proposal_role_logits": {1: "proposal_count"},
+            },
+            opset_version=18,
+            dynamo=False,
+        )
+    options = ort.SessionOptions()
+    options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_DISABLE_ALL
+    sessions = {
+        name: ort.InferenceSession(
+            path.read_bytes(), sess_options=options, providers=["CPUExecutionProvider"],
+        )
+        for name, path in paths.items()
+    }
+    for count in (3, 5):
+        values = evidence[:, :count].numpy().astype(np.float32)
+        crop_values = crops[:, :count].numpy().astype(np.float32)
+        relation_values = relations[:, :count, :count].numpy().astype(np.float32)
+        inputs = {
+            "proposal_evidence": values,
+            "proposal_crops": crop_values,
+            "proposal_relations": relation_values,
+        }
+        p1_output = sessions["p1"].run(None, inputs)[0]
+        p2_output = sessions["p2"].run(None, inputs)[0]
+        with torch.no_grad():
+            expected = model(
+                torch.from_numpy(values),
+                torch.from_numpy(crop_values),
+                torch.from_numpy(relation_values),
+            ).numpy()
+        assert np.array_equal(p2_output[:, :, :2], p1_output[:, :, :2])
+        assert float(np.max(np.abs(expected - p2_output))) <= 1e-5

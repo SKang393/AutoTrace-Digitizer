@@ -61,7 +61,21 @@ The tracked aggregate result SHA-256 is
 the ignored candidate report and rejected ONNX SHA-256 values are
 `af7d6ca29d374880f479977c6b6f740193f549593b0a9a993e5e06c8b0b5c618`
 and `788fe3ff7737b3a32db26533fa343477ef4f2d1db73a83f634eba6fbf6054867`.
-P2 is not preregistered or authorized. Truth-hidden public evaluation, marker
+
+P2 source is preregistered from those aggregate P1 facts only. It freezes the
+exact P1 checkpoint, including its perfect visible-selection proposal stream,
+and adds a zero-initialized relational role residual over the frozen P1 scene
+nodes, production evidence, and P1 role logits. Only the six residual-layer
+parameter tensors may train. P2 is bounded to four epochs and 1,024 optimizer
+steps.
+Selection additionally requires exact P1 PyTorch and ONNX proposal logits,
+identical acceptance at every fixed threshold, the exact P1 full output stream
+reexecution hash, unchanged frozen parameters, and strict P2 ONNX parity.
+Execution remains unauthorized until the committed source-bundle hash is bound
+in a separate candidate configuration and the canonical ledger grants the
+single P2 execution.
+
+Truth-hidden public evaluation, marker
 composition, private validation, manifest creation, model-store promotion,
 packaging, production approval, and release remain unauthorized. Synthetic
 fixtures are training and public-test inputs only and are never application
