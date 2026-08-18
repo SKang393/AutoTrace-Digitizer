@@ -75,9 +75,20 @@ The committed runner source bundle is SHA-256
 `a1322bf488796d6d5b673a0182061edffbed8817ccc7b28e6a7a3b1110e0dae1`.
 The checksum-bound P2 candidate configuration is SHA-256
 `0d2ac3c51c839c630330442a7a96ef83177ab8867e6c9f6b123c120b300477a9`.
-The canonical ledger grants P2 exactly one execution after this authorization
-checkpoint is committed. It may open only the frozen training and
-visible-selection archives.
+P2 consumed that one execution for four epochs and exactly 1,024 optimizer
+steps. It preserved the exact P1 PyTorch and ONNX proposal logits, every fixed
+threshold decision, the complete P1 output stream, and all frozen P1
+parameters. CPU ONNX parity passed at `4.76837158203125e-6`. P2 nevertheless
+failed selection: all five thresholds retained 1,024/1,024 truths with zero
+false regions, misses, duplicates, or prohibited hits, but only 123/128 scenes
+were exact and aggregate role accuracy regressed to `0.9951171875`. The minimum
+per-role accuracy remained `0.9765625`, recognition exact remained
+`0.97265625`, and CER remained `0.004634994206257242`. The tracked aggregate
+result, ignored candidate report, checkpoint, and rejected ONNX SHA-256 values
+are `c66beaf6...c3c2`, `2fce04c6...39359`, `ab3b2fcd...67d56`, and
+`e3438bb3...bae4f`. No case identity or case-level result was emitted or
+inspected. P2 is consumed and cannot rerun. P3 remains unregistered and no
+V28 execution is currently authorized.
 
 Truth-hidden public evaluation, marker
 composition, private validation, manifest creation, model-store promotion,

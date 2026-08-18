@@ -125,7 +125,7 @@ def test_v27_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_consumes_failed_p1_and_authorizes_only_bound_p2() -> None:
+def test_canonical_budget_consumes_failed_p1_and_p2_and_keeps_p3_unregistered() -> None:
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -135,10 +135,10 @@ def test_canonical_budget_consumes_failed_p1_and_authorizes_only_bound_p2() -> N
         item for item in ledger["revisions"]
         if item["revision"] == "graph-text-relational-neighborhood-proposal-v28"
     )
-    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["status"] == "candidate_3_unregistered"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["protocol_sha256"] == sha256_file(
         REPO_ROOT / entry["protocol_path"]
@@ -154,17 +154,17 @@ def test_canonical_budget_consumes_failed_p1_and_authorizes_only_bound_p2() -> N
     for candidate_id in ("P1", "P2"):
         config_path = REPO_ROOT / entry["candidate_config_paths"][candidate_id]
         assert sha256_file(config_path) == entry["candidate_config_sha256"][candidate_id]
-    result_path = REPO_ROOT / entry["candidate_result_paths"]["P1"]
-    assert sha256_file(result_path) == entry["candidate_result_sha256"]["P1"]
-    assert entry["selection_evaluations"] == 1
+    for candidate_id in ("P1", "P2"):
+        result_path = REPO_ROOT / entry["candidate_result_paths"][candidate_id]
+        assert sha256_file(result_path) == entry["candidate_result_sha256"][candidate_id]
+    assert entry["selection_evaluations"] == 2
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
-    assert entry["execution_blocker"] is None
-    assert "P2 may execute exactly once" in entry["execution_authorization"]
-    assert "public archive" in entry["execution_authorization"]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert "P1 and P2 are consumed" in entry["execution_blocker"]
+    assert "P2 cannot rerun" in entry["execution_authorization"]
     assert "remain unauthorized" in entry["execution_authorization"]
     p2_preregistration = REPO_ROOT / entry["candidate_2_preregistration_path"]
     assert sha256_file(p2_preregistration) == entry[
@@ -419,7 +419,7 @@ def test_p2_preregistration_is_aggregate_only_bounded_and_unauthorized() -> None
     assert "Generalization" in preregistration["data_scope"]
 
 
-def test_p2_exact_p1_inputs_and_source_bundle_are_present_and_preflight_is_ready() -> None:
+def test_p2_exact_p1_inputs_and_source_bundle_remain_bound_after_consumption() -> None:
     exact_inputs = {
         P1_RESULT_PATH: P1_RESULT_SHA256,
         P1_CHECKPOINT_PATH: P1_CHECKPOINT_SHA256,
@@ -453,11 +453,47 @@ def test_p2_exact_p1_inputs_and_source_bundle_are_present_and_preflight_is_ready
     assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, P2_RUNNER_SOURCE_PATHS,
     )
-    evidence = p2_preflight()
-    assert evidence["config"] == config
-    assert evidence["seal"]["source_commit"] == (
-        "d49a7b469ea787d2c991383608dd93e6565e4439"
+    with pytest.raises(RuntimeError):
+        p2_preflight()
+
+
+def test_p2_result_is_aggregate_only_consumed_and_fail_closed() -> None:
+    result_path = (
+        REPO_ROOT / "ml/ocr/relational_neighborhood_proposal_v28/P2_RESULT.json"
     )
+    report_path = (
+        REPO_ROOT
+        / "ml/ocr/relational_neighborhood_proposal_v28/artifacts/P2-run/candidate-report.json"
+    )
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert result["candidate_consumed"] is True
+    assert result["candidate_id"] == "P2"
+    assert result["status"] == "failed_selection"
+    assert result["optimizer_steps"] == 1024
+    assert result["selection_metrics"]["exact_scene_count"] == 123
+    assert result["selection_metrics"]["true_positives"] == 1024
+    assert result["selection_metrics"]["false_positives"] == 0
+    assert result["selection_metrics"]["false_negatives"] == 0
+    assert result["selection_metrics"]["duplicate_region_count"] == 0
+    assert result["selection_metrics"]["prohibited_structure_hits"] == 0
+    assert result["selection_metrics"]["role_accuracy"] == 0.9951171875
+    assert result["p1_proposal_decisions_preserved"] is True
+    assert result["p1_full_output_stream_preserved"] is True
+    assert result["onnx_parity_passed"] is True
+    assert result["onnx_parity_maximum_absolute_error"] <= 1e-5
+    assert result["passing_threshold_window"] == []
+    assert result["report_sha256"] == sha256_file(report_path)
+    assert result["selection_metrics"] == {
+        key: report["selection_metrics"][key]
+        for key in result["selection_metrics"]
+    }
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert result["private_validation_authorized"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
+    assert "cases" not in result and "predictions" not in result
 
 
 def test_p2_role_objective_rewards_correction_without_regressing_teacher_truths() -> None:
