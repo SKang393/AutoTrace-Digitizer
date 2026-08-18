@@ -32,7 +32,10 @@ from ml.ocr.morphology_veto_proposal_v27.protocol import (
     split_registration,
 )
 from ml.ocr.scene_topology_proposal_v26.dataset import render_scene as render_v26_scene
-from ml.ocr.morphology_veto_proposal_v27.train_p1 import _proposal_objective
+from ml.ocr.morphology_veto_proposal_v27.train_p1 import (
+    _proposal_objective,
+    preflight,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -93,7 +96,7 @@ def test_v26_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_records_only_preregistered_p1_before_freeze() -> None:
+def test_canonical_budget_authorizes_only_checksum_bound_p1_after_freeze() -> None:
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -103,27 +106,33 @@ def test_canonical_budget_records_only_preregistered_p1_before_freeze() -> None:
         item for item in ledger["revisions"]
         if item["revision"] == "graph-text-morphology-veto-proposal-v27"
     )
-    assert entry["status"] == "protocol_preregistered_before_fixture_freeze"
+    assert entry["status"] == "candidate_1_preregistered"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
     assert entry["protocol_sha256"] == sha256_file(REPO_ROOT / entry["protocol_path"])
-    assert entry["split_materialized"] is False
+    assert entry["split_materialized"] is True
+    assert entry["split_seal_sha256"] == sha256_file(
+        REPO_ROOT / entry["split_seal_path"]
+    )
     assert entry["selection_evaluations"] == 0
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
-    assert entry["execution_authorization"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["execution_authorization"]
     assert entry["manifest_created"] is False
     assert entry["model_store_promoted"] is False
     assert entry["private_validation"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
-    for path in entry["split_archive_paths"].values():
-        assert not (REPO_ROOT / path).exists()
+    for split, path in entry["split_archive_paths"].items():
+        assert sha256_file(REPO_ROOT / path) == entry["split_archive_sha256"][split]
+    assert entry["candidate_config_sha256"]["P1"] == sha256_file(
+        REPO_ROOT / entry["candidate_config_paths"]["P1"]
+    )
 
 
 def test_fresh_split_families_offsets_and_sample_bytes_are_disjoint() -> None:
@@ -270,3 +279,15 @@ def test_asymmetric_objective_weights_negative_errors_more_heavily() -> None:
         > false_negative_components["asymmetric_cross_entropy"]
     )
     assert config["false_positive_weight"] == 4.0
+
+
+def test_p1_preflight_binds_frozen_archives_without_opening_public_truth() -> None:
+    evidence = preflight()
+    seal = evidence["seal"]
+    assert seal["optimizer_steps_at_freeze"] == 0
+    assert seal["selection_evaluations"] == 0
+    assert seal["public_evaluations"] == 0
+    assert seal["training_authorized"] is False
+    assert seal["public_execution_authorized"] is False
+    assert evidence["config"]["selection_evaluation_limit"] == 1
+    assert evidence["config"]["public_execution_authorized"] is False

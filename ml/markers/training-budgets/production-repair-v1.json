@@ -6535,7 +6535,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-morphology-veto-proposal-v27",
-      "status": "protocol_preregistered_before_fixture_freeze",
+      "status": "candidate_1_preregistered",
       "defect_class": "V26 P3 retained all 1024 visible-selection truths but left one prohibited false region at two adjacent high thresholds, produced no three-threshold zero-error window, and exceeded strict CPU ONNX parity despite ORT_ENABLE_BASIC",
       "prior_revision": "graph-text-scene-topology-proposal-v26",
       "trigger_result_path": "ml/ocr/scene_topology_proposal_v26/P3_RESULT.json",
@@ -6552,7 +6552,10 @@
       "remaining_unregistered_candidate_ids": ["P2", "P3"],
       "protocol_path": "ml/ocr/morphology_veto_proposal_v27/PROTOCOL.json",
       "protocol_sha256": "5c73babf8741d6f6dff1238943608e34ba93d4bba899f42f8f71bebea186489a",
-      "split_materialized": false,
+      "split_materialized": true,
+      "split_seal_path": "ml/ocr/morphology_veto_proposal_v27/SPLIT_SEAL.json",
+      "split_seal_sha256": "01e4388ab05e3b872943b7a04a22cd12b2a1676481f65711a1e40171c9ab3097",
+      "split_source_bundle_sha256": "73631572d67db63c42a0a555e9e46a407f904766d60928b5f466f862b0684ca6",
       "split_scene_counts": {
         "train": 256,
         "validation": 128,
@@ -6563,6 +6566,16 @@
         "validation": "artifacts/production-validation/ocr-v27-selection.zip",
         "sealed_public": "artifacts/production-validation/ocr-v27-public.zip"
       },
+      "split_archive_sha256": {
+        "train": "b48733b08ccf8a19fbd8138bbe312e9c705046b307be70d474a871ede0d7eccd",
+        "validation": "aed343b56081bb52491d6744fa20aa27ba34695d89936bb9d1d135a84a887b33",
+        "sealed_public": "c170c183f106cce665389844522366db378419979aba501dcad0e616813380c4"
+      },
+      "split_manifest_sha256": {
+        "train": "922508b250fba4738daeb6b543302dca4094846398c00839cd33b2b3f7ee5b36",
+        "validation": "99a7e84aaa516693010ae76b2ffc06ee37163131bf6830ec3bdd6efed151d34e",
+        "sealed_public": "5ecb8961bd7c1586dc17a260055a9472d31a6d019c96ec5dfdd33bd2fec7685d"
+      },
       "split_policy": "fresh renderer, degradation, seed, fixture-byte, and case identities; truth-hidden public archive; no V26 validation or public bytes used for training or tuning",
       "candidate_1_architecture": "frozen-v26-morphology-veto-scaled-v1",
       "candidate_1_objective": "morphology-veto-asymmetric-scene-margin-v1",
@@ -6571,14 +6584,20 @@
       "candidate_1_output_logit_scale": 0.5,
       "candidate_1_onnx_runtime_policy": "CPUExecutionProvider with ORT_DISABLE_ALL graph optimization and unchanged strict 1e-5 maximum absolute error",
       "candidate_1_aggregate_design_basis": "V26 P3 aggregate terminal metrics only; no case identity, truth row, prediction, selection pixel, public pixel, or private data",
+      "candidate_config_paths": {
+        "P1": "ml/ocr/morphology_veto_proposal_v27/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "2f5ae2d7c42bcfa0ad917a7c59a9eb9d89cb4e4a8987de8356b21a60c2941f2b"
+      },
       "selection_evaluations": 0,
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "V27 source is preregistered, but fixture identity is not frozen and no checksum-bound candidate runner is authorized.",
-      "execution_authorization": null,
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "execution_blocker": null,
+      "execution_authorization": "Exact P1 configuration, committed runner-source bundle, frozen train and visible-selection archives, fixed V26 P3 parent, CPUExecutionProvider, ORT_DISABLE_ALL candidate graph optimization, and one selection execution are checksum-bound. The sealed-public archive remains unauthorized unless P1 first passes the visible-selection gate at three consecutive preregistered thresholds with strict parity and exact parent-role argmax preservation.",
       "marker_creation_evaluated": false,
       "manifest_created": false,
       "model_store_promoted": false,
