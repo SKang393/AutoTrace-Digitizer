@@ -63,6 +63,7 @@ from ml.markers.gate_seal import sha256_file, source_bundle_sha256
 REPO_ROOT = Path(__file__).resolve().parents[5]
 ROOT = REPO_ROOT / "ml/markers/center/seed_refinement_v11"
 V10_ROOT = REPO_ROOT / "ml/markers/center/decoupled_heads_v10"
+P3_RESULT_SHA256 = "4276a6baaf9a0cd15cf4d753cdfac92f5d25fbcf0588075648e7e25158f669ac"
 
 
 def _json(path: Path) -> dict[str, object]:
@@ -79,6 +80,12 @@ def _source_hashes(manifest: dict[str, object], names: tuple[str, ...]) -> set[s
 
 def test_protocol_is_bounded_and_does_not_weaken_any_gate() -> None:
     protocol = _json(ROOT / "PROTOCOL.json")
+    assert protocol["state"] == "exhausted_before_public_gate"
+    assert protocol["execution_authorized"] is False
+    assert protocol["authorized_candidate_id"] is None
+    assert protocol["public_gate_authorized"] is False
+    assert protocol["public_gate_archive_opened"] is False
+    assert protocol["public_gate_evaluations"] == 0
     assert EXPERIMENT_BUDGET == 3
     assert ONNX_PARITY_TOLERANCE == 1e-5
     assert TRIGGER_RESULT_SHA256 == "c0b580c68346124b878521dc6ef46f1e3ed4fe587c29be35be66d5bb8992b62f"
@@ -175,7 +182,7 @@ def test_frozen_sources_configs_and_ledger_match_exact_bytes() -> None:
     gate = _json(ROOT / "gates/sealed-public-v1.json")
     ledger = _json(REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json")
     entry = next(item for item in ledger["revisions"] if item["revision"] == protocol["revision"])
-    assert protocol["state"] == "p3_execution_authorized_public_gate_blocked"
+    assert protocol["state"] == "exhausted_before_public_gate"
     assert protocol["preregistration_commit"] == "729d51e916c8433e4c3ccadccd28d7038007ce12"
     assert protocol["preregistration_tree"] == "66054ffe3f52814c3ccb30b3ada7ec1b4d2d4980"
     assert protocol["p2_preregistration_commit"] == "589e8892718feaa011849132313c1eb6e71f534e"
@@ -184,20 +191,21 @@ def test_frozen_sources_configs_and_ledger_match_exact_bytes() -> None:
     assert protocol["p2_authorization_tree"] == "64e96328ee65433f6d7cdb55d726fd9e2391af25"
     assert protocol["p3_preregistration_commit"] == "be6a6a33cc42d7ac6fc3d3de8b7f6b1e70ebefbb"
     assert protocol["p3_preregistration_tree"] == "70b603dbc2a7f53846027b1bfc1ebbd58057588f"
-    assert protocol["execution_authorized"] is True
-    assert protocol["authorized_candidate_id"] == "P3"
-    assert protocol["preregistered_candidate_ids"] == ["P3"]
-    assert entry["status"] == "candidate_3_preregistered"
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert protocol["execution_authorized"] is False
+    assert protocol["authorized_candidate_id"] is None
+    assert protocol["preregistered_candidate_ids"] == []
+    assert protocol["consumed_candidate_ids"] == ["P1", "P2", "P3"]
+    assert entry["status"] == "exhausted"
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["preregistration_commit"] == protocol["preregistration_commit"]
     assert entry["preregistration_tree"] == protocol["preregistration_tree"]
     assert entry["p2_preregistration_commit"] == protocol["p2_preregistration_commit"]
     assert entry["p2_preregistration_tree"] == protocol["p2_preregistration_tree"]
     assert entry["p3_preregistration_commit"] == protocol["p3_preregistration_commit"]
     assert entry["p3_preregistration_tree"] == protocol["p3_preregistration_tree"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert sha256_file(ROOT / "PROTOCOL.json") == entry["protocol_sha256"]
     assert sha256_file(ROOT / "SPLIT_FREEZE_REPORT.json") == protocol["split_freeze_report_sha256"]
     assert sha256_file(ROOT / "SELECTION_MANIFEST.json") == protocol["selection_manifest_sha256"]
@@ -341,6 +349,42 @@ def test_p3_retention_loss_penalizes_only_seed_positive_truth_negative_pixels() 
     )
     assert torch.allclose(loss, expected)
     assert _false_seed_retention_loss(prediction, torch.zeros_like(seed), truth).item() == 0.0
+
+
+def test_p3_result_binds_exact_aggregate_report_and_exhausts_v11() -> None:
+    result = _json(ROOT / "P3_RESULT.json")
+    assert sha256_file(ROOT / "P3_RESULT.json") == P3_RESULT_SHA256
+    assert result["status"] == "failed_selection_consumed"
+    assert result["selection_exact_scene_count"] == 112
+    assert result["selection_true_positives"] == 1178
+    assert result["selection_false_positives"] == 2
+    assert result["selection_false_negatives"] == 38
+    assert result["selection_duplicate_count"] == 0
+    assert result["selection_prohibited_structure_hits"] == 0
+    assert result["selection_marker_artifact_hits"] == 0
+    assert result["artifact_precision"] == 0.0
+    assert result["artifact_recall"] == 0.0
+    assert result["seed_added_pixels"] == 0
+    assert result["seed_removed_pixels"] == 289107
+    assert result["onnx_parity_passed"] is True
+    assert result["case_detail_or_pixels_inspected"] is False
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
+    seal_root = REPO_ROOT / "ml/markers/training-seals/marker-center/marker-center-seed-refinement-v11/P3"
+    direct_paths = (
+        REPO_ROOT / result["candidate_report_path"],
+        REPO_ROOT / result["checkpoint_path"],
+        REPO_ROOT / result["onnx_path"],
+        seal_root / "opened.json",
+        seal_root / "result.json",
+    )
+    if not all(path.is_file() for path in direct_paths):
+        pytest.skip("Ignored local P3 payload and seal evidence is not present")
+    assert sha256_file(direct_paths[0]) == result["candidate_report_sha256"]
+    assert sha256_file(direct_paths[1]) == result["checkpoint_sha256"]
+    assert sha256_file(direct_paths[2]) == result["onnx_sha256"]
+    assert sha256_file(direct_paths[3]) == result["training_opened_seal_sha256"]
+    assert sha256_file(direct_paths[4]) == result["training_result_seal_sha256"]
 
 
 def test_public_gate_refuses_unapproved_candidate_before_model_or_archive_execution(

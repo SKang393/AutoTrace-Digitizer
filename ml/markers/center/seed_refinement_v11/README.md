@@ -46,15 +46,21 @@ seal SHA-256 values are `b886281d...24ec`, `d6c22bb1...03af`,
 `8ad7439d...2a9`, `ff7bca7b...bb7`, and `bcbf3a72...195e`. Only aggregate
 evidence was used. No case detail or fixture pixels were inspected.
 
-P3 is the final preregistered candidate. It retrains the exact P2
-architecture, frozen split, optimizer, seed, four-way reflection schedule, P2
-losses, 1,792-step budget, thresholds, CPU provider, parity limit, and all
-zero-error gates from scratch. Its only change adds a weight-6.0
-binary-cross-entropy term on artifact pixels that are seed-positive and
-truth-negative. This directly trains removal of false seed pixels without
-penalizing truth-supported seed pixels. P3 reuses no P2 checkpoint and is
-authorized exactly once from preregistration commit
-`be6a6a33cc42d7ac6fc3d3de8b7f6b1e70ebefbb` and tree
-`70b603dbc2a7f53846027b1bfc1ebbd58057588f`. Its single-use training seal
-must refuse any rerun. The public archive remains separately locked at zero
-evaluations.
+P3 consumed the final authorized from-scratch run and failed visible
+selection. It completed all 1,792 steps and passed CPU ONNX parity at
+`3.2782554626464844e-06`, but the weight-6.0 false-seed-retention loss
+collapsed the refined artifact mask at the fixed `0.35` artifact threshold.
+It removed 289,107 seed-positive pixels, added none, and produced artifact
+precision and recall of `0.0`. Center selection regressed to 112 of 128 exact
+scenes with 1,178 true positives, two false positives, 38 misses, zero
+duplicates, and zero prohibited-structure or marker-artifact hits. No passing
+threshold window exists. The report, checkpoint, ONNX, opening seal, result
+seal, and tracked result SHA-256 values are `688b1b18...64f2`,
+`2c134d68...84e2`, `070ea4c7...4706`, `9454eade...d42f`,
+`dfd1eefa...cba0`, and `4276a6ba...69ac`.
+
+P1, P2, and P3 are consumed. V11 is exhausted and cannot rerun or tune. The
+truth-hidden public archive remains locked and unopened at zero evaluations.
+Any future marker-center attempt requires a separately preregistered defect
+class with fresh unexposed splits. No manifest, model store, package, private
+validation, production approval, or release eligibility exists.
