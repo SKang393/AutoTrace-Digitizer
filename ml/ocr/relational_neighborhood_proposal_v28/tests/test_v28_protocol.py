@@ -12,6 +12,7 @@ from pathlib import Path
 import numpy as np
 import onnxruntime as ort
 from PIL import Image
+import pytest
 import torch
 
 from ml.markers.gate_seal import sha256_file, source_bundle_sha256
@@ -105,7 +106,7 @@ def test_v27_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_authorizes_only_checksum_bound_materialized_p1() -> None:
+def test_canonical_budget_consumes_failed_p1_and_blocks_further_execution() -> None:
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -115,10 +116,10 @@ def test_canonical_budget_authorizes_only_checksum_bound_materialized_p1() -> No
         item for item in ledger["revisions"]
         if item["revision"] == "graph-text-relational-neighborhood-proposal-v28"
     )
-    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["status"] == "candidate_1_failed_selection"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
     assert entry["protocol_sha256"] == sha256_file(
         REPO_ROOT / entry["protocol_path"]
@@ -133,16 +134,16 @@ def test_canonical_budget_authorizes_only_checksum_bound_materialized_p1() -> No
         assert sha256_file(REPO_ROOT / archive_path) == entry["split_archive_sha256"][split]
     config_path = REPO_ROOT / entry["candidate_config_paths"]["P1"]
     assert sha256_file(config_path) == entry["candidate_config_sha256"]["P1"]
-    assert entry["selection_evaluations"] == 0
+    result_path = REPO_ROOT / entry["candidate_result_paths"]["P1"]
+    assert sha256_file(result_path) == entry["candidate_result_sha256"]["P1"]
+    assert entry["selection_evaluations"] == 1
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
-    assert "exactly once" in entry["execution_authorization"]
-    assert "public archive remains unauthorized and unopened" in entry[
-        "execution_authorization"
-    ]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorization"] is None
+    assert "P2 is not preregistered or authorized" in entry["execution_blocker"]
     assert entry["manifest_created"] is False
     assert entry["model_store_promoted"] is False
     assert entry["private_validation"] is False
@@ -186,8 +187,41 @@ def test_frozen_split_and_candidate_preflight_remain_fail_closed() -> None:
     assert config["public_gate_evaluations"] == 0
     assert config["private_or_article_images"] is False
     assert config["chandler_included"] is False
-    state = preflight()
-    assert state["seal"] == seal
+    with pytest.raises(RuntimeError):
+        preflight()
+
+
+def test_p1_result_is_aggregate_only_consumed_and_fail_closed() -> None:
+    path = REPO_ROOT / "ml/ocr/relational_neighborhood_proposal_v28/P1_RESULT.json"
+    result = json.loads(path.read_text(encoding="utf-8"))
+    metrics = result["selection_metrics"]
+    assert result["candidate_id"] == "P1"
+    assert result["candidate_consumed"] is True
+    assert result["status"] == "failed_selection"
+    assert result["selection_gate_passed"] is False
+    assert result["optimizer_steps"] == 1024
+    assert result["passing_threshold_window"] == []
+    assert result["onnx_parity_maximum_absolute_error"] <= 1e-5
+    assert result["role_parent_argmax_mismatch_count"] == 0
+    assert result["role_parent_argmax_preserved"] is True
+    assert metrics["scene_count"] == 128
+    assert metrics["exact_scene_count"] == 124
+    assert metrics["true_positives"] == metrics["truth_region_count"] == 1024
+    assert metrics["false_positives"] == 0
+    assert metrics["false_negatives"] == 0
+    assert metrics["duplicate_region_count"] == 0
+    assert metrics["prohibited_structure_hits"] == 0
+    assert metrics["recognition_exact"] >= 0.90
+    assert metrics["character_error_rate"] <= 0.05
+    assert metrics["role_accuracy"] >= 0.90
+    assert result["case_level_details_emitted"] is False
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert result["marker_creation_evaluated"] is False
+    assert result["private_validation_authorized"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
+    assert "cases" not in result and "predictions" not in result
 
 
 def test_freeze_inventory_binds_the_exact_candidate_runner_and_relational_sources() -> None:

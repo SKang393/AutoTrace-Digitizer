@@ -6715,7 +6715,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-relational-neighborhood-proposal-v28",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_1_failed_selection",
       "defect_class": "V27 P1, P2, and P3 each retained the same three prohibited false regions and produced no three-threshold zero-error window despite strict CPU ONNX parity and exact role preservation",
       "prior_revision": "graph-text-morphology-veto-proposal-v27",
       "trigger_result_path": "ml/ocr/morphology_veto_proposal_v27/P3_RESULT.json",
@@ -6728,7 +6728,7 @@
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
       "preregistered_candidate_ids": ["P1"],
-      "consumed_candidate_ids": [],
+      "consumed_candidate_ids": ["P1"],
       "remaining_unregistered_candidate_ids": ["P2", "P3"],
       "protocol_path": "ml/ocr/relational_neighborhood_proposal_v28/PROTOCOL.json",
       "protocol_sha256": "bbab05ad7d8c991929a87493fff592027c55c0bf734f23c63df786cac23435c1",
@@ -6776,14 +6776,54 @@
       "candidate_config_sha256": {
         "P1": "26cdda410c2c19efaf5dd1112e8aee91c3cb82210b0c1b7b875720be3a5a7b3c"
       },
-      "selection_evaluations": 0,
+      "candidate_result_paths": {
+        "P1": "ml/ocr/relational_neighborhood_proposal_v28/P1_RESULT.json"
+      },
+      "candidate_result_sha256": {
+        "P1": "aa680630cdc1d94941d6864ec0ad8de5c0a9ad7763d37b18b193ad43339dc0be"
+      },
+      "candidate_report_sha256": {
+        "P1": "af7d6ca29d374880f479977c6b6f740193f549593b0a9a993e5e06c8b0b5c618"
+      },
+      "candidate_checkpoint_sha256": {
+        "P1": "7c42fff45fcd116e0f020cab4cc8e9a238d70dd943c302a5e3884cd1b570930c"
+      },
+      "candidate_onnx_sha256": {
+        "P1": "788fe3ff7737b3a32db26533fa343477ef4f2d1db73a83f634eba6fbf6054867"
+      },
+      "candidate_training_opened_seal_sha256": {
+        "P1": "c434155f0171b5250cea56d5d1b82228b99252377eaea9e321e1b4e687c5c1e3"
+      },
+      "candidate_training_result_seal_sha256": {
+        "P1": "16e75a972135aa0723a2121d5d8d490c86aa6bec28fede0ed1a9dbb79a84c6e4"
+      },
+      "candidate_1_result": {
+        "status": "failed_selection",
+        "optimizer_steps": 1024,
+        "scene_count": 128,
+        "exact_scene_count": 124,
+        "true_positives": 1024,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "duplicate_region_count": 0,
+        "prohibited_structure_hits": 0,
+        "recognition_exact": 0.97265625,
+        "character_error_rate": 0.004634994206257242,
+        "role_accuracy": 0.99609375,
+        "parent_role_argmax_mismatch_count": 0,
+        "parent_role_argmax_preserved": true,
+        "candidate_onnx_graph_optimization_level": "ORT_DISABLE_ALL",
+        "onnx_parity_maximum_absolute_error": 0.00000476837158203125,
+        "passing_threshold_window": []
+      },
+      "selection_evaluations": 1,
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P1",
-      "execution_blocker": null,
-      "execution_authorization": "Execute V28 P1 exactly once with the checksum-bound committed runner and candidate configuration against the frozen train and visible-selection archives. The truth-hidden public archive remains unauthorized and unopened; no private image, Chandler image, manifest, model-store promotion, packaging discovery, production approval, or release eligibility is authorized.",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "V28 P1 is consumed. It achieved zero false positives, misses, duplicates, and prohibited hits at all fixed thresholds, but only 124 of 128 scenes were exact because the frozen V24 role parent retained four aggregate role errors. No passing threshold window exists. P2 is not preregistered or authorized.",
+      "execution_authorization": null,
       "marker_creation_evaluated": false,
       "manifest_created": false,
       "model_store_promoted": false,

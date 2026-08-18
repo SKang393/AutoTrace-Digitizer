@@ -46,8 +46,23 @@ Train, visible-selection, and truth-hidden public archive SHA-256 values are
 and `db00a6bffda5cefe3ecd747d89f930946782f05e7c5a5f013abf06d2a07e0946`.
 The public archive remains unopened and has zero evaluations.
 
-Only checksum-bound P1 training and its one visible-selection evaluation are
-authorized. Truth-hidden public evaluation, marker composition, private
-validation, manifest creation, model-store promotion, packaging, production
-approval, and release remain unauthorized. Synthetic fixtures are training and
-public-test inputs only and are never application graph data.
+P1 executed once for exactly 1,024 optimizer steps and is consumed. Every fixed
+threshold retained all 1,024 truth regions with zero false regions, misses,
+duplicates, or prohibited hits. Recognition exact was `0.97265625`, CER was
+`0.004634994206257242`, role accuracy was `0.99609375`, the frozen V24 role
+argmax was preserved exactly, and strict CPU ONNX parity passed at
+`4.76837158203125e-6`. Selection still failed because only 124 of 128 scenes
+were exact and no required three-threshold passing window exists. The four
+aggregate scene failures align with the four retained frozen-parent role
+errors; no case identity or case-level result was emitted or inspected.
+
+The tracked aggregate result SHA-256 is
+`aa680630cdc1d94941d6864ec0ad8de5c0a9ad7763d37b18b193ad43339dc0be`;
+the ignored candidate report and rejected ONNX SHA-256 values are
+`af7d6ca29d374880f479977c6b6f740193f549593b0a9a993e5e06c8b0b5c618`
+and `788fe3ff7737b3a32db26533fa343477ef4f2d1db73a83f634eba6fbf6054867`.
+P2 is not preregistered or authorized. Truth-hidden public evaluation, marker
+composition, private validation, manifest creation, model-store promotion,
+packaging, production approval, and release remain unauthorized. Synthetic
+fixtures are training and public-test inputs only and are never application
+graph data.
