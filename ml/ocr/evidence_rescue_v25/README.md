@@ -36,12 +36,20 @@ exact parent-role preservation was not proven. No threshold window passed.
 Report SHA-256 is `c655ad88...48a5`; rejected ONNX SHA-256 is
 `ff9d0351...5acc`; tracked result SHA-256 is `700e1b65...dcf1`.
 
-P1 is consumed and cannot rerun. P2 and P3 remain unregistered, and any next
-candidate requires a separate aggregate-only preregistration. The public
-evaluator source bundle remains frozen at `82467dcf...fb15`, but the public
-archive stays unauthorized and unopened with zero evaluations. Marker
-composition, private validation, manifest creation, model store, packaging,
-approval, and release remain unauthorized.
+P1 is consumed and cannot rerun. P2 is separately preregistered from only the
+aggregate P1 result. It freezes the exact V24 P2 parent and trains only a small
+pooled tight/context crop plus 31-value evidence residual. Its fixed loss
+simultaneously enforces positive and negative logit margins, teacher
+preservation, and per-scene separation across all 16,520 frozen training
+proposals. The budget is five epochs and exactly 1,280 optimizer steps. P2
+configuration SHA-256 is `e6bacf0f...1dba`; its runner source bundle is
+`a637e8c6...12aa`. P2 execution is not yet authorized, and P3 remains
+unregistered.
+
+The public evaluator source bundle remains frozen at `82467dcf...fb15`, but
+the public archive stays unauthorized and unopened with zero evaluations.
+Marker composition, private validation, manifest creation, model store,
+packaging, approval, and release remain unauthorized.
 
 The candidate is not reachable from ordinary Auto Detect. It cannot become a
 manifest, production-model-store entry, package payload, approved model, or

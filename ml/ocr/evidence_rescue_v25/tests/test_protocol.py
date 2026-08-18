@@ -20,6 +20,9 @@ from ml.markers.gate_seal import (
 )
 from ml.ocr.evidence_rescue_v25.dataset import proposal_summary, render_scene
 from ml.ocr.evidence_rescue_v25.model import FrozenCropResidualCtcRescueNet
+from ml.ocr.evidence_rescue_v25.model_p2 import (
+    FrozenParentPooledEvidenceResidualNet,
+)
 from ml.ocr.evidence_rescue_v25.sealed_gate import (
     EVALUATOR_SOURCE_PATHS,
     GATE_CONFIG,
@@ -33,6 +36,10 @@ from ml.ocr.evidence_rescue_v25.protocol import (
     ROLE_ORDER,
     protocol_configuration,
     split_registration,
+)
+from ml.ocr.evidence_rescue_v25.train_p2 import (
+    RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
+    _proposal_residual_objective,
 )
 
 
@@ -75,7 +82,7 @@ def test_v24_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_consumes_failed_p1_while_public_gate_stays_locked() -> None:
+def test_canonical_budget_preregisters_p2_while_public_gate_stays_locked() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(
             encoding="utf-8"
@@ -86,18 +93,27 @@ def test_canonical_budget_consumes_failed_p1_while_public_gate_stays_locked() ->
         if item["task"] == "ocr-detection-recognition"
         and item["revision"] == "graph-text-evidence-rescue-v25"
     )
-    assert entry["status"] == "candidate_1_consumed"
+    assert entry["status"] == "candidate_2_preregistered"
     assert entry["protocol_sha256"] == sha256_file(
         REPO_ROOT / "ml/ocr/evidence_rescue_v25/PROTOCOL.json"
     )
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
     assert entry["split_materialized"] is True
     split_seal = REPO_ROOT / entry["split_seal_path"]
     assert entry["split_seal_sha256"] == sha256_file(split_seal)
     candidate_config = REPO_ROOT / entry["candidate_config_paths"]["P1"]
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(candidate_config)
+    p2_config_path = REPO_ROOT / entry["candidate_config_paths"]["P2"]
+    assert entry["candidate_config_sha256"]["P2"] == sha256_file(p2_config_path)
+    p2_config = json.loads(p2_config_path.read_text(encoding="utf-8"))
+    assert p2_config["candidate_id"] == "P2"
+    assert p2_config["expected_optimizer_steps"] == 1280
+    assert p2_config["case_level_selection_evidence_used_for_design"] is False
+    assert p2_config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, P2_RUNNER_SOURCE_PATHS,
+    )
     assert entry["public_evaluator_preregistered"] is True
     public_config = REPO_ROOT / entry["public_gate_config_path"]
     assert entry["public_gate_config_sha256"] == sha256_file(public_config)
@@ -124,6 +140,90 @@ def test_canonical_budget_consumes_failed_p1_while_public_gate_stays_locked() ->
     assert entry["public_gate_archive_opened"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
+
+
+def test_p2_starts_at_exact_parent_and_trains_only_residual_head() -> None:
+    torch.manual_seed(2502)
+    model = FrozenParentPooledEvidenceResidualNet().eval()
+    evidence = torch.linspace(-1.0, 1.0, 4 * FEATURE_COUNT).reshape(
+        1, 4, FEATURE_COUNT,
+    )
+    crops = torch.linspace(-1.0, 1.0, 4 * 2 * 32 * 128).reshape(1, 4, 2, 32, 128)
+    with torch.inference_mode():
+        parent = model.parent(evidence, crops)
+        candidate = model(evidence, crops)
+    assert torch.equal(candidate, parent)
+    trainable_names = {
+        name for name, parameter in model.named_parameters() if parameter.requires_grad
+    }
+    assert trainable_names
+    assert all(name.startswith("residual_head.") for name in trainable_names)
+
+
+def test_p2_exports_dynamic_cpu_with_exact_parent_roles(tmp_path: Path) -> None:
+    torch.manual_seed(2503)
+    model = FrozenParentPooledEvidenceResidualNet().eval()
+    evidence = torch.linspace(-1.0, 1.0, 5 * FEATURE_COUNT).reshape(
+        1, 5, FEATURE_COUNT,
+    )
+    crops = torch.linspace(-1.0, 1.0, 5 * 2 * 32 * 128).reshape(1, 5, 2, 32, 128)
+    path = tmp_path / "evidence-rescue-v25-p2.onnx"
+    torch.onnx.export(
+        model,
+        (evidence, crops),
+        path,
+        input_names=["proposal_evidence", "proposal_crops"],
+        output_names=["proposal_role_logits"],
+        dynamic_axes={
+            "proposal_evidence": {1: "proposal_count"},
+            "proposal_crops": {1: "proposal_count"},
+            "proposal_role_logits": {1: "proposal_count"},
+        },
+        opset_version=18,
+        dynamo=False,
+    )
+    session = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
+    for count in (3, 5):
+        values = evidence[:, :count].numpy().astype(np.float32)
+        crop_values = crops[:, :count].numpy().astype(np.float32)
+        with torch.inference_mode():
+            torch_values = torch.from_numpy(values)
+            torch_crops = torch.from_numpy(crop_values)
+            expected = model(torch_values, torch_crops).numpy()
+            parent = model.parent(torch_values, torch_crops).numpy()
+        actual = np.asarray(session.run(None, {
+            "proposal_evidence": values,
+            "proposal_crops": crop_values,
+        })[0], dtype=np.float32)
+        assert actual.shape == expected.shape == (1, count, 2 + len(ROLE_ORDER))
+        assert float(np.max(np.abs(expected - actual))) <= 1e-5
+        assert np.array_equal(expected[:, :, 2:], parent[:, :, 2:])
+
+
+def test_p2_objective_enforces_both_error_sides_and_teacher_preservation() -> None:
+    config = json.loads(
+        (REPO_ROOT / "ml/ocr/evidence_rescue_v25/training/p2.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    weights = torch.ones(2)
+    targets = torch.tensor([1, 0])
+    teacher = torch.tensor([[-2.0, 2.0], [2.0, -2.0]])
+    good_total, good = _proposal_residual_objective(
+        teacher, teacher, targets, weights, config,
+    )
+    bad_total, bad = _proposal_residual_objective(
+        torch.zeros_like(teacher), teacher, targets, weights, config,
+    )
+    assert float(good["positive_floor"]) == 0.0
+    assert float(good["negative_ceiling"]) == 0.0
+    assert float(good["teacher_positive_drop"]) == 0.0
+    assert float(good["teacher_negative_worsening"]) == 0.0
+    assert float(bad["positive_floor"]) > 0.0
+    assert float(bad["negative_ceiling"]) > 0.0
+    assert float(bad["teacher_positive_drop"]) > 0.0
+    assert float(bad["teacher_negative_worsening"]) > 0.0
+    assert float(bad_total) > float(good_total)
 
 
 def test_public_evaluator_is_preregistered_without_opening_hidden_truth() -> None:

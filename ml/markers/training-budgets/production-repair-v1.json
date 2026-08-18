@@ -6186,7 +6186,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-evidence-rescue-v25",
-      "status": "candidate_1_consumed",
+      "status": "candidate_2_preregistered",
       "defect_class": "V23 P3 retained all 1024 visible-selection truths with three false and prohibited regions, while V24 P2 removed every false region but missed two truths",
       "prior_revision": "graph-text-crop-evidence-role-anchor-v24",
       "trigger_result_path": "ml/ocr/crop_evidence_role_anchor_v24/P2_RESULT.json",
@@ -6198,9 +6198,9 @@
       "architecture": "frozen-crop-residual-ctc-evidence-rescue-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": ["P2"],
       "consumed_candidate_ids": ["P1"],
-      "remaining_unregistered_candidate_ids": ["P2", "P3"],
+      "remaining_unregistered_candidate_ids": ["P3"],
       "protocol_path": "ml/ocr/evidence_rescue_v25/PROTOCOL.json",
       "protocol_sha256": "7e1ab12c1e82bc78a0489f6d7db1abd5b8926667ad68ff1c23b30386c274de8d",
       "split_materialized": true,
@@ -6240,10 +6240,20 @@
         "validation_sealed_public": 0
       },
       "candidate_config_paths": {
-        "P1": "ml/ocr/evidence_rescue_v25/training/p1.json"
+        "P1": "ml/ocr/evidence_rescue_v25/training/p1.json",
+        "P2": "ml/ocr/evidence_rescue_v25/training/p2.json"
       },
       "candidate_config_sha256": {
-        "P1": "4c96df207f2ba0bebbb4cb48c3944a766820c0d79efdcf22cc0641c154973bb6"
+        "P1": "4c96df207f2ba0bebbb4cb48c3944a766820c0d79efdcf22cc0641c154973bb6",
+        "P2": "e6bacf0f828d50e90b9e5f66772d0a45ba1fb24d0d623faa434cbbd856ca1dba"
+      },
+      "candidate_2_isolated_change": "train only a pooled tight/context crop and 31-value evidence residual over the exact frozen V24 P2 parent, with explicit positive floor, negative ceiling, teacher preservation, and per-scene separation losses",
+      "candidate_2_architecture": "frozen-v24-parent-plus-pooled-evidence-residual-v1",
+      "candidate_2_objective": "teacher-preserving-pooled-residual-separation-v1",
+      "candidate_2_optimizer_step_limit": 1280,
+      "candidate_runner_source_bundle_sha256": {
+        "P1": "51c0b56373267306e1b4ceb8dc236d90c880656afc456e3125247f26fca430cf",
+        "P2": "a637e8c609c0cf1cf18dd01e3fb36b7bba355ff959e5dcdcee4a5c5de34812aa"
       },
       "candidate_result_paths": {
         "P1": "ml/ocr/evidence_rescue_v25/P1_RESULT.json"
@@ -6286,7 +6296,7 @@
       "public_gate_archive_opened": false,
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "execution_blocker": "P1 is consumed and failed exact selection with one prohibited false region, seven misses, no passing threshold window, and non-exact parent-role parity. P2 requires a separate aggregate-only preregistration before any execution.",
+      "execution_blocker": "P2 is preregistered from aggregate-only P1 evidence but is not authorized to execute until its committed configuration, source bundle, tests, and portable checkpoint are independently verified.",
       "execution_authorization": null,
       "marker_creation_evaluated": false,
       "manifest_created": false,
