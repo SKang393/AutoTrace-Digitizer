@@ -43,8 +43,8 @@ simultaneously enforces positive and negative logit margins, teacher
 preservation, and per-scene separation across all 16,520 frozen training
 proposals. The budget is five epochs and exactly 1,280 optimizer steps. P2
 configuration SHA-256 is `e6bacf0f...1dba`; its runner source bundle is
-`a637e8c6...12aa`. P2 execution is not yet authorized, and P3 remains
-unregistered.
+`a637e8c6...12aa`. The separately committed canonical ledger authorizes P2
+for exactly one execution from those bytes. P3 remains unregistered.
 
 The public evaluator source bundle remains frozen at `82467dcf...fb15`, but
 the public archive stays unauthorized and unopened with zero evaluations.

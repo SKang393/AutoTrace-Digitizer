@@ -133,8 +133,8 @@ def test_canonical_budget_preregisters_p2_while_public_gate_stays_locked() -> No
     assert result["case_level_details_emitted"] is False
     assert "cases" not in result and "predictions" not in result
     assert entry["selection_evaluations"] == 1
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P2"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
