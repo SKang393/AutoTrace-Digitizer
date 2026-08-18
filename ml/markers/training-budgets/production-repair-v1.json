@@ -6335,7 +6335,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-scene-topology-proposal-v26",
-      "status": "preregistered_before_split_freeze",
+      "status": "split_frozen_candidate_unconfigured",
       "defect_class": "V25 P3 retained 1017 of 1024 visible-selection truths with one false prohibited region and seven misses at every fixed threshold despite passing recognition, role, and ONNX parity gates",
       "prior_revision": "graph-text-evidence-rescue-v25",
       "trigger_result_path": "ml/ocr/evidence_rescue_v25/P3_RESULT.json",
@@ -6352,12 +6352,49 @@
       "remaining_unregistered_candidate_ids": ["P1", "P2", "P3"],
       "protocol_path": "ml/ocr/scene_topology_proposal_v26/PROTOCOL.json",
       "protocol_sha256": "2aacbb75a7ef02c4f7de5c806681dcf33093ea21f67c2b6185a07807827f19ef",
-      "split_materialized": false,
+      "split_materialized": true,
+      "split_seal_path": "ml/ocr/scene_topology_proposal_v26/SPLIT_SEAL.json",
+      "split_seal_sha256": "9bdcd0dab602cd44288733bc8414c0461889698e4172fccb880c644fcfe067b0",
+      "split_source_commit": "03aa8610f009e7a1f96fa52130b38ca2ea0d1b25",
+      "split_source_bundle_sha256": "2015a6b6f33ab28d095fd73b86f7c1aff988006bbb2805a1287087921033a916",
       "split_scene_counts": {
         "train": 384,
         "validation": 128,
         "sealed_public": 192
       },
+      "split_proposal_counts": {
+        "train": 24145,
+        "validation": 2462,
+        "sealed_public": 6318
+      },
+      "split_archive_paths": {
+        "train": "artifacts/production-validation/ocr-v26-train.zip",
+        "validation": "artifacts/production-validation/ocr-v26-selection.zip",
+        "sealed_public": "artifacts/production-validation/ocr-v26-public.zip"
+      },
+      "split_archive_sha256": {
+        "train": "769b1f1b502cfdb6c76410a0b4d62ee9f8cf213c2e5904b1c7c5fcc9b2a04280",
+        "validation": "5eccc44feb7e0f68a71dd9e17b451f00b3e3ea9adc65e8921406b428c770fc49",
+        "sealed_public": "84e00f59ba0dc486648a2568939f74f76af650ef6f2accde8983dac8ecbc1981"
+      },
+      "split_manifest_sha256": {
+        "train": "b44d7d6717db690269596978805262dc6f731664ec27c22cbfb000d59322747b",
+        "validation": "3517eb97b032cd5de961fc3637279c9994214ea69954d6504c5eec30355b3b3c",
+        "sealed_public": "f69b1324b9bf467648d7f39a640ffb1e41f3f0c050eb07c10af6b3c353e5a93b"
+      },
+      "split_fingerprints": {
+        "train": "978addf6cb954bb9f26dd191be861f17b69b5cc951ea9660f234f0e49c968309",
+        "validation": "6a02b312dec8824178211d9fb4828490425bc83cd033dc78dced72354fe8eeec",
+        "sealed_public": "6448fa2e45f427b5bc91972678013e690af44f0f67a26e5d1b658c3a75ca149d"
+      },
+      "cross_split_source_overlap_counts": {
+        "train_validation": 0,
+        "train_sealed_public": 0,
+        "validation_sealed_public": 0
+      },
+      "public_evaluator_preregistered": true,
+      "public_gate_config_path": "ml/ocr/scene_topology_proposal_v26/gates/sealed-public-v1.json",
+      "public_gate_config_sha256": "2e39854938f70a883c441eaedc6d5d59ce4c647c1128d89ea2646245caf4b674",
       "candidate_1_architecture": "frozen-role-axial-topology-proposal-v1",
       "candidate_1_objective": "complete-proposal-scene-extrema-margin-v1",
       "candidate_1_optimizer_step_limit": 2304,
@@ -6368,7 +6405,7 @@
       "public_gate_archive_opened": false,
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "execution_blocker": "The V26 source protocol is preregistered, but no fixture identity is frozen and no candidate configuration or execution is authorized.",
+      "execution_blocker": "The V26 split identity and public evaluator are frozen, but no candidate configuration or execution is authorized.",
       "execution_authorization": null,
       "marker_creation_evaluated": false,
       "manifest_created": false,

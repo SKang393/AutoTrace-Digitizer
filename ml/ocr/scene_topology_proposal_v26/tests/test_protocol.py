@@ -11,12 +11,18 @@ import numpy as np
 import onnxruntime as ort
 import torch
 
-from ml.markers.gate_seal import sha256_file
+from ml.markers.gate_seal import (
+    canonical_json_bytes,
+    sha256_bytes,
+    sha256_file,
+    source_bundle_sha256,
+)
 from ml.ocr.scene_topology_proposal_v26.dataset import proposal_summary, render_scene
 from ml.ocr.scene_topology_proposal_v26.model import (
     FrozenRoleAxialTopologyProposalNet,
 )
 from ml.ocr.scene_topology_proposal_v26.sealed_gate import (
+    EVALUATOR_SOURCE_PATHS,
     GATE_CONFIG,
     _public_window,
 )
@@ -76,7 +82,7 @@ def test_v25_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_preregisters_without_execution_authority() -> None:
+def test_canonical_budget_records_frozen_splits_without_execution_authority() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(
             encoding="utf-8"
@@ -87,12 +93,43 @@ def test_canonical_budget_preregisters_without_execution_authority() -> None:
         if item["task"] == "ocr-detection-recognition"
         and item["revision"] == "graph-text-scene-topology-proposal-v26"
     )
-    assert entry["status"] == "preregistered_before_split_freeze"
+    assert entry["status"] == "split_frozen_candidate_unconfigured"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == []
     assert entry["remaining_unregistered_candidate_ids"] == ["P1", "P2", "P3"]
-    assert entry["split_materialized"] is False
+    assert entry["split_materialized"] is True
+    split_seal_path = REPO_ROOT / entry["split_seal_path"]
+    assert entry["split_seal_sha256"] == sha256_file(split_seal_path)
+    split_seal = json.loads(split_seal_path.read_text(encoding="utf-8"))
+    assert split_seal["source_commit"] == entry["split_source_commit"]
+    assert split_seal["source_bundle_sha256"] == entry["split_source_bundle_sha256"]
+    assert split_seal["cross_split_source_overlap_counts"] == {
+        "train_sealed_public": 0,
+        "train_validation": 0,
+        "validation_sealed_public": 0,
+    }
+    for name in ("train", "validation", "sealed_public"):
+        registered = split_seal["splits"][name]
+        assert entry["split_archive_sha256"][name] == registered["archive_sha256"]
+        assert entry["split_manifest_sha256"][name] == registered["manifest_sha256"]
+        assert entry["split_fingerprints"][name] == registered["split_fingerprint"]
+        assert entry["split_proposal_counts"][name] == (
+            registered["proposal_summary"]["proposal_count"]
+        )
+    public_config_path = REPO_ROOT / entry["public_gate_config_path"]
+    assert entry["public_gate_config_sha256"] == sha256_file(public_config_path)
+    public_config = json.loads(public_config_path.read_text(encoding="utf-8"))
+    assert public_config["split_seal_sha256"] == entry["split_seal_sha256"]
+    assert public_config["expected_evaluator_source_bundle_sha256"] == (
+        source_bundle_sha256(REPO_ROOT, EVALUATOR_SOURCE_PATHS)
+    )
+    assert public_config["expected_gate_config_sha256"] == sha256_bytes(
+        canonical_json_bytes(dict(GATE_CONFIG))
+    )
+    assert public_config["public_execution_authorized"] is False
+    assert public_config["public_evaluations"] == 0
+    assert public_config["public_archive_opened"] is False
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False

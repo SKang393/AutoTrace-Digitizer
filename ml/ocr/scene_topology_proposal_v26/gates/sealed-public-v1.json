@@ -1,0 +1,31 @@
+{
+  "schema": "graphreader.ocr-scene-topology-public-gate-config.v1",
+  "task": "ocr-detection-recognition",
+  "revision": "graph-text-scene-topology-proposal-v26-public-v1",
+  "expected_candidate_hash_keys": [
+    "detector_onnx_sha256",
+    "recognizer_onnx_sha256",
+    "role_parent_onnx_sha256",
+    "candidate_onnx_sha256",
+    "selection_report_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "f69b1324b9bf467648d7f39a640ffb1e41f3f0c050eb07c10af6b3c353e5a93b",
+  "expected_evaluator_source_bundle_sha256": "d2918fdca79675cfe6b1d1cbb472334a6ded1eb702f22bbc302ace248be767b1",
+  "expected_gate_config_sha256": "abbf04aba3484cb09f610dd5cba4aee8ac35d22b0492104aa5263b077088ee0e",
+  "split_seal_path": "ml/ocr/scene_topology_proposal_v26/SPLIT_SEAL.json",
+  "split_seal_sha256": "9bdcd0dab602cd44288733bc8414c0461889698e4172fccb880c644fcfe067b0",
+  "split_source_commit": "03aa8610f009e7a1f96fa52130b38ca2ea0d1b25",
+  "split_source_bundle_sha256": "2015a6b6f33ab28d095fd73b86f7c1aff988006bbb2805a1287087921033a916",
+  "public_fixture_archive_path": "artifacts/production-validation/ocr-v26-public.zip",
+  "public_fixture_archive_sha256": "84e00f59ba0dc486648a2568939f74f76af650ef6f2accde8983dac8ecbc1981",
+  "public_fixture_manifest_sha256": "f69b1324b9bf467648d7f39a640ffb1e41f3f0c050eb07c10af6b3c353e5a93b",
+  "evaluation_limit": 1,
+  "truth_hidden_until_authorized_execution": true,
+  "case_level_failure_analysis_permitted": false,
+  "public_execution_authorized": false,
+  "public_evaluations": 0,
+  "public_archive_opened": false,
+  "marker_creation_evaluated": false,
+  "production_approval": false,
+  "release_eligible": false
+}

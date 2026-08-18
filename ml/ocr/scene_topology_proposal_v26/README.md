@@ -18,9 +18,11 @@ per-scene evidence aggregates. The parent role logits are copied unchanged.
 
 The train, visible-selection, and truth-hidden public registrations contain
 384, 128, and 192 new procedural scenes with disjoint seed offsets, renderer
-families, and degradation families. Their bytes do not exist yet. The one-time
-freeze may run only from committed source and will reject any existing archive,
-duplicate fixture bytes, or cross-split byte overlap.
+families, and degradation families. They were frozen once from clean commit
+`03aa8610f009e7a1f96fa52130b38ca2ea0d1b25`. The archive SHA-256 values are
+`769b1f1b...a04280`, `5eccc44f...0fc49`, and `84e00f59...1981`; the split-seal
+SHA-256 is `9bdcd0da...67b0`. Every split has one production proposal per truth,
+no duplicate fixture bytes, and zero cross-split byte overlap.
 
 P1 is preregistered for six epochs and exactly 2,304 optimizer steps. It must
 execute every frozen training proposal, perform exactly one stored-byte visible
@@ -29,11 +31,13 @@ three consecutive thresholds with zero false, missed, duplicate, or prohibited
 regions. Recognition exact must be at least `0.90`, CER at most `0.05`, overall
 role accuracy at least `0.90`, and every role at least `0.85`.
 
-This checkpoint authorizes neither split freezing nor training. No fixture,
+This checkpoint freezes only the split identity and public evaluator. The
+truth-hidden public archive remains unopened with zero evaluations. No
+candidate is configured or authorized, and no optimizer step, selection,
 checkpoint, ONNX file, manifest, model-store entry, package payload, public
 evaluation, marker composition, private validation, approval, or release has
-been created. A later committed checkpoint must bind the frozen archives and a
-single candidate configuration before P1 can execute.
+been created. A later committed checkpoint must bind one P1 configuration
+before any candidate execution can begin.
 
 Synthetic fixtures are training and public-test inputs only and are never
 application graph data.
