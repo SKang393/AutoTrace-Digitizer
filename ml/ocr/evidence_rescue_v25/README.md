@@ -26,7 +26,10 @@ available only for a later separately preregistered candidate if P1 fails.
 P1 configuration SHA-256 `4c96df20...bb6` and the public gate configuration
 SHA-256 `fc687363...7f18` bind the exact split seal, ignored fixture archives,
 detector, recognizer, frozen parent, candidate runner, and truth-hidden
-evaluator. Candidate execution is not authorized. The public evaluator source
+evaluator. P1 is authorized for one zero-optimizer selection execution from
+the exact committed configuration and runner source bundle. The public
+archive, marker composition, private validation, manifest creation, model
+store, packaging, approval, and release remain unauthorized. The public evaluator source
 bundle is frozen at `82467dcf...fb15`; it requires direct CPU execution of all
 four ONNX streams at three consecutive thresholds, aggregate-only output, and
 one canonical gate opening. The public archive remains unopened with zero

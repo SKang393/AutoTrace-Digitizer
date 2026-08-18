@@ -75,7 +75,7 @@ def test_v24_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_binds_frozen_split_candidate_and_public_gate() -> None:
+def test_canonical_budget_authorizes_only_p1_while_public_gate_stays_locked() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(
             encoding="utf-8"
@@ -102,8 +102,11 @@ def test_canonical_budget_binds_frozen_split_candidate_and_public_gate() -> None
     public_config = REPO_ROOT / entry["public_gate_config_path"]
     assert entry["public_gate_config_sha256"] == sha256_file(public_config)
     assert entry["selection_evaluations"] == 0
-    assert entry["execution_authorized"] is False
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
     assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_evaluations"] == 0
+    assert entry["public_gate_archive_opened"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
 
