@@ -41,7 +41,6 @@ from ml.ocr.evidence_rescue_v25.protocol import (
     split_registration,
 )
 from ml.ocr.evidence_rescue_v25.train_p2 import (
-    RUNNER_SOURCE_PATHS as P2_RUNNER_SOURCE_PATHS,
     _proposal_residual_objective,
 )
 from ml.ocr.evidence_rescue_v25.train_p3 import (
@@ -103,7 +102,7 @@ def test_canonical_budget_preregisters_p3_while_public_gate_stays_locked() -> No
     assert entry["protocol_sha256"] == sha256_file(
         REPO_ROOT / "ml/ocr/evidence_rescue_v25/PROTOCOL.json"
     )
-    assert entry["preregistered_candidate_ids"] == ["P2", "P3"]
+    assert entry["preregistered_candidate_ids"] == ["P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
     assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["split_materialized"] is True
@@ -117,8 +116,8 @@ def test_canonical_budget_preregisters_p3_while_public_gate_stays_locked() -> No
     assert p2_config["candidate_id"] == "P2"
     assert p2_config["expected_optimizer_steps"] == 1280
     assert p2_config["case_level_selection_evidence_used_for_design"] is False
-    assert p2_config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
-        REPO_ROOT, P2_RUNNER_SOURCE_PATHS,
+    assert p2_config["expected_runner_source_bundle_sha256"] == (
+        entry["candidate_runner_source_bundle_sha256"]["P2"]
     )
     p3_config_path = REPO_ROOT / entry["candidate_config_paths"]["P3"]
     assert entry["candidate_config_sha256"]["P3"] == sha256_file(p3_config_path)
@@ -166,6 +165,15 @@ def test_canonical_budget_preregisters_p3_while_public_gate_stays_locked() -> No
     assert entry["execution_authorized"] is True
     assert entry["authorized_candidate_id"] == "P3"
     assert entry["execution_blocker"] is None
+    assert entry["preexecution_rejected_invocations"] == 1
+    blocker_path = REPO_ROOT / entry["preexecution_rejection_path"]
+    assert entry["preexecution_rejection_sha256"] == sha256_file(blocker_path)
+    blocker = json.loads(blocker_path.read_text(encoding="utf-8"))
+    assert blocker["candidate_consumed"] is False
+    assert blocker["training_seal_created"] is False
+    assert blocker["canonical_output_created"] is False
+    assert blocker["optimizer_steps"] == 0
+    assert blocker["selection_evaluations"] == 0
     assert p3_config["expected_runner_source_bundle_sha256"] in (
         entry["execution_authorization"]
     )

@@ -1,0 +1,23 @@
+{
+  "schema": "graphreader.ocr-evidence-rescue-preexecution-blocker.v1",
+  "task": "ocr-detection-recognition",
+  "revision": "graph-text-evidence-rescue-v25",
+  "candidate_id": "P3",
+  "source_commit": "b58586b9e70512c17e89776a2b7d7f3d4d779695",
+  "command": "python -m ml.ocr.evidence_rescue_v25.train_p3 --execute",
+  "exit_code": 1,
+  "phase": "authorization_validation_before_seal",
+  "exception_type": "RuntimeError",
+  "exception_message": "Training candidate budget is not an unused single-candidate authorization: P3",
+  "cause": "The shared validator required preregistered_candidate_ids to contain only the current candidate, but the canonical third-candidate ledger correctly retained the cumulative P2 and P3 preregistration history.",
+  "training_seal_created": false,
+  "canonical_output_created": false,
+  "optimizer_steps": 0,
+  "selection_evaluations": 0,
+  "candidate_consumed": false,
+  "public_gate_archive_opened": false,
+  "public_gate_evaluations": 0,
+  "production_approval": false,
+  "release_eligible": false,
+  "recorded_utc": "2026-08-18T04:11:44.4805291Z"
+}

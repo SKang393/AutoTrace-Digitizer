@@ -17,7 +17,11 @@ import torch
 from torch import nn
 
 from ml.markers.gate_seal import canonical_json_bytes, sha256_file, source_bundle_sha256
-from ml.markers.training_budget import acquire_training_candidate, complete_training_candidate
+from ml.markers.training_budget import (
+    CANONICAL_LEDGER_PATH,
+    acquire_training_candidate,
+    complete_training_candidate,
+)
 from ml.ocr.margin_calibrator_v20.pipeline import evaluate_thresholds, select_robust_window
 from ml.ocr.official_bakeoff.production_evaluate import read_character_alphabet
 from ml.ocr.crop_evidence_role_anchor_v24.train_p1 import (
@@ -291,6 +295,23 @@ def preflight() -> dict[str, Any]:
         raise RuntimeError("OCR V25 split source commit is not an ancestor")
     if (REPO_ROOT / CANONICAL_OUTPUT).exists():
         raise RuntimeError("OCR V25 P3 output already exists")
+    ledger = _read_json(REPO_ROOT / CANONICAL_LEDGER_PATH)
+    entry = next(
+        (
+            item for item in ledger.get("revisions", [])
+            if item.get("task") == TASK and item.get("revision") == REVISION
+        ),
+        None,
+    )
+    if (
+        entry is None
+        or entry.get("status") != "candidate_3_preregistered"
+        or entry.get("execution_authorized") is not True
+        or entry.get("authorized_candidate_id") != CANDIDATE_ID
+        or entry.get("preregistered_candidate_ids") != [CANDIDATE_ID]
+        or entry.get("consumed_candidate_ids") != ["P1", "P2"]
+    ):
+        raise RuntimeError("OCR V25 P3 canonical single-candidate authorization changed")
     return {"config": config, "head": head, "seal": seal}
 
 

@@ -6198,7 +6198,7 @@
       "architecture": "frozen-crop-residual-ctc-evidence-rescue-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": ["P2", "P3"],
+      "preregistered_candidate_ids": ["P3"],
       "consumed_candidate_ids": ["P1", "P2"],
       "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/ocr/evidence_rescue_v25/PROTOCOL.json",
@@ -6247,7 +6247,7 @@
       "candidate_config_sha256": {
         "P1": "4c96df207f2ba0bebbb4cb48c3944a766820c0d79efdcf22cc0641c154973bb6",
         "P2": "e6bacf0f828d50e90b9e5f66772d0a45ba1fb24d0d623faa434cbbd856ca1dba",
-        "P3": "4bc7785059dd0a6e28d42d1ac9ecd1a88e0888d08d657b2f248262c9b7c4821a"
+        "P3": "a75fa413f22c377cab85328f1b2cafb261b8a8cd15be8720d6ed787b6439016b"
       },
       "candidate_2_isolated_change": "train only a pooled tight/context crop and 31-value evidence residual over the exact frozen V24 P2 parent, with explicit positive floor, negative ceiling, teacher preservation, and per-scene separation losses",
       "candidate_2_architecture": "frozen-v24-parent-plus-pooled-evidence-residual-v1",
@@ -6261,7 +6261,7 @@
       "candidate_runner_source_bundle_sha256": {
         "P1": "51c0b56373267306e1b4ceb8dc236d90c880656afc456e3125247f26fca430cf",
         "P2": "a637e8c609c0cf1cf18dd01e3fb36b7bba355ff959e5dcdcee4a5c5de34812aa",
-        "P3": "fbddfcce28454ae97505a99cb7bb2265c7086589678dba8fe4cad779b91763bd"
+        "P3": "5f025e00a37d928469a8c890c0d279eeb9d9fda9fff15cbf513f63d77a920d46"
       },
       "candidate_result_paths": {
         "P1": "ml/ocr/evidence_rescue_v25/P1_RESULT.json",
@@ -6283,7 +6283,7 @@
         "P1": "ff9d035136afe05947a0bf17005cad59a65b3265c48847308e036e9e2e5f5acc",
         "P2": "f612fe00c7480c02eaf88d8c12b16dbcf8a020715b74cee3652ee9656519f552"
       },
-      "expected_runner_source_bundle_sha256": "fbddfcce28454ae97505a99cb7bb2265c7086589678dba8fe4cad779b91763bd",
+      "expected_runner_source_bundle_sha256": "5f025e00a37d928469a8c890c0d279eeb9d9fda9fff15cbf513f63d77a920d46",
       "selection_evaluations": 2,
       "selection_status": "failed_selection",
       "selection_exact_scene_count": 112,
@@ -6310,7 +6310,14 @@
       "execution_authorized": true,
       "authorized_candidate_id": "P3",
       "execution_blocker": null,
-      "execution_authorization": "P3 may execute exactly once from committed configuration 4bc7785059dd0a6e28d42d1ac9ecd1a88e0888d08d657b2f248262c9b7c4821a and runner source bundle fbddfcce28454ae97505a99cb7bb2265c7086589678dba8fe4cad779b91763bd. Public, marker, private, manifest, model-store, packaging, approval, and release execution remain unauthorized.",
+      "preexecution_rejected_invocations": 1,
+      "preexecution_rejection_path": "ml/ocr/evidence_rescue_v25/P3_PREEXECUTION_BLOCKER.json",
+      "preexecution_rejection_sha256": "7409803c62758c075c2c3ff9d26769d230e09cdcbaa914354c112555ff499b4c",
+      "preexecution_rejection_created_training_seal": false,
+      "preexecution_rejection_created_canonical_output": false,
+      "preexecution_rejection_optimizer_steps": 0,
+      "preexecution_rejection_selection_evaluations": 0,
+      "execution_authorization": "P3 may execute exactly once after its pre-seal authorization-validation defect from committed configuration a75fa413f22c377cab85328f1b2cafb261b8a8cd15be8720d6ed787b6439016b and runner source bundle 5f025e00a37d928469a8c890c0d279eeb9d9fda9fff15cbf513f63d77a920d46. The rejected invocation created no seal or output, ran zero optimizer steps, performed zero selection evaluations, and did not consume P3. Public, marker, private, manifest, model-store, packaging, approval, and release execution remain unauthorized.",
       "marker_creation_evaluated": false,
       "manifest_created": false,
       "model_store_promoted": false,
