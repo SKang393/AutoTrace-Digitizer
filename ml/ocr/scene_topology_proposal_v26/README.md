@@ -56,11 +56,27 @@ output was preserved, but CPU ONNX parity again measured
 report, checkpoint, and ONNX SHA-256 values are `cce83aa9...e23fe`,
 `eaf87de8...db4df`, `ecd1cebc...a0271`, and `04eea8a6...97ce7`.
 
-P1 and P2 are consumed and cannot rerun. P3 remains unregistered and requires a
-separate aggregate-only preregistration before execution. The truth-hidden
-public archive remains unauthorized, unopened, and at zero evaluations. No
-manifest, model-store entry, package payload, public evaluation, marker
-composition, private validation, approval, or release has been created.
+P1 and P2 are consumed and cannot rerun. Final P3 is preregistered using only
+the aggregate P2 terminal metrics. It loads the exact P2 checkpoint, freezes
+the role parent, crop and evidence encoders, and the first two proposal layers,
+then trains only `proposal_head.5.weight` and `proposal_head.5.bias`. Its fixed
+three-epoch, 1,152-step objective combines positive and negative extrema,
+the hardest two percent of training negatives, target margins, and per-scene
+separation. No P2 case identity, truth row, prediction, or selection pixel was
+used to choose that repair.
+
+P2's parity excess was isolated on generated tensors to extended ONNX Runtime
+graph optimization in frozen role channels, not proposal output. P3 therefore
+binds candidate inference to deterministic CPU `ORT_ENABLE_BASIC`, which kept
+generated-tensor maximum error within the existing `1e-5` gate. The tolerance
+is unchanged, P2 is not rerun, and the policy must remain provider-compatible
+if this candidate later reaches production consideration.
+
+P3 may execute exactly once after its committed source binding. The
+truth-hidden public archive remains unauthorized, unopened, and at zero
+evaluations. No manifest, model-store entry, package payload, public
+evaluation, marker composition, private validation, approval, or release has
+been created.
 
 Synthetic fixtures are training and public-test inputs only and are never
 application graph data.
