@@ -85,7 +85,7 @@ def test_v25_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_authorizes_only_checksum_bound_p1() -> None:
+def test_canonical_budget_records_consumed_failed_p1_and_locks_execution() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(
             encoding="utf-8"
@@ -96,10 +96,10 @@ def test_canonical_budget_authorizes_only_checksum_bound_p1() -> None:
         if item["task"] == "ocr-detection-recognition"
         and item["revision"] == "graph-text-scene-topology-proposal-v26"
     )
-    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["status"] == "candidate_1_selection_failed"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
     assert entry["split_materialized"] is True
     split_seal_path = REPO_ROOT / entry["split_seal_path"]
@@ -149,8 +149,27 @@ def test_canonical_budget_authorizes_only_checksum_bound_p1() -> None:
     assert candidate_config["public_execution_authorized"] is False
     assert candidate_config["private_or_article_images"] is False
     assert candidate_config["chandler_included"] is False
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    result_path = REPO_ROOT / entry["candidate_result_paths"]["P1"]
+    assert entry["candidate_result_sha256"]["P1"] == sha256_file(result_path)
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert result["candidate_consumed"] is True
+    assert result["status"] == "failed_selection"
+    assert result["optimizer_steps"] == 2304
+    assert result["selection_metrics"]["true_positives"] == 1024
+    assert result["selection_metrics"]["false_positives"] == 5
+    assert result["selection_metrics"]["false_negatives"] == 0
+    assert result["selection_metrics"]["prohibited_structure_hits"] == 5
+    assert result["onnx_parity_maximum_absolute_error"] > 1e-5
+    assert result["passing_threshold_window"] == []
+    assert result["case_level_details_emitted"] is False
+    assert "cases" not in result and "predictions" not in result
+    assert entry["candidate_report_sha256"]["P1"] == result["report_sha256"]
+    assert entry["candidate_checkpoint_sha256"]["P1"] == result["checkpoint_sha256"]
+    assert entry["candidate_onnx_sha256"]["P1"] == result["onnx_sha256"]
+    assert entry["selection_evaluations"] == 1
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorization"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False

@@ -31,15 +31,23 @@ three consecutive thresholds with zero false, missed, duplicate, or prohibited
 regions. Recognition exact must be at least `0.90`, CER at most `0.05`, overall
 role accuracy at least `0.90`, and every role at least `0.85`.
 
-The split identity and public evaluator are frozen. P1 is now the only
-configured candidate, bound by configuration SHA-256 `27a94be0...a5db3` and
-runner-source-bundle SHA-256 `95fdb53b...f643`. It may execute once after this
-authorization is committed. The truth-hidden public archive remains unopened
-with zero evaluations. No optimizer step, selection, checkpoint, ONNX file,
+P1 executed exactly once from configuration SHA-256 `27a94be0...a5db3` and
+runner-source-bundle SHA-256 `95fdb53b...f643`. It completed all 2,304 fixed
+optimizer steps, preserved the frozen role parent exactly, and retained all
+1,024 truth regions. Its single stored-byte selection still left five false
+prohibited regions across 10 scenes at the best fixed threshold, so only 118
+of 128 scenes were exact and no passing three-threshold window existed. CPU
+ONNX parity was `1.1444091796875e-05`, above the fixed `1e-5` maximum.
+Recognition exact was `0.97265625`, CER was `0.004640371229698376`, and role
+accuracy was `0.9951171875`. Aggregate result, ignored report, checkpoint, and
+ONNX SHA-256 values are `1c1a3041...e5338`, `d962cd13...ec32b`,
+`29fe9349...6d89`, and `d6cb6910...c241`.
+
+P1 is consumed and cannot rerun. P2 and P3 remain unregistered and require a
+separate aggregate-only preregistration before execution. The truth-hidden
+public archive remains unauthorized, unopened, and at zero evaluations. No
 manifest, model-store entry, package payload, public evaluation, marker
-composition, private validation, approval, or release has been created. P2,
-P3, public, marker, private, packaging, approval, and release execution remain
-unauthorized.
+composition, private validation, approval, or release has been created.
 
 Synthetic fixtures are training and public-test inputs only and are never
 application graph data.
