@@ -59,7 +59,7 @@ Final P3 is preregistered from only the aggregate P1 and P2 results. It freezes
 the exact P1 proposal and role composition, preserves every parent role logit,
 and replaces P2's fixed 8-by-8 crop pooling with a trainable two-scale spatial
 encoder plus proposal residual. Fixed configuration SHA-256 is
-`1131ef88...15bf`; runner source bundle SHA-256 is `dc0a1593...ce7d`. It has a
+`4bc77850...821a`; runner source bundle SHA-256 is `fbddfcce...63bd`. It has a
 five-epoch, exactly 1,280-step budget with fixed weight decay, dropout, and
 gradient clipping. It is not yet authorized to execute.
 

@@ -65,7 +65,7 @@
   "selection_fixture_archive_sha256": "20284a9a259409cf9b94550bfed244fd59933a287f1fe2a13d2000ff8c354f9d",
   "public_fixture_archive_path": "artifacts/production-validation/ocr-v25-public.zip",
   "public_fixture_archive_sha256": "bab5eaa67d7d7427334523a2db3780b516b1e822bb017c0a154e2f029d46ec40",
-  "expected_runner_source_bundle_sha256": "dc0a159336ff075c5fa5ce8a6043dcc72eaab5e13ebd0655c6e098b9f801ce7d",
+  "expected_runner_source_bundle_sha256": "fbddfcce28454ae97505a99cb7bb2265c7086589678dba8fe4cad779b91763bd",
   "onnx_parity_maximum_absolute_error": 0.00001,
   "selection_evaluation_limit": 1,
   "validation_or_public_pixels_used_for_training": false,

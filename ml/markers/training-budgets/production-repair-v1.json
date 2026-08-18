@@ -6247,7 +6247,7 @@
       "candidate_config_sha256": {
         "P1": "4c96df207f2ba0bebbb4cb48c3944a766820c0d79efdcf22cc0641c154973bb6",
         "P2": "e6bacf0f828d50e90b9e5f66772d0a45ba1fb24d0d623faa434cbbd856ca1dba",
-        "P3": "1131ef888c5ddd7b0f20cb931aed0d3b5bffa98779cdb8631c2c900851b415bf"
+        "P3": "4bc7785059dd0a6e28d42d1ac9ecd1a88e0888d08d657b2f248262c9b7c4821a"
       },
       "candidate_2_isolated_change": "train only a pooled tight/context crop and 31-value evidence residual over the exact frozen V24 P2 parent, with explicit positive floor, negative ceiling, teacher preservation, and per-scene separation losses",
       "candidate_2_architecture": "frozen-v24-parent-plus-pooled-evidence-residual-v1",
@@ -6261,7 +6261,7 @@
       "candidate_runner_source_bundle_sha256": {
         "P1": "51c0b56373267306e1b4ceb8dc236d90c880656afc456e3125247f26fca430cf",
         "P2": "a637e8c609c0cf1cf18dd01e3fb36b7bba355ff959e5dcdcee4a5c5de34812aa",
-        "P3": "dc0a159336ff075c5fa5ce8a6043dcc72eaab5e13ebd0655c6e098b9f801ce7d"
+        "P3": "fbddfcce28454ae97505a99cb7bb2265c7086589678dba8fe4cad779b91763bd"
       },
       "candidate_result_paths": {
         "P1": "ml/ocr/evidence_rescue_v25/P1_RESULT.json",
@@ -6283,7 +6283,7 @@
         "P1": "ff9d035136afe05947a0bf17005cad59a65b3265c48847308e036e9e2e5f5acc",
         "P2": "f612fe00c7480c02eaf88d8c12b16dbcf8a020715b74cee3652ee9656519f552"
       },
-      "expected_runner_source_bundle_sha256": "dc0a159336ff075c5fa5ce8a6043dcc72eaab5e13ebd0655c6e098b9f801ce7d",
+      "expected_runner_source_bundle_sha256": "fbddfcce28454ae97505a99cb7bb2265c7086589678dba8fe4cad779b91763bd",
       "selection_evaluations": 2,
       "selection_status": "failed_selection",
       "selection_exact_scene_count": 112,
