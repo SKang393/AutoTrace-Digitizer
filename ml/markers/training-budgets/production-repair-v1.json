@@ -6186,7 +6186,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-evidence-rescue-v25",
-      "status": "candidate_2_preregistered",
+      "status": "candidate_2_consumed",
       "defect_class": "V23 P3 retained all 1024 visible-selection truths with three false and prohibited regions, while V24 P2 removed every false region but missed two truths",
       "prior_revision": "graph-text-crop-evidence-role-anchor-v24",
       "trigger_result_path": "ml/ocr/crop_evidence_role_anchor_v24/P2_RESULT.json",
@@ -6199,7 +6199,7 @@
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
       "preregistered_candidate_ids": ["P2"],
-      "consumed_candidate_ids": ["P1"],
+      "consumed_candidate_ids": ["P1", "P2"],
       "remaining_unregistered_candidate_ids": ["P3"],
       "protocol_path": "ml/ocr/evidence_rescue_v25/PROTOCOL.json",
       "protocol_sha256": "7e1ab12c1e82bc78a0489f6d7db1abd5b8926667ad68ff1c23b30386c274de8d",
@@ -6256,34 +6256,39 @@
         "P2": "a637e8c609c0cf1cf18dd01e3fb36b7bba355ff959e5dcdcee4a5c5de34812aa"
       },
       "candidate_result_paths": {
-        "P1": "ml/ocr/evidence_rescue_v25/P1_RESULT.json"
+        "P1": "ml/ocr/evidence_rescue_v25/P1_RESULT.json",
+        "P2": "ml/ocr/evidence_rescue_v25/P2_RESULT.json"
       },
       "candidate_result_sha256": {
-        "P1": "700e1b659a78bc48ebfd893dc66d5b23f082c340857c64da4f7fd752c5f7dcf1"
+        "P1": "700e1b659a78bc48ebfd893dc66d5b23f082c340857c64da4f7fd752c5f7dcf1",
+        "P2": "266df7f7e70f767a455b92acb06adc43bec7763e9404256b84dc4e896cea45c1"
       },
       "candidate_report_sha256": {
-        "P1": "c655ad88ed7bae1c3f5ecfe3aa71c114a9a663a9f67524cff3a643b1ac6e48a5"
+        "P1": "c655ad88ed7bae1c3f5ecfe3aa71c114a9a663a9f67524cff3a643b1ac6e48a5",
+        "P2": "057965da921ff6908c2836ab15f109cadf46692db1071fe78aaedd127a051768"
       },
       "candidate_checkpoint_sha256": {
-        "P1": "7b3443220ad17eee5daab1a314f1a0067690e3175da98fdaaada2d2712c9cd40"
+        "P1": "7b3443220ad17eee5daab1a314f1a0067690e3175da98fdaaada2d2712c9cd40",
+        "P2": "15beecac8243e5d324877933160355fc7973ac2a7c5a0ea6572f0431a25fd520"
       },
       "candidate_onnx_sha256": {
-        "P1": "ff9d035136afe05947a0bf17005cad59a65b3265c48847308e036e9e2e5f5acc"
+        "P1": "ff9d035136afe05947a0bf17005cad59a65b3265c48847308e036e9e2e5f5acc",
+        "P2": "f612fe00c7480c02eaf88d8c12b16dbcf8a020715b74cee3652ee9656519f552"
       },
-      "expected_runner_source_bundle_sha256": "51c0b56373267306e1b4ceb8dc236d90c880656afc456e3125247f26fca430cf",
-      "selection_evaluations": 1,
+      "expected_runner_source_bundle_sha256": "a637e8c609c0cf1cf18dd01e3fb36b7bba355ff959e5dcdcee4a5c5de34812aa",
+      "selection_evaluations": 2,
       "selection_status": "failed_selection",
       "selection_exact_scene_count": 112,
       "selection_scene_count": 128,
-      "selection_true_positives": 1017,
+      "selection_true_positives": 1016,
       "selection_false_positives": 1,
-      "selection_false_negatives": 7,
+      "selection_false_negatives": 8,
       "selection_duplicate_regions": 0,
       "selection_prohibited_structure_hits": 1,
-      "selection_recognition_exact": 0.96484375,
-      "selection_character_error_rate": 0.010632995514205018,
-      "selection_role_accuracy": 0.9833984375,
-      "selection_parent_roles_preserved": false,
+      "selection_recognition_exact": 0.9638671875,
+      "selection_character_error_rate": 0.011463698288752284,
+      "selection_role_accuracy": 0.982421875,
+      "selection_parent_roles_preserved": true,
       "selection_onnx_parity_maximum_absolute_error": 0.0000095367431640625,
       "selection_passing_threshold_window": [],
       "public_gate_revision": "graph-text-evidence-rescue-v25-public-v1",
@@ -6294,10 +6299,10 @@
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P2",
-      "execution_blocker": null,
-      "execution_authorization": "P2 may execute exactly once from committed configuration e6bacf0f828d50e90b9e5f66772d0a45ba1fb24d0d623faa434cbbd856ca1dba and runner source bundle a637e8c609c0cf1cf18dd01e3fb36b7bba355ff959e5dcdcee4a5c5de34812aa. Public, marker, private, manifest, model-store, packaging, approval, and release execution remain unauthorized.",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1 and P2 are consumed and failed fixed visible selection. P3 requires a separate aggregate-only preregistration and committed authorization before any execution. The truth-hidden public archive remains locked and unopened.",
+      "execution_authorization": null,
       "marker_creation_evaluated": false,
       "manifest_created": false,
       "model_store_promoted": false,

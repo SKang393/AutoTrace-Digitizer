@@ -36,15 +36,25 @@ exact parent-role preservation was not proven. No threshold window passed.
 Report SHA-256 is `c655ad88...48a5`; rejected ONNX SHA-256 is
 `ff9d0351...5acc`; tracked result SHA-256 is `700e1b65...dcf1`.
 
-P1 is consumed and cannot rerun. P2 is separately preregistered from only the
-aggregate P1 result. It freezes the exact V24 P2 parent and trains only a small
-pooled tight/context crop plus 31-value evidence residual. Its fixed loss
-simultaneously enforces positive and negative logit margins, teacher
+P1 and P2 are consumed and cannot rerun. P2 was separately preregistered from
+only the aggregate P1 result. It froze the exact V24 P2 parent and trained only
+a small pooled tight/context crop plus 31-value evidence residual. Its fixed
+loss simultaneously enforced positive and negative logit margins, teacher
 preservation, and per-scene separation across all 16,520 frozen training
-proposals. The budget is five epochs and exactly 1,280 optimizer steps. P2
-configuration SHA-256 is `e6bacf0f...1dba`; its runner source bundle is
-`a637e8c6...12aa`. The separately committed canonical ledger authorizes P2
-for exactly one execution from those bytes. P3 remains unregistered.
+proposals. It completed all five epochs and exactly 1,280 optimizer steps.
+Configuration SHA-256 is `e6bacf0f...1dba`; runner source bundle is
+`a637e8c6...12aa`.
+
+The single direct stored-byte CPU selection retained 1,016/1,024 truths with
+one false prohibited region, eight misses, zero duplicates, and 112/128 exact
+scenes at its best threshold `0.35`. Recognition exact was `0.9638671875`, CER
+was `0.011463698288752284`, and role accuracy was `0.982421875`. Exact parent
+roles were preserved and CPU ONNX parity passed at
+`9.5367431640625e-06`, but no fixed threshold passed the zero-error gate and no
+three-threshold window existed. Report, rejected ONNX, checkpoint, and tracked
+result SHA-256 values are `057965da...768`, `f612fe00...552`,
+`15beecac...520`, and `266df7f7...5c1`. P3 remains unregistered and requires a
+separate aggregate-only preregistration and committed authorization.
 
 The public evaluator source bundle remains frozen at `82467dcf...fb15`, but
 the public archive stays unauthorized and unopened with zero evaluations.
