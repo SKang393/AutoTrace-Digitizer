@@ -125,7 +125,7 @@ def test_v27_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_consumes_failed_p1_and_keeps_p2_source_fail_closed() -> None:
+def test_canonical_budget_consumes_failed_p1_and_authorizes_only_bound_p2() -> None:
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -135,7 +135,7 @@ def test_canonical_budget_consumes_failed_p1_and_keeps_p2_source_fail_closed() -
         item for item in ledger["revisions"]
         if item["revision"] == "graph-text-relational-neighborhood-proposal-v28"
     )
-    assert entry["status"] == "candidate_2_source_preregistered"
+    assert entry["status"] == "candidate_2_preregistered"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == ["P2"]
     assert entry["consumed_candidate_ids"] == ["P1"]
@@ -151,18 +151,21 @@ def test_canonical_budget_consumes_failed_p1_and_keeps_p2_source_fail_closed() -
     )
     for split, archive_path in entry["split_archive_paths"].items():
         assert sha256_file(REPO_ROOT / archive_path) == entry["split_archive_sha256"][split]
-    config_path = REPO_ROOT / entry["candidate_config_paths"]["P1"]
-    assert sha256_file(config_path) == entry["candidate_config_sha256"]["P1"]
+    for candidate_id in ("P1", "P2"):
+        config_path = REPO_ROOT / entry["candidate_config_paths"][candidate_id]
+        assert sha256_file(config_path) == entry["candidate_config_sha256"][candidate_id]
     result_path = REPO_ROOT / entry["candidate_result_paths"]["P1"]
     assert sha256_file(result_path) == entry["candidate_result_sha256"]["P1"]
     assert entry["selection_evaluations"] == 1
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
-    assert entry["execution_authorization"] is None
-    assert "P2 design and source are preregistered" in entry["execution_blocker"]
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["execution_blocker"] is None
+    assert "P2 may execute exactly once" in entry["execution_authorization"]
+    assert "public archive" in entry["execution_authorization"]
+    assert "remain unauthorized" in entry["execution_authorization"]
     p2_preregistration = REPO_ROOT / entry["candidate_2_preregistration_path"]
     assert sha256_file(p2_preregistration) == entry[
         "candidate_2_preregistration_sha256"
@@ -416,7 +419,7 @@ def test_p2_preregistration_is_aggregate_only_bounded_and_unauthorized() -> None
     assert "Generalization" in preregistration["data_scope"]
 
 
-def test_p2_exact_p1_inputs_and_source_bundle_are_present_but_preflight_is_blocked() -> None:
+def test_p2_exact_p1_inputs_and_source_bundle_are_present_and_preflight_is_ready() -> None:
     exact_inputs = {
         P1_RESULT_PATH: P1_RESULT_SHA256,
         P1_CHECKPOINT_PATH: P1_CHECKPOINT_SHA256,
@@ -435,8 +438,26 @@ def test_p2_exact_p1_inputs_and_source_bundle_are_present_but_preflight_is_block
         Path("ml/ocr/relational_neighborhood_proposal_v28/train_p2.py"),
     } <= set(P2_RUNNER_SOURCE_PATHS)
     assert all((REPO_ROOT / path).is_file() for path in P2_RUNNER_SOURCE_PATHS)
-    with pytest.raises((FileNotFoundError, RuntimeError)):
-        p2_preflight()
+    ledger = json.loads(
+        (
+            REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
+        ).read_text(encoding="utf-8")
+    )
+    entry = next(
+        item for item in ledger["revisions"]
+        if item["revision"] == "graph-text-relational-neighborhood-proposal-v28"
+    )
+    config_path = REPO_ROOT / entry["candidate_config_paths"]["P2"]
+    assert sha256_file(config_path) == entry["candidate_config_sha256"]["P2"]
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, P2_RUNNER_SOURCE_PATHS,
+    )
+    evidence = p2_preflight()
+    assert evidence["config"] == config
+    assert evidence["seal"]["source_commit"] == (
+        "d49a7b469ea787d2c991383608dd93e6565e4439"
+    )
 
 
 def test_p2_role_objective_rewards_correction_without_regressing_teacher_truths() -> None:

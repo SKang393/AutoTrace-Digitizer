@@ -71,9 +71,13 @@ steps.
 Selection additionally requires exact P1 PyTorch and ONNX proposal logits,
 identical acceptance at every fixed threshold, the exact P1 full output stream
 reexecution hash, unchanged frozen parameters, and strict P2 ONNX parity.
-Execution remains unauthorized until the committed source-bundle hash is bound
-in a separate candidate configuration and the canonical ledger grants the
-single P2 execution.
+The committed runner source bundle is SHA-256
+`a1322bf488796d6d5b673a0182061edffbed8817ccc7b28e6a7a3b1110e0dae1`.
+The checksum-bound P2 candidate configuration is SHA-256
+`0d2ac3c51c839c630330442a7a96ef83177ab8867e6c9f6b123c120b300477a9`.
+The canonical ledger grants P2 exactly one execution after this authorization
+checkpoint is committed. It may open only the frozen training and
+visible-selection archives.
 
 Truth-hidden public evaluation, marker
 composition, private validation, manifest creation, model-store promotion,
