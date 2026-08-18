@@ -53,8 +53,15 @@ roles were preserved and CPU ONNX parity passed at
 `9.5367431640625e-06`, but no fixed threshold passed the zero-error gate and no
 three-threshold window existed. Report, rejected ONNX, checkpoint, and tracked
 result SHA-256 values are `057965da...768`, `f612fe00...552`,
-`15beecac...520`, and `266df7f7...5c1`. P3 remains unregistered and requires a
-separate aggregate-only preregistration and committed authorization.
+`15beecac...520`, and `266df7f7...5c1`.
+
+Final P3 is preregistered from only the aggregate P1 and P2 results. It freezes
+the exact P1 proposal and role composition, preserves every parent role logit,
+and replaces P2's fixed 8-by-8 crop pooling with a trainable two-scale spatial
+encoder plus proposal residual. Fixed configuration SHA-256 is
+`1131ef88...15bf`; runner source bundle SHA-256 is `dc0a1593...ce7d`. It has a
+five-epoch, exactly 1,280-step budget with fixed weight decay, dropout, and
+gradient clipping. It is not yet authorized to execute.
 
 The public evaluator source bundle remains frozen at `82467dcf...fb15`, but
 the public archive stays unauthorized and unopened with zero evaluations.

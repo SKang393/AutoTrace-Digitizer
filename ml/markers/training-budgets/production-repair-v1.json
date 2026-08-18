@@ -6186,7 +6186,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-evidence-rescue-v25",
-      "status": "candidate_2_consumed",
+      "status": "candidate_3_preregistered",
       "defect_class": "V23 P3 retained all 1024 visible-selection truths with three false and prohibited regions, while V24 P2 removed every false region but missed two truths",
       "prior_revision": "graph-text-crop-evidence-role-anchor-v24",
       "trigger_result_path": "ml/ocr/crop_evidence_role_anchor_v24/P2_RESULT.json",
@@ -6198,9 +6198,9 @@
       "architecture": "frozen-crop-residual-ctc-evidence-rescue-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": ["P2"],
+      "preregistered_candidate_ids": ["P2", "P3"],
       "consumed_candidate_ids": ["P1", "P2"],
-      "remaining_unregistered_candidate_ids": ["P3"],
+      "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/ocr/evidence_rescue_v25/PROTOCOL.json",
       "protocol_sha256": "7e1ab12c1e82bc78a0489f6d7db1abd5b8926667ad68ff1c23b30386c274de8d",
       "split_materialized": true,
@@ -6241,19 +6241,27 @@
       },
       "candidate_config_paths": {
         "P1": "ml/ocr/evidence_rescue_v25/training/p1.json",
-        "P2": "ml/ocr/evidence_rescue_v25/training/p2.json"
+        "P2": "ml/ocr/evidence_rescue_v25/training/p2.json",
+        "P3": "ml/ocr/evidence_rescue_v25/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "4c96df207f2ba0bebbb4cb48c3944a766820c0d79efdcf22cc0641c154973bb6",
-        "P2": "e6bacf0f828d50e90b9e5f66772d0a45ba1fb24d0d623faa434cbbd856ca1dba"
+        "P2": "e6bacf0f828d50e90b9e5f66772d0a45ba1fb24d0d623faa434cbbd856ca1dba",
+        "P3": "1131ef888c5ddd7b0f20cb931aed0d3b5bffa98779cdb8631c2c900851b415bf"
       },
       "candidate_2_isolated_change": "train only a pooled tight/context crop and 31-value evidence residual over the exact frozen V24 P2 parent, with explicit positive floor, negative ceiling, teacher preservation, and per-scene separation losses",
       "candidate_2_architecture": "frozen-v24-parent-plus-pooled-evidence-residual-v1",
       "candidate_2_objective": "teacher-preserving-pooled-residual-separation-v1",
       "candidate_2_optimizer_step_limit": 1280,
+      "candidate_3_isolated_change": "freeze the exact V25 P1 proposal and role composition, replace P2's fixed 8-by-8 mean/max crop pooling with a trainable two-scale convolutional crop encoder, and train only the spatial encoder plus proposal residual while preserving every parent role logit",
+      "candidate_3_architecture": "frozen-v25-p1-plus-multiscale-spatial-residual-v1",
+      "candidate_3_objective": "teacher-preserving-multiscale-spatial-residual-v1",
+      "candidate_3_optimizer_step_limit": 1280,
+      "candidate_3_aggregate_design_basis": "P1 and P2 aggregate exact-scene, true-positive, false-positive, false-negative, prohibited-hit, duplicate, recognition, role, parent-preservation, and parity metrics only; no case identity, truth row, prediction, or selection pixel",
       "candidate_runner_source_bundle_sha256": {
         "P1": "51c0b56373267306e1b4ceb8dc236d90c880656afc456e3125247f26fca430cf",
-        "P2": "a637e8c609c0cf1cf18dd01e3fb36b7bba355ff959e5dcdcee4a5c5de34812aa"
+        "P2": "a637e8c609c0cf1cf18dd01e3fb36b7bba355ff959e5dcdcee4a5c5de34812aa",
+        "P3": "dc0a159336ff075c5fa5ce8a6043dcc72eaab5e13ebd0655c6e098b9f801ce7d"
       },
       "candidate_result_paths": {
         "P1": "ml/ocr/evidence_rescue_v25/P1_RESULT.json",
@@ -6275,7 +6283,7 @@
         "P1": "ff9d035136afe05947a0bf17005cad59a65b3265c48847308e036e9e2e5f5acc",
         "P2": "f612fe00c7480c02eaf88d8c12b16dbcf8a020715b74cee3652ee9656519f552"
       },
-      "expected_runner_source_bundle_sha256": "a637e8c609c0cf1cf18dd01e3fb36b7bba355ff959e5dcdcee4a5c5de34812aa",
+      "expected_runner_source_bundle_sha256": "dc0a159336ff075c5fa5ce8a6043dcc72eaab5e13ebd0655c6e098b9f801ce7d",
       "selection_evaluations": 2,
       "selection_status": "failed_selection",
       "selection_exact_scene_count": 112,
@@ -6301,7 +6309,7 @@
       "public_gate_archive_opened": false,
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "execution_blocker": "P1 and P2 are consumed and failed fixed visible selection. P3 requires a separate aggregate-only preregistration and committed authorization before any execution. The truth-hidden public archive remains locked and unopened.",
+      "execution_blocker": "P1 and P2 are consumed and failed fixed visible selection. P3 is preregistered from aggregate-only evidence but requires a separate committed authorization before its single execution. The truth-hidden public archive remains locked and unopened.",
       "execution_authorization": null,
       "marker_creation_evaluated": false,
       "manifest_created": false,
