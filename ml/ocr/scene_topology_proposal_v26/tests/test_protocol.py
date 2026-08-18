@@ -35,7 +35,10 @@ from ml.ocr.scene_topology_proposal_v26.protocol import (
     protocol_configuration,
     split_registration,
 )
-from ml.ocr.scene_topology_proposal_v26.train_p1 import _proposal_objective
+from ml.ocr.scene_topology_proposal_v26.train_p1 import (
+    RUNNER_SOURCE_PATHS,
+    _proposal_objective,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -82,7 +85,7 @@ def test_v25_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_records_frozen_splits_without_execution_authority() -> None:
+def test_canonical_budget_authorizes_only_checksum_bound_p1() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(
             encoding="utf-8"
@@ -93,11 +96,11 @@ def test_canonical_budget_records_frozen_splits_without_execution_authority() ->
         if item["task"] == "ocr-detection-recognition"
         and item["revision"] == "graph-text-scene-topology-proposal-v26"
     )
-    assert entry["status"] == "split_frozen_candidate_unconfigured"
+    assert entry["status"] == "candidate_1_preregistered"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
-    assert entry["remaining_unregistered_candidate_ids"] == ["P1", "P2", "P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
     assert entry["split_materialized"] is True
     split_seal_path = REPO_ROOT / entry["split_seal_path"]
     assert entry["split_seal_sha256"] == sha256_file(split_seal_path)
@@ -130,8 +133,24 @@ def test_canonical_budget_records_frozen_splits_without_execution_authority() ->
     assert public_config["public_execution_authorized"] is False
     assert public_config["public_evaluations"] == 0
     assert public_config["public_archive_opened"] is False
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    candidate_config_path = REPO_ROOT / entry["candidate_config_paths"]["P1"]
+    assert entry["candidate_config_sha256"]["P1"] == sha256_file(
+        candidate_config_path
+    )
+    candidate_config = json.loads(candidate_config_path.read_text(encoding="utf-8"))
+    assert candidate_config["candidate_id"] == "P1"
+    assert candidate_config["expected_optimizer_steps"] == 2304
+    assert candidate_config["expected_runner_source_bundle_sha256"] == (
+        source_bundle_sha256(REPO_ROOT, RUNNER_SOURCE_PATHS)
+    )
+    assert entry["candidate_runner_source_bundle_sha256"]["P1"] == (
+        candidate_config["expected_runner_source_bundle_sha256"]
+    )
+    assert candidate_config["public_execution_authorized"] is False
+    assert candidate_config["private_or_article_images"] is False
+    assert candidate_config["chandler_included"] is False
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False

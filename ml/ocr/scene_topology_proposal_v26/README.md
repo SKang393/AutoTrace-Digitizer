@@ -31,13 +31,15 @@ three consecutive thresholds with zero false, missed, duplicate, or prohibited
 regions. Recognition exact must be at least `0.90`, CER at most `0.05`, overall
 role accuracy at least `0.90`, and every role at least `0.85`.
 
-This checkpoint freezes only the split identity and public evaluator. The
-truth-hidden public archive remains unopened with zero evaluations. No
-candidate is configured or authorized, and no optimizer step, selection,
-checkpoint, ONNX file, manifest, model-store entry, package payload, public
-evaluation, marker composition, private validation, approval, or release has
-been created. A later committed checkpoint must bind one P1 configuration
-before any candidate execution can begin.
+The split identity and public evaluator are frozen. P1 is now the only
+configured candidate, bound by configuration SHA-256 `27a94be0...a5db3` and
+runner-source-bundle SHA-256 `95fdb53b...f643`. It may execute once after this
+authorization is committed. The truth-hidden public archive remains unopened
+with zero evaluations. No optimizer step, selection, checkpoint, ONNX file,
+manifest, model-store entry, package payload, public evaluation, marker
+composition, private validation, approval, or release has been created. P2,
+P3, public, marker, private, packaging, approval, and release execution remain
+unauthorized.
 
 Synthetic fixtures are training and public-test inputs only and are never
 application graph data.
