@@ -34,6 +34,10 @@ public sealed record LocalOnnxTextRecognizerOptions(
 
     public int InputHeight { get; init; } = 32;
 
+    public bool DynamicInputWidth { get; init; }
+
+    public int MaximumInputWidth { get; init; } = 4096;
+
     public int InputChannels { get; init; } = 1;
 
     public OcrTensorLayout InputLayout { get; init; } = OcrTensorLayout.ChannelsFirst;
@@ -316,8 +320,13 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
             return Array.Empty<OcrRecognition>();
         }
 
+        int inputWidth = crops[0].Width;
         if (crops.Any(crop =>
-                crop.Width != _options.InputWidth || crop.Height != _options.InputHeight ||
+                crop.Width != inputWidth ||
+                (!_options.DynamicInputWidth && crop.Width != _options.InputWidth) ||
+                (_options.DynamicInputWidth &&
+                 (crop.Width < _options.InputWidth || crop.Width > _options.MaximumInputWidth)) ||
+                crop.Height != _options.InputHeight ||
                 crop.Pixels.Length != checked(crop.Width * crop.Height) ||
                 (_options.InputColorMode == OcrTensorColorMode.Bgr &&
                  !HasValidBgrPixels(crop))))
@@ -325,7 +334,7 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
             throw new ArgumentException("Every OCR crop must match the configured model input dimensions.", nameof(crops));
         }
 
-        var pixelsPerCrop = checked(_options.InputWidth * _options.InputHeight);
+        var pixelsPerCrop = checked(inputWidth * _options.InputHeight);
         var valuesPerCrop = checked(pixelsPerCrop * _options.InputChannels);
         var inputValues = new float[checked(crops.Count * valuesPerCrop)];
         for (var cropIndex = 0; cropIndex < crops.Count; cropIndex++)
@@ -354,8 +363,8 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
         }
 
         IReadOnlyList<long> inputShape = _options.InputLayout == OcrTensorLayout.ChannelsFirst
-            ? [crops.Count, _options.InputChannels, _options.InputHeight, _options.InputWidth]
-            : [crops.Count, _options.InputHeight, _options.InputWidth, _options.InputChannels];
+            ? [crops.Count, _options.InputChannels, _options.InputHeight, inputWidth]
+            : [crops.Count, _options.InputHeight, inputWidth, _options.InputChannels];
 
         var inputHash = HashStrings(crops.Select(static crop => crop.CropSha256));
         var request = new InferenceRequest(
@@ -376,7 +385,9 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
                     ["alphabet_sha256"] = HashStrings([_options.Alphabet]),
                     ["blank_class_index"] = _options.BlankClassIndex,
                     ["input_height"] = _options.InputHeight,
-                    ["input_width"] = _options.InputWidth,
+                    ["input_width"] = inputWidth,
+                    ["dynamic_input_width"] = _options.DynamicInputWidth,
+                    ["maximum_input_width"] = _options.MaximumInputWidth,
                     ["input_channels"] = _options.InputChannels,
                     ["input_layout"] = _options.InputLayout.ToString(),
                     ["input_color_mode"] = _options.InputColorMode.ToString(),
@@ -499,6 +510,8 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
             options.Alphabet,
             options.InputWidth.ToString(System.Globalization.CultureInfo.InvariantCulture),
             options.InputHeight.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            options.DynamicInputWidth.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            options.MaximumInputWidth.ToString(System.Globalization.CultureInfo.InvariantCulture),
             options.InputChannels.ToString(System.Globalization.CultureInfo.InvariantCulture),
             options.InputLayout.ToString(),
             options.InputColorMode.ToString(),
@@ -558,12 +571,14 @@ public sealed class LocalOnnxTextRecognizer : ITextRecognizer
         if (alphabetSymbols.Count == 0 ||
             alphabetSymbols.Distinct(StringComparer.Ordinal).Count() != alphabetSymbols.Count ||
             options.InputWidth is < 1 or > 4096 || options.InputHeight is < 1 or > 4096 ||
+            options.MaximumInputWidth < options.InputWidth || options.MaximumInputWidth > 4096 ||
             options.InputChannels is < 1 or > 4 ||
             !Enum.IsDefined(options.InputLayout) || !Enum.IsDefined(options.InputColorMode) ||
             !Enum.IsDefined(options.OutputLayout) ||
             (options.InputColorMode == OcrTensorColorMode.Bgr && options.InputChannels != 3) ||
             !Enum.IsDefined(options.OutputActivation) ||
             options.ExpectedTimeSteps is <= 0 or > 16_384 ||
+            (options.DynamicInputWidth && options.ExpectedTimeSteps.HasValue) ||
             options.BlankClassIndex < 0 || options.BlankClassIndex > alphabetSymbols.Count ||
             options.MaximumAlternatives is < 1 or > 16 ||
             options.Timeout <= TimeSpan.Zero || options.Timeout > TimeSpan.FromMinutes(5) ||

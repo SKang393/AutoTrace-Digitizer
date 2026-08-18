@@ -15,6 +15,10 @@ public sealed record OcrPipelineOptions
 
     public int CropHeight { get; init; } = 32;
 
+    public OcrCropWidthMode CropWidthMode { get; init; } = OcrCropWidthMode.Fixed;
+
+    public int MaximumCropWidth { get; init; } = 4096;
+
     public double CropPaddingPixels { get; init; } = 1;
 
     public double? CropHorizontalPaddingPixels { get; init; }
@@ -70,6 +74,8 @@ public sealed class OcrPipeline
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         _options = options ?? throw new ArgumentNullException(nameof(options));
         if (_options.BatchSize <= 0 || _options.CropWidth <= 0 || _options.CropHeight <= 0 ||
+            _options.MaximumCropWidth < _options.CropWidth ||
+            !Enum.IsDefined(_options.CropWidthMode) ||
             _options.CropPaddingPixels < 0 ||
             (_options.CropHorizontalPaddingPixels.HasValue &&
              (!double.IsFinite(_options.CropHorizontalPaddingPixels.Value) ||
@@ -180,6 +186,8 @@ public sealed class OcrPipeline
         {
             TargetWidth = _options.CropWidth,
             TargetHeight = _options.CropHeight,
+            WidthMode = _options.CropWidthMode,
+            MaximumTargetWidth = _options.MaximumCropWidth,
             BatchSize = _options.BatchSize,
             PaddingPixels = _options.CropPaddingPixels,
             HorizontalPaddingPixels = _options.CropHorizontalPaddingPixels,

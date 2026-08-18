@@ -12,11 +12,30 @@ public enum OcrCropResizeMode
     Stretch,
 }
 
+public enum OcrCropWidthMode
+{
+    Fixed,
+    PaddleBatchMaximumAspectRatio,
+}
+
 public sealed record OcrCropBatcherOptions
 {
     public int TargetWidth { get; init; } = 128;
 
     public int TargetHeight { get; init; } = 32;
+
+    /// <summary>
+    /// Controls whether every crop uses <see cref="TargetWidth"/> or each
+    /// aspect-ratio-sorted batch expands to PaddleOCR's maximum width-to-height
+    /// ratio. TargetWidth is the minimum width in the dynamic mode.
+    /// </summary>
+    public OcrCropWidthMode WidthMode { get; init; } = OcrCropWidthMode.Fixed;
+
+    /// <summary>
+    /// Hard memory bound for dynamic recognition tensors. A source crop that
+    /// requires a wider tensor is rejected instead of being truncated.
+    /// </summary>
+    public int MaximumTargetWidth { get; init; } = 4096;
 
     public int BatchSize { get; init; } = 16;
 
@@ -62,17 +81,22 @@ public static class OcrCropBatcher
         options ??= new OcrCropBatcherOptions();
         Validate(image, options);
 
-        var crops = new List<OcrCrop>(regions.Count);
-        foreach (var region in regions.OrderBy(static item => item.RegionId, StringComparer.Ordinal))
+        var batches = new List<IReadOnlyList<OcrCrop>>();
+        IEnumerable<PreparedRegion> ordered = regions
+            .Select(region => PrepareRegion(region, options));
+        ordered = options.WidthMode == OcrCropWidthMode.PaddleBatchMaximumAspectRatio
+            ? ordered.OrderBy(static item => item.AspectRatio)
+                .ThenBy(static item => item.Region.RegionId, StringComparer.Ordinal)
+            : ordered.OrderBy(static item => item.Region.RegionId, StringComparer.Ordinal);
+        PreparedRegion[] prepared = ordered.ToArray();
+        for (var index = 0; index < prepared.Length; index += options.BatchSize)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            crops.Add(CreateCrop(image, region, options, cancellationToken));
-        }
-
-        var batches = new List<IReadOnlyList<OcrCrop>>();
-        for (var index = 0; index < crops.Count; index += options.BatchSize)
-        {
-            batches.Add(Array.AsReadOnly(crops.Skip(index).Take(options.BatchSize).ToArray()));
+            PreparedRegion[] batch = prepared.Skip(index).Take(options.BatchSize).ToArray();
+            int targetWidth = TargetWidth(batch, options);
+            batches.Add(Array.AsReadOnly(batch
+                .Select(item => CreateCrop(image, item, options, targetWidth, cancellationToken))
+                .ToArray()));
         }
 
         return OcrCollections.Freeze(batches);
@@ -80,9 +104,95 @@ public static class OcrCropBatcher
 
     private static OcrCrop CreateCrop(
         OcrImage image,
-        OcrDetectedRegion region,
+        PreparedRegion prepared,
         OcrCropBatcherOptions options,
+        int targetWidth,
         CancellationToken cancellationToken)
+    {
+        OcrDetectedRegion region = prepared.Region;
+        OcrOrientation orientation = prepared.Orientation;
+        OcrRectangle padded = prepared.PaddedBounds;
+        int contentWidth = ContentWidth(padded, orientation, options, targetWidth);
+        var output = Enumerable.Repeat(
+                options.PaddingValue,
+                checked(targetWidth * options.TargetHeight))
+            .ToArray();
+        float[]? bgrOutput = image.BgrPixels is null
+            ? null
+            : Enumerable.Repeat(
+                    options.PaddingValue,
+                    checked(targetWidth * options.TargetHeight * 3))
+                .ToArray();
+        for (var targetY = 0; targetY < options.TargetHeight; targetY++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var v = (targetY + 0.5) / options.TargetHeight;
+            for (var targetX = 0; targetX < contentWidth; targetX++)
+            {
+                var u = (targetX + 0.5) / contentWidth;
+                var original = MapSample(padded, u, v, orientation);
+                var source = image.OriginalToImage.MapFromOriginal(original);
+                output[(targetY * targetWidth) + targetX] = Sample(image, source.X, source.Y);
+                if (bgrOutput is not null)
+                {
+                    int targetOffset = checked(((targetY * targetWidth) + targetX) * 3);
+                    for (int channel = 0; channel < 3; channel++)
+                    {
+                        bgrOutput[targetOffset + channel] = SampleBgr(image, source.X, source.Y, channel);
+                    }
+                }
+            }
+        }
+
+        var bgrPixels = bgrOutput is null
+            ? null
+            : new OcrBgrFloatPixels(checked(targetWidth * 3), bgrOutput);
+        OcrV8SourceCrop? sourceCrop = image.SourceImage == OcrSourceImage.Original &&
+            image.OriginalToImage == OcrFrameTransform.Identity
+                ? OcrV8SourcePostprocessor.ExtractSourceCrop(image, region)
+                : null;
+
+        return new OcrCrop(
+            region.RegionId,
+            image.SourceImage,
+            targetWidth,
+            options.TargetHeight,
+            output,
+            HashCrop(output, bgrOutput, image.SourceImage, targetWidth, options.TargetHeight),
+            region.Polygon,
+            bgrPixels,
+            sourceCrop);
+    }
+
+    private static int ContentWidth(
+        OcrRectangle bounds,
+        OcrOrientation orientation,
+        OcrCropBatcherOptions options,
+        int targetWidth)
+    {
+        if (options.ResizeMode == OcrCropResizeMode.Stretch)
+        {
+            return targetWidth;
+        }
+
+        double orientedWidth = orientation is
+            OcrOrientation.RotatedClockwise or OcrOrientation.RotatedCounterClockwise
+                ? bounds.Height
+                : bounds.Width;
+        double orientedHeight = orientation is
+            OcrOrientation.RotatedClockwise or OcrOrientation.RotatedCounterClockwise
+                ? bounds.Width
+                : bounds.Height;
+        double ratio = orientedWidth / orientedHeight;
+        return Math.Clamp(
+            checked((int)Math.Ceiling(options.TargetHeight * ratio)),
+            1,
+            targetWidth);
+    }
+
+    private static PreparedRegion PrepareRegion(
+        OcrDetectedRegion region,
+        OcrCropBatcherOptions options)
     {
         ArgumentNullException.ThrowIfNull(region);
         if (region.CoordinateSpace != OcrContract.CoordinateSpace)
@@ -90,8 +200,8 @@ public static class OcrCropBatcher
             throw new ArgumentException("OCR regions must use original_pixels.", nameof(region));
         }
 
-        var orientation = GraphTextRoleClassifier.GetOrientation(region.OrientationDegrees);
-        var bounds = region.Polygon.Bounds;
+        OcrOrientation orientation = GraphTextRoleClassifier.GetOrientation(region.OrientationDegrees);
+        OcrRectangle bounds = region.Polygon.Bounds;
         double horizontalPadding = options.HorizontalPaddingPixels ?? options.PaddingPixels;
         double verticalPadding = options.VerticalPaddingPixels ?? options.PaddingPixels;
         if (orientation is OcrOrientation.RotatedClockwise or OcrOrientation.RotatedCounterClockwise)
@@ -108,81 +218,36 @@ public static class OcrCropBatcher
             bounds.Y - verticalPadding,
             bounds.Width + (2 * horizontalPadding),
             bounds.Height + (2 * verticalPadding));
-        int contentWidth = ContentWidth(padded, orientation, options);
-        var output = Enumerable.Repeat(
-                options.PaddingValue,
-                checked(options.TargetWidth * options.TargetHeight))
-            .ToArray();
-        float[]? bgrOutput = image.BgrPixels is null
-            ? null
-            : Enumerable.Repeat(
-                    options.PaddingValue,
-                    checked(options.TargetWidth * options.TargetHeight * 3))
-                .ToArray();
-        for (var targetY = 0; targetY < options.TargetHeight; targetY++)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var v = (targetY + 0.5) / options.TargetHeight;
-            for (var targetX = 0; targetX < contentWidth; targetX++)
-            {
-                var u = (targetX + 0.5) / contentWidth;
-                var original = MapSample(padded, u, v, orientation);
-                var source = image.OriginalToImage.MapFromOriginal(original);
-                output[(targetY * options.TargetWidth) + targetX] = Sample(image, source.X, source.Y);
-                if (bgrOutput is not null)
-                {
-                    int targetOffset = checked(((targetY * options.TargetWidth) + targetX) * 3);
-                    for (int channel = 0; channel < 3; channel++)
-                    {
-                        bgrOutput[targetOffset + channel] = SampleBgr(image, source.X, source.Y, channel);
-                    }
-                }
-            }
-        }
-
-        var bgrPixels = bgrOutput is null
-            ? null
-            : new OcrBgrFloatPixels(checked(options.TargetWidth * 3), bgrOutput);
-        OcrV8SourceCrop? sourceCrop = image.SourceImage == OcrSourceImage.Original &&
-            image.OriginalToImage == OcrFrameTransform.Identity
-                ? OcrV8SourcePostprocessor.ExtractSourceCrop(image, region)
-                : null;
-
-        return new OcrCrop(
-            region.RegionId,
-            image.SourceImage,
-            options.TargetWidth,
-            options.TargetHeight,
-            output,
-            HashCrop(output, bgrOutput, image.SourceImage, options.TargetWidth, options.TargetHeight),
-            region.Polygon,
-            bgrPixels,
-            sourceCrop);
+        double orientedWidth = orientation is
+            OcrOrientation.RotatedClockwise or OcrOrientation.RotatedCounterClockwise
+                ? padded.Height
+                : padded.Width;
+        double orientedHeight = orientation is
+            OcrOrientation.RotatedClockwise or OcrOrientation.RotatedCounterClockwise
+                ? padded.Width
+                : padded.Height;
+        return new PreparedRegion(region, orientation, padded, orientedWidth / orientedHeight);
     }
 
-    private static int ContentWidth(
-        OcrRectangle bounds,
-        OcrOrientation orientation,
+    private static int TargetWidth(
+        IReadOnlyList<PreparedRegion> batch,
         OcrCropBatcherOptions options)
     {
-        if (options.ResizeMode == OcrCropResizeMode.Stretch)
+        if (options.WidthMode == OcrCropWidthMode.Fixed || batch.Count == 0)
         {
             return options.TargetWidth;
         }
 
-        double orientedWidth = orientation is
-            OcrOrientation.RotatedClockwise or OcrOrientation.RotatedCounterClockwise
-                ? bounds.Height
-                : bounds.Width;
-        double orientedHeight = orientation is
-            OcrOrientation.RotatedClockwise or OcrOrientation.RotatedCounterClockwise
-                ? bounds.Width
-                : bounds.Height;
-        double ratio = orientedWidth / orientedHeight;
-        return Math.Clamp(
-            checked((int)Math.Ceiling(options.TargetHeight * ratio)),
-            1,
-            options.TargetWidth);
+        double minimumRatio = options.TargetWidth / (double)options.TargetHeight;
+        double maximumRatio = Math.Max(minimumRatio, batch.Max(static item => item.AspectRatio));
+        double requiredWidth = options.TargetHeight * maximumRatio;
+        if (!double.IsFinite(requiredWidth) || requiredWidth > options.MaximumTargetWidth)
+        {
+            throw new InvalidDataException(
+                $"OCR crop batch requires width {requiredWidth:R}, above the reviewed bound {options.MaximumTargetWidth}.");
+        }
+
+        return Math.Max(options.TargetWidth, checked((int)requiredWidth));
     }
 
     private static OcrPoint MapSample(
@@ -292,6 +357,8 @@ public static class OcrCropBatcher
         }
 
         if (options.TargetWidth <= 0 || options.TargetHeight <= 0 || options.BatchSize <= 0 ||
+            options.MaximumTargetWidth < options.TargetWidth ||
+            !Enum.IsDefined(options.WidthMode) ||
             !double.IsFinite(options.PaddingPixels) || options.PaddingPixels < 0 ||
             (options.HorizontalPaddingPixels.HasValue &&
              (!double.IsFinite(options.HorizontalPaddingPixels.Value) ||
@@ -314,4 +381,10 @@ public static class OcrCropBatcher
             throw new ArgumentException("OCR BGR24 dimensions, stride, or pixel buffer are invalid.", nameof(image));
         }
     }
+
+    private sealed record PreparedRegion(
+        OcrDetectedRegion Region,
+        OcrOrientation Orientation,
+        OcrRectangle PaddedBounds,
+        double AspectRatio);
 }

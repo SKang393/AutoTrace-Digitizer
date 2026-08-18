@@ -232,6 +232,65 @@ public sealed class ProductionComponentOcrAdapterFactoryTests
         }
     }
 
+    [TestMethod]
+    public void OfficialDynamicRecognitionManifestProducesBoundedPaddleWidthOptions()
+    {
+        string root = CreateTemporaryDirectory();
+        try
+        {
+            string modelPath = Path.Combine(root, "recognizer.onnx");
+            File.WriteAllBytes(modelPath, [0x01]);
+            string manifestPath = WriteOfficialRecognitionManifest(root);
+            var identity = new ModelIdentity(
+                "pp-ocrv5-mobile-rec",
+                "0.0.21-converted",
+                new string('c', 64),
+                modelPath);
+
+            (LocalOnnxTextRecognizerOptions recognizer, OcrPipelineOptions pipeline) =
+                ProductionOcrAdapter.ReadRecognitionOptions(identity, manifestPath);
+
+            Assert.AreEqual(320, recognizer.InputWidth);
+            Assert.AreEqual(4096, recognizer.MaximumInputWidth);
+            Assert.IsTrue(recognizer.DynamicInputWidth);
+            Assert.IsNull(recognizer.ExpectedTimeSteps);
+            Assert.AreEqual(OcrTensorColorMode.Bgr, recognizer.InputColorMode);
+            Assert.AreEqual(OcrCropWidthMode.PaddleBatchMaximumAspectRatio, pipeline.CropWidthMode);
+            Assert.AreEqual(320, pipeline.CropWidth);
+            Assert.AreEqual(4096, pipeline.MaximumCropWidth);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public void OfficialDynamicRecognitionManifestRejectsChangedMemoryBound()
+    {
+        string root = CreateTemporaryDirectory();
+        try
+        {
+            string modelPath = Path.Combine(root, "recognizer.onnx");
+            File.WriteAllBytes(modelPath, [0x01]);
+            string manifestPath = WriteOfficialRecognitionManifest(root, maximumWidth: 4095);
+            var identity = new ModelIdentity(
+                "pp-ocrv5-mobile-rec",
+                "0.0.21-converted",
+                new string('c', 64),
+                modelPath);
+
+            InvalidDataException exception = Assert.ThrowsExactly<InvalidDataException>(() =>
+                ProductionOcrAdapter.ReadRecognitionOptions(identity, manifestPath));
+
+            StringAssert.Contains(exception.Message, "maximum_width");
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     private static string WriteManifest(
         string root,
         float confidenceThreshold = 0.65f,
@@ -349,6 +408,53 @@ public sealed class ProductionComponentOcrAdapterFactoryTests
             },
         };
         string path = Path.Combine(root, "detection-manifest.json");
+        File.WriteAllText(path, JsonSerializer.Serialize(manifest));
+        return path;
+    }
+
+    private static string WriteOfficialRecognitionManifest(string root, int maximumWidth = 4096)
+    {
+        var manifest = new Dictionary<string, object?>
+        {
+            ["inputs"] = new[]
+            {
+                new Dictionary<string, object?>
+                {
+                    ["name"] = "x",
+                    ["element_type"] = "float32",
+                    ["layout"] = "NCHW",
+                    ["shape"] = new object[] { "N", 3, 48, "W" },
+                    ["channels"] = new[] { "b", "g", "r" },
+                },
+            },
+            ["outputs"] = new[]
+            {
+                new Dictionary<string, object?>
+                {
+                    ["name"] = "fetch_name_0",
+                    ["element_type"] = "float32",
+                    ["layout"] = "NTC",
+                    ["shape"] = new object[] { "N", "T", "C" },
+                    ["alphabet"] = "ab ",
+                    ["blank_class_index"] = 0,
+                },
+            },
+            ["preprocessing"] = new Dictionary<string, object?>
+            {
+                ["channel_order"] = "BGR",
+                ["channel_means"] = new[] { 0.5f, 0.5f, 0.5f },
+                ["channel_scales"] = new[] { 2f, 2f, 2f },
+                ["width_policy"] = "paddle_batch_max_wh_ratio_v1",
+                ["minimum_width"] = 320,
+                ["maximum_width"] = maximumWidth,
+            },
+            ["postprocessing"] = new Dictionary<string, object?>
+            {
+                ["algorithm"] = "ctc_greedy_alternatives_v1",
+                ["maximum_alternatives"] = 3,
+            },
+        };
+        string path = Path.Combine(root, "recognition-manifest.json");
         File.WriteAllText(path, JsonSerializer.Serialize(manifest));
         return path;
     }

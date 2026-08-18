@@ -130,7 +130,7 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
 
         LocalOnnxTextRegionDetectorOptions detectorOptions = ReadDetectionOptions(detectionModel);
         (LocalOnnxTextRecognizerOptions Recognizer, OcrPipelineOptions Pipeline) recognition =
-            ReadRecognitionOptions(recognitionModel);
+            ReadRecognitionOptions(recognitionModel.Identity, recognitionModel.ManifestPath);
         await ValidateExecutablePairAsync(
                 detectorOptions,
                 recognition.Recognizer,
@@ -563,25 +563,33 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         return options;
     }
 
-    private static (LocalOnnxTextRecognizerOptions Recognizer, OcrPipelineOptions Pipeline)
-        ReadRecognitionOptions(ResolvedProductionModel resolvedModel)
+    internal static (LocalOnnxTextRecognizerOptions Recognizer, OcrPipelineOptions Pipeline)
+        ReadRecognitionOptions(ModelIdentity identity, string manifestPath)
     {
-        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(resolvedModel.ManifestPath));
+        ArgumentNullException.ThrowIfNull(identity);
+        ArgumentException.ThrowIfNullOrWhiteSpace(manifestPath);
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(manifestPath));
         JsonElement root = document.RootElement;
         JsonElement input = SingleObject(root, "inputs", "OCR recognition");
         JsonElement output = SingleObject(root, "outputs", "OCR recognition");
         RequireString(input, "element_type", "float32", "OCR recognition input");
         RequireString(input, "layout", "NCHW", "OCR recognition input");
         JsonElement inputShape = RequiredArray(input, "shape", "OCR recognition input");
+        bool dynamicInputWidth = inputShape.GetArrayLength() == 4 &&
+            StringValueEquals(inputShape[3], "W");
+        bool fixedInputWidth = inputShape.GetArrayLength() == 4 &&
+            TryReadInt32(inputShape[3], out int declaredInputWidth) && declaredInputWidth == 320;
         if (inputShape.GetArrayLength() != 4 ||
             !StringValueEquals(inputShape[0], "N") ||
             !TryReadInt32(inputShape[1], out int channels) || channels != 3 ||
             !TryReadInt32(inputShape[2], out int inputHeight) || inputHeight != 48 ||
-            !TryReadInt32(inputShape[3], out int inputWidth) || inputWidth != 320)
+            (!dynamicInputWidth && !fixedInputWidth))
         {
             throw new InvalidDataException(
-                "OCR recognition input shape must be the reviewed [N,3,48,320] contract.");
+                "OCR recognition input shape must be reviewed [N,3,48,320] or dynamic [N,3,48,W].");
         }
+
+        const int inputWidth = 320;
 
         OcrTensorColorMode inputColorMode = ReadInputColorMode(input, "OCR recognition input");
         RequireString(output, "element_type", "float32", "OCR recognition output");
@@ -600,12 +608,38 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
                 : ["T", "N", "C"],
             "OCR recognition output");
         string alphabet = RequiredString(output, "alphabet", "OCR recognition output");
-        int expectedTimeSteps = RequiredInt32(output, "time_steps", "OCR recognition output");
+        int? expectedTimeSteps = dynamicInputWidth
+            ? null
+            : RequiredInt32(output, "time_steps", "OCR recognition output");
+        if (dynamicInputWidth && output.TryGetProperty("time_steps", out _))
+        {
+            throw new InvalidDataException(
+                "Dynamic OCR recognition output must not declare one fixed time_steps value.");
+        }
         int blankClassIndex = RequiredInt32(output, "blank_class_index", "OCR recognition output");
         JsonElement preprocessing = RequiredObject(root, "preprocessing", "OCR recognition manifest");
         RequireBgrChannelOrder(preprocessing, inputColorMode, "OCR recognition preprocessing");
         float[] means = RequiredSingles(preprocessing, "channel_means", 3, "OCR recognition preprocessing");
         float[] scales = RequiredSingles(preprocessing, "channel_scales", 3, "OCR recognition preprocessing");
+        int maximumInputWidth = inputWidth;
+        if (dynamicInputWidth)
+        {
+            RequireString(
+                preprocessing,
+                "width_policy",
+                "paddle_batch_max_wh_ratio_v1",
+                "OCR recognition preprocessing");
+            _ = RequiredReviewedInt32(
+                preprocessing,
+                "minimum_width",
+                inputWidth,
+                "OCR recognition preprocessing");
+            maximumInputWidth = RequiredReviewedInt32(
+                preprocessing,
+                "maximum_width",
+                4096,
+                "OCR recognition preprocessing");
+        }
         JsonElement postprocessing = RequiredObject(root, "postprocessing", "OCR recognition manifest");
         RequireString(
             postprocessing,
@@ -616,10 +650,12 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
             postprocessing,
             "maximum_alternatives",
             "OCR recognition postprocessing");
-        var recognizer = new LocalOnnxTextRecognizerOptions(resolvedModel.Identity, alphabet)
+        var recognizer = new LocalOnnxTextRecognizerOptions(identity, alphabet)
         {
             InputWidth = inputWidth,
             InputHeight = inputHeight,
+            DynamicInputWidth = dynamicInputWidth,
+            MaximumInputWidth = maximumInputWidth,
             InputChannels = channels,
             InputLayout = OcrTensorLayout.ChannelsFirst,
             InputColorMode = inputColorMode,
@@ -629,16 +665,20 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
             MaximumAlternatives = maximumAlternatives,
             InputName = RequiredString(input, "name", "OCR recognition input"),
             OutputName = RequiredString(output, "name", "OCR recognition output"),
-            StageVersion = resolvedModel.Identity.Version,
+            StageVersion = identity.Version,
             ChannelMeans = means,
             ChannelScales = scales,
             AllowedProviders = [InferenceProvider.Cpu],
         };
         var pipeline = new OcrPipelineOptions
         {
-            StageVersion = resolvedModel.Identity.Version,
+            StageVersion = identity.Version,
             CropWidth = inputWidth,
             CropHeight = inputHeight,
+            CropWidthMode = dynamicInputWidth
+                ? OcrCropWidthMode.PaddleBatchMaximumAspectRatio
+                : OcrCropWidthMode.Fixed,
+            MaximumCropWidth = maximumInputWidth,
         };
         LocalOnnxTextRecognizer.ValidateOptions(recognizer);
         return (recognizer, pipeline);

@@ -9,6 +9,7 @@ namespace GraphReader.Ocr.Tests;
 public sealed class CropAndMaskTests
 {
     private static readonly float[] ExpectedTwoPixelCrop = [0f, 1f];
+    private static readonly string[] ExpectedDynamicRegionOrder = ["ratio-1", "ratio-8"];
 
     [TestMethod]
     public void TinyRegionIsNormalizedWithoutLosingItsOriginalPolygon()
@@ -218,6 +219,61 @@ public sealed class CropAndMaskTests
                 OcrTestFixtures.Image(),
                 [OcrTestFixtures.Region("cancel", 20, 30, 12, 8)],
                 cancellationToken: cancellation));
+    }
+
+    [TestMethod]
+    public void PaddleDynamicWidthSortsByAspectRatioAndUsesEachBatchMaximum()
+    {
+        OcrImage image = OcrTestFixtures.Image(width: 800, height: 180);
+        OcrDetectedRegion[] regions =
+        [
+            OcrTestFixtures.Region("ratio-10", 0, 0, 480, 48),
+            OcrTestFixtures.Region("ratio-1", 0, 60, 48, 48),
+            OcrTestFixtures.Region("ratio-8", 100, 60, 384, 48),
+        ];
+
+        IReadOnlyList<IReadOnlyList<OcrCrop>> batches = OcrCropBatcher.CreateBatches(
+            image,
+            regions,
+            new OcrCropBatcherOptions
+            {
+                TargetWidth = 320,
+                TargetHeight = 48,
+                MaximumTargetWidth = 512,
+                BatchSize = 2,
+                PaddingPixels = 0,
+                WidthMode = OcrCropWidthMode.PaddleBatchMaximumAspectRatio,
+            });
+
+        Assert.HasCount(2, batches);
+        CollectionAssert.AreEqual(
+            ExpectedDynamicRegionOrder,
+            batches[0].Select(static crop => crop.RegionId).ToArray());
+        Assert.IsTrue(batches[0].All(static crop => crop.Width == 384));
+        Assert.AreEqual("ratio-10", batches[1][0].RegionId);
+        Assert.AreEqual(480, batches[1][0].Width);
+    }
+
+    [TestMethod]
+    public void PaddleDynamicWidthRejectsRatherThanTruncatingAboveBound()
+    {
+        OcrImage image = OcrTestFixtures.Image(width: 800, height: 100);
+        OcrDetectedRegion region = OcrTestFixtures.Region("too-wide", 0, 0, 500, 48);
+
+        InvalidDataException exception = Assert.ThrowsExactly<InvalidDataException>(() =>
+            OcrCropBatcher.CreateBatches(
+                image,
+                [region],
+                new OcrCropBatcherOptions
+                {
+                    TargetWidth = 320,
+                    TargetHeight = 48,
+                    MaximumTargetWidth = 400,
+                    PaddingPixels = 0,
+                    WidthMode = OcrCropWidthMode.PaddleBatchMaximumAspectRatio,
+                }));
+
+        StringAssert.Contains(exception.Message, "above the reviewed bound 400");
     }
 
     [TestMethod]

@@ -358,6 +358,86 @@ public sealed class LocalOnnxTextRecognizerTests
         }
     }
 
+    [TestMethod]
+    public async Task DynamicRecognizerAcceptsOneBoundedBatchWidthAndUsesItsTensorBytes()
+    {
+        string directory = CreateDirectory();
+        string modelPath = Path.Combine(directory, "dynamic-width.onnx");
+        await File.WriteAllBytesAsync(modelPath, [6, 5, 4, 3]);
+        try
+        {
+            var identity = new ModelIdentity(
+                "dynamic-width-ocr",
+                "1",
+                Convert.ToHexStringLower(SHA256.HashData(await File.ReadAllBytesAsync(modelPath))),
+                modelPath);
+            var factory = new FakeInferenceSessionFactory(scale: 1);
+            await using InferenceRuntime runtime = CreateRuntime(directory, factory);
+            var recognizer = new LocalOnnxTextRecognizer(
+                runtime,
+                new LocalOnnxTextRecognizerOptions(identity, "01")
+                {
+                    InputWidth = 3,
+                    MaximumInputWidth = 6,
+                    DynamicInputWidth = true,
+                    InputHeight = 1,
+                    NormalizeMean = 0,
+                    NormalizeScale = 1,
+                });
+
+            IReadOnlyList<OcrRecognition> results = await recognizer.RecognizeBatchAsync(
+                [Crop("wide", [0f, 8f, 1f, 0f, 1f, 8f], width: 6)],
+                CancellationToken.None);
+
+            Assert.HasCount(1, results);
+            Assert.IsNull(results[0].Failure);
+            Assert.HasCount(6, factory.Sessions.Single().LastInputValues);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task DynamicRecognizerRejectsMixedOrUnboundedBatchWidthsBeforeInference()
+    {
+        string directory = CreateDirectory();
+        try
+        {
+            var identity = new ModelIdentity(
+                "dynamic-width-ocr",
+                "1",
+                new string('a', 64),
+                Path.Combine(directory, "unused.onnx"));
+            var factory = new FakeInferenceSessionFactory(scale: 1);
+            await using InferenceRuntime runtime = CreateRuntime(directory, factory);
+            var recognizer = new LocalOnnxTextRecognizer(
+                runtime,
+                new LocalOnnxTextRecognizerOptions(identity, "01")
+                {
+                    InputWidth = 3,
+                    MaximumInputWidth = 6,
+                    DynamicInputWidth = true,
+                    InputHeight = 1,
+                });
+
+            await Assert.ThrowsExactlyAsync<ArgumentException>(async () =>
+                await recognizer.RecognizeBatchAsync(
+                    [Crop("three", new float[3], 3), Crop("six", new float[6], 6)],
+                    CancellationToken.None));
+            await Assert.ThrowsExactlyAsync<ArgumentException>(async () =>
+                await recognizer.RecognizeBatchAsync(
+                    [Crop("seven", new float[7], 7)],
+                    CancellationToken.None));
+            Assert.AreEqual(0, factory.CreatedCount);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
     private static OcrCrop Crop(string id, float[] pixels, int width = 3) =>
         new(
             id,
