@@ -1,0 +1,31 @@
+{
+  "schema": "graphreader.ocr-evidence-rescue-public-gate-config.v1",
+  "task": "ocr-detection-recognition",
+  "revision": "graph-text-evidence-rescue-v25-public-v1",
+  "expected_candidate_hash_keys": [
+    "detector_onnx_sha256",
+    "recognizer_onnx_sha256",
+    "parent_onnx_sha256",
+    "candidate_onnx_sha256",
+    "selection_report_sha256"
+  ],
+  "expected_dataset_manifest_sha256": "f6e9c051658ae01b1f5080a17d06a588c19821da0cf90729073254f71401cd81",
+  "expected_evaluator_source_bundle_sha256": "82467dcfbc0a4218cb633bd63ee13cd80a32cc2a5621589ae4ac40ac0fbefb15",
+  "expected_gate_config_sha256": "abbf04aba3484cb09f610dd5cba4aee8ac35d22b0492104aa5263b077088ee0e",
+  "split_seal_path": "ml/ocr/evidence_rescue_v25/SPLIT_SEAL.json",
+  "split_seal_sha256": "2f979f69f628498b9013c58b099089e8a673df8e7715a7c124cc5d562b7423c2",
+  "split_source_commit": "9805c2db397e2b7857093b3292cf115ddb6d559b",
+  "split_source_bundle_sha256": "624bfcaf73fbf791176fd5aa23ceb9e57f35296163ddd9453abb40f0d7c3852d",
+  "public_fixture_archive_path": "artifacts/production-validation/ocr-v25-public.zip",
+  "public_fixture_archive_sha256": "bab5eaa67d7d7427334523a2db3780b516b1e822bb017c0a154e2f029d46ec40",
+  "public_fixture_manifest_sha256": "f6e9c051658ae01b1f5080a17d06a588c19821da0cf90729073254f71401cd81",
+  "evaluation_limit": 1,
+  "truth_hidden_until_authorized_execution": true,
+  "case_level_failure_analysis_permitted": false,
+  "public_execution_authorized": false,
+  "public_evaluations": 0,
+  "public_archive_opened": false,
+  "marker_creation_evaluated": false,
+  "production_approval": false,
+  "release_eligible": false
+}

@@ -16,12 +16,21 @@ rescues only a parent-accepted rejection whose already-bound CTC evidence
 passes fixed generic confidence, entropy, blank, length, and alphanumeric
 conditions.
 
-P1 performs zero optimizer steps. The train split is still frozen to preserve
-the complete three-way split identity and may support a later separately
-preregistered candidate if P1 fails. Validation and truth-hidden public
-families, seed offsets, renderer identifiers, degradation identifiers, and
-fixture bytes are fresh and disjoint. The public archive remains locked until
-a candidate passes the fixed visible-selection gates.
+P1 performs zero optimizer steps. The complete split was frozen once from
+source commit `9805c2db397e2b7857093b3292cf115ddb6d559b`. The train,
+validation, and truth-hidden public archives contain 256, 128, and 192 fresh
+scenes and have SHA-256 values `63f9d63a...bcc1`, `20284a9a...f9d`, and
+`bab5eaa6...c40`. Their source-byte overlap is zero. The train split remains
+available only for a later separately preregistered candidate if P1 fails.
+
+P1 configuration SHA-256 `4c96df20...bb6` and the public gate configuration
+SHA-256 `fc687363...7f18` bind the exact split seal, ignored fixture archives,
+detector, recognizer, frozen parent, candidate runner, and truth-hidden
+evaluator. Candidate execution is not authorized. The public evaluator source
+bundle is frozen at `82467dcf...fb15`; it requires direct CPU execution of all
+four ONNX streams at three consecutive thresholds, aggregate-only output, and
+one canonical gate opening. The public archive remains unopened with zero
+evaluations.
 
 The candidate is not reachable from ordinary Auto Detect. It cannot become a
 manifest, production-model-store entry, package payload, approved model, or

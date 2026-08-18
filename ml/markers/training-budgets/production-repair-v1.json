@@ -6186,7 +6186,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-evidence-rescue-v25",
-      "status": "preregistered_before_fixture_freeze",
+      "status": "candidate_1_preregistered",
       "defect_class": "V23 P3 retained all 1024 visible-selection truths with three false and prohibited regions, while V24 P2 removed every false region but missed two truths",
       "prior_revision": "graph-text-crop-evidence-role-anchor-v24",
       "trigger_result_path": "ml/ocr/crop_evidence_role_anchor_v24/P2_RESULT.json",
@@ -6203,14 +6203,61 @@
       "remaining_unregistered_candidate_ids": ["P2", "P3"],
       "protocol_path": "ml/ocr/evidence_rescue_v25/PROTOCOL.json",
       "protocol_sha256": "7e1ab12c1e82bc78a0489f6d7db1abd5b8926667ad68ff1c23b30386c274de8d",
-      "split_materialized": false,
+      "split_materialized": true,
+      "split_seal_path": "ml/ocr/evidence_rescue_v25/SPLIT_SEAL.json",
+      "split_seal_sha256": "2f979f69f628498b9013c58b099089e8a673df8e7715a7c124cc5d562b7423c2",
+      "split_source_commit": "9805c2db397e2b7857093b3292cf115ddb6d559b",
+      "split_source_bundle_sha256": "624bfcaf73fbf791176fd5aa23ceb9e57f35296163ddd9453abb40f0d7c3852d",
+      "split_scene_counts": {
+        "train": 256,
+        "validation": 128,
+        "sealed_public": 192
+      },
+      "split_proposal_counts": {
+        "train": 16520,
+        "validation": 2405,
+        "sealed_public": 6420
+      },
+      "split_positive_proposal_counts": {
+        "train": 2048,
+        "validation": 1024,
+        "sealed_public": 1536
+      },
+      "split_negative_proposal_counts": {
+        "train": 14472,
+        "validation": 1381,
+        "sealed_public": 4884
+      },
+      "train_fixture_archive_path": "artifacts/production-validation/ocr-v25-train.zip",
+      "train_fixture_archive_sha256": "63f9d63a34dca66fb65047355ba2a9e2381ea918c476473411e20f48f243bcc1",
+      "validation_fixture_archive_path": "artifacts/production-validation/ocr-v25-selection.zip",
+      "validation_fixture_archive_sha256": "20284a9a259409cf9b94550bfed244fd59933a287f1fe2a13d2000ff8c354f9d",
+      "public_fixture_archive_path": "artifacts/production-validation/ocr-v25-public.zip",
+      "public_fixture_archive_sha256": "bab5eaa67d7d7427334523a2db3780b516b1e822bb017c0a154e2f029d46ec40",
+      "cross_split_source_overlap_counts": {
+        "train_validation": 0,
+        "train_sealed_public": 0,
+        "validation_sealed_public": 0
+      },
+      "candidate_config_paths": {
+        "P1": "ml/ocr/evidence_rescue_v25/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "4c96df207f2ba0bebbb4cb48c3944a766820c0d79efdcf22cc0641c154973bb6"
+      },
+      "expected_runner_source_bundle_sha256": "51c0b56373267306e1b4ceb8dc236d90c880656afc456e3125247f26fca430cf",
       "selection_evaluations": 0,
+      "public_gate_revision": "graph-text-evidence-rescue-v25-public-v1",
+      "public_gate_config_path": "ml/ocr/evidence_rescue_v25/gates/sealed-public-v1.json",
+      "public_gate_config_sha256": "fc6873635e61b8c53d89260cb83426286f5606bac1524dbb1342624d86cd7f18",
+      "public_evaluator_preregistered": true,
+      "public_evaluator_source_bundle_sha256": "82467dcfbc0a4218cb633bd63ee13cd80a32cc2a5621589ae4ac40ac0fbefb15",
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "execution_blocker": "Fresh V25 train, visible-selection, and truth-hidden public fixture identities must be frozen from committed preregistration sources before P1 can be configured or authorized.",
+      "execution_blocker": "P1 and its one-time truth-hidden public evaluator are fully preregistered against frozen fixture identities. A separate committed canonical-ledger authorization is required before the zero-optimizer candidate may execute.",
       "marker_creation_evaluated": false,
       "manifest_created": false,
       "model_store_promoted": false,

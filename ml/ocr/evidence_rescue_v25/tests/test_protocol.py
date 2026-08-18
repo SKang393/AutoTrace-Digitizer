@@ -12,9 +12,19 @@ import onnxruntime as ort
 import torch
 from torch import nn
 
-from ml.markers.gate_seal import sha256_file
+from ml.markers.gate_seal import (
+    canonical_json_bytes,
+    sha256_bytes,
+    sha256_file,
+    source_bundle_sha256,
+)
 from ml.ocr.evidence_rescue_v25.dataset import proposal_summary, render_scene
 from ml.ocr.evidence_rescue_v25.model import FrozenCropResidualCtcRescueNet
+from ml.ocr.evidence_rescue_v25.sealed_gate import (
+    EVALUATOR_SOURCE_PATHS,
+    GATE_CONFIG,
+    PUBLIC_REVISION,
+)
 from ml.ocr.evidence_rescue_v25.protocol import (
     CANDIDATE_LIMIT,
     FEATURE_COUNT,
@@ -65,7 +75,7 @@ def test_v24_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_is_preregistered_but_not_authorized() -> None:
+def test_canonical_budget_binds_frozen_split_candidate_and_public_gate() -> None:
     ledger = json.loads(
         (REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text(
             encoding="utf-8"
@@ -76,19 +86,54 @@ def test_canonical_budget_is_preregistered_but_not_authorized() -> None:
         if item["task"] == "ocr-detection-recognition"
         and item["revision"] == "graph-text-evidence-rescue-v25"
     )
-    assert entry["status"] == "preregistered_before_fixture_freeze"
+    assert entry["status"] == "candidate_1_preregistered"
     assert entry["protocol_sha256"] == sha256_file(
         REPO_ROOT / "ml/ocr/evidence_rescue_v25/PROTOCOL.json"
     )
     assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
     assert entry["remaining_unregistered_candidate_ids"] == ["P2", "P3"]
-    assert entry["split_materialized"] is False
+    assert entry["split_materialized"] is True
+    split_seal = REPO_ROOT / entry["split_seal_path"]
+    assert entry["split_seal_sha256"] == sha256_file(split_seal)
+    candidate_config = REPO_ROOT / entry["candidate_config_paths"]["P1"]
+    assert entry["candidate_config_sha256"]["P1"] == sha256_file(candidate_config)
+    assert entry["public_evaluator_preregistered"] is True
+    public_config = REPO_ROOT / entry["public_gate_config_path"]
+    assert entry["public_gate_config_sha256"] == sha256_file(public_config)
     assert entry["selection_evaluations"] == 0
     assert entry["execution_authorized"] is False
     assert entry["public_gate_authorized"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
+
+
+def test_public_evaluator_is_preregistered_without_opening_hidden_truth() -> None:
+    config_path = REPO_ROOT / "ml/ocr/evidence_rescue_v25/gates/sealed-public-v1.json"
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    split_seal = json.loads(
+        (REPO_ROOT / config["split_seal_path"]).read_text(encoding="utf-8")
+    )
+    public = split_seal["splits"]["sealed_public"]
+    assert config["task"] == "ocr-detection-recognition"
+    assert config["revision"] == PUBLIC_REVISION
+    assert config["expected_dataset_manifest_sha256"] == public["manifest_sha256"]
+    assert config["public_fixture_archive_path"] == public["archive_path"]
+    assert config["public_fixture_archive_sha256"] == public["archive_sha256"]
+    assert sha256_file(REPO_ROOT / public["archive_path"]) == public["archive_sha256"]
+    assert config["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, EVALUATOR_SOURCE_PATHS
+    )
+    assert config["expected_gate_config_sha256"] == sha256_bytes(
+        canonical_json_bytes(GATE_CONFIG)
+    )
+    assert config["public_execution_authorized"] is False
+    assert config["public_evaluations"] == 0
+    assert config["public_archive_opened"] is False
+    gate_root = REPO_ROOT / "ml/markers/gate-seals/ocr-detection-recognition"
+    for opened_path in gate_root.glob("*/opened.json") if gate_root.is_dir() else ():
+        opened = json.loads(opened_path.read_text(encoding="utf-8"))
+        assert opened.get("binding", {}).get("revision") != PUBLIC_REVISION
 
 
 def test_split_families_and_seed_offsets_are_disjoint() -> None:
