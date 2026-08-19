@@ -43,6 +43,20 @@
     "void_record_requires_exception": true,
     "void_run_reuses_authorization": true
   },
+  "execution_providers": {
+    "cpu_provider": "CPUExecutionProvider",
+    "non_cpu_requires_provenance_reviewed": true,
+    "train_dev": {
+      "allowed_non_cpu_providers": "any_installed_provenance_reviewed",
+      "cpu_fallback_required": true,
+      "graph_optimization": "ORT_ENABLE_ALL"
+    },
+    "sealed": {
+      "allowed_providers": ["CPUExecutionProvider"],
+      "cpu_fallback_required": true,
+      "graph_optimization": "ORT_DISABLE_ALL"
+    }
+  },
   "sealed_set_reuse": {
     "maximum_distinct_revisions": 5,
     "minimum_unused_sets": 2,

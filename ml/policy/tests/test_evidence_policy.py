@@ -13,6 +13,7 @@ from ml.policy.evidence_policy import (
     classify_candidate_failure,
     consumes_candidate_budget,
     evidence_policy_reference,
+    execution_provider_rule,
     load_evidence_policy,
     split_rule,
 )
@@ -56,6 +57,14 @@ def test_sealed_reuse_and_reserve_match_governing_policy() -> None:
 def test_unknown_split_fails_closed() -> None:
     with pytest.raises(ValueError, match="unsupported evidence split"):
         split_rule("public")
+
+
+def test_sealed_execution_policy_is_cpu_only_and_optimization_disabled() -> None:
+    sealed = execution_provider_rule("sealed")
+
+    assert sealed["allowed_providers"] == ["CPUExecutionProvider"]
+    assert sealed["cpu_fallback_required"] is True
+    assert sealed["graph_optimization"] == "ORT_DISABLE_ALL"
 
 
 def test_all_revision_protocols_reference_the_shared_policy() -> None:

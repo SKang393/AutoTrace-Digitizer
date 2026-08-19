@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "status": "profile_pass_cache_deferred",
+  "profiled_revision": "graph-text-unanimous-structure-veto-v30",
+  "profile_scope": {
+    "train_scenes": 2,
+    "dev_validation_scenes": 2,
+    "train_proposals": 80,
+    "dev_validation_proposals": 39,
+    "optimizer_steps": 1
+  },
+  "safety": {
+    "sealed_reads": 0,
+    "candidate_acquisitions": 0,
+    "private_data": false,
+    "model_revision_opened": false,
+    "checkpoints_written": 0,
+    "profile_output_files_written": 0
+  },
+  "frozen_inputs": {
+    "detector_sha256": "ca32487f1df2c3fea1b8c2f51daf7578ed9756e9140d1b0eaf2a16b283591262",
+    "recognizer_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+    "recognizer_yaml_sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
+    "role_parent_checkpoint_sha256": "8362c155285683130fd3e173db87d40ead0bd6df934e5b239bf455c2f9a0eb73",
+    "provider": "CPUExecutionProvider"
+  },
+  "timing_ms": {
+    "procedural_data_preparation": 793.847,
+    "feature_crop_relation_preparation": 23560.947,
+    "detector_session_initialization": 46.428,
+    "recognizer_session_initialization": 146.72,
+    "frozen_detector_inference": 84.091,
+    "frozen_recognizer_inference": 3956.052,
+    "bounded_optimizer_pass": 67.67,
+    "measured_total": 28655.755
+  },
+  "timing_share": {
+    "preparation_fraction": 0.8499093463075742,
+    "frozen_session_and_inference_fraction": 0.14772917342432612,
+    "optimizer_fraction": 0.002361480268099724,
+    "preparation_to_frozen_ratio": 5.753158476466655
+  },
+  "stream_identity": {
+    "train_feature_label_stream_sha256": "f331e4d2235462a18adc01b41405cc53be1df48a2a7cc8e97ef6279751a00b77",
+    "dev_feature_label_stream_sha256": "b4a9f4f140100876fd29d4260c6be39565c1bf356dfc012bf04e8f9ac7c5d7c4"
+  },
+  "cache_decision": {
+    "implemented": false,
+    "reason": "frozen inference is not dominant; preparation took about 5.75 times the combined frozen session and inference time",
+    "warm_cache_metric_identity_required": false,
+    "conditional_acceptance": "Goal 22 requires cache implementation only when frozen inference dominates"
+  },
+  "execution_provider_policy": {
+    "train_dev": "explicit installed provenance-reviewed provider with mandatory CPU fallback",
+    "sealed": "CPUExecutionProvider only with ORT_DISABLE_ALL",
+    "local_onnxruntime_version": "1.27.0",
+    "local_available_providers": [
+      "AzureExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "local_torch_version": "2.13.0+cpu",
+    "local_cuda_available": false,
+    "directml_local_claim": false
+  },
+  "source_identity": {
+    "profiler_sha256": "aacb210704da1738de003e53926eeadb6dad0b2d234652b2c429605a95238058",
+    "execution_provider_policy_sha256": "50a87bc8cb78c4e8a9334573ab86b4df6601b7fd3d5f9ca9511ebeebcd4bdc1a",
+    "evidence_policy_sha256": "4dc18136c284b0b1805d3a3b22a9197ad06e6a41f4e43b4e1d4d9245b97e0aed"
+  }
+}
