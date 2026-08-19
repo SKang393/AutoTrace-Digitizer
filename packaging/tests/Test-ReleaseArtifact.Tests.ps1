@@ -8,6 +8,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $testScript = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\Test-ReleaseArtifact.ps1'))
+$versionPolicyScript = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\VersionPolicy.ps1'))
 $testRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("GraphReader-PackagingTests-" + [Guid]::NewGuid().ToString('N'))
 $passed = 0
 $failed = 0
@@ -1006,6 +1007,7 @@ function New-ModelAuditFixture {
     $missingManifest.files = @('missing-model.onnx')
     Write-JsonFile -Path (Join-Path $fixture.Root 'models/manifest/missing.json') -Value $missingManifest
     Copy-Item -LiteralPath $testScript -Destination (Join-Path $fixture.Root 'packaging/Test-ReleaseArtifact.ps1')
+    Copy-Item -LiteralPath $versionPolicyScript -Destination (Join-Path $fixture.Root 'packaging/VersionPolicy.ps1')
 
     & git -C $fixture.Root init --quiet
     if ($LASTEXITCODE -ne 0) { throw 'Could not initialize the isolated audit fixture repository.' }
@@ -1276,6 +1278,7 @@ Console.WriteLine($"{model.Identity.ModelId}|{model.Identity.Version}|{model.Ide
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot '..\installer\GraphReader.Installer.csproj') -Destination (Join-Path $fixture.Root 'packaging/installer/GraphReader.Installer.csproj')
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot '..\installer\Program.cs') -Destination (Join-Path $fixture.Root 'packaging/installer/Program.cs')
     Copy-Item -LiteralPath $testScript -Destination (Join-Path $fixture.Root 'packaging/Test-ReleaseArtifact.ps1')
+    Copy-Item -LiteralPath $versionPolicyScript -Destination (Join-Path $fixture.Root 'packaging/VersionPolicy.ps1')
     'Release {{VERSION}} from {{GIT_COMMIT}} at {{BUILD_UTC}}' | Set-Content -LiteralPath (Join-Path $fixture.Root 'packaging/common/RELEASE_NOTES.template.md') -Encoding utf8
     'Synthetic fixture limitation.' | Set-Content -LiteralPath (Join-Path $fixture.Root 'packaging/common/KNOWN_LIMITATIONS.md') -Encoding utf8
     '/release-output/' | Set-Content -LiteralPath (Join-Path $fixture.Root '.gitignore') -Encoding ascii
@@ -1500,7 +1503,7 @@ try {
     Assert-Case 'Out-of-range version is rejected' {
         $fixture = New-PackagingFixture -Name 'invalid-version' -Version '0.100.1'
         $result = Invoke-Gate -Arguments @('-ManifestPath', $fixture.Manifest)
-        Assert-ExitCode -Result $result -Expected 1 -Contains 'does not satisfy'
+        Assert-ExitCode -Result $result -Expected 1 -Contains 'must use x.y.z'
     }
 
     Assert-Case 'Legacy manifest version cannot override the central version' {

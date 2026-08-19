@@ -14,6 +14,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'VersionPolicy.ps1')
 
 if ([string]::IsNullOrWhiteSpace($ManifestPath)) {
     $ManifestPath = Join-Path $PSScriptRoot 'artifacts.json'
@@ -176,37 +177,7 @@ function Get-CentralVersion {
         [string]$RepositoryRoot
     )
 
-    $propsPath = Join-Path $RepositoryRoot 'Directory.Build.props'
-    if (-not (Test-Path -LiteralPath $propsPath -PathType Leaf)) {
-        throw "Central version file is missing: $propsPath"
-    }
-
-    [xml]$props = Get-Content -LiteralPath $propsPath -Raw
-    $version = [string]$props.Project.PropertyGroup.Version
-    $assemblyVersion = [string]$props.Project.PropertyGroup.AssemblyVersion
-    $fileVersion = [string]$props.Project.PropertyGroup.FileVersion
-    $informationalVersion = [string]$props.Project.PropertyGroup.InformationalVersion
-
-    if ($version -notmatch '^(\d{1,2})\.(\d{1,2})\.(\d{1,2})$') {
-        throw "Central version must use x.y.z with components from 0 through 99: '$version'."
-    }
-
-    foreach ($component in @($Matches[1], $Matches[2], $Matches[3])) {
-        if ([int]$component -gt 99) {
-            throw "Central version component exceeds 99: '$version'."
-        }
-    }
-
-    if ($assemblyVersion -ne "$version.0" -or $fileVersion -ne "$version.0" -or $informationalVersion -ne $version) {
-        throw "Directory.Build.props version fields do not agree with Version '$version'."
-    }
-
-    return [pscustomobject]@{
-        Value = $version
-        Build = [int]$Matches[3]
-        ReleaseEligible = @([int[]](1, 21, 41, 61, 81)) -contains [int]$Matches[3]
-        Source = 'Directory.Build.props#Project/PropertyGroup/Version'
-    }
+    return Get-GraphReaderCentralVersion -RepositoryRoot $RepositoryRoot
 }
 
 function Get-GitCommit {
@@ -2192,7 +2163,7 @@ $releaseMetadata = [ordered]@{
         }
     }
     versionPolicy = [ordered]@{
-        releaseBuilds = @(1, 21, 41, 61, 81)
+        releaseBuilds = @(Get-GraphReaderReleaseBuilds)
         upgrade = 'allowed'
         repair = 'same-version reinstall'
         downgrade = 'blocked unless --allow-downgrade is passed to the installer'

@@ -26,6 +26,11 @@ The schema-version-1 report records:
 
 Report-only mode is the default and does not delete any build.
 
+Development portable folders are ignored local previews. Multiple previews may
+share the same central `x.y.z` version because timestamp and commit identity,
+not a version increment, distinguish rebuilds. They are not committed or
+published as GitHub Releases. See `docs/VERSIONING-AND-RELEASES.md`.
+
 ## Explicit pruning
 
 After a checkpoint is committed and its evidence is preserved, obsolete

@@ -10,6 +10,8 @@ provenance gates remain unresolved.
 
 It does not change or bypass `packaging/Build-Windows.ps1`,
 `packaging/Test-ReleaseArtifact.ps1`, or the public release audit.
+See `docs/VERSIONING-AND-RELEASES.md` for the source-checkpoint and release
+boundary.
 
 ## Build once
 
@@ -102,5 +104,6 @@ evidence boundaries.
 
 A failed build writes `artifacts\dev-portable\last-failure.json` and leaves the
 previous successful `latest.json` unchanged. Every successful build folder
-under `artifacts\dev-portable\builds` is immutable and receives a new version,
-UTC timestamp, and short-commit name.
+under `artifacts\dev-portable\builds` is immutable. It reuses the current
+central version and receives a new UTC timestamp and short-commit name. A
+preview rebuild never advances `x.y.z` and never creates a GitHub Release.

@@ -12,6 +12,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'VersionPolicy.ps1')
 
 if ([string]::IsNullOrWhiteSpace($ManifestPath)) {
     $ManifestPath = Join-Path $PSScriptRoot 'artifacts.json'
@@ -355,13 +356,9 @@ function Assert-BuildVersion {
         [switch]$ReleaseRequired
     )
 
-    if ($Version -notmatch '^(0|[1-9][0-9]?)\.(0|[1-9][0-9]?)\.([1-9][0-9]?)$') {
-        throw "Version '$Version' does not satisfy the x.y.z policy with components from 0 through 99 and z from 1 through 99."
-    }
-
-    $z = [int]$Matches[3]
-    if ($ReleaseRequired -and $z -notin @(1, 21, 41, 61, 81)) {
-        throw "Version '$Version' is an internal build and cannot be published. Release z must be 1, 21, 41, 61, or 81."
+    $record = ConvertTo-GraphReaderVersion -Version $Version
+    if ($ReleaseRequired -and -not $record.ReleaseEligible) {
+        throw "Version '$Version' is an internal checkpoint and cannot be published. Every twentieth checkpoint is release eligible: z 1, 21, 41, 61, or 81."
     }
 }
 
@@ -371,27 +368,7 @@ function Get-CentralVersion {
         [string]$Path
     )
 
-    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
-        throw "Central version file is missing: $Path"
-    }
-
-    [xml]$project = Get-Content -LiteralPath $Path -Raw
-    $versionNodes = @($project.Project.PropertyGroup.Version | Where-Object { $_ })
-    if ($versionNodes.Count -ne 1 -or [string]::IsNullOrWhiteSpace([string]$versionNodes[0])) {
-        throw "Central version file must contain exactly one nonempty Version element: $Path"
-    }
-
-    $version = [string]$versionNodes[0]
-    $assemblyVersion = [string]$project.Project.PropertyGroup.AssemblyVersion
-    $fileVersion = [string]$project.Project.PropertyGroup.FileVersion
-    $informationalVersion = [string]$project.Project.PropertyGroup.InformationalVersion
-    if ($assemblyVersion -ne "$version.0" -or
-        $fileVersion -ne "$version.0" -or
-        $informationalVersion -ne $version) {
-        throw "Central assembly, file, and informational versions must agree with Version '$version'."
-    }
-
-    return $version
+    return (Get-GraphReaderCentralVersion -Path $Path).Value
 }
 
 function Assert-LocalizationReport {

@@ -13,6 +13,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'DevPortable.Common.ps1')
+. (Join-Path $PSScriptRoot 'VersionPolicy.ps1')
 
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
@@ -67,13 +68,7 @@ function Invoke-CheckedCommand {
 }
 
 function Get-CentralVersion {
-    [xml]$props = Get-Content -LiteralPath (Join-Path $repositoryRoot 'Directory.Build.props') -Raw
-    $version = [string]$props.Project.PropertyGroup.Version
-    if ($version -notmatch '^\d{1,2}\.\d{1,2}\.\d{1,2}$') {
-        throw "Central version is invalid: '$version'."
-    }
-
-    return $version
+    return (Get-GraphReaderCentralVersion -RepositoryRoot $repositoryRoot).Value
 }
 
 function Get-GitOutput {

@@ -7,6 +7,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*.*.*'
   pull_request:
     branches:
       - main
@@ -32,7 +34,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 1
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Set up .NET
@@ -44,33 +46,28 @@ jobs:
         id: version
         shell: pwsh
         run: |
-          [xml]$properties = Get-Content -LiteralPath Directory.Build.props -Raw
-          $versionNode = $properties.SelectSingleNode('/Project/PropertyGroup/Version')
-          if ($null -eq $versionNode) {
-              throw 'Directory.Build.props does not define Version.'
-          }
-
-          $version = $versionNode.InnerText.Trim()
-          if ($version -notmatch '^(?<major>\d{1,2})\.(?<minor>\d{1,2})\.(?<build>\d{1,2})$') {
-              throw "Version '$version' does not follow the required x.y.z numeric format."
-          }
-
-          $components = @(
-              [int]$Matches.major,
-              [int]$Matches.minor,
-              [int]$Matches.build
-          )
-          if ($components.Where({ $_ -lt 0 -or $_ -gt 99 }).Count -ne 0) {
-              throw "Version '$version' contains a component outside 0 through 99."
-          }
-
-          $releaseBuilds = @(1, 21, 41, 61, 81)
-          $releaseEligible = $releaseBuilds -contains $components[2]
+          . "${{ github.workspace }}\packaging\VersionPolicy.ps1"
+          $record = Get-GraphReaderCentralVersion -RepositoryRoot "${{ github.workspace }}"
+          $version = $record.Value
+          $releaseEligible = $record.ReleaseEligible
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
           "release_eligible=$($releaseEligible.ToString().ToLowerInvariant())" |
               Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
           Write-Host "Build version: $version"
           Write-Host "Release-version eligible: $releaseEligible"
+
+      - name: Validate checkpoint version advancement
+        shell: pwsh
+        run: >-
+          powershell -NoProfile -ExecutionPolicy Bypass
+          -File "${{ github.workspace }}\packaging\Prepare-CheckpointVersion.ps1"
+          -CheckHead
+
+      - name: Test version and release policy
+        shell: pwsh
+        run: >-
+          powershell -NoProfile -ExecutionPolicy Bypass
+          -File "${{ github.workspace }}\packaging\tests\Test-VersionPolicy.Tests.ps1"
 
       - name: Restore
         shell: pwsh
@@ -111,7 +108,7 @@ jobs:
   package-release-candidate:
     name: Build validated Windows release candidates
     needs: build-and-test
-    if: needs.build-and-test.outputs.release_eligible == 'true'
+    if: github.event_name != 'pull_request' && needs.build-and-test.outputs.release_eligible == 'true'
     runs-on: windows-2025
     timeout-minutes: 45
     env:
@@ -121,7 +118,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 1
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Set up .NET
@@ -164,3 +161,66 @@ jobs:
           if-no-files-found: error
           include-hidden-files: false
           retention-days: 14
+
+  publish-release:
+    name: Publish tagged GitHub release
+    needs:
+      - build-and-test
+      - package-release-candidate
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-2025
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Check out tagged repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validate annotated release tag
+        shell: pwsh
+        run: >-
+          powershell -NoProfile -ExecutionPolicy Bypass
+          -File "${{ github.workspace }}\packaging\Test-ReleaseTag.ps1"
+          -TagName "${{ github.ref_name }}"
+
+      - name: Download validated release candidate
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: GraphAutoReader-${{ needs.build-and-test.outputs.version }}-win-x64
+          path: ${{ runner.temp }}/GraphAutoReader-release
+
+      - name: Revalidate downloaded release files
+        shell: pwsh
+        run: >-
+          powershell -NoProfile -ExecutionPolicy Bypass
+          -File "${{ github.workspace }}\packaging\Test-ReleaseArtifact.ps1"
+          -RequireReleaseVersion
+          -ArtifactRoot "$env:RUNNER_TEMP\GraphAutoReader-release"
+
+      - name: Publish immutable GitHub release
+        shell: pwsh
+        run: |
+          $version = '${{ needs.build-and-test.outputs.version }}'
+          $releaseRoot = Join-Path $env:RUNNER_TEMP 'GraphAutoReader-release'
+          $files = @(
+              (Join-Path $releaseRoot "GraphAutoReader-$version-win-x64-setup.exe"),
+              (Join-Path $releaseRoot "GraphAutoReader-$version-win-x64-portable.zip"),
+              (Join-Path $releaseRoot 'SHA256SUMS.txt'),
+              (Join-Path $releaseRoot 'sbom.cdx.json'),
+              (Join-Path $releaseRoot 'release-metadata.json'),
+              (Join-Path $releaseRoot 'KNOWN_LIMITATIONS.md')
+          )
+          & gh release create '${{ github.ref_name }}' @files `
+              --verify-tag `
+              --title "Graph Auto Reader $version" `
+              --notes-file (Join-Path $releaseRoot 'RELEASE_NOTES.md')
+          if ($LASTEXITCODE -ne 0) {
+              throw "GitHub release publication failed with exit code $LASTEXITCODE."
+          }
