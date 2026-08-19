@@ -38,7 +38,7 @@ class LocalStructureVetoRoute(nn.Module):
             nn.GELU(),
             nn.Conv2d(32, 40, kernel_size=3, stride=2, padding=1),
             nn.GELU(),
-            nn.AdaptiveAvgPool2d((2, 8)),
+            nn.AvgPool2d(kernel_size=2, stride=2),
             nn.Flatten(),
             nn.Linear(40 * 2 * 8, 96),
             nn.GELU(),
