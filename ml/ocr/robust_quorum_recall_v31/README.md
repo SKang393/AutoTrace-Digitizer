@@ -20,12 +20,18 @@ provider, tensor contracts, and mandatory gates are unchanged.
 
 Fresh 384-scene train, 192-scene visible-selection, and 256-scene truth-hidden
 public families use new seed offsets and disjoint renderer and degradation
-identities. Freezing must prove zero source-byte overlap within and across the
-three splits. V30 public bytes and case identities cannot be reused. The
+identities. They are frozen by split seal SHA-256
+`f6f0778071e7761d6a6065e11c9150e63ef8a1b8ee445976da850b1e0656e113`
+from source commit `d3a53bfeeefdce69204d26a4bb9962f2cf659a3b`. Every scene has
+exactly one production proposal for each of its eight truths, every within-
+split source hash is unique, and all three cross-split source-byte overlap
+counts are zero. V30 public bytes and case identities cannot be reused. The
 truth-hidden archive may be read once only after a separately committed public
 runner and a later explicit authorization.
 
-P1 is preregistered but not authorized. Selection requires three consecutive
+P1 is frozen but not authorized. Its checksum-bound config remains
+`candidate_execution_authorized=false`, and the candidate output does not
+exist. Selection requires three consecutive
 fixed thresholds with every scene exact, zero false regions, misses,
 duplicates, and prohibited hits, recognition exact at least `0.90`, CER at
 most `0.05`, overall role accuracy at least `0.90`, every role at least

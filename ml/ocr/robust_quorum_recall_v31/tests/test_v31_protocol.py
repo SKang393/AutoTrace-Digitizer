@@ -27,7 +27,7 @@ from ml.ocr.robust_quorum_recall_v31.protocol import (
     protocol_configuration,
     split_registration,
 )
-from ml.ocr.robust_quorum_recall_v31.train_p1 import _trigger_is_terminal
+from ml.ocr.robust_quorum_recall_v31.train_p1 import _trigger_is_terminal, preflight
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -220,6 +220,17 @@ def test_preregistered_ledger_closes_all_execution_and_release_gates() -> None:
     assert entry["trigger_case_detail_or_pixels_used"] is False
     assert entry["prior_fixture_bytes_reused"] is False
     assert entry["prior_checkpoint_reused"] is True
+    assert entry["split_materialized"] is True
+    assert entry["split_seal_sha256"] == _sha256(ROOT / "SPLIT_SEAL.json")
+    assert entry["candidate_1_config_sha256"] == _sha256(ROOT / "training/p1.json")
+    assert entry["split_source_commit"] == _read_json(ROOT / "SPLIT_SEAL.json")[
+        "source_commit"
+    ]
+    assert entry["cross_split_source_overlap_counts"] == {
+        "train_validation": 0,
+        "train_sealed_public": 0,
+        "validation_sealed_public": 0,
+    }
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
@@ -229,11 +240,36 @@ def test_preregistered_ledger_closes_all_execution_and_release_gates() -> None:
     assert entry["release_eligible"] is False
 
 
-def test_initial_preregistration_has_no_split_or_candidate_output() -> None:
-    assert not (ROOT / "SPLIT_SEAL.json").exists()
-    assert not (ROOT / "training/p1.json").exists()
+def test_frozen_split_is_checksum_bound_but_candidate_is_not_authorized() -> None:
+    seal_path = ROOT / "SPLIT_SEAL.json"
+    config_path = ROOT / "training/p1.json"
+    seal = _read_json(seal_path)
+    config = _read_json(config_path)
+    assert _sha256(seal_path) == config["split_seal_sha256"]
+    assert seal["source_bundle_sha256"] == config[
+        "expected_runner_source_bundle_sha256"
+    ]
+    assert seal["cross_split_source_overlap_counts"] == {
+        "train_validation": 0,
+        "train_sealed_public": 0,
+        "validation_sealed_public": 0,
+    }
+    assert seal["candidate_execution_authorized"] is False
+    assert config["candidate_execution_authorized"] is False
+    for split, path in ARCHIVE_PATHS.items():
+        assert _sha256(REPO_ROOT / path) == seal["splits"][split]["archive_sha256"]
+        assert len(seal["splits"][split]["source_sha256_inventory"]) == seal[
+            "splits"
+        ][split]["proposal_summary"]["scene_count"]
     assert not (ROOT / "artifacts/P1-run").exists()
-    assert all(not (REPO_ROOT / path).exists() for path in ARCHIVE_PATHS.values())
+
+
+def test_frozen_preflight_remains_fail_closed_before_authorization() -> None:
+    evidence = preflight(require_authorized=False)
+    assert evidence["config"]["candidate_execution_authorized"] is False
+    assert evidence["seal"]["candidate_execution_authorized"] is False
+    with pytest.raises(RuntimeError, match="not separately authorized"):
+        preflight()
 
 
 def test_source_inventory_binds_v31_runner_and_v30_aggregate_trigger() -> None:
@@ -258,7 +294,7 @@ def test_readme_forbids_public_reuse_and_application_synthetic_data() -> None:
     assert "No V30 case identity" in text
     assert "V30 public bytes and case identities cannot be reused" in text
     assert "zero optimizer steps" in text
-    assert "P1 is preregistered but not authorized" in text
+    assert "P1 is frozen but not authorized" in text
     assert "never become application graph data" in normalized
 
 
