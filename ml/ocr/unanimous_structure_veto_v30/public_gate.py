@@ -1,0 +1,738 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sungwoo Kang
+"""Single-use truth-hidden public gate for the selected OCR V30 P1 payload."""
+
+from __future__ import annotations
+
+import argparse
+from datetime import datetime, timezone
+from hashlib import sha256
+from io import BytesIO
+import json
+from pathlib import Path
+import time
+from typing import Any
+
+import numpy as np
+
+from ml.markers.gate_seal import (
+    acquire_gate_seal,
+    canonical_json_bytes,
+    complete_gate_seal,
+    require_committed_sources,
+    sha256_file,
+    source_bundle_sha256,
+)
+from ml.ocr.crop_evidence_role_anchor_v24.train_p1 import (
+    _calibrated_records,
+    _cpu_session,
+    _is_ancestor,
+    _read_json,
+    _repository_head,
+)
+from ml.ocr.margin_calibrator_v20.pipeline import evaluate_thresholds, metrics_pass
+from ml.ocr.official_bakeoff.production_evaluate import read_character_alphabet
+
+from .dataset import load_archive
+from .pipeline import extract_relational_evidence
+from .protocol import (
+    DETECTOR_PATH,
+    DETECTOR_SHA256,
+    RECOGNIZER_PATH,
+    RECOGNIZER_SHA256,
+    RECOGNIZER_YAML_PATH,
+    RECOGNIZER_YAML_SHA256,
+    REVISION,
+    ROBUST_THRESHOLD_RUN_LENGTH,
+    ROLE_PARENT_CHECKPOINT_PATH,
+    ROLE_PARENT_CHECKPOINT_SHA256,
+    ROLE_PARENT_ONNX_PATH,
+    ROLE_PARENT_ONNX_SHA256,
+    TASK,
+    THRESHOLDS,
+)
+from .train_p1 import (
+    RUNNER_SOURCE_PATHS as P1_RUNNER_SOURCE_PATHS,
+    _candidate_session,
+    _validate_stored_split,
+)
+
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path("ml/ocr/unanimous_structure_veto_v30")
+LEDGER_PATH = Path("ml/markers/training-budgets/production-repair-v1.json")
+SPLIT_SEAL_PATH = ROOT / "SPLIT_SEAL.json"
+SPLIT_SEAL_SHA256 = (
+    "8f75a388413e12d11ca1c8a8372bdaca4d982b2aca2a53ef61d8e4dd3326b116"
+)
+PUBLIC_CONFIG_PATH = ROOT / "gates/sealed-public-v1.json"
+PUBLIC_OUTPUT_PATH = ROOT / "artifacts/public-gate-v1/report.json"
+PUBLIC_ARCHIVE_PATH = Path("artifacts/production-validation/ocr-v30-public.zip")
+PUBLIC_ARCHIVE_SHA256 = (
+    "31632d9eee9db39b50dcb063ebce33dfd9549c159daff2bfd6291b2de1dcd01d"
+)
+PUBLIC_MANIFEST_SHA256 = (
+    "0a7cf969b9ba8525f2f04b4cf6a655eda01d9ebef1257ed0f0981d61fa7f7ce4"
+)
+PUBLIC_REVISION = "graph-text-unanimous-structure-veto-v30-public-v1"
+
+P1_RESULT_PATH = ROOT / "P1_RESULT.json"
+P1_RESULT_SHA256 = (
+    "0b5fa9c78414f690dc6a4c56c5ce8f6c9bbbc3a69c707adf0f6b89bd5ae87df5"
+)
+P1_REPORT_PATH = ROOT / "artifacts/P1-run/candidate-report.json"
+P1_REPORT_SHA256 = (
+    "4c7198d3bde303cdbbfe5c94b797ce4aebb9dc3fcf38fe8e8644f4942783a522"
+)
+P1_CHECKPOINT_PATH = (
+    ROOT / "artifacts/P1-run/graph-text-unanimous-structure-veto-v30-p1.pt"
+)
+P1_CHECKPOINT_SHA256 = (
+    "a91044ee4621fe914377ad522d7ee3d9036f0a5e5714168684c34d2c3b8a9ceb"
+)
+P1_ONNX_PATH = (
+    ROOT / "artifacts/P1-run/graph-text-unanimous-structure-veto-v30-p1.onnx"
+)
+P1_ONNX_SHA256 = (
+    "78425c5b4a45ef2cbf99086243af0ede96c91b2b6afcdac1daa71bfeb5e55c18"
+)
+P1_OPENED_SEAL_PATH = (
+    Path("ml/markers/training-seals/ocr-detection-recognition")
+    / REVISION / "P1/opened.json"
+)
+P1_OPENED_SEAL_SHA256 = (
+    "f75b739af41eca9a8fd406e9e21da97ccc559abccb2c24ba70a41081b710d5e7"
+)
+P1_RESULT_SEAL_PATH = (
+    Path("ml/markers/training-seals/ocr-detection-recognition")
+    / REVISION / "P1/result.json"
+)
+P1_RESULT_SEAL_SHA256 = (
+    "a2d3da12d12c647f5f37e6873b8aaed461931cf35f899caadc8f6092c143858e"
+)
+
+EVALUATOR_SOURCE_PATHS = tuple(dict.fromkeys((
+    *P1_RUNNER_SOURCE_PATHS,
+    P1_RESULT_PATH,
+    ROOT / "public_gate.py",
+)))
+EXPECTED_CANDIDATE_HASH_KEYS = (
+    "detector_onnx_sha256",
+    "recognizer_onnx_sha256",
+    "role_parent_checkpoint_sha256",
+    "role_parent_onnx_sha256",
+    "candidate_onnx_sha256",
+    "candidate_checkpoint_sha256",
+    "selection_result_sha256",
+    "selection_report_sha256",
+    "selection_opened_seal_sha256",
+    "selection_result_seal_sha256",
+)
+GATE_CONFIG: dict[str, object] = {
+    "evaluation_limit": 1,
+    "minimum_consecutive_thresholds": ROBUST_THRESHOLD_RUN_LENGTH,
+    "exact_region_and_role_every_scene_at_each_threshold": True,
+    "false_regions": 0,
+    "missed_regions": 0,
+    "duplicate_regions": 0,
+    "prohibited_structure_hits": 0,
+    "recognition_exact_minimum": 0.90,
+    "character_error_rate_maximum": 0.05,
+    "role_accuracy_minimum": 0.90,
+    "per_role_accuracy_minimum": 0.85,
+    "provider": "CPUExecutionProvider",
+    "candidate_onnx_graph_optimization_level": "ORT_DISABLE_ALL",
+    "direct_fixture_byte_execution_required": True,
+    "complete_production_proposal_stream_required": True,
+    "detector_recognizer_candidate_and_relation_tensor_hashes_required": True,
+    "case_level_failure_analysis_permitted": False,
+}
+
+_METRIC_KEYS = (
+    "scene_count",
+    "exact_scene_count",
+    "truth_region_count",
+    "true_positives",
+    "false_positives",
+    "false_negatives",
+    "duplicate_region_count",
+    "prohibited_structure_hits",
+    "recognition_exact_count",
+    "recognition_exact",
+    "character_error_count",
+    "truth_character_count",
+    "character_error_rate",
+    "role_accuracy",
+    "per_role_accuracy",
+    "proposal_count",
+    "positive_proposal_count",
+    "negative_proposal_count",
+    "detector_inference_calls",
+    "recognizer_region_calls",
+    "recognizer_batch_calls",
+    "candidate_inference_calls",
+    "public_archive_read_count",
+)
+_TENSOR_EVIDENCE_KEYS = (
+    "detector_input_tensor_stream_sha256",
+    "detector_output_tensor_stream_sha256",
+    "recognizer_input_tensor_stream_sha256",
+    "recognizer_output_tensor_stream_sha256",
+    "candidate_evidence_input_tensor_stream_sha256",
+    "candidate_crop_input_tensor_stream_sha256",
+    "candidate_relation_input_tensor_stream_sha256",
+    "candidate_output_tensor_stream_sha256",
+)
+
+
+def _public_window(selection: dict[str, object]) -> tuple[float, ...]:
+    selected = float(selection.get("selected_threshold", -1.0))
+    window = tuple(
+        float(value) for value in selection.get("passing_threshold_window", [])
+    )
+    if (
+        selected not in THRESHOLDS
+        or selected not in window
+        or len(window) < ROBUST_THRESHOLD_RUN_LENGTH
+        or any(value not in THRESHOLDS for value in window)
+    ):
+        raise RuntimeError("OCR V30 selection has no robust threshold window")
+    selected_index = window.index(selected)
+    lower = max(0, selected_index - 1)
+    result = window[lower:lower + ROBUST_THRESHOLD_RUN_LENGTH]
+    if len(result) < ROBUST_THRESHOLD_RUN_LENGTH:
+        result = window[-ROBUST_THRESHOLD_RUN_LENGTH:]
+    return result
+
+
+def _selected_result_is_terminal(selection: dict[str, Any]) -> bool:
+    metrics = selection.get("selection_metrics", {})
+    roles = metrics.get("per_role_accuracy", {})
+    return bool(
+        selection.get("schema")
+        == "graphreader.ocr-unanimous-structure-veto-selection-result.v1"
+        and selection.get("task") == TASK
+        and selection.get("revision") == REVISION
+        and selection.get("candidate_id") == "P1"
+        and selection.get("status") == "selected"
+        and selection.get("candidate_consumed") is True
+        and selection.get("selection_gate_passed") is True
+        and selection.get("optimizer_steps") == 1536
+        and selection.get("source_bundle_sha256")
+        == "b830b36be890ed53cb10f43a86961f4412bc238a97bd046d228ead18767cf8fe"
+        and selection.get("split_seal_sha256") == SPLIT_SEAL_SHA256
+        and selection.get("onnx_sha256") == P1_ONNX_SHA256
+        and selection.get("checkpoint_sha256") == P1_CHECKPOINT_SHA256
+        and selection.get("report_sha256") == P1_REPORT_SHA256
+        and selection.get("training_opened_seal_sha256") == P1_OPENED_SEAL_SHA256
+        and selection.get("training_result_seal_sha256") == P1_RESULT_SEAL_SHA256
+        and selection.get("onnx_parity_passed") is True
+        and float(selection.get("onnx_parity_maximum_absolute_error", 1.0))
+        <= 1e-5
+        and selection.get("provider") == "CPUExecutionProvider"
+        and selection.get("candidate_onnx_graph_optimization_level")
+        == "ORT_DISABLE_ALL"
+        and selection.get("frozen_v24_role_parent_preserved") is True
+        and metrics.get("direct_stored_fixture_byte_execution") is True
+        and metrics.get("scene_count") == metrics.get("exact_scene_count") == 192
+        and metrics.get("true_positives") == metrics.get("truth_region_count")
+        == 1536
+        and metrics.get("false_positives") == metrics.get("false_negatives") == 0
+        and metrics.get("duplicate_region_count") == 0
+        and metrics.get("prohibited_structure_hits") == 0
+        and metrics.get("recognition_exact") == 0.9713541666666666
+        and metrics.get("character_error_rate") == 0.004869411243913236
+        and metrics.get("role_accuracy") == 1.0
+        and metrics.get("deterministic_role_mismatch_count") == 0
+        and isinstance(roles, dict)
+        and set(roles) == {
+            "YTick", "XTick", "AxisTitle", "PhaseHeading",
+            "LegendText", "Participant", "Annotation", "Other",
+        }
+        and set(roles.values()) == {1.0}
+        and selection.get("passing_threshold_window") == list(THRESHOLDS)
+        and selection.get("selected_threshold") == 0.55
+        and selection.get("case_level_details_emitted") is False
+        and selection.get("public_gate_archive_opened") is False
+        and selection.get("public_gate_authorized") is False
+        and selection.get("public_gate_evaluations") == 0
+        and selection.get("marker_creation_evaluated") is False
+        and selection.get("private_validation_authorized") is False
+        and selection.get("production_approval") is False
+        and selection.get("release_eligible") is False
+        and not any(key in selection for key in (
+            "cases", "predictions", "truths", "fixture_bytes", "scene_ids",
+            "case_ids", "proposal_relation_scene_shapes",
+        ))
+    )
+
+
+def _candidate_hashes() -> dict[str, str]:
+    return {
+        "detector_onnx_sha256": sha256_file(REPO_ROOT / DETECTOR_PATH),
+        "recognizer_onnx_sha256": sha256_file(REPO_ROOT / RECOGNIZER_PATH),
+        "role_parent_checkpoint_sha256": sha256_file(
+            REPO_ROOT / ROLE_PARENT_CHECKPOINT_PATH
+        ),
+        "role_parent_onnx_sha256": sha256_file(REPO_ROOT / ROLE_PARENT_ONNX_PATH),
+        "candidate_onnx_sha256": sha256_file(REPO_ROOT / P1_ONNX_PATH),
+        "candidate_checkpoint_sha256": sha256_file(REPO_ROOT / P1_CHECKPOINT_PATH),
+        "selection_result_sha256": sha256_file(REPO_ROOT / P1_RESULT_PATH),
+        "selection_report_sha256": sha256_file(REPO_ROOT / P1_REPORT_PATH),
+        "selection_opened_seal_sha256": sha256_file(
+            REPO_ROOT / P1_OPENED_SEAL_PATH
+        ),
+        "selection_result_seal_sha256": sha256_file(
+            REPO_ROOT / P1_RESULT_SEAL_PATH
+        ),
+    }
+
+
+def _gate_metrics_pass(metrics: dict[str, object]) -> bool:
+    return bool(
+        metrics_pass(metrics)
+        and metrics.get("scene_count") == 256
+        and metrics.get("direct_stored_fixture_byte_execution") is True
+    )
+
+
+def _aggregate_metrics(metrics: dict[str, object]) -> dict[str, object]:
+    missing = [key for key in _METRIC_KEYS if key not in metrics]
+    if missing:
+        raise RuntimeError(f"OCR V30 aggregate metric evidence missing: {missing[0]}")
+    return {key: metrics[key] for key in _METRIC_KEYS}
+
+
+def _aggregate_comparison(comparison: dict[str, Any]) -> dict[str, object]:
+    metrics = comparison["metrics"]
+    roles = metrics.get("per_role_accuracy", {})
+    if not isinstance(roles, dict) or not roles:
+        raise RuntimeError("OCR V30 public role evidence is missing")
+    return {
+        "threshold": comparison["threshold"],
+        "exact_scene_count": metrics["exact_scene_count"],
+        "true_positives": metrics["true_positives"],
+        "false_positives": metrics["false_positives"],
+        "false_negatives": metrics["false_negatives"],
+        "duplicate_region_count": metrics["duplicate_region_count"],
+        "prohibited_structure_hits": metrics["prohibited_structure_hits"],
+        "role_accuracy": metrics["role_accuracy"],
+        "minimum_per_role_accuracy": min(float(value) for value in roles.values()),
+    }
+
+
+def _validate_config(config: dict[str, object], *, require_authorized: bool) -> None:
+    expected = {
+        "schema": "graphreader.ocr-unanimous-structure-veto-public-gate-config.v1",
+        "task": TASK,
+        "revision": PUBLIC_REVISION,
+        "candidate_id": "P1",
+        "evaluation_limit": 1,
+        "public_fixture_archive_path": PUBLIC_ARCHIVE_PATH.as_posix(),
+        "public_fixture_archive_sha256": PUBLIC_ARCHIVE_SHA256,
+        "expected_dataset_manifest_sha256": PUBLIC_MANIFEST_SHA256,
+        "split_seal_path": SPLIT_SEAL_PATH.as_posix(),
+        "split_seal_sha256": SPLIT_SEAL_SHA256,
+        "selection_result_path": P1_RESULT_PATH.as_posix(),
+        "selection_result_sha256": P1_RESULT_SHA256,
+        "selection_report_path": P1_REPORT_PATH.as_posix(),
+        "selection_report_sha256": P1_REPORT_SHA256,
+        "candidate_onnx_path": P1_ONNX_PATH.as_posix(),
+        "candidate_onnx_sha256": P1_ONNX_SHA256,
+        "candidate_checkpoint_path": P1_CHECKPOINT_PATH.as_posix(),
+        "candidate_checkpoint_sha256": P1_CHECKPOINT_SHA256,
+        "provider": "CPUExecutionProvider",
+        "candidate_onnx_graph_optimization_level": "ORT_DISABLE_ALL",
+        "case_level_failure_analysis_permitted": False,
+        "marker_creation_authorized": False,
+        "private_validation_authorized": False,
+        "production_approval": False,
+        "release_eligible": False,
+    }
+    for key, value in expected.items():
+        if config.get(key) != value:
+            raise RuntimeError(f"OCR V30 public gate configuration changed: {key}")
+    if config.get("expected_candidate_hash_keys") != list(
+        EXPECTED_CANDIDATE_HASH_KEYS
+    ):
+        raise RuntimeError("OCR V30 public gate candidate hash schema changed")
+    expected_gate_hash = sha256(canonical_json_bytes(dict(GATE_CONFIG))).hexdigest()
+    if config.get("expected_gate_config_sha256") != expected_gate_hash:
+        raise RuntimeError("OCR V30 public gate metric contract changed")
+    if require_authorized and config.get("public_execution_authorized") is not True:
+        raise RuntimeError("OCR V30 public gate is not separately authorized")
+
+
+def preflight() -> dict[str, Any]:
+    require_committed_sources(
+        REPO_ROOT,
+        (LEDGER_PATH, PUBLIC_CONFIG_PATH, P1_RESULT_PATH, ROOT / "public_gate.py"),
+    )
+    if (REPO_ROOT / PUBLIC_OUTPUT_PATH).exists():
+        raise RuntimeError("OCR V30 public gate output already exists")
+    config = _read_json(REPO_ROOT / PUBLIC_CONFIG_PATH)
+    _validate_config(config, require_authorized=True)
+    selection = _read_json(REPO_ROOT / P1_RESULT_PATH)
+    if sha256_file(REPO_ROOT / P1_RESULT_PATH) != P1_RESULT_SHA256:
+        raise RuntimeError("OCR V30 selected aggregate result changed")
+    if not _selected_result_is_terminal(selection):
+        raise RuntimeError("OCR V30 public gate requires the exact consumed P1")
+    if sha256_file(REPO_ROOT / P1_REPORT_PATH) != P1_REPORT_SHA256:
+        raise RuntimeError("OCR V30 selected candidate report changed")
+    candidate_report = _read_json(REPO_ROOT / P1_REPORT_PATH)
+    if (
+        candidate_report.get("status") != "selected"
+        or candidate_report.get("selection_gate_passed") is not True
+        or candidate_report.get("onnx_sha256") != P1_ONNX_SHA256
+        or candidate_report.get("checkpoint_sha256") != P1_CHECKPOINT_SHA256
+        or candidate_report.get("case_level_details_emitted") is not False
+        or candidate_report.get("public_gate_archive_opened") is not False
+        or candidate_report.get("public_gate_evaluations") != 0
+        or candidate_report.get("selected_threshold") != 0.55
+        or candidate_report.get("passing_threshold_window") != list(THRESHOLDS)
+        or "cases" in candidate_report
+        or "predictions" in candidate_report
+        or "truths" in candidate_report
+    ):
+        raise RuntimeError("OCR V30 selected candidate report is not terminal")
+    expected_hashes = dict(zip(EXPECTED_CANDIDATE_HASH_KEYS, (
+        DETECTOR_SHA256,
+        RECOGNIZER_SHA256,
+        ROLE_PARENT_CHECKPOINT_SHA256,
+        ROLE_PARENT_ONNX_SHA256,
+        P1_ONNX_SHA256,
+        P1_CHECKPOINT_SHA256,
+        P1_RESULT_SHA256,
+        P1_REPORT_SHA256,
+        P1_OPENED_SEAL_SHA256,
+        P1_RESULT_SEAL_SHA256,
+    ), strict=True))
+    candidate_hashes = _candidate_hashes()
+    if candidate_hashes != expected_hashes:
+        raise RuntimeError("OCR V30 public gate candidate payloads changed")
+    if sha256_file(REPO_ROOT / RECOGNIZER_YAML_PATH) != RECOGNIZER_YAML_SHA256:
+        raise RuntimeError("OCR V30 recognizer preprocessing contract changed")
+    if sha256_file(REPO_ROOT / SPLIT_SEAL_PATH) != SPLIT_SEAL_SHA256:
+        raise RuntimeError("OCR V30 split seal changed")
+    split_seal = _read_json(REPO_ROOT / SPLIT_SEAL_PATH)
+    registered = split_seal["splits"]["sealed_public"]
+    summary = registered.get("proposal_summary", {})
+    if (
+        registered.get("archive_path") != PUBLIC_ARCHIVE_PATH.as_posix()
+        or registered.get("archive_sha256") != PUBLIC_ARCHIVE_SHA256
+        or registered.get("manifest_sha256") != PUBLIC_MANIFEST_SHA256
+        or summary.get("scene_count") != 256
+        or summary.get("proposal_count") != 9389
+        or summary.get("positive_proposal_count") != 2048
+        or summary.get("negative_proposal_count") != 7341
+        or split_seal.get("public_execution_authorized") is not False
+        or split_seal.get("public_evaluations") != 0
+        or split_seal.get("chandler_used") is not False
+        or split_seal.get("private_data") is not False
+    ):
+        raise RuntimeError("OCR V30 sealed public registration changed")
+    head = _repository_head()
+    runner_commit = str(config.get("runner_source_commit", ""))
+    if not runner_commit or not _is_ancestor(runner_commit, head):
+        raise RuntimeError("OCR V30 public runner source commit is not an ancestor")
+    evaluator_bundle = source_bundle_sha256(REPO_ROOT, EVALUATOR_SOURCE_PATHS)
+    if config.get("expected_evaluator_source_bundle_sha256") != evaluator_bundle:
+        raise RuntimeError("OCR V30 public evaluator source bundle changed")
+    ledger = _read_json(REPO_ROOT / LEDGER_PATH)
+    entry = next((
+        item for item in ledger["revisions"]
+        if item.get("task") == TASK and item.get("revision") == REVISION
+    ), None)
+    if (
+        entry is None
+        or entry.get("status") != "candidate_1_selected_public_gate_pending"
+        or entry.get("consumed_candidate_ids") != ["P1"]
+        or entry.get("selection_evaluations") != 1
+        or entry.get("public_gate_authorized") is not True
+        or entry.get("public_gate_authorized_candidate_id") != "P1"
+        or entry.get("public_gate_evaluations") != 0
+        or entry.get("public_gate_archive_opened") is not False
+        or entry.get("public_gate_config_path") != PUBLIC_CONFIG_PATH.as_posix()
+        or entry.get("public_gate_config_sha256")
+        != sha256_file(REPO_ROOT / PUBLIC_CONFIG_PATH)
+        or entry.get("public_gate_runner_source_commit") != runner_commit
+        or entry.get("public_gate_runner_source_bundle_sha256") != evaluator_bundle
+        or entry.get("execution_authorized") is not False
+        or entry.get("authorized_candidate_id") is not None
+        or entry.get("marker_creation_evaluated") is not False
+        or entry.get("private_validation") is not False
+        or entry.get("production_approval") is not False
+        or entry.get("release_eligible") is not False
+    ):
+        raise RuntimeError("OCR V30 public gate lacks canonical authorization")
+    return {
+        "candidate_hashes": candidate_hashes,
+        "config": config,
+        "head": head,
+        "public_registration": registered,
+        "public_window": _public_window(selection),
+        "selection": selection,
+        "split_seal": split_seal,
+    }
+
+
+def evaluate_public() -> dict[str, object]:
+    evidence = preflight()
+    gate = acquire_gate_seal(
+        repo_root=REPO_ROOT,
+        task=TASK,
+        revision=PUBLIC_REVISION,
+        candidate_hashes=evidence["candidate_hashes"],
+        dataset_manifest_sha256=PUBLIC_MANIFEST_SHA256,
+        split_config_path=PUBLIC_CONFIG_PATH,
+        evaluator_source_paths=EVALUATOR_SOURCE_PATHS,
+        gate_config=GATE_CONFIG,
+    )
+    output_path = REPO_ROOT / PUBLIC_OUTPUT_PATH
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    started = time.perf_counter()
+    phase = "open_frozen_public_archive_once"
+    try:
+        archive_payload = (REPO_ROOT / PUBLIC_ARCHIVE_PATH).read_bytes()
+        if sha256(archive_payload).hexdigest() != PUBLIC_ARCHIVE_SHA256:
+            raise RuntimeError("OCR V30 public archive changed")
+        public_scenes = load_archive(BytesIO(archive_payload))  # type: ignore[arg-type]
+        _validate_stored_split(
+            public_scenes, evidence["public_registration"], "sealed_public",
+        )
+
+        phase = "direct_public_onnx_execution"
+        detector_session = _cpu_session(REPO_ROOT / DETECTOR_PATH)
+        recognizer_session = _cpu_session(REPO_ROOT / RECOGNIZER_PATH)
+        candidate_session = _candidate_session(REPO_ROOT / P1_ONNX_PATH)
+        detector_input = detector_session.get_inputs()[0].name
+        recognizer_input = recognizer_session.get_inputs()[0].name
+        alphabet = read_character_alphabet(REPO_ROOT / RECOGNIZER_YAML_PATH)
+
+        def detector_runner(values: np.ndarray) -> np.ndarray:
+            return np.asarray(detector_session.run(None, {
+                detector_input: np.ascontiguousarray(values),
+            })[0], dtype=np.float32)
+
+        def recognizer_runner(values: np.ndarray) -> np.ndarray:
+            return np.asarray(recognizer_session.run(None, {
+                recognizer_input: np.ascontiguousarray(values),
+            })[0], dtype=np.float32)
+
+        (
+            values,
+            crops,
+            _,
+            records,
+            relations,
+            scene_slices,
+            runtime_evidence,
+        ) = extract_relational_evidence(
+            public_scenes,
+            detector_runner,
+            recognizer_runner,
+            alphabet,
+            mode="train",
+            negative_cap_per_scene=10_000,
+            recognition_batch_size=64,
+        )
+        registered_summary = evidence["public_registration"]["proposal_summary"]
+        for key in (
+            "scene_count", "proposal_count",
+            "positive_proposal_count", "negative_proposal_count",
+        ):
+            if runtime_evidence.get(key) != registered_summary.get(key):
+                raise RuntimeError(f"OCR V30 public proposal stream changed: {key}")
+        runtime_evidence.pop("proposal_relation_scene_shapes", None)
+
+        outputs: list[np.ndarray] = []
+        evidence_inputs = sha256()
+        crop_inputs = sha256()
+        relation_inputs = sha256()
+        candidate_outputs = sha256()
+        for scene_index, scene_slice in enumerate(scene_slices):
+            scene_values = np.ascontiguousarray(values[scene_slice][None, ...])
+            scene_crops = np.ascontiguousarray(crops[scene_slice][None, ...])
+            scene_relations = np.ascontiguousarray(relations[scene_index][None, ...])
+            actual = np.asarray(candidate_session.run(None, {
+                "proposal_evidence": scene_values,
+                "proposal_crops": scene_crops,
+                "proposal_relations": scene_relations,
+            })[0], dtype=np.float32)
+            if actual.shape != (1, scene_values.shape[1], 10):
+                raise RuntimeError("OCR V30 public candidate output contract changed")
+            outputs.append(actual[0])
+            evidence_inputs.update(scene_values.tobytes(order="C"))
+            crop_inputs.update(scene_crops.tobytes(order="C"))
+            relation_inputs.update(scene_relations.tobytes(order="C"))
+            candidate_outputs.update(actual.tobytes(order="C"))
+        if len(outputs) != len(public_scenes):
+            raise RuntimeError("OCR V30 public inference call count changed")
+        runtime_evidence.update({
+            "candidate_inference_calls": len(scene_slices),
+            "candidate_evidence_input_tensor_stream_sha256": (
+                evidence_inputs.hexdigest()
+            ),
+            "candidate_crop_input_tensor_stream_sha256": crop_inputs.hexdigest(),
+            "candidate_relation_input_tensor_stream_sha256": (
+                relation_inputs.hexdigest()
+            ),
+            "candidate_output_tensor_stream_sha256": candidate_outputs.hexdigest(),
+            "candidate_onnx_sha256": P1_ONNX_SHA256,
+            "candidate_onnx_graph_optimization_level": "ORT_DISABLE_ALL",
+            "provider": "CPUExecutionProvider",
+            "public_archive_read_count": 1,
+        })
+        flat_output = np.concatenate(outputs)
+        calibrated_records = _calibrated_records(records, flat_output)
+        comparisons = evaluate_thresholds(
+            public_scenes,
+            calibrated_records,
+            flat_output[:, :2],
+            evidence["public_window"],
+            runtime_evidence,
+        )
+        passed = bool(
+            len(comparisons) == ROBUST_THRESHOLD_RUN_LENGTH
+            and all(_gate_metrics_pass(item["metrics"]) for item in comparisons)
+        )
+        selected_threshold = float(evidence["selection"]["selected_threshold"])
+        selected_metrics = next(
+            item["metrics"]
+            for item in comparisons
+            if item["threshold"] == selected_threshold
+        )
+        tensor_evidence = {
+            key: runtime_evidence[key] for key in _TENSOR_EVIDENCE_KEYS
+        }
+        report: dict[str, object] = {
+            "schema": "graphreader.ocr-unanimous-structure-veto-public-gate.v1",
+            "task": TASK,
+            "revision": PUBLIC_REVISION,
+            "candidate_id": "P1",
+            "status": "pass" if passed else "fail",
+            "evaluation_count": 1,
+            "candidate_hashes": evidence["candidate_hashes"],
+            "fixture_archive_sha256": PUBLIC_ARCHIVE_SHA256,
+            "fixture_manifest_sha256": PUBLIC_MANIFEST_SHA256,
+            "provider": "CPUExecutionProvider",
+            "selected_threshold": selected_threshold,
+            "public_threshold_window": list(evidence["public_window"]),
+            "metrics": _aggregate_metrics(selected_metrics),
+            "threshold_comparisons": [
+                _aggregate_comparison(item) for item in comparisons
+            ],
+            "tensor_evidence": tensor_evidence,
+            "gate_requirements": GATE_CONFIG,
+            "seal_binding": gate.binding,
+            "canonical_seal_key": gate.key,
+            "direct_fixture_byte_execution": True,
+            "public_archive_read_count": 1,
+            "case_identifiers_emitted": False,
+            "truth_rows_emitted": False,
+            "predictions_emitted": False,
+            "case_level_details_emitted": False,
+            "case_level_failure_analysis_performed": False,
+            "marker_creation_evaluated": False,
+            "marker_creation_gate_required_before_production_approval": True,
+            "private_validation_authorized": False,
+            "production_approval": False,
+            "release_eligible": False,
+            "synthetic_only": True,
+            "chandler_included": False,
+            "elapsed_ms": round((time.perf_counter() - started) * 1000.0, 3),
+        }
+        output_path.write_bytes(canonical_json_bytes(report))
+        complete_gate_seal(
+            gate, status=str(report["status"]), report_sha256=sha256_file(output_path),
+        )
+        return report
+    except Exception as error:
+        failure: dict[str, object] = {
+            "schema": "graphreader.ocr-unanimous-structure-veto-public-gate-failure.v1",
+            "task": TASK,
+            "revision": PUBLIC_REVISION,
+            "candidate_id": "P1",
+            "status": "failed_runner",
+            "evaluation_count": 1,
+            "phase": phase,
+            "exception_type": type(error).__name__,
+            "completed_utc": datetime.now(timezone.utc).isoformat(),
+            "candidate_hashes": evidence["candidate_hashes"],
+            "seal_binding": gate.binding,
+            "canonical_seal_key": gate.key,
+            "case_identifiers_emitted": False,
+            "truth_rows_emitted": False,
+            "predictions_emitted": False,
+            "case_level_details_emitted": False,
+            "marker_creation_evaluated": False,
+            "private_validation_authorized": False,
+            "production_approval": False,
+            "release_eligible": False,
+        }
+        output_path.write_bytes(canonical_json_bytes(failure))
+        complete_gate_seal(
+            gate, status="failed_runner", report_sha256=sha256_file(output_path),
+        )
+        raise
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--preflight", action="store_true")
+    group.add_argument("--execute", action="store_true")
+    arguments = parser.parse_args()
+    if arguments.preflight:
+        evidence = preflight()
+        print(json.dumps({
+            "candidate_id": "P1",
+            "head": evidence["head"],
+            "public_window": list(evidence["public_window"]),
+            "ready": True,
+        }, sort_keys=True))
+        return 0
+    report = evaluate_public()
+    metrics = report["metrics"]
+    print(json.dumps({
+        "status": report["status"],
+        "evaluation_count": report["evaluation_count"],
+        "selected_threshold": report["selected_threshold"],
+        "public_threshold_window": report["public_threshold_window"],
+        "scene_count": metrics["scene_count"],
+        "exact_scene_count": metrics["exact_scene_count"],
+        "true_positives": metrics["true_positives"],
+        "false_positives": metrics["false_positives"],
+        "false_negatives": metrics["false_negatives"],
+        "duplicate_region_count": metrics["duplicate_region_count"],
+        "prohibited_structure_hits": metrics["prohibited_structure_hits"],
+        "recognition_exact": metrics["recognition_exact"],
+        "character_error_rate": metrics["character_error_rate"],
+        "role_accuracy": metrics["role_accuracy"],
+        "case_level_details_emitted": False,
+        "production_approval": False,
+        "release_eligible": False,
+    }, indent=2, sort_keys=True))
+    return 0 if report["status"] == "pass" else 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+
+__all__ = [
+    "EVALUATOR_SOURCE_PATHS",
+    "EXPECTED_CANDIDATE_HASH_KEYS",
+    "GATE_CONFIG",
+    "PUBLIC_CONFIG_PATH",
+    "PUBLIC_OUTPUT_PATH",
+    "PUBLIC_REVISION",
+    "_aggregate_comparison",
+    "_aggregate_metrics",
+    "_gate_metrics_pass",
+    "_public_window",
+    "_selected_result_is_terminal",
+    "_validate_config",
+    "evaluate_public",
+    "preflight",
+]

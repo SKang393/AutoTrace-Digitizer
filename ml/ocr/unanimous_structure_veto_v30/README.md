@@ -53,9 +53,14 @@ local evidence.
 
 P1 is now consumed and no additional training or selection run is authorized.
 The sealed public archive remains unopened with zero evaluations. Public
-execution requires a separately committed truth-hidden runner, aggregate-only
-gate configuration, direct review, and explicit authorization. Marker,
-private, manifest, model-store, packaging, approval, and release gates also
-remain closed.
+execution now has a separately preregistered truth-hidden runner and
+aggregate-only gate configuration. The runner verifies every exact payload and
+source hash before acquiring a single-use seal, opens the archive once, runs
+the complete detector, recognizer, relation, and V30 candidate stream on CPU,
+removes per-scene shape evidence, and writes only whitelisted aggregate metrics
+and tensor-stream hashes. The configuration remains unauthorized and does not
+identify a runner source commit until this source checkpoint is committed and
+reviewed. Marker, private, manifest, model-store, packaging, approval, and
+release gates also remain closed.
 Synthetic fixtures are training and public-test inputs only and can never
 become application graph data.

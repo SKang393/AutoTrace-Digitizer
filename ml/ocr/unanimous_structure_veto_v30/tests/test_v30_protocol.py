@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from hashlib import sha256
+import inspect
 import json
 from pathlib import Path
 
@@ -11,6 +12,8 @@ import numpy as np
 import onnxruntime as ort
 import pytest
 import torch
+
+from ml.markers.gate_seal import source_bundle_sha256
 
 from ml.ocr.unanimous_structure_veto_v30.dataset import (
     proposal_summary,
@@ -27,6 +30,16 @@ from ml.ocr.unanimous_structure_veto_v30.protocol import (
     TRIGGER_RESULT_SHA256,
     protocol_configuration,
     split_registration,
+)
+from ml.ocr.unanimous_structure_veto_v30.public_gate import (
+    EVALUATOR_SOURCE_PATHS,
+    PUBLIC_CONFIG_PATH,
+    PUBLIC_OUTPUT_PATH,
+    _aggregate_metrics,
+    _gate_metrics_pass,
+    _selected_result_is_terminal,
+    _validate_config,
+    evaluate_public,
 )
 from ml.ocr.unanimous_structure_veto_v30.train_p1 import (
     _trigger_is_terminal,
@@ -271,11 +284,11 @@ def test_consumed_runner_preflight_refuses_a_second_execution() -> None:
         preflight()
 
 
-def test_ledger_records_selected_p1_and_refuses_every_later_gate() -> None:
+def test_ledger_records_selected_p1_and_keeps_later_gates_closed() -> None:
     entry = _entry()
     result_path = ROOT / "P1_RESULT.json"
     result = _read_json(result_path)
-    assert entry["status"] == "candidate_1_selected"
+    assert entry["status"] == "candidate_1_selected_public_gate_preregistered"
     assert entry["prior_revision"] == "graph-text-dual-route-consensus-proposal-v29"
     assert entry["trigger_result_sha256"] == TRIGGER_RESULT_SHA256
     assert entry["trigger_case_detail_or_pixels_used"] is False
@@ -345,6 +358,94 @@ def test_p1_result_is_aggregate_only_and_passes_fixed_selection_gates() -> None:
     assert result["release_eligible"] is False
 
 
+def test_public_gate_is_preregistered_but_not_authorized() -> None:
+    config_path = REPO_ROOT / PUBLIC_CONFIG_PATH
+    config = _read_json(config_path)
+    _validate_config(config, require_authorized=False)
+    with pytest.raises(RuntimeError, match="not separately authorized"):
+        _validate_config(config, require_authorized=True)
+    assert config["runner_source_commit"] is None
+    assert config["public_execution_authorized"] is False
+    assert config["expected_evaluator_source_bundle_sha256"] == (
+        source_bundle_sha256(REPO_ROOT, EVALUATOR_SOURCE_PATHS)
+    )
+    assert not (REPO_ROOT / PUBLIC_OUTPUT_PATH).exists()
+    entry = _entry()
+    assert entry["status"] == "candidate_1_selected_public_gate_preregistered"
+    assert entry["public_gate_config_path"] == PUBLIC_CONFIG_PATH.as_posix()
+    assert entry["public_gate_config_sha256"] == _sha256(config_path)
+    assert entry["public_gate_runner_source_commit"] is None
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_evaluations"] == 0
+    assert entry["public_gate_archive_opened"] is False
+
+
+def test_selected_p1_is_terminal_for_public_gate_without_case_material() -> None:
+    result = _read_json(ROOT / "P1_RESULT.json")
+    assert _selected_result_is_terminal(result)
+    for prohibited in (
+        "cases", "predictions", "truths", "fixture_bytes", "scene_ids",
+        "case_ids", "proposal_relation_scene_shapes",
+    ):
+        assert prohibited not in result
+
+
+def test_public_metric_gate_requires_all_256_scenes_and_direct_bytes() -> None:
+    roles = {
+        "YTick": 1.0,
+        "XTick": 1.0,
+        "AxisTitle": 1.0,
+        "PhaseHeading": 1.0,
+        "LegendText": 1.0,
+        "Participant": 1.0,
+        "Annotation": 1.0,
+        "Other": 1.0,
+    }
+    metrics: dict[str, object] = {
+        "scene_count": 256,
+        "truth_region_count": 2048,
+        "exact_scene_count": 256,
+        "true_positives": 2048,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "duplicate_region_count": 0,
+        "prohibited_structure_hits": 0,
+        "recognition_exact": 0.90,
+        "character_error_rate": 0.05,
+        "role_accuracy": 0.90,
+        "per_role_accuracy": roles,
+        "direct_stored_fixture_byte_execution": True,
+    }
+    assert _gate_metrics_pass(metrics)
+    assert not _gate_metrics_pass({**metrics, "scene_count": 255})
+    assert not _gate_metrics_pass({
+        **metrics, "direct_stored_fixture_byte_execution": False,
+    })
+
+
+def test_public_report_whitelists_aggregate_metrics_only() -> None:
+    selection = dict(_read_json(ROOT / "P1_RESULT.json")["selection_metrics"])
+    selection["public_archive_read_count"] = 1
+    selection["cases"] = ["must-not-escape"]
+    selection["proposal_relation_scene_shapes"] = [[1, 1, 19]]
+    aggregate = _aggregate_metrics(selection)
+    assert "cases" not in aggregate
+    assert "proposal_relation_scene_shapes" not in aggregate
+    assert aggregate["scene_count"] == 192
+    assert aggregate["public_archive_read_count"] == 1
+
+
+def test_public_runner_seals_before_one_read_and_drops_scene_shapes() -> None:
+    source = inspect.getsource(evaluate_public)
+    assert source.count(".read_bytes()") == 1
+    assert source.index("acquire_gate_seal(") < source.index(".read_bytes()")
+    assert "sha256(archive_payload)" in source
+    assert "load_archive(BytesIO(archive_payload))" in source
+    assert 'runtime_evidence.pop("proposal_relation_scene_shapes", None)' in source
+    assert "_aggregate_metrics(selected_metrics)" in source
+    assert "_aggregate_comparison(item)" in source
+
+
 def test_readme_forbids_v29_bytes_and_application_synthetic_data() -> None:
     text = (ROOT / "README.md").read_text(encoding="utf-8")
     normalized = " ".join(text.split())
@@ -353,6 +454,8 @@ def test_readme_forbids_v29_bytes_and_application_synthetic_data() -> None:
     assert "No V29 checkpoint is reused" in text
     assert "P1 consumed its single authorized CPU training run" in text
     assert "sealed public archive remains unopened" in text
+    assert "configuration remains unauthorized" in text
+    assert "writes only whitelisted aggregate metrics" in text
     assert "never become application graph data" in normalized
 
 
