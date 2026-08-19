@@ -241,7 +241,9 @@ def test_source_only_ledger_is_fail_closed_before_fixture_freeze() -> None:
     }
     assert entry["prior_fixture_bytes_reused"] is False
     assert entry["trigger_case_detail_or_pixels_used"] is False
-    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized"] is (
+        entry["status"] == "candidate_1_selected_public_gate_pending"
+    )
     assert entry["private_validation"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
@@ -318,10 +320,12 @@ def test_selected_p1_result_is_aggregate_only_and_fail_closed() -> None:
     assert entry["preregistered_candidate_ids"] == []
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized"] is (
+        entry["status"] == "candidate_1_selected_public_gate_pending"
+    )
 
 
-def test_public_runner_is_preregistered_without_opening_public_bytes() -> None:
+def test_public_runner_is_authorized_without_opening_public_bytes() -> None:
     result = _read_json(ROOT / "P1_RESULT.json")
     assert _selected_result_is_terminal(result)
     assert _public_window(result) == (0.45, 0.55, 0.65)
@@ -329,7 +333,9 @@ def test_public_runner_is_preregistered_without_opening_public_bytes() -> None:
     config = _read_json(config_path)
     assert config["candidate_id"] == "P1"
     assert config["evaluation_limit"] == 1
-    assert config["runner_source_commit"] is None
+    assert config["runner_source_commit"] == (
+        "8667c6d5e915d6aac56f03012f852c9dd053fe3b"
+    )
     assert config["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, EVALUATOR_SOURCE_PATHS,
     )
@@ -339,22 +345,22 @@ def test_public_runner_is_preregistered_without_opening_public_bytes() -> None:
     assert config["expected_candidate_hash_keys"] == list(
         EXPECTED_CANDIDATE_HASH_KEYS
     )
-    assert config["public_execution_authorized"] is False
+    assert config["public_execution_authorized"] is True
     assert config["case_level_failure_analysis_permitted"] is False
     assert config["marker_creation_authorized"] is False
     assert config["private_validation_authorized"] is False
     assert config["production_approval"] is False
     assert config["release_eligible"] is False
     entry = _ledger_entry()
-    assert entry["status"] == "candidate_1_selected_public_gate_preregistered"
+    assert entry["status"] == "candidate_1_selected_public_gate_pending"
     assert entry["public_gate_config_path"] == PUBLIC_CONFIG_PATH.as_posix()
     assert entry["public_gate_config_sha256"] == _sha256(config_path)
-    assert entry["public_gate_runner_source_commit"] is None
+    assert entry["public_gate_runner_source_commit"] == config["runner_source_commit"]
     assert entry["public_gate_runner_source_bundle_sha256"] == config[
         "expected_evaluator_source_bundle_sha256"
     ]
-    assert entry["public_gate_authorized"] is False
-    assert entry["public_gate_authorized_candidate_id"] is None
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_candidate_id"] == "P1"
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
 
