@@ -106,9 +106,14 @@ are `0b56a7a7...bcf2`, `16d60e8d...11fd`, `3d3f9e14...4e46b`, and
 `4179534c...b45af`. No case identity or case-level result was emitted or
 inspected. P3 is consumed and cannot rerun.
 
-The truth-hidden public gate requires a separately committed checksum-bound
-one-use runner and authorization and is not yet authorized. Marker
-composition, private validation, manifest creation, model-store promotion,
+The checksum-bound one-use public runner source is now committed separately. It
+acquires the canonical gate seal before reading the public archive once, runs
+the exact selected ONNX payload on all 192 stored scenes, emits aggregate
+metrics and tensor-stream hashes only, and permanently seals pass, fail, or
+runner failure. This source checkpoint creates no gate seal and opens no public
+fixture bytes. A second committed configuration and canonical ledger transition
+must bind the exact runner source before the public gate becomes authorized.
+Marker composition, private validation, manifest creation, model-store promotion,
 packaging, production approval, and release remain unauthorized. Synthetic
 fixtures are training and public-test inputs only and are never application
 graph data.

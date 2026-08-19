@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from hashlib import sha256
 from io import BytesIO
+import inspect
 import json
 from pathlib import Path
 
@@ -33,6 +34,14 @@ from ml.ocr.relational_neighborhood_proposal_v28.model_p3 import (
     FrozenP1GeometryRolePartitionNet,
 )
 from ml.ocr.relational_neighborhood_proposal_v28.prepare_split import SOURCE_PATHS
+from ml.ocr.relational_neighborhood_proposal_v28.public_gate import (
+    EVALUATOR_SOURCE_PATHS as PUBLIC_EVALUATOR_SOURCE_PATHS,
+    PUBLIC_CONFIG_PATH,
+    PUBLIC_OUTPUT_PATH,
+    _gate_metrics_pass,
+    _public_window,
+    _selected_result_is_terminal,
+)
 from ml.ocr.relational_neighborhood_proposal_v28.protocol import (
     CANDIDATE_LIMIT,
     FEATURE_COUNT,
@@ -148,7 +157,7 @@ def test_canonical_budget_consumes_selected_p3_and_keeps_public_gate_closed() ->
         item for item in ledger["revisions"]
         if item["revision"] == "graph-text-relational-neighborhood-proposal-v28"
     )
-    assert entry["status"] == "candidate_3_selected_public_gate_unregistered"
+    assert entry["status"] == "candidate_3_selected_public_gate_source_registered"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
@@ -176,7 +185,7 @@ def test_canonical_budget_consumes_selected_p3_and_keeps_public_gate_closed() ->
     assert entry["public_gate_archive_opened"] is False
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert "passed the complete visible-selection gate" in entry["execution_blocker"]
+    assert "runner source is committed" in entry["execution_blocker"]
     assert "No V28 execution is currently authorized" in entry["execution_authorization"]
     assert "remain unauthorized" in entry["execution_authorization"]
     p2_preregistration = REPO_ROOT / entry["candidate_2_preregistration_path"]
@@ -751,6 +760,82 @@ def test_p3_selected_aggregate_is_directly_bound_and_public_remains_closed() -> 
         assert sha256_file(seal_root / "result.json") == result[
             "training_result_seal_sha256"
         ]
+
+
+def test_public_runner_source_is_registered_but_execution_remains_unbound() -> None:
+    result_path = REPO_ROOT / "ml/ocr/relational_neighborhood_proposal_v28/P3_RESULT.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert _selected_result_is_terminal(result)
+    assert _public_window(result) == (0.45, 0.55, 0.65)
+    assert Path("ml/ocr/relational_neighborhood_proposal_v28/public_gate.py") in set(
+        PUBLIC_EVALUATOR_SOURCE_PATHS
+    )
+    assert Path("ml/ocr/relational_neighborhood_proposal_v28/P3_RESULT.json") in set(
+        PUBLIC_EVALUATOR_SOURCE_PATHS
+    )
+    assert not (REPO_ROOT / PUBLIC_CONFIG_PATH).exists()
+    assert not (REPO_ROOT / PUBLIC_OUTPUT_PATH).exists()
+    ledger = json.loads(
+        (
+            REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
+        ).read_text(encoding="utf-8")
+    )
+    entry = next(
+        item for item in ledger["revisions"]
+        if item["revision"] == "graph-text-relational-neighborhood-proposal-v28"
+    )
+    assert entry["status"] == "candidate_3_selected_public_gate_source_registered"
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_evaluations"] == 0
+    assert entry["public_gate_archive_opened"] is False
+    assert entry["execution_authorized"] is False
+    assert entry["marker_creation_evaluated"] is False
+    assert entry["private_validation"] is False
+    assert entry["production_approval"] is False
+    assert entry["release_eligible"] is False
+
+
+def test_public_metric_gate_requires_all_192_scenes_and_direct_bytes() -> None:
+    roles = {
+        "YTick": 1.0,
+        "XTick": 1.0,
+        "AxisTitle": 1.0,
+        "PhaseHeading": 1.0,
+        "LegendText": 1.0,
+        "Participant": 1.0,
+        "Annotation": 1.0,
+        "Other": 1.0,
+    }
+    metrics: dict[str, object] = {
+        "scene_count": 192,
+        "truth_region_count": 1536,
+        "exact_scene_count": 192,
+        "true_positives": 1536,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "duplicate_region_count": 0,
+        "prohibited_structure_hits": 0,
+        "recognition_exact": 0.90,
+        "character_error_rate": 0.05,
+        "role_accuracy": 0.90,
+        "per_role_accuracy": roles,
+        "direct_stored_fixture_byte_execution": True,
+    }
+    assert _gate_metrics_pass(metrics)
+    assert not _gate_metrics_pass({**metrics, "scene_count": 191})
+    assert not _gate_metrics_pass({
+        **metrics, "direct_stored_fixture_byte_execution": False,
+    })
+
+
+def test_public_runner_acquires_the_one_use_seal_before_one_archive_read() -> None:
+    from ml.ocr.relational_neighborhood_proposal_v28.public_gate import evaluate_public
+
+    source = inspect.getsource(evaluate_public)
+    assert source.count("archive_path.read_bytes()") == 1
+    assert source.index("acquire_gate_seal(") < source.index("archive_path.read_bytes()")
+    assert "sha256(archive_payload)" in source
+    assert "load_archive(BytesIO(archive_payload))" in source
 
 
 def test_p3_geometry_partition_is_exhaustive_and_preserves_exact_p1_proposals() -> None:
