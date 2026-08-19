@@ -82,7 +82,7 @@ def test_protocol_is_source_only_and_uses_aggregate_v29_evidence() -> None:
     assert tracked["release_eligible"] is False
 
 
-def test_fresh_split_registrations_are_disjoint_and_not_materialized() -> None:
+def test_fresh_split_registrations_are_disjoint_and_checksum_sealed() -> None:
     registrations = [
         split_registration("train"),
         split_registration("validation"),
@@ -96,11 +96,28 @@ def test_fresh_split_registrations_are_disjoint_and_not_materialized() -> None:
     ]
     assert len(renderer_ids) == len(set(renderer_ids))
     assert len(degradation_ids) == len(set(degradation_ids))
-    assert not (ROOT / "SPLIT_SEAL.json").exists()
-    for name in ("train", "selection", "public"):
-        assert not (
-            REPO_ROOT / f"artifacts/production-validation/ocr-v30-{name}.zip"
-        ).exists()
+    seal_path = ROOT / "SPLIT_SEAL.json"
+    seal = _read_json(seal_path)
+    config = _read_json(ROOT / "training/p1.json")
+    assert _sha256(seal_path) == config["split_seal_sha256"]
+    assert seal["source_commit"] == "380d4ece1b48623e60b4d82720d8b421d97349f3"
+    assert seal["source_bundle_sha256"] == config["split_source_bundle_sha256"]
+    assert set(seal["cross_split_source_overlap_counts"].values()) == {0}
+    assert seal["optimizer_steps_at_freeze"] == 0
+    assert seal["selection_evaluations"] == 0
+    assert seal["public_evaluations"] == 0
+    assert seal["training_authorized"] is False
+    archive_bindings = {
+        "train": "train",
+        "validation": "selection",
+        "sealed_public": "public",
+    }
+    for split, name in archive_bindings.items():
+        path = REPO_ROOT / f"artifacts/production-validation/ocr-v30-{name}.zip"
+        assert _sha256(path) == seal["splits"][split]["archive_sha256"]
+        assert seal["splits"][split]["proposal_summary"][
+            "exactly_one_production_proposal_per_truth"
+        ] is True
 
 
 def test_unanimous_margin_allows_any_route_to_veto() -> None:
@@ -250,19 +267,28 @@ def test_runner_source_is_complete_but_training_remains_fail_closed() -> None:
     assert required <= {path.name for path in SOURCE_PATHS if path.parent == Path(
         "ml/ocr/unanimous_structure_veto_v30"
     )}
-    with pytest.raises(RuntimeError, match="OCR V30 P1 config field mismatch"):
+    with pytest.raises(RuntimeError, match="canonical authorization changed"):
         preflight()
 
 
 def test_ledger_refuses_execution_and_every_later_gate() -> None:
     entry = _entry()
-    assert entry["status"] == "preregistered_source_only"
+    assert entry["status"] == "split_frozen_candidate_1_not_authorized"
     assert entry["prior_revision"] == "graph-text-dual-route-consensus-proposal-v29"
     assert entry["trigger_result_sha256"] == TRIGGER_RESULT_SHA256
     assert entry["trigger_case_detail_or_pixels_used"] is False
     assert entry["prior_fixture_bytes_reused"] is False
     assert entry["prior_checkpoint_reused"] is False
-    assert entry["split_materialized"] is False
+    assert entry["split_materialized"] is True
+    assert entry["split_source_commit"] == "380d4ece1b48623e60b4d82720d8b421d97349f3"
+    assert entry["split_seal_path"] == (
+        "ml/ocr/unanimous_structure_veto_v30/SPLIT_SEAL.json"
+    )
+    assert entry["split_seal_sha256"] == _sha256(ROOT / "SPLIT_SEAL.json")
+    assert entry["candidate_config_sha256"]["P1"] == _sha256(
+        ROOT / "training/p1.json"
+    )
+    assert _read_json(ROOT / "training/p1.json")["training_authorized"] is False
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == []
     assert entry["execution_authorized"] is False
@@ -279,7 +305,7 @@ def test_readme_forbids_v29_bytes_and_application_synthetic_data() -> None:
     assert "No V29 case identity" in text
     assert "bytes cannot be used for V30" in text
     assert "No V29 checkpoint is reused" in text
-    assert "This checkpoint is source-only" in text
+    assert "split-seal checkpoint only" in text
     assert "never become application graph data" in normalized
 
 

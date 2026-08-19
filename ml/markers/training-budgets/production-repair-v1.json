@@ -7097,7 +7097,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-unanimous-structure-veto-v30",
-      "status": "preregistered_source_only",
+      "status": "split_frozen_candidate_1_not_authorized",
       "defect_class": "V29 passed every visible-selection scene at five thresholds but its one truth-hidden public run passed only 222 of 224 scenes, with two false regions and two prohibited hits at every fixed threshold",
       "prior_revision": "graph-text-dual-route-consensus-proposal-v29",
       "trigger_result_path": "ml/ocr/dual_route_consensus_proposal_v29/PUBLIC_GATE_RESULT.json",
@@ -7115,11 +7115,16 @@
       "remaining_unregistered_candidate_ids": ["P1", "P2", "P3"],
       "protocol_path": "ml/ocr/unanimous_structure_veto_v30/PROTOCOL.json",
       "protocol_sha256": "c8d37af0acede69e95b1705c1fa404d3b0ec1cc7da78e2aa6e4ff6c3003fc81b",
-      "split_materialized": false,
-      "split_source_commit": null,
-      "split_source_bundle_sha256": null,
-      "split_seal_path": null,
-      "split_seal_sha256": null,
+      "split_materialized": true,
+      "split_source_commit": "380d4ece1b48623e60b4d82720d8b421d97349f3",
+      "split_source_bundle_sha256": "b830b36be890ed53cb10f43a86961f4412bc238a97bd046d228ead18767cf8fe",
+      "split_seal_path": "ml/ocr/unanimous_structure_veto_v30/SPLIT_SEAL.json",
+      "split_seal_sha256": "8f75a388413e12d11ca1c8a8372bdaca4d982b2aca2a53ef61d8e4dd3326b116",
+      "split_archive_sha256": {
+        "train": "b81f78a74cd514cb276d933d37a8b1d86bc9f52633da296e53e82ebeb6b5d834",
+        "validation": "6a28ffa43dfe1552051867bfecef492d78e0fc6a4c6461f38bf2810a73aeedd9",
+        "sealed_public": "31632d9eee9db39b50dcb063ebce33dfd9549c159daff2bfd6291b2de1dcd01d"
+      },
       "split_scene_counts": {
         "train": 384,
         "validation": 192,
@@ -7136,13 +7141,13 @@
         "P1": "ml/ocr/unanimous_structure_veto_v30/training/p1.json"
       },
       "candidate_config_sha256": {
-        "P1": "b551b14545ce54ed3e214d31ddb6f2fd46a92a121c95eee396ad8ffd8f7aa2f7"
+        "P1": "253a88910d021d4c4b269e6da6d058cc8d655e8f6cc1dc32fffd191c038174cd"
       },
       "selection_thresholds": [0.35, 0.45, 0.55, 0.65, 0.75],
       "minimum_consecutive_passing_thresholds": 3,
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "execution_blocker": "Source-only checkpoint. Freeze fresh disjoint V30 fixtures from this exact committed source before separately preregistering and authorizing P1. No V30 fixture or candidate execution is currently permitted.",
+      "execution_blocker": "Fresh disjoint V30 fixtures are sealed from exact commit 380d4ec with zero cross-split source-byte overlap. P1 still requires a separate committed authorization checkpoint before any candidate execution.",
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,

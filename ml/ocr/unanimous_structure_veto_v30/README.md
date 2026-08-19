@@ -34,12 +34,17 @@ recognition exact at least `0.90`, CER at most `0.05`, overall role accuracy at
 least `0.90`, every role at least `0.85`, direct stored-byte execution, CPU
 execution, tensor hashes, and ONNX parity at most `1e-5`.
 
-This checkpoint is source-only. The deterministic fixture freezer, checksum-bound
-archive loader, direct CPU feature pipeline, single-use P1 training runner, and
-dynamic ONNX parity check are implemented. The runner refuses execution until
-those exact sources are committed, fresh archives are frozen with zero byte
-overlap, their seal is committed, and P1 receives a separate ledger
-authorization. No V30 fixture has been generated, no candidate is authorized,
-and no training, selection, public, marker, private, manifest, model-store,
-packaging, approval, or release gate is open. Synthetic fixtures are training
-and public-test inputs only and can never become application graph data.
+The deterministic fixture freezer, checksum-bound archive loader, direct CPU
+feature pipeline, single-use P1 training runner, and dynamic ONNX parity check
+are implemented. Fresh archives are now frozen from exact source commit
+`380d4ece1b48623e60b4d82720d8b421d97349f3`. Their source bundle is
+`b830b36be890ed53cb10f43a86961f4412bc238a97bd046d228ead18767cf8fe`,
+and the train, selection, and sealed-public source-byte overlap counts are all
+zero.
+
+This is a split-seal checkpoint only. P1 is not authorized, and the runner
+still refuses execution until the seal, bound configuration, and a separate
+ledger authorization are committed together. No training, selection, public,
+marker, private, manifest, model-store, packaging, approval, or release gate is
+open. Synthetic fixtures are training and public-test inputs only and can never
+become application graph data.
