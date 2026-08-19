@@ -1,0 +1,99 @@
+{
+  "schema": "graphreader.ocr-robust-quorum-recall-protocol.v1",
+  "task": "ocr-detection-recognition",
+  "revision": "graph-text-robust-quorum-recall-v31",
+  "state": "preregistered_before_fixture_freeze_or_candidate_execution",
+  "defect_class": "V30 passed 255 of 256 truth-hidden public scenes with zero false regions, zero duplicates, zero prohibited hits, and one missed truth at every fixed threshold",
+  "trigger_result_path": "ml/ocr/unanimous_structure_veto_v30/PUBLIC_GATE_RESULT.json",
+  "trigger_result_sha256": "c070c1acd1b803f579529055949e363b97d24cb4207233a35d86b87b2e691e3c",
+  "aggregate_design_basis": {
+    "scene_count": 256,
+    "exact_scene_count": 255,
+    "truth_regions": 2048,
+    "true_positives": 2047,
+    "false_regions": 0,
+    "missed_regions": 1,
+    "duplicate_regions": 0,
+    "prohibited_structure_hits": 0,
+    "recognition_exact": 0.98095703125,
+    "character_error_rate": 0.0033769523005487546,
+    "role_accuracy": 0.99951171875,
+    "minimum_role_accuracy": 0.99609375,
+    "public_archive_read_count": 1,
+    "case_level_evidence_used": false,
+    "fixture_bytes_truth_scene_or_case_identity_reused": false
+  },
+  "isolated_change": "reuse the exact project-owned V30 route weights with zero optimizer steps and replace strict minimum-margin unanimity with the median positive-vs-negative margin across the three routes",
+  "architecture": {
+    "id": "two-of-three-robust-route-quorum-v1",
+    "routes": [
+      "relational-attention",
+      "invariant-relation-summary",
+      "local-crop-structure"
+    ],
+    "v30_checkpoint_reused": true,
+    "v30_checkpoint_sha256": "a91044ee4621fe914377ad522d7ee3d9036f0a5e5714168684c34d2c3b8a9ceb",
+    "optimizer_steps": 0,
+    "proposal_consensus": "median positive-vs-negative margin across all three routes",
+    "evidence_input": [1, "proposal_count", 31],
+    "crop_input": [1, "proposal_count", 2, 32, 128],
+    "relation_input": [1, "proposal_count", "proposal_count", 19],
+    "output": [1, "proposal_count", 10],
+    "role_output": "source-declared plot-relative deterministic partition",
+    "provider": "CPUExecutionProvider",
+    "candidate_onnx_graph_optimization_level": "ORT_DISABLE_ALL",
+    "model_license": "Apache-2.0",
+    "ordinary_production_reachable": false
+  },
+  "candidate_budget": {
+    "candidate_limit": 3,
+    "candidate_number": 1,
+    "optimizer_steps_maximum": 0,
+    "selection_execution_limit_per_candidate": 1,
+    "public_execution_limit": 1
+  },
+  "candidate_p1": {
+    "objective": "zero-training-two-of-three-route-quorum-v1",
+    "seed": 2608193101,
+    "expected_optimizer_steps": 0
+  },
+  "selection_thresholds": [0.35, 0.45, 0.55, 0.65, 0.75],
+  "selection_gates": {
+    "exact_region_and_role_every_scene": true,
+    "false_regions": 0,
+    "missed_regions": 0,
+    "duplicate_regions": 0,
+    "prohibited_structure_hits": 0,
+    "recognition_exact_minimum": 0.9,
+    "character_error_rate_maximum": 0.05,
+    "role_accuracy_minimum": 0.9,
+    "per_role_accuracy_minimum": 0.85,
+    "minimum_consecutive_passing_thresholds": 3,
+    "onnx_parity_maximum_absolute_error": 0.00001,
+    "direct_fixture_byte_execution_required": true
+  },
+  "split_registrations": {
+    "train": {"scene_count": 384, "seed_offset": 23711000},
+    "validation": {"scene_count": 192, "seed_offset": 24487000},
+    "sealed_public": {"scene_count": 256, "seed_offset": 25303000}
+  },
+  "split_policy": {
+    "fresh_renderer_degradation_seed_case_and_fixture_identities": true,
+    "train_validation_public_family_ids_disjoint": true,
+    "sealed_public_truth_hidden_until_one_time_gate": true,
+    "v30_fixture_bytes_reused": false,
+    "v30_case_identities_reused": false,
+    "validation_or_public_pixels_used_for_design": false,
+    "public_case_level_failure_analysis_permitted": false
+  },
+  "data_scope": "fresh project-owned procedural graph scenes only; no Chandler, Generalization, private or article images, external datasets, V30 fixture bytes, V30 case identities, truth rows, or predictions",
+  "fixture_identity_frozen": false,
+  "candidate_execution_authorized": false,
+  "public_execution_authorized": false,
+  "marker_creation_evaluated": false,
+  "manifest_created": false,
+  "model_store_promoted": false,
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "release_eligible": false
+}

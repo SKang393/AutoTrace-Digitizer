@@ -1,0 +1,194 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Sungwoo Kang
+
+from __future__ import annotations
+
+from hashlib import sha256
+import json
+from pathlib import Path
+
+import pytest
+import torch
+
+from ml.ocr.robust_quorum_recall_v31.dataset import (
+    proposal_summary,
+    render_scene,
+    split_fingerprint,
+)
+from ml.ocr.robust_quorum_recall_v31.model import RobustQuorumRecallProposalNet
+from ml.ocr.robust_quorum_recall_v31.prepare_split import ARCHIVE_PATHS, SOURCE_PATHS
+from ml.ocr.robust_quorum_recall_v31.protocol import (
+    REVISION,
+    TRIGGER_RESULT_PATH,
+    TRIGGER_RESULT_SHA256,
+    protocol_configuration,
+    split_registration,
+)
+from ml.ocr.robust_quorum_recall_v31.train_p1 import _trigger_is_terminal
+
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+ROOT = REPO_ROOT / "ml/ocr/robust_quorum_recall_v31"
+LEDGER = REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
+
+
+def _read_json(path: Path) -> dict[str, object]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _sha256(path: Path) -> str:
+    return sha256(path.read_bytes()).hexdigest()
+
+
+def _entry() -> dict[str, object]:
+    ledger = _read_json(LEDGER)
+    return next(
+        item for item in ledger["revisions"] if item["revision"] == REVISION
+    )
+
+
+def test_protocol_uses_only_terminal_aggregate_v30_evidence() -> None:
+    tracked = _read_json(ROOT / "PROTOCOL.json")
+    generated = protocol_configuration()
+    assert tracked["schema"] == generated["schema"]
+    assert tracked["revision"] == generated["revision"] == REVISION
+    assert tracked["trigger_result_path"] == TRIGGER_RESULT_PATH
+    assert tracked["trigger_result_sha256"] == TRIGGER_RESULT_SHA256
+    assert _sha256(REPO_ROOT / TRIGGER_RESULT_PATH) == TRIGGER_RESULT_SHA256
+    basis = tracked["aggregate_design_basis"]
+    assert basis["scene_count"] == 256
+    assert basis["exact_scene_count"] == 255
+    assert basis["truth_regions"] == 2048
+    assert basis["true_positives"] == 2047
+    assert basis["false_regions"] == 0
+    assert basis["missed_regions"] == 1
+    assert basis["duplicate_regions"] == 0
+    assert basis["prohibited_structure_hits"] == 0
+    assert basis["case_level_evidence_used"] is False
+    assert basis["fixture_bytes_truth_scene_or_case_identity_reused"] is False
+
+
+def test_exact_v30_aggregate_trigger_is_terminal_without_case_material() -> None:
+    trigger = _read_json(REPO_ROOT / TRIGGER_RESULT_PATH)
+    assert _trigger_is_terminal(trigger)
+    for prohibited in ("cases", "predictions", "truths", "case_ids", "scene_ids"):
+        assert prohibited not in trigger
+        assert prohibited not in trigger["metrics"]
+
+
+def test_split_registrations_are_fresh_and_pairwise_disjoint() -> None:
+    registrations = [
+        split_registration("train"),
+        split_registration("validation"),
+        split_registration("sealed_public"),
+    ]
+    assert [item.scene_count for item in registrations] == [384, 192, 256]
+    assert len({item.seed_offset for item in registrations}) == 3
+    renderer_sets = [set(item.renderer_families) for item in registrations]
+    degradation_sets = [set(item.degradation_families) for item in registrations]
+    for left in range(3):
+        for right in range(left + 1, 3):
+            assert renderer_sets[left].isdisjoint(renderer_sets[right])
+            assert degradation_sets[left].isdisjoint(degradation_sets[right])
+    assert all("v31" in value for item in registrations for value in (
+        *item.renderer_families, *item.degradation_families,
+    ))
+
+
+def test_visible_renderer_is_deterministic_and_proposal_complete() -> None:
+    scenes = (
+        render_scene("train", 0),
+        render_scene("validation", 0),
+    )
+    repeated = (
+        render_scene("train", 0),
+        render_scene("validation", 0),
+    )
+    assert split_fingerprint(scenes[:1]) == split_fingerprint(repeated[:1])
+    assert split_fingerprint(scenes[1:]) == split_fingerprint(repeated[1:])
+    for scene in scenes:
+        summary = proposal_summary((scene,))
+        assert summary["exactly_one_production_proposal_per_truth"] is True
+        assert summary["positive_proposal_count"] == 8
+        assert "v31" in scene.scene_id
+
+
+def test_quorum_uses_median_margin_and_tolerates_one_route() -> None:
+    attention = torch.tensor([[[4.0, -4.0]]])
+    summary = torch.tensor([[[-2.0, 2.0]]])
+    local = torch.tensor([[[-3.0, 3.0]]])
+    logits = RobustQuorumRecallProposalNet.unanimous_logits(
+        attention, summary, local,
+    )
+    assert logits[0, 0, 1] > logits[0, 0, 0]
+    second_negative = torch.tensor([[[3.0, -3.0]]])
+    rejected = RobustQuorumRecallProposalNet.unanimous_logits(
+        attention, second_negative, local,
+    )
+    assert rejected[0, 0, 1] < rejected[0, 0, 0]
+
+
+def test_preregistered_ledger_closes_all_execution_and_release_gates() -> None:
+    entry = _entry()
+    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["trigger_result_sha256"] == TRIGGER_RESULT_SHA256
+    assert entry["trigger_case_detail_or_pixels_used"] is False
+    assert entry["prior_fixture_bytes_reused"] is False
+    assert entry["prior_checkpoint_reused"] is True
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["public_gate_authorized"] is False
+    assert entry["marker_creation_evaluated"] is False
+    assert entry["private_validation"] is False
+    assert entry["production_approval"] is False
+    assert entry["release_eligible"] is False
+
+
+def test_initial_preregistration_has_no_split_or_candidate_output() -> None:
+    assert not (ROOT / "SPLIT_SEAL.json").exists()
+    assert not (ROOT / "training/p1.json").exists()
+    assert not (ROOT / "artifacts/P1-run").exists()
+    assert all(not (REPO_ROOT / path).exists() for path in ARCHIVE_PATHS.values())
+
+
+def test_source_inventory_binds_v31_runner_and_v30_aggregate_trigger() -> None:
+    expected = {
+        ROOT / "PROTOCOL.json",
+        ROOT / "dataset.py",
+        ROOT / "model.py",
+        ROOT / "pipeline.py",
+        ROOT / "prepare_split.py",
+        ROOT / "protocol.py",
+        ROOT / "train_p1.py",
+        REPO_ROOT / TRIGGER_RESULT_PATH,
+    }
+    resolved = {REPO_ROOT / path for path in SOURCE_PATHS}
+    assert expected <= resolved
+    assert not any("artifacts/public-gate" in path.as_posix() for path in SOURCE_PATHS)
+
+
+def test_readme_forbids_public_reuse_and_application_synthetic_data() -> None:
+    text = (ROOT / "README.md").read_text(encoding="utf-8")
+    normalized = " ".join(text.split())
+    assert "No V30 case identity" in text
+    assert "V30 public bytes and case identities cannot be reused" in text
+    assert "zero optimizer steps" in text
+    assert "P1 is preregistered but not authorized" in text
+    assert "never become application graph data" in normalized
+
+
+def test_python_sources_have_project_spdx_header() -> None:
+    for path in ROOT.rglob("*.py"):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        assert lines[:2] == [
+            "# SPDX-License-Identifier: Apache-2.0",
+            "# Copyright 2026 Sungwoo Kang",
+        ]
+
+
+@pytest.mark.parametrize("split", ("train", "validation", "sealed_public"))
+def test_split_names_reject_predecessor_identity(split: str) -> None:
+    registration = split_registration(split)
+    assert all("v30" not in value for value in (
+        *registration.renderer_families, *registration.degradation_families,
+    ))
