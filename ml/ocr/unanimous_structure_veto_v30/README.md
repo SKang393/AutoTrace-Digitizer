@@ -42,9 +42,11 @@ are implemented. Fresh archives are now frozen from exact source commit
 and the train, selection, and sealed-public source-byte overlap counts are all
 zero.
 
-This is a split-seal checkpoint only. P1 is not authorized, and the runner
-still refuses execution until the seal, bound configuration, and a separate
-ledger authorization are committed together. No training, selection, public,
-marker, private, manifest, model-store, packaging, approval, or release gate is
-open. Synthetic fixtures are training and public-test inputs only and can never
+P1 is separately preregistered and authorized for one CPU training run plus one
+visible-selection evaluation against the frozen selection bytes. Its exact
+configuration, runner bundle, split seal, three archives, prerequisites,
+candidate ID, optimizer-step ceiling, and experiment-budget ledger are bound by
+checksum. Public execution is not authorized. Marker, private, manifest,
+model-store, packaging, approval, and release gates also remain closed.
+Synthetic fixtures are training and public-test inputs only and can never
 become application graph data.

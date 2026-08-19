@@ -7097,7 +7097,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-unanimous-structure-veto-v30",
-      "status": "split_frozen_candidate_1_not_authorized",
+      "status": "candidate_1_preregistered",
       "defect_class": "V29 passed every visible-selection scene at five thresholds but its one truth-hidden public run passed only 222 of 224 scenes, with two false regions and two prohibited hits at every fixed threshold",
       "prior_revision": "graph-text-dual-route-consensus-proposal-v29",
       "trigger_result_path": "ml/ocr/dual_route_consensus_proposal_v29/PUBLIC_GATE_RESULT.json",
@@ -7110,9 +7110,9 @@
       "architecture": "unanimous-three-route-structure-veto-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": ["P1"],
       "consumed_candidate_ids": [],
-      "remaining_unregistered_candidate_ids": ["P1", "P2", "P3"],
+      "remaining_unregistered_candidate_ids": ["P2", "P3"],
       "protocol_path": "ml/ocr/unanimous_structure_veto_v30/PROTOCOL.json",
       "protocol_sha256": "c8d37af0acede69e95b1705c1fa404d3b0ec1cc7da78e2aa6e4ff6c3003fc81b",
       "split_materialized": true,
@@ -7141,13 +7141,13 @@
         "P1": "ml/ocr/unanimous_structure_veto_v30/training/p1.json"
       },
       "candidate_config_sha256": {
-        "P1": "253a88910d021d4c4b269e6da6d058cc8d655e8f6cc1dc32fffd191c038174cd"
+        "P1": "b26a1d202df39ce16d1b7e2c7ada5fa010ea135c3de27e5589c7af58d2f237bd"
       },
       "selection_thresholds": [0.35, 0.45, 0.55, 0.65, 0.75],
       "minimum_consecutive_passing_thresholds": 3,
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "Fresh disjoint V30 fixtures are sealed from exact commit 380d4ec with zero cross-split source-byte overlap. P1 still requires a separate committed authorization checkpoint before any candidate execution.",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P1",
+      "execution_blocker": null,
       "public_gate_authorized": false,
       "public_gate_authorized_candidate_id": null,
       "public_gate_evaluations": 0,

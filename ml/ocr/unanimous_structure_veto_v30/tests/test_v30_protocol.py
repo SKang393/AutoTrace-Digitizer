@@ -9,7 +9,6 @@ from pathlib import Path
 
 import numpy as np
 import onnxruntime as ort
-import pytest
 import torch
 
 from ml.ocr.unanimous_structure_veto_v30.dataset import (
@@ -259,7 +258,7 @@ def test_exact_v29_aggregate_trigger_is_terminal_without_case_material() -> None
         assert prohibited not in trigger
 
 
-def test_runner_source_is_complete_but_training_remains_fail_closed() -> None:
+def test_authorized_runner_preflight_binds_exact_seal_and_source() -> None:
     required = {
         "dataset.py", "model.py", "pipeline.py", "prepare_split.py",
         "protocol.py", "train_p1.py",
@@ -267,13 +266,16 @@ def test_runner_source_is_complete_but_training_remains_fail_closed() -> None:
     assert required <= {path.name for path in SOURCE_PATHS if path.parent == Path(
         "ml/ocr/unanimous_structure_veto_v30"
     )}
-    with pytest.raises(RuntimeError, match="canonical authorization changed"):
-        preflight()
+    evidence = preflight()
+    assert evidence["seal"]["source_bundle_sha256"] == (
+        "b830b36be890ed53cb10f43a86961f4412bc238a97bd046d228ead18767cf8fe"
+    )
+    assert evidence["config"]["training_authorized"] is True
 
 
-def test_ledger_refuses_execution_and_every_later_gate() -> None:
+def test_ledger_authorizes_only_p1_training_and_refuses_every_later_gate() -> None:
     entry = _entry()
-    assert entry["status"] == "split_frozen_candidate_1_not_authorized"
+    assert entry["status"] == "candidate_1_preregistered"
     assert entry["prior_revision"] == "graph-text-dual-route-consensus-proposal-v29"
     assert entry["trigger_result_sha256"] == TRIGGER_RESULT_SHA256
     assert entry["trigger_case_detail_or_pixels_used"] is False
@@ -288,10 +290,11 @@ def test_ledger_refuses_execution_and_every_later_gate() -> None:
     assert entry["candidate_config_sha256"]["P1"] == _sha256(
         ROOT / "training/p1.json"
     )
-    assert _read_json(ROOT / "training/p1.json")["training_authorized"] is False
-    assert entry["preregistered_candidate_ids"] == []
+    assert _read_json(ROOT / "training/p1.json")["training_authorized"] is True
+    assert entry["preregistered_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
-    assert entry["execution_authorized"] is False
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
     assert entry["public_gate_authorized"] is False
     assert entry["marker_creation_evaluated"] is False
     assert entry["private_validation"] is False
@@ -305,7 +308,7 @@ def test_readme_forbids_v29_bytes_and_application_synthetic_data() -> None:
     assert "No V29 case identity" in text
     assert "bytes cannot be used for V30" in text
     assert "No V29 checkpoint is reused" in text
-    assert "split-seal checkpoint only" in text
+    assert "P1 is separately preregistered and authorized" in text
     assert "never become application graph data" in normalized
 
 
