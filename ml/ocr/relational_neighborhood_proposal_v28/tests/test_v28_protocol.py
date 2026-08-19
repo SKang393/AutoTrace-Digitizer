@@ -16,7 +16,12 @@ from PIL import Image
 import pytest
 import torch
 
-from ml.markers.gate_seal import sha256_file, source_bundle_sha256
+from ml.markers.gate_seal import (
+    canonical_json_bytes,
+    sha256_bytes,
+    sha256_file,
+    source_bundle_sha256,
+)
 from ml.ocr.margin_calibrator_v20.pipeline import ProposalRecord
 from ml.ocr.morphology_veto_proposal_v27.dataset import render_scene as render_v27_scene
 from ml.ocr.relational_neighborhood_proposal_v28.dataset import (
@@ -36,6 +41,8 @@ from ml.ocr.relational_neighborhood_proposal_v28.model_p3 import (
 from ml.ocr.relational_neighborhood_proposal_v28.prepare_split import SOURCE_PATHS
 from ml.ocr.relational_neighborhood_proposal_v28.public_gate import (
     EVALUATOR_SOURCE_PATHS as PUBLIC_EVALUATOR_SOURCE_PATHS,
+    EXPECTED_CANDIDATE_HASH_KEYS,
+    GATE_CONFIG,
     PUBLIC_CONFIG_PATH,
     PUBLIC_OUTPUT_PATH,
     _gate_metrics_pass,
@@ -157,7 +164,7 @@ def test_canonical_budget_consumes_selected_p3_and_keeps_public_gate_closed() ->
         item for item in ledger["revisions"]
         if item["revision"] == "graph-text-relational-neighborhood-proposal-v28"
     )
-    assert entry["status"] == "candidate_3_selected_public_gate_source_registered"
+    assert entry["status"] == "candidate_3_selected_public_gate_pending"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
@@ -180,13 +187,14 @@ def test_canonical_budget_consumes_selected_p3_and_keeps_public_gate_closed() ->
         result_path = REPO_ROOT / entry["candidate_result_paths"][candidate_id]
         assert sha256_file(result_path) == entry["candidate_result_sha256"][candidate_id]
     assert entry["selection_evaluations"] == 3
-    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_candidate_id"] == "P3"
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert "runner source is committed" in entry["execution_blocker"]
-    assert "No V28 execution is currently authorized" in entry["execution_authorization"]
+    assert "authorizes exactly one" in entry["execution_blocker"]
+    assert "Only the exact V28 P3" in entry["execution_authorization"]
     assert "remain unauthorized" in entry["execution_authorization"]
     p2_preregistration = REPO_ROOT / entry["candidate_2_preregistration_path"]
     assert sha256_file(p2_preregistration) == entry[
@@ -762,7 +770,7 @@ def test_p3_selected_aggregate_is_directly_bound_and_public_remains_closed() -> 
         ]
 
 
-def test_public_runner_source_is_registered_but_execution_remains_unbound() -> None:
+def test_public_runner_is_checksum_bound_for_one_execution_only() -> None:
     result_path = REPO_ROOT / "ml/ocr/relational_neighborhood_proposal_v28/P3_RESULT.json"
     result = json.loads(result_path.read_text(encoding="utf-8"))
     assert _selected_result_is_terminal(result)
@@ -773,7 +781,26 @@ def test_public_runner_source_is_registered_but_execution_remains_unbound() -> N
     assert Path("ml/ocr/relational_neighborhood_proposal_v28/P3_RESULT.json") in set(
         PUBLIC_EVALUATOR_SOURCE_PATHS
     )
-    assert not (REPO_ROOT / PUBLIC_CONFIG_PATH).exists()
+    config_path = REPO_ROOT / PUBLIC_CONFIG_PATH
+    assert config_path.is_file()
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    assert config["candidate_id"] == "P3"
+    assert config["evaluation_limit"] == 1
+    assert config["runner_source_commit"] == "2aa05152362094134ae5230d07819904afdba02e"
+    assert config["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, PUBLIC_EVALUATOR_SOURCE_PATHS,
+    )
+    assert config["expected_gate_config_sha256"] == sha256_bytes(
+        canonical_json_bytes(dict(GATE_CONFIG))
+    )
+    assert config["expected_candidate_hash_keys"] == list(
+        EXPECTED_CANDIDATE_HASH_KEYS
+    )
+    assert config["public_execution_authorized"] is True
+    assert config["marker_creation_authorized"] is False
+    assert config["private_validation_authorized"] is False
+    assert config["production_approval"] is False
+    assert config["release_eligible"] is False
     assert not (REPO_ROOT / PUBLIC_OUTPUT_PATH).exists()
     ledger = json.loads(
         (
@@ -784,8 +811,17 @@ def test_public_runner_source_is_registered_but_execution_remains_unbound() -> N
         item for item in ledger["revisions"]
         if item["revision"] == "graph-text-relational-neighborhood-proposal-v28"
     )
-    assert entry["status"] == "candidate_3_selected_public_gate_source_registered"
-    assert entry["public_gate_authorized"] is False
+    assert entry["status"] == "candidate_3_selected_public_gate_pending"
+    assert entry["public_gate_authorized"] is True
+    assert entry["public_gate_authorized_candidate_id"] == "P3"
+    assert entry["public_gate_config_path"] == PUBLIC_CONFIG_PATH.as_posix()
+    assert entry["public_gate_config_sha256"] == sha256_file(config_path)
+    assert entry["public_gate_runner_source_commit"] == config[
+        "runner_source_commit"
+    ]
+    assert entry["public_gate_runner_source_bundle_sha256"] == config[
+        "expected_evaluator_source_bundle_sha256"
+    ]
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
     assert entry["execution_authorized"] is False

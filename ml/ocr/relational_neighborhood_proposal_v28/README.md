@@ -110,10 +110,13 @@ The checksum-bound one-use public runner source is now committed separately. It
 acquires the canonical gate seal before reading the public archive once, runs
 the exact selected ONNX payload on all 192 stored scenes, emits aggregate
 metrics and tensor-stream hashes only, and permanently seals pass, fail, or
-runner failure. This source checkpoint creates no gate seal and opens no public
-fixture bytes. A second committed configuration and canonical ledger transition
-must bind the exact runner source before the public gate becomes authorized.
-Marker composition, private validation, manifest creation, model-store promotion,
-packaging, production approval, and release remain unauthorized. Synthetic
+runner failure. Source commit `2aa05152362094134ae5230d07819904afdba02e`
+and evaluator bundle SHA-256
+`d38a613a206b878d5e558f072cd57af0d9379713cf78720df6e610157af05bad`
+are now bound by the separate public configuration. Exactly one public P3
+execution becomes authorized only after that configuration and the canonical
+ledger transition are committed. No result or public gate seal exists yet.
+Marker composition, private validation, manifest creation, model-store
+promotion, packaging, production approval, and release remain unauthorized. Synthetic
 fixtures are training and public-test inputs only and are never application
 graph data.
