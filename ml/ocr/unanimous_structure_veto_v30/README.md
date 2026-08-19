@@ -58,9 +58,10 @@ aggregate-only gate configuration. The runner verifies every exact payload and
 source hash before acquiring a single-use seal, opens the archive once, runs
 the complete detector, recognizer, relation, and V30 candidate stream on CPU,
 removes per-scene shape evidence, and writes only whitelisted aggregate metrics
-and tensor-stream hashes. The configuration remains unauthorized and does not
-identify a runner source commit until this source checkpoint is committed and
-reviewed. Marker, private, manifest, model-store, packaging, approval, and
-release gates also remain closed.
+and tensor-stream hashes. After that source checkpoint passed focused tests,
+the configuration was separately authorized for exactly one run and bound to
+source commit `3d4714fc239f8b6832ef223e92da9614efe31abf`. Marker, private,
+manifest, model-store, packaging, approval, and release gates remain closed
+regardless of the public result.
 Synthetic fixtures are training and public-test inputs only and can never
 become application graph data.
