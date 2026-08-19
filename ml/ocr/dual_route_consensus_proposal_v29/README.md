@@ -64,14 +64,14 @@ calls. CPU ONNX parity passed at `0.00000286102294921875`.
 
 P1 is selected and consumed. The aggregate-only result is `P1_RESULT.json`;
 its report, checkpoint, and ONNX SHA-256 values are `49b7cd6d...ee4b`,
-`1dd8fc61...336f`, and `a1ce7258...f223`. The truth-hidden public archive is
-still unopened with zero evaluations. One checksum-bound public execution is
-authorized against the exact committed runner source. Marker composition, private
+`1dd8fc61...336f`, and `a1ce7258...f223`. Its one checksum-bound public
+execution is now consumed. The aggregate result is `PUBLIC_GATE_RESULT.json`
+with SHA-256 `db2ceff2...7d0f8`. Marker composition, private
 validation, manifest creation, model-store promotion, packaging, production
 approval, and release remain unauthorized. Synthetic fixtures are training and
 public-test inputs only and are never application graph data.
 
-`public_gate.py` and `gates/sealed-public-v1.json` bind and authorize the one-use
+`public_gate.py` and `gates/sealed-public-v1.json` bound the one-use
 truth-hidden public execution. Evaluator source bundle SHA-256 is
 `03523386093b2c64c646aa9bb961fd353dc889e59c9449c8fdd3927788854fbe`;
 the authorized gate configuration SHA-256 is
@@ -80,5 +80,11 @@ The runner acquires its canonical seal before its only archive read, executes
 the exact detector, recognizer, and selected ONNX through CPU, emits aggregate
 metrics and tensor hashes only, and removes per-scene relation-shape details.
 Its source checkpoint is exact commit
-`8667c6d5e915d6aac56f03012f852c9dd053fe3b`; the unchanged evaluator bundle is
-bound, and exactly one public execution is pending. No later gate is authorized.
+`8667c6d5e915d6aac56f03012f852c9dd053fe3b`. The run directly executed all 224
+stored synthetic scenes once through the detector, recognizer, and P1 CPU ONNX.
+At each fixed threshold only 222/224 scenes were exact, with 1,792/1,792 true
+regions, two false regions, zero misses or duplicates, and two prohibited hits.
+Recognition exact was `0.98046875`, CER was `0.003376748673420164`, and overall
+and per-role accuracy were `1.0`. No case identifiers, truth rows, predictions,
+or fixture bytes were emitted. V29 is closed: its public archive and P1 through
+P3 budget cannot be rerun, inspected, or tuned. No later gate is authorized.

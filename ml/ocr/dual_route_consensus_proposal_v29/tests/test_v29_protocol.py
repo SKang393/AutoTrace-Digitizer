@@ -238,6 +238,7 @@ def test_source_only_ledger_is_fail_closed_before_fixture_freeze() -> None:
         "candidate_1_failed_selection",
         "candidate_1_selected_public_gate_preregistered",
         "candidate_1_selected_public_gate_pending",
+        "public_gate_failed_revision_closed",
     }
     assert entry["prior_fixture_bytes_reused"] is False
     assert entry["trigger_case_detail_or_pixels_used"] is False
@@ -315,6 +316,7 @@ def test_selected_p1_result_is_aggregate_only_and_fail_closed() -> None:
         "candidate_1_selected",
         "candidate_1_selected_public_gate_preregistered",
         "candidate_1_selected_public_gate_pending",
+        "public_gate_failed_revision_closed",
     }
     assert entry["consumed_candidate_ids"] == ["P1"]
     assert entry["preregistered_candidate_ids"] == []
@@ -325,7 +327,7 @@ def test_selected_p1_result_is_aggregate_only_and_fail_closed() -> None:
     )
 
 
-def test_public_runner_is_authorized_without_opening_public_bytes() -> None:
+def test_public_runner_is_consumed_with_aggregate_only_terminal_evidence() -> None:
     result = _read_json(ROOT / "P1_RESULT.json")
     assert _selected_result_is_terminal(result)
     assert _public_window(result) == (0.45, 0.55, 0.65)
@@ -352,17 +354,47 @@ def test_public_runner_is_authorized_without_opening_public_bytes() -> None:
     assert config["production_approval"] is False
     assert config["release_eligible"] is False
     entry = _ledger_entry()
-    assert entry["status"] == "candidate_1_selected_public_gate_pending"
+    assert entry["status"] == "public_gate_failed_revision_closed"
     assert entry["public_gate_config_path"] == PUBLIC_CONFIG_PATH.as_posix()
     assert entry["public_gate_config_sha256"] == _sha256(config_path)
     assert entry["public_gate_runner_source_commit"] == config["runner_source_commit"]
     assert entry["public_gate_runner_source_bundle_sha256"] == config[
         "expected_evaluator_source_bundle_sha256"
     ]
-    assert entry["public_gate_authorized"] is True
-    assert entry["public_gate_authorized_candidate_id"] == "P1"
-    assert entry["public_gate_evaluations"] == 0
-    assert entry["public_gate_archive_opened"] is False
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized_candidate_id"] is None
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_archive_opened"] is True
+    public_result_path = ROOT / "PUBLIC_GATE_RESULT.json"
+    public_result = _read_json(public_result_path)
+    assert entry["public_gate_result_sha256"] == _sha256(public_result_path)
+    assert public_result["gate_opened_seal_sha256"] == _sha256(
+        REPO_ROOT / public_result["gate_opened_seal_path"]
+    )
+    assert public_result["gate_result_seal_sha256"] == _sha256(
+        REPO_ROOT / public_result["gate_result_seal_path"]
+    )
+    assert public_result["status"] == "failed_public_gate"
+    assert public_result["evaluation_count"] == 1
+    assert public_result["public_archive_read_count"] == 1
+    assert public_result["exact_scene_count"] == 222
+    assert public_result["false_positives"] == 2
+    assert public_result["false_negatives"] == 0
+    assert public_result["duplicate_region_count"] == 0
+    assert public_result["prohibited_structure_hits"] == 2
+    assert public_result["case_level_failure_analysis_performed"] is False
+    assert public_result["next_revision_may_reuse_public_bytes"] is False
+    assert public_result["public_failure_tuning_authorized"] is False
+    assert public_result["marker_creation_authorized"] is False
+    assert public_result["private_validation_authorized"] is False
+    assert public_result["production_approval"] is False
+    assert public_result["release_eligible"] is False
+    for prohibited in (
+        "cases", "predictions", "truths", "fixture_bytes",
+        "case_ids", "scene_ids", "proposal_relation_scene_shapes",
+    ):
+        assert prohibited not in public_result
+        assert prohibited not in public_result["metrics"]
 
 
 def test_public_metric_gate_requires_all_224_scenes_and_direct_bytes() -> None:
@@ -430,7 +462,9 @@ def test_readme_keeps_all_later_gates_unauthorized() -> None:
     assert "zero\nsource-byte overlap" in text
     assert "P1 is checksum-bound" in text
     assert "P1 is selected and consumed" in text
-    assert "still unopened with zero evaluations" in text
+    assert "The run directly executed all 224" in text
+    assert "No case identifiers, truth rows, predictions" in text
+    assert "V29 is closed" in text
     assert "production\napproval, and release remain unauthorized" in text
 
 
