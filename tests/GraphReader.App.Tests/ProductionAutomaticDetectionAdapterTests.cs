@@ -1,10 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Sungwoo Kang
 
+using System.IO;
 using System.Security.Cryptography;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using GraphReader.App.Integration.Workflow;
 using GraphReader.Axis;
+using GraphReader.Export;
 using GraphReader.Inference;
+using ImageImportService = GraphReader.Imaging.ImageImportService;
 using GraphReader.Legends;
 using GraphReader.Markers.Classification;
 using GraphReader.Markers.Detection;
@@ -20,6 +25,7 @@ public sealed class ProductionAutomaticDetectionAdapterTests
 {
     private static readonly string[] ExpectedStages =
         ["axis", "ocr", "ocr", "markers", "markers", "markers", "legends", "phases"];
+    private static readonly string[] ExpectedPhaseCodes = ["a", "b"];
 
     [TestMethod]
     public async Task ApprovedCompositePersistsExactProjectionAndReturnsRealCandidates()
@@ -90,6 +96,127 @@ public sealed class ProductionAutomaticDetectionAdapterTests
         CollectionAssert.AreEqual(
             ExpectedStages,
             evidence.Provenance.Select(static item => item.Stage).ToArray());
+    }
+
+    [TestMethod]
+    public async Task SyntheticPngRunsThroughProductionWorkflowAndWritesAuditableExport()
+    {
+        string root = Path.Combine(Path.GetTempPath(), $"graphreader-goal22-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        try
+        {
+            string imagePath = Path.Combine(root, "synthetic.png");
+            WriteSyntheticPng(imagePath, 100, 100);
+            byte[] sourceBytes = await File.ReadAllBytesAsync(imagePath);
+            string sourceSha256 = Convert.ToHexStringLower(SHA256.HashData(sourceBytes));
+            Guid projectId = Guid.Parse("21000000-0000-0000-0000-000000000022");
+            Guid sourceId = Guid.Parse("31000000-0000-0000-0000-000000000022");
+            Guid runId = Guid.Parse("41000000-0000-0000-0000-000000000022");
+            var store = new ProductionWorkflowPanelStore();
+            var adapter = new ProductionAutomaticDetectionAdapter(
+                store,
+                new RasterDecoder(),
+                new AxisAdapter(),
+                new OcrAdapter("Synthetic participant"),
+                new MaskComposer(),
+                new CenterAdapter(),
+                new ClassificationAdapter(),
+                new ProductionLegendReasoningAdapter(),
+                new ProductionPhaseReasoningAdapter(),
+                new EmptyConnectionBuilder());
+            var orchestrator = new WorkflowOrchestrator(new WorkflowServiceSet(
+                new ProductionWorkflowImportStage(store, new ImageImportService()),
+                new ProductionWorkflowPrepareStage(store),
+                new ProductionWorkflowDetectionStage(store, adapter),
+                new ProductionWorkflowExportStage(store, new ExportService())));
+            var request = new WorkflowRunRequest(
+                runId,
+                new WorkflowImportRequest(
+                    projectId,
+                    [new WorkflowSourceRequest(sourceId, WorkflowSourceKind.Image, imagePath)],
+                    enhancementEnabled: false));
+
+            WorkflowRunResult first = await orchestrator.RunThroughReviewAsync(
+                request,
+                previousReview: null,
+                CancellationToken.None);
+            WorkflowReviewPanel firstPanel = first.Review.Panels.Single();
+            WorkflowPoint firstPoint = firstPanel.Points[0];
+            var correction = new AssignWorkflowPointPhaseCorrection(
+                "synthetic-phase-confirmation",
+                firstPanel.PanelId,
+                firstPoint.PointId,
+                firstPoint.DetectionKey,
+                firstPoint.PhaseId!);
+            WorkflowReviewState correctedReview = WorkflowOrchestrator.ApplyCorrection(
+                first.Review,
+                correction);
+            WorkflowRunResult rerun = await orchestrator.RunThroughReviewAsync(
+                request,
+                correctedReview,
+                CancellationToken.None);
+            string exportRoot = Path.Combine(root, "export");
+            WorkflowExportResult export = await orchestrator.ExportAsync(
+                rerun.Review,
+                new WorkflowExportRequest(
+                    Guid.Parse("51000000-0000-0000-0000-000000000022"),
+                    exportRoot),
+                CancellationToken.None);
+
+            Assert.IsTrue(adapter.IsApproved);
+            CollectionAssert.AreEqual(
+                new[] { WorkflowStep.Import, WorkflowStep.Prepare, WorkflowStep.Detect, WorkflowStep.Review },
+                rerun.Steps.Select(static step => step.Step).ToArray());
+            WorkflowReviewPanel panel = rerun.Review.Panels.Single();
+            Assert.AreEqual(sourceSha256, panel.PreparedPanel.Original.Sha256);
+            Assert.IsTrue(panel.Points.All(static point => point.GraphX.HasValue && point.GraphY.HasValue));
+            Assert.IsTrue(panel.Points.All(static point => point.OriginalPixelX >= 0 && point.OriginalPixelX < 100));
+            Assert.IsTrue(panel.Points.All(static point => point.OriginalPixelY >= 0 && point.OriginalPixelY < 100));
+            WorkflowPoint correctedPoint = panel.Points.Single(point => point.PointId == firstPoint.PointId);
+            Assert.AreEqual(firstPoint.GraphX, correctedPoint.GraphX);
+            Assert.AreEqual(firstPoint.GraphY, correctedPoint.GraphY);
+            Assert.AreEqual(WorkflowReviewStatus.Corrected, correctedPoint.ReviewStatus);
+            CollectionAssert.Contains(correctedPoint.CorrectionIds.ToArray(), correction.CorrectionId);
+            ProductionPanelExportEvidence evidence = store.Get(panel.PanelId).ExportEvidence!;
+            CollectionAssert.AreEqual(ExpectedStages, evidence.Provenance.Select(static item => item.Stage).ToArray());
+            Assert.AreEqual("Synthetic participant", evidence.Participant);
+            CollectionAssert.AreEqual(
+                ExpectedPhaseCodes,
+                evidence.Phases.Select(static phase => phase.Code).ToArray());
+            Assert.IsTrue(evidence.Series.Any(static series => series.SemanticRole == ExportSeriesRole.Baseline));
+            Assert.IsTrue(evidence.Series.Any(static series => series.SemanticRole == ExportSeriesRole.Intervention));
+            Assert.IsTrue(export.Succeeded, string.Join(" | ", export.Warnings));
+            WorkflowExportArtifact minimal = export.Artifacts.Single(static artifact =>
+                artifact.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase) &&
+                !artifact.FileName.Contains("audit", StringComparison.OrdinalIgnoreCase));
+            WorkflowExportArtifact audit = export.Artifacts.Single(static artifact =>
+                artifact.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase) &&
+                artifact.FileName.Contains("audit", StringComparison.OrdinalIgnoreCase));
+            Assert.IsGreaterThan(0, minimal.RowCount);
+            Assert.IsGreaterThan(0, audit.RowCount);
+            foreach (WorkflowExportArtifact artifact in export.Artifacts)
+            {
+                Assert.IsNotNull(artifact.WrittenPath);
+                Assert.IsTrue(File.Exists(artifact.WrittenPath));
+                Assert.AreEqual(
+                    artifact.Sha256,
+                    Convert.ToHexStringLower(SHA256.HashData(await File.ReadAllBytesAsync(artifact.WrittenPath))));
+            }
+            string[] minimalLines = await File.ReadAllLinesAsync(minimal.WrittenPath!);
+            string[] auditLines = await File.ReadAllLinesAsync(audit.WrittenPath!);
+            Assert.AreEqual(ExportContract.MinimalCsvHeader, minimalLines[0]);
+            StringAssert.Contains(auditLines[0], "original_pixel_x");
+            Assert.IsTrue(minimalLines.Skip(1).Any());
+            Assert.IsTrue(auditLines.Skip(1).Any());
+            Assert.AreEqual(sourceSha256, Convert.ToHexStringLower(SHA256.HashData(await File.ReadAllBytesAsync(imagePath))));
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
     }
 
     [TestMethod]
@@ -265,6 +392,10 @@ public sealed class ProductionAutomaticDetectionAdapterTests
 
     private sealed class OcrAdapter : IProductionOcrAdapter
     {
+        private readonly string participant;
+
+        public OcrAdapter(string participant = "Chandler") => this.participant = participant;
+
         public string AdapterId => "test-ocr";
 
         public bool IsApproved => true;
@@ -306,7 +437,7 @@ public sealed class ProductionAutomaticDetectionAdapterTests
                 Region("x2", 78, 92, "2", OcrTextRole.XTick),
                 Region("y0", 1, 78, "0", OcrTextRole.YTick),
                 Region("y100", 1, 18, "100", OcrTextRole.YTick),
-                Region("participant", 82, 84, "Chandler", OcrTextRole.Participant),
+                Region("participant", 82, 84, participant, OcrTextRole.Participant),
             ];
             var result = new OcrResult(
                 OcrContract.Version,
@@ -575,6 +706,24 @@ public sealed class ProductionAutomaticDetectionAdapterTests
                 Envelope(request, "phases", "phase-v1", "phase-deterministic", '1', deterministic: true),
                 payload));
         }
+    }
+
+    private static void WriteSyntheticPng(string path, int width, int height)
+    {
+        byte[] pixels = Enumerable.Repeat((byte)255, width * height * 4).ToArray();
+        BitmapSource bitmap = BitmapSource.Create(
+            width,
+            height,
+            96,
+            96,
+            PixelFormats.Bgra32,
+            null,
+            pixels,
+            width * 4);
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+        using FileStream stream = File.Create(path);
+        encoder.Save(stream);
     }
 
     private sealed class EmptyConnectionBuilder : IMarkerConnectionGraphBuilder
