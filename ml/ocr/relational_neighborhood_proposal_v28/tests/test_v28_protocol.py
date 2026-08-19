@@ -154,7 +154,7 @@ def test_v27_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_consumes_selected_p3_and_keeps_public_gate_closed() -> None:
+def test_canonical_budget_records_failed_public_gate_and_closes_v28() -> None:
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -164,7 +164,7 @@ def test_canonical_budget_consumes_selected_p3_and_keeps_public_gate_closed() ->
         item for item in ledger["revisions"]
         if item["revision"] == "graph-text-relational-neighborhood-proposal-v28"
     )
-    assert entry["status"] == "candidate_3_selected_public_gate_pending"
+    assert entry["status"] == "public_gate_failed_revision_closed"
     assert entry["experiment_budget"] == 3
     assert entry["preregistered_candidate_ids"] == []
     assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
@@ -187,14 +187,32 @@ def test_canonical_budget_consumes_selected_p3_and_keeps_public_gate_closed() ->
         result_path = REPO_ROOT / entry["candidate_result_paths"][candidate_id]
         assert sha256_file(result_path) == entry["candidate_result_sha256"][candidate_id]
     assert entry["selection_evaluations"] == 3
-    assert entry["public_gate_authorized"] is True
-    assert entry["public_gate_authorized_candidate_id"] == "P3"
-    assert entry["public_gate_evaluations"] == 0
-    assert entry["public_gate_archive_opened"] is False
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized_candidate_id"] is None
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_archive_opened"] is True
+    public_result_path = REPO_ROOT / entry["public_gate_result_path"]
+    assert sha256_file(public_result_path) == entry["public_gate_result_sha256"]
+    public_result = json.loads(public_result_path.read_text(encoding="utf-8"))
+    assert public_result["status"] == "failed_public_gate"
+    assert public_result["public_gate_passed"] is False
+    assert public_result["evaluation_count"] == 1
+    assert public_result["metrics"]["exact_scene_count"] == 188
+    assert public_result["metrics"]["false_positives"] == 3
+    assert public_result["metrics"]["false_negatives"] == 2
+    assert public_result["metrics"]["prohibited_structure_hits"] == 3
+    assert public_result["case_identifiers_emitted"] is False
+    assert public_result["truth_rows_emitted"] is False
+    assert public_result["predictions_emitted"] is False
+    assert public_result["per_scene_shape_metadata_emitted_in_sealed_report"] is True
+    assert public_result["case_level_failure_analysis_performed"] is False
+    assert public_result["public_failure_tuning_authorized"] is False
+    assert public_result["next_revision_may_reuse_public_bytes"] is False
+    assert "cases" not in public_result and "predictions" not in public_result
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert "authorizes exactly one" in entry["execution_blocker"]
-    assert "Only the exact V28 P3" in entry["execution_authorization"]
+    assert "V28 is closed" in entry["execution_blocker"]
+    assert "No V28 execution remains authorized" in entry["execution_authorization"]
     assert "remain unauthorized" in entry["execution_authorization"]
     p2_preregistration = REPO_ROOT / entry["candidate_2_preregistration_path"]
     assert sha256_file(p2_preregistration) == entry[
@@ -770,7 +788,7 @@ def test_p3_selected_aggregate_is_directly_bound_and_public_remains_closed() -> 
         ]
 
 
-def test_public_runner_is_checksum_bound_for_one_execution_only() -> None:
+def test_public_runner_and_failed_result_remain_checksum_bound() -> None:
     result_path = REPO_ROOT / "ml/ocr/relational_neighborhood_proposal_v28/P3_RESULT.json"
     result = json.loads(result_path.read_text(encoding="utf-8"))
     assert _selected_result_is_terminal(result)
@@ -801,7 +819,30 @@ def test_public_runner_is_checksum_bound_for_one_execution_only() -> None:
     assert config["private_validation_authorized"] is False
     assert config["production_approval"] is False
     assert config["release_eligible"] is False
-    assert not (REPO_ROOT / PUBLIC_OUTPUT_PATH).exists()
+    tracked_result_path = (
+        REPO_ROOT
+        / "ml/ocr/relational_neighborhood_proposal_v28/PUBLIC_GATE_RESULT.json"
+    )
+    tracked_result = json.loads(tracked_result_path.read_text(encoding="utf-8"))
+    assert tracked_result["gate_source_commit"] == config["runner_source_commit"]
+    assert tracked_result["gate_source_bundle_sha256"] == config[
+        "expected_evaluator_source_bundle_sha256"
+    ]
+    assert tracked_result["gate_config_sha256"] == sha256_file(config_path)
+    assert tracked_result["evaluation_count"] == 1
+    assert tracked_result["public_archive_read_count"] == 1
+    assert tracked_result["status"] == "failed_public_gate"
+    ignored_report_path = REPO_ROOT / PUBLIC_OUTPUT_PATH
+    if ignored_report_path.is_file():
+        report = json.loads(ignored_report_path.read_text(encoding="utf-8"))
+        assert sha256_file(ignored_report_path) == tracked_result[
+            "public_report_sha256"
+        ]
+        assert report["status"] == "fail"
+        assert report["evaluation_count"] == 1
+        assert report["public_archive_read_count"] == 1
+        assert "cases" not in report and "predictions" not in report
+        assert "proposal_relation_scene_shapes" in report["metrics"]
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -811,9 +852,9 @@ def test_public_runner_is_checksum_bound_for_one_execution_only() -> None:
         item for item in ledger["revisions"]
         if item["revision"] == "graph-text-relational-neighborhood-proposal-v28"
     )
-    assert entry["status"] == "candidate_3_selected_public_gate_pending"
-    assert entry["public_gate_authorized"] is True
-    assert entry["public_gate_authorized_candidate_id"] == "P3"
+    assert entry["status"] == "public_gate_failed_revision_closed"
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized_candidate_id"] is None
     assert entry["public_gate_config_path"] == PUBLIC_CONFIG_PATH.as_posix()
     assert entry["public_gate_config_sha256"] == sha256_file(config_path)
     assert entry["public_gate_runner_source_commit"] == config[
@@ -822,8 +863,23 @@ def test_public_runner_is_checksum_bound_for_one_execution_only() -> None:
     assert entry["public_gate_runner_source_bundle_sha256"] == config[
         "expected_evaluator_source_bundle_sha256"
     ]
-    assert entry["public_gate_evaluations"] == 0
-    assert entry["public_gate_archive_opened"] is False
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_archive_opened"] is True
+    assert entry["public_gate_result_sha256"] == sha256_file(tracked_result_path)
+    assert entry["public_gate_report_sha256"] == tracked_result[
+        "public_report_sha256"
+    ]
+    assert entry["public_gate_seal_key"] == tracked_result["seal_key"]
+    seal_root = REPO_ROOT / "ml/markers/gate-seals/ocr-detection-recognition" / entry[
+        "public_gate_seal_key"
+    ]
+    if seal_root.is_dir():
+        assert sha256_file(seal_root / "opened.json") == tracked_result[
+            "gate_opened_seal_sha256"
+        ]
+        assert sha256_file(seal_root / "result.json") == tracked_result[
+            "gate_result_seal_sha256"
+        ]
     assert entry["execution_authorized"] is False
     assert entry["marker_creation_evaluated"] is False
     assert entry["private_validation"] is False

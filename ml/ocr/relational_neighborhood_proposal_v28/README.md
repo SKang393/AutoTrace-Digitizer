@@ -113,10 +113,25 @@ metrics and tensor-stream hashes only, and permanently seals pass, fail, or
 runner failure. Source commit `2aa05152362094134ae5230d07819904afdba02e`
 and evaluator bundle SHA-256
 `d38a613a206b878d5e558f072cd57af0d9379713cf78720df6e610157af05bad`
-are now bound by the separate public configuration. Exactly one public P3
-execution becomes authorized only after that configuration and the canonical
-ledger transition are committed. No result or public gate seal exists yet.
+were bound by the separate public configuration. The exact P3 payload consumed
+that one authorized run over all 192 stored public scenes and failed closed at
+all three fixed thresholds. At the selected `0.55` threshold, 188/192 scenes
+were exact, with 1,534/1,536 true regions, three false regions, two misses, zero
+duplicates, and three prohibited hits. Recognition exact was `0.978515625`, CER
+was `0.003940553929295204`, overall role accuracy was
+`0.9986979166666666`, and minimum per-role accuracy was
+`0.9895833333333334`. The exact P1 proposal stream was preserved.
+
+The sealed report emitted no case identifiers, fixture bytes, truth text, truth
+rows, predictions, boxes, or per-scene pass/fail labels. It did retain an
+ordered list of proposal-relation tensor dimensions, so the tracked aggregate
+result records that limited per-scene shape metadata explicitly instead of
+overclaiming a fully aggregate report. No case-level failure analysis was
+performed, and those public bytes cannot be used for tuning. V28 is exhausted
+and closed. A later attempt requires a genuinely new defect class and fresh
+preregistered disjoint splits based only on the tracked aggregate result.
+
 Marker composition, private validation, manifest creation, model-store
-promotion, packaging, production approval, and release remain unauthorized. Synthetic
-fixtures are training and public-test inputs only and are never application
-graph data.
+promotion, packaging, production approval, and release remain unauthorized.
+Synthetic fixtures are training and public-test inputs only and are never
+application graph data.
