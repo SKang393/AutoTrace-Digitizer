@@ -232,9 +232,14 @@ def preflight() -> dict[str, Any]:
 
     seal = _read_json(REPO_ROOT / SEAL_PATH)
     if (
-        seal.get("state") != "frozen_before_candidate_execution"
-        or seal.get("public_fixture_archive_opened") is not False
-        or seal.get("chandler_included") is not False
+        seal.get("protocol", {}).get("state")
+        != "preregistered_before_fixture_freeze_or_candidate_execution"
+        or seal.get("public_execution_authorized") is not False
+        or seal.get("public_evaluations") != 0
+        or seal.get("chandler_used") is not False
+        or seal.get("private_data") is not False
+        or seal.get("production_approval") is not False
+        or seal.get("release_eligible") is not False
     ):
         raise RuntimeError("OCR V28 P3 split seal changed")
     for split, config_key in (
