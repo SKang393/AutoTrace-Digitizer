@@ -215,9 +215,9 @@ def test_quorum_uses_median_margin_and_tolerates_one_route() -> None:
     assert rejected[0, 0, 1] < rejected[0, 0, 0]
 
 
-def test_preregistered_ledger_consumes_p1_and_authorizes_only_p2() -> None:
+def test_terminal_ledger_consumes_p1_and_p2_without_public_authorization() -> None:
     entry = _entry()
-    assert entry["status"] == "candidate_2_preregistered"
+    assert entry["status"] == "candidate_2_failed"
     assert entry["trigger_result_sha256"] == TRIGGER_RESULT_SHA256
     assert entry["trigger_case_detail_or_pixels_used"] is False
     assert entry["prior_fixture_bytes_reused"] is False
@@ -237,14 +237,24 @@ def test_preregistered_ledger_consumes_p1_and_authorizes_only_p2() -> None:
         "validation_sealed_public": 0,
     }
     assert entry["preregistered_candidate_ids"] == ["P2"]
-    assert entry["consumed_candidate_ids"] == ["P1"]
-    assert entry["selection_evaluations"] == 1
+    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["selection_evaluations"] == 2
     assert entry["p1_status"] == "failed_runner_consumed"
     assert entry["p1_optimizer_steps"] == 0
     assert entry["p1_selection_archive_read_count"] == 1
     assert entry["p1_case_detail_or_pixels_inspected"] is False
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P2"
+    assert entry["p2_status"] == "failed_selection"
+    assert entry["p2_optimizer_steps"] == 0
+    assert entry["p2_selection_archive_read_count"] == 1
+    assert entry["p2_passing_threshold_window"] == []
+    assert entry["p2_selected_threshold_metrics"]["exact_scene_count"] == 192
+    assert entry["p2_selected_threshold_metrics"]["false_positives"] == 0
+    assert entry["p2_lower_threshold_aggregate"]["false_positives_each"] == 1
+    assert entry["p2_case_detail_or_pixels_inspected"] is False
+    assert entry["p2_result_sha256"] == _sha256(ROOT / "P2_RESULT.json")
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["marker_creation_evaluated"] is False
     assert entry["private_validation"] is False
@@ -252,7 +262,7 @@ def test_preregistered_ledger_consumes_p1_and_authorizes_only_p2() -> None:
     assert entry["release_eligible"] is False
 
 
-def test_frozen_split_and_consumed_p1_are_bound_while_public_remains_closed() -> None:
+def test_frozen_split_and_consumed_candidates_are_bound_while_public_remains_closed() -> None:
     seal_path = ROOT / "SPLIT_SEAL.json"
     config_path = ROOT / "training/p1.json"
     seal = _read_json(seal_path)
@@ -282,15 +292,27 @@ def test_frozen_split_and_consumed_p1_are_bound_while_public_remains_closed() ->
     assert _sha256(ROOT / "artifacts/P1-run/candidate-report.json") == result[
         "candidate_report_sha256"
     ]
-    assert not (ROOT / "artifacts/P2-run").exists()
+    p2_result = _read_json(ROOT / "P2_RESULT.json")
+    assert p2_result["status"] == "failed_selection"
+    assert p2_result["selection_archive_read_count"] == 1
+    assert p2_result["passing_threshold_window"] == []
+    assert p2_result["selected_threshold_metrics"]["exact_scene_count"] == 192
+    assert p2_result["selected_threshold_metrics"]["false_positives"] == 0
+    assert p2_result["threshold_comparisons"][0]["false_positives"] == 1
+    assert p2_result["case_detail_or_pixels_inspected"] is False
+    assert p2_result["public_gate_archive_opened"] is False
+    local_report = ROOT / p2_result["candidate_report_path"].split(
+        "robust_quorum_recall_v31/", maxsplit=1,
+    )[1]
+    if local_report.exists():
+        assert _sha256(local_report) == p2_result["candidate_report_sha256"]
 
 
-def test_exact_p2_selection_preflight_is_separately_authorized() -> None:
-    evidence = train_p2.preflight(require_authorized=False)
-    assert evidence["config"]["candidate_execution_authorized"] is True
-    assert evidence["seal"]["candidate_execution_authorized"] is False
-    authorized = train_p2.preflight(require_authorized=True)
-    assert authorized["entry"]["authorized_candidate_id"] == "P2"
+def test_consumed_p2_cannot_pass_preflight_again() -> None:
+    with pytest.raises(RuntimeError):
+        train_p2.preflight(require_authorized=False)
+    with pytest.raises(RuntimeError):
+        train_p2.preflight(require_authorized=True)
 
 
 def test_p2_ort_adapter_is_callable_contiguous_and_float32(
@@ -351,7 +373,8 @@ def test_readme_forbids_public_reuse_and_application_synthetic_data() -> None:
     assert "V30 public bytes and case identities cannot be reused" in text
     assert "zero optimizer steps" in text
     assert "P1 is consumed" in text
-    assert "P2 is authorized for exactly one visible-selection execution" in text
+    assert "P2 is consumed and failed visible selection" in text
+    assert "P3 remains unregistered" in text
     assert "never become application graph data" in normalized
 
 

@@ -37,22 +37,27 @@ adapters. The tracked aggregate result is SHA-256
 no case detail or pixels were inspected, and the truth-hidden public archive
 remains unopened.
 
-P2 preregisters only the runner correction. It wraps the unchanged detector
-and recognizer sessions as contiguous float32 callables while preserving the
-exact V30 weights, frozen fixtures, preprocessing, postprocessing, thresholds,
+P2 changed only the runner boundary. It wrapped the unchanged detector and
+recognizer sessions as contiguous float32 callables while preserving the exact
+V30 weights, frozen fixtures, preprocessing, postprocessing, thresholds,
 metrics, and gates. Its source bundle is SHA-256
 `630336a225eef62b4fd3aae7ae64d65cc77a0f266acc5bead0dad74b0a4292ae`
 and its separately authorized config is SHA-256
 `3ccf3b095db754f2e7105e91abfa5f6b236c3a189d04f98032e172d38087ad04`.
-P2 is authorized for exactly one visible-selection execution. Selection still
-requires three consecutive
-fixed thresholds with every scene exact, zero false regions, misses,
-duplicates, and prohibited hits, recognition exact at least `0.90`, CER at
-most `0.05`, overall role accuracy at least `0.90`, every role at least
-`0.85`, direct stored-byte execution, CPU tensor hashes, and ONNX parity at
-most `1e-5`. Public execution and marker composition,
-private validation, manifest creation, model-store promotion, packaging,
-production approval, and release remain closed.
+P2 is consumed and failed visible selection. Its single direct stored-byte CPU
+run completed zero optimizer steps and passed ONNX parity at
+`4.76837158203125e-06`. Threshold `0.75` passed all 192 scenes with all 1,536
+truths, zero false regions, misses, duplicates, or prohibited hits,
+recognition exact `0.9713541666666666`, CER `0.004862953138815208`, and every
+role at `1.0`. Thresholds `0.35`, `0.45`, `0.55`, and `0.65` each retained all
+truths but admitted one false prohibited region. Only one threshold passed, so
+the mandatory three-consecutive-threshold robustness gate failed. The tracked
+aggregate P2 result is SHA-256
+`34106e7a018be2964d733162b27292cef5db9bb448eaf3e999accbbd6065c4a3`.
+No case detail or pixels were emitted or inspected. P3 remains unregistered.
+Public execution, marker composition, private validation, manifest creation,
+model-store promotion, packaging, production approval, and release remain
+closed.
 
 Synthetic fixtures are training and public-test inputs only and can never
 become application graph data.
