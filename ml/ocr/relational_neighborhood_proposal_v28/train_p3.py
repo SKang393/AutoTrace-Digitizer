@@ -263,7 +263,7 @@ def preflight() -> dict[str, Any]:
     )
     if (
         entry is None
-        or entry.get("status") != "candidate_3_authorized"
+        or entry.get("status") != "candidate_3_preregistered"
         or entry.get("execution_authorized") is not True
         or entry.get("authorized_candidate_id") != CANDIDATE_ID
         or entry.get("preregistered_candidate_ids") != [CANDIDATE_ID]
