@@ -213,7 +213,7 @@ def test_quorum_uses_median_margin_and_tolerates_one_route() -> None:
     assert rejected[0, 0, 1] < rejected[0, 0, 0]
 
 
-def test_preregistered_ledger_closes_all_execution_and_release_gates() -> None:
+def test_preregistered_ledger_authorizes_only_p1_selection() -> None:
     entry = _entry()
     assert entry["status"] == "candidate_1_preregistered"
     assert entry["trigger_result_sha256"] == TRIGGER_RESULT_SHA256
@@ -231,8 +231,8 @@ def test_preregistered_ledger_closes_all_execution_and_release_gates() -> None:
         "train_sealed_public": 0,
         "validation_sealed_public": 0,
     }
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
     assert entry["public_gate_authorized"] is False
     assert entry["marker_creation_evaluated"] is False
     assert entry["private_validation"] is False
@@ -240,7 +240,7 @@ def test_preregistered_ledger_closes_all_execution_and_release_gates() -> None:
     assert entry["release_eligible"] is False
 
 
-def test_frozen_split_is_checksum_bound_but_candidate_is_not_authorized() -> None:
+def test_frozen_split_is_checksum_bound_and_public_remains_closed() -> None:
     seal_path = ROOT / "SPLIT_SEAL.json"
     config_path = ROOT / "training/p1.json"
     seal = _read_json(seal_path)
@@ -255,7 +255,8 @@ def test_frozen_split_is_checksum_bound_but_candidate_is_not_authorized() -> Non
         "validation_sealed_public": 0,
     }
     assert seal["candidate_execution_authorized"] is False
-    assert config["candidate_execution_authorized"] is False
+    assert config["candidate_execution_authorized"] is True
+    assert config["public_execution_authorized"] is False
     for split, path in ARCHIVE_PATHS.items():
         assert _sha256(REPO_ROOT / path) == seal["splits"][split]["archive_sha256"]
         assert len(seal["splits"][split]["source_sha256_inventory"]) == seal[
@@ -264,12 +265,10 @@ def test_frozen_split_is_checksum_bound_but_candidate_is_not_authorized() -> Non
     assert not (ROOT / "artifacts/P1-run").exists()
 
 
-def test_frozen_preflight_remains_fail_closed_before_authorization() -> None:
-    evidence = preflight(require_authorized=False)
-    assert evidence["config"]["candidate_execution_authorized"] is False
+def test_exact_p1_selection_preflight_is_authorized() -> None:
+    evidence = preflight()
+    assert evidence["config"]["candidate_execution_authorized"] is True
     assert evidence["seal"]["candidate_execution_authorized"] is False
-    with pytest.raises(RuntimeError, match="not separately authorized"):
-        preflight()
 
 
 def test_source_inventory_binds_v31_runner_and_v30_aggregate_trigger() -> None:
@@ -294,7 +293,7 @@ def test_readme_forbids_public_reuse_and_application_synthetic_data() -> None:
     assert "No V30 case identity" in text
     assert "V30 public bytes and case identities cannot be reused" in text
     assert "zero optimizer steps" in text
-    assert "P1 is frozen but not authorized" in text
+    assert "P1 is frozen and separately authorized" in text
     assert "never become application graph data" in normalized
 
 

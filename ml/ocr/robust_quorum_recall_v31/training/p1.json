@@ -44,7 +44,7 @@
   "deterministic_geometry_roles_required": true,
   "validation_or_public_pixels_used_for_training": false,
   "case_level_predecessor_evidence_used": false,
-  "candidate_execution_authorized": false,
+  "candidate_execution_authorized": true,
   "selection_evaluation_limit": 1,
   "public_execution_authorized": false,
   "public_gate_evaluations": 0,

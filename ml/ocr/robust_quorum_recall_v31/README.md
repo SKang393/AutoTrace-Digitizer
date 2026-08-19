@@ -29,14 +29,15 @@ counts are zero. V30 public bytes and case identities cannot be reused. The
 truth-hidden archive may be read once only after a separately committed public
 runner and a later explicit authorization.
 
-P1 is frozen but not authorized. Its checksum-bound config remains
-`candidate_execution_authorized=false`, and the candidate output does not
+P1 is frozen and separately authorized for exactly one visible-selection
+execution. Its checksum-bound config is `candidate_execution_authorized=true`,
+the canonical budget authorizes only P1, and the candidate output does not
 exist. Selection requires three consecutive
 fixed thresholds with every scene exact, zero false regions, misses,
 duplicates, and prohibited hits, recognition exact at least `0.90`, CER at
 most `0.05`, overall role accuracy at least `0.90`, every role at least
 `0.85`, direct stored-byte execution, CPU tensor hashes, and ONNX parity at
-most `1e-5`. Candidate execution, public execution, marker composition,
+most `1e-5`. Public execution and marker composition,
 private validation, manifest creation, model-store promotion, packaging,
 production approval, and release remain closed.
 
