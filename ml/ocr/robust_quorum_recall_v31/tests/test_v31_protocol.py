@@ -29,7 +29,7 @@ from ml.ocr.robust_quorum_recall_v31.protocol import (
     split_registration,
 )
 from ml.ocr.robust_quorum_recall_v31.train_p1 import _trigger_is_terminal
-from ml.ocr.robust_quorum_recall_v31 import train_p2
+from ml.ocr.robust_quorum_recall_v31 import train_p2, train_p3
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -215,9 +215,9 @@ def test_quorum_uses_median_margin_and_tolerates_one_route() -> None:
     assert rejected[0, 0, 1] < rejected[0, 0, 0]
 
 
-def test_terminal_ledger_consumes_p1_and_p2_without_public_authorization() -> None:
+def test_ledger_consumes_p1_p2_and_preregisters_unapproved_p3() -> None:
     entry = _entry()
-    assert entry["status"] == "candidate_2_failed"
+    assert entry["status"] == "candidate_3_preregistered"
     assert entry["trigger_result_sha256"] == TRIGGER_RESULT_SHA256
     assert entry["trigger_case_detail_or_pixels_used"] is False
     assert entry["prior_fixture_bytes_reused"] is False
@@ -225,9 +225,9 @@ def test_terminal_ledger_consumes_p1_and_p2_without_public_authorization() -> No
     assert entry["split_materialized"] is True
     assert entry["split_seal_sha256"] == _sha256(ROOT / "SPLIT_SEAL.json")
     assert entry["candidate_config_path"] == (
-        "ml/ocr/robust_quorum_recall_v31/training/p2.json"
+        "ml/ocr/robust_quorum_recall_v31/training/p3.json"
     )
-    assert entry["candidate_config_sha256"] == _sha256(ROOT / "training/p2.json")
+    assert entry["candidate_config_sha256"] == _sha256(ROOT / "training/p3.json")
     assert entry["split_source_commit"] == _read_json(ROOT / "SPLIT_SEAL.json")[
         "source_commit"
     ]
@@ -236,9 +236,9 @@ def test_terminal_ledger_consumes_p1_and_p2_without_public_authorization() -> No
         "train_sealed_public": 0,
         "validation_sealed_public": 0,
     }
-    assert entry["preregistered_candidate_ids"] == ["P2"]
+    assert entry["preregistered_candidate_ids"] == ["P2", "P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["selection_evaluations"] == 2
     assert entry["p1_status"] == "failed_runner_consumed"
     assert entry["p1_optimizer_steps"] == 0
@@ -253,6 +253,11 @@ def test_terminal_ledger_consumes_p1_and_p2_without_public_authorization() -> No
     assert entry["p2_lower_threshold_aggregate"]["false_positives_each"] == 1
     assert entry["p2_case_detail_or_pixels_inspected"] is False
     assert entry["p2_result_sha256"] == _sha256(ROOT / "P2_RESULT.json")
+    assert entry["p2_candidate_config_sha256"] == _sha256(ROOT / "training/p2.json")
+    assert entry["p3_expected_optimizer_steps"] == 1536
+    assert entry["p3_expected_runner_source_bundle_sha256"] == (
+        train_p3.source_bundle_sha256(REPO_ROOT, train_p3.RUNNER_SOURCE_PATHS)
+    )
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
@@ -315,6 +320,35 @@ def test_consumed_p2_cannot_pass_preflight_again() -> None:
         train_p2.preflight(require_authorized=True)
 
 
+def test_p3_is_checksum_bound_but_not_execution_authorized() -> None:
+    config = _read_json(ROOT / "training/p3.json")
+    entry = _entry()
+    assert config["candidate_id"] == "P3"
+    assert config["candidate_execution_authorized"] is False
+    assert config["selection_thresholds"] == [0.35, 0.45, 0.55, 0.65, 0.75]
+    assert config["minimum_consecutive_passing_thresholds"] == 3
+    assert config["validation_or_public_pixels_used_for_training"] is False
+    assert config["case_level_predecessor_evidence_used"] is False
+    assert config["expected_runner_source_bundle_sha256"] == (
+        train_p3.source_bundle_sha256(REPO_ROOT, train_p3.RUNNER_SOURCE_PATHS)
+    )
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["public_gate_authorized"] is False
+    assert not (ROOT / "artifacts/P3-run").exists()
+
+
+def test_p3_loader_replaces_the_complete_predecessor_state() -> None:
+    predecessor = RobustQuorumRecallProposalNet(seed=17)
+    candidate = train_p3.MarginFineTunedRobustQuorumRecallProposalNet(seed=29)
+    expected = {name: value.detach().clone() for name, value in predecessor.state_dict().items()}
+    candidate.load_role_parent_state_dict(expected)
+    assert all(
+        torch.equal(value, expected[name])
+        for name, value in candidate.state_dict().items()
+    )
+
+
 def test_p2_ort_adapter_is_callable_contiguous_and_float32(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -374,7 +408,7 @@ def test_readme_forbids_public_reuse_and_application_synthetic_data() -> None:
     assert "zero optimizer steps" in text
     assert "P1 is consumed" in text
     assert "P2 is consumed and failed visible selection" in text
-    assert "P3 remains unregistered" in text
+    assert "P3 is preregistered but not authorized" in text
     assert "never become application graph data" in normalized
 
 
