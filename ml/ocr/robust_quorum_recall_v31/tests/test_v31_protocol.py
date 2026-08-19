@@ -215,9 +215,9 @@ def test_quorum_uses_median_margin_and_tolerates_one_route() -> None:
     assert rejected[0, 0, 1] < rejected[0, 0, 0]
 
 
-def test_ledger_consumes_p1_p2_and_authorizes_only_p3_selection() -> None:
+def test_ledger_consumes_all_v31_candidates_and_keeps_public_closed() -> None:
     entry = _entry()
-    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["status"] == "exhausted"
     assert entry["trigger_result_sha256"] == TRIGGER_RESULT_SHA256
     assert entry["trigger_case_detail_or_pixels_used"] is False
     assert entry["prior_fixture_bytes_reused"] is False
@@ -237,7 +237,7 @@ def test_ledger_consumes_p1_p2_and_authorizes_only_p3_selection() -> None:
         "validation_sealed_public": 0,
     }
     assert entry["preregistered_candidate_ids"] == ["P2", "P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["selection_evaluations"] == 2
     assert entry["p1_status"] == "failed_runner_consumed"
@@ -255,11 +255,16 @@ def test_ledger_consumes_p1_p2_and_authorizes_only_p3_selection() -> None:
     assert entry["p2_result_sha256"] == _sha256(ROOT / "P2_RESULT.json")
     assert entry["p2_candidate_config_sha256"] == _sha256(ROOT / "training/p2.json")
     assert entry["p3_expected_optimizer_steps"] == 1536
-    assert entry["p3_expected_runner_source_bundle_sha256"] == (
-        train_p3.source_bundle_sha256(REPO_ROOT, train_p3.RUNNER_SOURCE_PATHS)
-    )
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    p3_result = _read_json(ROOT / "P3_RESULT.json")
+    assert entry["p3_expected_runner_source_bundle_sha256"] == p3_result[
+        "invocation_runner_source_bundle_sha256"
+    ]
+    assert entry["p3_status"] == "failed_authorization_contract_consumed"
+    assert entry["p3_optimizer_steps"] == 0
+    assert entry["p3_selection_archive_read_count"] == 0
+    assert entry["p3_result_sha256"] == _sha256(ROOT / "P3_RESULT.json")
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["marker_creation_evaluated"] is False
     assert entry["private_validation"] is False
@@ -320,7 +325,7 @@ def test_consumed_p2_cannot_pass_preflight_again() -> None:
         train_p2.preflight(require_authorized=True)
 
 
-def test_p3_is_checksum_bound_and_selection_authorized_only() -> None:
+def test_p3_is_checksum_bound_consumed_and_cannot_reenter_selection() -> None:
     config = _read_json(ROOT / "training/p3.json")
     entry = _entry()
     assert config["candidate_id"] == "P3"
@@ -329,13 +334,30 @@ def test_p3_is_checksum_bound_and_selection_authorized_only() -> None:
     assert config["minimum_consecutive_passing_thresholds"] == 3
     assert config["validation_or_public_pixels_used_for_training"] is False
     assert config["case_level_predecessor_evidence_used"] is False
-    assert config["expected_runner_source_bundle_sha256"] == (
-        train_p3.source_bundle_sha256(REPO_ROOT, train_p3.RUNNER_SOURCE_PATHS)
-    )
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
+    result = _read_json(ROOT / "P3_RESULT.json")
+    assert config["expected_runner_source_bundle_sha256"] == result[
+        "invocation_runner_source_bundle_sha256"
+    ]
+    assert result["single_execution_invocation_count"] == 1
+    assert result["training_started"] is False
+    assert result["selection_archive_opened"] is False
+    assert result["rerun_authorized"] is False
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert not (ROOT / "artifacts/P3-run").exists()
+
+
+def test_p3_preflight_mirrors_single_candidate_acquisition_contract() -> None:
+    historical_entry = {
+        "execution_authorized": True,
+        "authorized_candidate_id": "P3",
+        "preregistered_candidate_ids": ["P2", "P3"],
+        "consumed_candidate_ids": ["P1", "P2"],
+    }
+    assert not train_p3._single_candidate_acquisition_contract_satisfied(
+        historical_entry,
+    )
 
 
 def test_p3_loader_replaces_the_complete_predecessor_state() -> None:
@@ -408,7 +430,9 @@ def test_readme_forbids_public_reuse_and_application_synthetic_data() -> None:
     assert "zero optimizer steps" in text
     assert "P1 is consumed" in text
     assert "P2 is consumed and failed visible selection" in text
-    assert "P3 is preregistered and separately authorized for one execution" in text
+    assert "P3 is consumed and V31 is exhausted" in text
+    assert "the selection archive was not opened" in normalized
+    assert "consumed P3 invocation cannot be rerun" in normalized
     assert "Public execution" in normalized and "remain closed" in normalized
     assert "never become application graph data" in normalized
 

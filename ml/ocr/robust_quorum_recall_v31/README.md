@@ -56,23 +56,20 @@ aggregate P2 result is SHA-256
 `34106e7a018be2964d733162b27292cef5db9bb448eaf3e999accbbd6065c4a3`.
 No case detail or pixels were emitted or inspected.
 
-P3 is preregistered and separately authorized for one execution. It loads the
-exact P2 state and trains
-only on the already frozen V31 training archive for four fixed epochs and 1,536
-optimizer steps. Its single change is a fixed asymmetric margin objective with
-stronger negative, hard-negative, and scene-separation terms. The quorum
-architecture, five thresholds, three-consecutive-threshold rule, recognizer,
-deterministic roles, CPU provider, parity limit, and every zero-error gate stay
-unchanged. No selection or public pixels, case identities, truth rows,
-predictions, tensor contents, private images, Chandler, or `Generalization`
-informed the design. Runner-source and preregistered-config SHA-256 values are
-`9657bb658b40d4af9a87d2699732e130a558a5a0b253a30a5461ba0bdb7737a1`
-and `a4728cba4c44d235d0fca36ecf1268cf3a7d72387af989da6f19f7441ff6ca4f`.
-This authorization permits exactly one P3 training and visible-selection run
-after its authorization commit receives a clean portable checkpoint. Public
-execution, marker composition, private validation, manifest creation,
-model-store promotion, packaging, production approval, and release remain
-closed.
+P3 is consumed and V31 is exhausted. Its one authorized invocation ran from
+commit `5485a72121a30625fb6b35810392bb56087e597c` after the clean 0.0.22
+portable checkpoint. The invocation failed before training authorization was
+acquired because the committed preflight accepted historical candidate IDs
+`[P2, P3]`, while the canonical acquisition contract requires the current
+preregistered list to equal `[P3]`. No output directory or training seal was
+created, no optimizer step ran, and the selection archive was not opened. The
+tracked aggregate P3 result is SHA-256
+`2da0952d6d33ea5f0cd445d0470335d5564b1f91955348f3dea61d137cf8c55a`.
+The preflight now mirrors the single-candidate acquisition invariant, but the
+consumed P3 invocation cannot be rerun. No case detail or pixels were emitted
+or inspected. Public execution, marker composition, private validation,
+manifest creation, model-store promotion, packaging, production approval, and
+release remain closed.
 
 Synthetic fixtures are training and public-test inputs only and can never
 become application graph data.

@@ -74,6 +74,19 @@ class MarginFineTunedRobustQuorumRecallProposalNet(RobustQuorumRecallProposalNet
         self.load_state_dict(state_dict, strict=True)
 
 
+def _single_candidate_acquisition_contract_satisfied(
+    entry: dict[str, Any],
+) -> bool:
+    """Mirror the canonical acquire contract before reporting ready."""
+
+    return (
+        entry.get("execution_authorized") is True
+        and entry.get("authorized_candidate_id") == CANDIDATE_ID
+        and entry.get("preregistered_candidate_ids") == [CANDIDATE_ID]
+        and CANDIDATE_ID not in entry.get("consumed_candidate_ids", [])
+    )
+
+
 def _read_json(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
@@ -263,7 +276,6 @@ def preflight(*, require_authorized: bool = True) -> dict[str, Any]:
     if (
         entry is None
         or entry.get("status") != "candidate_3_preregistered"
-        or entry.get("preregistered_candidate_ids") != ["P2", "P3"]
         or entry.get("consumed_candidate_ids") != ["P1", "P2"]
         or entry.get("remaining_unregistered_candidate_ids") != []
         or entry.get("selection_evaluations") != 2
@@ -271,6 +283,8 @@ def preflight(*, require_authorized: bool = True) -> dict[str, Any]:
         or entry.get("public_gate_evaluations") != 0
     ):
         raise RuntimeError("OCR V31 P3 ledger state is not preregistered")
+    if not _single_candidate_acquisition_contract_satisfied(entry):
+        raise RuntimeError("OCR V31 P3 ledger cannot satisfy the training acquisition contract")
     if require_authorized and (
         entry.get("execution_authorized") is not True
         or entry.get("authorized_candidate_id") != CANDIDATE_ID
