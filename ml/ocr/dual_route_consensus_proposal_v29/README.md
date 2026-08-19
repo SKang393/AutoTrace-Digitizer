@@ -54,7 +54,8 @@ The train, selection, and unopened public archive SHA-256 values are
 `0a102f9b...cbef2e`, `a7b7a79e...452fa89`, and `b642bd38...04ae7e9`.
 P1 is checksum-bound by `training/p1.json` SHA-256
 `ddcae68452a356408994fa3a7e6ea2497c0709c393b07d761d5baecd57e846ee`
-but remains unauthorized. It has performed zero optimizer and selection steps.
+and is authorized for exactly one execution after its separate committed
+fixture checkpoint. It has performed zero optimizer and selection steps.
 Public evaluation, marker composition, private validation, manifest creation,
 model-store promotion, packaging, production approval, and release remain
 unauthorized. Synthetic fixtures are training and public-test inputs only and

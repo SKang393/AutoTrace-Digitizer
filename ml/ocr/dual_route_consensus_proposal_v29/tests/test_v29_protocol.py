@@ -243,9 +243,13 @@ def test_frozen_p1_inputs_validate_before_separate_execution_authorization() -> 
         pytest.skip("P1 preregistration checkpoint has advanced")
     assert (REPO_ROOT / SEAL_PATH).is_file()
     assert all((REPO_ROOT / path).is_file() for path in ARCHIVE_PATHS.values())
-    assert entry["execution_authorized"] is False
-    with pytest.raises(RuntimeError, match="canonical authorization changed"):
-        preflight()
+    if entry["execution_authorized"] is False:
+        with pytest.raises(RuntimeError, match="canonical authorization changed"):
+            preflight()
+    else:
+        assert entry["execution_authorized"] is True
+        assert entry["authorized_candidate_id"] == "P1"
+        assert preflight()["seal"]["public_execution_authorized"] is False
 
 
 def test_split_freeze_binds_complete_runner_and_aggregate_trigger() -> None:
@@ -270,7 +274,7 @@ def test_readme_keeps_all_later_gates_unauthorized() -> None:
     assert "bytes cannot be used for V29" in text
     assert "zero\nsource-byte overlap" in text
     assert "P1 is checksum-bound" in text
-    assert "but remains unauthorized" in text
+    assert "authorized for exactly one execution" in text
     assert "production approval, and release remain\nunauthorized" in text
 
 
