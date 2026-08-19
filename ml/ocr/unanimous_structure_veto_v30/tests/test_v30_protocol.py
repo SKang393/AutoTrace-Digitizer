@@ -284,11 +284,11 @@ def test_consumed_runner_preflight_refuses_a_second_execution() -> None:
         preflight()
 
 
-def test_ledger_records_selected_p1_and_bounded_public_authorization() -> None:
+def test_ledger_records_selected_p1_and_consumed_public_failure() -> None:
     entry = _entry()
     result_path = ROOT / "P1_RESULT.json"
     result = _read_json(result_path)
-    assert entry["status"] == "candidate_1_selected_public_gate_pending"
+    assert entry["status"] == "public_gate_failed_revision_closed"
     assert entry["prior_revision"] == "graph-text-dual-route-consensus-proposal-v29"
     assert entry["trigger_result_sha256"] == TRIGGER_RESULT_SHA256
     assert entry["trigger_case_detail_or_pixels_used"] is False
@@ -317,8 +317,11 @@ def test_ledger_records_selected_p1_and_bounded_public_authorization() -> None:
     assert entry["candidate_1_selected_threshold"] == 0.55
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert entry["public_gate_authorized"] is True
-    assert entry["public_gate_authorized_candidate_id"] == "P1"
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized_candidate_id"] is None
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_archive_opened"] is True
+    assert entry["public_gate_archive_consumed"] is True
     assert entry["marker_creation_evaluated"] is False
     assert entry["private_validation"] is False
     assert entry["production_approval"] is False
@@ -359,7 +362,7 @@ def test_p1_result_is_aggregate_only_and_passes_fixed_selection_gates() -> None:
     assert result["release_eligible"] is False
 
 
-def test_public_gate_is_separately_authorized_for_one_run() -> None:
+def test_public_gate_is_consumed_with_aggregate_only_terminal_evidence() -> None:
     config_path = REPO_ROOT / PUBLIC_CONFIG_PATH
     config = _read_json(config_path)
     _validate_config(config, require_authorized=False)
@@ -371,16 +374,46 @@ def test_public_gate_is_separately_authorized_for_one_run() -> None:
     assert config["expected_evaluator_source_bundle_sha256"] == (
         source_bundle_sha256(REPO_ROOT, EVALUATOR_SOURCE_PATHS)
     )
-    assert not (REPO_ROOT / PUBLIC_OUTPUT_PATH).exists()
     entry = _entry()
-    assert entry["status"] == "candidate_1_selected_public_gate_pending"
+    assert entry["status"] == "public_gate_failed_revision_closed"
     assert entry["public_gate_config_path"] == PUBLIC_CONFIG_PATH.as_posix()
     assert entry["public_gate_config_sha256"] == _sha256(config_path)
     assert entry["public_gate_runner_source_commit"] == config["runner_source_commit"]
-    assert entry["public_gate_authorized"] is True
-    assert entry["public_gate_authorized_candidate_id"] == "P1"
-    assert entry["public_gate_evaluations"] == 0
-    assert entry["public_gate_archive_opened"] is False
+    assert entry["public_gate_authorized"] is False
+    assert entry["public_gate_authorized_candidate_id"] is None
+    assert entry["public_gate_evaluations"] == 1
+    assert entry["public_gate_archive_opened"] is True
+    public_result_path = ROOT / "PUBLIC_GATE_RESULT.json"
+    public_result = _read_json(public_result_path)
+    assert entry["public_gate_result_sha256"] == _sha256(public_result_path)
+    assert public_result["gate_opened_seal_sha256"] == _sha256(
+        REPO_ROOT / public_result["gate_opened_seal_path"]
+    )
+    assert public_result["gate_result_seal_sha256"] == _sha256(
+        REPO_ROOT / public_result["gate_result_seal_path"]
+    )
+    assert public_result["status"] == "failed_public_gate"
+    assert public_result["evaluation_count"] == 1
+    assert public_result["public_archive_read_count"] == 1
+    assert public_result["exact_scene_count"] == 255
+    assert public_result["metrics"]["true_positives"] == 2047
+    assert public_result["false_positives"] == 0
+    assert public_result["false_negatives"] == 1
+    assert public_result["duplicate_region_count"] == 0
+    assert public_result["prohibited_structure_hits"] == 0
+    assert public_result["case_level_failure_analysis_performed"] is False
+    assert public_result["next_revision_may_reuse_public_bytes"] is False
+    assert public_result["public_failure_tuning_authorized"] is False
+    assert public_result["marker_creation_authorized"] is False
+    assert public_result["private_validation_authorized"] is False
+    assert public_result["production_approval"] is False
+    assert public_result["release_eligible"] is False
+    for prohibited in (
+        "cases", "predictions", "truths", "fixture_bytes",
+        "case_ids", "scene_ids", "proposal_relation_scene_shapes",
+    ):
+        assert prohibited not in public_result
+        assert prohibited not in public_result["metrics"]
 
 
 def test_selected_p1_is_terminal_for_public_gate_without_case_material() -> None:
@@ -456,8 +489,8 @@ def test_readme_forbids_v29_bytes_and_application_synthetic_data() -> None:
     assert "bytes cannot be used for V30" in text
     assert "No V29 checkpoint is reused" in text
     assert "P1 consumed its single authorized CPU training run" in text
-    assert "sealed public archive remains unopened" in text
-    assert "separately authorized for exactly one run" in text
+    assert "single authorized truth-hidden public run" in text
+    assert "V30 is closed" in text
     assert "writes only whitelisted aggregate metrics" in text
     assert "never become application graph data" in normalized
 

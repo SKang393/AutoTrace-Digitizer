@@ -51,17 +51,28 @@ threshold is `0.55`. Only aggregate evidence is tracked in `P1_RESULT.json`;
 the checksum-bound checkpoint, ONNX model, and full run report remain ignored
 local evidence.
 
-P1 is now consumed and no additional training or selection run is authorized.
-The sealed public archive remains unopened with zero evaluations. Public
-execution now has a separately preregistered truth-hidden runner and
-aggregate-only gate configuration. The runner verifies every exact payload and
-source hash before acquiring a single-use seal, opens the archive once, runs
-the complete detector, recognizer, relation, and V30 candidate stream on CPU,
-removes per-scene shape evidence, and writes only whitelisted aggregate metrics
-and tensor-stream hashes. After that source checkpoint passed focused tests,
-the configuration was separately authorized for exactly one run and bound to
-source commit `3d4714fc239f8b6832ef223e92da9614efe31abf`. Marker, private,
-manifest, model-store, packaging, approval, and release gates remain closed
-regardless of the public result.
+P1 and its single authorized truth-hidden public run are now consumed. The
+runner verified every exact payload and source hash before acquiring its
+single-use seal, opened the 256-scene archive once, ran the complete detector,
+recognizer, relation, and V30 candidate stream on CPU, removed per-scene shape
+evidence, and writes only whitelisted aggregate metrics and tensor-stream
+hashes. The public run passed 255/256 scenes and retained 2,047/2,048 truth
+regions with zero false regions, duplicates, or prohibited hits at each of the
+three fixed public thresholds. One false negative caused the exact-scene and
+zero-miss requirements to fail. Recognition exact was `0.98095703125`, CER was
+`0.0033769523005487546`, overall role accuracy was `0.99951171875`, and the
+minimum role accuracy was `0.99609375`.
+
+The archive read count is exactly one. Aggregate report SHA-256 is
+`b04db1e244e672ac0c0b0700f8cf05d42b5e54fb78a96ec33b569ff807b93a1d`;
+opened and result seal SHA-256 values are
+`b77f16e8e848ea571e5b0fc8c7dcc20de517b31e438fbd416459c8e0e682423d`
+and `5253429b13e7dbddda42d5a65c686f2e96f741417f5cd4ead8bd335cf1e3c4d8`.
+No case identifiers, truth rows, predictions, fixture bytes, or case-level
+failure analysis were emitted or used. V30 is closed. Its public bytes cannot
+be rerun, reused, or tuned against. A later OCR attempt requires a fresh defect
+class and disjoint preregistered splits designed only from this tracked
+aggregate result. Marker, private, manifest, model-store, packaging, approval,
+and release gates remain closed.
 Synthetic fixtures are training and public-test inputs only and can never
 become application graph data.
