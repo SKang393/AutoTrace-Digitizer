@@ -47,9 +47,15 @@ every role at least `0.85`, direct stored-byte execution, input and output
 tensor hashes, CPU execution, deterministic role equality, and ONNX parity at
 most `1e-5`.
 
-No V29 fixture archive, split seal, candidate configuration, model payload, or
-execution authorization exists at this source checkpoint. Training, visible
-selection, public evaluation, marker composition, private validation, manifest
-creation, model-store promotion, packaging, production approval, and release
-remain unauthorized. Synthetic fixtures are training and public-test inputs
-only and are never application graph data.
+The exact `d3f8be4` source checkpoint froze new 320/160/224 archives with zero
+source-byte overlap. `SPLIT_SEAL.json` SHA-256 is
+`e0f30b2d57c3c22e6e1121e71248af4c6ff65e48d4781e815f4cf1f6bcdf41bf`.
+The train, selection, and unopened public archive SHA-256 values are
+`0a102f9b...cbef2e`, `a7b7a79e...452fa89`, and `b642bd38...04ae7e9`.
+P1 is checksum-bound by `training/p1.json` SHA-256
+`ddcae68452a356408994fa3a7e6ea2497c0709c393b07d761d5baecd57e846ee`
+but remains unauthorized. It has performed zero optimizer and selection steps.
+Public evaluation, marker composition, private validation, manifest creation,
+model-store promotion, packaging, production approval, and release remain
+unauthorized. Synthetic fixtures are training and public-test inputs only and
+are never application graph data.

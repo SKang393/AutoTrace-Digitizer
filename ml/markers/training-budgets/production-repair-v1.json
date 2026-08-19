@@ -6958,7 +6958,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-dual-route-consensus-proposal-v29",
-      "status": "preregistered_source_only",
+      "status": "candidate_1_preregistered",
       "defect_class": "V28 passed every visible-selection scene at five thresholds, then its one truth-hidden public run passed only 188 of 192 scenes with three false regions, two misses, and three prohibited hits at the selected threshold",
       "prior_revision": "graph-text-relational-neighborhood-proposal-v28",
       "trigger_result_path": "ml/ocr/relational_neighborhood_proposal_v28/PUBLIC_GATE_RESULT.json",
@@ -6971,12 +6971,16 @@
       "architecture": "dual-route-relational-consensus-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": ["P1"],
       "consumed_candidate_ids": [],
-      "remaining_unregistered_candidate_ids": ["P1", "P2", "P3"],
+      "remaining_unregistered_candidate_ids": ["P2", "P3"],
       "protocol_path": "ml/ocr/dual_route_consensus_proposal_v29/PROTOCOL.json",
       "protocol_sha256": "fbf6c9c88e9b7b0a55b0c64cb657932b3002e1c924eeb6dd382231181d2b4f8a",
-      "split_materialized": false,
+      "split_materialized": true,
+      "split_source_commit": "d3f8be40bfd408ef32326662f8998223b6882a93",
+      "split_source_bundle_sha256": "2834392f7484fc9882bdef28a30e4cdb331847376b5a8c0781951af56cc5ee99",
+      "split_seal_path": "ml/ocr/dual_route_consensus_proposal_v29/SPLIT_SEAL.json",
+      "split_seal_sha256": "e0f30b2d57c3c22e6e1121e71248af4c6ff65e48d4781e815f4cf1f6bcdf41bf",
       "split_scene_counts": {
         "train": 320,
         "validation": 160,
@@ -6990,11 +6994,17 @@
       "candidate_1_output_logit_scale": 0.5,
       "candidate_1_onnx_runtime_policy": "CPUExecutionProvider with ORT_DISABLE_ALL graph optimization and unchanged strict 1e-5 maximum absolute error",
       "candidate_1_aggregate_design_basis": "tracked V28 aggregate public result only; no case identity, truth row, prediction, tensor content, fixture pixel, private image, Chandler image, or Generalization label",
+      "candidate_config_paths": {
+        "P1": "ml/ocr/dual_route_consensus_proposal_v29/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "ddcae68452a356408994fa3a7e6ea2497c0709c393b07d761d5baecd57e846ee"
+      },
       "selection_thresholds": [0.35, 0.45, 0.55, 0.65, 0.75],
       "minimum_consecutive_passing_thresholds": 3,
       "execution_authorized": false,
       "authorized_candidate_id": null,
-      "execution_blocker": "Commit the complete source checkpoint, freeze fresh disjoint fixture archives from that exact commit, record the split seal and checksum-bound P1 configuration, and separately authorize P1 before any optimizer or selection execution.",
+      "execution_blocker": "P1 is checksum-bound but remains unauthorized. Commit this fixture-seal and candidate-config checkpoint, then separately authorize exactly one P1 execution before any optimizer or selection step.",
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,

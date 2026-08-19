@@ -9,6 +9,7 @@ from pathlib import Path
 
 import numpy as np
 import onnxruntime as ort
+import pytest
 import torch
 
 from ml.ocr.dual_route_consensus_proposal_v29.model import (
@@ -30,6 +31,7 @@ from ml.ocr.dual_route_consensus_proposal_v29.protocol import (
 from ml.ocr.dual_route_consensus_proposal_v29.train_p1 import (
     _dual_route_objective,
     _trigger_is_terminal,
+    preflight,
 )
 
 
@@ -235,6 +237,17 @@ def test_source_only_ledger_is_fail_closed_before_fixture_freeze() -> None:
         assert all(not (REPO_ROOT / path).exists() for path in ARCHIVE_PATHS.values())
 
 
+def test_frozen_p1_inputs_validate_before_separate_execution_authorization() -> None:
+    entry = _ledger_entry()
+    if entry["status"] != "candidate_1_preregistered":
+        pytest.skip("P1 preregistration checkpoint has advanced")
+    assert (REPO_ROOT / SEAL_PATH).is_file()
+    assert all((REPO_ROOT / path).is_file() for path in ARCHIVE_PATHS.values())
+    assert entry["execution_authorized"] is False
+    with pytest.raises(RuntimeError, match="canonical authorization changed"):
+        preflight()
+
+
 def test_split_freeze_binds_complete_runner_and_aggregate_trigger() -> None:
     expected = {
         ROOT / "PROTOCOL.json",
@@ -255,8 +268,10 @@ def test_readme_keeps_all_later_gates_unauthorized() -> None:
     text = (ROOT / "README.md").read_text(encoding="utf-8")
     assert "No V28 case identity" in text
     assert "bytes cannot be used for V29" in text
-    assert "No V29 fixture archive" in text
-    assert "production approval, and release\nremain unauthorized" in text
+    assert "zero\nsource-byte overlap" in text
+    assert "P1 is checksum-bound" in text
+    assert "but remains unauthorized" in text
+    assert "production approval, and release remain\nunauthorized" in text
 
 
 def test_python_sources_have_project_spdx_header() -> None:
