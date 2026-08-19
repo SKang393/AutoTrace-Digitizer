@@ -48,7 +48,7 @@
   "isolated_change": "wrap the unchanged detector and recognizer ONNX Runtime sessions as contiguous float32 callables required by the frozen evidence pipeline",
   "p1_result_path": "ml/ocr/robust_quorum_recall_v31/P1_RESULT.json",
   "p1_result_sha256": "b3087ce9a6c0ab7e71351fb3f2b60bde83f910b89476ffa90c9cc60fcb8f2eed",
-  "candidate_execution_authorized": false,
+  "candidate_execution_authorized": true,
   "selection_evaluation_limit": 1,
   "public_execution_authorized": false,
   "public_gate_evaluations": 0,

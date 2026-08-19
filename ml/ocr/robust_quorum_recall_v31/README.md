@@ -42,9 +42,10 @@ and recognizer sessions as contiguous float32 callables while preserving the
 exact V30 weights, frozen fixtures, preprocessing, postprocessing, thresholds,
 metrics, and gates. Its source bundle is SHA-256
 `630336a225eef62b4fd3aae7ae64d65cc77a0f266acc5bead0dad74b0a4292ae`
-and its config is SHA-256
-`1b4f968dcbd9d3be16ee8cf05b28ecc7545a166dacbd1410c33d8d9839acfabd`.
-P2 is not execution-authorized. Selection still requires three consecutive
+and its separately authorized config is SHA-256
+`3ccf3b095db754f2e7105e91abfa5f6b236c3a189d04f98032e172d38087ad04`.
+P2 is authorized for exactly one visible-selection execution. Selection still
+requires three consecutive
 fixed thresholds with every scene exact, zero false regions, misses,
 duplicates, and prohibited hits, recognition exact at least `0.90`, CER at
 most `0.05`, overall role accuracy at least `0.90`, every role at least

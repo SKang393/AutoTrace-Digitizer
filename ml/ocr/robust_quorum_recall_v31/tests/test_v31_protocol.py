@@ -215,7 +215,7 @@ def test_quorum_uses_median_margin_and_tolerates_one_route() -> None:
     assert rejected[0, 0, 1] < rejected[0, 0, 0]
 
 
-def test_preregistered_ledger_consumes_p1_and_keeps_p2_unauthorized() -> None:
+def test_preregistered_ledger_consumes_p1_and_authorizes_only_p2() -> None:
     entry = _entry()
     assert entry["status"] == "candidate_2_preregistered"
     assert entry["trigger_result_sha256"] == TRIGGER_RESULT_SHA256
@@ -243,8 +243,8 @@ def test_preregistered_ledger_consumes_p1_and_keeps_p2_unauthorized() -> None:
     assert entry["p1_optimizer_steps"] == 0
     assert entry["p1_selection_archive_read_count"] == 1
     assert entry["p1_case_detail_or_pixels_inspected"] is False
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P2"
     assert entry["public_gate_authorized"] is False
     assert entry["marker_creation_evaluated"] is False
     assert entry["private_validation"] is False
@@ -285,12 +285,12 @@ def test_frozen_split_and_consumed_p1_are_bound_while_public_remains_closed() ->
     assert not (ROOT / "artifacts/P2-run").exists()
 
 
-def test_exact_p2_selection_preflight_is_preregistered_but_unauthorized() -> None:
+def test_exact_p2_selection_preflight_is_separately_authorized() -> None:
     evidence = train_p2.preflight(require_authorized=False)
-    assert evidence["config"]["candidate_execution_authorized"] is False
+    assert evidence["config"]["candidate_execution_authorized"] is True
     assert evidence["seal"]["candidate_execution_authorized"] is False
-    with pytest.raises(RuntimeError, match="not separately authorized"):
-        train_p2.preflight(require_authorized=True)
+    authorized = train_p2.preflight(require_authorized=True)
+    assert authorized["entry"]["authorized_candidate_id"] == "P2"
 
 
 def test_p2_ort_adapter_is_callable_contiguous_and_float32(
@@ -351,7 +351,7 @@ def test_readme_forbids_public_reuse_and_application_synthetic_data() -> None:
     assert "V30 public bytes and case identities cannot be reused" in text
     assert "zero optimizer steps" in text
     assert "P1 is consumed" in text
-    assert "P2 is not execution-authorized" in text
+    assert "P2 is authorized for exactly one visible-selection execution" in text
     assert "never become application graph data" in normalized
 
 
