@@ -42,11 +42,20 @@ are implemented. Fresh archives are now frozen from exact source commit
 and the train, selection, and sealed-public source-byte overlap counts are all
 zero.
 
-P1 is separately preregistered and authorized for one CPU training run plus one
-visible-selection evaluation against the frozen selection bytes. Its exact
-configuration, runner bundle, split seal, three archives, prerequisites,
-candidate ID, optimizer-step ceiling, and experiment-budget ledger are bound by
-checksum. Public execution is not authorized. Marker, private, manifest,
-model-store, packaging, approval, and release gates also remain closed.
+P1 consumed its single authorized CPU training run and visible-selection
+evaluation. It passed all 192 scenes exactly at all five fixed thresholds with
+zero false regions, misses, duplicates, or prohibited hits. Recognition exact
+was `0.9713541666666666`, CER was `0.004869411243913236`, all role accuracies
+were `1.0`, and dynamic ONNX parity was `0.000003337860107421875`. The selected
+threshold is `0.55`. Only aggregate evidence is tracked in `P1_RESULT.json`;
+the checksum-bound checkpoint, ONNX model, and full run report remain ignored
+local evidence.
+
+P1 is now consumed and no additional training or selection run is authorized.
+The sealed public archive remains unopened with zero evaluations. Public
+execution requires a separately committed truth-hidden runner, aggregate-only
+gate configuration, direct review, and explicit authorization. Marker,
+private, manifest, model-store, packaging, approval, and release gates also
+remain closed.
 Synthetic fixtures are training and public-test inputs only and can never
 become application graph data.

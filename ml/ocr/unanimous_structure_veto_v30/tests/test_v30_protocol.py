@@ -9,6 +9,7 @@ from pathlib import Path
 
 import numpy as np
 import onnxruntime as ort
+import pytest
 import torch
 
 from ml.ocr.unanimous_structure_veto_v30.dataset import (
@@ -258,7 +259,7 @@ def test_exact_v29_aggregate_trigger_is_terminal_without_case_material() -> None
         assert prohibited not in trigger
 
 
-def test_authorized_runner_preflight_binds_exact_seal_and_source() -> None:
+def test_consumed_runner_preflight_refuses_a_second_execution() -> None:
     required = {
         "dataset.py", "model.py", "pipeline.py", "prepare_split.py",
         "protocol.py", "train_p1.py",
@@ -266,16 +267,15 @@ def test_authorized_runner_preflight_binds_exact_seal_and_source() -> None:
     assert required <= {path.name for path in SOURCE_PATHS if path.parent == Path(
         "ml/ocr/unanimous_structure_veto_v30"
     )}
-    evidence = preflight()
-    assert evidence["seal"]["source_bundle_sha256"] == (
-        "b830b36be890ed53cb10f43a86961f4412bc238a97bd046d228ead18767cf8fe"
-    )
-    assert evidence["config"]["training_authorized"] is True
+    with pytest.raises(RuntimeError, match="P1 output already exists"):
+        preflight()
 
 
-def test_ledger_authorizes_only_p1_training_and_refuses_every_later_gate() -> None:
+def test_ledger_records_selected_p1_and_refuses_every_later_gate() -> None:
     entry = _entry()
-    assert entry["status"] == "candidate_1_preregistered"
+    result_path = ROOT / "P1_RESULT.json"
+    result = _read_json(result_path)
+    assert entry["status"] == "candidate_1_selected"
     assert entry["prior_revision"] == "graph-text-dual-route-consensus-proposal-v29"
     assert entry["trigger_result_sha256"] == TRIGGER_RESULT_SHA256
     assert entry["trigger_case_detail_or_pixels_used"] is False
@@ -292,14 +292,57 @@ def test_ledger_authorizes_only_p1_training_and_refuses_every_later_gate() -> No
     )
     assert _read_json(ROOT / "training/p1.json")["training_authorized"] is True
     assert entry["preregistered_candidate_ids"] == ["P1"]
-    assert entry["consumed_candidate_ids"] == []
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["selection_evaluations"] == 1
+    assert entry["candidate_1_result_path"] == (
+        "ml/ocr/unanimous_structure_veto_v30/P1_RESULT.json"
+    )
+    assert entry["candidate_1_result_sha256"] == _sha256(result_path)
+    assert entry["candidate_1_report_sha256"] == result["report_sha256"]
+    assert entry["candidate_1_checkpoint_sha256"] == result["checkpoint_sha256"]
+    assert entry["candidate_1_onnx_sha256"] == result["onnx_sha256"]
+    assert entry["candidate_1_selected_threshold"] == 0.55
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["marker_creation_evaluated"] is False
     assert entry["private_validation"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
+
+
+def test_p1_result_is_aggregate_only_and_passes_fixed_selection_gates() -> None:
+    result = _read_json(ROOT / "P1_RESULT.json")
+    assert result["status"] == "selected"
+    assert result["candidate_consumed"] is True
+    assert result["optimizer_steps"] == 1536
+    assert result["selection_evaluations"] == 1
+    assert result["selection_gate_passed"] is True
+    assert result["selected_threshold"] == 0.55
+    assert result["passing_threshold_window"] == [0.35, 0.45, 0.55, 0.65, 0.75]
+    metrics = result["selection_metrics"]
+    assert metrics["scene_count"] == metrics["exact_scene_count"] == 192
+    assert metrics["truth_region_count"] == metrics["true_positives"] == 1536
+    assert metrics["false_positives"] == 0
+    assert metrics["false_negatives"] == 0
+    assert metrics["duplicate_region_count"] == 0
+    assert metrics["prohibited_structure_hits"] == 0
+    assert metrics["recognition_exact"] >= 0.90
+    assert metrics["character_error_rate"] <= 0.05
+    assert metrics["role_accuracy"] == 1.0
+    assert set(metrics["per_role_accuracy"].values()) == {1.0}
+    assert metrics["direct_stored_fixture_byte_execution"] is True
+    assert result["provider"] == "CPUExecutionProvider"
+    assert result["onnx_parity_maximum_absolute_error"] <= 1e-5
+    assert result["onnx_parity_passed"] is True
+    assert result["case_level_details_emitted"] is False
+    for prohibited in ("cases", "predictions", "truths", "case_ids"):
+        assert prohibited not in result
+    assert result["public_gate_evaluations"] == 0
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_authorized"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
 
 
 def test_readme_forbids_v29_bytes_and_application_synthetic_data() -> None:
@@ -308,7 +351,8 @@ def test_readme_forbids_v29_bytes_and_application_synthetic_data() -> None:
     assert "No V29 case identity" in text
     assert "bytes cannot be used for V30" in text
     assert "No V29 checkpoint is reused" in text
-    assert "P1 is separately preregistered and authorized" in text
+    assert "P1 consumed its single authorized CPU training run" in text
+    assert "sealed public archive remains unopened" in text
     assert "never become application graph data" in normalized
 
 
