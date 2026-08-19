@@ -47,6 +47,8 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
 {
     public const string ApprovalBenchmarkProfile =
         "graphreader-ocr-structure-consensus-public-gate-v1";
+    internal const string OfficialRecognitionSpacingV2Algorithm =
+        "ctc_greedy_alternatives_with_source_spacing_v2_p2";
     private const string CombinedTimingWarning = "ocr_pipeline_timing_not_model_isolated";
     private readonly Lazy<OcrPipeline> pipeline;
     private readonly ModelIdentity detectionModel;
@@ -131,6 +133,8 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         LocalOnnxTextRegionDetectorOptions detectorOptions = ReadDetectionOptions(detectionModel);
         (LocalOnnxTextRecognizerOptions Recognizer, OcrPipelineOptions Pipeline) recognition =
             ReadRecognitionOptions(recognitionModel.Identity, recognitionModel.ManifestPath);
+        bool usesOfficialSpacingV2 = UsesOfficialRecognitionSpacingV2Manifest(
+            recognitionModel.ManifestPath);
         await ValidateExecutablePairAsync(
                 detectorOptions,
                 recognition.Recognizer,
@@ -145,7 +149,13 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
                 var detector = new GraphStructureConsensusTextRegionDetector(
                     modelDetector,
                     new ConnectedComponentTextRegionDetector());
-                var recognizer = new LocalOnnxTextRecognizer(runtime, recognition.Recognizer);
+                ITextRecognizer recognizer = new LocalOnnxTextRecognizer(
+                    runtime,
+                    recognition.Recognizer);
+                if (usesOfficialSpacingV2)
+                {
+                    recognizer = new OfficialRecognitionSpacingV2TextRecognizer(recognizer);
+                }
                 return new OcrPipeline(
                     detector,
                     recognizer,
@@ -641,11 +651,29 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
                 "OCR recognition preprocessing");
         }
         JsonElement postprocessing = RequiredObject(root, "postprocessing", "OCR recognition manifest");
-        RequireString(
+        string postprocessingAlgorithm = RequiredString(
             postprocessing,
             "algorithm",
-            "ctc_greedy_alternatives_v1",
             "OCR recognition postprocessing");
+        if (!string.Equals(
+                postprocessingAlgorithm,
+                "ctc_greedy_alternatives_v1",
+                StringComparison.Ordinal) &&
+            !string.Equals(
+                postprocessingAlgorithm,
+                OfficialRecognitionSpacingV2Algorithm,
+                StringComparison.Ordinal))
+        {
+            throw new InvalidDataException(
+                "OCR recognition postprocessing algorithm is not reviewed for production.");
+        }
+        if (string.Equals(
+                postprocessingAlgorithm,
+                OfficialRecognitionSpacingV2Algorithm,
+                StringComparison.Ordinal))
+        {
+            ValidateOfficialRecognitionSpacingV2(postprocessing);
+        }
         int maximumAlternatives = RequiredInt32(
             postprocessing,
             "maximum_alternatives",
@@ -682,6 +710,74 @@ public sealed class ProductionOcrAdapter : IProductionOcrAdapter
         };
         LocalOnnxTextRecognizer.ValidateOptions(recognizer);
         return (recognizer, pipeline);
+    }
+
+    internal static bool UsesOfficialRecognitionSpacingV2Manifest(string manifestPath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(manifestPath);
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(manifestPath));
+        JsonElement postprocessing = RequiredObject(
+            document.RootElement,
+            "postprocessing",
+            "OCR recognition manifest");
+        return string.Equals(
+            RequiredString(postprocessing, "algorithm", "OCR recognition postprocessing"),
+            OfficialRecognitionSpacingV2Algorithm,
+            StringComparison.Ordinal);
+    }
+
+    private static void ValidateOfficialRecognitionSpacingV2(JsonElement postprocessing)
+    {
+        _ = RequiredReviewedInt32(
+            postprocessing,
+            "minimum_gap_pixels",
+            OfficialRecognitionSpacingV2Postprocessor.MinimumGapPixels,
+            "OCR recognition spacing V2 postprocessing");
+        _ = RequiredReviewedDouble(
+            postprocessing,
+            "minimum_gap_to_ink_height_ratio",
+            OfficialRecognitionSpacingV2Postprocessor.MinimumGapToInkHeightRatio,
+            "OCR recognition spacing V2 postprocessing");
+        _ = RequiredReviewedInt32(
+            postprocessing,
+            "minimum_source_groups",
+            OfficialRecognitionSpacingV2Postprocessor.MinimumSourceGroups,
+            "OCR recognition spacing V2 postprocessing");
+        _ = RequiredReviewedDouble(
+            postprocessing,
+            "foreground_contrast_fraction",
+            OfficialRecognitionSpacingV2Postprocessor.ForegroundContrastFraction,
+            "OCR recognition spacing V2 postprocessing");
+        _ = RequiredReviewedDouble(
+            postprocessing,
+            "minimum_foreground_contrast",
+            OfficialRecognitionSpacingV2Postprocessor.MinimumForegroundContrast,
+            "OCR recognition spacing V2 postprocessing");
+        _ = RequiredReviewedDouble(
+            postprocessing,
+            "capital_i_minimum_width_height_ratio",
+            OfficialRecognitionSpacingV2Postprocessor.CapitalIMinimumWidthHeightRatio,
+            "OCR recognition spacing V2 postprocessing");
+        _ = RequiredReviewedDouble(
+            postprocessing,
+            "capital_i_minimum_top_coverage",
+            OfficialRecognitionSpacingV2Postprocessor.CapitalIMinimumTopCoverage,
+            "OCR recognition spacing V2 postprocessing");
+        _ = RequiredReviewedDouble(
+            postprocessing,
+            "capital_i_minimum_bottom_coverage",
+            OfficialRecognitionSpacingV2Postprocessor.CapitalIMinimumBottomCoverage,
+            "OCR recognition spacing V2 postprocessing");
+        _ = RequiredReviewedInt32(
+            postprocessing,
+            "maximum_character_count",
+            OfficialRecognitionSpacingV2Postprocessor.MaximumCharacterCount,
+            "OCR recognition spacing V2 postprocessing");
+        _ = RequiredReviewedInt32(
+            postprocessing,
+            "maximum_source_groups",
+            OfficialRecognitionSpacingV2Postprocessor.MaximumSourceGroups,
+            "OCR recognition spacing V2 postprocessing");
     }
 
     private static void RequireTask(ResolvedProductionModel model, string expected)

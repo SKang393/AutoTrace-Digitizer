@@ -291,6 +291,59 @@ public sealed class ProductionComponentOcrAdapterFactoryTests
         }
     }
 
+    [TestMethod]
+    public void OfficialSpacingV2ManifestBindsEveryFrozenSourceRule()
+    {
+        string root = CreateTemporaryDirectory();
+        try
+        {
+            string manifestPath = WriteOfficialRecognitionManifest(
+                root,
+                postprocessingAlgorithm: ProductionOcrAdapter.OfficialRecognitionSpacingV2Algorithm);
+            var identity = new ModelIdentity(
+                "en-ppocrv5-mobile-rec-spacing-v2",
+                "0.1.0",
+                new string('c', 64),
+                Path.Combine(root, "recognizer.onnx"));
+
+            _ = ProductionOcrAdapter.ReadRecognitionOptions(identity, manifestPath);
+
+            Assert.IsTrue(
+                ProductionOcrAdapter.UsesOfficialRecognitionSpacingV2Manifest(manifestPath));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public void OfficialSpacingV2ManifestRejectsRuleDrift()
+    {
+        string root = CreateTemporaryDirectory();
+        try
+        {
+            string manifestPath = WriteOfficialRecognitionManifest(
+                root,
+                postprocessingAlgorithm: ProductionOcrAdapter.OfficialRecognitionSpacingV2Algorithm,
+                minimumGapPixels: 5);
+            var identity = new ModelIdentity(
+                "en-ppocrv5-mobile-rec-spacing-v2",
+                "0.1.0",
+                new string('c', 64),
+                Path.Combine(root, "recognizer.onnx"));
+
+            InvalidDataException exception = Assert.ThrowsExactly<InvalidDataException>(() =>
+                ProductionOcrAdapter.ReadRecognitionOptions(identity, manifestPath));
+
+            StringAssert.Contains(exception.Message, "minimum_gap_pixels");
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     private static string WriteManifest(
         string root,
         float confidenceThreshold = 0.65f,
@@ -412,8 +465,33 @@ public sealed class ProductionComponentOcrAdapterFactoryTests
         return path;
     }
 
-    private static string WriteOfficialRecognitionManifest(string root, int maximumWidth = 4096)
+    private static string WriteOfficialRecognitionManifest(
+        string root,
+        int maximumWidth = 4096,
+        string postprocessingAlgorithm = "ctc_greedy_alternatives_v1",
+        int minimumGapPixels = 4)
     {
+        var postprocessing = new Dictionary<string, object?>
+        {
+            ["algorithm"] = postprocessingAlgorithm,
+            ["maximum_alternatives"] = 3,
+        };
+        if (string.Equals(
+                postprocessingAlgorithm,
+                ProductionOcrAdapter.OfficialRecognitionSpacingV2Algorithm,
+                StringComparison.Ordinal))
+        {
+            postprocessing["minimum_gap_pixels"] = minimumGapPixels;
+            postprocessing["minimum_gap_to_ink_height_ratio"] = 0.25;
+            postprocessing["minimum_source_groups"] = 3;
+            postprocessing["foreground_contrast_fraction"] = 0.30;
+            postprocessing["minimum_foreground_contrast"] = 10.0;
+            postprocessing["capital_i_minimum_width_height_ratio"] = 0.25;
+            postprocessing["capital_i_minimum_top_coverage"] = 0.75;
+            postprocessing["capital_i_minimum_bottom_coverage"] = 0.75;
+            postprocessing["maximum_character_count"] = 128;
+            postprocessing["maximum_source_groups"] = 32;
+        }
         var manifest = new Dictionary<string, object?>
         {
             ["inputs"] = new[]
@@ -448,11 +526,7 @@ public sealed class ProductionComponentOcrAdapterFactoryTests
                 ["minimum_width"] = 320,
                 ["maximum_width"] = maximumWidth,
             },
-            ["postprocessing"] = new Dictionary<string, object?>
-            {
-                ["algorithm"] = "ctc_greedy_alternatives_v1",
-                ["maximum_alternatives"] = 3,
-            },
+            ["postprocessing"] = postprocessing,
         };
         string path = Path.Combine(root, "recognition-manifest.json");
         File.WriteAllText(path, JsonSerializer.Serialize(manifest));
