@@ -1,0 +1,219 @@
+{
+  "architecture": {
+    "attention_route_initialized_from_scratch": true,
+    "candidate_onnx_graph_optimization_level": "ORT_DISABLE_ALL",
+    "crop_input": [
+      1,
+      "proposal_count",
+      2,
+      32,
+      128
+    ],
+    "evidence_input": [
+      1,
+      "proposal_count",
+      31
+    ],
+    "execution_providers": [
+      "CPUExecutionProvider"
+    ],
+    "id": "dual-route-relational-consensus-v1",
+    "model_license": "Apache-2.0",
+    "ordinary_production_reachable": false,
+    "output": [
+      1,
+      "proposal_count",
+      10
+    ],
+    "output_logit_scale": 0.5,
+    "proposal_consensus": "arithmetic mean of two scaled route logits",
+    "relation_input": [
+      1,
+      "proposal_count",
+      "proposal_count",
+      19
+    ],
+    "relation_summary_route_initialized_from_scratch": true,
+    "role_output": "source-declared plot-relative deterministic partition",
+    "role_parent_weights_frozen": true,
+    "runtime_numeric_precision": "float32",
+    "summary_route_relations": "per-proposal neighbor mean, maximum, and minimum"
+  },
+  "candidate_budget": {
+    "candidate_limit": 3,
+    "candidate_number": 1,
+    "optimizer_steps_maximum": 1280,
+    "public_execution_limit": 1,
+    "selection_execution_limit_per_candidate": 1
+  },
+  "candidate_p1": {
+    "complete_proposal_negative_cap_per_scene": 10000,
+    "ensemble_objective_weight": 1.0,
+    "epochs": 4,
+    "expected_optimizer_steps": 1280,
+    "false_positive_weight": 5.0,
+    "gradient_clip_norm": 5.0,
+    "hard_negative_top_k": 4,
+    "hard_negative_weight": 3.0,
+    "learning_rate": 0.00035,
+    "negative_ceiling_weight": 5.0,
+    "negative_logit_margin_ceiling": -2.0,
+    "objective": "dual-route-consensus-asymmetric-scene-margin-v1",
+    "per_route_objective_weight": 0.25,
+    "positive_floor_weight": 2.0,
+    "positive_logit_margin_floor": 2.0,
+    "proposal_cross_entropy_weight": 1.0,
+    "recognition_batch_size": 64,
+    "route_agreement_weight": 0.2,
+    "scene_separation_logit_margin_minimum": 4.0,
+    "scene_separation_weight": 2.5,
+    "seed": 2608192901,
+    "weight_decay": 0.0005,
+    "worst_route_objective_weight": 0.5
+  },
+  "data_scope": "fresh project-owned procedural graph scenes only; no Chandler, Generalization, private or article images, external datasets, V28 fixture bytes, or V28 case identities",
+  "defect_class": "V28 passed every visible-selection scene at five thresholds but its one truth-hidden public run passed only 188 of 192 scenes, with three false regions and two misses at the selected threshold",
+  "fixed_inputs": {
+    "detector_path": "ml/ocr/structural_veto_proposal_role_v17/artifacts/P3-run/graph-text-structural-veto-proposal-role-v17-p3.onnx",
+    "detector_sha256": "ca32487f1df2c3fea1b8c2f51daf7578ed9756e9140d1b0eaf2a16b283591262",
+    "provider": "CPUExecutionProvider",
+    "recognizer_inference_yaml_path": "ml/ocr/official_bakeoff/runs/extracted/en_PP-OCRv5_mobile_rec_infer/inference.yml",
+    "recognizer_inference_yaml_sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
+    "recognizer_path": "ml/ocr/official_bakeoff/runs/conversion/en_PP-OCRv5_mobile_rec.onnx",
+    "recognizer_sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+    "role_parent_checkpoint_path": "ml/ocr/crop_evidence_role_anchor_v24/artifacts/P2-run/graph-text-crop-evidence-role-anchor-v24-p2.pt",
+    "role_parent_checkpoint_sha256": "8362c155285683130fd3e173db87d40ead0bd6df934e5b239bf455c2f9a0eb73",
+    "role_parent_onnx_path": "ml/ocr/crop_evidence_role_anchor_v24/artifacts/P2-run/graph-text-crop-evidence-role-anchor-v24-p2.onnx",
+    "role_parent_onnx_sha256": "c3276b2109509dddae5b6aea8a7a8ee2ee82960dcbe659834ef1a7cb6c3ea7e6",
+    "trigger_result_path": "ml/ocr/relational_neighborhood_proposal_v28/PUBLIC_GATE_RESULT.json",
+    "trigger_result_sha256": "e5ed3ed21c66f3bc3e0e6789d099c720f907b97a14a26f1433b80a35381e630b"
+  },
+  "fixture_identity_frozen": false,
+  "isolated_change": "replace the single relational proposal route with two independently initialized project-owned routes: pairwise attention and permutation-invariant relation summaries; train both from scratch and average only their proposal logits while emitting deterministic geometry roles",
+  "manifest_created": false,
+  "marker_creation_evaluated": false,
+  "model_store_promoted": false,
+  "predecessor_aggregate_only": {
+    "case_level_evidence_used": false,
+    "fixture_bytes_truth_scene_or_case_identity_reused": false,
+    "v28_public_archive_read_count": 1,
+    "v28_public_character_error_rate": 0.003940553929295204,
+    "v28_public_duplicate_regions": 0,
+    "v28_public_exact_scene_count": 188,
+    "v28_public_false_regions": 3,
+    "v28_public_gate_consumed": true,
+    "v28_public_missed_regions": 2,
+    "v28_public_prohibited_structure_hits": 3,
+    "v28_public_recognition_exact": 0.978515625,
+    "v28_public_role_accuracy": 0.9986979166666666,
+    "v28_public_scene_count": 192,
+    "v28_public_true_positives": 1534,
+    "v28_public_true_regions": 1536
+  },
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "public_execution_authorized": false,
+  "release_eligible": false,
+  "revision": "graph-text-dual-route-consensus-proposal-v29",
+  "schema": "graphreader.ocr-dual-route-consensus-protocol.v1",
+  "selection_gates": {
+    "character_error_rate_maximum": 0.05,
+    "detector_recognizer_and_candidate_tensor_hashes_required": true,
+    "direct_fixture_byte_execution_required": true,
+    "duplicate_regions": 0,
+    "exact_region_and_role_every_scene": true,
+    "false_regions": 0,
+    "minimum_consecutive_passing_thresholds": 3,
+    "missed_regions": 0,
+    "onnx_parity_maximum_absolute_error": 1e-05,
+    "per_role_accuracy_minimum": 0.85,
+    "prohibited_structure_hits": 0,
+    "provider": "CPUExecutionProvider",
+    "recognition_exact_minimum": 0.9,
+    "role_accuracy_minimum": 0.9
+  },
+  "selection_thresholds": [
+    0.35,
+    0.45,
+    0.55,
+    0.65,
+    0.75
+  ],
+  "split_policy": {
+    "predecessor_case_identities_reused": false,
+    "predecessor_fixture_bytes_reused": false,
+    "public_case_level_failure_analysis_permitted": false,
+    "sealed_public_truth_hidden_until_one_time_gate": true,
+    "train_validation_public_family_ids_disjoint": true,
+    "validation_or_public_pixels_used_for_design": false
+  },
+  "splits": [
+    {
+      "degradation_families": [
+        "multiaxis-luminance-v29-train",
+        "edge-safe-blur-v29-train",
+        "alternating-stroke-v29-train",
+        "rank-quantization-v29-train"
+      ],
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "name": "train",
+      "renderer_families": [
+        "dual-route-neighborhoods-v29-train-a",
+        "dual-route-rows-v29-train-b",
+        "dual-route-columns-v29-train-c",
+        "dual-route-boundaries-v29-train-d"
+      ],
+      "scene_count": 320,
+      "seed_offset": 18907000
+    },
+    {
+      "degradation_families": [
+        "cosine-field-v29-selection",
+        "sparse-row-luminance-v29-selection",
+        "edge-safe-unsharp-v29-selection",
+        "asymmetric-gamma-v29-selection"
+      ],
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Regular.ttf"
+      ],
+      "name": "validation",
+      "renderer_families": [
+        "dual-route-chains-v29-selection-e",
+        "dual-route-islands-v29-selection-f",
+        "dual-route-grids-v29-selection-g",
+        "dual-route-corners-v29-selection-h"
+      ],
+      "scene_count": 160,
+      "seed_offset": 19631000
+    },
+    {
+      "degradation_families": [
+        "bilinear-field-v29-public",
+        "sparse-grid-v29-public",
+        "piecewise-contrast-v29-public",
+        "paired-block-v29-public"
+      ],
+      "font_paths": [
+        "src/GraphReader.App/Assets/Fonts/NotoSans-Medium.ttf",
+        "src/GraphReader.App/Assets/Fonts/NotoSans-SemiBold.ttf"
+      ],
+      "name": "sealed_public",
+      "renderer_families": [
+        "dual-route-lattices-v29-public-i",
+        "dual-route-satellites-v29-public-j",
+        "dual-route-bridges-v29-public-k",
+        "dual-route-bands-v29-public-l"
+      ],
+      "scene_count": 224,
+      "seed_offset": 20357000
+    }
+  ],
+  "state": "preregistered_before_fixture_freeze_or_candidate_execution",
+  "task": "ocr-detection-recognition",
+  "training_authorized": false
+}
