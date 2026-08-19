@@ -70,3 +70,15 @@ committed and authorized checksum-bound runner. Marker composition, private
 validation, manifest creation, model-store promotion, packaging, production
 approval, and release remain unauthorized. Synthetic fixtures are training and
 public-test inputs only and are never application graph data.
+
+`public_gate.py` and `gates/sealed-public-v1.json` now preregister the one-use
+truth-hidden public execution. Evaluator source bundle SHA-256 is
+`03523386093b2c64c646aa9bb961fd353dc889e59c9449c8fdd3927788854fbe`;
+the authorization-false gate configuration SHA-256 is
+`68e50d3e7fd2cea1c87c5f2ace0fb847d1ef4c48dab04453c1013d7a77598921`.
+The runner acquires its canonical seal before its only archive read, executes
+the exact detector, recognizer, and selected ONNX through CPU, emits aggregate
+metrics and tensor hashes only, and removes per-scene relation-shape details.
+Its source checkpoint is not yet bound and public execution remains false. A
+separate later commit must bind the exact committed source and unchanged bundle
+before the public archive may be opened once.
