@@ -53,10 +53,20 @@ source-byte overlap. `SPLIT_SEAL.json` SHA-256 is
 The train, selection, and unopened public archive SHA-256 values are
 `0a102f9b...cbef2e`, `a7b7a79e...452fa89`, and `b642bd38...04ae7e9`.
 P1 is checksum-bound by `training/p1.json` SHA-256
-`ddcae68452a356408994fa3a7e6ea2497c0709c393b07d761d5baecd57e846ee`
-and is authorized for exactly one execution after its separate committed
-fixture checkpoint. It has performed zero optimizer and selection steps.
-Public evaluation, marker composition, private validation, manifest creation,
-model-store promotion, packaging, production approval, and release remain
-unauthorized. Synthetic fixtures are training and public-test inputs only and
-are never application graph data.
+`ddcae68452a356408994fa3a7e6ea2497c0709c393b07d761d5baecd57e846ee`.
+Its one authorized execution completed four epochs and exactly 1,280 optimizer
+steps. It passed all 160 visible-selection scenes at every frozen threshold
+from `0.35` through `0.75`: 1,280/1,280 truths, zero false regions, misses,
+duplicates, or prohibited hits, recognition exact `0.97109375`, CER
+`0.004912373871481678`, and overall and per-role accuracy `1.0`. Direct stored
+fixture bytes drove 160 detector and candidate calls and 3,310 recognizer-region
+calls. CPU ONNX parity passed at `0.00000286102294921875`.
+
+P1 is selected and consumed. The aggregate-only result is `P1_RESULT.json`;
+its report, checkpoint, and ONNX SHA-256 values are `49b7cd6d...ee4b`,
+`1dd8fc61...336f`, and `a1ce7258...f223`. The truth-hidden public archive is
+still unopened with zero evaluations. Public execution requires a separately
+committed and authorized checksum-bound runner. Marker composition, private
+validation, manifest creation, model-store promotion, packaging, production
+approval, and release remain unauthorized. Synthetic fixtures are training and
+public-test inputs only and are never application graph data.

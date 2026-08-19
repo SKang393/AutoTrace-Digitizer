@@ -252,6 +252,57 @@ def test_frozen_p1_inputs_validate_before_separate_execution_authorization() -> 
         assert preflight()["seal"]["public_execution_authorized"] is False
 
 
+def test_selected_p1_result_is_aggregate_only_and_fail_closed() -> None:
+    entry = _ledger_entry()
+    result_path = ROOT / "P1_RESULT.json"
+    assert result_path.is_file()
+    result = _read_json(result_path)
+    assert result["schema"] == "graphreader.ocr-dual-route-consensus-selection-result.v1"
+    assert result["status"] == "selected"
+    assert result["candidate_consumed"] is True
+    assert result["report_sha256"] == "49b7cd6d2645d7e5bda5c787a0bad9547cb2a244dc694c4ec77a17266672ee4b"
+    assert result["checkpoint_sha256"] == "1dd8fc613815402fdad389f38652dbf75e35f8e25ed2f56dd06f06be6196336f"
+    assert result["onnx_sha256"] == "a1ce725897f44d43a6db0852638abb3787c9be917bba0d412f0b1a798831f223"
+    assert result["training_opened_seal_sha256"] == _sha256(
+        REPO_ROOT / "ml/markers/training-seals/ocr-detection-recognition/graph-text-dual-route-consensus-proposal-v29/P1/opened.json"
+    )
+    assert result["training_result_seal_sha256"] == _sha256(
+        REPO_ROOT / "ml/markers/training-seals/ocr-detection-recognition/graph-text-dual-route-consensus-proposal-v29/P1/result.json"
+    )
+    metrics = result["selection_metrics"]
+    assert metrics["exact_scene_count"] == metrics["scene_count"] == 160
+    assert metrics["true_positives"] == metrics["truth_region_count"] == 1280
+    assert metrics["false_positives"] == 0
+    assert metrics["false_negatives"] == 0
+    assert metrics["duplicate_region_count"] == 0
+    assert metrics["prohibited_structure_hits"] == 0
+    assert metrics["direct_stored_fixture_byte_execution"] is True
+    assert result["passing_threshold_window"] == [0.35, 0.45, 0.55, 0.65, 0.75]
+    assert result["onnx_parity_maximum_absolute_error"] <= 1e-5
+    assert result["public_gate_evaluations"] == 0
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_authorized"] is False
+    assert result["marker_creation_evaluated"] is False
+    assert result["manifest_created"] is False
+    assert result["model_store_promoted"] is False
+    assert result["packaging_discovery"] is False
+    assert result["private_validation_authorized"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
+    for prohibited in (
+        "cases", "predictions", "truths", "fixture_bytes",
+        "case_ids", "scene_ids", "proposal_relation_scene_shapes",
+    ):
+        assert prohibited not in result
+        assert prohibited not in metrics
+    assert entry["status"] == "candidate_1_selected"
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["public_gate_authorized"] is False
+
+
 def test_split_freeze_binds_complete_runner_and_aggregate_trigger() -> None:
     expected = {
         ROOT / "PROTOCOL.json",
@@ -274,8 +325,9 @@ def test_readme_keeps_all_later_gates_unauthorized() -> None:
     assert "bytes cannot be used for V29" in text
     assert "zero\nsource-byte overlap" in text
     assert "P1 is checksum-bound" in text
-    assert "authorized for exactly one execution" in text
-    assert "production approval, and release remain\nunauthorized" in text
+    assert "P1 is selected and consumed" in text
+    assert "still unopened with zero evaluations" in text
+    assert "production\napproval, and release remain unauthorized" in text
 
 
 def test_python_sources_have_project_spdx_header() -> None:

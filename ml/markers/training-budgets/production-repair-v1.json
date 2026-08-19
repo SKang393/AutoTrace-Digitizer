@@ -6958,7 +6958,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-dual-route-consensus-proposal-v29",
-      "status": "candidate_1_preregistered",
+      "status": "candidate_1_selected",
       "defect_class": "V28 passed every visible-selection scene at five thresholds, then its one truth-hidden public run passed only 188 of 192 scenes with three false regions, two misses, and three prohibited hits at the selected threshold",
       "prior_revision": "graph-text-relational-neighborhood-proposal-v28",
       "trigger_result_path": "ml/ocr/relational_neighborhood_proposal_v28/PUBLIC_GATE_RESULT.json",
@@ -6971,8 +6971,8 @@
       "architecture": "dual-route-relational-consensus-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": ["P1"],
-      "consumed_candidate_ids": [],
+      "preregistered_candidate_ids": [],
+      "consumed_candidate_ids": ["P1"],
       "remaining_unregistered_candidate_ids": ["P2", "P3"],
       "protocol_path": "ml/ocr/dual_route_consensus_proposal_v29/PROTOCOL.json",
       "protocol_sha256": "fbf6c9c88e9b7b0a55b0c64cb657932b3002e1c924eeb6dd382231181d2b4f8a",
@@ -7000,11 +7000,53 @@
       "candidate_config_sha256": {
         "P1": "ddcae68452a356408994fa3a7e6ea2497c0709c393b07d761d5baecd57e846ee"
       },
+      "candidate_result_paths": {
+        "P1": "ml/ocr/dual_route_consensus_proposal_v29/P1_RESULT.json"
+      },
+      "candidate_result_sha256": {
+        "P1": "16fc3cab1c357a81bab2bdd0ae2f44b50f4a38a6c2d4e5bab688d9e9f4a2396e"
+      },
+      "candidate_report_sha256": {
+        "P1": "49b7cd6d2645d7e5bda5c787a0bad9547cb2a244dc694c4ec77a17266672ee4b"
+      },
+      "candidate_checkpoint_sha256": {
+        "P1": "1dd8fc613815402fdad389f38652dbf75e35f8e25ed2f56dd06f06be6196336f"
+      },
+      "candidate_onnx_sha256": {
+        "P1": "a1ce725897f44d43a6db0852638abb3787c9be917bba0d412f0b1a798831f223"
+      },
+      "candidate_1_optimizer_steps": 1280,
+      "candidate_1_selection_evaluations": 1,
+      "candidate_1_selected_threshold": 0.55,
+      "candidate_1_passing_threshold_window": [0.35, 0.45, 0.55, 0.65, 0.75],
+      "candidate_1_selection_metrics": {
+        "scene_count": 160,
+        "exact_scene_count": 160,
+        "truth_region_count": 1280,
+        "true_positives": 1280,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "duplicate_region_count": 0,
+        "prohibited_structure_hits": 0,
+        "recognition_exact": 0.97109375,
+        "character_error_rate": 0.004912373871481678,
+        "role_accuracy": 1.0,
+        "minimum_role_accuracy": 1.0,
+        "direct_stored_fixture_byte_execution": true,
+        "deterministic_role_mismatch_count": 0,
+        "onnx_parity_maximum_absolute_error": 0.00000286102294921875
+      },
+      "training_opened_seal_sha256": {
+        "P1": "8e5a1194cbfbb4422da6f428b90e7ba0e0b6bd3b680fda11c641b6e76ef01bcc"
+      },
+      "training_result_seal_sha256": {
+        "P1": "25f4407719abc06fd32d160f410af71575a7095dd859173f00b78793e59f21f8"
+      },
       "selection_thresholds": [0.35, 0.45, 0.55, 0.65, 0.75],
       "minimum_consecutive_passing_thresholds": 3,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P1",
-      "execution_blocker": null,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "P1 is consumed and selected from one direct stored-fixture execution. The truth-hidden public archive remains unopened. A separate checksum-bound public runner must be source-preregistered, committed, and authorized before its single public evaluation. P2 and P3 remain unregistered and are not needed unless a later fresh defect class is justified without public case analysis.",
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
