@@ -1,0 +1,111 @@
+{
+  "schema": "graphreader.ocr-unanimous-structure-veto-protocol.v1",
+  "task": "ocr-detection-recognition",
+  "revision": "graph-text-unanimous-structure-veto-v30",
+  "state": "preregistered_before_fixture_freeze_or_candidate_execution",
+  "defect_class": "V29 passed every visible-selection scene at five thresholds but its one truth-hidden public run passed only 222 of 224 scenes, with two false regions and two prohibited hits at every fixed threshold",
+  "trigger_result_path": "ml/ocr/dual_route_consensus_proposal_v29/PUBLIC_GATE_RESULT.json",
+  "trigger_result_sha256": "db2ceff2bf73cc37804fca76280f90b6112bcc79165910add87755297bf7d0f8",
+  "aggregate_design_basis": {
+    "scene_count": 224,
+    "exact_scene_count": 222,
+    "truth_regions": 1792,
+    "true_positives": 1792,
+    "false_regions": 2,
+    "missed_regions": 0,
+    "duplicate_regions": 0,
+    "prohibited_structure_hits": 2,
+    "recognition_exact": 0.98046875,
+    "character_error_rate": 0.003376748673420164,
+    "role_accuracy": 1.0,
+    "public_archive_read_count": 1,
+    "case_level_evidence_used": false,
+    "fixture_bytes_truth_scene_or_case_identity_reused": false
+  },
+  "isolated_change": "replace averaged dual-route proposal logits with three independently initialized project-owned experts and accept only the minimum route margin",
+  "architecture": {
+    "id": "unanimous-three-route-structure-veto-v1",
+    "routes": [
+      "relational-attention",
+      "invariant-relation-summary",
+      "local-crop-structure-veto"
+    ],
+    "routes_initialized_from_scratch": true,
+    "v29_checkpoint_reused": false,
+    "proposal_consensus": "minimum positive-vs-negative margin across all routes",
+    "evidence_input": [1, "proposal_count", 31],
+    "crop_input": [1, "proposal_count", 2, 32, 128],
+    "relation_input": [1, "proposal_count", "proposal_count", 19],
+    "output": [1, "proposal_count", 10],
+    "role_output": "source-declared plot-relative deterministic partition",
+    "provider": "CPUExecutionProvider",
+    "candidate_onnx_graph_optimization_level": "ORT_DISABLE_ALL",
+    "model_license": "Apache-2.0",
+    "ordinary_production_reachable": false
+  },
+  "candidate_budget": {
+    "candidate_limit": 3,
+    "candidate_number": 1,
+    "optimizer_steps_maximum": 1536,
+    "selection_execution_limit_per_candidate": 1,
+    "public_execution_limit": 1
+  },
+  "candidate_p1": {
+    "objective": "unanimous-structure-veto-asymmetric-margin-v1",
+    "seed": 2608193001,
+    "epochs": 4,
+    "expected_optimizer_steps": 1536,
+    "false_positive_weight": 7.0,
+    "negative_logit_margin_ceiling": -2.5,
+    "hard_negative_top_k": 6,
+    "hard_negative_weight": 4.0
+  },
+  "selection_thresholds": [0.35, 0.45, 0.55, 0.65, 0.75],
+  "selection_gates": {
+    "exact_region_and_role_every_scene": true,
+    "false_regions": 0,
+    "missed_regions": 0,
+    "duplicate_regions": 0,
+    "prohibited_structure_hits": 0,
+    "recognition_exact_minimum": 0.9,
+    "character_error_rate_maximum": 0.05,
+    "role_accuracy_minimum": 0.9,
+    "per_role_accuracy_minimum": 0.85,
+    "minimum_consecutive_passing_thresholds": 3,
+    "onnx_parity_maximum_absolute_error": 0.00001,
+    "direct_fixture_byte_execution_required": true
+  },
+  "split_registrations": {
+    "train": {
+      "scene_count": 384,
+      "seed_offset": 21441000
+    },
+    "validation": {
+      "scene_count": 192,
+      "seed_offset": 22183000
+    },
+    "sealed_public": {
+      "scene_count": 256,
+      "seed_offset": 22957000
+    }
+  },
+  "split_policy": {
+    "fresh_renderer_degradation_seed_case_and_fixture_identities": true,
+    "train_validation_public_family_ids_disjoint": true,
+    "sealed_public_truth_hidden_until_one_time_gate": true,
+    "v29_fixture_bytes_reused": false,
+    "v29_case_identities_reused": false,
+    "validation_or_public_pixels_used_for_design": false,
+    "public_case_level_failure_analysis_permitted": false
+  },
+  "data_scope": "fresh project-owned procedural graph scenes only; no Chandler, Generalization, private or article images, external datasets, V29 fixture bytes, V29 case identities, or V29 checkpoints",
+  "fixture_identity_frozen": false,
+  "training_authorized": false,
+  "public_execution_authorized": false,
+  "marker_creation_evaluated": false,
+  "manifest_created": false,
+  "model_store_promoted": false,
+  "private_validation_authorized": false,
+  "production_approval": false,
+  "release_eligible": false
+}

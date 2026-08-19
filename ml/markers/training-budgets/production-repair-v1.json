@@ -7093,6 +7093,68 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "ocr-detection-recognition",
+      "revision": "graph-text-unanimous-structure-veto-v30",
+      "status": "preregistered_source_only",
+      "defect_class": "V29 passed every visible-selection scene at five thresholds but its one truth-hidden public run passed only 222 of 224 scenes, with two false regions and two prohibited hits at every fixed threshold",
+      "prior_revision": "graph-text-dual-route-consensus-proposal-v29",
+      "trigger_result_path": "ml/ocr/dual_route_consensus_proposal_v29/PUBLIC_GATE_RESULT.json",
+      "trigger_result_sha256": "db2ceff2bf73cc37804fca76280f90b6112bcc79165910add87755297bf7d0f8",
+      "trigger_evidence_scope_used_for_design": "tracked aggregate V29 public scene, true-positive, false-positive, false-negative, prohibited-hit, duplicate, recognition, CER, role, threshold-window, tensor-stream, archive-read-count, and gate-consumption facts only",
+      "trigger_case_detail_or_pixels_used": false,
+      "prior_fixture_bytes_reused": false,
+      "prior_checkpoint_reused": false,
+      "isolated_change": "replace averaged dual-route proposal logits with three independently initialized project-owned experts, relational attention, invariant relation summary, and local crop structure veto, and accept only the minimum route margin while retaining deterministic geometry roles",
+      "architecture": "unanimous-three-route-structure-veto-v1",
+      "model_license": "Apache-2.0",
+      "experiment_budget": 3,
+      "preregistered_candidate_ids": [],
+      "consumed_candidate_ids": [],
+      "remaining_unregistered_candidate_ids": ["P1", "P2", "P3"],
+      "protocol_path": "ml/ocr/unanimous_structure_veto_v30/PROTOCOL.json",
+      "protocol_sha256": "c8d37af0acede69e95b1705c1fa404d3b0ec1cc7da78e2aa6e4ff6c3003fc81b",
+      "split_materialized": false,
+      "split_source_commit": null,
+      "split_source_bundle_sha256": null,
+      "split_seal_path": null,
+      "split_seal_sha256": null,
+      "split_scene_counts": {
+        "train": 384,
+        "validation": 192,
+        "sealed_public": 256
+      },
+      "split_policy": "fresh renderer, degradation, seed, case, and fixture-byte identities with disjoint train, visible-selection, and truth-hidden public families; no V29 bytes or identities may be reused",
+      "candidate_1_architecture": "unanimous-three-route-structure-veto-v1",
+      "candidate_1_objective": "unanimous-structure-veto-asymmetric-margin-v1",
+      "candidate_1_optimizer_step_limit": 1536,
+      "candidate_1_runtime_numeric_precision": "float32",
+      "candidate_1_onnx_runtime_policy": "CPUExecutionProvider with ORT_DISABLE_ALL graph optimization and strict 1e-5 maximum absolute error",
+      "candidate_1_aggregate_design_basis": "tracked V29 aggregate public result only; no case identity, truth row, prediction, tensor content, fixture pixel, private image, Chandler image, or Generalization label",
+      "candidate_config_paths": {
+        "P1": "ml/ocr/unanimous_structure_veto_v30/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "b551b14545ce54ed3e214d31ddb6f2fd46a92a121c95eee396ad8ffd8f7aa2f7"
+      },
+      "selection_thresholds": [0.35, 0.45, 0.55, 0.65, 0.75],
+      "minimum_consecutive_passing_thresholds": 3,
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "Source-only checkpoint. Freeze fresh disjoint V30 fixtures from this exact committed source before separately preregistering and authorizing P1. No V30 fixture or candidate execution is currently permitted.",
+      "public_gate_authorized": false,
+      "public_gate_authorized_candidate_id": null,
+      "public_gate_evaluations": 0,
+      "public_gate_archive_opened": false,
+      "marker_creation_evaluated": false,
+      "manifest_created": false,
+      "model_store_promoted": false,
+      "packaging_discovery": false,
+      "private_validation": false,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
     }
   ]
 }
