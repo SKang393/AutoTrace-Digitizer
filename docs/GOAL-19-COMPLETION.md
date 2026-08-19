@@ -504,7 +504,7 @@ clean-machine, production, and release approval remain false.
 Goal 20 recovered this work and satisfied the mandatory manual real-graph gate.
 Subsequent production checkpoints are integrated directly on `main` in the
 single primary workspace. The user's unrelated dirty files remain untouched.
-No tag, installer, portable release ZIP, GitHub release, or `1.0.1` promotion
+No tag, installer, portable release ZIP, GitHub release, or `1.0.0` promotion
 was created.
 
 ## Acceptance status

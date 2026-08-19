@@ -21,15 +21,40 @@ function ConvertTo-GraphReaderVersion {
     $minor = [int]$match.Groups['minor'].Value
     $build = [int]$match.Groups['build'].Value
     $ordinal = ($major * 10000) + ($minor * 100) + $build
+    $value = "$major.$minor.$build"
+    $cadenceEligible = ($ordinal % 20) -eq 1
+    $stablePromotionRelease = $value -ceq (Get-GraphReaderStablePromotionVersion)
 
     return [pscustomobject][ordered]@{
-        Value = "$major.$minor.$build"
+        Value = $value
         Major = $major
         Minor = $minor
         Build = $build
         Ordinal = $ordinal
-        ReleaseEligible = ($ordinal % 20) -eq 1
+        CadenceEligible = $cadenceEligible
+        StablePromotionRelease = $stablePromotionRelease
+        ReleaseEligible = $cadenceEligible -or $stablePromotionRelease
     }
+}
+
+function Get-GraphReaderStablePromotionVersion {
+    return '1.0.0'
+}
+
+function Test-GraphReaderStablePromotion {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$FromVersion,
+
+        [Parameter(Mandatory)]
+        [string]$ToVersion
+    )
+
+    $from = ConvertTo-GraphReaderVersion -Version $FromVersion
+    $to = ConvertTo-GraphReaderVersion -Version $ToVersion
+    return $from.Major -eq 0 -and
+        $to.Value -ceq (Get-GraphReaderStablePromotionVersion)
 }
 
 function Get-NextGraphReaderVersion {
@@ -97,6 +122,8 @@ function Get-GraphReaderVersionFromProjectXml {
         Minor = $record.Minor
         Build = $record.Build
         Ordinal = $record.Ordinal
+        CadenceEligible = $record.CadenceEligible
+        StablePromotionRelease = $record.StablePromotionRelease
         ReleaseEligible = $record.ReleaseEligible
         Source = 'Directory.Build.props#Project/PropertyGroup/Version'
     }

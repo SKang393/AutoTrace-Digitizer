@@ -194,4 +194,4 @@ development portable, not either mandatory public release artifact.
 - Purpose-aware local portable isolation: **PASS** with stated local-evidence
   limitations.
 - Automatic production workflow: **FAIL**.
-- `1.0.1` readiness: **FAIL**.
+- `1.0.0` readiness: **FAIL**.

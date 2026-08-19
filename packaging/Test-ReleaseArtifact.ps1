@@ -358,7 +358,7 @@ function Assert-BuildVersion {
 
     $record = ConvertTo-GraphReaderVersion -Version $Version
     if ($ReleaseRequired -and -not $record.ReleaseEligible) {
-        throw "Version '$Version' is an internal checkpoint and cannot be published. Every twentieth checkpoint is release eligible: z 1, 21, 41, 61, or 81."
+        throw "Version '$Version' is an internal checkpoint and cannot be published. Eligible versions use z 1, 21, 41, 61, or 81, or the explicit stable 1.0.0 milestone."
     }
 }
 
@@ -1866,6 +1866,7 @@ if (-not [string]::IsNullOrWhiteSpace($ArtifactRoot)) {
 
     $releaseBuilds = @($metadata.versionPolicy.releaseBuilds | ForEach-Object { [int]$_ })
     Assert-Equal -Actual ($releaseBuilds -join ',') -Expected '1,21,41,61,81' -Description 'Release metadata cadence differs'
+    Assert-Equal -Actual ([string]$metadata.versionPolicy.stablePromotionRelease) -Expected (Get-GraphReaderStablePromotionVersion) -Description 'Stable-promotion release metadata differs'
     foreach ($policyName in @('upgrade', 'repair', 'downgrade')) {
         if ([string]::IsNullOrWhiteSpace([string]$metadata.versionPolicy.$policyName)) {
             throw "Release metadata version policy '$policyName' is missing."

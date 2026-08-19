@@ -841,6 +841,7 @@ function New-ReleaseFixture {
             }
             versionPolicy = @{
                 releaseBuilds = @(1, 21, 41, 61, 81)
+                stablePromotionRelease = '1.0.0'
                 upgrade = 'allowed'
                 repair = 'same-version reinstall'
                 downgrade = 'blocked by default'
@@ -1475,6 +1476,12 @@ try {
 
     Assert-Case 'Release cadence build passes the release gate' {
         $fixture = New-PackagingFixture -Name 'release' -Version '0.0.21'
+        $result = Invoke-Gate -Arguments @('-ManifestPath', $fixture.Manifest, '-RequireReleaseVersion')
+        Assert-ExitCode -Result $result -Expected 0 -Contains 'PASS'
+    }
+
+    Assert-Case 'Stable 1.0.0 promotion passes the release gate' {
+        $fixture = New-PackagingFixture -Name 'stable-release' -Version '1.0.0'
         $result = Invoke-Gate -Arguments @('-ManifestPath', $fixture.Manifest, '-RequireReleaseVersion')
         Assert-ExitCode -Result $result -Expected 0 -Contains 'PASS'
     }

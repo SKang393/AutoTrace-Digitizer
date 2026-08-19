@@ -33,4 +33,4 @@ Because no candidate passed the fixed validation gate, the public evaluator is
 not authorized and its truth-hidden archive remains unopened by training or the
 public gate. V7 produces no manifest, model-store payload, or packaging input.
 Nothing in this revision is production-approved, release-eligible, manifest,
-stored, packaged, or authorized for a 1.0.1 promotion.
+stored, packaged, or authorized for the `1.0.0` stable promotion.

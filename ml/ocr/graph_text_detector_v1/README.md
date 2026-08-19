@@ -53,4 +53,4 @@ manifested, placed in the production model store, packaged, or approved.
 
 No result in this folder alone can create a model manifest, promote the local
 model store, package weights, approve the combined OCR pair, change release
-readiness, or authorize version `1.0.1`.
+readiness, or authorize the stable version `1.0.0`.

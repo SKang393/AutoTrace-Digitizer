@@ -48,4 +48,4 @@ tune, open its public gate, manifest, store, package, or approve any payload.
 
 No result in this folder can create a production manifest, populate the model
 store, package weights, approve the combined OCR pair, change release readiness,
-or authorize version `1.0.1` by itself.
+or authorize the stable version `1.0.0` by itself.

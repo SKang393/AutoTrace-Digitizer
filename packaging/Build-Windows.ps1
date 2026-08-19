@@ -1728,7 +1728,7 @@ if ($AuditOnly) {
 }
 
 if (-not $version.ReleaseEligible) {
-    throw "Version $($version.Value) is an internal build. Windows release artifacts require z in 1, 21, 41, 61, or 81."
+    throw "Version $($version.Value) is an internal build. Windows release artifacts require z in 1, 21, 41, 61, or 81, or the explicit stable 1.0.0 milestone."
 }
 
 if ($releaseBlockers.Count -gt 0) {
@@ -2164,6 +2164,7 @@ $releaseMetadata = [ordered]@{
     }
     versionPolicy = [ordered]@{
         releaseBuilds = @(Get-GraphReaderReleaseBuilds)
+        stablePromotionRelease = (Get-GraphReaderStablePromotionVersion)
         upgrade = 'allowed'
         repair = 'same-version reinstall'
         downgrade = 'blocked unless --allow-downgrade is passed to the installer'

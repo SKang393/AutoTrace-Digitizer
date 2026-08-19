@@ -24,5 +24,5 @@ single public evaluation. It retained all 192 truth regions with zero misses or
 duplicates, but seven false regions left only 57/64 scenes exact. The gate
 failed. P1 cannot rerun, and P2/P3 are retired because the public split is now
 exposed and the gate budget is consumed. No production manifest, model-store
-entry, package payload, production approval, release eligibility, or version
-1.0.1 promotion exists.
+entry, package payload, production approval, release eligibility, or stable
+`1.0.0` promotion exists.

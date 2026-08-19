@@ -13,6 +13,10 @@ $prepareScript = Join-Path $repositoryRoot 'packaging\Prepare-CheckpointVersion.
 $releaseTagScript = Join-Path $repositoryRoot 'packaging\Test-ReleaseTag.ps1'
 $hostExecutable = (Get-Process -Id $PID).Path
 $testRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionPolicy-' + [Guid]::NewGuid().ToString('N'))
+$ordinaryRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionOrdinary-' + [Guid]::NewGuid().ToString('N'))
+$promotionRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionPromotion-' + [Guid]::NewGuid().ToString('N'))
+$invalidPromotionRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionInvalidPromotion-' + [Guid]::NewGuid().ToString('N'))
+$testRoots = @($testRoot, $ordinaryRoot, $promotionRoot, $invalidPromotionRoot)
 $passed = 0
 . $policyScript
 
@@ -59,19 +63,57 @@ function Invoke-Child {
 }
 
 function Invoke-Git {
-    param([Parameter(Mandatory)][string[]]$Arguments)
+    param(
+        [Parameter(Mandatory)][string[]]$Arguments,
+        [string]$Root = $testRoot
+    )
     $previousPreference = $ErrorActionPreference
     try {
         $ErrorActionPreference = 'Continue'
-        & git -C $testRoot @Arguments 1>$null 2>$null
+        & git -C $Root @Arguments 1>$null 2>$null
         $exitCode = $LASTEXITCODE
     }
     finally {
         $ErrorActionPreference = $previousPreference
     }
     if ($exitCode -ne 0) {
-        throw "git failed: git -C $testRoot $($Arguments -join ' ')"
+        throw "git failed: git -C $Root $($Arguments -join ' ')"
     }
+}
+
+function Write-TestProps {
+    param(
+        [Parameter(Mandatory)][string]$Root,
+        [Parameter(Mandatory)][string]$Version
+    )
+
+    $props = @"
+<Project>
+  <PropertyGroup>
+    <Version>$Version</Version>
+    <AssemblyVersion>$Version.0</AssemblyVersion>
+    <FileVersion>$Version.0</FileVersion>
+    <InformationalVersion>$Version</InformationalVersion>
+  </PropertyGroup>
+</Project>
+"@
+    [System.IO.File]::WriteAllText((Join-Path $Root 'Directory.Build.props'), $props)
+}
+
+function Initialize-TestRepository {
+    param(
+        [Parameter(Mandatory)][string]$Root,
+        [Parameter(Mandatory)][string]$Version
+    )
+
+    New-Item -ItemType Directory -Path $Root | Out-Null
+    Write-TestProps -Root $Root -Version $Version
+    Invoke-Git -Root $Root -Arguments @('init', '-b', 'main')
+    Invoke-Git -Root $Root -Arguments @('config', 'user.name', 'Version Policy Test')
+    Invoke-Git -Root $Root -Arguments @('config', 'user.email', 'version-policy@example.invalid')
+    Invoke-Git -Root $Root -Arguments @('config', 'core.autocrlf', 'false')
+    Invoke-Git -Root $Root -Arguments @('add', 'Directory.Build.props')
+    Invoke-Git -Root $Root -Arguments @('commit', '-m', "Establish $Version checkpoint")
 }
 
 try {
@@ -87,7 +129,7 @@ try {
         $passed++
     }
 
-    foreach ($version in @('0.0.1', '0.0.21', '0.0.41', '0.0.61', '0.0.81', '0.1.1', '1.0.1')) {
+    foreach ($version in @('0.0.1', '0.0.21', '0.0.41', '0.0.61', '0.0.81', '0.1.1', '1.0.0', '1.0.1')) {
         Assert-True (Test-GraphReaderReleaseVersion -Version $version) "Expected release eligibility for $version."
         $passed++
     }
@@ -96,7 +138,22 @@ try {
         $passed++
     }
 
-    foreach ($invalid in @('-1.0.0', '0.0.100', '0.01.1', '1.0', 'v1.0.1')) {
+    $stableRecord = ConvertTo-GraphReaderVersion -Version '1.0.0'
+    Assert-True $stableRecord.StablePromotionRelease '1.0.0 was not classified as the stable-promotion release.'
+    Assert-True (-not $stableRecord.CadenceEligible) '1.0.0 must not alter the twentieth-checkpoint cadence.'
+    Assert-True (Test-GraphReaderStablePromotion -FromVersion '0.23.58' -ToVersion '1.0.0') 'Arbitrary pre-1.0 stable promotion was rejected.'
+    foreach ($transition in @(
+            @{ From = '0.23.58'; To = '1.0.1' },
+            @{ From = '0.23.58'; To = '1.1.0' },
+            @{ From = '1.0.0'; To = '1.0.0' })) {
+        Assert-True `
+            (-not (Test-GraphReaderStablePromotion -FromVersion $transition.From -ToVersion $transition.To)) `
+            "Invalid stable promotion was accepted: $($transition.From) -> $($transition.To)."
+        $passed++
+    }
+    $passed += 3
+
+    foreach ($invalid in @('-1.0.0', '0.0.100', '0.01.1', '1.0', 'v1.0.0')) {
         $failed = $false
         try {
             $null = ConvertTo-GraphReaderVersion -Version $invalid
@@ -108,24 +165,7 @@ try {
         $passed++
     }
 
-    New-Item -ItemType Directory -Path $testRoot | Out-Null
-    $props = @"
-<Project>
-  <PropertyGroup>
-    <Version>0.0.21</Version>
-    <AssemblyVersion>0.0.21.0</AssemblyVersion>
-    <FileVersion>0.0.21.0</FileVersion>
-    <InformationalVersion>0.0.21</InformationalVersion>
-  </PropertyGroup>
-</Project>
-"@
-    [System.IO.File]::WriteAllText((Join-Path $testRoot 'Directory.Build.props'), $props)
-    Invoke-Git -Arguments @('init', '-b', 'main')
-    Invoke-Git -Arguments @('config', 'user.name', 'Version Policy Test')
-    Invoke-Git -Arguments @('config', 'user.email', 'version-policy@example.invalid')
-    Invoke-Git -Arguments @('config', 'core.autocrlf', 'false')
-    Invoke-Git -Arguments @('add', 'Directory.Build.props')
-    Invoke-Git -Arguments @('commit', '-m', 'Establish release checkpoint')
+    Initialize-TestRepository -Root $testRoot -Version '0.0.21'
     Invoke-Git -Arguments @('tag', '-a', 'v0.0.21', '-m', 'Release 0.0.21')
 
     Invoke-Child -Script $releaseTagScript -Arguments @('-RepositoryRoot', $testRoot, '-TagName', 'v0.0.21') -ShouldPass $true
@@ -158,10 +198,42 @@ try {
     Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $testRoot, '-CheckHead') -ShouldPass $false
     $passed++
 
+    Initialize-TestRepository -Root $ordinaryRoot -Version '0.23.58'
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $ordinaryRoot, '-PrepareNext') -ShouldPass $true
+    Assert-Equal (Get-GraphReaderCentralVersion -RepositoryRoot $ordinaryRoot).Value '0.23.59' 'Ordinary pre-1.0 preparation jumped versions.'
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $ordinaryRoot, '-PromoteStable') -ShouldPass $false
+    $passed += 2
+
+    Initialize-TestRepository -Root $promotionRoot -Version '0.23.58'
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $promotionRoot, '-PromoteStable') -ShouldPass $true
+    Assert-Equal (Get-GraphReaderCentralVersion -RepositoryRoot $promotionRoot).Value '1.0.0' 'Explicit stable promotion differs.'
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $promotionRoot, '-PromoteStable') -ShouldPass $true
+    Invoke-Git -Root $promotionRoot -Arguments @('add', 'Directory.Build.props')
+    Invoke-Git -Root $promotionRoot -Arguments @('commit', '-m', 'Promote first stable release')
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $promotionRoot, '-CheckHead') -ShouldPass $true
+    Invoke-Git -Root $promotionRoot -Arguments @('tag', '-a', 'v1.0.0', '-m', 'Release 1.0.0')
+    Invoke-Child -Script $releaseTagScript -Arguments @('-RepositoryRoot', $promotionRoot, '-TagName', 'v1.0.0') -ShouldPass $true
+    Invoke-Git -Root $promotionRoot -Arguments @('tag', '-d', 'v1.0.0')
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $promotionRoot, '-PromoteStable') -ShouldPass $false
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $promotionRoot, '-PrepareNext') -ShouldPass $true
+    Assert-Equal (Get-GraphReaderCentralVersion -RepositoryRoot $promotionRoot).Value '1.0.1' 'Normal successor after 1.0.0 differs.'
+    $passed += 7
+
+    Initialize-TestRepository -Root $invalidPromotionRoot -Version '0.23.58'
+    Write-TestProps -Root $invalidPromotionRoot -Version '1.0.1'
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $invalidPromotionRoot, '-PromoteStable') -ShouldPass $false
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $invalidPromotionRoot, '-PrepareNext') -ShouldPass $false
+    Invoke-Git -Root $invalidPromotionRoot -Arguments @('add', 'Directory.Build.props')
+    Invoke-Git -Root $invalidPromotionRoot -Arguments @('commit', '-m', 'Create invalid stable jump')
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $invalidPromotionRoot, '-CheckHead') -ShouldPass $false
+    $passed += 3
+
     Write-Host "Version policy tests passed: $passed"
 }
 finally {
-    if (Test-Path -LiteralPath $testRoot) {
-        Remove-Item -LiteralPath $testRoot -Recurse -Force
+    foreach ($root in $testRoots) {
+        if (Test-Path -LiteralPath $root) {
+            Remove-Item -LiteralPath $root -Recurse -Force
+        }
     }
 }

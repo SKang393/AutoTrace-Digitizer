@@ -5,17 +5,23 @@
 param(
     [string]$RepositoryRoot,
     [switch]$CheckHead,
-    [switch]$PrepareNext
+    [switch]$PrepareNext,
+    [switch]$PromoteStable
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'VersionPolicy.ps1')
 
-if ($CheckHead.IsPresent -and $PrepareNext.IsPresent) {
-    throw '-CheckHead and -PrepareNext cannot be used together.'
+$selectedModeCount = @(
+    $CheckHead.IsPresent,
+    $PrepareNext.IsPresent,
+    $PromoteStable.IsPresent
+).Where({ $_ }).Count
+if ($selectedModeCount -gt 1) {
+    throw '-CheckHead, -PrepareNext, and -PromoteStable are mutually exclusive.'
 }
-if (-not $CheckHead.IsPresent -and -not $PrepareNext.IsPresent) {
+if ($selectedModeCount -eq 0) {
     $PrepareNext = $true
 }
 
@@ -75,22 +81,55 @@ function Set-VersionFields {
 
 if ($CheckHead.IsPresent) {
     $parent = Invoke-GitText -Arguments @('rev-parse', 'HEAD^')
-    $expected = if ([string]::IsNullOrWhiteSpace($parent)) {
-        '0.0.1'
+    if ([string]::IsNullOrWhiteSpace($parent)) {
+        $expected = '0.0.1'
+        $validTransition = $workingVersion.Value -eq $expected
+        $stablePromotion = $false
     }
     else {
-        Get-NextGraphReaderVersion -Version (Get-CommittedVersion -Revision $parent).Value
+        $parentVersion = Get-CommittedVersion -Revision $parent
+        $expected = Get-NextGraphReaderVersion -Version $parentVersion.Value
+        $stablePromotion = Test-GraphReaderStablePromotion `
+            -FromVersion $parentVersion.Value `
+            -ToVersion $workingVersion.Value
+        $validTransition = $workingVersion.Value -eq $expected -or $stablePromotion
     }
 
-    if ($workingVersion.Value -ne $expected) {
-        throw "Checkpoint version '$($workingVersion.Value)' is invalid for HEAD. Expected '$expected' from its first parent. Run packaging/Prepare-CheckpointVersion.ps1 before committing."
+    if (-not $validTransition) {
+        $promotionHint = if ([string]::IsNullOrWhiteSpace($parent)) {
+            ''
+        }
+        else {
+            " The only nonsequential transition is an explicit pre-1.0 promotion to '$(Get-GraphReaderStablePromotionVersion)'."
+        }
+        throw "Checkpoint version '$($workingVersion.Value)' is invalid for HEAD. Expected '$expected' from its first parent.$promotionHint Run packaging/Prepare-CheckpointVersion.ps1 before committing."
     }
 
-    Write-Host "Checkpoint version verified: $($workingVersion.Value)"
+    $transitionName = if ($stablePromotion) { 'stable promotion' } else { 'sequential checkpoint' }
+    Write-Host "Checkpoint version verified: $($workingVersion.Value) ($transitionName)"
     exit 0
 }
 
 $committedVersion = Get-CommittedVersion -Revision 'HEAD'
+$stableVersion = Get-GraphReaderStablePromotionVersion
+
+if ($PromoteStable.IsPresent) {
+    if (-not (Test-GraphReaderStablePromotion -FromVersion $committedVersion.Value -ToVersion $stableVersion)) {
+        throw "Stable promotion is permitted only from a committed 0.y.z version to '$stableVersion'. Current committed version: '$($committedVersion.Value)'."
+    }
+    if ($workingVersion.Value -eq $stableVersion) {
+        Write-Host "Stable promotion version already prepared: $($committedVersion.Value) -> $stableVersion"
+        exit 0
+    }
+    if ($workingVersion.Value -ne $committedVersion.Value) {
+        throw "Working version '$($workingVersion.Value)' is neither committed version '$($committedVersion.Value)' nor stable promotion version '$stableVersion'."
+    }
+
+    Set-VersionFields -Version $stableVersion
+    Write-Host "Prepared stable promotion: $($committedVersion.Value) -> $stableVersion"
+    exit 0
+}
+
 $nextVersion = Get-NextGraphReaderVersion -Version $committedVersion.Value
 if ($workingVersion.Value -eq $nextVersion) {
     Write-Host "Checkpoint version already prepared: $nextVersion"
