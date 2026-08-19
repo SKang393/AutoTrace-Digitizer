@@ -75,6 +75,7 @@ from ml.ocr.relational_neighborhood_proposal_v28.train_p3 import (
     RUNNER_SOURCE_PATHS as P3_RUNNER_SOURCE_PATHS,
     TRAINING_GEOMETRY_EVIDENCE_PATH,
     _p2_trigger_is_terminal,
+    preflight as p3_preflight,
 )
 
 
@@ -137,7 +138,7 @@ def test_v27_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_consumes_failed_p1_and_p2_and_keeps_p3_unregistered() -> None:
+def test_canonical_budget_consumes_failed_p1_and_p2_and_authorizes_exact_p3() -> None:
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -147,11 +148,11 @@ def test_canonical_budget_consumes_failed_p1_and_p2_and_keeps_p3_unregistered() 
         item for item in ledger["revisions"]
         if item["revision"] == "graph-text-relational-neighborhood-proposal-v28"
     )
-    assert entry["status"] == "candidate_3_unregistered"
+    assert entry["status"] == "candidate_3_preregistered"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == ["P3"]
     assert entry["consumed_candidate_ids"] == ["P1", "P2"]
-    assert entry["remaining_unregistered_candidate_ids"] == ["P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["protocol_sha256"] == sha256_file(
         REPO_ROOT / entry["protocol_path"]
     )
@@ -163,7 +164,7 @@ def test_canonical_budget_consumes_failed_p1_and_p2_and_keeps_p3_unregistered() 
     )
     for split, archive_path in entry["split_archive_paths"].items():
         assert sha256_file(REPO_ROOT / archive_path) == entry["split_archive_sha256"][split]
-    for candidate_id in ("P1", "P2"):
+    for candidate_id in ("P1", "P2", "P3"):
         config_path = REPO_ROOT / entry["candidate_config_paths"][candidate_id]
         assert sha256_file(config_path) == entry["candidate_config_sha256"][candidate_id]
     for candidate_id in ("P1", "P2"):
@@ -173,14 +174,22 @@ def test_canonical_budget_consumes_failed_p1_and_p2_and_keeps_p3_unregistered() 
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
-    assert "P1 and P2 are consumed" in entry["execution_blocker"]
-    assert "P2 cannot rerun" in entry["execution_authorization"]
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P3"
+    assert "exact checksum-bound V28 P3" in entry["execution_blocker"]
+    assert "authorized for one committed execution" in entry["execution_authorization"]
     assert "remain unauthorized" in entry["execution_authorization"]
     p2_preregistration = REPO_ROOT / entry["candidate_2_preregistration_path"]
     assert sha256_file(p2_preregistration) == entry[
         "candidate_2_preregistration_sha256"
+    ]
+    p3_preregistration = REPO_ROOT / entry["candidate_3_preregistration_path"]
+    assert sha256_file(p3_preregistration) == entry[
+        "candidate_3_preregistration_sha256"
+    ]
+    p3_geometry = REPO_ROOT / entry["candidate_3_training_geometry_evidence_path"]
+    assert sha256_file(p3_geometry) == entry[
+        "candidate_3_training_geometry_evidence_sha256"
     ]
     assert entry["manifest_created"] is False
     assert entry["model_store_promoted"] is False
@@ -667,7 +676,17 @@ def test_p3_preregistration_uses_only_aggregate_and_training_geometry_evidence()
     assert preregistration["private_validation_authorized"] is False
     assert preregistration["production_approval"] is False
     assert preregistration["release_eligible"] is False
-    assert not (REPO_ROOT / P3_CONFIG_PATH).exists()
+    p3_config_path = REPO_ROOT / P3_CONFIG_PATH
+    assert p3_config_path.is_file()
+    p3_config = json.loads(p3_config_path.read_text(encoding="utf-8"))
+    assert p3_config["candidate_id"] == "P3"
+    assert p3_config["optimizer_steps"] == 0
+    assert p3_config["expected_training_role_matches"] == 2048
+    assert p3_config["expected_training_role_mismatches"] == 0
+    assert p3_config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
+        REPO_ROOT, P3_RUNNER_SOURCE_PATHS,
+    )
+    assert p3_preflight()["config"] == p3_config
     assert {
         P2_RESULT_PATH,
         P3_PREREGISTRATION_PATH,

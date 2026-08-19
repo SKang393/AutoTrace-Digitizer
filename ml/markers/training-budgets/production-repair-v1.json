@@ -6715,7 +6715,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-relational-neighborhood-proposal-v28",
-      "status": "candidate_3_unregistered",
+      "status": "candidate_3_preregistered",
       "defect_class": "V27 P1, P2, and P3 each retained the same three prohibited false regions and produced no three-threshold zero-error window despite strict CPU ONNX parity and exact role preservation",
       "prior_revision": "graph-text-morphology-veto-proposal-v27",
       "trigger_result_path": "ml/ocr/morphology_veto_proposal_v27/P3_RESULT.json",
@@ -6727,9 +6727,9 @@
       "architecture": "pairwise-geometry-relational-neighborhood-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": [],
+      "preregistered_candidate_ids": ["P3"],
       "consumed_candidate_ids": ["P1", "P2"],
-      "remaining_unregistered_candidate_ids": ["P3"],
+      "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/ocr/relational_neighborhood_proposal_v28/PROTOCOL.json",
       "protocol_sha256": "bbab05ad7d8c991929a87493fff592027c55c0bf734f23c63df786cac23435c1",
       "split_materialized": true,
@@ -6779,13 +6779,35 @@
       "candidate_2_aggregate_design_basis": "P1 aggregate visible-selection metrics, per-role aggregate accuracy, aggregate loss checkpoints, strict parity, tensor-stream hashes, and artifact hashes only; no case identity, truth row, prediction, tensor content, fixture pixel, public pixel, private image, Chandler image, or Generalization label",
       "candidate_2_preregistration_path": "ml/ocr/relational_neighborhood_proposal_v28/P2_PREREGISTRATION.json",
       "candidate_2_preregistration_sha256": "e736bb2f94b763ce6785e02e1f27d5daec6ff15b7da52f2eec0f035bdc1f0007",
+      "candidate_3_isolated_change": "discard the regressing learned P2 role residual, freeze the exact P1 checkpoint and proposal logits, and replace only role logits with a zero-optimizer plot-relative center partition whose boundaries are fixed from the source-declared role layout and aggregate frozen-training ranges",
+      "candidate_3_architecture": "frozen-p1-geometry-role-partition-v1",
+      "candidate_3_objective": "zero-optimizer-source-declared-geometry-role-partition-v1",
+      "candidate_3_optimizer_step_limit": 0,
+      "candidate_3_runtime_numeric_precision": "float32",
+      "candidate_3_relative_center_feature_indices": [25, 26],
+      "candidate_3_partition_boundaries": {
+        "x_left": 0.0,
+        "x_right": 1.0,
+        "y_above": 0.0,
+        "y_below": 1.0,
+        "x_tick_axis_title_y": 1.15
+      },
+      "candidate_3_training_geometry_partition_matches": 2048,
+      "candidate_3_training_geometry_partition_mismatches": 0,
+      "candidate_3_aggregate_design_basis": "P1 and P2 aggregate selection metrics, per-role aggregate accuracy, aggregate P2 loss checkpoints, strict parity, tensor-stream hashes, artifact hashes, and the frozen training split aggregate geometry ranges only; no validation case identity, truth row, prediction, tensor content, validation pixel, public pixel, private image, Chandler image, or Generalization label",
+      "candidate_3_preregistration_path": "ml/ocr/relational_neighborhood_proposal_v28/P3_PREREGISTRATION.json",
+      "candidate_3_preregistration_sha256": "9c66be5a9986e90a9e275d89365ee753fdcca647eb930fba8c7d5b5e4db79017",
+      "candidate_3_training_geometry_evidence_path": "ml/ocr/relational_neighborhood_proposal_v28/P3_TRAINING_GEOMETRY_EVIDENCE.json",
+      "candidate_3_training_geometry_evidence_sha256": "dd9bfad4f397789e9c80b0171954aa83a923476335301c7dc2b052ed8177881d",
       "candidate_config_paths": {
         "P1": "ml/ocr/relational_neighborhood_proposal_v28/training/p1.json",
-        "P2": "ml/ocr/relational_neighborhood_proposal_v28/training/p2.json"
+        "P2": "ml/ocr/relational_neighborhood_proposal_v28/training/p2.json",
+        "P3": "ml/ocr/relational_neighborhood_proposal_v28/training/p3.json"
       },
       "candidate_config_sha256": {
         "P1": "26cdda410c2c19efaf5dd1112e8aee91c3cb82210b0c1b7b875720be3a5a7b3c",
-        "P2": "0d2ac3c51c839c630330442a7a96ef83177ab8867e6c9f6b123c120b300477a9"
+        "P2": "0d2ac3c51c839c630330442a7a96ef83177ab8867e6c9f6b123c120b300477a9",
+        "P3": "c9b18f5c0378bb58e45c0c034c756e15f155b8daecaca876e0949cfc82cb9c51"
       },
       "candidate_result_paths": {
         "P1": "ml/ocr/relational_neighborhood_proposal_v28/P1_RESULT.json",
@@ -6858,10 +6880,10 @@
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
-      "execution_authorized": false,
-      "authorized_candidate_id": null,
-      "execution_blocker": "V28 P1 and P2 are consumed. P2 preserved every P1 proposal decision and passed strict CPU ONNX parity, but regressed visible-selection exact scenes from 124 to 123 and aggregate role accuracy from 0.99609375 to 0.9951171875. P3 requires a separately committed aggregate-only preregistration, runner, checksum-bound candidate configuration, and one-use authorization.",
-      "execution_authorization": "No V28 execution is currently authorized. P2 cannot rerun. The truth-hidden public archive, private data, Chandler, Generalization, marker composition, manifest creation, model-store promotion, packaging discovery, production approval, and release remain unauthorized.",
+      "execution_authorized": true,
+      "authorized_candidate_id": "P3",
+      "execution_blocker": "Only the exact checksum-bound V28 P3 zero-optimizer runner may execute once against the frozen training and visible-selection archives. P1 and P2 are consumed and cannot rerun. No replacement candidate remains after P3.",
+      "execution_authorization": "V28 P3 is authorized for one committed execution using its exact configuration and runner source bundle. The truth-hidden public archive, private data, Chandler, Generalization, marker composition, manifest creation, model-store promotion, packaging discovery, production approval, and release remain unauthorized.",
       "marker_creation_evaluated": false,
       "manifest_created": false,
       "model_store_promoted": false,
