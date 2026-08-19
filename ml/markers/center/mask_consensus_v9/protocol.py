@@ -7,6 +7,7 @@ from __future__ import annotations
 from pathlib import Path
 
 
+EVIDENCE_POLICY = "ml/policy/evidence-policy.json"
 TASK = "marker-center"
 REVISION = "marker-center-mask-consensus-v9"
 ROOT = Path("ml/markers/center/mask_consensus_v9")
@@ -31,6 +32,7 @@ DESIGN_SOURCE_PATHS = (
 __all__ = [
     "ARTIFACT_THRESHOLD",
     "DESIGN_SOURCE_PATHS",
+    "EVIDENCE_POLICY",
     "EXPERIMENT_BUDGET",
     "MINIMUM_ARTIFACT_PRECISION",
     "MINIMUM_ARTIFACT_RECALL",

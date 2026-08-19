@@ -28,6 +28,7 @@ GATES = {
 
 def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, object]:
     return {
+        "evidence_policy": "ml/policy/evidence-policy.json",
         "schema": "graphreader.ocr-ambiguity-glyph-protocol.v1",
         "task": TASK,
         "revision": REVISION,

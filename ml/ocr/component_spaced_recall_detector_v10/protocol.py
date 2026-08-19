@@ -66,6 +66,7 @@ def split_registration(split: str) -> SplitRegistration:
 
 def protocol_configuration() -> dict[str, object]:
     return {
+        "evidence_policy": "ml/policy/evidence-policy.json",
         "schema": "graphreader.ocr-spaced-component-recall-protocol.v1",
         "task": TASK, "revision": REVISION, "state": "split_frozen_before_candidate_execution",
         "experiment_budget": EXPERIMENT_BUDGET, "candidate_ids": ["P1", "P2", "P3"],

@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "policy_id": "graphreader-evidence-policy",
+  "policy_revision": "2026-08-19",
+  "authoritative_source": "AGENTS.md Section 7",
+  "splits": {
+    "train": {
+      "training_permitted": true,
+      "case_level_inspection": "unrestricted",
+      "run_limit_per_candidate": null,
+      "consumes_candidate_budget": false
+    },
+    "dev": {
+      "training_permitted": false,
+      "case_level_inspection": "unrestricted",
+      "run_limit_per_candidate": null,
+      "consumes_candidate_budget": false
+    },
+    "sealed": {
+      "training_permitted": false,
+      "case_level_inspection": "aggregate_only_until_retired",
+      "run_limit_per_candidate": 1,
+      "consumes_candidate_budget": true
+    }
+  },
+  "budget_accounting": {
+    "consumption_event": "first_sealed_split_read",
+    "pre_read_failures_are_void": true,
+    "void_failures": [
+      "import_error",
+      "type_error",
+      "shape_error",
+      "adapter_error",
+      "onnx_export_error",
+      "onnx_parity_error",
+      "preflight_error",
+      "ledger_error",
+      "authorization_contract_error",
+      "crash",
+      "cancellation",
+      "out_of_memory"
+    ],
+    "void_record_requires_exception": true,
+    "void_run_reuses_authorization": true
+  },
+  "sealed_set_reuse": {
+    "maximum_distinct_revisions": 5,
+    "minimum_unused_sets": 2,
+    "aggregate_only_preserves_set": true,
+    "retire_on_case_identity_or_truth_or_prediction_or_pixel_disclosure": true
+  },
+  "acceptance_thresholds": {
+    "must_be_numeric": true,
+    "reason_required_before_sealed_run": true,
+    "zero_allowed_only_for_unacceptable_shipped_defects": true,
+    "prohibited_gate_rules": [
+      "unused_operating_point",
+      "same_protocol_consecutive_threshold_rule",
+      "same_protocol_margin_rule",
+      "same_protocol_robustness_rule",
+      "criterion_rejecting_previously_approved_artifact"
+    ],
+    "threshold_sensitivity_is_evidence_not_gate": true
+  },
+  "iteration": {
+    "train_and_dev_runs_unlimited": true,
+    "sealed_requires_dev_margin": true,
+    "stop_after_three_same_gate_failures_within_fraction": 0.01
+  },
+  "promotion": {
+    "sealed_gate_pass_opens_promotion": true,
+    "manifest_store_and_packaging_are_same_session": true,
+    "maintainer_approval_required_only_for_final_production_switch": true
+  },
+  "revision_protocol_contract": {
+    "reference_field": "evidence_policy",
+    "allowed_declarations": [
+      "hypothesis",
+      "isolated_change",
+      "split_identities",
+      "metric",
+      "acceptance_bar",
+      "budget"
+    ]
+  }
+}

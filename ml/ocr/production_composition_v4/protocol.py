@@ -64,6 +64,7 @@ def split_registration(split: str) -> SplitRegistration:
 
 def protocol_configuration() -> dict[str, object]:
     return {
+        "evidence_policy": "ml/policy/evidence-policy.json",
         "schema": "graphreader.ocr-production-composition-protocol.v4", "task": TASK,
         "revision": REVISION, "state": "fresh_splits_frozen_before_any_composed_model_execution",
         "predecessor": {"revision": "graphreader-v10-official-spacing-p2-numeric-v5-composition-v3",

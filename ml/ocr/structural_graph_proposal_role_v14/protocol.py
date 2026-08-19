@@ -76,6 +76,7 @@ def split_registration(split: str) -> SplitRegistration:
 
 def protocol_configuration() -> dict[str, object]:
     return {
+        "evidence_policy": "ml/policy/evidence-policy.json",
         "schema": "graphreader.ocr-structural-graph-proposal-role-protocol.v1",
         "task": TASK,
         "revision": REVISION,
@@ -185,7 +186,6 @@ def protocol_configuration() -> dict[str, object]:
             "predecessor_fixture_bytes_reused": False,
             "v13_public_fixture_bytes_scene_truth_or_case_identity_reused": False,
             "validation_or_public_pixels_used_for_training": False,
-            "public_case_level_failure_analysis_permitted": False,
         },
         "data_scope": (
             "fresh procedural scientific graph scenes with structural collisions, crosshatches, rulers, "

@@ -93,6 +93,7 @@ def split_registration(split: str) -> SplitRegistration:
 
 def protocol_configuration() -> dict[str, object]:
     return {
+        "evidence_policy": "ml/policy/evidence-policy.json",
         "schema": "graphreader.ocr-graph-text-stride4-protocol.v1",
         "task": TASK,
         "revision": REVISION,
@@ -176,4 +177,3 @@ def protocol_configuration() -> dict[str, object]:
 
 
 __all__ = [name for name in globals() if name.isupper()] + ["protocol_configuration", "split_registration"]
-

@@ -115,6 +115,7 @@ def evaluate_validation(*, detector_path: Path, official_path: Path, numeric_pat
         repo_root=REPO_ROOT, task=TASK, revision=VALIDATION_REVISION, candidate_hashes=hashes,
         dataset_manifest_sha256=seal["private_manifest_sha256"], split_config_path=SPLIT_CONFIG_PATH,
         evaluator_source_paths=EVALUATOR_SOURCE_PATHS, gate_config=GATE_CONFIG,
+        evidence_split="dev",
     )
     runners = (
         DirectRunner(_cpu_session(detector_path, "region_proposals", "region_logits"), "region_proposals"),

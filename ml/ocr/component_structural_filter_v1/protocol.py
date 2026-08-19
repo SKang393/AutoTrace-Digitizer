@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 
+EVIDENCE_POLICY = "ml/policy/evidence-policy.json"
 TASK = "ocr-recognition"
 REVISION = "graph-numeric-component-structural-filter-v1"
 PUBLIC_REVISION = f"{REVISION}-public-v1"

@@ -7,7 +7,7 @@ GATES={"validation_accuracy_minimum":0.97,"validation_macro_accuracy_minimum":0.
        "sealed_accuracy_minimum":0.97,"sealed_macro_accuracy_minimum":0.97,"sealed_per_class_accuracy_minimum":0.95,
        "onnx_parity_maximum_absolute_error":0.00001,"onnx_argmax_mismatch_count":0,"provider":"CPUExecutionProvider"}
 def protocol_configuration(*,runner_source_bundle_sha256:str)->dict[str,object]:
-    return {"schema":"graphreader.ocr-ambiguity-source-group-protocol.v1","task":TASK,"revision":REVISION,"status":"candidate_2_preregistered",
+    return {"evidence_policy":"ml/policy/evidence-policy.json","schema":"graphreader.ocr-ambiguity-source-group-protocol.v1","task":TASK,"revision":REVISION,"status":"candidate_2_preregistered",
             "defect_class":"the public-passing line-box classifier was not trained on the exact multi-group production crop adapter and mapped lowercase o to uppercase O in V4 composition",
             "trigger_report_path":"ml/ocr/production_composition_v4/VALIDATION_REPORT.json","trigger_report_sha256":"075eb4cfee77591b8c2f16e3752a85364db261425ca477d99b26d940733a978e",
             "trigger_ambiguity_exact_match":0.5,"trigger_public_archive_opened":False,"prior_exposed_fixture_bytes_reused":False,

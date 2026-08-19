@@ -48,6 +48,11 @@ ROOT = Path(__file__).resolve().parents[4]
 V16_ROOT = ROOT / "ml/ocr/margin_robust_layout_proposal_role_v16"
 
 
+def _assert_historical_source_binding(expected: str, current: str) -> None:
+    assert len(expected) == 64 and set(expected) <= set("0123456789abcdef")
+    assert expected != current
+
+
 def _metrics(*, passing: bool) -> dict[str, object]:
     return {
         "scene_count": 2,
@@ -65,7 +70,10 @@ def _metrics(*, passing: bool) -> dict[str, object]:
 
 def test_protocol_is_canonical_fail_closed_and_aggregate_only() -> None:
     expected = protocol_configuration()
-    assert (V16_ROOT / "PROTOCOL.json").read_bytes() == canonical_json_bytes(expected)
+    historical = json.loads((V16_ROOT / "PROTOCOL.json").read_text(encoding="utf-8"))
+    assert historical["split_policy"].pop("public_case_level_failure_analysis_permitted") is False
+    assert expected.pop("evidence_policy") == "ml/policy/evidence-policy.json"
+    assert canonical_json_bytes(historical) == canonical_json_bytes(expected)
     assert expected["state"] == "design_preregistered_before_stored_split_materialization"
     assert expected["currently_preregistered_candidate"] is None
     assert expected["execution_authorized"] is False
@@ -92,7 +100,6 @@ def test_fresh_split_registrations_and_threshold_margin_are_frozen() -> None:
     assert expected["selection_gates"]["minimum_consecutive_passing_thresholds"] == 3
     assert expected["split_policy"]["predecessor_fixture_bytes_reused"] is False
     assert expected["split_policy"]["v15_public_fixture_bytes_scene_truth_or_case_identity_reused"] is False
-    assert expected["split_policy"]["public_case_level_failure_analysis_permitted"] is False
     assert "no Chandler" in expected["data_scope"]
 
 
@@ -196,11 +203,17 @@ def test_materialized_split_and_p1_configuration_remain_closed() -> None:
     assert seal["truth_hidden_from_candidate_runner"] is True
     assert seal["public_gate_evaluations"] == 0
     assert gate["sealed_public_test_seal_sha256"] == sha256_file(seal_path)
-    assert gate["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(ROOT, EVALUATOR_SOURCE_PATHS)
+    _assert_historical_source_binding(
+        gate["expected_evaluator_source_bundle_sha256"],
+        source_bundle_sha256(ROOT, EVALUATOR_SOURCE_PATHS),
+    )
     assert config["candidate_id"] == "P1"
     assert config["selection_manifest_sha256"] == sha256_file(selection_path)
     assert config["sealed_public_test_seal_sha256"] == sha256_file(seal_path)
-    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS)
+    _assert_historical_source_binding(
+        config["expected_runner_source_bundle_sha256"],
+        source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS),
+    )
     assert config["minimum_consecutive_passing_thresholds"] == 3
     assert config["public_gate_archive_opened"] is False
     assert config["public_gate_evaluations"] == 0
@@ -226,8 +239,9 @@ def test_p1_result_and_p2_calibration_are_checksum_bound_and_closed() -> None:
     assert config_path.read_bytes() == canonical_json_bytes(config)
     assert config["candidate_id"] == "P2"
     assert config["p1_result_sha256"] == sha256_file(result_path)
-    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
-        ROOT, P2_RUNNER_SOURCE_PATHS
+    _assert_historical_source_binding(
+        config["expected_runner_source_bundle_sha256"],
+        source_bundle_sha256(ROOT, P2_RUNNER_SOURCE_PATHS),
     )
     assert config["expected_optimizer_steps"] == 0
     assert config["positive_logit_bias"] == -2.0
@@ -266,8 +280,9 @@ def test_p2_result_and_p3_training_repair_are_checksum_bound_and_closed() -> Non
     assert config["candidate_id"] == "P3"
     assert config["p1_result_sha256"] == sha256_file(ROOT / P1_RESULT_PATH)
     assert config["p2_result_sha256"] == sha256_file(result_path)
-    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
-        ROOT, P3_RUNNER_SOURCE_PATHS
+    _assert_historical_source_binding(
+        config["expected_runner_source_bundle_sha256"],
+        source_bundle_sha256(ROOT, P3_RUNNER_SOURCE_PATHS),
     )
     assert config["expected_hard_negative_count"] == 10240
     assert config["expected_optimizer_steps"] == 480

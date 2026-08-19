@@ -215,9 +215,9 @@ def test_quorum_uses_median_margin_and_tolerates_one_route() -> None:
     assert rejected[0, 0, 1] < rejected[0, 0, 0]
 
 
-def test_ledger_consumes_all_v31_candidates_and_keeps_public_closed() -> None:
+def test_ledger_voids_pre_sealed_failures_and_keeps_public_closed() -> None:
     entry = _entry()
-    assert entry["status"] == "exhausted"
+    assert entry["status"] == "candidate_3_preregistered"
     assert entry["trigger_result_sha256"] == TRIGGER_RESULT_SHA256
     assert entry["trigger_case_detail_or_pixels_used"] is False
     assert entry["prior_fixture_bytes_reused"] is False
@@ -236,11 +236,15 @@ def test_ledger_consumes_all_v31_candidates_and_keeps_public_closed() -> None:
         "train_sealed_public": 0,
         "validation_sealed_public": 0,
     }
-    assert entry["preregistered_candidate_ids"] == ["P2", "P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
-    assert entry["remaining_unregistered_candidate_ids"] == []
+    assert entry["preregistered_candidate_ids"] == ["P3"]
+    assert entry["consumed_candidate_ids"] == ["P2"]
+    assert entry["void_candidate_ids"] == ["P1", "P3"]
+    assert entry["remaining_unregistered_candidate_ids"] == ["P1"]
+    assert [item["candidate_id"] for item in entry["void_runs"]] == ["P1", "P3"]
+    assert all(item["sealed_public_archive_read_count"] == 0 for item in entry["void_runs"])
     assert entry["selection_evaluations"] == 2
-    assert entry["p1_status"] == "failed_runner_consumed"
+    assert entry["p1_status"] == "void"
+    assert entry["p1_historical_status"] == "failed_runner_consumed"
     assert entry["p1_optimizer_steps"] == 0
     assert entry["p1_selection_archive_read_count"] == 1
     assert entry["p1_case_detail_or_pixels_inspected"] is False
@@ -259,7 +263,8 @@ def test_ledger_consumes_all_v31_candidates_and_keeps_public_closed() -> None:
     assert entry["p3_expected_runner_source_bundle_sha256"] == p3_result[
         "invocation_runner_source_bundle_sha256"
     ]
-    assert entry["p3_status"] == "failed_authorization_contract_consumed"
+    assert entry["p3_status"] == "void"
+    assert entry["p3_historical_status"] == "failed_authorization_contract_consumed"
     assert entry["p3_optimizer_steps"] == 0
     assert entry["p3_selection_archive_read_count"] == 0
     assert entry["p3_result_sha256"] == _sha256(ROOT / "P3_RESULT.json")
@@ -272,7 +277,7 @@ def test_ledger_consumes_all_v31_candidates_and_keeps_public_closed() -> None:
     assert entry["release_eligible"] is False
 
 
-def test_frozen_split_and_consumed_candidates_are_bound_while_public_remains_closed() -> None:
+def test_frozen_split_and_historical_results_are_bound_while_public_remains_closed() -> None:
     seal_path = ROOT / "SPLIT_SEAL.json"
     config_path = ROOT / "training/p1.json"
     seal = _read_json(seal_path)
@@ -325,7 +330,7 @@ def test_consumed_p2_cannot_pass_preflight_again() -> None:
         train_p2.preflight(require_authorized=True)
 
 
-def test_p3_is_checksum_bound_consumed_and_cannot_reenter_selection() -> None:
+def test_p3_is_checksum_bound_void_and_requires_explicit_reauthorization() -> None:
     config = _read_json(ROOT / "training/p3.json")
     entry = _entry()
     assert config["candidate_id"] == "P3"
@@ -342,6 +347,8 @@ def test_p3_is_checksum_bound_consumed_and_cannot_reenter_selection() -> None:
     assert result["training_started"] is False
     assert result["selection_archive_opened"] is False
     assert result["rerun_authorized"] is False
+    assert entry["p3_status"] == "void"
+    assert entry["consumed_candidate_ids"] == ["P2"]
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False

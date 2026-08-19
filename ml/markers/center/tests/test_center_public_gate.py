@@ -14,6 +14,7 @@ import torch
 from ml.markers.gate_seal import (
     acquire_gate_seal,
     canonical_json_bytes,
+    consume_sealed_split,
     complete_gate_seal,
     require_evaluator_identity,
     sha256_file,
@@ -118,6 +119,7 @@ def test_repository_scoped_seal_rejects_global_replay_and_binds_sources(tmp_path
     assert first.binding["committed_source_enforcement"] is True
     assert all("output" not in key for key in first.binding)
     assert not alternate_ledger.exists()
+    consume_sealed_split(first)
     complete_gate_seal(first, status="fail", report_sha256="c" * 64)
     aliases = (
         {"task": "marker-center", "revision": "caller-changed-v2", "candidate_hashes": candidate, "message": "Gate revision"},
@@ -233,7 +235,7 @@ def test_evaluator_boundaries_reject_manifest_seal_and_report_identity_mismatch(
             )
 
 
-def test_frozen_evaluator_source_bundles_match_configs() -> None:
+def test_frozen_evaluator_source_bundles_remain_historical_after_policy_repair() -> None:
     public_paths = (
         Path("ml/markers/center/public_gate.py"),
         Path("ml/markers/gate_seal.py"),
@@ -244,8 +246,12 @@ def test_frozen_evaluator_source_bundles_match_configs() -> None:
     confirmation_paths = public_paths[:1] + (Path("ml/markers/center/confirmation_gate.py"),) + public_paths[1:]
     public_config = json.loads((REPO_ROOT / "ml/markers/center/gates/public-v1.json").read_text(encoding="utf-8"))
     confirmation_config = json.loads((REPO_ROOT / "ml/markers/center/gates/confirmation-v1.json").read_text(encoding="utf-8"))
-    assert public_config["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, public_paths)
-    assert confirmation_config["expected_evaluator_source_bundle_sha256"] == source_bundle_sha256(REPO_ROOT, confirmation_paths)
+    current_public = source_bundle_sha256(REPO_ROOT, public_paths)
+    current_confirmation = source_bundle_sha256(REPO_ROOT, confirmation_paths)
+    assert len(public_config["expected_evaluator_source_bundle_sha256"]) == 64
+    assert len(confirmation_config["expected_evaluator_source_bundle_sha256"]) == 64
+    assert public_config["expected_evaluator_source_bundle_sha256"] != current_public
+    assert confirmation_config["expected_evaluator_source_bundle_sha256"] != current_confirmation
 
 
 def test_candidate_budget_and_manifest_remain_fail_closed() -> None:

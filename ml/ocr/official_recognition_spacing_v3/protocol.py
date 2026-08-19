@@ -37,6 +37,7 @@ PUBLIC_GATE_CONFIG = {
 
 def protocol_configuration(*, runner_source_bundle_sha256: str) -> dict[str, object]:
     return {
+        "evidence_policy": "ml/policy/evidence-policy.json",
         "schema": "graphreader.ocr-official-recognition-spacing-protocol.v2",
         "task": TASK,
         "revision": REVISION,

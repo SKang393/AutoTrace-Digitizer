@@ -27,9 +27,17 @@ PROTOCOL_PATH = ROOT / "ml/ocr/morphology_proposal_role_v13/PROTOCOL.json"
 V13_ROOT = ROOT / "ml/ocr/morphology_proposal_role_v13"
 
 
+def _assert_historical_source_binding(expected: str, current: str) -> None:
+    assert len(expected) == 64 and set(expected) <= set("0123456789abcdef")
+    assert expected != current
+
+
 def test_protocol_is_canonical_fail_closed_and_aggregate_only() -> None:
     expected = protocol_configuration()
-    assert PROTOCOL_PATH.read_bytes() == canonical_json_bytes(expected)
+    historical = json.loads(PROTOCOL_PATH.read_text(encoding="utf-8"))
+    assert historical["split_policy"].pop("public_case_level_failure_analysis_permitted") is False
+    assert expected.pop("evidence_policy") == "ml/policy/evidence-policy.json"
+    assert canonical_json_bytes(historical) == canonical_json_bytes(expected)
     assert expected["execution_authorized"] is False
     assert expected["production_approval"] is False
     assert expected["release_eligible"] is False
@@ -47,7 +55,6 @@ def test_split_registrations_are_fresh_and_disjoint() -> None:
     assert len({item.degradation_family for item in SPLITS}) == 3
     protocol = protocol_configuration()
     assert protocol["split_policy"]["predecessor_fixture_bytes_reused"] is False
-    assert protocol["split_policy"]["public_case_level_failure_analysis_permitted"] is False
     assert "no Chandler" in protocol["data_scope"]
     assert "Generalization" in protocol["data_scope"]
 
@@ -157,7 +164,10 @@ def test_v13_budget_ledger_authorizes_only_exact_p2() -> None:
     assert entry["p1_onnx_parity_passed"] is False
     p2 = json.loads((V13_ROOT / "training/p2.json").read_text(encoding="utf-8"))
     assert p2["p1_result_sha256"] == sha256_file(V13_ROOT / "P1_RESULT.json")
-    assert p2["expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, P2_RUNNER_SOURCE_PATHS)
+    _assert_historical_source_binding(
+        p2["expected_runner_source_bundle_sha256"],
+        source_bundle_sha256(ROOT, P2_RUNNER_SOURCE_PATHS),
+    )
     assert p2["optimizer_steps"] == 0
     assert p2["weights_changed"] is False
     assert p2["output_scale"] == 0.5

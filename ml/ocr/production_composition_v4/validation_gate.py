@@ -93,7 +93,8 @@ def evaluate_validation(*, detector_path: Path, official_path: Path, numeric_pat
     if hashes != expected or sha256_file(inference_yaml_path) != OFFICIAL_INFERENCE_YAML_SHA256: raise RuntimeError("V4 payload changed")
     gate = acquire_gate_seal(repo_root=REPO_ROOT, task=TASK, revision=VALIDATION_REVISION,
                              candidate_hashes=hashes, dataset_manifest_sha256=seal["private_manifest_sha256"],
-                             split_config_path=SPLIT_CONFIG_PATH, evaluator_source_paths=EVALUATOR_SOURCE_PATHS, gate_config=GATE_CONFIG)
+                             split_config_path=SPLIT_CONFIG_PATH, evaluator_source_paths=EVALUATOR_SOURCE_PATHS,
+                             gate_config=GATE_CONFIG, evidence_split="dev")
     detector = DirectRunner(_cpu_session(detector_path, "region_proposals", "region_logits"), "region_proposals")
     official = DirectRunner(_cpu_session(official_path, "x", "fetch_name_0"), "x")
     numeric = DirectRunner(_cpu_session(numeric_path, "glyphs", "logits"), "glyphs")

@@ -40,6 +40,7 @@ DEGRADATION_FAMILIES = (
 def protocol_configuration() -> dict[str, object]:
     """Return the immutable preregistration without opening fixture bytes."""
     return {
+        "evidence_policy": "ml/policy/evidence-policy.json",
         "schema": "graphreader.ocr-marker-production-composition-protocol.v1",
         "task": TASK,
         "revision": REVISION,

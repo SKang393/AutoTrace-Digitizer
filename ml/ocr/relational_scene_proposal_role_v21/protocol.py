@@ -118,6 +118,7 @@ def split_registration(split: str) -> SplitRegistration:
 
 def protocol_configuration() -> dict[str, object]:
     return {
+        "evidence_policy": "ml/policy/evidence-policy.json",
         "schema": "graphreader.ocr-relational-scene-proposal-role-protocol.v1",
         "task": TASK,
         "revision": REVISION,

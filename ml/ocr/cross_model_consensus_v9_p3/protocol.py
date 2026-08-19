@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 
+EVIDENCE_POLICY = "ml/policy/evidence-policy.json"
 TASK = "ocr-detection-recognition-composition"
 REVISION = "graphreader-v10-v11-cross-model-consensus-v9-p3"
 CANDIDATE_ID = "P3"

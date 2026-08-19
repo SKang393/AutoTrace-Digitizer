@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 
+EVIDENCE_POLICY = "ml/policy/evidence-policy.json"
 TASK = "ocr-detection-recognition-composition"
 REVISION = "graphreader-v10-selected-confidence-eight-role-public-v9-p2"
 CANDIDATE_ID = "P2"

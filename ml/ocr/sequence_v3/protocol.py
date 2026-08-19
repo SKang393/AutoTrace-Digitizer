@@ -46,6 +46,7 @@ class ProtocolViolation(RuntimeError):
 
 def protocol_configuration() -> dict[str, object]:
     return {
+        "evidence_policy": "ml/policy/evidence-policy.json",
         "protocol_id": PROTOCOL_ID,
         "protocol_state": PROTOCOL_STATE,
         "seed": SEED,

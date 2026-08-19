@@ -136,6 +136,7 @@ def split_registration(split: str) -> SplitRegistration:
 
 def protocol_configuration() -> dict[str, object]:
     return {
+        "evidence_policy": "ml/policy/evidence-policy.json",
         "schema": "graphreader.ocr-robust-quorum-recall-protocol.v1",
         "task": TASK,
         "revision": REVISION,
@@ -244,7 +245,6 @@ def protocol_configuration() -> dict[str, object]:
             "predecessor_fixture_bytes_reused": False,
             "predecessor_case_identities_reused": False,
             "validation_or_public_pixels_used_for_design": False,
-            "public_case_level_failure_analysis_permitted": False,
         },
         "data_scope": (
             "fresh project-owned procedural graph scenes only; no Chandler, "

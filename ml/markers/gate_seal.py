@@ -9,8 +9,12 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
+import shutil
 import subprocess
 from typing import Mapping, Sequence
+from uuid import uuid4
+
+from ml.policy.evidence_policy import evidence_policy_reference, split_rule
 
 
 def canonical_json_bytes(value: object) -> bytes:
@@ -58,6 +62,36 @@ class GateSeal:
     opened_path: Path
     binding: dict[str, object]
 
+    @property
+    def consumed_path(self) -> Path:
+        return self.directory / "consumed.json"
+
+    def consume_sealed_split(self) -> Path:
+        """Consume this gate at the first truth-hidden split read."""
+
+        if self.binding.get("evidence_split", "sealed") != "sealed":
+            raise RuntimeError("Only the sealed evidence split consumes gate budget")
+        if self.consumed_path.exists():
+            raise RuntimeError(f"Gate sealed split was already consumed: {self.key}")
+        if (self.directory / "void.json").exists():
+            raise RuntimeError(f"Gate was voided before sealed-split read: {self.key}")
+        payload = {
+            "schema_version": 1,
+            "status": "consumed",
+            "sealed_split_read": True,
+            "budget_consumed": True,
+            "consumed_utc": datetime.now(timezone.utc).isoformat(),
+            "key": self.key,
+            "opened_sha256": sha256_file(self.opened_path),
+            "binding": self.binding,
+        }
+        try:
+            with self.consumed_path.open("xb") as stream:
+                stream.write(canonical_json_bytes(payload))
+        except FileExistsError as error:
+            raise RuntimeError(f"Gate sealed split was already consumed: {self.key}") from error
+        return self.consumed_path
+
 
 def require_evaluator_identity(
     *,
@@ -93,6 +127,7 @@ def acquire_gate_seal(
     split_config_path: Path,
     evaluator_source_paths: Sequence[Path],
     gate_config: Mapping[str, object],
+    evidence_split: str = "sealed",
 ) -> GateSeal:
     canonical_root = repo_root / "ml" / "markers" / "gate-seals"
     retired_path = canonical_root / "retired-historical-pairs.json"
@@ -104,6 +139,7 @@ def acquire_gate_seal(
     )
     require_committed_sources(repo_root, source_paths)
     split_config = json.loads((repo_root / split_config_path).read_text(encoding="utf-8"))
+    split_rule(evidence_split)
     expected_task = split_config.get("task")
     if task != expected_task:
         raise RuntimeError(f"Gate task {task} does not match frozen configuration {expected_task}")
@@ -146,6 +182,8 @@ def acquire_gate_seal(
         "evaluator_source_paths": sorted(path.as_posix() for path in evaluator_source_paths),
         "evaluator_source_bundle_sha256": evaluator_sha256,
         "gate_config_sha256": gate_config_sha256,
+        "evidence_split": evidence_split,
+        "evidence_policy": evidence_policy_reference(),
         "ledger_mode": "canonical_repository",
         "ledger_root": "ml/markers/gate-seals",
         "committed_source_enforcement": True,
@@ -170,6 +208,23 @@ def acquire_gate_seal(
         raise RuntimeError(f"Gate pair is retired historical evidence and cannot be replayed: {key}")
     directory = canonical_root / task / key
     directory.mkdir(parents=True, exist_ok=True)
+    prior_result = directory / "result.json"
+    prior_opened = directory / "opened.json"
+    if (
+        evidence_split == "dev"
+        and prior_result.exists()
+        and prior_opened.exists()
+        and not (directory / "consumed.json").exists()
+    ):
+        archive = directory / "dev-attempts" / uuid4().hex
+        archive.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(prior_opened), str(archive / "opened.json"))
+        shutil.move(str(prior_result), str(archive / "result.json"))
+    prior_void = directory / "void.json"
+    if prior_void.exists() and not (directory / "opened.json").exists() and not (directory / "consumed.json").exists():
+        archive = directory / "void-attempts" / uuid4().hex
+        archive.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(prior_void), str(archive / "void.json"))
     opened_path = directory / "opened.json"
     opened = {
         "schema_version": 1,
@@ -178,6 +233,7 @@ def acquire_gate_seal(
         "opened_utc": datetime.now(timezone.utc).isoformat(),
         "key": key,
         "binding": binding,
+        "budget_status": "pending_sealed_read",
     }
     try:
         with opened_path.open("xb") as stream:
@@ -187,7 +243,47 @@ def acquire_gate_seal(
     return GateSeal(key, directory, opened_path, binding)
 
 
+def consume_sealed_split(seal: GateSeal) -> Path:
+    """Mark the first read of the truth-hidden sealed split as budget use."""
+
+    return seal.consume_sealed_split()
+
+
+def void_candidate(seal: GateSeal, exception: BaseException) -> Path:
+    """Release a gate whose runner failed before reading the sealed split."""
+
+    if seal.consumed_path.exists():
+        raise RuntimeError(f"Cannot void gate after sealed-split read: {seal.key}")
+    void_path = seal.directory / "void.json"
+    payload = {
+        "schema_version": 1,
+        "status": "void",
+        "sealed_split_read": False,
+        "budget_consumed": False,
+        "voided_utc": datetime.now(timezone.utc).isoformat(),
+        "key": seal.key,
+        "exception_type": type(exception).__name__,
+        "exception_message": str(exception),
+        "binding": seal.binding,
+    }
+    try:
+        with void_path.open("xb") as stream:
+            stream.write(canonical_json_bytes(payload))
+    except FileExistsError as error:
+        raise RuntimeError(f"Gate void record was already recorded: {seal.key}") from error
+    if seal.opened_path.exists():
+        archive = seal.directory / "void-attempts" / uuid4().hex
+        archive.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(seal.opened_path), str(archive / "opened.json"))
+    return void_path
+
+
 def complete_gate_seal(seal: GateSeal, *, status: str, report_sha256: str) -> Path:
+    evidence_split = str(seal.binding.get("evidence_split", "sealed"))
+    if evidence_split == "sealed" and not seal.consumed_path.exists():
+        raise RuntimeError("Sealed split must be consumed at first read before gate completion")
+    if evidence_split == "dev" and seal.consumed_path.exists():
+        raise RuntimeError("Dev split must not consume gate budget")
     result_path = seal.directory / "result.json"
     result = {
         "schema_version": 1,
@@ -196,6 +292,7 @@ def complete_gate_seal(seal: GateSeal, *, status: str, report_sha256: str) -> Pa
         "key": seal.key,
         "opened_sha256": sha256_file(seal.opened_path),
         "report_sha256": report_sha256,
+        "budget_status": "consumed" if evidence_split == "sealed" else "not_consumed_dev",
     }
     try:
         with result_path.open("xb") as stream:
@@ -209,10 +306,12 @@ __all__ = [
     "GateSeal",
     "acquire_gate_seal",
     "canonical_json_bytes",
+    "consume_sealed_split",
     "complete_gate_seal",
     "require_evaluator_identity",
     "require_committed_sources",
     "sha256_bytes",
     "sha256_file",
     "source_bundle_sha256",
+    "void_candidate",
 ]

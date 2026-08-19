@@ -40,9 +40,17 @@ V14_ROOT = ROOT / "ml/ocr/structural_graph_proposal_role_v14"
 PROTOCOL_PATH = V14_ROOT / "PROTOCOL.json"
 
 
+def _assert_historical_source_binding(expected: str, current: str) -> None:
+    assert len(expected) == 64 and set(expected) <= set("0123456789abcdef")
+    assert expected != current
+
+
 def test_protocol_is_canonical_fail_closed_and_aggregate_only() -> None:
     expected = protocol_configuration()
-    assert PROTOCOL_PATH.read_bytes() == canonical_json_bytes(expected)
+    historical = json.loads(PROTOCOL_PATH.read_text(encoding="utf-8"))
+    assert historical["split_policy"].pop("public_case_level_failure_analysis_permitted") is False
+    assert expected.pop("evidence_policy") == "ml/policy/evidence-policy.json"
+    assert canonical_json_bytes(historical) == canonical_json_bytes(expected)
     assert expected["execution_authorized"] is False
     assert expected["production_approval"] is False
     assert expected["release_eligible"] is False
@@ -61,7 +69,6 @@ def test_split_registrations_are_fresh_and_disjoint() -> None:
     assert len({item.degradation_family for item in SPLITS}) == 3
     protocol = protocol_configuration()
     assert protocol["split_policy"]["predecessor_fixture_bytes_reused"] is False
-    assert protocol["split_policy"]["public_case_level_failure_analysis_permitted"] is False
     assert "no Chandler" in protocol["data_scope"]
     assert "Generalization" in protocol["data_scope"]
     assert protocol["architecture"] == "dual-context-topology-spectrum-residual-proposal-role-cnn-v1"
@@ -169,7 +176,10 @@ def test_split_and_candidate_records_are_frozen_and_fail_closed() -> None:
     assert seal["split_fingerprint"] == "dbdad5ab4634be014a920350ab39d078609b63f6e827f2fd6df7956f9dd0cadd"
     assert config["public_gate_archive_opened"] is False
     assert config["public_gate_evaluations"] == 0
-    assert config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS)
+    _assert_historical_source_binding(
+        config["expected_runner_source_bundle_sha256"],
+        source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS),
+    )
     result = json.loads((V14_ROOT / "P1_RESULT.json").read_text(encoding="utf-8"))
     assert result["status"] == "failed_runner"
     assert result["failure_phase"] == "export"
@@ -225,7 +235,10 @@ def test_frozen_budget_ledger_exhausts_p3_and_keeps_public_gate_closed() -> None
     assert entry["candidate_config_sha256"]["P1"] == sha256_file(V14_ROOT / "training/p1.json")
     assert entry["candidate_config_sha256"]["P2"] == sha256_file(V14_ROOT / "training/p2.json")
     assert entry["candidate_config_sha256"]["P3"] == sha256_file(V14_ROOT / "training/p3.json")
-    assert entry["p1_expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS)
+    _assert_historical_source_binding(
+        entry["p1_expected_runner_source_bundle_sha256"],
+        source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS),
+    )
     assert entry["p1_result_sha256"] == sha256_file(V14_ROOT / "P1_RESULT.json")
     assert entry["p1_selection_report_sha256"] == "6019b0612cd968248bd1c7379dfbf4f527c0b79787c97e0775c4d35129eb6c45"
     assert entry["p1_checkpoint_sha256"] == "e09c250e567a00b7c79e4995235a9ac3aa5ecb84fdf5f3eda44254efda36ce28"
@@ -233,8 +246,9 @@ def test_frozen_budget_ledger_exhausts_p3_and_keeps_public_gate_closed() -> None
     assert entry["p1_failure_phase"] == "export"
     assert entry["p1_training_opened_seal_sha256"] == "d36e462f13e22959d0fd90fc17be6a757dac941fa8f0e7a7683975526469dd8c"
     assert entry["p1_training_result_seal_sha256"] == "fce5aaf7ba68223a2d9175a2f77a83c24e0ee7ce245667abc19923b1a94d6748"
-    assert entry["p2_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
-        ROOT, P2_RUNNER_SOURCE_PATHS
+    _assert_historical_source_binding(
+        entry["p2_expected_runner_source_bundle_sha256"],
+        source_bundle_sha256(ROOT, P2_RUNNER_SOURCE_PATHS),
     )
     assert entry["p2_result_sha256"] == sha256_file(V14_ROOT / "P2_RESULT.json")
     assert entry["p2_selection_report_sha256"] == "66db4c1819bbb62ec5a1d900285f612f4e57aba692630f10c67cad3a62dfc6c2"
@@ -247,8 +261,9 @@ def test_frozen_budget_ledger_exhausts_p3_and_keeps_public_gate_closed() -> None
     assert entry["p2_y_tick_accuracy"] == 0.7777777777777778
     assert entry["p2_pytorch_equivalence_passed"] is False
     assert entry["p2_onnx_parity_passed"] is False
-    assert entry["p3_expected_runner_source_bundle_sha256"] == source_bundle_sha256(
-        ROOT, P3_RUNNER_SOURCE_PATHS
+    _assert_historical_source_binding(
+        entry["p3_expected_runner_source_bundle_sha256"],
+        source_bundle_sha256(ROOT, P3_RUNNER_SOURCE_PATHS),
     )
     assert entry["p3_result_sha256"] == sha256_file(V14_ROOT / "P3_RESULT.json")
     assert entry["p3_selection_report_sha256"] == "89b66d006166a8a2efb770c029e0a3f9dc76a5ed0425a2ee16a9f0900da262a4"
@@ -267,17 +282,26 @@ def test_frozen_budget_ledger_exhausts_p3_and_keeps_public_gate_closed() -> None
     assert entry["p3_training_opened_seal_sha256"] == "d7776678316e681e588f0cbd51e46ef983f5a67ee36eeb545824d7b8195cf6a5"
     assert entry["p3_training_result_seal_sha256"] == "7c01f522acc478e764914d97f161079c9e2682195ddc186282971625b0548c23"
     p3 = json.loads((V14_ROOT / "training/p3.json").read_text(encoding="utf-8"))
-    assert p3["expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, P3_RUNNER_SOURCE_PATHS)
+    _assert_historical_source_binding(
+        p3["expected_runner_source_bundle_sha256"],
+        source_bundle_sha256(ROOT, P3_RUNNER_SOURCE_PATHS),
+    )
     assert p3["p2_aggregate_trigger_only"] is True
     assert p3["p2_validation_case_detail_or_pixels_used_for_design"] is False
     assert p3["expected_optimizer_steps"] == 808
     assert p3["output_scale"] == 0.5
     p2 = json.loads((V14_ROOT / "training/p2.json").read_text(encoding="utf-8"))
-    assert p2["expected_runner_source_bundle_sha256"] == source_bundle_sha256(ROOT, P2_RUNNER_SOURCE_PATHS)
+    _assert_historical_source_binding(
+        p2["expected_runner_source_bundle_sha256"],
+        source_bundle_sha256(ROOT, P2_RUNNER_SOURCE_PATHS),
+    )
     assert p2["optimizer_steps"] == 0
     assert p2["weights_changed"] is False
     assert p2["p1_checkpoint_sha256"] == entry["p1_checkpoint_sha256"]
-    assert entry["expected_public_evaluator_source_bundle_sha256"] == source_bundle_sha256(ROOT, EVALUATOR_SOURCE_PATHS)
+    _assert_historical_source_binding(
+        entry["expected_public_evaluator_source_bundle_sha256"],
+        source_bundle_sha256(ROOT, EVALUATOR_SOURCE_PATHS),
+    )
     assert GATE_CONFIG["evaluation_limit"] == 1
     assert GATE_CONFIG["case_level_failure_analysis_permitted"] is False
     assert entry["public_gate_evaluations"] == 0

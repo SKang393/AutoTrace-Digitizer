@@ -8,7 +8,9 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import shutil
 from typing import Sequence
+from uuid import uuid4
 
 from ml.markers.gate_seal import (
     canonical_json_bytes,
@@ -16,6 +18,7 @@ from ml.markers.gate_seal import (
     sha256_file,
     source_bundle_sha256,
 )
+from ml.policy.evidence_policy import evidence_policy_reference
 
 
 CANONICAL_LEDGER_PATH = Path("ml/markers/training-budgets/production-repair-v1.json")
@@ -26,6 +29,38 @@ class TrainingAuthorization:
     directory: Path
     opened_path: Path
     binding: dict[str, object]
+
+    @property
+    def consumed_path(self) -> Path:
+        return self.directory / "consumed.json"
+
+    def consume_sealed_split(self) -> Path:
+        """Consume this candidate at the first sealed-split read.
+
+        Acquisition only reserves a candidate.  This marker is the durable
+        budget boundary and is intentionally created separately from
+        ``opened.json`` so pre-sealed failures remain void.
+        """
+
+        if self.consumed_path.exists():
+            raise RuntimeError("Training candidate sealed split was already consumed")
+        if (self.directory / "void.json").exists():
+            raise RuntimeError("Training candidate was voided before sealed-split read")
+        payload = {
+            "schema_version": 1,
+            "status": "consumed",
+            "sealed_split_read": True,
+            "budget_consumed": True,
+            "consumed_utc": datetime.now(timezone.utc).isoformat(),
+            "opened_sha256": sha256_file(self.opened_path),
+            "binding": self.binding,
+        }
+        try:
+            with self.consumed_path.open("x", encoding="utf-8") as stream:
+                stream.write(canonical_json_bytes(payload).decode("utf-8"))
+        except FileExistsError as error:
+            raise RuntimeError("Training candidate sealed split was already consumed") from error
+        return self.consumed_path
 
 
 def require_training_budget(repo_root: Path, *, task: str, revision: str) -> None:
@@ -108,6 +143,22 @@ def acquire_training_candidate(
         raise RuntimeError("Training runner source bundle does not match the preregistered configuration")
     directory = repo_root / "ml" / "markers" / "training-seals" / task / revision / candidate_id
     directory.mkdir(parents=True, exist_ok=True)
+    prior_result = directory / "result.json"
+    prior_opened = directory / "opened.json"
+    if (
+        prior_result.exists()
+        and prior_opened.exists()
+        and not (directory / "consumed.json").exists()
+    ):
+        archive = directory / "dev-attempts" / uuid4().hex
+        archive.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(prior_opened), str(archive / "opened.json"))
+        shutil.move(str(prior_result), str(archive / "result.json"))
+    prior_void = directory / "void.json"
+    if prior_void.exists() and not (directory / "opened.json").exists() and not (directory / "consumed.json").exists():
+        archive = directory / "void-attempts" / uuid4().hex
+        archive.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(prior_void), str(archive / "void.json"))
     opened_path = directory / "opened.json"
     binding: dict[str, object] = {
         "task": task,
@@ -118,11 +169,13 @@ def acquire_training_candidate(
         "runner_source_paths": sorted(path.as_posix() for path in runner_source_paths),
         "runner_source_bundle_sha256": runner_sha256,
         "training_budget_ledger_sha256": sha256_file(ledger_path),
+        "evidence_policy": evidence_policy_reference(),
         "committed_source_enforcement": True,
     }
     opened = {
         "schema_version": 1,
         "status": "opened",
+        "budget_status": "pending_sealed_read",
         "opened_utc": datetime.now(timezone.utc).isoformat(),
         "binding": binding,
     }
@@ -132,6 +185,47 @@ def acquire_training_candidate(
     except FileExistsError as error:
         raise RuntimeError(f"Training candidate was already opened: {task}/{revision}/{candidate_id}") from error
     return TrainingAuthorization(directory, opened_path, binding)
+
+
+def consume_sealed_split(authorization: TrainingAuthorization) -> Path:
+    """Mark the first read of the truth-hidden sealed split as budget use."""
+
+    return authorization.consume_sealed_split()
+
+
+def void_candidate(
+    authorization: TrainingAuthorization,
+    exception: BaseException,
+) -> Path:
+    """Release an unconsumed candidate and retain the pre-sealed exception.
+
+    A void run is retryable under the same authorization.  The opened seal is
+    moved into a retained attempt folder rather than deleted.
+    """
+
+    if authorization.consumed_path.exists():
+        raise RuntimeError("Cannot void a training candidate after sealed-split read")
+    void_path = authorization.directory / "void.json"
+    payload = {
+        "schema_version": 1,
+        "status": "void",
+        "sealed_split_read": False,
+        "budget_consumed": False,
+        "voided_utc": datetime.now(timezone.utc).isoformat(),
+        "exception_type": type(exception).__name__,
+        "exception_message": str(exception),
+        "binding": authorization.binding,
+    }
+    try:
+        with void_path.open("x", encoding="utf-8") as stream:
+            stream.write(canonical_json_bytes(payload).decode("utf-8"))
+    except FileExistsError as error:
+        raise RuntimeError("Training candidate void record was already recorded") from error
+    if authorization.opened_path.exists():
+        archive = authorization.directory / "void-attempts" / uuid4().hex
+        archive.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(authorization.opened_path), str(archive / "opened.json"))
+    return void_path
 
 
 def complete_training_candidate(
@@ -146,6 +240,7 @@ def complete_training_candidate(
         "status": status,
         "opened_sha256": sha256_file(authorization.opened_path),
         "report_sha256": report_sha256,
+        "budget_status": "consumed" if authorization.consumed_path.exists() else "pending_sealed_read",
     }
     try:
         with result_path.open("xb") as stream:
@@ -159,6 +254,8 @@ __all__ = [
     "CANONICAL_LEDGER_PATH",
     "TrainingAuthorization",
     "acquire_training_candidate",
+    "consume_sealed_split",
     "complete_training_candidate",
     "require_training_budget",
+    "void_candidate",
 ]

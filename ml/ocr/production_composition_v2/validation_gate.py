@@ -115,6 +115,7 @@ def evaluate_validation(
         },
         dataset_manifest_sha256=seal["private_manifest_sha256"], split_config_path=SPLIT_CONFIG_PATH,
         evaluator_source_paths=EVALUATOR_SOURCE_PATHS, gate_config=GATE_CONFIG,
+        evidence_split="dev",
     )
     detector = DirectRunner(_cpu_session(detector_path, "region_proposals", "region_logits"), "region_proposals")
     official = DirectRunner(_cpu_session(official_recognizer_path, "x", "fetch_name_0"), "x")

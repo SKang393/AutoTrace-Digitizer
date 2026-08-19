@@ -17,7 +17,11 @@ import numpy as np
 import torch
 
 from ml.markers.gate_seal import canonical_json_bytes, sha256_file, source_bundle_sha256
-from ml.markers.training_budget import acquire_training_candidate, complete_training_candidate
+from ml.markers.training_budget import (
+    acquire_training_candidate,
+    complete_training_candidate,
+    void_candidate,
+)
 from ml.ocr.crop_evidence_role_anchor_v24.train_p1 import (
     _calibrated_records,
     _cpu_session,
@@ -476,11 +480,7 @@ def evaluate_candidate(output_dir: Path) -> dict[str, object]:
             "release_eligible": False,
         }
         report_path.write_bytes(canonical_json_bytes(failure))
-        complete_training_candidate(
-            authorization,
-            status="failed_runner",
-            report_sha256=sha256_file(report_path),
-        )
+        void_candidate(authorization, error)
         raise
 
 
