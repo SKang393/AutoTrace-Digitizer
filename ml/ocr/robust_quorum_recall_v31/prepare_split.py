@@ -132,8 +132,17 @@ def _source_hash(scene: Any) -> str:
 def freeze() -> dict[str, object]:
     if (REPO_ROOT / SEAL_PATH).exists():
         raise RuntimeError("OCR V31 split identity is already frozen")
+    temporary_archive_paths = {
+        split: Path(f"{relative.as_posix()}.freeze.tmp")
+        for split, relative in ARCHIVE_PATHS.items()
+    }
+    temporary_seal_path = Path(f"{SEAL_PATH.as_posix()}.freeze.tmp")
     existing = [
-        path.as_posix() for path in ARCHIVE_PATHS.values()
+        path.as_posix() for path in (
+            *ARCHIVE_PATHS.values(),
+            *temporary_archive_paths.values(),
+            temporary_seal_path,
+        )
         if (REPO_ROOT / path).exists()
     ]
     if existing:
@@ -143,49 +152,71 @@ def freeze() -> dict[str, object]:
     _require_sources_at_head()
     records: dict[str, object] = {}
     hash_sets: dict[str, set[str]] = {}
-    for split, relative in ARCHIVE_PATHS.items():
-        scenes = build_split(split)  # type: ignore[arg-type]
-        hashes = {_source_hash(scene) for scene in scenes}
-        if len(hashes) != len(scenes):
-            raise RuntimeError(f"OCR V31 {split} contains duplicate fixture bytes")
-        hash_sets[split] = hashes
-        records[split] = {
-            **save_archive(scenes, REPO_ROOT / relative),
-            "source_sha256_inventory": sorted(hashes),
+    published: list[tuple[Path, Path]] = []
+    try:
+        for split, relative in ARCHIVE_PATHS.items():
+            scenes = build_split(split)  # type: ignore[arg-type]
+            hashes = {_source_hash(scene) for scene in scenes}
+            if len(hashes) != len(scenes):
+                raise RuntimeError(f"OCR V31 {split} contains duplicate fixture bytes")
+            hash_sets[split] = hashes
+            temporary = temporary_archive_paths[split]
+            record = save_archive(scenes, REPO_ROOT / temporary)
+            record["archive_path"] = relative.as_posix()
+            records[split] = {
+                **record,
+                "source_sha256_inventory": sorted(hashes),
+            }
+        overlaps = {
+            "train_validation": len(hash_sets["train"] & hash_sets["validation"]),
+            "train_sealed_public": len(
+                hash_sets["train"] & hash_sets["sealed_public"]
+            ),
+            "validation_sealed_public": len(
+                hash_sets["validation"] & hash_sets["sealed_public"]
+            ),
         }
-    overlaps = {
-        "train_validation": len(hash_sets["train"] & hash_sets["validation"]),
-        "train_sealed_public": len(hash_sets["train"] & hash_sets["sealed_public"]),
-        "validation_sealed_public": len(
-            hash_sets["validation"] & hash_sets["sealed_public"]
-        ),
-    }
-    if any(overlaps.values()):
-        raise RuntimeError("OCR V31 split fixture bytes overlap")
-    value: dict[str, object] = {
-        "schema": "graphreader.ocr-robust-quorum-recall-split-seal.v1",
-        "revision": REVISION,
-        "source_commit": _repository_head(),
-        "protocol": protocol_configuration(),
-        "source_sha256": {
-            path.as_posix(): sha256_file(REPO_ROOT / path) for path in SOURCE_PATHS
-        },
-        "source_bundle_sha256": source_bundle_sha256(REPO_ROOT, SOURCE_PATHS),
-        "splits": records,
-        "cross_split_source_overlap_counts": overlaps,
-        "optimizer_steps_at_freeze": 0,
-        "selection_evaluations": 0,
-        "public_evaluations": 0,
-        "candidate_execution_authorized": False,
-        "public_execution_authorized": False,
-        "marker_creation_evaluated": False,
-        "private_data": False,
-        "chandler_used": False,
-        "production_approval": False,
-        "release_eligible": False,
-    }
-    (REPO_ROOT / SEAL_PATH).write_bytes(canonical_json_bytes(value))
-    return value
+        if any(overlaps.values()):
+            raise RuntimeError("OCR V31 split fixture bytes overlap")
+        value: dict[str, object] = {
+            "schema": "graphreader.ocr-robust-quorum-recall-split-seal.v1",
+            "revision": REVISION,
+            "source_commit": _repository_head(),
+            "protocol": protocol_configuration(),
+            "source_sha256": {
+                path.as_posix(): sha256_file(REPO_ROOT / path) for path in SOURCE_PATHS
+            },
+            "source_bundle_sha256": source_bundle_sha256(REPO_ROOT, SOURCE_PATHS),
+            "splits": records,
+            "cross_split_source_overlap_counts": overlaps,
+            "optimizer_steps_at_freeze": 0,
+            "selection_evaluations": 0,
+            "public_evaluations": 0,
+            "candidate_execution_authorized": False,
+            "public_execution_authorized": False,
+            "marker_creation_evaluated": False,
+            "private_data": False,
+            "chandler_used": False,
+            "production_approval": False,
+            "release_eligible": False,
+        }
+        (REPO_ROOT / temporary_seal_path).write_bytes(canonical_json_bytes(value))
+        for split, relative in ARCHIVE_PATHS.items():
+            temporary = temporary_archive_paths[split]
+            (REPO_ROOT / temporary).replace(REPO_ROOT / relative)
+            published.append((relative, temporary))
+        (REPO_ROOT / temporary_seal_path).replace(REPO_ROOT / SEAL_PATH)
+        return value
+    except BaseException:
+        for relative, temporary in reversed(published):
+            final_path = REPO_ROOT / relative
+            temporary_path = REPO_ROOT / temporary
+            if final_path.exists() and not temporary_path.exists():
+                final_path.replace(temporary_path)
+        raise
+    finally:
+        for temporary in (*temporary_archive_paths.values(), temporary_seal_path):
+            (REPO_ROOT / temporary).unlink(missing_ok=True)
 
 
 def main() -> int:

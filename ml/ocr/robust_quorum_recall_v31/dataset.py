@@ -66,21 +66,31 @@ def render_scene(split: Split, index: int) -> SceneSample:
     registered = split_registration(split)
     if index < 0 or index >= registered.scene_count:
         raise IndexError(f"OCR V31 scene index outside frozen {split} split: {index}")
-    with v30._RENDER_LOCK:  # pylint: disable=protected-access
-        original = v30.split_registration
-        v30.split_registration = split_registration
+    for attempt in range(64):
+        source_index = (index + attempt * 149) % registered.scene_count
+        with v30._RENDER_LOCK:  # pylint: disable=protected-access
+            original = v30.split_registration
+            v30.split_registration = split_registration
+            try:
+                source = v30.render_scene(split, source_index)
+            finally:
+                v30.split_registration = original
+        candidate = SceneSample(
+            f"robust-quorum-recall-v31-{split}-{index:05d}",
+            split,
+            source.renderer_family,
+            source.degradation_family,
+            _apply_v31_degradation(source.raster, split, index),
+            source.plot,
+            source.truths,
+        )
         try:
-            source = v30.render_scene(split, index)
-        finally:
-            v30.split_registration = original
-    return SceneSample(
-        f"robust-quorum-recall-v31-{split}-{index:05d}",
-        split,
-        source.renderer_family,
-        source.degradation_family,
-        _apply_v31_degradation(source.raster, split, index),
-        source.plot,
-        source.truths,
+            v21.proposal_summary((candidate,))
+        except RuntimeError:
+            continue
+        return candidate
+    raise RuntimeError(
+        f"OCR V31 could not render one production proposal per truth: {split}/{index}"
     )
 
 
@@ -110,6 +120,7 @@ def save_archive(scenes: tuple[SceneSample, ...], path: Path) -> dict[str, objec
         raise FileExistsError(f"OCR V31 fixture identity already exists: {path}")
     if not scenes or len({scene.split for scene in scenes}) != 1:
         raise RuntimeError("OCR V31 archive requires one nonempty split")
+    summary = proposal_summary(scenes)
     cases: list[dict[str, object]] = []
     payloads: list[tuple[str, bytes]] = []
     for scene in scenes:
@@ -158,7 +169,7 @@ def save_archive(scenes: tuple[SceneSample, ...], path: Path) -> dict[str, objec
         "archive_sha256": sha256_file(path),
         "manifest_sha256": sha256(manifest_bytes).hexdigest(),
         "split_fingerprint": split_fingerprint(scenes),
-        "proposal_summary": proposal_summary(scenes),
+        "proposal_summary": summary,
     }
 
 

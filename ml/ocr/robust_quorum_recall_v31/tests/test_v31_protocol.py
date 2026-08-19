@@ -10,9 +10,12 @@ from pathlib import Path
 import pytest
 import torch
 
+from ml.ocr.robust_quorum_recall_v31 import dataset as v31_dataset
+from ml.ocr.robust_quorum_recall_v31 import prepare_split
 from ml.ocr.robust_quorum_recall_v31.dataset import (
     proposal_summary,
     render_scene,
+    save_archive,
     split_fingerprint,
 )
 from ml.ocr.robust_quorum_recall_v31.model import RobustQuorumRecallProposalNet
@@ -111,6 +114,88 @@ def test_visible_renderer_is_deterministic_and_proposal_complete() -> None:
         assert summary["exactly_one_production_proposal_per_truth"] is True
         assert summary["positive_proposal_count"] == 8
         assert "v31" in scene.scene_id
+
+
+def test_renderer_retries_after_post_degradation_proposal_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source = render_scene("train", 0)
+    source_indices: list[int] = []
+    summary_calls = 0
+
+    def fake_render(split: str, index: int):
+        source_indices.append(index)
+        return source
+
+    def fake_summary(scenes):
+        nonlocal summary_calls
+        summary_calls += 1
+        if summary_calls == 1:
+            raise RuntimeError("generic incomplete proposal coverage")
+        return {"exactly_one_production_proposal_per_truth": True}
+
+    monkeypatch.setattr(v31_dataset.v30, "render_scene", fake_render)
+    monkeypatch.setattr(v31_dataset.v21, "proposal_summary", fake_summary)
+    candidate = v31_dataset.render_scene("train", 0)
+    assert candidate.scene_id == "robust-quorum-recall-v31-train-00000"
+    assert source_indices == [0, 149]
+
+
+def test_archive_validation_precedes_file_creation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    scene = render_scene("train", 0)
+    archive = tmp_path / "invalid.zip"
+    monkeypatch.setattr(
+        v31_dataset,
+        "proposal_summary",
+        lambda _scenes: (_ for _ in ()).throw(RuntimeError("invalid proposals")),
+    )
+    with pytest.raises(RuntimeError, match="invalid proposals"):
+        save_archive((scene,), archive)
+    assert not archive.exists()
+
+
+def test_freeze_cleans_temporary_archives_after_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    scene = render_scene("train", 0)
+    archives = {
+        "train": Path("train.zip"),
+        "validation": Path("selection.zip"),
+        "sealed_public": Path("public.zip"),
+    }
+    writes = 0
+
+    def fake_save(_scenes, path: Path):
+        nonlocal writes
+        writes += 1
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"temporary")
+        if writes == 3:
+            raise RuntimeError("generic freeze failure")
+        return {
+            "archive_path": path.as_posix(),
+            "archive_sha256": "0" * 64,
+            "manifest_sha256": "1" * 64,
+            "split_fingerprint": "2" * 64,
+            "proposal_summary": {},
+        }
+
+    monkeypatch.setattr(prepare_split, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(prepare_split, "SEAL_PATH", Path("SPLIT_SEAL.json"))
+    monkeypatch.setattr(prepare_split, "ARCHIVE_PATHS", archives)
+    monkeypatch.setattr(prepare_split, "_require_sources_at_head", lambda: None)
+    monkeypatch.setattr(prepare_split, "build_split", lambda _split: (scene,))
+    monkeypatch.setattr(prepare_split, "save_archive", fake_save)
+    with pytest.raises(RuntimeError, match="generic freeze failure"):
+        prepare_split.freeze()
+    assert not (tmp_path / "SPLIT_SEAL.json").exists()
+    for path in archives.values():
+        assert not (tmp_path / path).exists()
+        assert not (tmp_path / f"{path.as_posix()}.freeze.tmp").exists()
 
 
 def test_quorum_uses_median_margin_and_tolerates_one_route() -> None:
