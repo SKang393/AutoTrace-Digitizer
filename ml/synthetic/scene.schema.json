@@ -383,10 +383,12 @@
           "enum": [
             3.5,
             4.0,
+            4.4,
             4.5,
             5.0,
             5.5,
-            6.0
+            6.0,
+            6.2
           ]
         },
         "session_spacing": {
@@ -629,6 +631,14 @@
         },
         "grayscale": {
           "type": "boolean"
+        },
+        "dense_tick_labels": {
+          "type": "boolean"
+        },
+        "font_size_px": {
+          "type": "integer",
+          "minimum": 6,
+          "maximum": 64
         },
         "monochrome": {
           "type": "boolean"

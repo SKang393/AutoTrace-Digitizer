@@ -43,13 +43,16 @@ def test_tracked_private_result_is_aggregate_only() -> None:
     assert "Generalization" not in serialized
 
 
-def test_real_contradiction_triggers_stop_and_blocks_approval() -> None:
+def test_real_contradiction_redirects_to_generator_repair_and_blocks_approval() -> None:
     result = json.loads(AGGREGATE_PATH.read_text(encoding="utf-8"))
 
-    assert result["stop_condition"]["triggered"] is True
-    assert result["stop_condition"]["reason"] == (
-        "real acceptance set contradicts passing synthetic gate"
-    )
+    assert result["stop_condition"]["triggered"] is False
+    assert result["workflow_redirect"] == {
+        "triggered": True,
+        "phase": "4R",
+        "reason": "real acceptance contradicts passing synthetic evidence",
+        "private_training_or_selection_permitted": False,
+    }
     assert all(stage["status"] == "fail" for stage in result["stages"])
     assert result["production_approval"] is False
     assert result["release_eligible"] is False

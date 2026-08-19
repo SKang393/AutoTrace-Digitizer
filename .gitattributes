@@ -47,3 +47,4 @@ ml/markers/classifier/manifests/public-v3.json text eol=lf
 ml/markers/classifier/manifests/confirmation-v3.json text eol=lf
 ml/markers/training-seals/marker-classifier/marker-classifier-production-runtime-repair-v2/P1/** text eol=lf
 ml/markers/gate-seals/marker-classifier/** text eol=lf
+ml/synthetic/LICENSES/*.txt text eol=lf

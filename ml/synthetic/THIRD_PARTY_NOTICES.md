@@ -47,6 +47,6 @@ installed metadata after copying. Their SHA-256 values are:
 
 | License artifact | SHA-256 |
 | --- | --- |
-| Pillow 12.3.0 `LICENSE` | `4f7866a74802c6326f81faff59a56546b6aec2b10b91973e0e9308de95e79857` |
+| Pillow 12.3.0 `LICENSE` | `51ed379cf673c9676b7fa7e1bedbfc5d4ad63caac4f6f99eeec5ccab50c3e0ef` |
 | jsonschema 4.26.0 `COPYING` | `4f92a015a13c4d1a040bef018aa13430b4f1bc73b41b16bb846c346766de7439` |
 | pytest 9.1.1 `LICENSE` | `ca836a5f9ecca3b2f350230faa20a48fb8b145653b5568d784862df864706b9b` |

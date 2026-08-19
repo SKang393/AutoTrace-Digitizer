@@ -6,14 +6,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from importlib.metadata import version as package_version
+import math
 from pathlib import Path
+import statistics
 from typing import Any, Iterable, Mapping, Sequence
 
 from PIL import Image
 
 from .contact_sheet import build_contact_sheet
 from .io import sha256, write_csv, write_json, write_png
-from .renderer import render_scene
+from .renderer import production_resize_dimensions, render_scene
 from .schema import validate_scene
 from .templates import (
     FILL_STATES,
@@ -72,6 +74,12 @@ class CaseSpec:
     panel_count: int
     session_count: int
     features: tuple[str, ...] = ()
+    canvas_width: int = 1200
+    panel_height: int = 270
+    marker_radius: float | None = None
+    stroke_width: int | None = None
+    presentation: Mapping[str, Any] | None = None
+    degradations: tuple[Mapping[str, Any], ...] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -133,6 +141,51 @@ PRESETS: dict[str, tuple[CaseSpec, ...]] = {
             ("blank_phase_gaps",),
         ),
     ),
+    "real_range": (
+        CaseSpec(
+            "multiple_probe",
+            "vector_clean",
+            1,
+            24,
+            ("sparse_probes",),
+            canvas_width=863,
+            panel_height=315,
+            marker_radius=4.4,
+            stroke_width=2,
+            presentation={
+                "dense_tick_labels": True,
+                "font_size_px": 18,
+                "grayscale": False,
+                "monochrome": False,
+            },
+        ),
+        CaseSpec(
+            "ab", "print_monochrome", 1, 24,
+            canvas_width=768, panel_height=304, marker_radius=5.0,
+            stroke_width=1, presentation={"font_size_px": 18},
+        ),
+        CaseSpec(
+            "abab", "scan_rough", 1, 24,
+            canvas_width=1024, panel_height=482, marker_radius=6.2,
+            stroke_width=3, presentation={"font_size_px": 18},
+        ),
+        *(
+            CaseSpec(
+                "ab", "scan_rough", 1, 24,
+                canvas_width=640, panel_height=240, marker_radius=4.4,
+                stroke_width=1 if quality == 55 else 2,
+                presentation={"font_size_px": 17},
+                degradations=({
+                    "stage": 1,
+                    "family_key": "real-range-jpeg-roundtrip",
+                    "kind": "jpeg",
+                    "parameters": {"quality": quality},
+                    "deterministic": True,
+                },),
+            )
+            for quality in (55, 70, 85)
+        ),
+    ),
 }
 
 
@@ -177,9 +230,14 @@ def generate_dataset(
     )
     destination.mkdir(parents=True, exist_ok=True)
 
-    scenes = _build_scenes(PRESETS[preset], seed)
+    scenes = _build_scenes(
+        PRESETS[preset],
+        seed,
+        require_complete_style_catalog=preset == "smoke",
+    )
     case_entries: list[dict[str, Any]] = []
     rendered_images: list[Image.Image] = []
+    rendered_image_paths: list[Path] = []
     output_files: list[Path] = []
     all_annotations: list[Mapping[str, Any]] = []
 
@@ -204,6 +262,7 @@ def generate_dataset(
         }
         output_files.extend(payloads)
         rendered_images.append(image.copy())
+        rendered_image_paths.append(image_path)
         all_annotations.append(annotation)
 
         split = _scene_split(scene)
@@ -232,10 +291,28 @@ def generate_dataset(
         write_json(path, payload)
         output_files.append(path)
 
-    sanity = _dataset_sanity(scenes, all_annotations, case_entries)
+    sanity = _dataset_sanity(
+        scenes,
+        all_annotations,
+        case_entries,
+        require_full_acceptance_matrix=preset == "smoke",
+    )
     sanity_path = destination / "sanity-report.json"
     write_json(sanity_path, sanity)
     output_files.append(sanity_path)
+
+    if preset == "real_range":
+        distribution_path = destination / "distribution-report.json"
+        write_json(
+            distribution_path,
+            _real_range_distribution_report(
+                scenes,
+                all_annotations,
+                rendered_images,
+                rendered_image_paths,
+            ),
+        )
+        output_files.append(distribution_path)
 
     contact_sheet = build_contact_sheet(rendered_images)
     contact_path = destination / "contact-sheet.png"
@@ -271,7 +348,284 @@ def generate_dataset(
     )
 
 
-def _build_scenes(specs: Sequence[CaseSpec], dataset_seed: int) -> list[dict[str, Any]]:
+def _real_range_distribution_report(
+    scenes: Sequence[Mapping[str, Any]],
+    annotations: Sequence[Mapping[str, Any]],
+    images: Sequence[Image.Image],
+    image_paths: Sequence[Path],
+) -> dict[str, Any]:
+    if not (
+        len(scenes) == len(annotations) == len(images) == len(image_paths)
+    ):
+        raise AssertionError(
+            "Real-range scene, annotation, image, and encoded streams diverged."
+        )
+    text_heights_by_case = [
+        _measure_text_heights(image, annotation)
+        for image, annotation in zip(images, annotations, strict=True)
+    ]
+    source_text_heights = [
+        height for heights in text_heights_by_case for height in heights
+    ]
+    resize_records = [
+        production_resize_dimensions(
+            int(scene["canvas"]["width"]),
+            int(scene["canvas"]["height"]),
+            maximum_side=960,
+            stride=128,
+        )
+        for scene in scenes
+    ]
+    db_text_heights = [
+        height * float(resize["tensor_scale_y"])
+        for heights, resize in zip(
+            text_heights_by_case,
+            resize_records,
+            strict=True,
+        )
+        for height in heights
+    ]
+    marker_diameters = [
+        diameter
+        for image, annotation in zip(images, annotations, strict=True)
+        for diameter in _measure_circle_diameters(image, annotation)
+    ]
+    stroke_widths = [
+        width
+        for image, annotation in zip(images, annotations, strict=True)
+        for width in _measure_open_circle_strokes(image, annotation)
+    ]
+    region_counts = [
+        len(_annotation_records(annotation, "texts"))
+        for annotation in annotations
+    ]
+    envelope = {
+        "source_text_height_px": [13.0, 16.0],
+        "db_aligned_text_height_px": [16.85, 20.74],
+        "marker_diameter_px": [10.0, 12.0],
+        "open_stroke_width_px": [1.4, 1.74],
+        "text_region_count": 38,
+    }
+    source_range = [min(source_text_heights), max(source_text_heights)]
+    db_range = [min(db_text_heights), max(db_text_heights)]
+    diameter_range = [min(marker_diameters), max(marker_diameters)]
+    stroke_range = [min(stroke_widths), max(stroke_widths)]
+    encoded_png = [_png_header(path) for path in image_paths]
+    modes = sorted({record["mode"] for record in encoded_png})
+    bit_depths = sorted({int(record["bit_depth"]) for record in encoded_png})
+    color_types = sorted({int(record["color_type"]) for record in encoded_png})
+    compression_methods = sorted(
+        {int(record["compression_method"]) for record in encoded_png}
+    )
+    filter_methods = sorted({int(record["filter_method"]) for record in encoded_png})
+    interlace_methods = sorted(
+        {int(record["interlace_method"]) for record in encoded_png}
+    )
+    jpeg_qualities = sorted(
+        {
+            int(stage["parameters"]["quality"])
+            for scene in scenes
+            for stage in scene.get("degradations", [])
+            if stage.get("kind") == "jpeg"
+        }
+    )
+    gates = {
+        "exact_863x395_case": any(
+            int(scene["canvas"]["width"]) == 863
+            and int(scene["canvas"]["height"]) == 395
+            for scene in scenes
+        ),
+        "source_text_contains_envelope": (
+            source_range[0] <= envelope["source_text_height_px"][0]
+            and source_range[1] >= envelope["source_text_height_px"][1]
+        ),
+        "db_text_contains_envelope": (
+            db_range[0] <= envelope["db_aligned_text_height_px"][0]
+            and db_range[1] >= envelope["db_aligned_text_height_px"][1]
+        ),
+        "marker_diameter_contains_envelope": (
+            diameter_range[0] <= envelope["marker_diameter_px"][0]
+            and diameter_range[1] >= envelope["marker_diameter_px"][1]
+        ),
+        "marker_stroke_contains_envelope": (
+            stroke_range[0] <= envelope["open_stroke_width_px"][0]
+            and stroke_range[1] >= envelope["open_stroke_width_px"][1]
+        ),
+        "text_region_count_spans_measurement": (
+            min(region_counts) <= envelope["text_region_count"] <= max(region_counts)
+        ),
+        "rgb8_png": (
+            modes == ["RGB"]
+            and bit_depths == [8]
+            and color_types == [2]
+            and compression_methods == [0]
+            and filter_methods == [0]
+            and interlace_methods == [0]
+        ),
+        "jpeg_roundtrip_qualities": jpeg_qualities == [55, 70, 85],
+    }
+    if not all(gates.values()):
+        failed = sorted(name for name, passed in gates.items() if not passed)
+        raise AssertionError(
+            "Real-range synthetic distribution gate failed: " + ", ".join(failed)
+        )
+    return {
+        "schema_version": 1,
+        "report_scope": "synthetic_real_range_aggregate_only",
+        "source_dimensions": sorted(
+            {f"{int(scene['canvas']['width'])}x{int(scene['canvas']['height'])}" for scene in scenes}
+        ),
+        "source_pixel_format": {
+            "modes": modes,
+            "bit_depths": bit_depths,
+            "png_color_types": color_types,
+        },
+        "png_encoding": {
+            "compression_methods": compression_methods,
+            "filter_methods": filter_methods,
+            "interlace_methods": interlace_methods,
+        },
+        "jpeg_roundtrip_qualities": jpeg_qualities,
+        "source_text_height_px": source_range,
+        "db_aligned_text_height_px": db_range,
+        "db_resize_records": resize_records,
+        "marker_diameter_px": diameter_range,
+        "open_stroke_width_px": stroke_range,
+        "text_region_counts": region_counts,
+        "envelope": envelope,
+        "gates": gates,
+        "measurement_methods": {
+            "text_height": "foreground pixel bounds inside each truth-authorized rendered text box",
+            "marker_diameter": "median farthest dark-pixel radius across 72 truth-center rays",
+            "open_stroke": "upper-arc dark radial p90 minus p10 inside each truth-authorized open circle",
+            "png_encoding": "decoded IHDR bytes from every emitted PNG",
+        },
+    }
+
+
+def _measure_text_heights(
+    image: Image.Image,
+    annotation: Mapping[str, Any],
+) -> list[float]:
+    gray = image.convert("L")
+    heights: list[float] = []
+    for text in _annotation_records(annotation, "texts"):
+        box = text.get("rendered_pixel_box")
+        if not text.get("visible") or not text.get("text") or not box:
+            continue
+        left, top, width, height = (float(value) for value in box)
+        crop = gray.crop((
+            max(0, math.floor(left)),
+            max(0, math.floor(top)),
+            min(gray.width, math.ceil(left + width)),
+            min(gray.height, math.ceil(top + height)),
+        ))
+        foreground = crop.point(lambda value: 255 if value < 200 else 0)
+        pixel_box = foreground.getbbox()
+        if pixel_box is not None:
+            heights.append(float(pixel_box[3] - pixel_box[1]))
+    return heights
+
+
+def _measure_circle_diameters(
+    image: Image.Image,
+    annotation: Mapping[str, Any],
+) -> list[float]:
+    gray = image.convert("L")
+    diameters: list[float] = []
+    for marker in _annotation_records(annotation, "markers"):
+        if marker.get("shape") != "circle":
+            continue
+        center_x, center_y = (float(value) for value in marker["center"])
+        _, _, box_width, box_height = (float(value) for value in marker["box"])
+        search_radius = max(box_width, box_height) / 2.0 + 3.0
+        farthest: list[float] = []
+        for angle_index in range(72):
+            angle = math.tau * angle_index / 72.0
+            dark_radii: list[float] = []
+            step_count = max(1, math.ceil((search_radius - 0.5) / 0.25))
+            for step_index in range(step_count + 1):
+                radius = min(search_radius, 0.5 + step_index * 0.25)
+                x = max(0, min(gray.width - 1, round(
+                    center_x + radius * math.cos(angle)
+                )))
+                y = max(0, min(gray.height - 1, round(
+                    center_y + radius * math.sin(angle)
+                )))
+                if gray.getpixel((x, y)) < 160:
+                    dark_radii.append(radius)
+            if dark_radii:
+                farthest.append(max(dark_radii))
+        if farthest:
+            diameters.append(2.0 * statistics.median(farthest))
+    return diameters
+
+
+def _measure_open_circle_strokes(
+    image: Image.Image,
+    annotation: Mapping[str, Any],
+) -> list[float]:
+    gray = image.convert("L")
+    widths: list[float] = []
+    for marker in _annotation_records(annotation, "markers"):
+        if marker.get("shape") != "circle" or marker.get("fill") != "open":
+            continue
+        center_x, center_y = (float(value) for value in marker["center"])
+        _, _, box_width, box_height = (float(value) for value in marker["box"])
+        search_radius = max(box_width, box_height) / 2.0 + 3.0
+        radial: list[float] = []
+        x_start = max(0, math.floor(center_x - search_radius))
+        x_end = min(gray.width - 1, math.ceil(center_x + search_radius))
+        y_start = max(0, math.floor(center_y - search_radius))
+        y_end = min(gray.height - 1, math.floor(center_y - 2.0))
+        for y in range(y_start, y_end + 1):
+            for x in range(x_start, x_end + 1):
+                radius = math.hypot(x - center_x, y - center_y)
+                if radius <= search_radius and gray.getpixel((x, y)) < 160:
+                    radial.append(radius)
+        if radial:
+            widths.append(
+                _percentile(radial, 0.90) - _percentile(radial, 0.10)
+            )
+    return widths
+
+
+def _percentile(values: Sequence[float], fraction: float) -> float:
+    ordered = sorted(float(value) for value in values)
+    if not ordered:
+        raise ValueError("A percentile requires at least one value.")
+    position = (len(ordered) - 1) * fraction
+    lower = math.floor(position)
+    upper = math.ceil(position)
+    if lower == upper:
+        return ordered[lower]
+    weight = position - lower
+    return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
+
+
+def _png_header(path: Path) -> dict[str, Any]:
+    payload = path.read_bytes()
+    if len(payload) < 29 or payload[:8] != b"\x89PNG\r\n\x1a\n":
+        raise AssertionError(f"Synthetic image is not a complete PNG: {path.name}")
+    with Image.open(path) as image:
+        mode = image.mode
+        image.verify()
+    return {
+        "mode": mode,
+        "bit_depth": payload[24],
+        "color_type": payload[25],
+        "compression_method": payload[26],
+        "filter_method": payload[27],
+        "interlace_method": payload[28],
+    }
+
+
+def _build_scenes(
+    specs: Sequence[CaseSpec],
+    dataset_seed: int,
+    *,
+    require_complete_style_catalog: bool = True,
+) -> list[dict[str, Any]]:
     scenes: list[dict[str, Any]] = []
     style_catalog = [
         (shape, fill)
@@ -290,6 +644,11 @@ def _build_scenes(specs: Sequence[CaseSpec], dataset_seed: int) -> list[dict[str
             spec.panel_count,
             session_count=spec.session_count,
             features=spec.features,
+            canvas_width=spec.canvas_width,
+            panel_height=spec.panel_height,
+            marker_radius=spec.marker_radius,
+            stroke_width=spec.stroke_width,
+            presentation=spec.presentation,
         )
         for panel in scene["panels"]:
             points_by_series: dict[str, list[dict[str, Any]]] = {}
@@ -311,9 +670,12 @@ def _build_scenes(specs: Sequence[CaseSpec], dataset_seed: int) -> list[dict[str
                     # reassigned style. Avoid retaining a stale template polygon.
                     point["mask"] = None
         validate_scene(scene)
+        if spec.degradations is not None:
+            scene["degradations"] = [dict(item) for item in spec.degradations]
+            validate_scene(scene)
         scenes.append(scene)
 
-    if style_index < len(style_catalog):
+    if require_complete_style_catalog and style_index < len(style_catalog):
         raise AssertionError(
             f"Smoke matrix exposes {style_index} series but needs "
             f"{len(style_catalog)} for complete marker style coverage."
@@ -550,6 +912,8 @@ def _dataset_sanity(
     scenes: Sequence[Mapping[str, Any]],
     annotations: Sequence[Mapping[str, Any]],
     cases: Sequence[Mapping[str, Any]],
+    *,
+    require_full_acceptance_matrix: bool = True,
 ) -> dict[str, Any]:
     markers = [
         marker
@@ -667,48 +1031,50 @@ def _dataset_sanity(
     expected_styles = {
         (shape, fill) for shape in MARKER_SHAPES for fill in FILL_STATES
     }
-    _require_subset("marker styles", expected_styles, marker_styles, failures)
-    _require_subset("line styles", set(LINE_STYLES), line_styles, failures)
-    _require_subset(
-        "hard negatives",
-        set(HARD_NEGATIVE_KINDS),
-        hard_negative_kinds,
-        failures,
-    )
-    _require_subset("text roles", set(REQUIRED_TEXT_ROLES), roles, failures)
-    _require_subset("scene features", set(SCENE_FEATURES), feature_set, failures)
-    _require_subset("panel counts", {1, 6}, panel_counts, failures)
-    _require_subset("session counts", {2, 100}, session_counts, failures)
+    if require_full_acceptance_matrix:
+        _require_subset("marker styles", expected_styles, marker_styles, failures)
+        _require_subset("line styles", set(LINE_STYLES), line_styles, failures)
+        _require_subset(
+            "hard negatives",
+            set(HARD_NEGATIVE_KINDS),
+            hard_negative_kinds,
+            failures,
+        )
+        _require_subset("text roles", set(REQUIRED_TEXT_ROLES), roles, failures)
+        _require_subset("scene features", set(SCENE_FEATURES), feature_set, failures)
+        _require_subset("panel counts", {1, 6}, panel_counts, failures)
+        _require_subset("session counts", {2, 100}, session_counts, failures)
     if not degradation_stage_counts or not degradation_stage_counts <= {1, 2}:
         failures.append(
             "degradation stage counts must contain only one or two stages, got "
             f"{sorted(degradation_stage_counts)}"
         )
-    _require_subset(
-        "x label visibility",
-        {"visible", "partial", "hidden"},
-        x_label_visibility,
-        failures,
-    )
-    _require_subset(
-        "legend positions",
-        {"inside", "outside"},
-        legend_positions,
-        failures,
-    )
-    _require_subset(
-        "divider styles",
-        {"dotted"},
-        divider_styles,
-        failures,
-    )
-    if True not in shared_axes_values:
-        failures.append("missing shared-axis scene")
-    if True not in hidden_zero_values:
-        failures.append("missing hidden-zero-label scene")
-    for feature, covered in decoration_coverage.items():
-        if not covered:
-            failures.append(f"missing presentation decoration: {feature}")
+    if require_full_acceptance_matrix:
+        _require_subset(
+            "x label visibility",
+            {"visible", "partial", "hidden"},
+            x_label_visibility,
+            failures,
+        )
+        _require_subset(
+            "legend positions",
+            {"inside", "outside"},
+            legend_positions,
+            failures,
+        )
+        _require_subset(
+            "divider styles",
+            {"dotted"},
+            divider_styles,
+            failures,
+        )
+        if True not in shared_axes_values:
+            failures.append("missing shared-axis scene")
+        if True not in hidden_zero_values:
+            failures.append("missing hidden-zero-label scene")
+        for feature, covered in decoration_coverage.items():
+            if not covered:
+                failures.append(f"missing presentation decoration: {feature}")
     for label, values in (
         ("y-axis profiles", y_axis_profiles),
         ("stroke widths", stroke_widths),

@@ -5,6 +5,7 @@ and perfect original-pixel annotations. It uses no published figures, private
 images, downloaded assets, or bundled font files.
 
     python -m ml.synthetic.generate --preset smoke --seed 393
+    python -m ml.synthetic.generate --preset real_range --seed 393
     python -m pytest ml/synthetic/tests -q
 
 The default output is written below ml/synthetic/datasets/, which is ignored by
@@ -32,3 +33,12 @@ eligible installed font can be found.
 - pytest: MIT license, test-only.
 
 Generated scenes are original project output and contain no copied study data.
+
+## Publication-range profile
+
+The `real_range` preset is a deterministic, synthetic-only coverage matrix for
+compact publication graphs. It includes the measured aggregate resolution,
+text-height, marker-size, stroke-width, text-density, RGB8 PNG, JPEG-roundtrip,
+and production 960-long-side/128-stride preprocessing envelope. Its
+`distribution-report.json` is a fail-closed aggregate gate. No private image,
+text, case identity, or model output is used by the preset.

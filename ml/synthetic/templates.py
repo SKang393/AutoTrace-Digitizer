@@ -297,6 +297,10 @@ def build_scene(
     session_count: int | None = None,
     features: Iterable[str] | None = None,
     presentation: Mapping[str, Any] | None = None,
+    canvas_width: int = 1200,
+    panel_height: int = 270,
+    marker_radius: float | None = None,
+    stroke_width: int | None = None,
 ) -> dict[str, Any]:
     """Build and schema-validate a deterministic declarative graph scene.
 
@@ -320,6 +324,14 @@ def build_scene(
         raise TypeError("panel_count must be an integer")
     if not 1 <= resolved_panel_count <= 6:
         raise ValueError("panel_count must be between 1 and 6")
+    if isinstance(canvas_width, bool) or not isinstance(canvas_width, int) or not 320 <= canvas_width <= 10000:
+        raise ValueError("canvas_width must be an integer from 320 through 10000")
+    if isinstance(panel_height, bool) or not isinstance(panel_height, int) or panel_height <= 0:
+        raise ValueError("panel_height must be a positive integer")
+    if marker_radius is not None and (not math.isfinite(float(marker_radius)) or float(marker_radius) <= 0):
+        raise ValueError("marker_radius must be positive")
+    if stroke_width is not None and (isinstance(stroke_width, bool) or not isinstance(stroke_width, int) or stroke_width <= 0):
+        raise ValueError("stroke_width must be a positive integer")
 
     session_rng = _rng(seed_value, "session-count")
     resolved_session_count = (
@@ -352,10 +364,21 @@ def build_scene(
 
     default_presentation = _presentation_defaults(seed_value, renderer_family)
     if presentation:
-        unknown = set(presentation) - set(default_presentation)
+        presentation_values = dict(presentation)
+        font_size_px = presentation_values.pop("font_size_px", None)
+        dense_tick_labels = presentation_values.pop("dense_tick_labels", None)
+        if font_size_px is not None:
+            if isinstance(font_size_px, bool) or not isinstance(font_size_px, int) or not 6 <= font_size_px <= 64:
+                raise ValueError("presentation.font_size_px must be an integer from 6 through 64")
+            default_presentation["font_size_px"] = font_size_px
+        if dense_tick_labels is not None:
+            if not isinstance(dense_tick_labels, bool):
+                raise ValueError("presentation.dense_tick_labels must be a boolean")
+            default_presentation["dense_tick_labels"] = dense_tick_labels
+        unknown = set(presentation_values) - set(default_presentation)
         if unknown:
             raise ValueError(f"Unsupported presentation keys: {sorted(unknown)}")
-        default_presentation.update(dict(presentation))
+        default_presentation.update(presentation_values)
     default_presentation["features"] = list(resolved_features)
 
     style = _style_variation(
@@ -363,6 +386,10 @@ def build_scene(
         resolved_session_count,
         irregular="irregular_spacing" in resolved_features,
     )
+    if marker_radius is not None:
+        style["marker_radius"] = float(marker_radius)
+    if stroke_width is not None:
+        style["stroke_width"] = int(stroke_width)
     x_positions = _session_positions(
         seed_value,
         resolved_session_count,
@@ -370,8 +397,6 @@ def build_scene(
         edge_padding_fraction=style["session_spacing"]["edge_padding_fraction"],
         jitter_fraction=style["session_spacing"]["jitter_fraction"],
     )
-    panel_height = 270
-    canvas_width = 1200
     canvas_height = 50 + resolved_panel_count * panel_height + 30
     shared_axes = resolved_panel_count > 1
 
@@ -717,10 +742,17 @@ def _build_panel(
     panel_y = 40 + panel_index * panel_height
     panel_box = [20.0, float(panel_y), float(canvas_width - 40), float(panel_height - 8)]
     legend_outside = presentation["legend_position"] == "outside"
-    plot_x = 105.0
-    plot_y = float(panel_y + 56)
-    plot_width = 855.0 if legend_outside else 990.0
-    plot_height = 164.0
+    if canvas_width == 1200 and panel_height == 270:
+        plot_x = 105.0
+        plot_y = float(panel_y + 56)
+        plot_width = 855.0 if legend_outside else 990.0
+        plot_height = 164.0
+    else:
+        plot_x = max(48.0, round(canvas_width * 0.0875, 4))
+        legend_reserve = 168.0 if legend_outside else 45.0
+        plot_width = max(240.0, canvas_width - plot_x - legend_reserve)
+        plot_y = float(panel_y + round(panel_height * 0.207, 4))
+        plot_height = max(120.0, round(panel_height * 0.607, 4))
     plot_box = [plot_x, plot_y, plot_width, plot_height]
     bottom = plot_y + plot_height
     right = plot_x + plot_width
@@ -968,7 +1000,10 @@ def _build_ticks(
     plot_x, plot_y, plot_width, plot_height = plot_box
     bottom = plot_y + plot_height
     ticks: list[dict[str, Any]] = []
-    step = max(1, math.ceil(session_count / 10))
+    step = 1 if presentation.get("dense_tick_labels", False) else max(
+        1,
+        math.ceil(session_count / 10),
+    )
     x_values = list(range(1, session_count + 1, step))
     if x_values[-1] != session_count:
         x_values.append(session_count)

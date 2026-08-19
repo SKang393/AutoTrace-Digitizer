@@ -36,6 +36,35 @@ RENDERER_ID = "graph-auto-reader-pillow"
 RENDERER_VERSION = "1.0"
 COORDINATE_SPACE = "original_pixels"
 
+
+def production_resize_dimensions(
+    width: int,
+    height: int,
+    *,
+    maximum_side: int = 960,
+    stride: int = 128,
+) -> dict[str, float | int]:
+    """Return deterministic DB resize and stride-alignment metadata."""
+
+    if min(width, height, maximum_side, stride) <= 0:
+        raise ValueError("resize dimensions and stride must be positive")
+    scale = maximum_side / float(max(width, height))
+    resized_width = max(1, int(width * scale))
+    resized_height = max(1, int(height * scale))
+    aligned_width = ((resized_width + stride - 1) // stride) * stride
+    aligned_height = ((resized_height + stride - 1) // stride) * stride
+    return {
+        "scale": scale,
+        "resized_width": resized_width,
+        "resized_height": resized_height,
+        "aligned_width": aligned_width,
+        "aligned_height": aligned_height,
+        "tensor_scale_x": aligned_width / float(width),
+        "tensor_scale_y": aligned_height / float(height),
+        "maximum_side": maximum_side,
+        "stride": stride,
+    }
+
 MARKER_SHAPES = frozenset(
     {
         "circle",
@@ -2032,5 +2061,6 @@ __all__ = [
     "LINE_STYLES",
     "MARKER_FILLS",
     "MARKER_SHAPES",
+    "production_resize_dimensions",
     "render_scene",
 ]

@@ -80,9 +80,15 @@
     }
   ],
   "stop_condition": {
+    "triggered": false,
+    "reason": "AGENTS.md Section 8.1 classifies a real-synthetic contradiction as a generator-repair redirect, not a hard stop",
+    "required_action": "measure the aggregate gap, repair and validate synthetic generation, then use private data only for confirmation"
+  },
+  "workflow_redirect": {
     "triggered": true,
-    "reason": "real acceptance set contradicts passing synthetic gate",
-    "required_action": "fix the generator or gate without tuning against private data"
+    "phase": "4R",
+    "reason": "real acceptance contradicts passing synthetic evidence",
+    "private_training_or_selection_permitted": false
   },
   "production_approval": false,
   "release_eligible": false
