@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 import pytest
+import numpy as np
 import torch
 
 from ml.ocr.robust_quorum_recall_v31 import dataset as v31_dataset
@@ -27,7 +28,8 @@ from ml.ocr.robust_quorum_recall_v31.protocol import (
     protocol_configuration,
     split_registration,
 )
-from ml.ocr.robust_quorum_recall_v31.train_p1 import _trigger_is_terminal, preflight
+from ml.ocr.robust_quorum_recall_v31.train_p1 import _trigger_is_terminal
+from ml.ocr.robust_quorum_recall_v31 import train_p2
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -213,9 +215,9 @@ def test_quorum_uses_median_margin_and_tolerates_one_route() -> None:
     assert rejected[0, 0, 1] < rejected[0, 0, 0]
 
 
-def test_preregistered_ledger_authorizes_only_p1_selection() -> None:
+def test_preregistered_ledger_consumes_p1_and_keeps_p2_unauthorized() -> None:
     entry = _entry()
-    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["status"] == "candidate_2_preregistered"
     assert entry["trigger_result_sha256"] == TRIGGER_RESULT_SHA256
     assert entry["trigger_case_detail_or_pixels_used"] is False
     assert entry["prior_fixture_bytes_reused"] is False
@@ -223,9 +225,9 @@ def test_preregistered_ledger_authorizes_only_p1_selection() -> None:
     assert entry["split_materialized"] is True
     assert entry["split_seal_sha256"] == _sha256(ROOT / "SPLIT_SEAL.json")
     assert entry["candidate_config_path"] == (
-        "ml/ocr/robust_quorum_recall_v31/training/p1.json"
+        "ml/ocr/robust_quorum_recall_v31/training/p2.json"
     )
-    assert entry["candidate_config_sha256"] == _sha256(ROOT / "training/p1.json")
+    assert entry["candidate_config_sha256"] == _sha256(ROOT / "training/p2.json")
     assert entry["split_source_commit"] == _read_json(ROOT / "SPLIT_SEAL.json")[
         "source_commit"
     ]
@@ -234,8 +236,15 @@ def test_preregistered_ledger_authorizes_only_p1_selection() -> None:
         "train_sealed_public": 0,
         "validation_sealed_public": 0,
     }
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["preregistered_candidate_ids"] == ["P2"]
+    assert entry["consumed_candidate_ids"] == ["P1"]
+    assert entry["selection_evaluations"] == 1
+    assert entry["p1_status"] == "failed_runner_consumed"
+    assert entry["p1_optimizer_steps"] == 0
+    assert entry["p1_selection_archive_read_count"] == 1
+    assert entry["p1_case_detail_or_pixels_inspected"] is False
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["public_gate_authorized"] is False
     assert entry["marker_creation_evaluated"] is False
     assert entry["private_validation"] is False
@@ -243,7 +252,7 @@ def test_preregistered_ledger_authorizes_only_p1_selection() -> None:
     assert entry["release_eligible"] is False
 
 
-def test_frozen_split_is_checksum_bound_and_public_remains_closed() -> None:
+def test_frozen_split_and_consumed_p1_are_bound_while_public_remains_closed() -> None:
     seal_path = ROOT / "SPLIT_SEAL.json"
     config_path = ROOT / "training/p1.json"
     seal = _read_json(seal_path)
@@ -265,13 +274,52 @@ def test_frozen_split_is_checksum_bound_and_public_remains_closed() -> None:
         assert len(seal["splits"][split]["source_sha256_inventory"]) == seal[
             "splits"
         ][split]["proposal_summary"]["scene_count"]
-    assert not (ROOT / "artifacts/P1-run").exists()
+    result = _read_json(ROOT / "P1_RESULT.json")
+    assert result["status"] == "failed_runner_consumed"
+    assert result["selection_archive_read_count"] == 1
+    assert result["public_gate_archive_opened"] is False
+    assert result["case_detail_or_pixels_inspected"] is False
+    assert _sha256(ROOT / "artifacts/P1-run/candidate-report.json") == result[
+        "candidate_report_sha256"
+    ]
+    assert not (ROOT / "artifacts/P2-run").exists()
 
 
-def test_exact_p1_selection_preflight_is_authorized() -> None:
-    evidence = preflight()
-    assert evidence["config"]["candidate_execution_authorized"] is True
+def test_exact_p2_selection_preflight_is_preregistered_but_unauthorized() -> None:
+    evidence = train_p2.preflight(require_authorized=False)
+    assert evidence["config"]["candidate_execution_authorized"] is False
     assert evidence["seal"]["candidate_execution_authorized"] is False
+    with pytest.raises(RuntimeError, match="not separately authorized"):
+        train_p2.preflight(require_authorized=True)
+
+
+def test_p2_ort_adapter_is_callable_contiguous_and_float32(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observed: dict[str, object] = {}
+
+    class Input:
+        name = "input"
+
+    class Session:
+        def get_inputs(self):
+            return [Input()]
+
+        def run(self, outputs, feeds):
+            observed["outputs"] = outputs
+            observed["values"] = feeds["input"]
+            return [np.asarray(feeds["input"], dtype=np.float64) + 1.0]
+
+    monkeypatch.setattr(train_p2, "_RAW_CPU_SESSION", lambda _path: Session())
+    runner = train_p2._callable_cpu_session(Path("fixed.onnx"))
+    source = np.arange(12, dtype=np.float32).reshape(3, 4)[:, ::2]
+    result = runner(source)
+    values = observed["values"]
+    assert isinstance(values, np.ndarray)
+    assert values.flags.c_contiguous
+    assert values.dtype == np.float32
+    assert result.dtype == np.float32
+    assert np.array_equal(result, values + 1.0)
 
 
 def test_source_inventory_binds_v31_runner_and_v30_aggregate_trigger() -> None:
@@ -288,6 +336,12 @@ def test_source_inventory_binds_v31_runner_and_v30_aggregate_trigger() -> None:
     resolved = {REPO_ROOT / path for path in SOURCE_PATHS}
     assert expected <= resolved
     assert not any("artifacts/public-gate" in path.as_posix() for path in SOURCE_PATHS)
+    assert ROOT / "train_p2.py" in {
+        REPO_ROOT / path for path in train_p2.RUNNER_SOURCE_PATHS
+    }
+    assert ROOT / "P1_RESULT.json" in {
+        REPO_ROOT / path for path in train_p2.RUNNER_SOURCE_PATHS
+    }
 
 
 def test_readme_forbids_public_reuse_and_application_synthetic_data() -> None:
@@ -296,7 +350,8 @@ def test_readme_forbids_public_reuse_and_application_synthetic_data() -> None:
     assert "No V30 case identity" in text
     assert "V30 public bytes and case identities cannot be reused" in text
     assert "zero optimizer steps" in text
-    assert "P1 is frozen and separately authorized" in text
+    assert "P1 is consumed" in text
+    assert "P2 is not execution-authorized" in text
     assert "never become application graph data" in normalized
 
 

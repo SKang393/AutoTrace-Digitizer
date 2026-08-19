@@ -29,10 +29,22 @@ counts are zero. V30 public bytes and case identities cannot be reused. The
 truth-hidden archive may be read once only after a separately committed public
 runner and a later explicit authorization.
 
-P1 is frozen and separately authorized for exactly one visible-selection
-execution. Its checksum-bound config is `candidate_execution_authorized=true`,
-the canonical budget authorizes only P1, and the candidate output does not
-exist. Selection requires three consecutive
+P1 is consumed. It opened the visible-selection archive once, completed zero
+optimizer steps, and failed before scoring because the runner passed raw ONNX
+Runtime sessions where the frozen evidence pipeline requires callable tensor
+adapters. The tracked aggregate result is SHA-256
+`b3087ce9a6c0ab7e71351fb3f2b60bde83f910b89476ffa90c9cc60fcb8f2eed`;
+no case detail or pixels were inspected, and the truth-hidden public archive
+remains unopened.
+
+P2 preregisters only the runner correction. It wraps the unchanged detector
+and recognizer sessions as contiguous float32 callables while preserving the
+exact V30 weights, frozen fixtures, preprocessing, postprocessing, thresholds,
+metrics, and gates. Its source bundle is SHA-256
+`630336a225eef62b4fd3aae7ae64d65cc77a0f266acc5bead0dad74b0a4292ae`
+and its config is SHA-256
+`1b4f968dcbd9d3be16ee8cf05b28ecc7545a166dacbd1410c33d8d9839acfabd`.
+P2 is not execution-authorized. Selection still requires three consecutive
 fixed thresholds with every scene exact, zero false regions, misses,
 duplicates, and prohibited hits, recognition exact at least `0.90`, CER at
 most `0.05`, overall role accuracy at least `0.90`, every role at least
