@@ -89,20 +89,25 @@ are `c66beaf6...c3c2`, `2fce04c6...39359`, `ab3b2fcd...67d56`, and
 `e3438bb3...bae4f`. No case identity or case-level result was emitted or
 inspected. P2 is consumed and cannot rerun.
 
-P3 is preregistered from the P1/P2 aggregates and a single aggregate-only
+P3 was preregistered from the P1/P2 aggregates and a single aggregate-only
 probe of the frozen training split. The probe confirmed that proposal-center
 coordinates relative to the plot separate all 2,048 training truths into the
 eight source-declared roles with zero overlap: plot-side boundaries are fixed
 at `0.0` and `1.0`, and the disjoint X-tick/axis-title boundary is fixed at
 `1.15`. P3 freezes the exact P1 proposal model, performs zero optimizer steps,
 and replaces only the regressing learned role residual with that deterministic
-partition. It must still prove 2,048/2,048 training role matches, exact P1
-PyTorch and ONNX proposal logits, identical decisions at every threshold, one
-single visible-selection pass, and strict CPU ONNX parity. The runner source
-bundle and execution configuration are not yet bound to a committed checkpoint,
-so P3 execution remains unauthorized.
+partition. Its only authorized run completed with 2,048/2,048 training role
+matches, exact P1 PyTorch and ONNX proposal preservation, 128/128 exact
+visible-selection scenes, zero false regions, misses, duplicates, or prohibited
+hits, perfect accuracy for all eight roles, and strict CPU ONNX parity at
+`3.337860107421875e-6`. All five fixed thresholds passed. The tracked aggregate
+result, ignored candidate report, checkpoint, and selected ONNX SHA-256 values
+are `0b56a7a7...bcf2`, `16d60e8d...11fd`, `3d3f9e14...4e46b`, and
+`4179534c...b45af`. No case identity or case-level result was emitted or
+inspected. P3 is consumed and cannot rerun.
 
-Truth-hidden public evaluation, marker
+The truth-hidden public gate requires a separately committed checksum-bound
+one-use runner and authorization and is not yet authorized. Marker
 composition, private validation, manifest creation, model-store promotion,
 packaging, production approval, and release remain unauthorized. Synthetic
 fixtures are training and public-test inputs only and are never application

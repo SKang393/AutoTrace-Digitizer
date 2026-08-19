@@ -6715,7 +6715,7 @@
     {
       "task": "ocr-detection-recognition",
       "revision": "graph-text-relational-neighborhood-proposal-v28",
-      "status": "candidate_3_preregistered",
+      "status": "candidate_3_selected_public_gate_unregistered",
       "defect_class": "V27 P1, P2, and P3 each retained the same three prohibited false regions and produced no three-threshold zero-error window despite strict CPU ONNX parity and exact role preservation",
       "prior_revision": "graph-text-morphology-veto-proposal-v27",
       "trigger_result_path": "ml/ocr/morphology_veto_proposal_v27/P3_RESULT.json",
@@ -6727,8 +6727,8 @@
       "architecture": "pairwise-geometry-relational-neighborhood-v1",
       "model_license": "Apache-2.0",
       "experiment_budget": 3,
-      "preregistered_candidate_ids": ["P3"],
-      "consumed_candidate_ids": ["P1", "P2"],
+      "preregistered_candidate_ids": [],
+      "consumed_candidate_ids": ["P1", "P2", "P3"],
       "remaining_unregistered_candidate_ids": [],
       "protocol_path": "ml/ocr/relational_neighborhood_proposal_v28/PROTOCOL.json",
       "protocol_sha256": "bbab05ad7d8c991929a87493fff592027c55c0bf734f23c63df786cac23435c1",
@@ -6811,31 +6811,38 @@
       },
       "candidate_result_paths": {
         "P1": "ml/ocr/relational_neighborhood_proposal_v28/P1_RESULT.json",
-        "P2": "ml/ocr/relational_neighborhood_proposal_v28/P2_RESULT.json"
+        "P2": "ml/ocr/relational_neighborhood_proposal_v28/P2_RESULT.json",
+        "P3": "ml/ocr/relational_neighborhood_proposal_v28/P3_RESULT.json"
       },
       "candidate_result_sha256": {
         "P1": "aa680630cdc1d94941d6864ec0ad8de5c0a9ad7763d37b18b193ad43339dc0be",
-        "P2": "c66beaf6662b91113921e26274de8d3fe1219966d122367de6bf537b6c14c3c2"
+        "P2": "c66beaf6662b91113921e26274de8d3fe1219966d122367de6bf537b6c14c3c2",
+        "P3": "0b56a7a72d4ed8cd2733cd80cfcad4c88ee0acbf404a87660b57cfe07df7bcf2"
       },
       "candidate_report_sha256": {
         "P1": "af7d6ca29d374880f479977c6b6f740193f549593b0a9a993e5e06c8b0b5c618",
-        "P2": "2fce04c67db97dcff4ba03148d2b99ba838839164ca4e10ec0dfdb2e73a39359"
+        "P2": "2fce04c67db97dcff4ba03148d2b99ba838839164ca4e10ec0dfdb2e73a39359",
+        "P3": "16d60e8d74ea38910ef97fe09365eb37102c377a8018421566d48dcfdcce11fd"
       },
       "candidate_checkpoint_sha256": {
         "P1": "7c42fff45fcd116e0f020cab4cc8e9a238d70dd943c302a5e3884cd1b570930c",
-        "P2": "ab3b2fcde7fddb10deb838f8bb73d666d08b061c80da6f052639c20015067d56"
+        "P2": "ab3b2fcde7fddb10deb838f8bb73d666d08b061c80da6f052639c20015067d56",
+        "P3": "3d3f9e147a3606af2d398ee5930a3bb51a60e6b0b41cc436d48ba1b26714e46b"
       },
       "candidate_onnx_sha256": {
         "P1": "788fe3ff7737b3a32db26533fa343477ef4f2d1db73a83f634eba6fbf6054867",
-        "P2": "e3438bb31d26670e42a18393e14fa59f97acf46d327f2fbcf6cd25329cabae4f"
+        "P2": "e3438bb31d26670e42a18393e14fa59f97acf46d327f2fbcf6cd25329cabae4f",
+        "P3": "4179534c1abfe7dd22e041d452d52269550f8a13471cbd18bacb0becd18b45af"
       },
       "candidate_training_opened_seal_sha256": {
         "P1": "c434155f0171b5250cea56d5d1b82228b99252377eaea9e321e1b4e687c5c1e3",
-        "P2": "f7afa82990b5ecacde68f4864ee2f829a2f586f2acce8146d26f6fcf0bb8716a"
+        "P2": "f7afa82990b5ecacde68f4864ee2f829a2f586f2acce8146d26f6fcf0bb8716a",
+        "P3": "dd9a66ee10586a6756fb7559ed50d0d4df68baaa4289b9f2a2b7408db840c7a8"
       },
       "candidate_training_result_seal_sha256": {
         "P1": "16e75a972135aa0723a2121d5d8d490c86aa6bec28fede0ed1a9dbb79a84c6e4",
-        "P2": "22582501b531c1927885dc56bb3af96b85321e1a5379a70e679d1f3c1124167a"
+        "P2": "22582501b531c1927885dc56bb3af96b85321e1a5379a70e679d1f3c1124167a",
+        "P3": "46f2f8a63784124cb8251ac0fe670451e53f9b345aa30b19da241957015d8067"
       },
       "candidate_1_result": {
         "status": "failed_selection",
@@ -6876,14 +6883,37 @@
         "onnx_parity_maximum_absolute_error": 0.00000476837158203125,
         "passing_threshold_window": []
       },
-      "selection_evaluations": 2,
+      "candidate_3_result": {
+        "status": "selected",
+        "optimizer_steps": 0,
+        "weights_changed": false,
+        "training_role_matches": 2048,
+        "training_role_mismatches": 0,
+        "scene_count": 128,
+        "exact_scene_count": 128,
+        "true_positives": 1024,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "duplicate_region_count": 0,
+        "prohibited_structure_hits": 0,
+        "recognition_exact": 0.97265625,
+        "character_error_rate": 0.004634994206257242,
+        "role_accuracy": 1.0,
+        "minimum_per_role_accuracy": 1.0,
+        "p1_proposal_decisions_preserved": true,
+        "p1_full_output_stream_preserved": true,
+        "candidate_onnx_graph_optimization_level": "ORT_DISABLE_ALL",
+        "onnx_parity_maximum_absolute_error": 0.000003337860107421875,
+        "passing_threshold_window": [0.35, 0.45, 0.55, 0.65, 0.75]
+      },
+      "selection_evaluations": 3,
       "public_gate_authorized": false,
       "public_gate_evaluations": 0,
       "public_gate_archive_opened": false,
-      "execution_authorized": true,
-      "authorized_candidate_id": "P3",
-      "execution_blocker": "Only the exact checksum-bound V28 P3 zero-optimizer runner may execute once against the frozen training and visible-selection archives. P1 and P2 are consumed and cannot rerun. No replacement candidate remains after P3.",
-      "execution_authorization": "V28 P3 is authorized for one committed execution using its exact configuration and runner source bundle. The truth-hidden public archive, private data, Chandler, Generalization, marker composition, manifest creation, model-store promotion, packaging discovery, production approval, and release remain unauthorized.",
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "V28 P3 passed the complete visible-selection gate and is consumed. The truth-hidden public archive may not execute until a separately committed, checksum-bound, one-use public runner and canonical authorization exist.",
+      "execution_authorization": "No V28 execution is currently authorized. P1, P2, and P3 cannot rerun. Public execution, private data, Chandler, Generalization, marker composition, manifest creation, model-store promotion, packaging discovery, production approval, and release remain unauthorized.",
       "marker_creation_evaluated": false,
       "manifest_created": false,
       "model_store_promoted": false,

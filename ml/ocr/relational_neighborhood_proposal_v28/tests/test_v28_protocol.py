@@ -138,7 +138,7 @@ def test_v27_trigger_is_exact_aggregate_only_terminal_record() -> None:
     assert "cases" not in result and "predictions" not in result
 
 
-def test_canonical_budget_consumes_failed_p1_and_p2_and_authorizes_exact_p3() -> None:
+def test_canonical_budget_consumes_selected_p3_and_keeps_public_gate_closed() -> None:
     ledger = json.loads(
         (
             REPO_ROOT / "ml/markers/training-budgets/production-repair-v1.json"
@@ -148,10 +148,10 @@ def test_canonical_budget_consumes_failed_p1_and_p2_and_authorizes_exact_p3() ->
         item for item in ledger["revisions"]
         if item["revision"] == "graph-text-relational-neighborhood-proposal-v28"
     )
-    assert entry["status"] == "candidate_3_preregistered"
+    assert entry["status"] == "candidate_3_selected_public_gate_unregistered"
     assert entry["experiment_budget"] == 3
-    assert entry["preregistered_candidate_ids"] == ["P3"]
-    assert entry["consumed_candidate_ids"] == ["P1", "P2"]
+    assert entry["preregistered_candidate_ids"] == []
+    assert entry["consumed_candidate_ids"] == ["P1", "P2", "P3"]
     assert entry["remaining_unregistered_candidate_ids"] == []
     assert entry["protocol_sha256"] == sha256_file(
         REPO_ROOT / entry["protocol_path"]
@@ -167,17 +167,17 @@ def test_canonical_budget_consumes_failed_p1_and_p2_and_authorizes_exact_p3() ->
     for candidate_id in ("P1", "P2", "P3"):
         config_path = REPO_ROOT / entry["candidate_config_paths"][candidate_id]
         assert sha256_file(config_path) == entry["candidate_config_sha256"][candidate_id]
-    for candidate_id in ("P1", "P2"):
+    for candidate_id in ("P1", "P2", "P3"):
         result_path = REPO_ROOT / entry["candidate_result_paths"][candidate_id]
         assert sha256_file(result_path) == entry["candidate_result_sha256"][candidate_id]
-    assert entry["selection_evaluations"] == 2
+    assert entry["selection_evaluations"] == 3
     assert entry["public_gate_authorized"] is False
     assert entry["public_gate_evaluations"] == 0
     assert entry["public_gate_archive_opened"] is False
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P3"
-    assert "exact checksum-bound V28 P3" in entry["execution_blocker"]
-    assert "authorized for one committed execution" in entry["execution_authorization"]
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert "passed the complete visible-selection gate" in entry["execution_blocker"]
+    assert "No V28 execution is currently authorized" in entry["execution_authorization"]
     assert "remain unauthorized" in entry["execution_authorization"]
     p2_preregistration = REPO_ROOT / entry["candidate_2_preregistration_path"]
     assert sha256_file(p2_preregistration) == entry[
@@ -686,7 +686,8 @@ def test_p3_preregistration_uses_only_aggregate_and_training_geometry_evidence()
     assert p3_config["expected_runner_source_bundle_sha256"] == source_bundle_sha256(
         REPO_ROOT, P3_RUNNER_SOURCE_PATHS,
     )
-    assert p3_preflight()["config"] == p3_config
+    with pytest.raises(RuntimeError, match="canonical authorization changed"):
+        p3_preflight()
     assert {
         P2_RESULT_PATH,
         P3_PREREGISTRATION_PATH,
@@ -694,6 +695,62 @@ def test_p3_preregistration_uses_only_aggregate_and_training_geometry_evidence()
         Path("ml/ocr/relational_neighborhood_proposal_v28/model_p3.py"),
         Path("ml/ocr/relational_neighborhood_proposal_v28/train_p3.py"),
     } <= set(P3_RUNNER_SOURCE_PATHS)
+
+
+def test_p3_selected_aggregate_is_directly_bound_and_public_remains_closed() -> None:
+    result_path = REPO_ROOT / "ml/ocr/relational_neighborhood_proposal_v28/P3_RESULT.json"
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    metrics = result["selection_metrics"]
+    assert result["candidate_id"] == "P3"
+    assert result["candidate_consumed"] is True
+    assert result["status"] == "selected"
+    assert result["selection_gate_passed"] is True
+    assert result["optimizer_steps"] == 0
+    assert result["weights_changed"] is False
+    assert result["training_role_matches"] == 2048
+    assert result["training_role_mismatches"] == 0
+    assert result["passing_threshold_window"] == [0.35, 0.45, 0.55, 0.65, 0.75]
+    assert metrics["direct_stored_fixture_byte_execution"] is True
+    assert metrics["scene_count"] == metrics["exact_scene_count"] == 128
+    assert metrics["true_positives"] == metrics["truth_region_count"] == 1024
+    assert metrics["false_positives"] == metrics["false_negatives"] == 0
+    assert metrics["duplicate_region_count"] == 0
+    assert metrics["prohibited_structure_hits"] == 0
+    assert metrics["role_accuracy"] == 1.0
+    assert set(metrics["per_role_accuracy"].values()) == {1.0}
+    assert result["p1_proposal_decisions_preserved"] is True
+    assert result["p1_full_output_stream_preserved"] is True
+    assert result["onnx_parity_passed"] is True
+    assert result["onnx_parity_maximum_absolute_error"] <= 1e-5
+    assert result["case_level_details_emitted"] is False
+    assert result["public_gate_archive_opened"] is False
+    assert result["public_gate_authorized"] is False
+    assert result["public_gate_evaluations"] == 0
+    assert result["private_validation_authorized"] is False
+    assert result["production_approval"] is False
+    assert result["release_eligible"] is False
+    assert "cases" not in result and "predictions" not in result
+
+    report_path = REPO_ROOT / result["report_path"]
+    if report_path.is_file():
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        assert sha256_file(report_path) == result["report_sha256"]
+        assert report["selection_metrics"]["exact_scene_count"] == 128
+        assert report["selection_metrics"]["role_accuracy"] == 1.0
+        assert report["selection_gate_passed"] is True
+        assert "cases" not in report and "predictions" not in report
+
+    seal_root = (
+        REPO_ROOT / "ml/markers/training-seals/ocr-detection-recognition"
+        / "graph-text-relational-neighborhood-proposal-v28/P3"
+    )
+    if seal_root.is_dir():
+        assert sha256_file(seal_root / "opened.json") == result[
+            "training_opened_seal_sha256"
+        ]
+        assert sha256_file(seal_root / "result.json") == result[
+            "training_result_seal_sha256"
+        ]
 
 
 def test_p3_geometry_partition_is_exhaustive_and_preserves_exact_p1_proposals() -> None:
