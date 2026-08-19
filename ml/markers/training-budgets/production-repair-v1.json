@@ -7255,8 +7255,8 @@
         "train_sealed_public": 0,
         "validation_sealed_public": 0
       },
-      "candidate_1_config_path": "ml/ocr/robust_quorum_recall_v31/training/p1.json",
-      "candidate_1_config_sha256": "43be8b3e4a8effc80480d2da6f457669cfc2ebfea5861f10006c9eb9412a543a",
+      "candidate_config_path": "ml/ocr/robust_quorum_recall_v31/training/p1.json",
+      "candidate_config_sha256": "43be8b3e4a8effc80480d2da6f457669cfc2ebfea5861f10006c9eb9412a543a",
       "candidate_1_architecture": "two-of-three-robust-route-quorum-v1",
       "candidate_1_objective": "zero-training-two-of-three-route-quorum-v1",
       "candidate_1_optimizer_step_limit": 0,

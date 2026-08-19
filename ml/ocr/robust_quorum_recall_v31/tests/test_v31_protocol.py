@@ -222,7 +222,10 @@ def test_preregistered_ledger_authorizes_only_p1_selection() -> None:
     assert entry["prior_checkpoint_reused"] is True
     assert entry["split_materialized"] is True
     assert entry["split_seal_sha256"] == _sha256(ROOT / "SPLIT_SEAL.json")
-    assert entry["candidate_1_config_sha256"] == _sha256(ROOT / "training/p1.json")
+    assert entry["candidate_config_path"] == (
+        "ml/ocr/robust_quorum_recall_v31/training/p1.json"
+    )
+    assert entry["candidate_config_sha256"] == _sha256(ROOT / "training/p1.json")
     assert entry["split_source_commit"] == _read_json(ROOT / "SPLIT_SEAL.json")[
         "source_commit"
     ]
