@@ -1,0 +1,85 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "P1",
+      "checkpoint_sha256": "a91044ee4621fe914377ad522d7ee3d9036f0a5e5714168684c34d2c3b8a9ceb",
+      "evidence_split": "sealed",
+      "gates": {
+        "character_error_rate": true,
+        "prohibited_structure_hits": true,
+        "role_accuracy": true,
+        "scene_exact_rate": true
+      },
+      "metrics": {
+        "character_error_rate": 0.0033769523005487546,
+        "exact_scene_count": 255,
+        "minimum_per_role_accuracy": 0.99609375,
+        "prohibited_structure_hits": 0,
+        "recognition_exact": 0.98095703125,
+        "role_accuracy": 0.99951171875,
+        "scene_count": 256,
+        "scene_exact_rate": 0.99609375
+      },
+      "name": "V30 P1 sealed aggregate",
+      "onnx_sha256": "78425c5b4a45ef2cbf99086243af0ede96c91b2b6afcdac1daa71bfeb5e55c18",
+      "product_bar_passed": true,
+      "qualification": "synthetic_candidate_approved_private_acceptance_pending",
+      "result_path": "ml/ocr/unanimous_structure_veto_v30/PUBLIC_GATE_RESULT.json",
+      "result_sha256": "c070c1acd1b803f579529055949e363b97d24cb4207233a35d86b87b2e691e3c",
+      "revision": "graph-text-unanimous-structure-veto-v30",
+      "selected_threshold": 0.55
+    },
+    {
+      "candidate_id": "P2",
+      "checkpoint_sha256": "c2c5077c44538390bb71f73739c38aecdfa81b4c6d93799f01bc002d16a82e36",
+      "evidence_split": "dev",
+      "gates": {
+        "character_error_rate": true,
+        "prohibited_structure_hits": true,
+        "role_accuracy": true,
+        "scene_exact_rate": true
+      },
+      "metrics": {
+        "character_error_rate": 0.004862953138815208,
+        "exact_scene_count": 192,
+        "minimum_per_role_accuracy": 1.0,
+        "prohibited_structure_hits": 0,
+        "recognition_exact": 0.9713541666666666,
+        "role_accuracy": 1.0,
+        "scene_count": 192,
+        "scene_exact_rate": 1.0
+      },
+      "name": "V31 P2 dev aggregate",
+      "onnx_sha256": "98ff06aef445cbdb0a9c7a7a376ee5b0eea51c691610ba0d4fe72203225b976a",
+      "product_bar_passed": true,
+      "qualification": "dev_product_bar_pass_supporting_evidence_only",
+      "result_path": "ml/ocr/robust_quorum_recall_v31/P2_RESULT.json",
+      "result_sha256": "34106e7a018be2964d733162b27292cef5db9bb448eaf3e999accbbd6065c4a3",
+      "revision": "graph-text-robust-quorum-recall-v31",
+      "selected_threshold": 0.75
+    }
+  ],
+  "case_level_reads": 0,
+  "evaluation_mode": "recorded_aggregate_metrics_only",
+  "manifest_created": false,
+  "model_inference_runs": 0,
+  "model_store_promoted": false,
+  "model_training_runs": 0,
+  "packaging_discovery": false,
+  "policy_path": "ml/policy/ocr-product-bar-v1.json",
+  "policy_sha256": "9dc13dbded2a0634c6174b846a9d5af560a72828a003629255dc255edde6cfa8",
+  "private_acceptance": false,
+  "production_approval": false,
+  "release_eligible": false,
+  "schema_version": 1,
+  "sealed_split_reads": 0,
+  "selected_candidate": {
+    "candidate_id": "P1",
+    "checkpoint_sha256": "a91044ee4621fe914377ad522d7ee3d9036f0a5e5714168684c34d2c3b8a9ceb",
+    "onnx_sha256": "78425c5b4a45ef2cbf99086243af0ede96c91b2b6afcdac1daa71bfeb5e55c18",
+    "revision": "graph-text-unanimous-structure-veto-v30"
+  },
+  "status": "pass",
+  "synthetic_candidate_approval": true,
+  "task": "ocr-detection-recognition"
+}

@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "policy_id": "graphreader-ocr-product-bar-v1",
+  "task": "ocr-detection-recognition",
+  "state": "preregistered_before_aggregate_rescore",
+  "evidence_policy": {
+    "path": "ml/policy/evidence-policy.json",
+    "sha256": "054d0b9e0f6dbeab536713b8e27198d59c169f9576a6ea07150c29d3e7ad0809"
+  },
+  "hypothesis": "Existing V30 and V31 P2 checkpoints clear the OCR product bar at their selected operating thresholds without retraining or another data read.",
+  "isolated_change": "Replace historical consecutive-threshold and every-scene perfection grading with the fixed product bar; model bytes, recorded metrics, splits, and operating thresholds remain unchanged.",
+  "metric": {
+    "scene_exact_rate": "exact_scene_count / scene_count",
+    "character_error_rate": "recorded aggregate CER",
+    "role_accuracy": "recorded aggregate role accuracy",
+    "prohibited_structure_hits": "recorded count at selected operating threshold"
+  },
+  "acceptance_bar": {
+    "scene_exact_rate_minimum": {
+      "value": 0.98,
+      "reason": "At least 98 percent of graph scenes must be completely correct so automatic review is dependable while allowing rare reviewable misses."
+    },
+    "character_error_rate_maximum": {
+      "value": 0.01,
+      "reason": "Tick and label text carries scientific meaning; at most one character error per hundred reference characters is acceptable before review."
+    },
+    "role_accuracy_minimum": {
+      "value": 0.99,
+      "reason": "OCR roles drive calibration, phases, legends, and metadata; no more than one percent may be misrouted."
+    },
+    "prohibited_structure_hits_maximum": {
+      "value": 0,
+      "reason": "Admitting text, axes, ticks, dividers, brackets, arrows, legends, or line intersections as data is unacceptable shipped output."
+    }
+  },
+  "operating_point": {
+    "selected_threshold_only": true,
+    "threshold_sensitivity_is_descriptive_only": true,
+    "consecutive_threshold_rule": false,
+    "margin_gate": false,
+    "robustness_gate": false
+  },
+  "candidates": [
+    {
+      "name": "V30 P1 sealed aggregate",
+      "revision": "graph-text-unanimous-structure-veto-v30",
+      "candidate_id": "P1",
+      "evidence_split": "sealed",
+      "result_path": "ml/ocr/unanimous_structure_veto_v30/PUBLIC_GATE_RESULT.json",
+      "result_sha256": "c070c1acd1b803f579529055949e363b97d24cb4207233a35d86b87b2e691e3c",
+      "metrics_path": ["metrics"],
+      "checkpoint_path": "ml/ocr/unanimous_structure_veto_v30/artifacts/P1-run/graph-text-unanimous-structure-veto-v30-p1.pt",
+      "checkpoint_sha256": "a91044ee4621fe914377ad522d7ee3d9036f0a5e5714168684c34d2c3b8a9ceb",
+      "checkpoint_hash_field": "candidate_checkpoint_sha256",
+      "onnx_path": "ml/ocr/unanimous_structure_veto_v30/artifacts/P1-run/graph-text-unanimous-structure-veto-v30-p1.onnx",
+      "onnx_sha256": "78425c5b4a45ef2cbf99086243af0ede96c91b2b6afcdac1daa71bfeb5e55c18",
+      "onnx_hash_field": "candidate_onnx_sha256"
+    },
+    {
+      "name": "V31 P2 dev aggregate",
+      "revision": "graph-text-robust-quorum-recall-v31",
+      "candidate_id": "P2",
+      "evidence_split": "dev",
+      "result_path": "ml/ocr/robust_quorum_recall_v31/P2_RESULT.json",
+      "result_sha256": "34106e7a018be2964d733162b27292cef5db9bb448eaf3e999accbbd6065c4a3",
+      "metrics_path": ["selected_threshold_metrics"],
+      "checkpoint_path": "ml/ocr/robust_quorum_recall_v31/artifacts/P2-run/graph-text-robust-quorum-recall-v31-p2.pt",
+      "checkpoint_sha256": "c2c5077c44538390bb71f73739c38aecdfa81b4c6d93799f01bc002d16a82e36",
+      "checkpoint_hash_field": "checkpoint_sha256",
+      "onnx_path": "ml/ocr/robust_quorum_recall_v31/artifacts/P2-run/graph-text-robust-quorum-recall-v31-p2.onnx",
+      "onnx_sha256": "98ff06aef445cbdb0a9c7a7a376ee5b0eea51c691610ba0d4fe72203225b976a",
+      "onnx_hash_field": "onnx_sha256"
+    }
+  ],
+  "budget": {
+    "model_training_runs": 0,
+    "model_inference_runs": 0,
+    "sealed_split_reads": 0,
+    "case_level_reads": 0
+  },
+  "production_approval": false,
+  "private_acceptance_required": true
+}
