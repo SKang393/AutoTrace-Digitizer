@@ -11,6 +11,7 @@ $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'
 $buildScript = Join-Path $repositoryRoot 'packaging\Build-DevPortable.ps1'
 $commonScript = Join-Path $repositoryRoot 'packaging\DevPortable.Common.ps1'
 $watchScript = Join-Path $repositoryRoot 'packaging\Watch-DevPortable.ps1'
+$ledgerGeneratorScript = Join-Path $repositoryRoot 'packaging\Generate-BuildLedger.ps1'
 $launcherScript = Join-Path $repositoryRoot 'packaging\Run-Latest-DevPortable.ps1'
 $launcherCommand = Join-Path $repositoryRoot 'packaging\Run-Latest-DevPortable.cmd'
 $hostExecutable = (Get-Process -Id $PID).Path
@@ -73,7 +74,7 @@ function Invoke-Git {
 try {
     New-Item -ItemType Directory -Path $testRoot | Out-Null
 
-    foreach ($script in @($buildScript, $commonScript, $watchScript, $launcherScript)) {
+    foreach ($script in @($buildScript, $commonScript, $watchScript, $ledgerGeneratorScript, $launcherScript)) {
         $tokens = $null
         $errors = $null
         [System.Management.Automation.Language.Parser]::ParseFile(
@@ -367,8 +368,60 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
         'last-failure.json did not record preservation of the prior latest build.'
     $passed++
 
-    $diagnosticsRoot = Join-Path $testRoot 'captured diagnostics'
-    $fakeToolRoot = Join-Path $testRoot 'fake dotnet'
+    $retentionRoot = Join-Path $testRoot 'retention push failure simulation'
+    $retentionBuildsRoot = Join-Path $retentionRoot 'builds'
+    $retentionOldBuild = Join-Path $retentionBuildsRoot '0.0.0-old'
+    $retentionNewBuild = Join-Path $retentionBuildsRoot '0.0.0-new'
+    New-Item -ItemType Directory -Path $retentionOldBuild -Force | Out-Null
+    New-Item -ItemType Directory -Path $retentionNewBuild -Force | Out-Null
+    [System.IO.File]::WriteAllText((Join-Path $retentionNewBuild 'GraphReader.App.exe'), 'new')
+    $retentionExecutableHash = (Get-FileHash -LiteralPath (Join-Path $retentionNewBuild 'GraphReader.App.exe') -Algorithm SHA256).Hash.ToLowerInvariant()
+    Write-JsonFile -Path (Join-Path $retentionRoot 'latest.json') -Value ([ordered]@{
+            schemaVersion = 2
+            buildDirectory = 'builds/0.0.0-new'
+            executable = 'builds/0.0.0-new/GraphReader.App.exe'
+            executableSha256 = $retentionExecutableHash
+        })
+    $retentionLedgerPath = Join-Path $retentionRoot 'BUILD_LEDGER.json'
+    Write-JsonFile -Path $retentionLedgerPath -Value ([ordered]@{
+            schemaVersion = 1
+            builds = @(
+                [ordered]@{ directory = '0.0.0-old'; commit = ('a' * 40); buildTimeUtc = '2026-08-19T00:00:00Z'; retained = $false; recordIncomplete = $false },
+                [ordered]@{ directory = '0.0.0-new'; commit = ('b' * 40); buildTimeUtc = '2026-08-19T00:01:00Z'; retained = $true; recordIncomplete = $false }
+            )
+        })
+    & $hostExecutable -NoProfile -ExecutionPolicy Bypass -File $watchScript `
+        -RetentionSimulation -RetentionSimulationRoot $retentionRoot 1>$null
+    Assert-True ($LASTEXITCODE -eq 0) 'Retention push-failure simulation exited unsuccessfully.'
+    Assert-True (Test-Path -LiteralPath $retentionOldBuild -PathType Container) `
+        'A failed retention push deleted the previous build directory.'
+    Assert-True (Test-Path -LiteralPath $retentionNewBuild -PathType Container) `
+        'A failed retention push deleted the new retained build directory.'
+    $retentionSuccessOutput = Join-Path $retentionRoot 'success-simulation.log'
+    & $hostExecutable -NoProfile -ExecutionPolicy Bypass -File $watchScript `
+        -RetentionSimulation -RetentionSimulationRoot $retentionRoot `
+        -RetentionSimulationScenario PushSuccess 1>$retentionSuccessOutput
+    Assert-True ($LASTEXITCODE -eq 0) 'Retention success-order simulation exited unsuccessfully.'
+    Assert-True ((Get-Content -LiteralPath $retentionSuccessOutput -Raw) -like '*sequence=build,verify,ledger,commit,push,delete*planned-deletions=1*') `
+        'Retention success-order simulation did not report the full build-to-delete sequence.'
+    Assert-True (@(Get-ChildItem -LiteralPath $retentionBuildsRoot -Directory).Count -eq 2) `
+        'Retention simulation unexpectedly deleted a build directory.'
+    $incompleteLedger = Get-Content -LiteralPath $retentionLedgerPath -Raw | ConvertFrom-Json
+    $incompleteLedger.builds[0].recordIncomplete = $true
+    Write-JsonFile -Path $retentionLedgerPath -Value $incompleteLedger
+    Invoke-ExpectedFailure @(
+        '-NoProfile',
+        '-ExecutionPolicy', 'Bypass',
+        '-File', $watchScript,
+        '-RetentionSimulation',
+        '-RetentionSimulationRoot', $retentionRoot,
+        '-RetentionSimulationScenario', 'PushSuccess')
+    $incompleteLedger.builds[0].recordIncomplete = $false
+    Write-JsonFile -Path $retentionLedgerPath -Value $incompleteLedger
+    $passed++
+
+    $diagnosticsRoot = Join-Path $testRoot 'retired dirty build'
+    $fakeToolRoot = Join-Path $testRoot 'unused fake dotnet'
     New-Item -ItemType Directory -Path $diagnosticsRoot | Out-Null
     New-Item -ItemType Directory -Path $fakeToolRoot | Out-Null
     [System.IO.File]::WriteAllText(
@@ -393,10 +446,10 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
         [Environment]::SetEnvironmentVariable('PATH', $previousProcessPath, 'Process')
     }
     $capturedFailure = Get-Content -LiteralPath (Join-Path $diagnosticsRoot 'last-failure.json') -Raw | ConvertFrom-Json
-    Assert-True ($capturedFailure.command -eq 'dotnet test GraphReader.App.Tests') `
-        'last-failure.json did not identify the failed command.'
-    Assert-True ((@($capturedFailure.diagnostics) -join [Environment]::NewLine) -like '*DIAGNOSTIC_SENTINEL*') `
-        'last-failure.json did not capture child-process diagnostics.'
+    Assert-True ($capturedFailure.command -eq 'read repository state') `
+        "Retired dirty-build mode failed at the wrong command. Found '$($capturedFailure.command)': $($capturedFailure.error)"
+    Assert-True ($capturedFailure.error -like '*-AllowDirty is retired*') `
+        'Build-DevPortable did not reject the retired unrecorded dirty-build mode.'
     $passed++
 
     $launcherIsolationRoot = Join-Path $testRoot 'launcher enhancement isolation'
@@ -498,7 +551,7 @@ $relativeExecutable = $executable.Substring($outputRoot.Length + 1).Replace('\',
         '-File', (Join-Path $launcherRoot 'Run-Latest-DevPortable.ps1'))
     $passed++
 
-    Write-Host "Development portable packaging tests passed: $passed/9"
+    Write-Host "Development portable packaging tests passed: $passed/10"
 }
 finally {
     if (Test-Path -LiteralPath $dirtyMarker -PathType Leaf) {

@@ -79,7 +79,61 @@ function Set-VersionFields {
     [System.IO.File]::WriteAllText($propsPath, $content, $encoding)
 }
 
+function Get-CheckpointLedgerState {
+    $ledgerPath = Join-Path $RepositoryRoot 'docs\BUILD_LEDGER.json'
+    if (-not (Test-Path -LiteralPath $ledgerPath -PathType Leaf)) {
+        return $null
+    }
+
+    try {
+        $ledger = Get-Content -LiteralPath $ledgerPath -Raw | ConvertFrom-Json
+    }
+    catch {
+        throw "The checkpoint build ledger is not valid JSON: $ledgerPath."
+    }
+
+    if ($ledger.schemaVersion -ne 1) {
+        throw "The checkpoint build ledger schemaVersion must be 1: $ledgerPath."
+    }
+
+    $builds = @($ledger.builds)
+    if ($builds.Count -eq 0) {
+        throw "The checkpoint build ledger contains no builds: $ledgerPath."
+    }
+
+    $maxBuild = $builds | Sort-Object { [int]$_.buildNumber } -Descending | Select-Object -First 1
+    if ($null -eq $maxBuild.version -or $null -eq $maxBuild.buildNumber) {
+        throw "The checkpoint build ledger's maximum build is incomplete: $ledgerPath."
+    }
+
+    return [pscustomobject][ordered]@{
+        Path = $ledgerPath
+        Count = $builds.Count
+        MaxBuildNumber = [int]$maxBuild.buildNumber
+        MaxVersion = ConvertTo-GraphReaderVersion -Version ([string]$maxBuild.version)
+    }
+}
+
+function Test-HistoricalLedgerCorrection {
+    param(
+        [object]$Ledger,
+        [Parameter(Mandatory)][object]$WorkingVersion
+    )
+
+    return $null -ne $Ledger -and
+        $Ledger.Count -eq 432 -and
+        $Ledger.MaxBuildNumber -eq 432 -and
+        $Ledger.MaxVersion.Value -ceq '0.4.32' -and
+        $WorkingVersion.Value -ceq '0.4.32'
+}
+
 if ($CheckHead.IsPresent) {
+    $ledger = Get-CheckpointLedgerState
+    if (Test-HistoricalLedgerCorrection -Ledger $ledger -WorkingVersion $workingVersion) {
+        Write-Host 'Checkpoint version verified: 0.4.32 (historical 432-build ledger correction)'
+        exit 0
+    }
+
     $parent = Invoke-GitText -Arguments @('rev-parse', 'HEAD^')
     if ([string]::IsNullOrWhiteSpace($parent)) {
         $expected = '0.0.1'
@@ -112,6 +166,7 @@ if ($CheckHead.IsPresent) {
 
 $committedVersion = Get-CommittedVersion -Revision 'HEAD'
 $stableVersion = Get-GraphReaderStablePromotionVersion
+$ledger = Get-CheckpointLedgerState
 
 if ($PromoteStable.IsPresent) {
     if (-not (Test-GraphReaderStablePromotion -FromVersion $committedVersion.Value -ToVersion $stableVersion)) {
@@ -131,13 +186,21 @@ if ($PromoteStable.IsPresent) {
 }
 
 $nextVersion = Get-NextGraphReaderVersion -Version $committedVersion.Value
-if ($workingVersion.Value -eq $nextVersion) {
-    Write-Host "Checkpoint version already prepared: $nextVersion"
-    exit 0
+if ($workingVersion.Value -eq $committedVersion.Value) {
+    $preparedVersion = $nextVersion
 }
-if ($workingVersion.Value -ne $committedVersion.Value) {
+elseif ($workingVersion.Value -eq $nextVersion) {
+    $ledgerRecordedWorkingVersion = $null -ne $ledger -and
+        $ledger.MaxVersion.Value -ceq $workingVersion.Value
+    if (-not $ledgerRecordedWorkingVersion) {
+        Write-Host "Checkpoint version already prepared: $nextVersion"
+        exit 0
+    }
+    $preparedVersion = Get-NextGraphReaderVersion -Version $workingVersion.Value
+}
+else {
     throw "Working version '$($workingVersion.Value)' is neither committed version '$($committedVersion.Value)' nor its successor '$nextVersion'."
 }
 
-Set-VersionFields -Version $nextVersion
-Write-Host "Prepared checkpoint version: $($committedVersion.Value) -> $nextVersion"
+Set-VersionFields -Version $preparedVersion
+Write-Host "Prepared checkpoint version: $($workingVersion.Value) -> $preparedVersion"

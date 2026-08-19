@@ -13,20 +13,21 @@ It does not change or bypass `packaging/Build-Windows.ps1`,
 See `docs/VERSIONING-AND-RELEASES.md` for the source-checkpoint and release
 boundary.
 
-## Build once
+## Prepare the next build
 
-From the repository root:
+Every preview is a numbered build. Prepare and commit the ledger successor
+before starting the watcher. The build script rejects dirty source, the retired
+`-AllowDirty` switch, and version reuse.
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass `
-  -File .\packaging\Build-DevPortable.ps1 `
-  -AllowDirty `
-  -FastTestsOnly
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+  -File .\packaging\Prepare-CheckpointVersion.ps1 -PrepareNext
+git add Directory.Build.props
+git commit -m "Prepare portable build"
 ```
 
-Omit `-AllowDirty` for a stable checkpoint. Omit `-FastTestsOnly` to run the
-full Release suite, public synthetic scoreboard, packaging regression, and
-localization regression before publishing the new local preview.
+Repeated preparation is idempotent until that version appears in
+`docs/BUILD_LEDGER.json`.
 
 ## Watch and rebuild
 
@@ -35,13 +36,15 @@ powershell -NoProfile -ExecutionPolicy Bypass `
   -File .\packaging\Watch-DevPortable.ps1 `
   -BuildOnStart `
   -FastTestsOnly `
-  -AllowDirty `
   -LaunchAfterBuild
 ```
 
 The watcher debounces relevant changes for two seconds and permits one build at
-a time. Changes raised during a build queue one additional build. Existing WPF
-processes are never modified or overwritten.
+a time. After a clean prepared build passes, it updates the tracked ledger,
+commits and pushes that record, confirms `origin/main`, and only then removes
+the previous build directory. A failed push leaves both builds on disk. Changes
+raised during a build queue one additional build. Existing WPF processes are
+never modified or overwritten.
 
 ## Launch the latest successful preview
 
@@ -104,6 +107,7 @@ evidence boundaries.
 
 A failed build writes `artifacts\dev-portable\last-failure.json` and leaves the
 previous successful `latest.json` unchanged. Every successful build folder
-under `artifacts\dev-portable\builds` is immutable. It reuses the current
-central version and receives a new UTC timestamp and short-commit name. A
-preview rebuild never advances `x.y.z` and never creates a GitHub Release.
+under `artifacts\dev-portable\builds` is immutable. Every rebuild advances the
+central version, receives a UTC timestamp and short-commit name, and is recorded
+in `docs/BUILD_LEDGER.json`. A preview build never creates a GitHub Release
+unless its version is eligible and a release session is explicitly assigned.

@@ -26,28 +26,28 @@ The schema-version-1 report records:
 
 Report-only mode is the default and does not delete any build.
 
-Development portable folders are ignored local previews. Multiple previews may
-share the same central `x.y.z` version because timestamp and commit identity,
-not a version increment, distinguish rebuilds. They are not committed or
-published as GitHub Releases. See `docs/VERSIONING-AND-RELEASES.md`.
+Development portable folders are ignored local builds. Every produced build
+consumes the next central version even when application source is otherwise
+unchanged. Timestamp and commit identity supplement the version; they do not
+replace it. Dirty local-only builds are not permitted. See
+`docs/VERSIONING-AND-RELEASES.md`.
 
 ## Explicit pruning
 
-After a checkpoint is committed and its evidence is preserved, obsolete
-development portable builds can be pruned explicitly:
+The current retention policy keeps exactly the build selected by `latest.json`.
+After the complete ledger is committed and confirmed on `origin/main`, apply
+the same validated retention path used by the watcher:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File packaging/Report-DevPortableSize.ps1 `
-  -PruneObsoleteBuilds `
-  -KeepPreviousBuilds 1
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+  -File packaging/Watch-DevPortable.ps1 -ApplyRetentionOnce
 ```
 
-The script always preserves the exact `latest.json` target. It also preserves
-the requested number of newest fallback builds. Cleanup is restricted to
+The watcher preserves the exact `latest.json` target and deletes only validated,
 non-reparse-point immediate child directories under
-`artifacts/dev-portable/builds`. Missing, malformed, outside-root, or nested
-latest targets stop pruning before any build is removed. `-WhatIf` can preview
-the explicit cleanup action.
+`artifacts/dev-portable/builds`. Missing, malformed, outside-root, incomplete,
+unpushed, or nested metadata stops pruning before any build is removed. A failed
+push retains both the previous and new build directories.
 
 Do not prune while a build or validation run is writing the portable output.
 Keep any build or evidence referenced by a current readiness report.
@@ -106,5 +106,6 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File packaging/tests/Test-Dev
 ```
 
 The focused test verifies the report schema and measured fixture sizes,
-report-only no-delete behavior, exact latest build preservation during explicit
-pruning, fallback retention, reclaimed-byte reporting, and traversal rejection.
+report-only no-delete behavior, rejection of the retired direct-pruning path,
+and traversal safety. Push-gated retention is covered by
+`packaging/tests/Test-DevPortable.Tests.ps1`.

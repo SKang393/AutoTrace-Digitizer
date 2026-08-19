@@ -3,24 +3,28 @@
 Graph Auto Reader uses a custom numeric `x.y.z` sequence. Each component ranges
 from 0 through 99. This is not Semantic Versioning.
 
-## Source checkpoints
+## Build checkpoints
 
-A completed, verified source checkpoint advances the central version in
-`Directory.Build.props` exactly once. Prepare that value before committing:
+Every produced build advances the central version in `Directory.Build.props`
+exactly once. Build number equals version ordinal. Prepare the next value before
+committing the clean source checkpoint that will be built:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass `
   -File packaging/Prepare-CheckpointVersion.ps1
 ```
 
-The ordinary checkpoint sequence is continuous across component boundaries:
+The ordinary build sequence is continuous across component boundaries:
 
 ```text
 0.0.98 -> 0.0.99 -> 0.1.0 -> 0.1.1
 0.99.99 -> 1.0.0 -> 1.0.1
 ```
 
-Therefore, rollover resets the lower component to `0`, not `1`.
+Therefore, rollover resets the lower component to `0`, not `1`. A retry before
+the prepared version has a build-ledger entry remains idempotent. Once the
+ledger records that version, rebuilding otherwise unchanged source requires the
+next version.
 
 ## First stable promotion
 
@@ -49,16 +53,17 @@ created for every commit.
 
 ## Development portable previews
 
-`packaging/Build-DevPortable.ps1` and `packaging/Watch-DevPortable.ps1` reuse the
-current central version. Rebuilding unchanged or uncommitted source does not
-advance `x.y.z`. Preview folders are distinguished by UTC timestamp and commit
-identity and remain ignored local output.
+`packaging/Build-DevPortable.ps1` and `packaging/Watch-DevPortable.ps1` produce
+builds, so every successful portable build consumes a build number. UTC time and
+commit identity remain part of the local folder name, but they do not replace
+the central version. The build script refuses a dirty tree, the retired
+`-AllowDirty` mode, and a central version that is not the ledger successor.
 
 Portable previews, training snapshots, generated weights, caches, `bin`, and
-`obj` are not committed and are not GitHub Releases. Preserve only evidence that
-an active validation or readiness report still references. Use the explicit,
-report-first cleanup process in `docs/DEV-PORTABLE-SIZE.md` for obsolete
-previews.
+`obj` are not committed and are not GitHub Releases. Every portable build is
+recorded in `docs/BUILD_LEDGER.json`; the ledger commit is pushed before the
+previous build directory is deleted. Exactly one portable build directory is
+kept locally. A failed commit or push retains both the previous and new build.
 
 ## Every-twentieth-checkpoint release cadence
 
@@ -114,20 +119,21 @@ and publishes the installer, portable ZIP, checksums, SBOM, release metadata,
 release notes, and known limitations. A normal push to `main` never creates a
 tag or public release.
 
-## 2026-08-19 versioning regression and correction
+## 2026-08-19 build-numbering correction
 
-The central version remained frozen at `0.0.21` while local portable previews
-and later source commits were produced. Preview rebuilds were correct to reuse
-the current central version, but completed source checkpoints also failed to
-advance it. That was a versioning regression, not evidence that every preview
-was the same source checkpoint or that dozens of releases existed.
+The central version remained at `0.0.21` while 430 portable builds were
+produced, followed by two builds stamped `0.0.22`. The previous policy that let
+preview rebuilds reuse a version is withdrawn.
 
-The correction resumed at `0.0.22` and is enforced by the shared checkpoint
-tool and CI transition check. Preview count and historical commit count are not
-used to invent skipped versions, and no historical commit or artifact is
-renumbered or released retroactively. No `0.0.21` release may be created unless
-its original clean commit and every release gate are independently proven.
-This verified policy correction advances normally to checkpoint `0.0.23`.
+The 432 historical build directories are assigned build numbers 1 through 432
+in their existing chronological lexical order. Their binaries and folder names
+are not changed. `docs/BUILD_LEDGER.json` preserves each stamped version,
+commit, build time, executable checksum, and retention state.
+
+Build 432 maps to `0.4.32`, which is the corrected central version. The next
+produced build is `0.4.33`. The 22 historical release-eligible builds are marked
+`missed-historical`; no retroactive tags, artifacts, or releases are fabricated.
+The live public cadence resumes at build 441, version `0.4.41`.
 
 The earlier documentation that named `1.0.1` as the first functional release
 and prohibited `1.0.0` was incorrect. The corrected target is `1.0.0`, using

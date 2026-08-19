@@ -16,7 +16,11 @@ $testRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionPol
 $ordinaryRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionOrdinary-' + [Guid]::NewGuid().ToString('N'))
 $promotionRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionPromotion-' + [Guid]::NewGuid().ToString('N'))
 $invalidPromotionRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionInvalidPromotion-' + [Guid]::NewGuid().ToString('N'))
-$testRoots = @($testRoot, $ordinaryRoot, $promotionRoot, $invalidPromotionRoot)
+$rolloverRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionRollover-' + [Guid]::NewGuid().ToString('N'))
+$identicalRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionIdentical-' + [Guid]::NewGuid().ToString('N'))
+$releaseRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionRelease-' + [Guid]::NewGuid().ToString('N'))
+$historicalRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionHistorical-' + [Guid]::NewGuid().ToString('N'))
+$testRoots = @($testRoot, $ordinaryRoot, $promotionRoot, $invalidPromotionRoot, $rolloverRoot, $identicalRoot, $releaseRoot, $historicalRoot)
 $passed = 0
 . $policyScript
 
@@ -116,7 +120,77 @@ function Initialize-TestRepository {
     Invoke-Git -Root $Root -Arguments @('commit', '-m', "Establish $Version checkpoint")
 }
 
+function Write-TestLedger {
+    param(
+        [Parameter(Mandatory)][string]$Root,
+        [Parameter(Mandatory)][string]$MaxVersion
+    )
+
+    $builds = @(
+        1..431 | ForEach-Object {
+            [ordered]@{ buildNumber = $_; version = '0.0.1' }
+        }
+    )
+    $builds += [ordered]@{ buildNumber = 432; version = $MaxVersion }
+    $ledgerPath = Join-Path $Root 'docs\BUILD_LEDGER.json'
+    New-Item -ItemType Directory -Path (Split-Path -Parent $ledgerPath) -Force | Out-Null
+    $ledger = [ordered]@{
+        schemaVersion = 1
+        policy = 'one produced build consumes one build number; ordinal equals build number'
+        assignedUtc = '2026-08-19T00:00:00.0000000+00:00'
+        builds = $builds
+    }
+    [System.IO.File]::WriteAllText(
+        $ledgerPath,
+        ($ledger | ConvertTo-Json -Depth 5),
+        [System.Text.UTF8Encoding]::new($false))
+}
+
+function Assert-CanonicalBuildLedger {
+    $ledgerPath = Join-Path $repositoryRoot 'docs\BUILD_LEDGER.json'
+    Assert-True (Test-Path -LiteralPath $ledgerPath -PathType Leaf) 'Canonical build ledger is missing.'
+    $ledger = Get-Content -LiteralPath $ledgerPath -Raw | ConvertFrom-Json
+    Assert-Equal $ledger.schemaVersion 1 'Canonical build ledger schema differs.'
+    $builds = @($ledger.builds)
+    Assert-True ($builds.Count -ge 432) 'Canonical build ledger has fewer than 432 historical builds.'
+    for ($index = 0; $index -lt $builds.Count; $index++) {
+        $expectedNumber = $index + 1
+        $expectedVersion = ConvertTo-GraphReaderVersion -Version (Get-NextGraphReaderVersion `
+            -Version (ConvertTo-BuildVersionForTest -BuildNumber ($expectedNumber - 1)))
+        $entry = $builds[$index]
+        Assert-Equal ([int]$entry.buildNumber) $expectedNumber "Build ledger number differs at index $index."
+        Assert-Equal ([string]$entry.version) $expectedVersion.Value "Build ledger version differs at build $expectedNumber."
+        Assert-True (-not [string]::IsNullOrWhiteSpace([string]$entry.commit)) "Build $expectedNumber lacks a commit."
+        Assert-True (-not [string]::IsNullOrWhiteSpace([string]$entry.buildTimeUtc)) "Build $expectedNumber lacks a build time."
+        Assert-True ([string]$entry.executableSha256 -match '^[0-9a-f]{64}$') "Build $expectedNumber lacks an executable SHA-256."
+        Assert-True ($entry.recordIncomplete -eq $false) "Build $expectedNumber is marked incomplete."
+        Assert-Equal ([bool]$entry.releaseEligible) (($expectedNumber % 20) -eq 1) `
+            "Release eligibility differs at build $expectedNumber."
+    }
+    Assert-Equal @($builds | Where-Object { $_.retained }).Count 1 'Canonical ledger retained count differs.'
+    Assert-Equal @($builds | Select-Object -First 432 | Where-Object { $_.releaseStatus -eq 'missed-historical' }).Count 22 `
+        'Historical missed-release count differs.'
+    $central = Get-GraphReaderCentralVersion -RepositoryRoot $repositoryRoot
+    $maximum = ConvertTo-GraphReaderVersion -Version ([string]$builds[-1].version)
+    Assert-True (
+        $central.Ordinal -eq $maximum.Ordinal -or
+        $central.Ordinal -eq ($maximum.Ordinal + 1) -or
+        $central.Value -ceq (Get-GraphReaderStablePromotionVersion)) `
+        "Central version '$($central.Value)' is not the latest ledger version or its successor."
+}
+
+function ConvertTo-BuildVersionForTest {
+    param([Parameter(Mandatory)][int]$BuildNumber)
+
+    $major = [Math]::Floor($BuildNumber / 10000)
+    $remainder = $BuildNumber % 10000
+    return "$major.$([Math]::Floor($remainder / 100)).$($remainder % 100)"
+}
+
 try {
+    Assert-CanonicalBuildLedger
+    $passed++
+
     foreach ($case in @(
             @{ Current = '0.0.21'; Next = '0.0.22' },
             @{ Current = '0.0.99'; Next = '0.1.0' },
@@ -165,37 +239,55 @@ try {
         $passed++
     }
 
-    Initialize-TestRepository -Root $testRoot -Version '0.0.21'
-    Invoke-Git -Arguments @('tag', '-a', 'v0.0.21', '-m', 'Release 0.0.21')
-
-    Invoke-Child -Script $releaseTagScript -Arguments @('-RepositoryRoot', $testRoot, '-TagName', 'v0.0.21') -ShouldPass $true
-    $passed++
-    Invoke-Git -Arguments @('tag', '-d', 'v0.0.21')
-    Invoke-Git -Arguments @('tag', 'v0.0.21')
-    Invoke-Child -Script $releaseTagScript -Arguments @('-RepositoryRoot', $testRoot, '-TagName', 'v0.0.21') -ShouldPass $false
-    $passed++
-    Invoke-Git -Arguments @('tag', '-d', 'v0.0.21')
-
+    Initialize-TestRepository -Root $testRoot -Version '0.4.32'
     Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $testRoot, '-PrepareNext') -ShouldPass $true
     $prepared = Get-GraphReaderCentralVersion -RepositoryRoot $testRoot
-    Assert-Equal $prepared.Value '0.0.22' 'Prepared checkpoint version differs.'
+    Assert-Equal $prepared.Value '0.4.33' 'Prepared checkpoint version differs.'
     Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $testRoot, '-PrepareNext') -ShouldPass $true
-    Assert-Equal (Get-GraphReaderCentralVersion -RepositoryRoot $testRoot).Value '0.0.22' 'Repeated preparation was not idempotent.'
-    $passed += 2
-
+    Assert-Equal (Get-GraphReaderCentralVersion -RepositoryRoot $testRoot).Value '0.4.33' 'Unrecorded build preparation was not idempotent.'
     Invoke-Git -Arguments @('add', 'Directory.Build.props')
     Invoke-Git -Arguments @('commit', '-m', 'Advance checkpoint version')
     Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $testRoot, '-CheckHead') -ShouldPass $true
-    $passed++
-
-    Invoke-Git -Arguments @('tag', '-a', 'v0.0.22', '-m', 'Invalid release 0.0.22')
-    Invoke-Child -Script $releaseTagScript -Arguments @('-RepositoryRoot', $testRoot, '-TagName', 'v0.0.22') -ShouldPass $false
     $passed++
 
     [System.IO.File]::WriteAllText((Join-Path $testRoot 'without-version-bump.txt'), 'invalid checkpoint')
     Invoke-Git -Arguments @('add', 'without-version-bump.txt')
     Invoke-Git -Arguments @('commit', '-m', 'Forget version advancement')
     Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $testRoot, '-CheckHead') -ShouldPass $false
+    $passed++
+
+    Initialize-TestRepository -Root $identicalRoot -Version '0.4.32'
+    Write-TestLedger -Root $identicalRoot -MaxVersion '0.4.32'
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $identicalRoot, '-PrepareNext') -ShouldPass $true
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $identicalRoot, '-PrepareNext') -ShouldPass $true
+    Assert-Equal (Get-GraphReaderCentralVersion -RepositoryRoot $identicalRoot).Value '0.4.33' 'Unrecorded identical-commit preparation was not idempotent.'
+    Write-TestLedger -Root $identicalRoot -MaxVersion '0.4.33'
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $identicalRoot, '-PrepareNext') -ShouldPass $true
+    Assert-Equal (Get-GraphReaderCentralVersion -RepositoryRoot $identicalRoot).Value '0.4.34' 'Identical-commit rebuild did not consume the next ordinal.'
+    $passed += 2
+
+    Invoke-Git -Root $identicalRoot -Arguments @('tag', '-a', 'v0.4.34', '-m', 'Invalid release 0.4.34')
+    Invoke-Child -Script $releaseTagScript -Arguments @('-RepositoryRoot', $identicalRoot, '-TagName', 'v0.4.34') -ShouldPass $false
+    $passed++
+
+    Initialize-TestRepository -Root $rolloverRoot -Version '0.4.99'
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $rolloverRoot, '-PrepareNext') -ShouldPass $true
+    Assert-Equal (Get-GraphReaderCentralVersion -RepositoryRoot $rolloverRoot).Value '0.5.0' 'Checkpoint rollover differs.'
+    $passed++
+
+    Initialize-TestRepository -Root $releaseRoot -Version '0.0.21'
+    Invoke-Git -Root $releaseRoot -Arguments @('tag', '-a', 'v0.0.21', '-m', 'Release 0.0.21')
+    Invoke-Child -Script $releaseTagScript -Arguments @('-RepositoryRoot', $releaseRoot, '-TagName', 'v0.0.21') -ShouldPass $true
+    Invoke-Git -Root $releaseRoot -Arguments @('tag', '-d', 'v0.0.21')
+    Invoke-Git -Root $releaseRoot -Arguments @('tag', 'v0.0.21')
+    Invoke-Child -Script $releaseTagScript -Arguments @('-RepositoryRoot', $releaseRoot, '-TagName', 'v0.0.21') -ShouldPass $false
+    Invoke-Git -Root $releaseRoot -Arguments @('tag', '-d', 'v0.0.21')
+    $passed += 2
+
+    Initialize-TestRepository -Root $historicalRoot -Version '0.0.23'
+    Write-TestProps -Root $historicalRoot -Version '0.4.32'
+    Write-TestLedger -Root $historicalRoot -MaxVersion '0.4.32'
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $historicalRoot, '-CheckHead') -ShouldPass $true
     $passed++
 
     Initialize-TestRepository -Root $ordinaryRoot -Version '0.23.58'

@@ -71,11 +71,41 @@ function Get-CentralVersion {
     return (Get-GraphReaderCentralVersion -RepositoryRoot $repositoryRoot).Value
 }
 
+function Assert-PreparedBuildVersion {
+    param([Parameter(Mandatory)][string]$Version)
+
+    $ledgerPath = Join-Path $repositoryRoot 'docs\BUILD_LEDGER.json'
+    if (-not (Test-Path -LiteralPath $ledgerPath -PathType Leaf)) {
+        throw "The tracked build ledger is missing: $ledgerPath"
+    }
+    $ledger = Get-Content -LiteralPath $ledgerPath -Raw | ConvertFrom-Json
+    if ($ledger.schemaVersion -ne 1) {
+        throw 'The tracked build ledger schemaVersion must be 1.'
+    }
+    $builds = @($ledger.builds)
+    if ($builds.Count -eq 0) {
+        throw 'The tracked build ledger contains no builds.'
+    }
+    $latestBuild = $builds | Sort-Object { [int]$_.buildNumber } -Descending | Select-Object -First 1
+    $expectedVersion = Get-NextGraphReaderVersion -Version ([string]$latestBuild.version)
+    if ($Version -cne $expectedVersion) {
+        throw "Central version '$Version' would reuse a build number. Prepare and commit '$expectedVersion' before building."
+    }
+}
+
 function Get-GitOutput {
     param([Parameter(Mandatory)][string[]]$Arguments)
 
-    $output = & git -C $repositoryRoot @Arguments 2>&1
-    if ($LASTEXITCODE -ne 0) {
+    $previousPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        $output = & git -C $repositoryRoot @Arguments 2>$null
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousPreference
+    }
+    if ($exitCode -ne 0) {
         throw "Git command failed: git $($Arguments -join ' ')`n$($output -join [Environment]::NewLine)"
     }
 
@@ -84,14 +114,18 @@ function Get-GitOutput {
 
 try {
     $currentCommand = 'read repository state'
+    if ($AllowDirty.IsPresent) {
+        throw '-AllowDirty is retired: every produced build must be committed, recorded, and pushed.'
+    }
     $version = Get-CentralVersion
     $commit = Get-GitOutput -Arguments @('rev-parse', 'HEAD')
     $shortCommit = Get-GitOutput -Arguments @('rev-parse', '--short=8', 'HEAD')
     $status = Get-GitOutput -Arguments @('status', '--porcelain', '--untracked-files=normal')
     $isDirty = -not [string]::IsNullOrWhiteSpace($status)
-    if ($isDirty -and -not $AllowDirty.IsPresent) {
-        throw 'The working tree is dirty. Commit the checkpoint or rerun with -AllowDirty for a local-only preview.'
+    if ($isDirty) {
+        throw 'The working tree is dirty. Commit the checkpoint before producing a build.'
     }
+    Assert-PreparedBuildVersion -Version $version
 
     New-Item -ItemType Directory -Path $OutputRoot -Force | Out-Null
     New-Item -ItemType Directory -Path $buildsRoot -Force | Out-Null

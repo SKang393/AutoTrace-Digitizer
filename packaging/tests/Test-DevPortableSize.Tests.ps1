@@ -126,30 +126,18 @@ try {
     $pruneRoot = Join-Path $testRoot 'prune'
     New-SizeFixture -Root $pruneRoot
     $pruneOutput = Join-Path $pruneRoot 'artifacts\dev-portable\size-report.json'
-    & $reportScript `
-        -RepositoryRoot $pruneRoot `
-        -OutputPath $pruneOutput `
-        -PruneObsoleteBuilds `
-        -KeepPreviousBuilds 1 `
-        -Confirm:$false
-    $prune = Get-Content -LiteralPath $pruneOutput -Raw | ConvertFrom-Json
-    Assert-True ($prune.mode -eq 'prune') 'Explicit prune run did not record prune mode.'
-    Assert-True ($prune.latest.status -eq 'resolved') 'Latest build metadata did not resolve.'
-    Assert-True ($prune.latest.preserved -eq $true) 'Exact latest build was not preserved.'
-    Assert-True (Test-Path -LiteralPath (Join-Path $pruneRoot 'artifacts\dev-portable\builds\build-a') -PathType Container) `
-        'Pruning deleted the exact latest.json target.'
-    Assert-True (Test-Path -LiteralPath (Join-Path $pruneRoot 'artifacts\dev-portable\builds\build-c') -PathType Container) `
-        'Pruning did not preserve the newest previous fallback build.'
-    Assert-True (-not (Test-Path -LiteralPath (Join-Path $pruneRoot 'artifacts\dev-portable\builds\build-b'))) `
-        'Pruning retained an obsolete non-latest build.'
-    Assert-True (@($prune.cleanup.prunedBuilds).Count -eq 1) `
-        'Pruning did not report exactly one removed build.'
-    Assert-True ($prune.cleanup.prunedBuilds[0].name -eq 'build-b') `
-        'Pruning removed a build other than the expected obsolete build.'
-    Assert-True ($prune.cleanup.reclaimedBytes -eq 20) `
-        'Pruning did not report the exact reclaimed bytes.'
-    Assert-True ($prune.summary.developmentPortableBuilds.count -eq 2) `
-        'Post-prune build count was not two.'
+    Invoke-ExpectedFailure @(
+        '-NoProfile',
+        '-ExecutionPolicy', 'Bypass',
+        '-File', $reportScript,
+        '-RepositoryRoot', $pruneRoot,
+        '-OutputPath', $pruneOutput,
+        '-PruneObsoleteBuilds',
+        '-Confirm:$false')
+    foreach ($name in @('build-a', 'build-b', 'build-c')) {
+        Assert-True (Test-Path -LiteralPath (Join-Path $pruneRoot "artifacts\dev-portable\builds\$name") -PathType Container) `
+            "Disabled direct pruning deleted $name."
+    }
     $passed++
 
     $unsafeRoot = Join-Path $testRoot 'unsafe'

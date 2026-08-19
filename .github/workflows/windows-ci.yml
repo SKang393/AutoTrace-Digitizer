@@ -69,6 +69,18 @@ jobs:
           powershell -NoProfile -ExecutionPolicy Bypass
           -File "${{ github.workspace }}\packaging\tests\Test-VersionPolicy.Tests.ps1"
 
+      - name: Test build ledger generation
+        shell: pwsh
+        run: >-
+          powershell -NoProfile -ExecutionPolicy Bypass
+          -File "${{ github.workspace }}\packaging\tests\Test-GenerateBuildLedger.Tests.ps1"
+
+      - name: Test portable build retention
+        shell: pwsh
+        run: >-
+          powershell -NoProfile -ExecutionPolicy Bypass
+          -File "${{ github.workspace }}\packaging\tests\Test-DevPortable.Tests.ps1"
+
       - name: Restore
         shell: pwsh
         run: dotnet restore GraphAutoReader.slnx

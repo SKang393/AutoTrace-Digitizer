@@ -13,6 +13,10 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+if ($PruneObsoleteBuilds.IsPresent) {
+    throw 'Direct size-report pruning is disabled. Commit and push docs/BUILD_LEDGER.json, then use packaging/Watch-DevPortable.ps1 -ApplyRetentionOnce.'
+}
+
 function Test-PathWithinRoot {
     param(
         [Parameter(Mandatory)]
