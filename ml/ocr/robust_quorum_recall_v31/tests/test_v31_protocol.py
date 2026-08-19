@@ -215,7 +215,7 @@ def test_quorum_uses_median_margin_and_tolerates_one_route() -> None:
     assert rejected[0, 0, 1] < rejected[0, 0, 0]
 
 
-def test_ledger_consumes_p1_p2_and_preregisters_unapproved_p3() -> None:
+def test_ledger_consumes_p1_p2_and_authorizes_only_p3_selection() -> None:
     entry = _entry()
     assert entry["status"] == "candidate_3_preregistered"
     assert entry["trigger_result_sha256"] == TRIGGER_RESULT_SHA256
@@ -258,8 +258,8 @@ def test_ledger_consumes_p1_p2_and_preregisters_unapproved_p3() -> None:
     assert entry["p3_expected_runner_source_bundle_sha256"] == (
         train_p3.source_bundle_sha256(REPO_ROOT, train_p3.RUNNER_SOURCE_PATHS)
     )
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["public_gate_authorized"] is False
     assert entry["marker_creation_evaluated"] is False
     assert entry["private_validation"] is False
@@ -320,11 +320,11 @@ def test_consumed_p2_cannot_pass_preflight_again() -> None:
         train_p2.preflight(require_authorized=True)
 
 
-def test_p3_is_checksum_bound_but_not_execution_authorized() -> None:
+def test_p3_is_checksum_bound_and_selection_authorized_only() -> None:
     config = _read_json(ROOT / "training/p3.json")
     entry = _entry()
     assert config["candidate_id"] == "P3"
-    assert config["candidate_execution_authorized"] is False
+    assert config["candidate_execution_authorized"] is True
     assert config["selection_thresholds"] == [0.35, 0.45, 0.55, 0.65, 0.75]
     assert config["minimum_consecutive_passing_thresholds"] == 3
     assert config["validation_or_public_pixels_used_for_training"] is False
@@ -332,8 +332,8 @@ def test_p3_is_checksum_bound_but_not_execution_authorized() -> None:
     assert config["expected_runner_source_bundle_sha256"] == (
         train_p3.source_bundle_sha256(REPO_ROOT, train_p3.RUNNER_SOURCE_PATHS)
     )
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P3"
     assert entry["public_gate_authorized"] is False
     assert not (ROOT / "artifacts/P3-run").exists()
 
@@ -408,7 +408,8 @@ def test_readme_forbids_public_reuse_and_application_synthetic_data() -> None:
     assert "zero optimizer steps" in text
     assert "P1 is consumed" in text
     assert "P2 is consumed and failed visible selection" in text
-    assert "P3 is preregistered but not authorized" in text
+    assert "P3 is preregistered and separately authorized for one execution" in text
+    assert "Public execution" in normalized and "remain closed" in normalized
     assert "never become application graph data" in normalized
 
 

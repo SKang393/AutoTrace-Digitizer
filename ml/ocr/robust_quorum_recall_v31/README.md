@@ -56,7 +56,8 @@ aggregate P2 result is SHA-256
 `34106e7a018be2964d733162b27292cef5db9bb448eaf3e999accbbd6065c4a3`.
 No case detail or pixels were emitted or inspected.
 
-P3 is preregistered but not authorized. It loads the exact P2 state and trains
+P3 is preregistered and separately authorized for one execution. It loads the
+exact P2 state and trains
 only on the already frozen V31 training archive for four fixed epochs and 1,536
 optimizer steps. Its single change is a fixed asymmetric margin objective with
 stronger negative, hard-negative, and scene-separation terms. The quorum
@@ -66,11 +67,12 @@ unchanged. No selection or public pixels, case identities, truth rows,
 predictions, tensor contents, private images, Chandler, or `Generalization`
 informed the design. Runner-source and preregistered-config SHA-256 values are
 `9657bb658b40d4af9a87d2699732e130a558a5a0b253a30a5461ba0bdb7737a1`
-and `924eb7304dcbcafce6b5a4d529e6c5a35ff1d75e5a3287c47e268c3b42072ed7`.
-A later clean commit must separately authorize its only training and visible-
-selection run. Public execution, marker composition, private validation,
-manifest creation, model-store promotion, packaging, production approval, and
-release remain closed.
+and `a4728cba4c44d235d0fca36ecf1268cf3a7d72387af989da6f19f7441ff6ca4f`.
+This authorization permits exactly one P3 training and visible-selection run
+after its authorization commit receives a clean portable checkpoint. Public
+execution, marker composition, private validation, manifest creation,
+model-store promotion, packaging, production approval, and release remain
+closed.
 
 Synthetic fixtures are training and public-test inputs only and can never
 become application graph data.
