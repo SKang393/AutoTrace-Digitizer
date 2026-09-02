@@ -9,7 +9,7 @@ from dataclasses import asdict, dataclass
 import hashlib
 import json
 from pathlib import Path
-from typing import Any, Iterable, Sequence
+from typing import Any, Sequence
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -22,23 +22,6 @@ class TensorSignature:
     name: str
     element_type: str
     shape: tuple[int | str, ...]
-
-
-@dataclass(frozen=True)
-class PayloadAudit:
-    task: str
-    revision: str
-    candidate_id: str
-    path: str
-    sha256: str | None
-    expected_sha256: str | None
-    input_signature: tuple[TensorSignature, ...]
-    output_signature: tuple[TensorSignature, ...]
-    adapter_compatible: bool
-    compatibility_reason: str
-    production_approval: bool
-    availability: str
-    next_adapter_work: str
 
 
 def _sha256(path: Path) -> str:
@@ -98,6 +81,25 @@ def _compatible(task: str, inputs: tuple[TensorSignature, ...], outputs: tuple[T
     )
 
 
+def _proposal_adapter_compatible(
+    inputs: tuple[TensorSignature, ...],
+    outputs: tuple[TensorSignature, ...],
+    source: str,
+    model_sha256: str,
+) -> bool:
+    return (
+        len(inputs) == 1
+        and len(outputs) == 1
+        and inputs[0].element_type == "float32"
+        and inputs[0].shape == ("candidate_count", 3, 33, 33)
+        and outputs[0].element_type == "float32"
+        and outputs[0].shape == ("candidate_count", 4)
+        and "ProductionProposalMarkerCenterAdapter" in source
+        and "DetectCandidateAsync" in source
+        and model_sha256 in source
+    )
+
+
 def audit(rescore_path: Path = RESCORE_PATH) -> dict[str, Any]:
     result = json.loads(rescore_path.read_text(encoding="utf-8"))
     payload_audits: list[dict[str, Any]] = []
@@ -149,6 +151,7 @@ def audit(rescore_path: Path = RESCORE_PATH) -> dict[str, Any]:
     })
 
     marker = _selected_entry(result, "marker-center")
+    selected_marker = result["selected_marker"]
     payload = next(item for item in marker["payloads"] if item.get("kind") == "onnx")
     path = REPO_ROOT / payload["path"]
     if path.is_file():
@@ -161,21 +164,28 @@ def audit(rescore_path: Path = RESCORE_PATH) -> dict[str, Any]:
         actual_hash = None
         inputs, outputs = (), ()
         availability = "missing"
-    payload_audits.append(asdict(PayloadAudit(
-            task="marker-center",
-            revision=marker["revision"],
-            candidate_id=marker["candidate_id"],
-            path=payload["path"],
-            sha256=actual_hash,
-            expected_sha256=payload["sha256"],
-            input_signature=inputs,
-            output_signature=outputs,
-            adapter_compatible=_compatible("marker-center", inputs, outputs) if inputs else False,
-            compatibility_reason="The selected P2 payload consumes candidate patches and returns four proposal values, while the current marker adapter requires equal bounded full-frame NCHW [1,3,H,W] input and output.",
-            production_approval=False,
-            availability=availability,
-            next_adapter_work="Implement and review a proposal-patch marker adapter, or provide a compatible full-frame [1,3,H,W] model.",
-        )))
+    adapter_path = REPO_ROOT / selected_marker["adapter_path"]
+    if _sha256(adapter_path) != selected_marker["adapter_sha256"]:
+        raise ValueError("MARKER_ADAPTER_CHECKSUM_MISMATCH")
+    adapter_source = adapter_path.read_text(encoding="utf-8")
+    adapter_compatible = _proposal_adapter_compatible(inputs, outputs, adapter_source, payload["sha256"])
+    payload_audits.append({
+        "task": "marker-center",
+        "revision": marker["revision"],
+        "candidate_id": marker["candidate_id"],
+        "path": payload["path"],
+        "sha256": actual_hash,
+        "expected_sha256": payload["sha256"],
+        "input_signature": [asdict(item) for item in inputs],
+        "output_signature": [asdict(item) for item in outputs],
+        "adapter_path": selected_marker["adapter_path"],
+        "adapter_sha256": selected_marker["adapter_sha256"],
+        "adapter_compatible": adapter_compatible,
+        "compatibility_reason": "The checksum-bound candidate adapter implements the selected [N,3,33,33] proposal-patch input and [N,4] output contract.",
+        "production_approval": False,
+        "availability": availability,
+        "next_adapter_work": "Replace or repair the candidate on synthetic train/dev because corrected real-dev marker evidence fails Tier 1.",
+    })
     return {
         "schema": "graphreader.candidate-contract-audit.v1",
         "report_scope": "aggregate_only",
@@ -183,7 +193,7 @@ def audit(rescore_path: Path = RESCORE_PATH) -> dict[str, Any]:
         "production_approval": False,
         "model_inference_runs": 0,
         "private_corpus_access": False,
-        "next_work": "Run V8 on real-dev and implement the selected marker proposal adapter; do not weaken the existing production contracts.",
+        "next_work": "Repair OCR and marker candidates on synthetic train/dev; current corrected evidence fails Tier 1 and real-sealed remains unopened.",
     }
 
 

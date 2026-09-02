@@ -1,0 +1,846 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2026 Sungwoo Kang
+
+using System.Globalization;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Xml.Linq;
+using GraphReader.Inference;
+using GraphReader.Ocr;
+using GraphReader.Markers.Detection;
+using GraphReader.App.Integration.Workflow;
+
+namespace GraphReader.RealAcceptance.Ocr;
+
+internal static class Program
+{
+    private const int SealedTarget = 51;
+    private const int ExpectedDev = 120;
+    private const string OfficialDbDetectorSha256 = "d4aa24d408cd70b8b9f66cc758e20f397fc31a9c69d8477cf8887fc53bd5fceb";
+    private static readonly string[] CiNames = ["CI", "TF_BUILD", "GITHUB_ACTIONS", "GITLAB_CI", "BUILD_BUILDID", "JENKINS_URL", "TEAMCITY_VERSION"];
+
+    public static async Task<int> Main(string[] args)
+    {
+        if (args.Contains("--self-test", StringComparer.Ordinal))
+        {
+            SelfTest();
+            Console.WriteLine("{\"status\":\"pass\",\"self_test\":true,\"private_corpus_access\":false,\"model_inference_runs\":0}");
+            return 0;
+        }
+        if (!args.Contains("--explicit-opt-in", StringComparer.Ordinal))
+        {
+            Console.Error.WriteLine("PRIVATE_CORPUS_EXPLICIT_OPT_IN_REQUIRED");
+            return 2;
+        }
+        if (CiNames.Any(name => !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(name)) &&
+            !new[] { "0", "false", "no", "off" }.Contains(Environment.GetEnvironmentVariable(name)!.Trim(), StringComparer.OrdinalIgnoreCase)))
+        {
+            Console.Error.WriteLine("PRIVATE_CORPUS_DISABLED_IN_CI");
+            return 2;
+        }
+        string? syntheticArg = GetOption(args, "--synthetic-real-range");
+        string? officialArg = GetOption(args, "--synthetic-official-db");
+        if (args.Contains("--run-real-dev-marker", StringComparer.Ordinal))
+        {
+            string? markerRoot = GetOption(args, "--root");
+            if (markerRoot is null)
+            {
+                Console.Error.WriteLine("REAL_DEV_ROOT_AND_RUN_FLAG_REQUIRED");
+                return 2;
+            }
+
+            MarkerAggregateReport markerReport = await RunRealDevMarkerAsync(Path.GetFullPath(markerRoot), CancellationToken.None);
+            Console.WriteLine(JsonSerializer.Serialize(markerReport, JsonOptions));
+            return markerReport.FailureCount == 0 && markerReport.Gates.Values.All(value => value) ? 0 : 1;
+        }
+        if (officialArg is not null)
+        {
+            DetectorAggregateReport detectorReport = await RunOfficialDbAsync(Path.GetFullPath(officialArg), CancellationToken.None);
+            Console.WriteLine(JsonSerializer.Serialize(detectorReport, JsonOptions));
+            return detectorReport.DetectionPrecision >= 0.95 && detectorReport.DetectionRecall >= 0.95 ? 0 : 1;
+        }
+        if (syntheticArg is not null)
+        {
+            SyntheticAggregateReport synthetic = await RunSyntheticAsync(Path.GetFullPath(syntheticArg), CancellationToken.None);
+            Console.WriteLine(JsonSerializer.Serialize(synthetic, JsonOptions));
+            return synthetic.Gates.Values.All(value => value) ? 0 : 1;
+        }
+        string? rootArg = GetOption(args, "--root");
+        if (rootArg is null || !args.Contains("--run-real-dev", StringComparer.Ordinal))
+        {
+            Console.Error.WriteLine("REAL_DEV_ROOT_AND_RUN_FLAG_REQUIRED");
+            return 2;
+        }
+        AggregateReport report = await RunAsync(Path.GetFullPath(rootArg), CancellationToken.None);
+        Console.WriteLine(JsonSerializer.Serialize(report, JsonOptions));
+        return report.Gates.Values.All(value => value) ? 0 : 1;
+    }
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower };
+
+    private static string? GetOption(string[] args, string name)
+    {
+        int index = Array.IndexOf(args, name);
+        return index >= 0 && index + 1 < args.Length ? args[index + 1] : null;
+    }
+
+    private static async Task<AggregateReport> RunAsync(string rootPath, CancellationToken cancellationToken)
+    {
+        string root = Path.GetFullPath(rootPath);
+        string[] paths = Directory.EnumerateFiles(root, "*.dig", SearchOption.AllDirectories).OrderBy(Path.GetFullPath, StringComparer.Ordinal).ToArray();
+        Dictionary<string, string> assignments = Assign(paths, root);
+        string[] dev = paths.Where(path => assignments[Path.GetFullPath(path)] == "real-dev").ToArray();
+        if (dev.Length != ExpectedDev) throw new InvalidDataException($"REAL_DEV_COUNT:{dev.Length}");
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        int succeeded = 0, failed = 0, anchors = 0, points = 0, calibrated = 0, within = 0, matched = 0;
+        int numericYTicks = 0, projectsWithTwoYTicks = 0;
+        int recognizedRegions = 0, numericRegions = 0;
+        var roleCounts = new Dictionary<string, int>(StringComparer.Ordinal);
+        double anchorError = 0, maxAnchorError = 0;
+        var failureKinds = new Dictionary<string, int>(StringComparer.Ordinal);
+        var timings = new List<double>();
+        await using InferenceRuntime runtime = CreateRuntime();
+        OcrV8ProductionCompositionPipeline pipeline = CreatePipeline(runtime);
+        foreach (string path in dev)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                byte[] before = SHA256.HashData(File.ReadAllBytes(path));
+                DigTruth truth = ReadDig(path);
+                byte[] png = truth.ImageBytes;
+                Raster raster = DecodePng(png);
+                OcrImage image = ToOcrImage(raster);
+                var started = System.Diagnostics.Stopwatch.StartNew();
+                OcrResult result = await pipeline.RecognizeAsync(new OcrRequest(
+                    "real-dev-aggregate", "real-dev-panel", Convert.ToHexStringLower(SHA256.HashData(png)), image,
+                    PlotBounds(truth.Anchors, raster)), cancellationToken);
+                started.Stop(); timings.Add(started.Elapsed.TotalMilliseconds);
+                if (!result.Succeeded) throw new InvalidDataException("OCR_RESULT_FAILURE");
+                recognizedRegions += result.Regions.Count;
+                foreach (OcrRegion region in result.Regions)
+                {
+                    string role = region.Role.ToString();
+                    roleCounts[role] = roleCounts.GetValueOrDefault(role) + 1;
+                    if (double.TryParse(region.Text.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out _)) numericRegions++;
+                }
+                anchors += truth.Anchors.Count;
+                points += truth.Points.Count;
+                Calibration truthCalibration = Fit(truth.Anchors);
+                foreach (OcrRegion region in result.Regions.Where(region => region.Role == OcrTextRole.YTick))
+                {
+                    if (!double.TryParse(region.Text.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out double value)) continue;
+                    double y = region.Polygon.Bounds.Y + region.Polygon.Bounds.Height / 2;
+                    truthCalibration.Ticks.Add((y, value));
+                }
+                numericYTicks += truthCalibration.Ticks.Count;
+                if (truthCalibration.Ticks.Count >= 2) projectsWithTwoYTicks++;
+                if (!before.AsSpan().SequenceEqual(SHA256.HashData(File.ReadAllBytes(path)))) throw new InvalidDataException("REAL_DEV_SOURCE_MUTATED");
+                string? tickFailure = TickFailure(truthCalibration.Ticks);
+                if (tickFailure is not null) throw new InvalidDataException(tickFailure);
+                Calibration predicted = FitTicks(truthCalibration.Ticks);
+                calibrated++;
+                foreach (AxisAnchor anchor in truth.Anchors)
+                {
+                    double predictedScreenY = (anchor.GraphY - predicted.A) / predicted.B;
+                    double error = Math.Abs(anchor.ScreenY - predictedScreenY);
+                    anchorError += error; maxAnchorError = Math.Max(maxAnchorError, error);
+                }
+                foreach (CurvePoint point in truth.Points)
+                {
+                    double expected = truthCalibration.GraphY(point.ScreenY);
+                    double actual = predicted.GraphY(point.ScreenY);
+                    matched++; if (Math.Abs(actual - expected) <= 5) within++;
+                }
+                succeeded++;
+            }
+            catch (Exception exception) when (exception is InvalidDataException or FormatException or InvalidOperationException)
+            {
+                failed++; string key = exception.Message.Split(':', 2)[0]; failureKinds[key] = failureKinds.GetValueOrDefault(key) + 1;
+            }
+        }
+        stopwatch.Stop();
+        double calibrationCoverage = succeeded / (double)dev.Length;
+        double pointYAccuracy = within / (double)Math.Max(1, matched);
+        using JsonDocument policy = JsonDocument.Parse(File.ReadAllText(Path.GetFullPath("ml/policy/acceptance-bars.json")));
+        double tier1Bar = policy.RootElement.GetProperty("tier1_reviewable_error")
+            .GetProperty("text_region_detection_recall_minimum").GetDouble();
+        var gates = new Dictionary<string, bool>(StringComparer.Ordinal)
+        {
+            ["automatic_calibration_coverage"] = calibrationCoverage >= tier1Bar,
+            ["export_y_within_five_units"] = pointYAccuracy >= tier1Bar,
+            ["zero_silently_accepted_invalid_calibrations"] = failed == dev.Length - calibrated &&
+                failureKinds.Keys.All(key => key.StartsWith("CALIBRATION_", StringComparison.Ordinal)),
+        };
+        return new AggregateReport(
+            1, "real_dev_ocr_aggregate_only", dev.Length, SealedTarget, 0, succeeded, failed,
+            anchors, points, recognizedRegions, numericRegions,
+            new Dictionary<string, int>(roleCounts, StringComparer.Ordinal),
+            numericYTicks, projectsWithTwoYTicks, calibrated, matched, within,
+            calibrationCoverage,
+            anchorError / Math.Max(1, calibrated * 3), maxAnchorError,
+            pointYAccuracy, gates, timings.Count == 0 ? 0 : timings.Average(), stopwatch.Elapsed.TotalMilliseconds,
+            AssignmentsSha256: AssignmentHash(paths, assignments, root),
+            ModelPayloadSha256: OcrPayloadSha256(),
+            PolicySha256: AcceptancePolicySha256(),
+            new Dictionary<string, int>(failureKinds, StringComparer.Ordinal), false, false, false, false, false);
+    }
+
+    private static async Task<MarkerAggregateReport> RunRealDevMarkerAsync(string rootPath, CancellationToken cancellationToken)
+    {
+        string root = Path.GetFullPath(rootPath);
+        string[] paths = Directory.EnumerateFiles(root, "*.dig", SearchOption.AllDirectories)
+            .OrderBy(path => Path.GetFullPath(path), StringComparer.Ordinal).ToArray();
+        Dictionary<string, string> assignments = Assign(paths, root);
+        string[] dev = paths.Where(path => assignments[Path.GetFullPath(path)] == "real-dev").ToArray();
+        if (dev.Length != ExpectedDev) throw new InvalidDataException($"REAL_DEV_COUNT:{dev.Length}");
+
+        await using InferenceRuntime runtime = CreateRuntime();
+        OcrV8ProductionCompositionPipeline pipeline = CreatePipeline(runtime);
+        string modelPath = Path.GetFullPath("ml/markers/center/artifacts/runtime-consistency-v2/P2-run/marker-center-runtime-consistency-p2.onnx");
+        var model = new ModelIdentity("marker-center-runtime-consistency-v2", "P2", "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b", modelPath);
+        ProductionProposalMarkerCenterAdapter adapter = ProductionProposalMarkerCenterAdapter.CreateCandidate(model, runtime);
+        int succeeded = 0, failed = 0, truePositives = 0, falsePositives = 0, falseNegatives = 0;
+        var failureKinds = new Dictionary<string, int>(StringComparer.Ordinal);
+        var timings = new List<double>();
+        foreach (string path in dev)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                byte[] before = SHA256.HashData(File.ReadAllBytes(path));
+                DigTruth truth = ReadDig(path);
+                Raster raster = DecodePng(truth.ImageBytes);
+                OcrImage ocrImage = ToOcrImage(raster);
+                OcrRectangle plot = PlotBounds(truth.Anchors, raster);
+                OcrResult ocr = await pipeline.RecognizeAsync(new OcrRequest(
+                    "real-dev-marker-aggregate", "real-dev-marker-panel", Convert.ToHexStringLower(SHA256.HashData(truth.ImageBytes)), ocrImage, plot), cancellationToken);
+                if (!ocr.Succeeded) throw new InvalidDataException("OCR_RESULT_FAILURE");
+                float[] luminance = raster.Gray.Select(static value => value / 255f).ToArray();
+                float[] ocrMask = RasterizeOcrMask(raster.Width, raster.Height, ocr.Regions.Where(static region => region.ReviewStatus != OcrReviewStatus.Rejected).ToArray());
+                float[] artifactMask = RasterizeAxisMask(raster.Width, raster.Height, truth.Anchors, 2.0);
+                MarkerImageFrame frame = new(raster.Width, raster.Height, 1, luminance, MarkerSourceImage.Original, MarkerAffineTransform.Identity, new MarkerMask(raster.Width, raster.Height, ocrMask), new MarkerMask(raster.Width, raster.Height, artifactMask));
+                var started = System.Diagnostics.Stopwatch.StartNew();
+                IReadOnlyList<MarkerCenter> predictions = await adapter.DetectCandidateAsync(frame, ToMarkerPolygon(plot), cancellationToken);
+                started.Stop();
+                timings.Add(started.Elapsed.TotalMilliseconds);
+                (int tp, int fp, int fn) = MatchCenters(predictions, truth.Points, 5.0);
+                truePositives += tp; falsePositives += fp; falseNegatives += fn;
+                if (!before.AsSpan().SequenceEqual(SHA256.HashData(File.ReadAllBytes(path)))) throw new InvalidDataException("REAL_DEV_SOURCE_MUTATED");
+                succeeded++;
+            }
+            catch (Exception exception) when (exception is InvalidDataException or FormatException or InvalidOperationException)
+            {
+                failed++; string key = exception.Message.Split(':', 2)[0]; failureKinds[key] = failureKinds.GetValueOrDefault(key) + 1;
+            }
+        }
+
+        double precision = truePositives / (double)Math.Max(1, truePositives + falsePositives);
+        double recall = truePositives / (double)Math.Max(1, truePositives + falseNegatives);
+        using JsonDocument policy = JsonDocument.Parse(File.ReadAllText(Path.GetFullPath("ml/policy/acceptance-bars.json")));
+        JsonElement bars = policy.RootElement.GetProperty("tier1_reviewable_error");
+        var gates = new Dictionary<string, bool>(StringComparer.Ordinal)
+        {
+            ["marker_center_precision"] = precision >= bars.GetProperty("marker_center_precision_minimum").GetDouble(),
+            ["marker_center_recall"] = recall >= bars.GetProperty("marker_center_recall_minimum").GetDouble(),
+        };
+
+        return new MarkerAggregateReport(
+            1, "real_dev_marker_aggregate_only", dev.Length, SealedTarget, 0, succeeded, failed,
+            truePositives, falsePositives, falseNegatives,
+            precision, recall, 5.0, gates,
+            timings.Count == 0 ? 0 : timings.Average(),
+            timings.Sum(), AssignmentHash(paths, assignments, root), model.Sha256,
+            OcrPayloadSha256(), "v8_accepted_regions_plus_anchor_axes",
+            AcceptancePolicySha256(),
+            new Dictionary<string, int>(failureKinds, StringComparer.Ordinal), false, false, false, false, false);
+    }
+
+    private static MarkerPolygon ToMarkerPolygon(OcrRectangle rectangle) => MarkerPolygon.FromRectangle(new(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height));
+
+    private static float[] RasterizeOcrMask(int width, int height, IReadOnlyList<OcrRegion> regions)
+    {
+        float[] values = new float[checked(width * height)];
+        foreach (OcrRegion region in regions)
+        {
+            IReadOnlyList<OcrPoint> points = region.Polygon.Points;
+            int left = Math.Max(0, (int)Math.Floor(points.Min(static point => point.X)));
+            int right = Math.Min(width - 1, (int)Math.Ceiling(points.Max(static point => point.X)));
+            int top = Math.Max(0, (int)Math.Floor(points.Min(static point => point.Y)));
+            int bottom = Math.Min(height - 1, (int)Math.Ceiling(points.Max(static point => point.Y)));
+            for (int y = top; y <= bottom; y++) for (int x = left; x <= right; x++) if (PointInPolygon(x + 0.5, y + 0.5, points)) values[y * width + x] = 1;
+        }
+        return values;
+    }
+
+    private static float[] RasterizeAxisMask(int width, int height, IReadOnlyList<AxisAnchor> anchors, double radius)
+    {
+        float[] values = new float[checked(width * height)];
+        RasterizeSegment(values, width, height, anchors[0].ScreenX, anchors[0].ScreenY, anchors[1].ScreenX, anchors[1].ScreenY, radius);
+        RasterizeSegment(values, width, height, anchors[0].ScreenX, anchors[0].ScreenY, anchors[2].ScreenX, anchors[2].ScreenY, radius);
+        return values;
+    }
+
+    private static void RasterizeSegment(float[] values, int width, int height, double x1, double y1, double x2, double y2, double radius)
+    {
+        int left = Math.Max(0, (int)Math.Floor(Math.Min(x1, x2) - radius));
+        int right = Math.Min(width - 1, (int)Math.Ceiling(Math.Max(x1, x2) + radius));
+        int top = Math.Max(0, (int)Math.Floor(Math.Min(y1, y2) - radius));
+        int bottom = Math.Min(height - 1, (int)Math.Ceiling(Math.Max(y1, y2) + radius));
+        double dx = x2 - x1, dy = y2 - y1, denominator = dx * dx + dy * dy;
+        for (int y = top; y <= bottom; y++) for (int x = left; x <= right; x++)
+        {
+            double parameter = denominator <= double.Epsilon ? 0 : Math.Clamp(((x + 0.5 - x1) * dx + (y + 0.5 - y1) * dy) / denominator, 0, 1);
+            double px = x1 + parameter * dx, py = y1 + parameter * dy;
+            if (Math.Sqrt(Math.Pow(x + 0.5 - px, 2) + Math.Pow(y + 0.5 - py, 2)) <= radius) values[y * width + x] = 1;
+        }
+    }
+
+    private static bool PointInPolygon(double x, double y, IReadOnlyList<OcrPoint> points)
+    {
+        bool inside = false;
+        for (int current = 0; current < points.Count; current++)
+        {
+            OcrPoint a = points[current], b = points[current == 0 ? points.Count - 1 : current - 1];
+            if ((a.Y > y) != (b.Y > y) && x < ((b.X - a.X) * (y - a.Y) / (b.Y - a.Y)) + a.X) inside = !inside;
+        }
+        return inside;
+    }
+
+    private static (int TruePositives, int FalsePositives, int FalseNegatives) MatchCenters(IReadOnlyList<MarkerCenter> predictions, IReadOnlyList<CurvePoint> truth, double tolerance)
+    {
+        int[][] edges = predictions.Select(prediction => truth
+            .Select((point, truthIndex) => (truthIndex, distance: Math.Sqrt(
+                Math.Pow(prediction.Center.X - point.ScreenX, 2) +
+                Math.Pow(prediction.Center.Y - point.ScreenY, 2))))
+            .Where(edge => edge.distance <= tolerance)
+            .OrderBy(edge => edge.distance)
+            .Select(edge => edge.truthIndex)
+            .ToArray()).ToArray();
+        int truePositives = MaximumMatching(edges, truth.Count).Count(match => match >= 0);
+        return (truePositives, predictions.Count - truePositives, truth.Count - truePositives);
+    }
+
+    private static int[] MaximumMatching(int[][] edges, int truthCount)
+    {
+        int[] predictionForTruth = Enumerable.Repeat(-1, truthCount).ToArray();
+
+        bool Augment(int predictionIndex, bool[] visited)
+        {
+            foreach (int truthIndex in edges[predictionIndex])
+            {
+                if ((uint)truthIndex >= (uint)truthCount)
+                    throw new InvalidDataException("MATCH_TRUTH_INDEX_OUT_OF_RANGE");
+                if (visited[truthIndex]) continue;
+                visited[truthIndex] = true;
+                int prior = predictionForTruth[truthIndex];
+                if (prior < 0 || Augment(prior, visited))
+                {
+                    predictionForTruth[truthIndex] = predictionIndex;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        for (int predictionIndex = 0; predictionIndex < edges.Length; predictionIndex++)
+            Augment(predictionIndex, new bool[truthCount]);
+
+        int[] truthForPrediction = Enumerable.Repeat(-1, edges.Length).ToArray();
+        for (int truthIndex = 0; truthIndex < predictionForTruth.Length; truthIndex++)
+        {
+            int predictionIndex = predictionForTruth[truthIndex];
+            if (predictionIndex >= 0) truthForPrediction[predictionIndex] = truthIndex;
+        }
+        return truthForPrediction;
+    }
+
+    private static async Task<SyntheticAggregateReport> RunSyntheticAsync(string datasetPath, CancellationToken cancellationToken)
+    {
+        string root = Path.GetFullPath(datasetPath);
+        string[] images = Directory.EnumerateFiles(Path.Combine(root, "images"), "*.png").OrderBy(path => path, StringComparer.Ordinal).ToArray();
+        if (images.Length == 0) throw new InvalidDataException("SYNTHETIC_DATASET_EMPTY");
+        await using InferenceRuntime runtime = CreateRuntime();
+        OcrV8ProductionCompositionPipeline pipeline = CreatePipeline(runtime);
+        LocalOnnxProposalTextRegionDetector proposalDetector = CreateProposalDetector(runtime);
+        int truthRegions = 0, truePositives = 0, falsePositives = 0, falseNegatives = 0, roleCorrect = 0, exact = 0, characters = 0, editErrors = 0, prohibited = 0;
+        var dimensionCounts = new Dictionary<string, int[]>(StringComparer.Ordinal);
+        var times = new List<double>();
+        var proposalObservations = new List<ProposalObservation>();
+        foreach (string imagePath in images)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            string annotationPath = Path.Combine(root, "annotations", Path.GetFileNameWithoutExtension(imagePath) + ".json");
+            SyntheticCase truth = ReadSyntheticCase(annotationPath);
+            Raster raster = DecodePng(File.ReadAllBytes(imagePath));
+            OcrImage image = ToOcrImage(raster);
+            OcrDetectorImage detectorImage = ToMaskedDetectorImage(raster, truth.MaskLines);
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            OcrResult result = await pipeline.RecognizeAsync(new OcrRequest(
+                "synthetic-real-range", Path.GetFileNameWithoutExtension(imagePath), Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(imagePath))), image,
+                truth.PlotBounds, DetectorImage: detectorImage), cancellationToken);
+            watch.Stop(); times.Add(watch.Elapsed.TotalMilliseconds);
+            if (!result.Succeeded) throw new InvalidDataException("SYNTHETIC_OCR_RESULT_FAILURE");
+            IReadOnlyList<OcrDetectedRegion> rawProposals = await proposalDetector.DetectProposalsAsync(detectorImage.Image, cancellationToken);
+            proposalObservations.Add(new ProposalObservation(
+                raster.Width,
+                raster.Height,
+                truth.Texts.Select(item => new ProposalTruth(item.Role, item.Box)).ToArray(),
+                rawProposals.Select(item => new ProposalCandidate((float)item.DetectionConfidence, item.Polygon.Bounds)).ToArray()));
+            string dimension = $"{raster.Width}x{raster.Height}";
+            int[] dimensionValues = dimensionCounts.GetValueOrDefault(dimension) ?? new int[8];
+            dimensionCounts[dimension] = dimensionValues;
+            truthRegions += truth.Texts.Count;
+            dimensionValues[0] += truth.Texts.Count;
+            OcrRegion[] regions = result.Regions.ToArray();
+            int[][] edges = regions.Select(region => truth.Texts
+                .Select((item, index) => (index, overlap: IoU(region.Polygon.Bounds, item.Box)))
+                .Where(item => item.overlap >= 0.5)
+                .OrderByDescending(item => item.overlap)
+                .Select(item => item.index)
+                .ToArray()).ToArray();
+            int[] matches = MaximumMatching(edges, truth.Texts.Count);
+            int matchedScene = 0;
+            for (int regionIndex = 0; regionIndex < regions.Length; regionIndex++)
+            {
+                OcrRegion region = regions[regionIndex];
+                int index = matches[regionIndex];
+                if (index < 0)
+                {
+                    falsePositives++;
+                    dimensionValues[2]++;
+                    if (truth.Prohibited.Any(box => Contains(box, region.Polygon.Bounds.Center))) prohibited++;
+                    continue;
+                }
+                matchedScene++; truePositives++;
+                dimensionValues[1]++;
+                SyntheticText expected = truth.Texts[index];
+                bool textMatch = string.Equals(region.Text, expected.Text, StringComparison.Ordinal);
+                exact += textMatch ? 1 : 0;
+                dimensionValues[4] += textMatch ? 1 : 0;
+                bool roleMatch = RoleName(region.Role) == expected.Role;
+                roleCorrect += roleMatch ? 1 : 0;
+                dimensionValues[5] += roleMatch ? 1 : 0;
+                int characterCount = expected.Text.EnumerateRunes().Count();
+                int errors = Levenshtein(expected.Text, region.Text);
+                characters += characterCount; editErrors += errors;
+                dimensionValues[6] += characterCount;
+                dimensionValues[7] += errors;
+            }
+            int sceneFalseNegatives = truth.Texts.Count - matchedScene;
+            falseNegatives += sceneFalseNegatives;
+            dimensionValues[3] += sceneFalseNegatives;
+        }
+        using JsonDocument policy = JsonDocument.Parse(File.ReadAllText(Path.GetFullPath("ml/policy/acceptance-bars.json")));
+        JsonElement bars = policy.RootElement.GetProperty("tier1_reviewable_error");
+        double precision = truePositives / (double)Math.Max(1, truePositives + falsePositives);
+        double recall = truePositives / (double)Math.Max(1, truePositives + falseNegatives);
+        double cer = editErrors / (double)Math.Max(1, characters);
+        double role = roleCorrect / (double)Math.Max(1, truePositives);
+        double prohibitedRate = prohibited / (double)Math.Max(1, truePositives + falsePositives);
+        var gates = new Dictionary<string, bool>(StringComparer.Ordinal)
+        {
+            ["detection_precision"] = precision >= bars.GetProperty("text_region_detection_precision_minimum").GetDouble(),
+            ["detection_recall"] = recall >= bars.GetProperty("text_region_detection_recall_minimum").GetDouble(),
+            ["recognition_exact"] = exact / (double)Math.Max(1, truthRegions) >= bars.GetProperty("recognition_exact_match_minimum").GetDouble(),
+            ["character_error_rate"] = cer <= bars.GetProperty("character_error_rate_maximum").GetDouble(),
+            ["role_accuracy"] = role >= bars.GetProperty("role_accuracy_minimum").GetDouble(),
+            ["prohibited_structure_hit_rate"] = prohibitedRate <= bars.GetProperty("prohibited_structure_hit_rate_maximum").GetDouble(),
+        };
+        Dictionary<string, SyntheticDimensionReport> byDimension = dimensionCounts.ToDictionary(
+            item => item.Key,
+            item => new SyntheticDimensionReport(
+                item.Value[0], item.Value[1], item.Value[2], item.Value[3],
+                item.Value[1] / (double)Math.Max(1, item.Value[1] + item.Value[2]),
+                item.Value[1] / (double)Math.Max(1, item.Value[1] + item.Value[3]),
+                item.Value[4] / (double)Math.Max(1, item.Value[0]),
+                item.Value[7] / (double)Math.Max(1, item.Value[6]),
+                item.Value[5] / (double)Math.Max(1, item.Value[1])),
+            StringComparer.Ordinal);
+        return new SyntheticAggregateReport(1, "synthetic_real_range_ocr_aggregate_only", images.Length, truthRegions, truePositives, falsePositives, falseNegatives, precision, recall, exact / (double)Math.Max(1, truthRegions), cer, role, prohibited, prohibitedRate, times.Average(), byDimension, ProposalThresholdSummary(proposalObservations), ProposalRoleRecall(proposalObservations), gates, OcrPayloadSha256(), AcceptancePolicySha256(), false, false, false);
+    }
+
+    private static async Task<DetectorAggregateReport> RunOfficialDbAsync(string datasetPath, CancellationToken cancellationToken)
+    {
+        string root = Path.GetFullPath(datasetPath);
+        string[] images = Directory.EnumerateFiles(Path.Combine(root, "images"), "*.png").OrderBy(path => path, StringComparer.Ordinal).ToArray();
+        if (images.Length == 0) throw new InvalidDataException("SYNTHETIC_DATASET_EMPTY");
+        await using InferenceRuntime runtime = CreateRuntime();
+        LocalOnnxTextRegionDetector detector = CreateOfficialDbDetector(runtime);
+        int truthRegions = 0, truePositives = 0, falsePositives = 0, falseNegatives = 0;
+        var byDimension = new Dictionary<string, int[]>(StringComparer.Ordinal);
+        var times = new List<double>();
+        foreach (string imagePath in images)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            SyntheticCase truth = ReadSyntheticCase(Path.Combine(root, "annotations", Path.GetFileNameWithoutExtension(imagePath) + ".json"));
+            Raster raster = DecodePng(File.ReadAllBytes(imagePath));
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            IReadOnlyList<OcrDetectedRegion> regions = await detector.DetectAsync(ToMaskedDetectorImage(raster, truth.MaskLines).Image, cancellationToken);
+            watch.Stop(); times.Add(watch.Elapsed.TotalMilliseconds);
+            int[] values = byDimension.GetValueOrDefault($"{raster.Width}x{raster.Height}") ?? new int[4];
+            byDimension[$"{raster.Width}x{raster.Height}"] = values;
+            truthRegions += truth.Texts.Count; values[0] += truth.Texts.Count;
+            int[][] edges = regions.Select(region => truth.Texts
+                .Select((item, index) => (index, overlap: IoU(region.Polygon.Bounds, item.Box)))
+                .Where(item => item.overlap >= 0.5)
+                .OrderByDescending(item => item.overlap)
+                .Select(item => item.index)
+                .ToArray()).ToArray();
+            int matched = MaximumMatching(edges, truth.Texts.Count).Count(match => match >= 0);
+            int sceneFalsePositives = regions.Count - matched;
+            int sceneFalseNegatives = truth.Texts.Count - matched;
+            truePositives += matched; values[3] += matched;
+            falsePositives += sceneFalsePositives; values[1] += sceneFalsePositives;
+            falseNegatives += sceneFalseNegatives; values[2] += sceneFalseNegatives;
+        }
+        double precision = truePositives / (double)Math.Max(1, truePositives + falsePositives);
+        double recall = truePositives / (double)Math.Max(1, truePositives + falseNegatives);
+        var dimensions = byDimension.ToDictionary(item => item.Key, item => new DetectorDimensionReport(item.Value[0], item.Value[3], item.Value[1], item.Value[2], item.Value[3] / (double)Math.Max(1, item.Value[3] + item.Value[1]), item.Value[3] / (double)Math.Max(1, item.Value[0])), StringComparer.Ordinal);
+        return new DetectorAggregateReport(1, "synthetic_real_range_official_db_aggregate_only", images.Length, truthRegions, truePositives, falsePositives, falseNegatives, precision, recall, dimensions, times.Average(), OfficialDbDetectorSha256, false, false, false, 0.30, 0.60, 1.5, 3, 1000);
+    }
+
+    private static LocalOnnxTextRegionDetector CreateOfficialDbDetector(InferenceRuntime runtime)
+    {
+        string path = Path.GetFullPath("ml/ocr/official_bakeoff/runs/conversion/PP-OCRv5_mobile_det.onnx");
+        return new LocalOnnxTextRegionDetector(runtime, new LocalOnnxTextRegionDetectorOptions(new ModelIdentity(
+            "PP-OCRv5_mobile_det", "0.0.21-converted", OfficialDbDetectorSha256, path))
+        {
+            InputName = "x",
+            OutputName = "fetch_name_0",
+            InputColorMode = OcrTensorColorMode.Bgr,
+            PostprocessAlgorithm = OcrDetectionPostprocessAlgorithm.DbPostprocessV1,
+            ProbabilityThreshold = 0.30f,
+            BoxConfidenceThreshold = 0.60f,
+            UnclipRatio = 1.5,
+            MinimumSideLength = 3,
+            MaximumRegions = 1000,
+            AllowedProviders = [InferenceProvider.Cpu],
+            BypassCache = true,
+        });
+    }
+
+    private static LocalOnnxProposalTextRegionDetector CreateProposalDetector(InferenceRuntime runtime)
+    {
+        string path = Path.GetFullPath("ml/ocr/component_spaced_recall_detector_v10/artifacts/P2-run/graph-text-spaced-component-recall-v10-p2.onnx");
+        return new LocalOnnxProposalTextRegionDetector(runtime, new LocalOnnxProposalTextRegionDetectorOptions(new ModelIdentity(
+            "graph-text-spaced-component-recall-v10-p2", "0.0.21-p2", OcrV8ProductionCompositionFactory.DetectorSha256, path))
+        {
+            AllowedProviders = [InferenceProvider.Cpu],
+            BypassCache = true,
+        });
+    }
+
+    private sealed record ProposalCandidate(float Confidence, OcrRectangle Box);
+    private sealed record ProposalTruth(string Role, OcrRectangle Box);
+    private sealed record ProposalObservation(int Width, int Height, IReadOnlyList<ProposalTruth> Truth, IReadOnlyList<ProposalCandidate> Proposals);
+    private sealed record ProposalAggregate(int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall);
+
+    private static Dictionary<string, IReadOnlyDictionary<string, ProposalAggregate>> ProposalThresholdSummary(IReadOnlyList<ProposalObservation> observations)
+    {
+        double[] thresholds = [0.0, 0.82, 0.85, 0.90, 0.95];
+        var output = new Dictionary<string, IReadOnlyDictionary<string, ProposalAggregate>>(StringComparer.Ordinal);
+        foreach (double threshold in thresholds)
+        {
+            var perGroup = new Dictionary<string, ProposalAggregate>(StringComparer.Ordinal);
+            foreach (string groupName in new[] { "overall", "wide", "tall", "other" })
+            {
+                IEnumerable<ProposalObservation> group = groupName == "overall"
+                    ? observations
+                    : observations.Where(item => groupName == "wide" ? item.Width > item.Height * 2 : groupName == "tall" ? item.Height > item.Width * 2 : item.Width <= item.Height * 2 && item.Height <= item.Width * 2);
+                int tp = 0, fp = 0, fn = 0;
+                foreach (ProposalObservation observation in group)
+                {
+                    ProposalCandidate[] proposals = observation.Proposals.Where(item => item.Confidence >= threshold).ToArray();
+                    int[][] edges = proposals.Select(proposal => observation.Truth
+                        .Select((truth, index) => (index, overlap: IoU(proposal.Box, truth.Box)))
+                        .Where(item => item.overlap >= 0.5)
+                        .OrderByDescending(item => item.overlap)
+                        .Select(item => item.index)
+                        .ToArray()).ToArray();
+                    int matched = MaximumMatching(edges, observation.Truth.Count).Count(match => match >= 0);
+                    tp += matched;
+                    fp += proposals.Length - matched;
+                    fn += observation.Truth.Count - matched;
+                }
+                perGroup[groupName] = new ProposalAggregate(tp, fp, fn, tp / (double)Math.Max(1, tp + fp), tp / (double)Math.Max(1, tp + fn));
+            }
+            output[threshold.ToString("0.00", CultureInfo.InvariantCulture)] = perGroup;
+        }
+        return output;
+    }
+
+    private static Dictionary<string, ProposalAggregate> ProposalRoleRecall(IReadOnlyList<ProposalObservation> observations)
+    {
+        var totals = new Dictionary<string, int[]>(StringComparer.Ordinal);
+        foreach (ProposalObservation observation in observations)
+        {
+            int[][] edges = observation.Proposals.Select(proposal => observation.Truth
+                .Select((truth, index) => (index, overlap: IoU(proposal.Box, truth.Box)))
+                .Where(item => item.overlap >= 0.5)
+                .OrderByDescending(item => item.overlap)
+                .Select(item => item.index)
+                .ToArray()).ToArray();
+            HashSet<int> used = MaximumMatching(edges, observation.Truth.Count)
+                .Where(match => match >= 0).ToHashSet();
+            foreach (IGrouping<string, ProposalTruth> group in observation.Truth.GroupBy(item => item.Role, StringComparer.Ordinal))
+            {
+                int[] values = totals.GetValueOrDefault(group.Key) ?? new int[2];
+                values[0] += group.Count();
+                values[1] += observation.Truth.Select((truth, index) => (truth, index)).Count(item => item.truth.Role == group.Key && used.Contains(item.index));
+                totals[group.Key] = values;
+            }
+        }
+        return totals.ToDictionary(item => item.Key, item => new ProposalAggregate(item.Value[1], 0, item.Value[0] - item.Value[1], 0, item.Value[1] / (double)Math.Max(1, item.Value[0])), StringComparer.Ordinal);
+    }
+
+    private sealed record SyntheticText(string Text, string Role, OcrRectangle Box);
+    private sealed record SyntheticCase(List<SyntheticText> Texts, List<OcrRectangle> Prohibited, OcrRectangle PlotBounds, List<MaskLine> MaskLines);
+    private sealed record MaskLine(double X1, double Y1, double X2, double Y2);
+
+    private static SyntheticCase ReadSyntheticCase(string path)
+    {
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
+        JsonElement root = document.RootElement;
+        var texts = new List<SyntheticText>();
+        IEnumerable<JsonElement> textArrays = root.TryGetProperty("texts", out JsonElement rootTexts)
+            ? new[] { rootTexts }.Concat(root.TryGetProperty("panels", out JsonElement panels) ? panels.EnumerateArray().Where(item => item.TryGetProperty("texts", out _)).Select(item => item.GetProperty("texts")) : [])
+            : (root.TryGetProperty("panels", out JsonElement onlyPanels) ? onlyPanels.EnumerateArray().Where(item => item.TryGetProperty("texts", out _)).Select(item => item.GetProperty("texts")) : []);
+        foreach (JsonElement textArray in textArrays) foreach (JsonElement item in textArray.EnumerateArray())
+        {
+            if (!item.TryGetProperty("rendered_pixel_box", out JsonElement box) || box.GetArrayLength() != 4) continue;
+            texts.Add(new SyntheticText(item.GetProperty("text").GetString() ?? string.Empty, NormalizeRole(item.GetProperty("role").GetString()), Rectangle(box)));
+        }
+        var prohibited = new List<OcrRectangle>();
+        if (root.TryGetProperty("hard_negatives", out JsonElement negativeArray)) foreach (JsonElement item in negativeArray.EnumerateArray())
+        {
+            if (item.TryGetProperty("rendered_pixel_box", out JsonElement box) && box.GetArrayLength() == 4) prohibited.Add(Rectangle(box));
+        }
+        var lines = new List<MaskLine>();
+        foreach (JsonElement container in (new[] { root }).Concat(root.TryGetProperty("panels", out JsonElement maskPanels) ? maskPanels.EnumerateArray() : []))
+        {
+            foreach (string key in new[] { "axes", "ticks", "dividers" })
+            {
+                if (!container.TryGetProperty(key, out JsonElement lineArray)) continue;
+                foreach (JsonElement item in lineArray.EnumerateArray())
+                {
+                    if (!item.TryGetProperty("line", out JsonElement line) || line.GetArrayLength() != 2) continue;
+                    lines.Add(new MaskLine(line[0][0].GetDouble(), line[0][1].GetDouble(), line[1][0].GetDouble(), line[1][1].GetDouble()));
+                }
+            }
+        }
+        JsonElement firstPanel = root.GetProperty("panels")[0];
+        OcrRectangle plotBounds = Rectangle(firstPanel.GetProperty("plot_box"));
+        return new SyntheticCase(texts, prohibited, plotBounds, lines);
+    }
+
+    private static OcrRectangle Rectangle(JsonElement box) => new(box[0].GetDouble(), box[1].GetDouble(), box[2].GetDouble(), box[3].GetDouble());
+    private static bool Contains(OcrRectangle box, OcrPoint point) => point.X >= box.Left && point.X <= box.Right && point.Y >= box.Top && point.Y <= box.Bottom;
+    private static double IoU(OcrRectangle a, OcrRectangle b) { double left = Math.Max(a.Left, b.Left), top = Math.Max(a.Top, b.Top), right = Math.Min(a.Right, b.Right), bottom = Math.Min(a.Bottom, b.Bottom); double intersection = Math.Max(0, right - left) * Math.Max(0, bottom - top); return intersection / Math.Max(double.Epsilon, a.Width * a.Height + b.Width * b.Height - intersection); }
+    private static string RoleName(OcrTextRole role) => role switch
+    {
+        OcrTextRole.YTick => "y_tick",
+        OcrTextRole.XTick => "x_tick",
+        OcrTextRole.AxisTitle => "axis_title",
+        OcrTextRole.PhaseHeading => "phase_heading",
+        OcrTextRole.LegendText => "legend_text",
+        OcrTextRole.Participant => "participant",
+        OcrTextRole.Annotation => "annotation",
+        _ => "other",
+    };
+
+    private static string NormalizeRole(string? role) => role switch
+    {
+        "condition_label" => "other",
+        "y_tick" or "x_tick" or "axis_title" or "phase_heading" or "legend_text" or "participant" or "annotation" or "other" => role,
+        _ => "other",
+    };
+    private static int Levenshtein(string left, string right) { System.Text.Rune[] a = left.EnumerateRunes().ToArray(), b = right.EnumerateRunes().ToArray(); int[] previous = Enumerable.Range(0, b.Length + 1).ToArray(); for (int row = 1; row <= a.Length; row++) { int[] current = new int[b.Length + 1]; current[0] = row; for (int col = 1; col <= b.Length; col++) current[col] = Math.Min(Math.Min(current[col - 1] + 1, previous[col] + 1), previous[col - 1] + (a[row - 1] == b[col - 1] ? 0 : 1)); previous = current; } return previous[^1]; }
+
+    private static InferenceRuntime CreateRuntime()
+    {
+        var factory = new OnnxInferenceSessionFactory(NoUiThreadGuard.Instance);
+        var registry = new OnnxSessionRegistry(new OrtExecutionProviderDiscovery(), new WindowsExecutionProviderPolicy(), factory, CpuThreadConfiguration.Create(1));
+        return new InferenceRuntime(registry, new BoundedInferenceScheduler(2, 1), new ContentAddressedStageCache(Path.Combine(Path.GetTempPath(), "GraphReader.RealAcceptance.Ocr", Guid.NewGuid().ToString("N"))));
+    }
+
+    private static OcrV8ProductionCompositionPipeline CreatePipeline(InferenceRuntime runtime)
+    {
+        static ModelIdentity Model(string id, string version, string hash, string path) => new(id, version, hash, Path.GetFullPath(path));
+        string yaml = Path.GetFullPath("ml/ocr/official_bakeoff/runs/extracted/en_PP-OCRv5_mobile_rec_infer/inference.yml");
+        string alphabet = ReadAlphabet(yaml);
+        return OcrV8ProductionCompositionFactory.Create(runtime, new OcrV8ProductionPayloadSet(
+            Model("graph-text-spaced-component-recall-v10-p2", "0.0.21-p2", OcrV8ProductionCompositionFactory.DetectorSha256, "ml/ocr/component_spaced_recall_detector_v10/artifacts/P2-run/graph-text-spaced-component-recall-v10-p2.onnx"),
+            Model("en_PP-OCRv5_mobile_rec", "0.0.21-converted", OcrV8ProductionCompositionFactory.OfficialRecognizerSha256, "ml/ocr/official_bakeoff/runs/conversion/en_PP-OCRv5_mobile_rec.onnx"),
+            Model("graph-numeric-component-ensemble-v5", "0.0.21-p1", OcrV8ProductionCompositionFactory.NumericRecognizerSha256, "ml/ocr/component_ensemble_v5/artifacts/P1-run/graph-numeric-component-ensemble-v5-p1.onnx"),
+            Model("graph-ambiguity-source-group-v3-p2", "0.0.21-p2", OcrV8ProductionCompositionFactory.AmbiguityRecognizerSha256, "ml/ocr/ambiguity_source_group_classifier_v3/artifacts/P2-run/graph-ambiguity-source-group-v3-p2.onnx"), alphabet), [InferenceProvider.Cpu], bypassCache: true);
+    }
+
+    private static string ReadAlphabet(string path)
+    {
+        string[] lines = File.ReadAllLines(path, Encoding.UTF8); int start = Array.FindIndex(lines, line => line.Trim() == "character_dict:");
+        if (start < 0) throw new InvalidDataException("ALPHABET_MISSING");
+        var result = new StringBuilder();
+        for (int i = start + 1; i < lines.Length && lines[i].StartsWith("  - ", StringComparison.Ordinal); i++)
+        {
+            string value = lines[i][4..].Trim();
+            if (value.Length >= 2 && value[0] == '\'' && value[^1] == '\'')
+            {
+                value = value[1..^1].Replace("''", "'", StringComparison.Ordinal);
+            }
+            else if (value.Length >= 2 && value[0] == '"' && value[^1] == '"')
+            {
+                value = JsonSerializer.Deserialize<string>(value) ?? string.Empty;
+            }
+            result.Append(value);
+        }
+        if (!result.ToString().Contains(' ', StringComparison.Ordinal))
+        {
+            result.Append(' ');
+        }
+        return result.ToString();
+    }
+
+    private sealed record DigTruth(byte[] ImageBytes, List<AxisAnchor> Anchors, List<CurvePoint> Points);
+    private sealed record AxisAnchor(double ScreenX, double ScreenY, double GraphX, double GraphY);
+    private sealed record CurvePoint(double ScreenX, double ScreenY);
+    private sealed record Raster(int Width, int Height, byte[] Gray, byte[] Bgr);
+    private sealed class Calibration
+    {
+        public List<(double ScreenY, double Value)> Ticks { get; } = [];
+        public double A { get; init; }
+        public double B { get; init; }
+        public double GraphY(double screenY) => A + B * screenY;
+    }
+
+    private static DigTruth ReadDig(string path)
+    {
+        byte[] raw = File.ReadAllBytes(path); string xml = Encoding.UTF8.GetString(raw);
+        if (raw.Length > 64 * 1024 * 1024 || xml.Contains("<!ENTITY", StringComparison.OrdinalIgnoreCase) || xml.Contains(" SYSTEM ", StringComparison.OrdinalIgnoreCase) || xml.Contains(" PUBLIC ", StringComparison.OrdinalIgnoreCase)) throw new InvalidDataException("DIG_XML_INVALID");
+        XDocument document = XDocument.Parse(xml, LoadOptions.PreserveWhitespace); XElement root = document.Root ?? throw new InvalidDataException("DIG_ROOT_MISSING");
+        byte[]? image = null; foreach (XElement item in root.Descendants()) if (item.Name.LocalName.Contains("image", StringComparison.OrdinalIgnoreCase) || item.Name.LocalName.Contains("raster", StringComparison.OrdinalIgnoreCase)) { string text = string.Concat(item.Nodes().OfType<XText>().Select(node => node.Value)).Replace("\r", "").Replace("\n", "").Replace(" ", ""); if (text.Length > 0) { image = Convert.FromBase64String(text); if (image.Length > 4 && !image.AsSpan().StartsWith(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }) && image.AsSpan(4).StartsWith(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 })) image = image[4..]; break; } }
+        if (image is null) throw new InvalidDataException("DIG_IMAGE_MISSING");
+        var anchors = new List<AxisAnchor>(); var points = new List<CurvePoint>();
+        foreach (XElement item in root.Descendants().Where(item => new[] { "Point", "DataPoint", "CurvePoint", "Coordinate" }.Contains(item.Name.LocalName, StringComparer.OrdinalIgnoreCase))) { XElement? screen = item.Descendants().FirstOrDefault(child => child.Name.LocalName.Equals("PositionScreen", StringComparison.OrdinalIgnoreCase)); XElement? graph = item.Descendants().FirstOrDefault(child => child.Name.LocalName.Equals("PositionGraph", StringComparison.OrdinalIgnoreCase)); if (screen is not null && graph is not null && Pair(screen) is { } s && Pair(graph) is { } g) anchors.Add(new AxisAnchor(s.X, s.Y, g.X, g.Y)); else if (screen is not null && Pair(screen) is { } p) points.Add(new CurvePoint(p.X, p.Y)); }
+        if (anchors.Count != 3) throw new InvalidDataException($"DIG_AXIS_ANCHOR_COUNT:{anchors.Count}"); return new DigTruth(image, anchors, points);
+    }
+
+    private static (double X, double Y)? Pair(XElement element) => double.TryParse((string?)element.Attribute("x") ?? (string?)element.Attribute("X"), NumberStyles.Float, CultureInfo.InvariantCulture, out double x) && double.TryParse((string?)element.Attribute("y") ?? (string?)element.Attribute("Y"), NumberStyles.Float, CultureInfo.InvariantCulture, out double y) ? (x, y) : null;
+
+    private static Raster DecodePng(byte[] bytes)
+    {
+        using var stream = new MemoryStream(bytes, writable: false); BitmapDecoder decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad); BitmapSource source = new FormatConvertedBitmap(decoder.Frames[0], PixelFormats.Bgra32, null, 0); int stride = source.PixelWidth * 4; byte[] bgra = new byte[stride * source.PixelHeight]; source.CopyPixels(bgra, stride, 0); byte[] gray = new byte[source.PixelWidth * source.PixelHeight]; byte[] bgr = new byte[gray.Length * 3]; for (int i = 0, p = 0; i < gray.Length; i++, p += 4) { byte value = (byte)Math.Clamp((0.114 * bgra[p]) + (0.587 * bgra[p + 1]) + (0.299 * bgra[p + 2]), 0, 255); gray[i] = value; bgr[i * 3] = bgra[p]; bgr[i * 3 + 1] = bgra[p + 1]; bgr[i * 3 + 2] = bgra[p + 2]; } return new Raster(source.PixelWidth, source.PixelHeight, gray, bgr);
+    }
+
+    private static OcrImage ToOcrImage(Raster raster) => new(raster.Width, raster.Height, raster.Width, raster.Gray, OcrSourceImage.Original, OcrFrameTransform.Identity, OcrContract.CoordinateSpace, raster.Width, raster.Height, new OcrBgrBytePixels(raster.Width * 3, raster.Bgr));
+
+    private static OcrDetectorImage ToMaskedDetectorImage(Raster raster, IReadOnlyList<MaskLine> lines)
+    {
+        byte[] gray = (byte[])raster.Gray.Clone();
+        byte[] bgr = (byte[])raster.Bgr.Clone();
+        foreach (MaskLine line in lines)
+        {
+            int left = Math.Max(0, (int)Math.Floor(Math.Min(line.X1, line.X2) - 2));
+            int right = Math.Min(raster.Width - 1, (int)Math.Ceiling(Math.Max(line.X1, line.X2) + 2));
+            int top = Math.Max(0, (int)Math.Floor(Math.Min(line.Y1, line.Y2) - 2));
+            int bottom = Math.Min(raster.Height - 1, (int)Math.Ceiling(Math.Max(line.Y1, line.Y2) + 2));
+            for (int y = top; y <= bottom; y++) for (int x = left; x <= right; x++) if (DistanceToSegment(x + 0.5, y + 0.5, line) <= 2)
+            {
+                int index = y * raster.Width + x;
+                gray[index] = 255;
+                bgr[index * 3] = bgr[index * 3 + 1] = bgr[index * 3 + 2] = 255;
+            }
+        }
+        OcrImage image = new(raster.Width, raster.Height, raster.Width, gray, OcrSourceImage.Original, OcrFrameTransform.Identity, OcrContract.CoordinateSpace, raster.Width, raster.Height, new OcrBgrBytePixels(raster.Width * 3, bgr));
+        return new OcrDetectorImage(image, Convert.ToHexStringLower(SHA256.HashData(gray)), Convert.ToHexStringLower(SHA256.HashData(bgr)));
+    }
+
+    private static double DistanceToSegment(double x, double y, MaskLine line)
+    {
+        double dx = line.X2 - line.X1, dy = line.Y2 - line.Y1;
+        double parameter = dx * dx + dy * dy <= double.Epsilon ? 0 : Math.Clamp(((x - line.X1) * dx + (y - line.Y1) * dy) / (dx * dx + dy * dy), 0, 1);
+        double px = line.X1 + parameter * dx, py = line.Y1 + parameter * dy;
+        return Math.Sqrt((x - px) * (x - px) + (y - py) * (y - py));
+    }
+
+    private static OcrRectangle PlotBounds(IReadOnlyList<AxisAnchor> anchors, Raster raster)
+    {
+        double left = Math.Clamp(anchors.Min(item => item.ScreenX), 0, raster.Width - 1);
+        double top = Math.Clamp(anchors.Min(item => item.ScreenY), 0, raster.Height - 1);
+        double right = Math.Clamp(anchors.Max(item => item.ScreenX), left + 1, raster.Width);
+        double bottom = Math.Clamp(anchors.Max(item => item.ScreenY), top + 1, raster.Height);
+        return new OcrRectangle(left, top, right - left, bottom - top);
+    }
+
+    private static Calibration Fit(IReadOnlyList<AxisAnchor> anchors)
+    {
+        double meanY = anchors.Average(item => item.ScreenY), meanG = anchors.Average(item => item.GraphY); double denominator = anchors.Sum(item => (item.ScreenY - meanY) * (item.ScreenY - meanY)); if (denominator <= double.Epsilon) throw new InvalidDataException("CALIBRATION_DEGENERATE"); double b = anchors.Sum(item => (item.ScreenY - meanY) * (item.GraphY - meanG)) / denominator; return new Calibration { A = meanG - b * meanY, B = b };
+    }
+
+    private static Calibration FitTicks(IReadOnlyList<(double ScreenY, double Value)> ticks)
+    {
+        double meanY = ticks.Average(item => item.ScreenY), meanV = ticks.Average(item => item.Value); double denominator = ticks.Sum(item => (item.ScreenY - meanY) * (item.ScreenY - meanY)); if (denominator <= double.Epsilon) throw new InvalidDataException("CALIBRATION_TICKS_DEGENERATE"); double b = ticks.Sum(item => (item.ScreenY - meanY) * (item.Value - meanV)) / denominator; return new Calibration { A = meanV - b * meanY, B = b };
+    }
+
+    private static string? TickFailure(List<(double ScreenY, double Value)> ticks)
+    {
+        if (ticks.Count < 2) return "CALIBRATION_INSUFFICIENT_YTICKS";
+        var ordered = ticks.OrderBy(item => item.ScreenY).ToArray();
+        if (ordered.Zip(ordered.Skip(1), static (left, right) => Math.Abs(right.ScreenY - left.ScreenY)).Any(static value => value < 1)) return "CALIBRATION_DUPLICATE_YTICK_POSITION";
+        double step = ordered[1].Value - ordered[0].Value;
+        if (Math.Abs(step) < 1e-9) return "CALIBRATION_NONMONOTONIC_YTICKS";
+        for (int i = 2; i < ordered.Length; i++)
+        {
+            double actual = ordered[i].Value - ordered[i - 1].Value;
+            if (Math.Sign(actual) != Math.Sign(step)) return "CALIBRATION_NONMONOTONIC_YTICKS";
+            if (Math.Abs(actual - step) > Math.Max(1, Math.Abs(step)) * 0.25) return "CALIBRATION_UNEVEN_YTICKS";
+        }
+        return null;
+    }
+
+    private static Dictionary<string, string> Assign(IEnumerable<string> source, string root, int target = SealedTarget)
+    {
+        string[] paths = source.Select(Path.GetFullPath).OrderBy(path => path, StringComparer.Ordinal).ToArray(); var groups = paths.GroupBy(path => Sha256Hex(Path.GetRelativePath(root, path).Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)[0]), StringComparer.Ordinal).OrderBy(group => group.Key, StringComparer.Ordinal).ToArray(); var sealedPaths = new HashSet<string>(StringComparer.Ordinal); int count = 0; foreach (IGrouping<string, string> group in groups) if (count < target && (count + group.Count() <= target || sealedPaths.Count == 0)) { foreach (string path in group) sealedPaths.Add(path); count += group.Count(); } return paths.ToDictionary(path => path, path => sealedPaths.Contains(path) ? "real-sealed" : "real-dev", StringComparer.Ordinal);
+    }
+
+    private static string AssignmentHash(IEnumerable<string> paths, Dictionary<string, string> assignments, string root) => Sha256Hex(string.Join("\n", paths.OrderBy(path => path, StringComparer.Ordinal).Select(path => $"{Sha256Hex(Path.GetRelativePath(root, path).Replace(Path.DirectorySeparatorChar, '/'))}={assignments[Path.GetFullPath(path)]}")));
+    private static string Sha256Hex(string value) => Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
+    private static string AcceptancePolicySha256() => Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(Path.GetFullPath("ml/policy/acceptance-bars.json"))));
+    private static Dictionary<string, string> OcrPayloadSha256() => new(StringComparer.Ordinal)
+    {
+        ["detector"] = OcrV8ProductionCompositionFactory.DetectorSha256,
+        ["official_recognizer"] = OcrV8ProductionCompositionFactory.OfficialRecognizerSha256,
+        ["numeric_recognizer"] = OcrV8ProductionCompositionFactory.NumericRecognizerSha256,
+        ["ambiguity_recognizer"] = OcrV8ProductionCompositionFactory.AmbiguityRecognizerSha256,
+        ["official_alphabet"] = OcrV8ProductionCompositionFactory.OfficialAlphabetSha256,
+    };
+
+    private static void SelfTest()
+    {
+        AxisAnchor[] anchors = [new(0, 0, 0, 100), new(0, 10, 0, 80), new(20, 0, 1, 100)];
+        Calibration calibration = Fit(anchors);
+        if (Math.Abs(calibration.GraphY(5) - 90) > 1e-9 ||
+            TickFailure([(0, 100), (10, 80)]) is not null ||
+            TickFailure([(0, 100), (10, 80), (20, 85)]) != "CALIBRATION_NONMONOTONIC_YTICKS" ||
+            Math.Abs(IoU(new OcrRectangle(0, 0, 10, 10), new OcrRectangle(0, 0, 10, 10)) - 1) > 1e-9 ||
+            Levenshtein("20", "70") != 1 || RoleName(OcrTextRole.YTick) != "y_tick" ||
+            MatchCenters([new MarkerCenter("m", new MarkerPoint(5, 5), 3, 0, 1, MarkerSourceImage.Original)], [new CurvePoint(5, 5)], 5) != (1, 0, 0) ||
+            MaximumMatching(new int[][] { [0, 1], [0] }, 2).Count(match => match >= 0) != 2 ||
+            RasterizeAxisMask(32, 32, [new AxisAnchor(4, 4, 0, 0), new AxisAnchor(4, 28, 0, 1), new AxisAnchor(28, 4, 1, 0)], 1).All(static value => value == 0))
+        {
+            throw new InvalidOperationException("SELF_TEST_CALIBRATION_FAILED");
+        }
+    }
+
+    private sealed record AggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int AxisAnchorCount, int CurvePointCount, int RecognizedRegionCount, int NumericRegionCount, IReadOnlyDictionary<string, int> RoleCounts, int NumericYTickCount, int ProjectsWithAtLeastTwoYTicks, int CalibratedProjects, int MatchedPoints, int PointsWithinFiveUnits, double CalibrationProjectSuccessRate, double MeanAnchorErrorPx, double MaximumAnchorErrorPx, double PointYAccuracy, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, IReadOnlyDictionary<string, string> ModelPayloadSha256, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection);
+    private sealed record MarkerAggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall, double TolerancePx, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, string ModelSha256, IReadOnlyDictionary<string, string> UpstreamOcrPayloadSha256, string MaskingMode, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection);
+    private sealed record SyntheticDimensionReport(int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, double RecognitionExact, double CharacterErrorRate, double RoleAccuracy);
+    private sealed record DetectorDimensionReport(int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall);
+    private sealed record DetectorAggregateReport(int SchemaVersion, string ReportScope, int SceneCount, int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, IReadOnlyDictionary<string, DetectorDimensionReport> ByDimension, double MeanSceneInferenceMs, string ModelSha256, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, double ProbabilityThreshold, double BoxConfidenceThreshold, double UnclipRatio, int MinimumSideLength, int MaximumRegions);
+    private sealed record SyntheticAggregateReport(int SchemaVersion, string ReportScope, int SceneCount, int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, double RecognitionExact, double CharacterErrorRate, double RoleAccuracy, int ProhibitedStructureHits, double ProhibitedStructureHitRate, double MeanSceneInferenceMs, IReadOnlyDictionary<string, SyntheticDimensionReport> ByDimension, IReadOnlyDictionary<string, IReadOnlyDictionary<string, ProposalAggregate>> ProposalThresholdSummary, IReadOnlyDictionary<string, ProposalAggregate> ProposalRoleRecall, IReadOnlyDictionary<string, bool> Gates, IReadOnlyDictionary<string, string> ModelPayloadSha256, string PolicySha256, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput);
+}

@@ -9,6 +9,7 @@ from tools.private_acceptance.candidate_contract_audit import (
     REPO_ROOT,
     TensorSignature,
     _compatible,
+    _proposal_adapter_compatible,
     audit,
     inspect_onnx,
 )
@@ -26,6 +27,12 @@ def test_signature_comparison_rejects_single_head_and_marker_candidate_contracts
     assert not _compatible("marker-center", marker_inputs, marker_outputs)
     production_input = (TensorSignature("input", "float32", (1, 3, "H", "W")),)
     assert _compatible("marker-center", production_input, (TensorSignature("output", "float32", (1, 3, "H", "W")),))
+    assert _proposal_adapter_compatible(
+        marker_inputs,
+        marker_outputs,
+        "ProductionProposalMarkerCenterAdapter DetectCandidateAsync expected-hash",
+        "expected-hash",
+    )
 
 
 def test_current_payload_hashes_and_signatures_are_audited_without_inference() -> None:
@@ -51,8 +58,10 @@ def test_current_payload_hashes_and_signatures_are_audited_without_inference() -
     assert components["official_recognizer"]["sha256"] == "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743"
     marker = by_task["marker-center"]
     assert marker["sha256"] == "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b"
-    assert marker["adapter_compatible"] is False
-    assert "candidate patches" in marker["compatibility_reason"]
+    assert marker["adapter_compatible"] is True
+    assert marker["adapter_path"] == "src/GraphReader.App/Integration/Workflow/ProductionProposalMarkerCenterAdapter.cs"
+    assert marker["adapter_sha256"] == "28793e4a743cfb76441137d7b2580082b7034d8b2d930c4543c8c01e67329f88"
+    assert "proposal-patch" in marker["compatibility_reason"]
     assert marker["output_signature"][0]["shape"] == ("candidate_count", 4)
 
 

@@ -59,15 +59,22 @@ def test_selection_prefers_v8_and_payload_available_marker_p2() -> None:
     assert result["selected_ocr"] == {
         "revision": "graphreader-v10-bounded-zero-consensus-ambiguity-alias-composition-v8",
         "candidate_id": "P1",
-        "tier1_passed": True,
+        "recorded_public_tier1_passed": True,
+        "corrected_synthetic_tier1_passed": False,
     }
     assert result["selected_marker"] == {
         "revision": "marker-center-runtime-consistency-v2",
         "candidate_id": "P2",
-        "tier1_passed": True,
+        "recorded_public_tier1_passed": True,
+        "real_dev_tier1_passed": False,
+        "adapter_path": "src/GraphReader.App/Integration/Workflow/ProductionProposalMarkerCenterAdapter.cs",
+        "adapter_sha256": "28793e4a743cfb76441137d7b2580082b7034d8b2d930c4543c8c01e67329f88",
+        "adapter_test_path": "tests/GraphReader.App.Tests/ProductionProposalMarkerCenterAdapterTests.cs",
+        "adapter_test_sha256": "727df4878c0d60a7059d5090d90fd0705fabd1fd57f173577f5992d0fe6cd79c",
     }
-    assert result["selected_adapter_compatibility"] == {"ocr": True, "marker": False}
-    assert result["selected_detection_candidates_clear_tier1"] is True
+    assert result["selected_adapter_compatibility"] == {"ocr": True, "marker": True}
+    assert result["recorded_public_detection_candidates_clear_tier1"] is True
+    assert result["selected_detection_candidates_clear_current_tier1"] is False
     assert result["tier1_automatic_pipeline_complete"] is False
     assert result["synthetic_candidate_approval"] is False
     assert "marker_fill_bar_compatibility_unresolved" not in result["promotion_blockers"]
@@ -80,10 +87,16 @@ def test_selection_prefers_v8_and_payload_available_marker_p2() -> None:
         "assignment_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
         "real_dev_project_count": 120,
         "real_sealed_project_count": 51,
+        "real_dev_ocr_axis_scored": True,
+        "real_dev_ocr_axis_passed": False,
+        "real_dev_marker_center_scored": True,
+        "real_dev_marker_center_passed": False,
         "real_sealed_scored": False,
     }
-    assert "real_corpus_acceptance_not_scored" in result["promotion_blockers"]
-    assert "selected_marker_adapter_not_implemented" in result["promotion_blockers"]
+    assert "selected_ocr_fails_corrected_synthetic_tier1" in result["promotion_blockers"]
+    assert "selected_marker_fails_real_dev_tier1" in result["promotion_blockers"]
+    assert "real_sealed_acceptance_not_scored" in result["promotion_blockers"]
+    assert "selected_marker_adapter_not_implemented" not in result["promotion_blockers"]
     assert "private_acceptance_set_has_fewer_than_five_images" not in result["promotion_blockers"]
     assert result["model_inference_runs"] == 0
     assert result["sealed_split_reads"] == 0

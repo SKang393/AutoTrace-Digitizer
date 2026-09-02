@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "status": "fail_redirect_to_new_synthetic_revision",
+  "report_scope": "aggregate_only",
+  "corrected_synthetic_dataset": {
+    "preset": "real_range",
+    "seed": 393,
+    "scene_count": 10,
+    "truth_region_count": 226,
+    "distribution_report_sha256": "d8fe3fe54b873451b3cbda66821edc5666062912accc610ca1046910e49e8536",
+    "seed_manifest_sha256": "123f4f6973588b3294b11237e6e6deac1b8f812a5b1bbab55b1315a546ef5329"
+  },
+  "selected_v8_composition": {
+    "revision": "graphreader-v10-bounded-zero-consensus-ambiguity-alias-composition-v8",
+    "model_payload_sha256": {
+      "detector": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+      "official_recognizer": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+      "numeric_recognizer": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+      "ambiguity_recognizer": "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096",
+      "official_alphabet": "8b31115bc8675a58b670879950b550e7d9840984954d9584d251fd72a764477a"
+    },
+    "true_positives": 119,
+    "false_positives": 6,
+    "false_negatives": 107,
+    "detection_precision": 0.952,
+    "detection_recall": 0.5265486725663717,
+    "recognition_exact": 0.3672566371681416,
+    "character_error_rate": 0.0825,
+    "role_accuracy": 0.5378151260504201,
+    "prohibited_structure_hits": 0,
+    "gates": {
+      "detection_precision": true,
+      "detection_recall": false,
+      "recognition_exact": false,
+      "character_error_rate": false,
+      "role_accuracy": false,
+      "prohibited_structure_hit_rate": true
+    },
+    "proposal_floor": {
+      "threshold": 0.0,
+      "precision": 0.924812030075188,
+      "recall": 0.5442477876106194,
+      "finding": "the proposal stream misses 103 of 226 truths before recognition thresholds"
+    }
+  },
+  "official_pretrained_db_detector": {
+    "true_positives": 48,
+    "false_positives": 169,
+    "false_negatives": 178,
+    "detection_precision": 0.22119815668202766,
+    "detection_recall": 0.21238938053097345,
+    "wide_6352x600_recall": 0.0,
+    "tall_600x4484_recall": 0.0,
+    "tier1_passed": false,
+    "model_sourcing_order_attempt_recorded": true
+  },
+  "real_dev_axis_and_export": {
+    "real_dev_projects": 120,
+    "real_sealed_projects": 51,
+    "real_sealed_reads": 0,
+    "calibrated_projects": 28,
+    "calibration_project_success_rate": 0.23333333333333334,
+    "failure_kinds": {
+      "CALIBRATION_UNEVEN_YTICKS": 35,
+      "CALIBRATION_INSUFFICIENT_YTICKS": 57
+    },
+    "matched_points": 486,
+    "points_within_five_units": 481,
+    "point_y_accuracy": 0.9897119341563786,
+    "mean_anchor_error_px": 1.7600953968326014,
+    "maximum_anchor_error_px": 41.87350495049506,
+    "gates": {
+      "automatic_calibration_coverage": false,
+      "export_y_within_five_units": true,
+      "zero_silently_accepted_invalid_calibrations": true
+    },
+    "assignments_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a"
+  },
+  "implementation": {
+    "project_path": "tools/GraphReader.RealAcceptance.Ocr/GraphReader.RealAcceptance.Ocr.csproj",
+    "project_sha256": "b751462cfa17691a4e6d899a162dc2b9a4095fcdd21463310415fb10a95e06fe",
+    "runner_path": "tools/GraphReader.RealAcceptance.Ocr/Program.cs",
+    "runner_sha256": "c3cc06df0985214b7fcc05b75d3a984e2ef746b7bc9f39bb3baafda69cf90c8a",
+    "matching_method": "augmenting_path_maximum_cardinality",
+    "policy_sha256": "aab9f2ab60cf166828f0928b8496f537341870fd457d0408952e22549fc53a56",
+    "provider": "CPUExecutionProvider",
+    "self_test": "pass",
+    "build_warnings": 0,
+    "build_errors": 0
+  },
+  "privacy": {
+    "case_level_output": false,
+    "truth_rows_output": false,
+    "pixel_output": false,
+    "training_use": false,
+    "candidate_selection_from_real_data": false,
+    "real_sealed_reads": 0
+  },
+  "production_approval": false,
+  "release_eligible": false
+}

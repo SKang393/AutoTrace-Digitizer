@@ -182,9 +182,10 @@ PRESETS: dict[str, tuple[CaseSpec, ...]] = {
             stroke_width=2, presentation={"font_size_px": 18},
         ),
         CaseSpec(
-            "ab", "print_monochrome", 1, 24,
+            "ab", "vector_clean", 1, 24,
             canvas_width=1338, panel_height=412, marker_radius=5.0,
-            stroke_width=1, presentation={"font_size_px": 18},
+            stroke_width=1,
+            presentation={"font_size_px": 18, "grayscale": True, "monochrome": True},
         ),
         CaseSpec(
             "abab", "scan_rough", 1, 24,
@@ -431,7 +432,7 @@ def _real_range_distribution_report(
         "source_width_px": [361, 6352],
         "source_height_px": [207, 4484],
         "source_height_minimum_tolerance_px": 33,
-        "source_text_height_px": [13.0, 16.0],
+        "source_text_height_px": [10.0, 17.0],
         "post_resize_text_height_px": [1.8, 20.74],
         "marker_diameter_px": [7.0, 24.0],
         "open_stroke_width_px": [1.4, 1.74],
@@ -483,9 +484,11 @@ def _real_range_distribution_report(
             and int(scene["canvas"]["height"]) == 395
             for scene in scenes
         ),
-        "source_text_contains_envelope": (
-            source_range[0] <= envelope["source_text_height_px"][0]
+        "source_text_matches_realistic_range": (
+            source_range[0] >= envelope["source_text_height_px"][0]
+            and source_range[0] <= 13.0
             and source_range[1] >= envelope["source_text_height_px"][1]
+            and source_range[1] <= 20.0
         ),
         "post_resize_text_contains_envelope": (
             post_resize_range[0] <= envelope["post_resize_text_height_px"][0]

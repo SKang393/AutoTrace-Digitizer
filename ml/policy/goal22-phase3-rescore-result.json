@@ -455,40 +455,59 @@
   "packaging_discovery": false,
   "policy_path": "ml/policy/acceptance-bars.json",
   "policy_sha256": "aab9f2ab60cf166828f0928b8496f537341870fd457d0408952e22549fc53a56",
+  "post_rescore_evidence": {
+    "corrected_ocr_diagnostic_path": "docs/GOAL-22-PHASE-4-CORRECTED-OCR-DIAGNOSTIC.json",
+    "corrected_ocr_diagnostic_sha256": "53e6c458f0a9688aca51595b37038811639b798eb2435e8ce653eb8501c74569",
+    "real_dev_marker_diagnostic_path": "docs/GOAL-22-PHASE-4-REAL-DEV-MARKER-DIAGNOSTIC.json",
+    "real_dev_marker_diagnostic_sha256": "ac87592cf92a3391d59a431d4fa6788042b404beb677ffcca789bf3984c97ac3",
+    "real_sealed_reads": 0
+  },
   "private_acceptance": false,
   "production_approval": false,
   "promotion_blockers": [
-    "selected_marker_adapter_not_implemented",
-    "real_corpus_acceptance_not_scored",
+    "selected_ocr_fails_corrected_synthetic_tier1",
+    "selected_marker_fails_real_dev_tier1",
+    "real_sealed_acceptance_not_scored",
     "production_manifest_store_and_package_contract_not_satisfied"
   ],
   "real_acceptance_corpus": {
     "assignment_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
     "dig_project_count": 171,
     "digitized_point_count": 3055,
+    "real_dev_marker_center_passed": false,
+    "real_dev_marker_center_scored": true,
+    "real_dev_ocr_axis_passed": false,
+    "real_dev_ocr_axis_scored": true,
     "real_dev_project_count": 120,
     "real_sealed_project_count": 51,
     "real_sealed_scored": false,
     "split_status": "frozen_study_level_assignment",
     "study_count": 40
   },
+  "recorded_public_detection_candidates_clear_tier1": true,
   "release_eligible": false,
   "schema_version": 1,
   "sealed_split_reads": 0,
   "selected_adapter_compatibility": {
-    "marker": false,
+    "marker": true,
     "ocr": true
   },
-  "selected_detection_candidates_clear_tier1": true,
+  "selected_detection_candidates_clear_current_tier1": false,
   "selected_marker": {
+    "adapter_path": "src/GraphReader.App/Integration/Workflow/ProductionProposalMarkerCenterAdapter.cs",
+    "adapter_sha256": "28793e4a743cfb76441137d7b2580082b7034d8b2d930c4543c8c01e67329f88",
+    "adapter_test_path": "tests/GraphReader.App.Tests/ProductionProposalMarkerCenterAdapterTests.cs",
+    "adapter_test_sha256": "727df4878c0d60a7059d5090d90fd0705fabd1fd57f173577f5992d0fe6cd79c",
     "candidate_id": "P2",
-    "revision": "marker-center-runtime-consistency-v2",
-    "tier1_passed": true
+    "real_dev_tier1_passed": false,
+    "recorded_public_tier1_passed": true,
+    "revision": "marker-center-runtime-consistency-v2"
   },
   "selected_ocr": {
     "candidate_id": "P1",
-    "revision": "graphreader-v10-bounded-zero-consensus-ambiguity-alias-composition-v8",
-    "tier1_passed": true
+    "corrected_synthetic_tier1_passed": false,
+    "recorded_public_tier1_passed": true,
+    "revision": "graphreader-v10-bounded-zero-consensus-ambiguity-alias-composition-v8"
   },
   "synthetic_candidate_approval": false,
   "tier1_automatic_pipeline_complete": false

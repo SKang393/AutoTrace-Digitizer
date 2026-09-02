@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "status": "generator_distribution_repaired_real_dev_confirmation_pending",
+  "status": "generator_distribution_repaired_selected_candidates_fail_corrected_evidence",
   "report_scope": "aggregate_only",
   "real_corpus_envelope": {
     "source_width_px": {
@@ -66,11 +66,11 @@
       2.6592797783933517
     ],
     "source_text_height_px": [
-      1.0,
+      11.0,
       17.0
     ],
     "post_resize_text_height_px": [
-      0.7174887892376681,
+      1.6624685138539044,
       42.54847645429363
     ],
     "marker_diameter_px": [
@@ -78,23 +78,23 @@
       25.0
     ],
     "open_stroke_width_px": [
-      0.6121903001486944,
-      3.6314738271446627
+      0.36595361354770084,
+      2.6728836432356973
     ],
     "distribution_gates_passed": 12,
     "distribution_gates_total": 12,
-    "distribution_report_sha256": "5493d6c97ad4d07bf9be3ad62988cde87e3ad1f6f3918d23d3fba1df57ba654a",
-    "seed_manifest_sha256": "b6f00848f1c9b5d38d0da80e897b9c383e9c2b25d193eb158bf6ea89aff01403"
+    "distribution_report_sha256": "d8fe3fe54b873451b3cbda66821edc5666062912accc610ca1046910e49e8536",
+    "seed_manifest_sha256": "123f4f6973588b3294b11237e6e6deac1b8f812a5b1bbab55b1315a546ef5329"
   },
   "implementation": {
     "dataset_path": "ml/synthetic/dataset.py",
-    "dataset_sha256": "147ef3ad88073bf6a589d60e1db69e091c04decb59405685857915fa01d3049b",
+    "dataset_sha256": "c7186c9e55413a1d09ce33406fabf177d99bd3e9be5a63e057d618eb258d04b5",
     "schema_path": "ml/synthetic/scene.schema.json",
     "schema_sha256": "fc72d6ce4e37dd2893e5fe56d087b0496008a904f11ebc4a5c525a4a27843e0f",
     "test_path": "ml/synthetic/tests/test_real_range.py",
-    "test_sha256": "aaacd021116c4a4705ba4b69bbf9c9dbbfe9e68861107cb16c5843e041ab6622",
+    "test_sha256": "fadec452ba56ad4c78f4ecf70d0d947d8f931141d511c6dcd8d0217b9bb12975",
     "synthetic_test_result": "39 passed",
-    "synthetic_test_elapsed_seconds": 163.63
+    "synthetic_test_elapsed_seconds": 163.82
   },
   "private_data_use": {
     "pixels_copied": false,
@@ -104,7 +104,9 @@
     "optimizer_steps": 0
   },
   "real_confirmation": {
-    "real_dev_scored": false,
+    "real_dev_scored": true,
+    "real_dev_ocr_axis_passed": false,
+    "real_dev_marker_center_passed": false,
     "real_sealed_scored": false,
     "production_approval": false
   },

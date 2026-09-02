@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "status": "fail_redirect_to_new_synthetic_revision",
+  "report_scope": "aggregate_only",
+  "candidate": {
+    "revision": "marker-center-runtime-consistency-v2",
+    "candidate_id": "P2",
+    "model_sha256": "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b",
+    "adapter_path": "src/GraphReader.App/Integration/Workflow/ProductionProposalMarkerCenterAdapter.cs",
+    "adapter_sha256": "28793e4a743cfb76441137d7b2580082b7034d8b2d930c4543c8c01e67329f88"
+  },
+  "execution": {
+    "real_dev_projects": 120,
+    "successful_projects": 120,
+    "failure_count": 0,
+    "real_sealed_projects": 51,
+    "real_sealed_reads": 0,
+    "tolerance_px": 5,
+    "true_positives": 391,
+    "false_positives": 3332,
+    "false_negatives": 1613,
+    "precision": 0.1050228310502283,
+    "recall": 0.19510978043912175,
+    "mean_project_inference_ms": 799.3887941666667,
+    "total_inference_ms": 95926.6553,
+    "assignments_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
+    "matching_method": "augmenting_path_maximum_cardinality",
+    "masking_mode": "v8_accepted_regions_plus_anchor_axes",
+    "upstream_ocr_payload_sha256": {
+      "detector": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+      "official_recognizer": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+      "numeric_recognizer": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+      "ambiguity_recognizer": "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096",
+      "official_alphabet": "8b31115bc8675a58b670879950b550e7d9840984954d9584d251fd72a764477a"
+    },
+    "policy_sha256": "aab9f2ab60cf166828f0928b8496f537341870fd457d0408952e22549fc53a56",
+    "gates": {
+      "marker_center_precision": false,
+      "marker_center_recall": false
+    }
+  },
+  "implementation": {
+    "runner_path": "tools/GraphReader.RealAcceptance.Ocr/Program.cs",
+    "runner_sha256": "c3cc06df0985214b7fcc05b75d3a984e2ef746b7bc9f39bb3baafda69cf90c8a",
+    "adapter_test_path": "tests/GraphReader.App.Tests/ProductionProposalMarkerCenterAdapterTests.cs",
+    "adapter_test_sha256": "727df4878c0d60a7059d5090d90fd0705fabd1fd57f173577f5992d0fe6cd79c",
+    "adapter_focused_tests": "8 passed"
+  },
+  "privacy": {
+    "case_level_output": false,
+    "truth_rows_output": false,
+    "pixel_output": false,
+    "training_use": false,
+    "candidate_selection_from_real_data": false,
+    "real_sealed_reads": 0
+  },
+  "production_approval": false,
+  "release_eligible": false
+}

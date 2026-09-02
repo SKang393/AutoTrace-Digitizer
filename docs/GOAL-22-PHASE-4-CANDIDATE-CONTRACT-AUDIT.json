@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "selected_marker_adapter_missing",
+  "status": "selected_adapters_implemented_current_candidates_fail_evidence",
   "report_scope": "aggregate_only",
   "selected_ocr": {
     "revision": "graphreader-v10-bounded-zero-consensus-ambiguity-alias-composition-v8",
@@ -22,14 +22,16 @@
     "payload_sha256": "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b",
     "input": "candidate_patches:[N,3,33,33]",
     "output": "candidate_predictions:[N,4]",
-    "current_production_adapter_compatible": false,
-    "reason": "the current marker adapter requires equal bounded full-frame NCHW [1,3,H,W] input and output"
+    "adapter_path": "src/GraphReader.App/Integration/Workflow/ProductionProposalMarkerCenterAdapter.cs",
+    "adapter_sha256": "28793e4a743cfb76441137d7b2580082b7034d8b2d930c4543c8c01e67329f88",
+    "current_production_adapter_compatible": true,
+    "reason": "the checksum-bound candidate adapter implements the selected proposal-patch input and four-value output contract while production detection remains fail-closed"
   },
   "implementation": {
     "path": "tools/private_acceptance/candidate_contract_audit.py",
-    "sha256": "e8658bf557c7b875448ef22e4cf811e4a40de42f9535c28e094f7d783b9fc77b",
+    "sha256": "acfd41e2a7cea56378057a0a729e308b5c7c4342a1194b8d40f7573ee0635cc5",
     "test_path": "tools/private_acceptance/tests/test_candidate_contract_audit.py",
-    "test_sha256": "28bf925306d12170644dde0d79dd53f2d9e6af12ee86964d47e43dd2e6476ff8",
+    "test_sha256": "499382d34b17b93de292d74e2ebbbb4e5193ff2052712bb97add52dbee915cc3",
     "focused_test_result": "3 passed"
   },
   "execution": {
@@ -37,7 +39,7 @@
     "private_corpus_access": false,
     "payload_checksums_verified": true
   },
-  "next_action": "run V8 on real-dev and implement the selected marker proposal adapter before real-sealed scoring",
+  "next_action": "repair OCR and marker candidates on synthetic train/dev because corrected synthetic OCR and real-dev marker evidence fail Tier 1; keep real-sealed unopened",
   "production_approval": false,
   "release_eligible": false
 }
