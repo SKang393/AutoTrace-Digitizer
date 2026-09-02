@@ -145,7 +145,7 @@ PRESETS: dict[str, tuple[CaseSpec, ...]] = {
     "real_range": (
         CaseSpec(
             "ab", "vector_clean", 1, 24,
-            canvas_width=361, panel_height=160, marker_radius=4.4,
+            canvas_width=361, panel_height=160, marker_radius=3.0,
             stroke_width=1, presentation={"font_size_px": 17},
         ),
         CaseSpec(
@@ -167,7 +167,7 @@ PRESETS: dict[str, tuple[CaseSpec, ...]] = {
         ),
         CaseSpec(
             "multiple_baseline", "print_monochrome", 1, 24,
-            canvas_width=1338, panel_height=412, marker_radius=6.2,
+            canvas_width=1338, panel_height=412, marker_radius=12.0,
             stroke_width=2, output_mode="RGBA",
             presentation={"font_size_px": 18},
         ),
@@ -433,7 +433,7 @@ def _real_range_distribution_report(
         "source_height_minimum_tolerance_px": 33,
         "source_text_height_px": [13.0, 16.0],
         "post_resize_text_height_px": [1.8, 20.74],
-        "marker_diameter_px": [10.0, 12.0],
+        "marker_diameter_px": [7.0, 24.0],
         "open_stroke_width_px": [1.4, 1.74],
         "text_region_count": 38,
     }

@@ -51,6 +51,8 @@ def test_real_range_preset_passes_aggregate_distribution_gate(
     assert report["gates"]["weighted_toward_observed_median"] is True
     assert report["post_resize_text_height_px"][0] <= 1.8
     assert report["post_resize_text_height_px"][1] >= 20.74
+    assert report["marker_diameter_px"][0] <= 7.0
+    assert report["marker_diameter_px"][1] >= 24.0
     assert min(report["text_region_counts"]) <= 38 <= max(
         report["text_region_counts"]
     )

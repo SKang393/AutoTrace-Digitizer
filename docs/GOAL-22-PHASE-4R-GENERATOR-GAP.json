@@ -74,8 +74,8 @@
       42.54847645429363
     ],
     "marker_diameter_px": [
-      8.5,
-      13.5
+      6.0,
+      25.0
     ],
     "open_stroke_width_px": [
       0.6121903001486944,
@@ -83,16 +83,18 @@
     ],
     "distribution_gates_passed": 12,
     "distribution_gates_total": 12,
-    "distribution_report_sha256": "1ea0e6c68c73431472cd22c5c4e757857a388c7c3cac450611a47baee55aa077",
-    "seed_manifest_sha256": "62d4e2a687632e253b3353c059856bd29bc5d99d983100e6a07b7d14e4b08db3"
+    "distribution_report_sha256": "5493d6c97ad4d07bf9be3ad62988cde87e3ad1f6f3918d23d3fba1df57ba654a",
+    "seed_manifest_sha256": "b6f00848f1c9b5d38d0da80e897b9c383e9c2b25d193eb158bf6ea89aff01403"
   },
   "implementation": {
     "dataset_path": "ml/synthetic/dataset.py",
-    "dataset_sha256": "b27d71fc865fddc6ac99d5a5a0d8b1debdffda24da74176f8b40e3ca154b45ec",
+    "dataset_sha256": "147ef3ad88073bf6a589d60e1db69e091c04decb59405685857915fa01d3049b",
+    "schema_path": "ml/synthetic/scene.schema.json",
+    "schema_sha256": "fc72d6ce4e37dd2893e5fe56d087b0496008a904f11ebc4a5c525a4a27843e0f",
     "test_path": "ml/synthetic/tests/test_real_range.py",
-    "test_sha256": "061af1df4059f7885d6a48d27bd596b5af063d869b63ce8980603f7d1057f03c",
+    "test_sha256": "aaacd021116c4a4705ba4b69bbf9c9dbbfe9e68861107cb16c5843e041ab6622",
     "synthetic_test_result": "39 passed",
-    "synthetic_test_elapsed_seconds": 173.87
+    "synthetic_test_elapsed_seconds": 163.63
   },
   "private_data_use": {
     "pixels_copied": false,

@@ -31,8 +31,9 @@
   },
   "finding": {
     "resize_collapse_confirmed": true,
-    "marker_scale_gap": "the current synthetic 8.5 to 13.5 pixel diameter range covers the real-dev median but not p90",
-    "required_redirect": "extend synthetic marker scale coverage without training or selecting on private outcomes"
+    "marker_scale_gap": "the prior synthetic 8.5 to 13.5 pixel diameter range covered the real-dev median but not p90",
+    "repair_status": "closed by the synthetic 6 to 25 pixel marker envelope",
+    "required_redirect": "complete"
   },
   "implementation": {
     "path": "tools/private_acceptance/real_dev_distribution.py",
