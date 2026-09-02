@@ -1,0 +1,31 @@
+{
+  "schema": "graphreader.ocr-real-range-classifier-finetune-v32-training.v1",
+  "task": "ocr-detection",
+  "revision": "graph-text-real-range-classifier-finetune-v32",
+  "candidate_id": "P1",
+  "source_revision": "graph-text-spaced-component-recall-v10-p2",
+  "model_license": "Apache-2.0",
+  "source_checkpoint_path": "ml/ocr/component_spaced_recall_detector_v10/artifacts/P2-run/graph-text-spaced-component-recall-v10-p2.pt",
+  "source_checkpoint_sha256": "c452e66013610a5ea79de78f6bbbac53d809c6c80f82d64798c4c694a27e7301",
+  "source_model_seed": 20261422,
+  "output_logit_scale": 0.5,
+  "source_onnx_sha256": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+  "train_seed": 32031,
+  "dev_seed": 32032,
+  "negative_cap_per_scene": 64,
+  "epochs": 8,
+  "batch_size": 32,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.00001,
+  "positive_class_weight": 4.0,
+  "seed": 20260932,
+  "proposal_score_threshold": 0.82,
+  "truth_match_iou_minimum": 0.5,
+  "onnx_parity_tolerance": 0.00001,
+  "expected_runner_source_bundle_sha256": "25911ae4f7b03b362eec982cdd80e730a44fb9d45ceb700b7f6e143c008156eb",
+  "selection_gates": {
+    "precision_minimum": 0.95,
+    "recall_minimum": 0.95,
+    "sealed_public_evaluations": 0
+  }
+}
