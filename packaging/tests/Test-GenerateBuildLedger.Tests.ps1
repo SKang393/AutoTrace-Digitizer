@@ -74,6 +74,8 @@ try {
     if ((Test-Path -LiteralPath $realBuildRoot -PathType Container) -and
         (Test-Path -LiteralPath $realLatestPath -PathType Leaf)) {
         $realOutput = Join-Path $testRoot 'real-ledger.json'
+        New-Item -ItemType Directory -Path $testRoot -Force | Out-Null
+        Copy-Item -LiteralPath (Join-Path $repositoryRoot 'docs\BUILD_LEDGER.json') -Destination $realOutput
         Invoke-Child -Arguments @(
             '-BuildRoot', $realBuildRoot,
             '-LatestPath', $realLatestPath,
