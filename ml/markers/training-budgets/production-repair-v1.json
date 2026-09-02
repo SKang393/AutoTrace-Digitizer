@@ -1828,6 +1828,7 @@
       "p3_public_gate_result_seal_sha256": "536731c66afd0b31b7697c5cfad0bf0b3e8f7a7c74305970bd68d4a676996012",
       "p3_public_gate_exact_scene_count": 2,
       "p3_public_gate_scene_count": 3,
+      "p3_public_gate_true_positives": 18,
       "p3_public_gate_false_positives": 1,
       "p3_public_gate_false_negatives": 0,
       "p3_public_gate_duplicate_count": 0,

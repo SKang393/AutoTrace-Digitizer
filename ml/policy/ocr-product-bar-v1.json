@@ -2,10 +2,11 @@
   "schema_version": 1,
   "policy_id": "graphreader-ocr-product-bar-v1",
   "task": "ocr-detection-recognition",
-  "state": "preregistered_before_aggregate_rescore",
+  "state": "superseded_by_goal22_phase3_acceptance_bars",
+  "superseded_by": "ml/policy/acceptance-bars.json",
   "evidence_policy": {
     "path": "ml/policy/evidence-policy.json",
-    "sha256": "054d0b9e0f6dbeab536713b8e27198d59c169f9576a6ea07150c29d3e7ad0809"
+    "sha256": "4dc18136c284b0b1805d3a3b22a9197ad06e6a41f4e43b4e1d4d9245b97e0aed"
   },
   "hypothesis": "Existing V30 and V31 P2 checkpoints clear the OCR product bar at their selected operating thresholds without retraining or another data read.",
   "isolated_change": "Replace historical consecutive-threshold and every-scene perfection grading with the fixed product bar; model bytes, recorded metrics, splits, and operating thresholds remain unchanged.",

@@ -67,7 +67,7 @@
   "model_training_runs": 0,
   "packaging_discovery": false,
   "policy_path": "ml/policy/ocr-product-bar-v1.json",
-  "policy_sha256": "9dc13dbded2a0634c6174b846a9d5af560a72828a003629255dc255edde6cfa8",
+  "policy_sha256": "0413385606f2530b39e660dcccfdeed70440b42891f7eabbf62efe1227aa70c7",
   "private_acceptance": false,
   "production_approval": false,
   "release_eligible": false,

@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "policy_id": "graphreader-goal22-tier1-v1",
+  "task_scope": ["ocr-detection-recognition", "marker-center"],
+  "evaluation_rule": "selected_operating_threshold_only",
+  "tier1_reviewable_error": {
+    "text_region_detection_recall_minimum": 0.95,
+    "text_region_detection_precision_minimum": 0.95,
+    "recognition_exact_match_minimum": 0.95,
+    "character_error_rate_maximum": 0.05,
+    "role_accuracy_minimum": 0.95,
+    "prohibited_structure_hit_rate_maximum": 0.02,
+    "marker_center_recall_minimum": 0.95,
+    "marker_center_precision_minimum": 0.95,
+    "marker_shape_accuracy_minimum": 0.95,
+    "marker_fill_accuracy_minimum": 0.95
+  },
+  "tier2_silent_corruption": {
+    "zero_silently_exported_unvalidated_calibrations": true,
+    "tick_sequence_monotonic_required": true,
+    "tick_spacing_even_within_tolerance_required": true,
+    "export_values_must_trace_to_pixels": true,
+    "invalid_calibration_action": "flag_review_and_block_export"
+  },
+  "compatibility_findings": {
+    "marker_fill_accuracy_enforcement": "incompatible_pending_corrected_bar_handling",
+    "reason": "The 0.95 marker-fill bar would reject the previously production-approved marker classifier public-v3 artifact.",
+    "existing_approval_action": "retain_existing_approval_and_do_not_revoke_or_approve_from_this_rescore",
+    "approved_payload_compatibility_proposal": {
+      "existing_approved_fill_gate": 0.9,
+      "future_candidate_fill_target": 0.95,
+      "resolution_required_before_tier1_complete": true
+    }
+  },
+  "sensitivity_rule": "other_thresholds_are_descriptive_only",
+  "private_acceptance_required": true,
+  "production_approval_requires": [
+    "real_sealed_aggregate_acceptance",
+    "schema_valid_manifest",
+    "checksum_bound_production_model_store",
+    "packaging_discovery"
+  ]
+}
