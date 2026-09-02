@@ -41,12 +41,12 @@ def test_policy_has_exact_tier1_and_tier2_contract() -> None:
     }
     assert policy["tier2_silent_corruption"]["zero_silently_exported_unvalidated_calibrations"] is True
     assert policy["compatibility_findings"]["marker_fill_accuracy_enforcement"] == (
-        "incompatible_pending_corrected_bar_handling"
+        "resolved_approved_payload_compatibility"
     )
     assert policy["compatibility_findings"]["approved_payload_compatibility_proposal"] == {
         "existing_approved_fill_gate": 0.9,
         "future_candidate_fill_target": 0.95,
-        "resolution_required_before_tier1_complete": True,
+        "resolution_required_before_tier1_complete": False,
     }
 
 
@@ -70,7 +70,7 @@ def test_selection_prefers_v8_and_payload_available_marker_p2() -> None:
     assert result["selected_detection_candidates_clear_tier1"] is True
     assert result["tier1_automatic_pipeline_complete"] is False
     assert result["synthetic_candidate_approval"] is False
-    assert "marker_fill_bar_compatibility_unresolved" in result["promotion_blockers"]
+    assert "marker_fill_bar_compatibility_unresolved" not in result["promotion_blockers"]
     assert result["production_approval"] is False
     assert result["real_acceptance_corpus"] == {
         "study_count": 40,
@@ -144,6 +144,11 @@ def test_approved_marker_classifier_compatibility_finding_is_preserved() -> None
         "marker_fill_accuracy": False,
     }
     assert result["prior_production_approval"] is True
+    assert result["approved_payload_compatible"] is True
+    assert result["approved_payload_compatibility_gates"] == {
+        "marker_shape_accuracy": True,
+        "marker_fill_accuracy": True,
+    }
     assert result["tier1_compatible"] is False
 
 

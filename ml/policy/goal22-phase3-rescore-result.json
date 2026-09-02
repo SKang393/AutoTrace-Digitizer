@@ -1,6 +1,11 @@
 {
   "approved_marker_classifier": {
-    "compatibility_finding": "The new 0.95 fill bar rejects a previously production-approved artifact; retain the existing approval and queue corrected-bar handling under AGENTS Section 7.4.",
+    "approved_payload_compatibility_gates": {
+      "marker_fill_accuracy": true,
+      "marker_shape_accuracy": true
+    },
+    "approved_payload_compatible": true,
+    "compatibility_finding": "Resolved under AGENTS Section 7.4: the approved payload retains its 0.90 fill gate and 0.95 applies to future candidates.",
     "evidence_file_sha256": "c4fb25e45e9c6d77100de8230a30443231445fa71751d685ba66c65da370e7a3",
     "evidence_path": "artifacts/production-model-store/evidence/graph-marker-classifier/0.1.0/marker-classifier-production-approval.json",
     "fill_accuracy": 0.9444444444444444,
@@ -449,11 +454,10 @@
   ],
   "packaging_discovery": false,
   "policy_path": "ml/policy/acceptance-bars.json",
-  "policy_sha256": "64ad50e2e5c6cbc95d4b962bce9fc6e265ff53ea27563824104b0f4d9509cd25",
+  "policy_sha256": "aab9f2ab60cf166828f0928b8496f537341870fd457d0408952e22549fc53a56",
   "private_acceptance": false,
   "production_approval": false,
   "promotion_blockers": [
-    "marker_fill_bar_compatibility_unresolved",
     "selected_marker_adapter_not_implemented",
     "real_corpus_acceptance_not_scored",
     "production_manifest_store_and_package_contract_not_satisfied"

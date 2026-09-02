@@ -23,13 +23,13 @@
     "invalid_calibration_action": "flag_review_and_block_export"
   },
   "compatibility_findings": {
-    "marker_fill_accuracy_enforcement": "incompatible_pending_corrected_bar_handling",
+    "marker_fill_accuracy_enforcement": "resolved_approved_payload_compatibility",
     "reason": "The 0.95 marker-fill bar would reject the previously production-approved marker classifier public-v3 artifact.",
     "existing_approval_action": "retain_existing_approval_and_do_not_revoke_or_approve_from_this_rescore",
     "approved_payload_compatibility_proposal": {
       "existing_approved_fill_gate": 0.9,
       "future_candidate_fill_target": 0.95,
-      "resolution_required_before_tier1_complete": true
+      "resolution_required_before_tier1_complete": false
     }
   },
   "sensitivity_rule": "other_thresholds_are_descriptive_only",
