@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "status": "foundation_pass_stage_scoring_pending",
+  "report_scope": "aggregate_only",
+  "corpus": {
+    "study_directory_count": 40,
+    "study_count_with_dig_projects": 37,
+    "dig_project_count": 171,
+    "axis_anchor_count": 513,
+    "digitized_point_count": 3055,
+    "corpus_tree_sha256": "f092a9c3ba2fbc0b115a6a455364002c0a21f7bde6513e4345e941c95b870aff",
+    "embedded_image_format_counts": {
+      "PNG": 171
+    },
+    "embedded_image_mode_counts": {
+      "RGB": 171
+    },
+    "image_width_px": {
+      "minimum": 361,
+      "median": 1338,
+      "maximum": 6352
+    },
+    "image_height_px": {
+      "minimum": 207,
+      "median": 472,
+      "maximum": 1944
+    }
+  },
+  "split": {
+    "unit": "study_directory",
+    "algorithm": "sort SHA-256 study keys and assign whole groups toward 51 sealed projects",
+    "real_dev_project_count": 120,
+    "real_sealed_project_count": 51,
+    "assignment_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
+    "study_overlap": 0
+  },
+  "implementation": {
+    "reader_path": "tools/private_acceptance/real_corpus.py",
+    "reader_sha256": "40ac8a3efaab5c30bb766d396b76924df7ef0c7c91802bf4372f8c929e7d2779",
+    "test_path": "tools/private_acceptance/tests/test_real_corpus.py",
+    "test_sha256": "1fce01b66f989085d17dfbde0ffc1359c0cfecd6d646b435ae4bf71f1fa8e595",
+    "focused_test_result": "12 passed"
+  },
+  "privacy": {
+    "status": "private",
+    "training_use": false,
+    "selection_use": false,
+    "git_eligible": false,
+    "redistribution_authorized": false,
+    "case_level_output": false,
+    "study_identifiers_output": false,
+    "truth_rows_output": false,
+    "pixel_output": false
+  },
+  "stage_scoring": {
+    "axis_complete": false,
+    "marker_center_complete": false,
+    "export_value_complete": false
+  },
+  "production_approval": false,
+  "release_eligible": false
+}
