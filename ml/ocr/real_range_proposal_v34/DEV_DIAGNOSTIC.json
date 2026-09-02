@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "revision": "graph-text-real-range-proposal-v34",
+  "status": "failed_dev_diagnostic",
+  "evaluation_kind": "non_candidate_diagnostic",
+  "synthetic_only": true,
+  "dev_scene_count": 5,
+  "truth_region_count": 86,
+  "strategies": {
+    "v32_base": {
+      "proposal_count": 428,
+      "true_positives": 61,
+      "false_positives": 367,
+      "false_negatives": 25,
+      "precision": 0.1425233644859813,
+      "recall": 0.7093023255813954
+    },
+    "v34_deterministic_expansion": {
+      "proposal_count": 16831,
+      "true_positives": 61,
+      "false_positives": 16770,
+      "false_negatives": 25,
+      "precision": 0.0036242647495692473,
+      "recall": 0.7093023255813954
+    }
+  },
+  "gates": {
+    "raw_proposal_precision": false,
+    "raw_proposal_recall": false
+  },
+  "finding": "percentile contrast, one-pixel expansion, and regrouping add false proposals without recovering any of the 25 missed truths",
+  "source_bundle_sha256": "2b6b268a0a5bf58d78b3b1c7a7daf60e8ed659c668c2865f06f766781a01cec5",
+  "raw_proposal_diagnostic_path": "docs/GOAL-22-PHASE-4R-OCR-RAW-PROPOSAL-DIAGNOSTIC.json",
+  "raw_proposal_diagnostic_sha256": "8b26d337b8ff29a1d9d937c09c38073635ac2cf9b24dabfc6e7a41e9ea22de8a",
+  "v33_result_path": "ml/ocr/real_range_classifier_v33/P1_RESULT.json",
+  "v33_result_sha256": "96526456b1bc191af2f6490dd929ba35b756bd76506ac1c23d1c79393470e51b",
+  "evidence_policy_path": "ml/policy/evidence-policy.json",
+  "evidence_policy_sha256": "4dc18136c284b0b1805d3a3b22a9197ad06e6a41f4e43b4e1d4d9245b97e0aed",
+  "elapsed_ms": 64974.692,
+  "training_use": false,
+  "candidate_consumed": false,
+  "public_gate_evaluations": 0,
+  "real_sealed_reads": 0,
+  "private_data": false,
+  "production_approval": false,
+  "release_eligible": false,
+  "next_action": "use a distinct source-bound proposal generator or detector architecture; do not repeat deterministic contrast expansion"
+}

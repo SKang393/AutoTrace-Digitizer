@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "status": "failed_synthetic_dev_diagnostic",
+  "report_scope": "aggregate_only",
+  "stage": "ocr_raw_proposal_generation_before_classification",
+  "dataset_revision": "graph-text-real-range-classifier-finetune-v32",
+  "dev_scene_count": 5,
+  "truth_region_count": 86,
+  "raw_proposal_count": 428,
+  "maximum_cardinality_true_positives": 61,
+  "false_positives": 367,
+  "false_negatives": 25,
+  "raw_proposal_precision": 0.1425233644859813,
+  "raw_proposal_recall": 0.7093023255813954,
+  "truth_match_iou_minimum": 0.5,
+  "by_dimension": {
+    "361x240": {"truth_region_count": 18, "proposal_count": 124, "true_positives": 15, "false_negatives": 3},
+    "863x395": {"truth_region_count": 26, "proposal_count": 100, "true_positives": 20, "false_negatives": 6},
+    "1338x492": {"truth_region_count": 13, "proposal_count": 75, "true_positives": 10, "false_negatives": 3},
+    "6352x600": {"truth_region_count": 13, "proposal_count": 91, "true_positives": 9, "false_negatives": 4},
+    "600x4484": {"truth_region_count": 16, "proposal_count": 38, "true_positives": 7, "false_negatives": 9}
+  },
+  "finding": "the raw proposal generator misses 25 of 86 dev truths, so no downstream classifier can reach the 0.95 detection-recall bar on this stream",
+  "source_bundle_paths": [
+    "ml/ocr/real_range_classifier_finetune_v32/dataset.py",
+    "ml/ocr/real_range_classifier_finetune_v32/pipeline.py",
+    "ml/ocr/component_context_detector_v7/dataset.py"
+  ],
+  "source_bundle_sha256": "4b378c2f2a059c24759b61aa96e2685c142c7719b5ca682be163b92d0326382d",
+  "v32_result_path": "ml/ocr/real_range_classifier_finetune_v32/P1_RESULT.json",
+  "v32_result_sha256": "76795363e8d77034fa6f0f055ad59a1de7b362bbdce93ed440347dbb17a1a91d",
+  "v33_result_path": "ml/ocr/real_range_classifier_v33/P1_RESULT.json",
+  "v33_result_sha256": "96526456b1bc191af2f6490dd929ba35b756bd76506ac1c23d1c79393470e51b",
+  "evidence_policy_path": "ml/policy/evidence-policy.json",
+  "evidence_policy_sha256": "4dc18136c284b0b1805d3a3b22a9197ad06e6a41f4e43b4e1d4d9245b97e0aed",
+  "training_use": false,
+  "private_data": false,
+  "public_gate_evaluations": 0,
+  "real_sealed_reads": 0,
+  "production_approval": false,
+  "release_eligible": false
+}
