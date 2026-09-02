@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "status": "selected_payload_adapters_missing",
+  "report_scope": "aggregate_only",
+  "selected_ocr": {
+    "revision": "graph-text-unanimous-structure-veto-v30",
+    "candidate_id": "P1",
+    "payload_sha256": "78425c5b4a45ef2cbf99086243af0ede96c91b2b6afcdac1daa71bfeb5e55c18",
+    "inputs": [
+      "proposal_evidence:[1,N,31]",
+      "proposal_crops:[1,N,2,32,128]",
+      "proposal_relations:[1,N,N,19]"
+    ],
+    "output": "proposal_and_role_logits:[1,N,10]",
+    "current_production_adapter_compatible": false,
+    "reason": "the current OCR adapter composes separate full-image detector and crop-recognizer payloads and has no V30 proposal-relation head"
+  },
+  "selected_marker": {
+    "revision": "marker-center-runtime-consistency-v2",
+    "candidate_id": "P2",
+    "payload_sha256": "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b",
+    "input": "candidate_patches:[N,3,33,33]",
+    "output": "candidate_predictions:[N,4]",
+    "current_production_adapter_compatible": false,
+    "reason": "the current marker adapter requires equal bounded full-frame NCHW [1,3,H,W] input and output"
+  },
+  "implementation": {
+    "path": "tools/private_acceptance/candidate_contract_audit.py",
+    "sha256": "24f440231a08eb6c2d9f49d1b9ce8410089bffb2d37df4a208a971aa42fc5946",
+    "test_path": "tools/private_acceptance/tests/test_candidate_contract_audit.py",
+    "test_sha256": "c030d4439eab1c863d50565dfaaebb4bdd33e28db3c0893b4a651ad9f364bfa2",
+    "focused_test_result": "3 passed"
+  },
+  "execution": {
+    "model_inference_runs": 0,
+    "private_corpus_access": false,
+    "payload_checksums_verified": true
+  },
+  "next_action": "implement candidate-specific adapters or select an existing Tier-1 composition already supported by the production adapters",
+  "production_approval": false,
+  "release_eligible": false
+}

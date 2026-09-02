@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "status": "real_dev_gap_measured",
+  "report_scope": "real_dev_aggregate_only",
+  "split": {
+    "assignment_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
+    "real_dev_project_count": 120,
+    "real_sealed_project_count": 51,
+    "real_sealed_reads": 0
+  },
+  "source_dimensions": {
+    "width_px": {"minimum": 361, "median": 1167, "maximum": 3200},
+    "height_px": {"minimum": 224, "median": 461, "maximum": 1639},
+    "mode_counts": {"RGB": 120}
+  },
+  "production_resize_scale_before_padding": {
+    "minimum": 0.3,
+    "median": 0.8226221079691517,
+    "maximum": 2.6592797783933517
+  },
+  "effective_marker_diameter_px": {
+    "minimum": 1.0,
+    "p10": 7.0,
+    "median": 12.0,
+    "p90": 24.0,
+    "maximum": 48.0,
+    "truth_marker_count": 2004,
+    "measured_marker_count": 1968,
+    "measurement_coverage": 0.9820359281437125,
+    "method": "outermost radius with at least 65 percent dark angular occupancy across 72 truth-centred rays"
+  },
+  "finding": {
+    "resize_collapse_confirmed": true,
+    "marker_scale_gap": "the current synthetic 8.5 to 13.5 pixel diameter range covers the real-dev median but not p90",
+    "required_redirect": "extend synthetic marker scale coverage without training or selecting on private outcomes"
+  },
+  "implementation": {
+    "path": "tools/private_acceptance/real_dev_distribution.py",
+    "sha256": "9ce86e5e18b7f1ee12a70c2e0d0640c00df45687b1035483ee8b9eabd5501168",
+    "test_path": "tools/private_acceptance/tests/test_real_dev_distribution.py",
+    "test_sha256": "26995b9b6022e5b80c5062e33554ccf01e6e6a609adaf211c671fdcbc6ba5103",
+    "focused_test_result": "2 passed"
+  },
+  "execution": {
+    "model_inference_runs": 0,
+    "optimizer_steps": 0,
+    "candidate_selection": 0,
+    "source_mutations": 0,
+    "case_level_output": false,
+    "study_identifiers_output": false,
+    "truth_rows_output": false,
+    "pixel_output": false
+  },
+  "production_approval": false,
+  "release_eligible": false
+}
