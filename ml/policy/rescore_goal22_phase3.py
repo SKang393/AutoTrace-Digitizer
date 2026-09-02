@@ -31,6 +31,38 @@ def _read(path: Path) -> dict[str, Any]:
 
 OCR_CANDIDATES: tuple[dict[str, Any], ...] = (
     {
+        "name": "V8 public production composition aggregate",
+        "task": "ocr-detection-recognition",
+        "revision": "graphreader-v10-bounded-zero-consensus-ambiguity-alias-composition-v8",
+        "candidate_id": "P1",
+        "evidence_split": "sealed",
+        "result_path": "ml/ocr/production_composition_v8/PUBLIC_GATE_REPORT.json",
+        "result_sha256": "43384271fefedab374613141a858367b00d86a14d41b1d0994a66d602f6329b4",
+        "metrics_path": ("metrics",),
+        "selected_threshold": 0.95,
+        "operating_configuration": {
+            "detector_threshold": 0.95,
+            "official_rescue_threshold": 0.90,
+            "consensus_rescue_threshold": 0.85,
+            "zero_consensus_rescue_threshold": 0.82,
+            "numeric_minimum_confidence": 0.65,
+        },
+        "threshold_source_path": "ml/ocr/production_composition_v8/PROTOCOL.json",
+        "threshold_source_sha256": "32b4a7f74bfe93eba01ae59f0a6eb7cd575e019c605bb182119b67da2b7b25d0",
+        "threshold_source_field_path": ("models", "detector", "threshold"),
+        "protocol_path": "ml/ocr/production_composition_v8/PROTOCOL.json",
+        "protocol_sha256": "32b4a7f74bfe93eba01ae59f0a6eb7cd575e019c605bb182119b67da2b7b25d0",
+        "adapter_factory_path": "src/GraphReader.Ocr/OcrV8ProductionCompositionFactory.cs",
+        "adapter_factory_sha256": "883db3c175362c265c92775475286a6263907f99e37ad11e62a4abd8f9230399",
+        "payloads": (
+            ("detector", "ml/ocr/component_spaced_recall_detector_v10/artifacts/P2-run/graph-text-spaced-component-recall-v10-p2.onnx", "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db"),
+            ("official_recognizer", "ml/ocr/official_bakeoff/runs/conversion/en_PP-OCRv5_mobile_rec.onnx", "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743"),
+            ("official_recognizer_inference_yaml", "ml/ocr/official_bakeoff/runs/extracted/en_PP-OCRv5_mobile_rec_infer/inference.yml", "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067"),
+            ("numeric_recognizer", "ml/ocr/component_ensemble_v5/artifacts/P1-run/graph-numeric-component-ensemble-v5-p1.onnx", "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84"),
+            ("ambiguity_recognizer", "ml/ocr/ambiguity_source_group_classifier_v3/artifacts/P2-run/graph-ambiguity-source-group-v3-p2.onnx", "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096"),
+        ),
+    },
+    {
         "name": "V18 P1 selection aggregate",
         "task": "ocr-detection-recognition",
         "revision": "graph-text-recognition-confirmed-proposal-role-v18",
@@ -221,7 +253,7 @@ def _metric(record: dict[str, Any], candidate: dict[str, Any]) -> dict[str, int]
         scene_count = int(record[candidate["scene_count_path"][0]])
     return {
         "scene_count": scene_count,
-        "exact_scene_count": int(metrics.get("exact_scene_count", record.get("exact_scene_count", 0))),
+        "exact_scene_count": int(metrics.get("exact_scene_count", metrics.get("exact_detection_scene_count", record.get("exact_scene_count", 0)))),
         "true_positives": int(metrics["true_positives"]),
         "false_positives": int(metrics["false_positives"]),
         "false_negatives": int(metrics["false_negatives"]),
@@ -333,6 +365,14 @@ def _score(candidate: dict[str, Any], bars: dict[str, Any]) -> dict[str, Any]:
     path = REPO_ROOT / candidate["result_path"]
     if _sha256(path) != candidate["result_sha256"]:
         raise RuntimeError(f"Aggregate evidence checksum mismatch: {path}")
+    if "protocol_path" in candidate:
+        protocol = REPO_ROOT / candidate["protocol_path"]
+        if _sha256(protocol) != candidate["protocol_sha256"]:
+            raise RuntimeError(f"Protocol checksum mismatch: {protocol}")
+    if "adapter_factory_path" in candidate:
+        factory = REPO_ROOT / candidate["adapter_factory_path"]
+        if _sha256(factory) != candidate["adapter_factory_sha256"]:
+            raise RuntimeError(f"Adapter factory checksum mismatch: {factory}")
     record = _read(path)
     threshold_record = record
     if "ledger_revision" in candidate:
@@ -357,6 +397,7 @@ def _score(candidate: dict[str, Any], bars: dict[str, Any]) -> dict[str, Any]:
         return {
             "task": candidate["task"], "name": candidate["name"], "revision": candidate["revision"], "candidate_id": candidate["candidate_id"], "evidence_split": candidate["evidence_split"],
             "result_path": candidate["result_path"], "result_sha256": candidate["result_sha256"], "selected_threshold": selected_threshold,
+            **({"protocol_path": candidate["protocol_path"], "protocol_sha256": candidate["protocol_sha256"], "adapter_factory_path": candidate["adapter_factory_path"], "adapter_factory_sha256": candidate["adapter_factory_sha256"], "operating_configuration": candidate["operating_configuration"]} if "protocol_path" in candidate else {}),
             "metrics": {**metrics, "detected_region_count": detected, "marker_center_precision": precision, "marker_center_recall": recall, "prohibited_structure_hit_rate": prohibited_rate},
             "gates": gates, "tier1_passed": all(gates.values()), "payloads": _payloads(candidate), "payload_available_at_phase3_run": candidate.get("payload_available_at_phase3_run", True), "payload_identity_recorded": bool(candidate.get("payloads") or candidate.get("payload_path")), "payload_reason": candidate.get("payload_reason"),
         }
@@ -367,7 +408,7 @@ def _score(candidate: dict[str, Any], bars: dict[str, Any]) -> dict[str, Any]:
         nested: dict[str, Any] = record
         for key in candidate["metrics_path"]:
             nested = nested[key]
-        recognition_exact = float(nested.get("recognition_exact", recognition_exact))
+        recognition_exact = float(nested.get("recognition_exact", nested.get("recognition_exact_match", recognition_exact)))
         cer = float(nested.get("character_error_rate", cer))
         role = float(nested.get("role_accuracy", role))
     gates = {
@@ -381,6 +422,7 @@ def _score(candidate: dict[str, Any], bars: dict[str, Any]) -> dict[str, Any]:
     return {
         "task": candidate["task"], "name": candidate["name"], "revision": candidate["revision"], "candidate_id": candidate["candidate_id"], "evidence_split": candidate["evidence_split"],
         "result_path": candidate["result_path"], "result_sha256": candidate["result_sha256"], "selected_threshold": selected_threshold,
+        **({"protocol_path": candidate["protocol_path"], "protocol_sha256": candidate["protocol_sha256"], "adapter_factory_path": candidate["adapter_factory_path"], "adapter_factory_sha256": candidate["adapter_factory_sha256"], "operating_configuration": candidate["operating_configuration"]} if "protocol_path" in candidate else {}),
         "metrics": {**metrics, "detected_region_count": detected, "detection_precision": precision, "detection_recall": recall, "prohibited_structure_hit_rate": prohibited_rate, "recognition_exact_match": recognition_exact, "character_error_rate": cer, "role_accuracy": role},
         "gates": gates, "tier1_passed": all(gates.values()), "payloads": _payloads(candidate), "payload_available_at_phase3_run": candidate.get("payload_available_at_phase3_run", True), "payload_identity_recorded": bool(candidate.get("payloads") or candidate.get("payload_path")), "payload_reason": candidate.get("payload_reason"),
     }
@@ -392,7 +434,7 @@ def rescore() -> dict[str, Any]:
     _validate_optional_approved_classifier_evidence()
     ocr = [_score(candidate, bars) for candidate in OCR_CANDIDATES]
     markers = [_score(candidate, bars) for candidate in MARKER_CANDIDATES]
-    selected_ocr = next(item for item in ocr if item["revision"] == "graph-text-unanimous-structure-veto-v30")
+    selected_ocr = next(item for item in ocr if item["revision"] == "graphreader-v10-bounded-zero-consensus-ambiguity-alias-composition-v8")
     selected_marker = next(item for item in markers if item["revision"] == "marker-center-runtime-consistency-v2")
     classifier_gates = {
         "marker_shape_accuracy": APPROVED_MARKER_CLASSIFIER["shape_accuracy"] >= bars["marker_shape_accuracy_minimum"],
@@ -410,6 +452,7 @@ def rescore() -> dict[str, Any]:
         },
         "selected_ocr": {"revision": selected_ocr["revision"], "candidate_id": selected_ocr["candidate_id"], "tier1_passed": selected_ocr["tier1_passed"]},
         "selected_marker": {"revision": selected_marker["revision"], "candidate_id": selected_marker["candidate_id"], "tier1_passed": selected_marker["tier1_passed"]},
+        "selected_adapter_compatibility": {"ocr": True, "marker": False},
         "selected_detection_candidates_clear_tier1": selected_ocr["tier1_passed"] and selected_marker["tier1_passed"],
         "tier1_automatic_pipeline_complete": False,
         "synthetic_candidate_approval": False,
@@ -418,11 +461,14 @@ def rescore() -> dict[str, Any]:
             "study_count": 40,
             "dig_project_count": 171,
             "digitized_point_count": 3055,
-            "split_status": "pending_frozen_study_level_assignment",
+            "split_status": "frozen_study_level_assignment",
+            "assignment_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
+            "real_dev_project_count": 120,
+            "real_sealed_project_count": 51,
             "real_sealed_scored": False,
         },
         "manifest_created": False, "model_store_promoted": False, "packaging_discovery": False, "production_approval": False, "release_eligible": False,
-        "promotion_blockers": ["marker_fill_bar_compatibility_unresolved", "real_corpus_acceptance_not_scored", "production_manifest_store_and_package_contract_not_satisfied"],
+        "promotion_blockers": ["marker_fill_bar_compatibility_unresolved", "selected_marker_adapter_not_implemented", "real_corpus_acceptance_not_scored", "production_manifest_store_and_package_contract_not_satisfied"],
     }
 
 

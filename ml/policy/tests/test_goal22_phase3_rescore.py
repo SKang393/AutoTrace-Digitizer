@@ -50,10 +50,14 @@ def test_policy_has_exact_tier1_and_tier2_contract() -> None:
     }
 
 
-def test_selection_prefers_v30_and_payload_available_marker_p2() -> None:
+def _ocr_candidate(revision: str) -> dict:
+    return next(item for item in OCR_CANDIDATES if item["revision"] == revision)
+
+
+def test_selection_prefers_v8_and_payload_available_marker_p2() -> None:
     result = rescore()
     assert result["selected_ocr"] == {
-        "revision": "graph-text-unanimous-structure-veto-v30",
+        "revision": "graphreader-v10-bounded-zero-consensus-ambiguity-alias-composition-v8",
         "candidate_id": "P1",
         "tier1_passed": True,
     }
@@ -62,6 +66,7 @@ def test_selection_prefers_v30_and_payload_available_marker_p2() -> None:
         "candidate_id": "P2",
         "tier1_passed": True,
     }
+    assert result["selected_adapter_compatibility"] == {"ocr": True, "marker": False}
     assert result["selected_detection_candidates_clear_tier1"] is True
     assert result["tier1_automatic_pipeline_complete"] is False
     assert result["synthetic_candidate_approval"] is False
@@ -71,10 +76,14 @@ def test_selection_prefers_v30_and_payload_available_marker_p2() -> None:
         "study_count": 40,
         "dig_project_count": 171,
         "digitized_point_count": 3055,
-        "split_status": "pending_frozen_study_level_assignment",
+        "split_status": "frozen_study_level_assignment",
+        "assignment_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
+        "real_dev_project_count": 120,
+        "real_sealed_project_count": 51,
         "real_sealed_scored": False,
     }
     assert "real_corpus_acceptance_not_scored" in result["promotion_blockers"]
+    assert "selected_marker_adapter_not_implemented" in result["promotion_blockers"]
     assert "private_acceptance_set_has_fewer_than_five_images" not in result["promotion_blockers"]
     assert result["model_inference_runs"] == 0
     assert result["sealed_split_reads"] == 0
@@ -87,6 +96,43 @@ def test_selection_prefers_v30_and_payload_available_marker_p2() -> None:
     assert "recognition_exact_match" not in marker["metrics"]
     assert "character_error_rate" not in marker["metrics"]
     assert "role_accuracy" not in marker["metrics"]
+
+
+def test_selected_v8_has_all_composition_payload_identities() -> None:
+    result = rescore()
+    v8 = next(item for item in result["ocr_candidates"] if item["revision"].endswith("composition-v8"))
+    assert v8["protocol_sha256"] == "32b4a7f74bfe93eba01ae59f0a6eb7cd575e019c605bb182119b67da2b7b25d0"
+    assert v8["adapter_factory_path"] == "src/GraphReader.Ocr/OcrV8ProductionCompositionFactory.cs"
+    assert v8["adapter_factory_sha256"] == "883db3c175362c265c92775475286a6263907f99e37ad11e62a4abd8f9230399"
+    assert v8["operating_configuration"] == {
+        "detector_threshold": 0.95,
+        "official_rescue_threshold": 0.90,
+        "consensus_rescue_threshold": 0.85,
+        "zero_consensus_rescue_threshold": 0.82,
+        "numeric_minimum_confidence": 0.65,
+    }
+    assert {item["kind"] for item in v8["payloads"]} == {
+        "detector",
+        "official_recognizer",
+        "official_recognizer_inference_yaml",
+        "numeric_recognizer",
+        "ambiguity_recognizer",
+    }
+    assert v8["metrics"] == {
+        "scene_count": 160,
+        "exact_scene_count": 160,
+        "true_positives": 800,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "prohibited_structure_hits": 0,
+        "detected_region_count": 800,
+        "detection_precision": 1.0,
+        "detection_recall": 1.0,
+        "prohibited_structure_hit_rate": 0.0,
+        "recognition_exact_match": 0.99375,
+        "character_error_rate": 0.0013979496738117428,
+        "role_accuracy": 1.0,
+    }
 
 
 def test_approved_marker_classifier_compatibility_finding_is_preserved() -> None:
@@ -162,7 +208,7 @@ def test_classifier_identity_is_recorded_when_optional_artifacts_are_absent() ->
 
 def test_missing_optional_report_does_not_block_aggregate_rescore() -> None:
     policy = json.loads(POLICY_PATH.read_text(encoding="utf-8"))
-    candidate = dict(OCR_CANDIDATES[3])
+    candidate = dict(_ocr_candidate("graph-text-unanimous-structure-veto-v30"))
     candidate["optional_evidence_path"] = "artifacts/not-present-report.json"
     scored = _score(candidate, policy["tier1_reviewable_error"])
     assert scored["tier1_passed"] is True
@@ -170,7 +216,7 @@ def test_missing_optional_report_does_not_block_aggregate_rescore() -> None:
 
 def test_selected_threshold_mismatch_fails_closed() -> None:
     policy = json.loads(POLICY_PATH.read_text(encoding="utf-8"))
-    candidate = dict(OCR_CANDIDATES[3])
+    candidate = dict(_ocr_candidate("graph-text-unanimous-structure-veto-v30"))
     candidate["selected_threshold"] = 0.54
     with pytest.raises(RuntimeError, match="Selected threshold mismatch"):
         _score(candidate, policy["tier1_reviewable_error"])

@@ -132,6 +132,81 @@
   "model_training_runs": 0,
   "ocr_candidates": [
     {
+      "adapter_factory_path": "src/GraphReader.Ocr/OcrV8ProductionCompositionFactory.cs",
+      "adapter_factory_sha256": "883db3c175362c265c92775475286a6263907f99e37ad11e62a4abd8f9230399",
+      "candidate_id": "P1",
+      "evidence_split": "sealed",
+      "gates": {
+        "character_error_rate": true,
+        "detection_precision": true,
+        "detection_recall": true,
+        "prohibited_structure_hit_rate": true,
+        "recognition_exact_match": true,
+        "role_accuracy": true
+      },
+      "metrics": {
+        "character_error_rate": 0.0013979496738117428,
+        "detected_region_count": 800,
+        "detection_precision": 1.0,
+        "detection_recall": 1.0,
+        "exact_scene_count": 160,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "prohibited_structure_hit_rate": 0.0,
+        "prohibited_structure_hits": 0,
+        "recognition_exact_match": 0.99375,
+        "role_accuracy": 1.0,
+        "scene_count": 160,
+        "true_positives": 800
+      },
+      "name": "V8 public production composition aggregate",
+      "operating_configuration": {
+        "consensus_rescue_threshold": 0.85,
+        "detector_threshold": 0.95,
+        "numeric_minimum_confidence": 0.65,
+        "official_rescue_threshold": 0.9,
+        "zero_consensus_rescue_threshold": 0.82
+      },
+      "payload_available_at_phase3_run": true,
+      "payload_identity_recorded": true,
+      "payload_reason": null,
+      "payloads": [
+        {
+          "kind": "detector",
+          "path": "ml/ocr/component_spaced_recall_detector_v10/artifacts/P2-run/graph-text-spaced-component-recall-v10-p2.onnx",
+          "sha256": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db"
+        },
+        {
+          "kind": "official_recognizer",
+          "path": "ml/ocr/official_bakeoff/runs/conversion/en_PP-OCRv5_mobile_rec.onnx",
+          "sha256": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743"
+        },
+        {
+          "kind": "official_recognizer_inference_yaml",
+          "path": "ml/ocr/official_bakeoff/runs/extracted/en_PP-OCRv5_mobile_rec_infer/inference.yml",
+          "sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067"
+        },
+        {
+          "kind": "numeric_recognizer",
+          "path": "ml/ocr/component_ensemble_v5/artifacts/P1-run/graph-numeric-component-ensemble-v5-p1.onnx",
+          "sha256": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84"
+        },
+        {
+          "kind": "ambiguity_recognizer",
+          "path": "ml/ocr/ambiguity_source_group_classifier_v3/artifacts/P2-run/graph-ambiguity-source-group-v3-p2.onnx",
+          "sha256": "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096"
+        }
+      ],
+      "protocol_path": "ml/ocr/production_composition_v8/PROTOCOL.json",
+      "protocol_sha256": "32b4a7f74bfe93eba01ae59f0a6eb7cd575e019c605bb182119b67da2b7b25d0",
+      "result_path": "ml/ocr/production_composition_v8/PUBLIC_GATE_REPORT.json",
+      "result_sha256": "43384271fefedab374613141a858367b00d86a14d41b1d0994a66d602f6329b4",
+      "revision": "graphreader-v10-bounded-zero-consensus-ambiguity-alias-composition-v8",
+      "selected_threshold": 0.95,
+      "task": "ocr-detection-recognition",
+      "tier1_passed": true
+    },
+    {
       "candidate_id": "P1",
       "evidence_split": "selection",
       "gates": {
@@ -379,19 +454,27 @@
   "production_approval": false,
   "promotion_blockers": [
     "marker_fill_bar_compatibility_unresolved",
+    "selected_marker_adapter_not_implemented",
     "real_corpus_acceptance_not_scored",
     "production_manifest_store_and_package_contract_not_satisfied"
   ],
   "real_acceptance_corpus": {
+    "assignment_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
     "dig_project_count": 171,
     "digitized_point_count": 3055,
+    "real_dev_project_count": 120,
+    "real_sealed_project_count": 51,
     "real_sealed_scored": false,
-    "split_status": "pending_frozen_study_level_assignment",
+    "split_status": "frozen_study_level_assignment",
     "study_count": 40
   },
   "release_eligible": false,
   "schema_version": 1,
   "sealed_split_reads": 0,
+  "selected_adapter_compatibility": {
+    "marker": false,
+    "ocr": true
+  },
   "selected_detection_candidates_clear_tier1": true,
   "selected_marker": {
     "candidate_id": "P2",
@@ -400,7 +483,7 @@
   },
   "selected_ocr": {
     "candidate_id": "P1",
-    "revision": "graph-text-unanimous-structure-veto-v30",
+    "revision": "graphreader-v10-bounded-zero-consensus-ambiguity-alias-composition-v8",
     "tier1_passed": true
   },
   "synthetic_candidate_approval": false,

@@ -77,22 +77,12 @@ def inspect_onnx(path: Path) -> tuple[tuple[TensorSignature, ...], tuple[TensorS
     )
 
 
-def _expected(result: dict[str, Any], task: str) -> dict[str, Any]:
+def _selected_entry(result: dict[str, Any], task: str) -> dict[str, Any]:
     selected = result["selected_ocr" if task == "ocr-detection-recognition" else "selected_marker"]
     entries = result["ocr_candidates" if task == "ocr-detection-recognition" else "marker_candidates"]
     for entry in entries:
         if entry.get("revision") == selected["revision"] and entry.get("candidate_id") == selected["candidate_id"]:
-            payloads = entry.get("payloads", [])
-            payload = next((item for item in payloads if item.get("kind") == "onnx"), None)
-            if payload is None:
-                break
-            return {
-                "task": task,
-                "revision": selected["revision"],
-                "candidate_id": selected["candidate_id"],
-                "path": str(payload["path"]),
-                "sha256": str(payload["sha256"]),
-            }
+            return entry
     raise ValueError(f"SELECTED_PAYLOAD_NOT_RECORDED:{task}")
 
 
@@ -110,58 +100,90 @@ def _compatible(task: str, inputs: tuple[TensorSignature, ...], outputs: tuple[T
 
 def audit(rescore_path: Path = RESCORE_PATH) -> dict[str, Any]:
     result = json.loads(rescore_path.read_text(encoding="utf-8"))
-    payload_audits: list[PayloadAudit] = []
-    for task in ("ocr-detection-recognition", "marker-center"):
-        expected = _expected(result, task)
-        path = REPO_ROOT / expected["path"]
+    payload_audits: list[dict[str, Any]] = []
+
+    ocr = _selected_entry(result, "ocr-detection-recognition")
+    components: list[dict[str, Any]] = []
+    for payload in ocr["payloads"]:
+        path = REPO_ROOT / payload["path"]
         if path.is_file():
             actual_hash = _sha256(path)
-            if actual_hash != expected["sha256"]:
-                raise ValueError(f"PAYLOAD_CHECKSUM_MISMATCH:{task}")
-            inputs, outputs = inspect_onnx(path)
+            if actual_hash != payload["sha256"]:
+                raise ValueError("PAYLOAD_CHECKSUM_MISMATCH:ocr-detection-recognition")
+            if path.suffix.lower() == ".onnx":
+                inputs, outputs = inspect_onnx(path)
+            else:
+                inputs, outputs = (), ()
             availability = "present_checksum_verified"
         else:
             actual_hash = None
             inputs, outputs = (), ()
             availability = "missing"
-        compatible = _compatible(task, inputs, outputs) if inputs else False
-        if task.startswith("ocr"):
-            reason = (
-                "The selected V30 payload is a proposal-evidence/crop/relation head, while the current production OCR adapter composes separate full-image detector and crop-recognizer payloads."
-            )
-            work = (
-                "Implement and review a candidate-specific V17 plus official-recognizer plus V30 proposal adapter, or select a Tier-1 composition already supported by the production OCR adapter."
-            )
-        else:
-            reason = (
-                "The selected P2 payload consumes candidate patches and returns four proposal values, while the current marker adapter requires equal bounded full-frame NCHW [1,3,H,W] input and output."
-            )
-            work = (
-                "Implement and review a proposal-patch marker adapter, or provide a compatible full-frame [1,3,H,W] model."
-            )
-        payload_audits.append(PayloadAudit(
-            task=task,
-            revision=expected["revision"],
-            candidate_id=expected["candidate_id"],
-            path=expected["path"],
+        components.append({
+            "kind": payload["kind"],
+            "path": payload["path"],
+            "sha256": actual_hash,
+            "expected_sha256": payload["sha256"],
+            "input_signature": [asdict(item) for item in inputs],
+            "output_signature": [asdict(item) for item in outputs],
+            "availability": availability,
+        })
+    factory_path = REPO_ROOT / ocr["adapter_factory_path"]
+    if _sha256(factory_path) != ocr["adapter_factory_sha256"]:
+        raise ValueError("OCR_ADAPTER_FACTORY_CHECKSUM_MISMATCH")
+    factory_source = factory_path.read_text(encoding="utf-8")
+    model_hashes = [payload["sha256"] for payload in ocr["payloads"] if payload["path"].endswith(".onnx")]
+    if any(value not in factory_source for value in model_hashes):
+        raise ValueError("OCR_ADAPTER_FACTORY_PAYLOAD_BINDING_MISMATCH")
+    payload_audits.append({
+        "task": "ocr-detection-recognition",
+        "revision": ocr["revision"],
+        "candidate_id": ocr["candidate_id"],
+        "components": components,
+        "adapter_factory_path": ocr["adapter_factory_path"],
+        "adapter_factory_sha256": ocr["adapter_factory_sha256"],
+        "adapter_compatible": True,
+        "compatibility_reason": "The selected four-model V8 composition is checksum-bound by the existing OcrV8ProductionCompositionFactory.",
+        "production_approval": False,
+        "next_adapter_work": "Run the exact V8 factory on real-dev, then real-sealed, before manifest and store promotion.",
+    })
+
+    marker = _selected_entry(result, "marker-center")
+    payload = next(item for item in marker["payloads"] if item.get("kind") == "onnx")
+    path = REPO_ROOT / payload["path"]
+    if path.is_file():
+        actual_hash = _sha256(path)
+        if actual_hash != payload["sha256"]:
+            raise ValueError("PAYLOAD_CHECKSUM_MISMATCH:marker-center")
+        inputs, outputs = inspect_onnx(path)
+        availability = "present_checksum_verified"
+    else:
+        actual_hash = None
+        inputs, outputs = (), ()
+        availability = "missing"
+    payload_audits.append(asdict(PayloadAudit(
+            task="marker-center",
+            revision=marker["revision"],
+            candidate_id=marker["candidate_id"],
+            path=payload["path"],
             sha256=actual_hash,
-            expected_sha256=expected["sha256"],
+            expected_sha256=payload["sha256"],
             input_signature=inputs,
             output_signature=outputs,
-            adapter_compatible=compatible,
-            compatibility_reason=reason,
+            adapter_compatible=_compatible("marker-center", inputs, outputs) if inputs else False,
+            compatibility_reason="The selected P2 payload consumes candidate patches and returns four proposal values, while the current marker adapter requires equal bounded full-frame NCHW [1,3,H,W] input and output.",
             production_approval=False,
             availability=availability,
-            next_adapter_work=work,
-        ))
+            next_adapter_work="Implement and review a proposal-patch marker adapter, or provide a compatible full-frame [1,3,H,W] model.",
+        )))
     return {
         "schema": "graphreader.candidate-contract-audit.v1",
         "report_scope": "aggregate_only",
-        "payloads": [asdict(item) for item in payload_audits],
+        "payloads": payload_audits,
         "production_approval": False,
         "model_inference_runs": 0,
         "private_corpus_access": False,
-        "next_work": "Create checksum-bound candidate-specific adapters and manifests; do not weaken the existing production contracts.",
+        "next_work": "Run V8 on real-dev and implement the selected marker proposal adapter; do not weaken the existing production contracts.",
     }
 
 

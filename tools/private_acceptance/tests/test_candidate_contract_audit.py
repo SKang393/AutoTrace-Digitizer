@@ -14,7 +14,7 @@ from tools.private_acceptance.candidate_contract_audit import (
 )
 
 
-def test_signature_comparison_rejects_candidate_contracts() -> None:
+def test_signature_comparison_rejects_single_head_and_marker_candidate_contracts() -> None:
     ocr_inputs = (
         TensorSignature("proposal_evidence", "float32", (1, "proposal_count", 31)),
         TensorSignature("proposal_crops", "float32", (1, "proposal_count", 2, 32, 128)),
@@ -36,10 +36,19 @@ def test_current_payload_hashes_and_signatures_are_audited_without_inference() -
     assert len(result["payloads"]) == 2
     by_task = {item["task"]: item for item in result["payloads"]}
     ocr = by_task["ocr-detection-recognition"]
-    assert ocr["sha256"] == "78425c5b4a45ef2cbf99086243af0ede96c91b2b6afcdac1daa71bfeb5e55c18"
-    assert ocr["adapter_compatible"] is False
-    assert "proposal-evidence" in ocr["compatibility_reason"]
-    assert ocr["input_signature"][0]["shape"] == (1, "proposal_count", 31)
+    assert ocr["adapter_compatible"] is True
+    assert ocr["revision"].endswith("composition-v8")
+    assert ocr["adapter_factory_path"] == "src/GraphReader.Ocr/OcrV8ProductionCompositionFactory.cs"
+    components = {item["kind"]: item for item in ocr["components"]}
+    assert set(components) == {
+        "detector",
+        "official_recognizer",
+        "official_recognizer_inference_yaml",
+        "numeric_recognizer",
+        "ambiguity_recognizer",
+    }
+    assert components["detector"]["sha256"] == "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db"
+    assert components["official_recognizer"]["sha256"] == "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743"
     marker = by_task["marker-center"]
     assert marker["sha256"] == "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b"
     assert marker["adapter_compatible"] is False
