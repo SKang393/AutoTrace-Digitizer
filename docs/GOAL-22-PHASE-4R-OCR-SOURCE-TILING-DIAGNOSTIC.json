@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "status": "failed_synthetic_dev_diagnostic",
+  "report_scope": "aggregate_only",
+  "hypothesis": "running the selected V10 proposal classifier on overlapping source-scale tiles may recover text lost by whole-image geometry",
+  "dataset": {
+    "preset": "real_range",
+    "scene_count": 10,
+    "truth_region_count": 226,
+    "distribution_report_sha256": "d8fe3fe54b873451b3cbda66821edc5666062912accc610ca1046910e49e8536",
+    "seed_manifest_sha256": "123f4f6973588b3294b11237e6e6deac1b8f812a5b1bbab55b1315a546ef5329"
+  },
+  "model": {
+    "revision": "graph-text-spaced-component-recall-v10",
+    "candidate_id": "P2",
+    "sha256": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+    "training_runs": 0
+  },
+  "fixed_strategies": [
+    {
+      "tile_size": 512,
+      "tile_overlap": 128,
+      "true_positives": 123,
+      "false_positives": 9,
+      "false_negatives": 103,
+      "precision": 0.9318181818181818,
+      "recall": 0.5442477876106194,
+      "mean_scene_inference_ms": 592.2724800000001,
+      "suppressed_cross_tile_duplicates": 0,
+      "tier1_passed": false
+    },
+    {
+      "tile_size": 640,
+      "tile_overlap": 128,
+      "true_positives": 123,
+      "false_positives": 7,
+      "false_negatives": 103,
+      "precision": 0.9461538461538461,
+      "recall": 0.5442477876106194,
+      "mean_scene_inference_ms": 338.69996000000003,
+      "suppressed_cross_tile_duplicates": 1,
+      "tier1_passed": false
+    },
+    {
+      "tile_size": 960,
+      "tile_overlap": 192,
+      "true_positives": 123,
+      "false_positives": 11,
+      "false_negatives": 103,
+      "precision": 0.917910447761194,
+      "recall": 0.5442477876106194,
+      "mean_scene_inference_ms": 315.40250000000003,
+      "suppressed_cross_tile_duplicates": 0,
+      "tier1_passed": false
+    }
+  ],
+  "finding": "source tiling changes false-positive counts but does not change matched proposal recall from 123 of 226 truths, so tile geometry is not the responsible recall subsystem",
+  "implementation": {
+    "runner_path": "tools/GraphReader.RealAcceptance.Ocr/Program.cs",
+    "runner_sha256": "3a132e6f60ae304e632aac5c038a786fed5553e2bf3e26861d2808f44f15a826",
+    "matching_method": "augmenting_path_maximum_cardinality",
+    "policy_path": "ml/policy/acceptance-bars.json",
+    "policy_sha256": "aab9f2ab60cf166828f0928b8496f537341870fd457d0408952e22549fc53a56",
+    "evidence_policy_path": "ml/policy/evidence-policy.json",
+    "evidence_policy_sha256": "4dc18136c284b0b1805d3a3b22a9197ad06e6a41f4e43b4e1d4d9245b97e0aed",
+    "self_test": "pass",
+    "build_warnings": 0,
+    "build_errors": 0
+  },
+  "privacy": {
+    "private_data_access": false,
+    "real_sealed_reads": 0,
+    "public_gate_evaluations": 0,
+    "case_level_output": false,
+    "truth_rows_output": false,
+    "pixel_output": false
+  },
+  "production_approval": false,
+  "release_eligible": false
+}

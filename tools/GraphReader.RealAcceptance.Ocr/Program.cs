@@ -22,6 +22,7 @@ internal static class Program
     private const int SealedTarget = 51;
     private const int ExpectedDev = 120;
     private const string OfficialDbDetectorSha256 = "d4aa24d408cd70b8b9f66cc758e20f397fc31a9c69d8477cf8887fc53bd5fceb";
+    private const string CorrectedRealRangeSeedManifestSha256 = "123f4f6973588b3294b11237e6e6deac1b8f812a5b1bbab55b1315a546ef5329";
     private static readonly string[] CiNames = ["CI", "TF_BUILD", "GITHUB_ACTIONS", "GITLAB_CI", "BUILD_BUILDID", "JENKINS_URL", "TEAMCITY_VERSION"];
 
     public static async Task<int> Main(string[] args)
@@ -45,6 +46,7 @@ internal static class Program
         }
         string? syntheticArg = GetOption(args, "--synthetic-real-range");
         string? officialArg = GetOption(args, "--synthetic-official-db");
+        string? tiledArg = GetOption(args, "--synthetic-tiled-proposals");
         if (args.Contains("--run-real-dev-marker", StringComparer.Ordinal))
         {
             string? markerRoot = GetOption(args, "--root");
@@ -63,6 +65,15 @@ internal static class Program
             DetectorAggregateReport detectorReport = await RunOfficialDbAsync(Path.GetFullPath(officialArg), CancellationToken.None);
             Console.WriteLine(JsonSerializer.Serialize(detectorReport, JsonOptions));
             return detectorReport.DetectionPrecision >= 0.95 && detectorReport.DetectionRecall >= 0.95 ? 0 : 1;
+        }
+        if (tiledArg is not null)
+        {
+            int tileSize = GetIntOption(args, "--tile-size", 960);
+            int tileOverlap = GetIntOption(args, "--tile-overlap", Math.Min(192, tileSize / 4));
+            TiledProposalAggregateReport tiledReport = await RunTiledProposalsAsync(
+                Path.GetFullPath(tiledArg), tileSize, tileOverlap, CancellationToken.None);
+            Console.WriteLine(JsonSerializer.Serialize(tiledReport, JsonOptions));
+            return tiledReport.Gates.Values.All(value => value) ? 0 : 1;
         }
         if (syntheticArg is not null)
         {
@@ -87,6 +98,15 @@ internal static class Program
     {
         int index = Array.IndexOf(args, name);
         return index >= 0 && index + 1 < args.Length ? args[index + 1] : null;
+    }
+
+    private static int GetIntOption(string[] args, string name, int defaultValue)
+    {
+        string? value = GetOption(args, name);
+        if (value is null) return defaultValue;
+        return int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out int parsed)
+            ? parsed
+            : throw new InvalidDataException($"INVALID_INTEGER_OPTION:{name}");
     }
 
     private static async Task<AggregateReport> RunAsync(string rootPath, CancellationToken cancellationToken)
@@ -363,6 +383,7 @@ internal static class Program
     private static async Task<SyntheticAggregateReport> RunSyntheticAsync(string datasetPath, CancellationToken cancellationToken)
     {
         string root = Path.GetFullPath(datasetPath);
+        ValidateCorrectedSyntheticDataset(root);
         string[] images = Directory.EnumerateFiles(Path.Combine(root, "images"), "*.png").OrderBy(path => path, StringComparer.Ordinal).ToArray();
         if (images.Length == 0) throw new InvalidDataException("SYNTHETIC_DATASET_EMPTY");
         await using InferenceRuntime runtime = CreateRuntime();
@@ -503,6 +524,206 @@ internal static class Program
         double recall = truePositives / (double)Math.Max(1, truePositives + falseNegatives);
         var dimensions = byDimension.ToDictionary(item => item.Key, item => new DetectorDimensionReport(item.Value[0], item.Value[3], item.Value[1], item.Value[2], item.Value[3] / (double)Math.Max(1, item.Value[3] + item.Value[1]), item.Value[3] / (double)Math.Max(1, item.Value[0])), StringComparer.Ordinal);
         return new DetectorAggregateReport(1, "synthetic_real_range_official_db_aggregate_only", images.Length, truthRegions, truePositives, falsePositives, falseNegatives, precision, recall, dimensions, times.Average(), OfficialDbDetectorSha256, false, false, false, 0.30, 0.60, 1.5, 3, 1000);
+    }
+
+    private static async Task<TiledProposalAggregateReport> RunTiledProposalsAsync(
+        string datasetPath,
+        int tileSize,
+        int tileOverlap,
+        CancellationToken cancellationToken)
+    {
+        string root = Path.GetFullPath(datasetPath);
+        ValidateCorrectedSyntheticDataset(root);
+        string[] images = Directory.EnumerateFiles(Path.Combine(root, "images"), "*.png")
+            .OrderBy(path => path, StringComparer.Ordinal).ToArray();
+        if (images.Length == 0) throw new InvalidDataException("SYNTHETIC_DATASET_EMPTY");
+
+        await using InferenceRuntime runtime = CreateRuntime();
+        var detector = new SourceTiledProposalDetector(CreateProposalDetector(runtime), tileSize, tileOverlap);
+        int truthRegions = 0, truePositives = 0, falsePositives = 0, falseNegatives = 0;
+        var byDimension = new Dictionary<string, int[]>(StringComparer.Ordinal);
+        var timings = new List<double>();
+        foreach (string imagePath in images)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            SyntheticCase truth = ReadSyntheticCase(Path.Combine(root, "annotations", Path.GetFileNameWithoutExtension(imagePath) + ".json"));
+            Raster raster = DecodePng(File.ReadAllBytes(imagePath));
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            IReadOnlyList<OcrDetectedRegion> regions = await detector.DetectProposalsAsync(
+                ToMaskedDetectorImage(raster, truth.MaskLines).Image, cancellationToken);
+            watch.Stop();
+            timings.Add(watch.Elapsed.TotalMilliseconds);
+
+            int[][] edges = regions.Select(region => truth.Texts
+                .Select((item, index) => (index, overlap: IoU(region.Polygon.Bounds, item.Box)))
+                .Where(item => item.overlap >= 0.5)
+                .OrderByDescending(item => item.overlap)
+                .Select(item => item.index)
+                .ToArray()).ToArray();
+            int matched = MaximumMatching(edges, truth.Texts.Count).Count(match => match >= 0);
+            int sceneFalsePositives = regions.Count - matched;
+            int sceneFalseNegatives = truth.Texts.Count - matched;
+            truthRegions += truth.Texts.Count;
+            truePositives += matched;
+            falsePositives += sceneFalsePositives;
+            falseNegatives += sceneFalseNegatives;
+            string dimension = $"{raster.Width}x{raster.Height}";
+            int[] values = byDimension.GetValueOrDefault(dimension) ?? new int[4];
+            values[0] += truth.Texts.Count;
+            values[1] += matched;
+            values[2] += sceneFalsePositives;
+            values[3] += sceneFalseNegatives;
+            byDimension[dimension] = values;
+        }
+
+        double precision = truePositives / (double)Math.Max(1, truePositives + falsePositives);
+        double recall = truePositives / (double)Math.Max(1, truePositives + falseNegatives);
+        using JsonDocument policy = JsonDocument.Parse(File.ReadAllText(Path.GetFullPath("ml/policy/acceptance-bars.json")));
+        JsonElement bars = policy.RootElement.GetProperty("tier1_reviewable_error");
+        var gates = new Dictionary<string, bool>(StringComparer.Ordinal)
+        {
+            ["detection_precision"] = precision >= bars.GetProperty("text_region_detection_precision_minimum").GetDouble(),
+            ["detection_recall"] = recall >= bars.GetProperty("text_region_detection_recall_minimum").GetDouble(),
+        };
+        Dictionary<string, DetectorDimensionReport> dimensions = byDimension.ToDictionary(
+            item => item.Key,
+            item => new DetectorDimensionReport(
+                item.Value[0], item.Value[1], item.Value[2], item.Value[3],
+                item.Value[1] / (double)Math.Max(1, item.Value[1] + item.Value[2]),
+                item.Value[1] / (double)Math.Max(1, item.Value[0])),
+            StringComparer.Ordinal);
+        return new TiledProposalAggregateReport(
+            1, "synthetic_real_range_source_tiled_v10_proposals_aggregate_only", images.Length,
+            truthRegions, truePositives, falsePositives, falseNegatives, precision, recall,
+            tileSize, tileOverlap, dimensions, timings.Average(),
+            detector.TotalSuppressedDuplicateCount,
+            OcrV8ProductionCompositionFactory.DetectorSha256,
+            CorrectedRealRangeSeedManifestSha256,
+            AcceptancePolicySha256(), EvidencePolicySha256(), gates,
+            false, false, false, 0, 0, false);
+    }
+
+    private static void ValidateCorrectedSyntheticDataset(string root)
+    {
+        string manifestPath = Path.Combine(root, "seed-manifest.json");
+        if (!File.Exists(manifestPath) ||
+            !string.Equals(Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(manifestPath))), CorrectedRealRangeSeedManifestSha256, StringComparison.Ordinal))
+            throw new InvalidDataException("CORRECTED_SYNTHETIC_MANIFEST_MISMATCH");
+        using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(manifestPath));
+        if (!string.Equals(manifest.RootElement.GetProperty("preset").GetString(), "real_range", StringComparison.Ordinal))
+            throw new InvalidDataException("CORRECTED_SYNTHETIC_PRESET_MISMATCH");
+        JsonElement artifacts = manifest.RootElement.GetProperty("artifact_sha256");
+        foreach (string path in Directory.EnumerateFiles(Path.Combine(root, "images"), "*.png")
+            .Concat(Directory.EnumerateFiles(Path.Combine(root, "annotations"), "*.json")))
+        {
+            string relative = Path.GetRelativePath(root, path).Replace(Path.DirectorySeparatorChar, '/');
+            if (!artifacts.TryGetProperty(relative, out JsonElement expected) ||
+                !string.Equals(Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(path))), expected.GetString(), StringComparison.Ordinal))
+                throw new InvalidDataException("CORRECTED_SYNTHETIC_ARTIFACT_MISMATCH");
+        }
+    }
+
+    private sealed class SourceTiledProposalDetector(
+        ITextRegionProposalDetector inner,
+        int tileSize,
+        int tileOverlap) : ITextRegionProposalDetector
+    {
+        private const double InternalEdgeMargin = 4;
+
+        public int TotalSuppressedDuplicateCount { get; private set; }
+
+        public string ConfigurationFingerprint => $"source-tiled-v1:{tileSize}:{tileOverlap}:{inner.ConfigurationFingerprint}";
+
+        public ValueTask<IReadOnlyList<OcrDetectedRegion>> DetectAsync(OcrImage image, CancellationToken cancellationToken) =>
+            DetectProposalsAsync(image, cancellationToken);
+
+        public async ValueTask<IReadOnlyList<OcrDetectedRegion>> DetectProposalsAsync(
+            OcrImage image,
+            CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(image);
+            if (tileSize <= 0 || tileOverlap < 0 || tileOverlap >= tileSize)
+                throw new InvalidOperationException("SOURCE_TILE_CONFIGURATION_INVALID");
+            var output = new List<OcrDetectedRegion>();
+            foreach (int top in TileStarts(image.Height, tileSize, tileOverlap))
+            {
+                foreach (int left in TileStarts(image.Width, tileSize, tileOverlap))
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    int width = Math.Min(tileSize, image.Width - left);
+                    int height = Math.Min(tileSize, image.Height - top);
+                    OcrImage tile = CropOcrImage(image, left, top, width, height);
+                    IReadOnlyList<OcrDetectedRegion> proposals = await inner.DetectProposalsAsync(tile, cancellationToken);
+                    foreach (OcrDetectedRegion proposal in proposals)
+                    {
+                        OcrRectangle box = proposal.Polygon.Bounds;
+                        OcrPoint tileTopLeft = image.OriginalToImage.MapToOriginal(new OcrPoint(left, top));
+                        OcrPoint tileBottomRight = image.OriginalToImage.MapToOriginal(new OcrPoint(left + width, top + height));
+                        bool touchesInternalEdge =
+                            (left > 0 && box.Left <= tileTopLeft.X + InternalEdgeMargin) ||
+                            (top > 0 && box.Top <= tileTopLeft.Y + InternalEdgeMargin) ||
+                            (left + width < image.Width && box.Right >= tileBottomRight.X - InternalEdgeMargin) ||
+                            (top + height < image.Height && box.Bottom >= tileBottomRight.Y - InternalEdgeMargin);
+                        if (!touchesInternalEdge) output.Add(proposal);
+                    }
+                }
+            }
+            OcrDetectedRegion[] exactUnique = output
+                .GroupBy(item => item.RegionId, StringComparer.Ordinal)
+                .Select(group => group.OrderByDescending(item => item.DetectionConfidence).First())
+                .OrderByDescending(item => item.DetectionConfidence)
+                .ThenBy(item => item.Polygon.Bounds.Top)
+                .ThenBy(item => item.Polygon.Bounds.Left)
+                .ToArray();
+            var kept = new List<OcrDetectedRegion>();
+            foreach (OcrDetectedRegion candidate in exactUnique)
+            {
+                if (kept.Any(current => IoU(candidate.Polygon.Bounds, current.Polygon.Bounds) >= 0.8))
+                {
+                    TotalSuppressedDuplicateCount++;
+                    continue;
+                }
+                kept.Add(candidate);
+            }
+            return Array.AsReadOnly(kept
+                .OrderBy(item => item.Polygon.Bounds.Top)
+                .ThenBy(item => item.Polygon.Bounds.Left)
+                .ToArray());
+        }
+
+        public static int[] TileStarts(int length, int size, int overlap)
+        {
+            if (length <= size) return [0];
+            int step = size - overlap;
+            var starts = new List<int>();
+            for (int value = 0; value <= length - size; value += step) starts.Add(value);
+            if (starts[^1] != length - size) starts.Add(length - size);
+            return starts.ToArray();
+        }
+
+        private static OcrImage CropOcrImage(OcrImage image, int left, int top, int width, int height)
+        {
+            byte[] gray = new byte[checked(width * height)];
+            ReadOnlySpan<byte> sourceGray = image.Pixels.Span;
+            for (int y = 0; y < height; y++)
+                sourceGray.Slice(checked((top + y) * image.Stride + left), width).CopyTo(gray.AsSpan(y * width, width));
+
+            OcrBgrBytePixels? bgr = null;
+            if (image.BgrPixels is not null)
+            {
+                byte[] values = new byte[checked(width * height * 3)];
+                ReadOnlySpan<byte> sourceBgr = image.BgrPixels.Pixels.Span;
+                for (int y = 0; y < height; y++)
+                    sourceBgr.Slice(checked((top + y) * image.BgrPixels.Stride + left * 3), width * 3)
+                        .CopyTo(values.AsSpan(y * width * 3, width * 3));
+                bgr = new OcrBgrBytePixels(width * 3, values);
+            }
+            OcrFrameTransform transform = image.OriginalToImage;
+            return new OcrImage(
+                width, height, width, gray, image.SourceImage,
+                new OcrFrameTransform(transform.ScaleX, transform.ScaleY, transform.OffsetX - left, transform.OffsetY - top),
+                image.CoordinateSpace, image.CanonicalOriginalWidth, image.CanonicalOriginalHeight, bgr);
+        }
     }
 
     private static LocalOnnxTextRegionDetector CreateOfficialDbDetector(InferenceRuntime runtime)
@@ -811,6 +1032,7 @@ internal static class Program
     private static string AssignmentHash(IEnumerable<string> paths, Dictionary<string, string> assignments, string root) => Sha256Hex(string.Join("\n", paths.OrderBy(path => path, StringComparer.Ordinal).Select(path => $"{Sha256Hex(Path.GetRelativePath(root, path).Replace(Path.DirectorySeparatorChar, '/'))}={assignments[Path.GetFullPath(path)]}")));
     private static string Sha256Hex(string value) => Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
     private static string AcceptancePolicySha256() => Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(Path.GetFullPath("ml/policy/acceptance-bars.json"))));
+    private static string EvidencePolicySha256() => Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(Path.GetFullPath("ml/policy/evidence-policy.json"))));
     private static Dictionary<string, string> OcrPayloadSha256() => new(StringComparer.Ordinal)
     {
         ["detector"] = OcrV8ProductionCompositionFactory.DetectorSha256,
@@ -831,6 +1053,7 @@ internal static class Program
             Levenshtein("20", "70") != 1 || RoleName(OcrTextRole.YTick) != "y_tick" ||
             MatchCenters([new MarkerCenter("m", new MarkerPoint(5, 5), 3, 0, 1, MarkerSourceImage.Original)], [new CurvePoint(5, 5)], 5) != (1, 0, 0) ||
             MaximumMatching(new int[][] { [0, 1], [0] }, 2).Count(match => match >= 0) != 2 ||
+            !SourceTiledProposalDetector.TileStarts(1000, 640, 128).SequenceEqual([0, 360]) ||
             RasterizeAxisMask(32, 32, [new AxisAnchor(4, 4, 0, 0), new AxisAnchor(4, 28, 0, 1), new AxisAnchor(28, 4, 1, 0)], 1).All(static value => value == 0))
         {
             throw new InvalidOperationException("SELF_TEST_CALIBRATION_FAILED");
@@ -841,6 +1064,7 @@ internal static class Program
     private sealed record MarkerAggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall, double TolerancePx, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, string ModelSha256, IReadOnlyDictionary<string, string> UpstreamOcrPayloadSha256, string MaskingMode, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection);
     private sealed record SyntheticDimensionReport(int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, double RecognitionExact, double CharacterErrorRate, double RoleAccuracy);
     private sealed record DetectorDimensionReport(int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall);
+    private sealed record TiledProposalAggregateReport(int SchemaVersion, string ReportScope, int SceneCount, int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, int TileSize, int TileOverlap, IReadOnlyDictionary<string, DetectorDimensionReport> ByDimension, double MeanSceneInferenceMs, int SuppressedCrossTileDuplicates, string ModelSha256, string DatasetManifestSha256, string AcceptancePolicySha256, string EvidencePolicySha256, IReadOnlyDictionary<string, bool> Gates, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, int PublicGateEvaluations, int RealSealedReads, bool TrainingUse);
     private sealed record DetectorAggregateReport(int SchemaVersion, string ReportScope, int SceneCount, int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, IReadOnlyDictionary<string, DetectorDimensionReport> ByDimension, double MeanSceneInferenceMs, string ModelSha256, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, double ProbabilityThreshold, double BoxConfidenceThreshold, double UnclipRatio, int MinimumSideLength, int MaximumRegions);
     private sealed record SyntheticAggregateReport(int SchemaVersion, string ReportScope, int SceneCount, int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, double RecognitionExact, double CharacterErrorRate, double RoleAccuracy, int ProhibitedStructureHits, double ProhibitedStructureHitRate, double MeanSceneInferenceMs, IReadOnlyDictionary<string, SyntheticDimensionReport> ByDimension, IReadOnlyDictionary<string, IReadOnlyDictionary<string, ProposalAggregate>> ProposalThresholdSummary, IReadOnlyDictionary<string, ProposalAggregate> ProposalRoleRecall, IReadOnlyDictionary<string, bool> Gates, IReadOnlyDictionary<string, string> ModelPayloadSha256, string PolicySha256, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput);
 }
