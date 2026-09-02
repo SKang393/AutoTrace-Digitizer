@@ -19,6 +19,7 @@ def test_production_resize_profile_matches_960_128_contract() -> None:
     assert profile["resized_height"] == 439
     assert profile["aligned_width"] == 1024
     assert profile["aligned_height"] == 512
+    assert profile["scale"] == 960 / 863
     assert profile["tensor_scale_x"] == 1024 / 863
     assert profile["tensor_scale_y"] == 512 / 395
 
@@ -31,20 +32,25 @@ def test_real_range_preset_passes_aggregate_distribution_gate(
     report = json.loads(report_path.read_text(encoding="utf-8"))
     serialized = report_path.read_text(encoding="utf-8")
 
-    assert result.case_count == 6
+    assert result.case_count == 10
     assert all(report["gates"].values())
+    assert "361x240" in report["source_dimensions"]
     assert "863x395" in report["source_dimensions"]
-    assert report["source_pixel_format"] == {
-        "bit_depths": [8],
-        "modes": ["RGB"],
-        "png_color_types": [2],
-    }
+    assert "6352x600" in report["source_dimensions"]
+    assert "600x4484" in report["source_dimensions"]
+    assert report["source_pixel_format"]["bit_depths"] == [8]
+    assert report["source_pixel_format"]["modes"] == ["RGB", "RGBA"]
+    assert report["source_pixel_format"]["png_color_types"] == [2, 6]
     assert report["png_encoding"] == {
         "compression_methods": [0],
         "filter_methods": [0],
         "interlace_methods": [0],
+        "rgba_alpha_ranges": [[224, 255]],
     }
     assert report["jpeg_roundtrip_qualities"] == [55, 70, 85]
+    assert report["gates"]["weighted_toward_observed_median"] is True
+    assert report["post_resize_text_height_px"][0] <= 1.8
+    assert report["post_resize_text_height_px"][1] >= 20.74
     assert min(report["text_region_counts"]) <= 38 <= max(
         report["text_region_counts"]
     )
@@ -55,10 +61,10 @@ def test_real_range_preset_passes_aggregate_distribution_gate(
     for path in (result.output_directory / "images").glob("*.png"):
         payload = path.read_bytes()
         assert payload[:8] == b"\x89PNG\r\n\x1a\n"
-        assert payload[24:29] == bytes((8, 2, 0, 0, 0))
+        assert payload[24] == 8
         with Image.open(path) as image:
             assert image.format == "PNG"
-            assert image.mode == "RGB"
+            assert image.mode in {"RGB", "RGBA"}
             sizes.add(image.size)
     assert (863, 395) in sizes
 

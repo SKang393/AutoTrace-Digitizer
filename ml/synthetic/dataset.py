@@ -80,6 +80,7 @@ class CaseSpec:
     stroke_width: int | None = None
     presentation: Mapping[str, Any] | None = None
     degradations: tuple[Mapping[str, Any], ...] | None = None
+    output_mode: str = "RGB"
 
 
 @dataclass(frozen=True, slots=True)
@@ -143,6 +144,11 @@ PRESETS: dict[str, tuple[CaseSpec, ...]] = {
     ),
     "real_range": (
         CaseSpec(
+            "ab", "vector_clean", 1, 24,
+            canvas_width=361, panel_height=160, marker_radius=4.4,
+            stroke_width=1, presentation={"font_size_px": 17},
+        ),
+        CaseSpec(
             "multiple_probe",
             "vector_clean",
             1,
@@ -160,19 +166,35 @@ PRESETS: dict[str, tuple[CaseSpec, ...]] = {
             },
         ),
         CaseSpec(
+            "multiple_baseline", "print_monochrome", 1, 24,
+            canvas_width=1338, panel_height=412, marker_radius=6.2,
+            stroke_width=2, output_mode="RGBA",
+            presentation={"font_size_px": 18},
+        ),
+        CaseSpec(
+            "ab", "scan_rough", 1, 24,
+            canvas_width=6352, panel_height=520, marker_radius=6.2,
+            stroke_width=3, presentation={"font_size_px": 18},
+        ),
+        CaseSpec(
+            "abab", "scan_rough", 1, 24,
+            canvas_width=600, panel_height=4404, marker_radius=5.0,
+            stroke_width=2, presentation={"font_size_px": 18},
+        ),
+        CaseSpec(
             "ab", "print_monochrome", 1, 24,
-            canvas_width=768, panel_height=304, marker_radius=5.0,
+            canvas_width=1338, panel_height=412, marker_radius=5.0,
             stroke_width=1, presentation={"font_size_px": 18},
         ),
         CaseSpec(
             "abab", "scan_rough", 1, 24,
-            canvas_width=1024, panel_height=482, marker_radius=6.2,
+            canvas_width=1338, panel_height=412, marker_radius=6.2,
             stroke_width=3, presentation={"font_size_px": 18},
         ),
         *(
             CaseSpec(
                 "ab", "scan_rough", 1, 24,
-                canvas_width=640, panel_height=240, marker_radius=4.4,
+                canvas_width=1338, panel_height=412, marker_radius=4.4,
                 stroke_width=1 if quality == 55 else 2,
                 presentation={"font_size_px": 17},
                 degradations=({
@@ -230,8 +252,9 @@ def generate_dataset(
     )
     destination.mkdir(parents=True, exist_ok=True)
 
+    specs = PRESETS[preset]
     scenes = _build_scenes(
-        PRESETS[preset],
+        specs,
         seed,
         require_complete_style_catalog=preset == "smoke",
     )
@@ -241,9 +264,14 @@ def generate_dataset(
     output_files: list[Path] = []
     all_annotations: list[Mapping[str, Any]] = []
 
-    for index, scene in enumerate(scenes):
+    for index, (scene, spec) in enumerate(zip(scenes, specs, strict=True)):
         scene_id = str(scene["scene_id"])
         image, annotation, marker_mask = render_scene(scene)
+        if spec.output_mode == "RGBA":
+            image = image.convert("RGBA")
+            alpha = Image.linear_gradient("L").resize(image.size)
+            alpha = alpha.point(lambda value: 224 + ((value * 31) // 255))
+            image.putalpha(alpha)
         case_metrics = _validate_rendered_case(scene, annotation, marker_mask)
         rows = list(_csv_rows(scene, annotation))
 
@@ -376,8 +404,8 @@ def _real_range_distribution_report(
         )
         for scene in scenes
     ]
-    db_text_heights = [
-        height * float(resize["tensor_scale_y"])
+    post_resize_text_heights = [
+        height * float(resize["scale"])
         for heights, resize in zip(
             text_heights_by_case,
             resize_records,
@@ -400,14 +428,17 @@ def _real_range_distribution_report(
         for annotation in annotations
     ]
     envelope = {
+        "source_width_px": [361, 6352],
+        "source_height_px": [207, 4484],
+        "source_height_minimum_tolerance_px": 33,
         "source_text_height_px": [13.0, 16.0],
-        "db_aligned_text_height_px": [16.85, 20.74],
+        "post_resize_text_height_px": [1.8, 20.74],
         "marker_diameter_px": [10.0, 12.0],
         "open_stroke_width_px": [1.4, 1.74],
         "text_region_count": 38,
     }
     source_range = [min(source_text_heights), max(source_text_heights)]
-    db_range = [min(db_text_heights), max(db_text_heights)]
+    post_resize_range = [min(post_resize_text_heights), max(post_resize_text_heights)]
     diameter_range = [min(marker_diameters), max(marker_diameters)]
     stroke_range = [min(stroke_widths), max(stroke_widths)]
     encoded_png = [_png_header(path) for path in image_paths]
@@ -421,6 +452,7 @@ def _real_range_distribution_report(
     interlace_methods = sorted(
         {int(record["interlace_method"]) for record in encoded_png}
     )
+    alpha_ranges = [record["alpha_range"] for record in encoded_png if record["alpha_range"] is not None]
     jpeg_qualities = sorted(
         {
             int(stage["parameters"]["quality"])
@@ -430,6 +462,22 @@ def _real_range_distribution_report(
         }
     )
     gates = {
+        "source_dimensions_cover_real_envelope": (
+            min(int(scene["canvas"]["width"]) for scene in scenes) <= envelope["source_width_px"][0]
+            and max(int(scene["canvas"]["width"]) for scene in scenes) >= envelope["source_width_px"][1]
+            and min(int(scene["canvas"]["height"]) for scene in scenes)
+            <= envelope["source_height_px"][0] + envelope["source_height_minimum_tolerance_px"]
+            and max(int(scene["canvas"]["height"]) for scene in scenes) >= envelope["source_height_px"][1]
+        ),
+        "weighted_toward_observed_median": sum(
+            int(scene["canvas"]["width"]) == 1338
+            and int(scene["canvas"]["height"]) == 492
+            for scene in scenes
+        ) >= len(scenes) // 2,
+        "observed_style_wide_and_tall_cases": (
+            any(int(scene["canvas"]["width"]) >= 6000 and int(scene["canvas"]["height"]) < 1000 for scene in scenes)
+            and any(int(scene["canvas"]["height"]) >= 4000 and int(scene["canvas"]["width"]) < 1000 for scene in scenes)
+        ),
         "exact_863x395_case": any(
             int(scene["canvas"]["width"]) == 863
             and int(scene["canvas"]["height"]) == 395
@@ -439,9 +487,9 @@ def _real_range_distribution_report(
             source_range[0] <= envelope["source_text_height_px"][0]
             and source_range[1] >= envelope["source_text_height_px"][1]
         ),
-        "db_text_contains_envelope": (
-            db_range[0] <= envelope["db_aligned_text_height_px"][0]
-            and db_range[1] >= envelope["db_aligned_text_height_px"][1]
+        "post_resize_text_contains_envelope": (
+            post_resize_range[0] <= envelope["post_resize_text_height_px"][0]
+            and post_resize_range[1] >= envelope["post_resize_text_height_px"][1]
         ),
         "marker_diameter_contains_envelope": (
             diameter_range[0] <= envelope["marker_diameter_px"][0]
@@ -454,14 +502,15 @@ def _real_range_distribution_report(
         "text_region_count_spans_measurement": (
             min(region_counts) <= envelope["text_region_count"] <= max(region_counts)
         ),
-        "rgb8_png": (
-            modes == ["RGB"]
+        "rgb8_and_rgba8_png": (
+            modes == ["RGB", "RGBA"]
             and bit_depths == [8]
-            and color_types == [2]
+            and color_types == [2, 6]
             and compression_methods == [0]
             and filter_methods == [0]
             and interlace_methods == [0]
         ),
+        "rgba_alpha_compositing": alpha_ranges == [[224, 255]],
         "jpeg_roundtrip_qualities": jpeg_qualities == [55, 70, 85],
     }
     if not all(gates.values()):
@@ -484,10 +533,15 @@ def _real_range_distribution_report(
             "compression_methods": compression_methods,
             "filter_methods": filter_methods,
             "interlace_methods": interlace_methods,
+            "rgba_alpha_ranges": alpha_ranges,
         },
         "jpeg_roundtrip_qualities": jpeg_qualities,
         "source_text_height_px": source_range,
-        "db_aligned_text_height_px": db_range,
+        "post_resize_text_height_px": post_resize_range,
+        "resize_scale": [
+            min(float(record["scale"]) for record in resize_records),
+            max(float(record["scale"]) for record in resize_records),
+        ],
         "db_resize_records": resize_records,
         "marker_diameter_px": diameter_range,
         "open_stroke_width_px": stroke_range,
@@ -495,7 +549,7 @@ def _real_range_distribution_report(
         "envelope": envelope,
         "gates": gates,
         "measurement_methods": {
-            "text_height": "foreground pixel bounds inside each truth-authorized rendered text box",
+            "text_height": "foreground pixel bounds inside each truth-authorized rendered text box multiplied by the production resize scale before stride padding",
             "marker_diameter": "median farthest dark-pixel radius across 72 truth-center rays",
             "open_stroke": "upper-arc dark radial p90 minus p10 inside each truth-authorized open circle",
             "png_encoding": "decoded IHDR bytes from every emitted PNG",
@@ -609,7 +663,12 @@ def _png_header(path: Path) -> dict[str, Any]:
         raise AssertionError(f"Synthetic image is not a complete PNG: {path.name}")
     with Image.open(path) as image:
         mode = image.mode
+        has_alpha = "A" in image.getbands()
         image.verify()
+    alpha_range = None
+    if has_alpha:
+        with Image.open(path) as image:
+            alpha_range = list(image.getchannel("A").getextrema())
     return {
         "mode": mode,
         "bit_depth": payload[24],
@@ -617,6 +676,7 @@ def _png_header(path: Path) -> dict[str, Any]:
         "compression_method": payload[26],
         "filter_method": payload[27],
         "interlace_method": payload[28],
+        "alpha_range": alpha_range,
     }
 
 
@@ -670,6 +730,8 @@ def _build_scenes(
                     # reassigned style. Avoid retaining a stale template polygon.
                     point["mask"] = None
         validate_scene(scene)
+        if spec.output_mode not in {"RGB", "RGBA"}:
+            raise ValueError("output_mode must be RGB or RGBA")
         if spec.degradations is not None:
             scene["degradations"] = [dict(item) for item in spec.degradations]
             validate_scene(scene)

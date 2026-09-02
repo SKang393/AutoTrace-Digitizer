@@ -1,181 +1,109 @@
 {
-  "schema_version": 1,
-  "status": "generator_repaired_private_confirmation_pending",
+  "schema_version": 2,
+  "status": "generator_distribution_repaired_real_dev_confirmation_pending",
   "report_scope": "aggregate_only",
-  "private_set": {
-    "input_count": 1,
-    "minimum_acceptance_count": 5,
-    "input_sha256": "65bd6e1021bd9a3f2d2564a640ff90060a34e784782f2d847b4b26f9c6c342e1",
-    "privacy_status": "private",
-    "training_use": false,
-    "selection_use": false,
-    "source_git_eligible": false,
-    "private_optimizer_steps": 0
-  },
-  "measured_private_aggregate": {
-    "source": {
-      "width_px": 863,
-      "height_px": 395,
-      "file_bytes": 36222,
-      "format": "PNG",
-      "mode": "RGB",
-      "bit_depth": 8,
-      "png_color_type": 2,
-      "compression": "lossless-deflate-method-0",
-      "dpi": null
+  "real_corpus_envelope": {
+    "source_width_px": {
+      "minimum": 361,
+      "median": 1338,
+      "maximum": 6352
     },
-    "ocr": {
-      "truth_region_count": 38,
-      "classical_proposal_count": 57,
-      "source_text_height_px": {
-        "minimum": 13.0,
-        "median": 13.0,
-        "maximum": 16.0
-      },
-      "private_runner_global_resize_applied": false,
-      "production_db_resize": {
-        "maximum_side": 960,
-        "stride": 128,
-        "resized_width": 960,
-        "resized_height": 439,
-        "aligned_width": 1024,
-        "aligned_height": 512,
-        "aligned_text_height_px": [
-          16.85,
-          20.74
-        ]
-      },
-      "accepted_region_count": 5,
-      "true_positives": 3,
-      "false_negatives": 35
+    "source_height_px": {
+      "minimum": 207,
+      "median": 472,
+      "maximum_embedded_dig_png": 1944,
+      "maximum_loose_raster": 4484
     },
-    "markers": {
-      "marker_count": 24,
-      "descriptive_hough_radius_px": {
-        "minimum": 4.4,
-        "median": 5.0,
-        "maximum": 6.2
-      },
-      "gate_comparable_ray_diameter_px": {
-        "minimum": 10.0,
-        "median": 10.0,
-        "maximum": 12.0
-      },
-      "open_upper_arc_stroke_band_px": [
-        1.4,
-        1.74
-      ],
-      "shape_accuracy": 0.5833333333333334,
-      "fill_accuracy": 0.9166666666666666,
-      "open_probe_accuracy": 0.0,
-      "maximum_artifact_probability": 0.000014275312423706055
-    },
-    "method": {
-      "source_metadata": "Pillow PNG header and metadata read without source mutation",
-      "text_height": "aggregate connected-component height in truth-authorized text zones; no pixels, text, boxes, or case rows emitted",
-      "marker_diameter": "median farthest dark-pixel radius across 72 rays at each of the 24 truth-authorized centers; the same method grades synthetic images",
-      "open_stroke": "aggregate upper-arc radial dark-pixel band, excluding connecting lines and annotation strokes",
-      "source_immutable": true
-    }
-  },
-  "synthetic_before_repair": {
-    "v30_validation": {
-      "scene_count": 192,
-      "raster": "Gray8 640x320",
-      "truth_regions_per_scene": 8,
-      "text_height_px": {
-        "minimum": 10.0,
-        "p10": 12.0,
-        "median": 16.0,
-        "p90": 18.0,
-        "maximum": 20.0
-      },
-      "proposal_count_per_scene": {
-        "minimum": 10.0,
-        "p10": 14.0,
-        "median": 20.0,
-        "p90": 34.9,
-        "maximum": 66.0
-      }
-    },
-    "shared_smoke": {
-      "fixed_width_px": 1200,
-      "one_panel_height_px": 350,
-      "mode": "RGB8",
-      "text_height_px": [
-        8.768526,
-        16.476443
-      ],
-      "marker_diameter_px": [
-        6.993782,
-        12.012377
-      ],
-      "stroke_width_px": [
-        1.0,
-        3.0
-      ],
-      "text_region_count_per_scene": [
-        16,
-        127
-      ]
-    }
+    "embedded_dig_png_count": 171,
+    "embedded_dig_png_mode": "RGB",
+    "digitized_point_count": 3055,
+    "assignment_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a"
   },
   "diagnosis": {
-    "text_scale_explains_recall_collapse": false,
-    "proposal_count_explains_recall_collapse": false,
-    "reason": "private text height lies inside the V30 range and 57 private proposals lie below the V30 validation maximum of 66",
-    "measured_generator_gap": "the shared generator did not include the private aggregate source dimensions and the V30 corpus fixed every scene at eight truth regions",
-    "pipeline_finding": "the prior private runner evaluated a direct Gray8 research proposal path that bypassed production BGR, masking, 960/128 preprocessing, and coordinate provenance; its prohibited counter was also derived from recognition mismatches rather than an independent spatial structure check"
+    "production_resize_maximum_side": 960,
+    "production_stride": 128,
+    "synthetic_legacy_long_side_px": 640,
+    "synthetic_legacy_resize_scale": 1.5,
+    "real_median_long_side_px": 1338,
+    "real_median_resize_scale": 0.7174887892376681,
+    "real_maximum_long_side_px": 6352,
+    "real_maximum_resize_scale": 0.15113350125944586,
+    "failure_mechanism": "legacy synthetic text was always enlarged while median and large real text was reduced before detector inference"
   },
   "generator_repair": {
     "preset": "real_range",
-    "private_pixels_or_text_used": false,
+    "case_count": 10,
     "source_dimensions": [
-      "640x320",
-      "768x384",
+      "361x240",
       "863x395",
-      "1024x562"
+      "1338x492",
+      "6352x600",
+      "600x4484"
+    ],
+    "median_dimension_case_count": 6,
+    "source_modes": [
+      "RGB",
+      "RGBA"
+    ],
+    "png_bit_depths": [
+      8
+    ],
+    "png_color_types": [
+      2,
+      6
+    ],
+    "rgba_alpha_range": [
+      224,
+      255
+    ],
+    "jpeg_roundtrip_qualities": [
+      55,
+      70,
+      85
+    ],
+    "production_resize_scale": [
+      0.15113350125944586,
+      2.6592797783933517
     ],
     "source_text_height_px": [
-      11.0,
+      1.0,
       17.0
     ],
-    "db_aligned_text_height_px": [
-      12.526690391459075,
-      24.0
+    "post_resize_text_height_px": [
+      0.7174887892376681,
+      42.54847645429363
     ],
     "marker_diameter_px": [
-      9.0,
-      14.0
+      8.5,
+      13.5
     ],
-    "marker_stroke_width_px": [
-      1.0793568959252209,
-      3.155631904619078
+    "open_stroke_width_px": [
+      0.6121903001486944,
+      3.6314738271446627
     ],
-    "text_region_count_per_scene": [
-      17,
-      40
-    ],
-    "color_and_compression": {
-      "physical_output": "RGB8 PNG",
-      "png_compress_level": 9,
-      "jpeg_roundtrip_qualities": [
-        55,
-        70,
-        85
-      ]
-    },
-    "distribution_gates_passed": 8,
-    "distribution_gates_total": 8,
-    "distribution_report_sha256": "440e3854ba610f363726af6b6616a3bae6975ffcd6d4a284678f27bd788425ff",
-    "seed_manifest_sha256": "b18c64a150f75724f3272130e04ddbb8f5818f525f8335f64735e5f679b6ab5c",
-    "legacy_smoke_manifest_byte_identical": true,
-    "synthetic_test_result": "39 passed"
+    "distribution_gates_passed": 12,
+    "distribution_gates_total": 12,
+    "distribution_report_sha256": "1ea0e6c68c73431472cd22c5c4e757857a388c7c3cac450611a47baee55aa077",
+    "seed_manifest_sha256": "62d4e2a687632e253b3353c059856bd29bc5d99d983100e6a07b7d14e4b08db3"
   },
-  "private_confirmation": {
-    "status": "waiting_for_minimum_five_image_set",
-    "review_item": "REV-001",
-    "one_image_acceptance_rerun_permitted": false,
+  "implementation": {
+    "dataset_path": "ml/synthetic/dataset.py",
+    "dataset_sha256": "b27d71fc865fddc6ac99d5a5a0d8b1debdffda24da74176f8b40e3ca154b45ec",
+    "test_path": "ml/synthetic/tests/test_real_range.py",
+    "test_sha256": "061af1df4059f7885d6a48d27bd596b5af063d869b63ce8980603f7d1057f03c",
+    "synthetic_test_result": "39 passed",
+    "synthetic_test_elapsed_seconds": 173.87
+  },
+  "private_data_use": {
+    "pixels_copied": false,
+    "truth_rows_copied": false,
+    "training_use": false,
+    "selection_use": false,
+    "optimizer_steps": 0
+  },
+  "real_confirmation": {
+    "real_dev_scored": false,
+    "real_sealed_scored": false,
     "production_approval": false
   },
   "release_eligible": false
