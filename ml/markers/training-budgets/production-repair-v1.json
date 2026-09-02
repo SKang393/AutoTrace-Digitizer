@@ -7397,6 +7397,76 @@
       "production_approval": false,
       "release_eligible": false,
       "refusal_required_before_output": true
+    },
+    {
+      "task": "marker-center",
+      "revision": "marker-center-geometry-finetune-v15",
+      "status": "retired_failed_dev",
+      "defect_class": "the selected runtime-consistency P2 classifier receives full-coverage corrected synthetic proposals but rejects too many real-range marker scales",
+      "prior_revision": "marker-center-runtime-consistency-v2",
+      "prior_checkpoint_reused": true,
+      "source_checkpoint_path": "ml/markers/center/artifacts/runtime-consistency-v2/P2-run/marker-center-runtime-consistency-p2.pt",
+      "source_checkpoint_sha256": "6b670a6f29454d7f63527f57210aa918540a817fca156a71b96872ff09aa2787",
+      "source_onnx_sha256": "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b",
+      "isolated_change": "fine-tune the compatible radial proposal classifier on the committed V13 geometry-filtered synthetic train stream while retaining the runtime tensor and radius contracts",
+      "model_sourcing_order": "reuse and fine-tune the existing redistributable runtime-consistency P2 payload before considering a new architecture",
+      "model_license": "Apache-2.0",
+      "experiment_budget": 1,
+      "preregistered_candidate_ids": [],
+      "consumed_candidate_ids": [],
+      "retired_unconsumed_candidate_ids": ["P1"],
+      "remaining_unregistered_candidate_ids": [],
+      "candidate_config_paths": {
+        "P1": "ml/markers/center/geometry_finetune_v15/training/p1.json"
+      },
+      "candidate_config_sha256": {
+        "P1": "39bad294c705a2e6101f54d847fd5fd68842a83754df6ed20efdb23027763106"
+      },
+      "protocol_path": "ml/markers/center/geometry_finetune_v15/protocol.py",
+      "protocol_sha256": "457747c1b980030dc9550f1c67567b34058de3f2f6c41334be98cf0299f3e559",
+      "expected_runner_source_bundle_sha256": "df1fa185859403d452db7aba8d9a79c9de7e5ee99a65ab737b1c1b9a0634f398",
+      "input_proposal_revision": "marker-center-proposal-geometry-v13",
+      "input_proposal_manifest_sha256": "771141bd5d22d2ffdb56e63f193c16c0775a0f47c02313ef67b06bbce9603126",
+      "evidence_policy_path": "ml/policy/evidence-policy.json",
+      "evidence_policy_sha256": "4dc18136c284b0b1805d3a3b22a9197ad06e6a41f4e43b4e1d4d9245b97e0aed",
+      "p1_result_path": "ml/markers/center/geometry_finetune_v15/P1_RESULT.json",
+      "p1_result_sha256": "5fa8853427c6a3f4bb24073a18f0f3b99c31aaa67105ad511d25dbc0a9b56520",
+      "p1_candidate_report_sha256": "cfe15ed68fce4dc21d29e867d0b71b2674d9e9f699577693a8eed4bb9d19c6d0",
+      "p1_training_opened_seal_sha256": "52f62e437cf7fb31c7d7a83357bb4d9648c09da7e0a49d4a4f34c05668b688ba",
+      "p1_training_result_seal_sha256": "9943d71303b838e531baa5c2872362386bff9f957a3773592749257b8f75a183",
+      "p1_optimizer_steps": 342,
+      "p1_selected_threshold": 0.7,
+      "p1_selected_precision": 0.3959731543624161,
+      "p1_selected_recall": 0.6145833333333334,
+      "p1_onnx_sha256": "4ee915e6fae2a7d0781bf5d484d6910964f292b8853d25e7dad3ad5d4c39350a",
+      "p1_onnx_parity_maximum_absolute_error": 8.940696716308594e-08,
+      "p1_onnx_parity_passed": true,
+      "p1_sealed_reads": 0,
+      "p1_failure": "Compatible-checkpoint fine-tuning remains far below the fixed Tier 1 bars, with 59 true positives, 90 false positives, and 37 false negatives at the best dev threshold.",
+      "void_runs": [
+        {
+          "candidate_id": "P1",
+          "status": "void",
+          "exception_type": "KeyError",
+          "exception_message": "seed",
+          "failure_phase": "initialization",
+          "optimizer_steps": 0,
+          "sealed_reads": 0,
+          "reason": "The checkpoint loader used the wrong metadata path and was repaired before the same authorization reran."
+        }
+      ],
+      "execution_authorized": false,
+      "authorized_candidate_id": null,
+      "execution_blocker": "V15 is retired after a valid synthetic dev failure. A different classifier architecture requires a distinct preregistered revision.",
+      "public_gate_authorized": false,
+      "public_gate_authorized_candidate_id": null,
+      "public_gate_evaluations": 0,
+      "public_gate_archive_opened": false,
+      "sealed_runs": 0,
+      "private_data": false,
+      "production_approval": false,
+      "release_eligible": false,
+      "refusal_required_before_output": true
     }
   ]
 }
