@@ -29,7 +29,7 @@
     "raw_proposal_recall": false
   },
   "finding": "percentile contrast, one-pixel expansion, and regrouping add false proposals without recovering any of the 25 missed truths",
-  "source_bundle_sha256": "2b6b268a0a5bf58d78b3b1c7a7daf60e8ed659c668c2865f06f766781a01cec5",
+  "source_bundle_sha256": "e1fc9b78e1fbf120ab30afa95d161334e83db78e6116c9acfffd772acde1af33",
   "raw_proposal_diagnostic_path": "docs/GOAL-22-PHASE-4R-OCR-RAW-PROPOSAL-DIAGNOSTIC.json",
   "raw_proposal_diagnostic_sha256": "8b26d337b8ff29a1d9d937c09c38073635ac2cf9b24dabfc6e7a41e9ea22de8a",
   "v33_result_path": "ml/ocr/real_range_classifier_v33/P1_RESULT.json",

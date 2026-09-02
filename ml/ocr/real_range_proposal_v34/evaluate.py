@@ -38,6 +38,7 @@ SOURCE_PATHS = (
     ROOT / "protocol.py",
     ROOT / "evaluate.py",
     Path("ml/ocr/real_range_classifier_finetune_v32/dataset.py"),
+    Path("ml/ocr/real_range_classifier_finetune_v32/protocol.py"),
     Path("ml/ocr/component_context_detector_v7/dataset.py"),
     Path("ml/ocr/component_region_detector_v6/dataset.py"),
     Path("ml/ocr/component_region_detector_v6/protocol.py"),

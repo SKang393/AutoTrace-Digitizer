@@ -34,7 +34,7 @@
   "synthetic_only": true,
   "private_or_article_images": false,
   "public_or_sealed_reads": 0,
-  "expected_runner_source_bundle_sha256": "2b6b268a0a5bf58d78b3b1c7a7daf60e8ed659c668c2865f06f766781a01cec5",
+  "expected_runner_source_bundle_sha256": "e1fc9b78e1fbf120ab30afa95d161334e83db78e6116c9acfffd772acde1af33",
   "production_approval": false,
   "release_eligible": false
 }

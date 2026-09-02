@@ -31,7 +31,7 @@ def test_diagnostic_source_hash_is_filled_consistently() -> None:
     root = Path(__file__).parents[1]
     protocol = json.loads((root / "PROTOCOL.json").read_text(encoding="utf-8"))
     config = json.loads((root / "evaluation" / "p1.json").read_text(encoding="utf-8"))
-    expected = "2b6b268a0a5bf58d78b3b1c7a7daf60e8ed659c668c2865f06f766781a01cec5"
+    expected = "e1fc9b78e1fbf120ab30afa95d161334e83db78e6116c9acfffd772acde1af33"
     assert protocol["expected_runner_source_bundle_sha256"] == expected
     assert config["expected_runner_source_bundle_sha256"] == expected
 
