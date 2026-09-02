@@ -93,7 +93,8 @@ installers/
 checksums/
 packaging/**/staging/
 portable.mode
-Data/
+data/manual data/
+data/manual*/
 
 # Logs and diagnostics
 *.log
