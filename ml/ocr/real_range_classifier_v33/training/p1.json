@@ -1,0 +1,42 @@
+{
+  "schema": "graphreader.ocr-real-range-classifier-v33-training.v1",
+  "task": "ocr-detection",
+  "revision": "graph-text-real-range-classifier-v33",
+  "candidate_id": "P1",
+  "architecture": "multiscale-detail-context-geometry-fusion-v1",
+  "training_from_scratch": true,
+  "model_license": "Apache-2.0",
+  "official_diagnostic_path": "docs/GOAL-22-PHASE-4-CORRECTED-OCR-DIAGNOSTIC.json",
+  "official_diagnostic_sha256": "53e6c458f0a9688aca51595b37038811639b798eb2435e8ce653eb8501c74569",
+  "fine_tune_result_path": "ml/ocr/real_range_classifier_finetune_v32/P1_RESULT.json",
+  "fine_tune_result_sha256": "76795363e8d77034fa6f0f055ad59a1de7b362bbdce93ed440347dbb17a1a91d",
+  "model_sourcing_rationale": "Approved pretrained OCR failed corrected real-range evaluation and the compatible V32 fine-tune failed two dev attempts; project-owned architecture is permitted by the required sourcing order.",
+  "v32_data_revision": "graph-text-real-range-classifier-finetune-v32",
+  "v32_data_source_paths": [
+    "ml/ocr/real_range_classifier_finetune_v32/dataset.py",
+    "ml/ocr/real_range_classifier_finetune_v32/training_data.py",
+    "ml/ocr/real_range_classifier_finetune_v32/pipeline.py",
+    "ml/ocr/real_range_classifier_finetune_v32/protocol.py"
+  ],
+  "seed": 20260933,
+  "epochs": 12,
+  "batch_size": 64,
+  "learning_rate": 0.0005,
+  "weight_decay": 0.0001,
+  "class_weights": [1.0, 8.0],
+  "proposal_score_threshold": 0.82,
+  "truth_match_iou_minimum": 0.5,
+  "onnx_parity_tolerance": 0.00001,
+  "parity_batch_sizes": [1, 7, 64, 257],
+  "expected_runner_source_bundle_sha256": "9f07552a844f7c5e33b1d15ec2f0a165888deb657a841b195072f434448d2f31",
+  "selection_gates": {
+    "dev_only_until_margin": true,
+    "precision_minimum": 0.95,
+    "recall_minimum": 0.95,
+    "sealed_public_evaluations": 0
+  },
+  "private_or_article_images": false,
+  "public_gate_evaluations": 0,
+  "production_approval": false,
+  "release_eligible": false
+}
