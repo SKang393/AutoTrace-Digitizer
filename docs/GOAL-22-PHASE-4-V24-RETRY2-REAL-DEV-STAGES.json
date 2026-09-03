@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "status": "fail",
+  "report_scope": "real_dev_marker_v24_retry2_mask_preserving_aggregate_only",
+  "real_dev_projects": 120,
+  "real_sealed_projects": 51,
+  "real_sealed_reads": 0,
+  "successful_projects": 120,
+  "failure_count": 0,
+  "model_sha256": "98c605eea8a579d28ad0e5d3b355458ab1e1883c3947c4a3a442557d639f5b79",
+  "true_positives": 1202,
+  "false_positives": 8786,
+  "false_negatives": 802,
+  "precision": 0.12034441329595515,
+  "recall": 0.5998003992015968,
+  "tolerance_px": 5,
+  "gates": {"marker_center_precision": false, "marker_center_recall": false},
+  "mean_project_inference_ms": 3710.616431666667,
+  "total_runtime_ms": 445273.9718,
+  "assignments_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
+  "masking_mode": "mask-preserving_v24_ink_supported_with_ocr_and_artifact_channels",
+  "policy_sha256": "aab9f2ab60cf166828f0928b8496f537341870fd457d0408952e22549fc53a56",
+  "candidate_revision": "marker-center-mask-preserving-v24",
+  "candidate_id": "P1",
+  "candidate_retry": 2,
+  "candidate_consumed": false,
+  "stage_counters": {
+    "proposal_grid_positions_considered": 6043845,
+    "low_ink_rejects": 4685835,
+    "ocr_mask_rejects": 0,
+    "artifact_mask_rejects": 0,
+    "emitted_proposals": 1358010,
+    "inference_outputs": 1358010,
+    "outputs_above_0_25": 22510,
+    "decoded_points_masked": 0,
+    "geometry_consensus_rejects_after_1px_refinement_attempts": 236,
+    "candidates_before_nms": 22274,
+    "nms_suppressions": 12286,
+    "final_candidates": 9988
+  },
+  "proposal_coverage": {
+    "grid_recall": 1.0,
+    "ink_supported_recall": 1.0,
+    "mask_preserved_recall": 1.0
+  },
+  "above_threshold": {
+    "true_positives": 1236,
+    "false_positives": 21274,
+    "false_negatives": 768,
+    "precision": 0.054908929364726786,
+    "recall": 0.6167664670658682
+  },
+  "pre_nms": {
+    "true_positives": 1236,
+    "false_positives": 21038,
+    "false_negatives": 768,
+    "precision": 0.055490706653497354,
+    "recall": 0.6167664670658682
+  },
+  "retry1_comparison": {
+    "precision_change": -0.0023082318376428795,
+    "recall_change": 0.029441117764471003,
+    "retry1_precision": 0.12265264513359803,
+    "retry1_recall": 0.5703592814371258
+  },
+  "diagnosis": {
+    "scalar_negative_distribution_repaired": true,
+    "generic_sampling_rebalanced": true,
+    "remaining_failure": "real above-threshold false candidates remain 21274, so negative spatial morphology and topology are not represented by the synthetic generator",
+    "prohibited_response": "do not tune the fixed threshold or select another model against real-dev"
+  },
+  "case_level_output": false,
+  "truth_rows_output": false,
+  "pixel_output": false,
+  "training_use": false,
+  "candidate_selection": false,
+  "production_approval": false,
+  "real_sealed_authorized": false,
+  "release_eligible": false,
+  "next_action": "measure aggregate spatial morphology of retry2 above-threshold false proposals on synthetic dev and real-dev, repair synthetic topology, and re-pass synthetic gates before another model or private run"
+}

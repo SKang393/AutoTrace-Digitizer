@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "v24_retry2_runtime_integrated_pending_real_dev",
+  "status": "v24_retry2_real_dev_failed_spatial_morphology_gap",
   "report_scope": "aggregate_only",
   "runtime_contract": {
     "marker_frame_coordinate_space": "original_source_pixels",
@@ -305,6 +305,21 @@
     "real_dev_reads": 0,
     "real_sealed_reads": 0
   },
+  "v24_retry2_real_dev": {
+    "projects": 120,
+    "real_sealed_reads": 0,
+    "true_positives": 1202,
+    "false_positives": 8786,
+    "false_negatives": 802,
+    "precision": 0.12034441329595515,
+    "recall": 0.5998003992015968,
+    "proposal_recall": 1.0,
+    "above_threshold_false_candidates": 21274,
+    "precision_gate_passed": false,
+    "recall_gate_passed": false,
+    "candidate_consumed": false,
+    "real_sealed_authorized": false
+  },
   "finding": {
     "central_scale_coverage": "the current train distribution covers the real-dev p05 diameter of 6 px through the p90 diameter of 24 px",
     "remaining_scale_gap": "the current train distribution omits the real-dev 24 to 27 px p90-to-p95 tail and the 1 to 48 px full measured envelope",
@@ -322,7 +337,8 @@
     "retry1_diagnosis": "every final false positive came from generic negatives, so quantile-grounded retry2 restored 21681 generic samples while preserving measured tail coverage",
     "retry2_result": "the same unconsumed P1 now clears every fixed synthetic dev gate at threshold 0.25",
     "retry2_runtime": "candidate-only C# binding, mask preservation, multiradius geometry, fixed threshold, CPU execution, and fail-closed production behavior all pass focused verification",
-    "required_next_diagnosis": "run the exact retry2 candidate-only C# runtime on aggregate-only real-dev before any real-sealed read"
+    "retry2_real_dev_contradiction": "retry2 improves real-dev recall to 0.59980 but precision remains 0.12034 with 21274 false candidates above threshold, so scalar negative coverage and sampling were insufficient",
+    "required_next_diagnosis": "measure aggregate spatial morphology of retry2 above-threshold false proposals on synthetic dev and real-dev, repair synthetic topology, and re-pass synthetic gates before another model or private run"
   },
   "implementation": {
     "real_probe_path": "tools/private_acceptance/real_dev_distribution.py",
@@ -365,7 +381,9 @@
     "retry1_diagnosis_path": "ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY_DIAGNOSIS.json",
     "retry1_diagnosis_sha256": "6d135b6d22cc1d016337fdadff439919a5934eeea34a71cb66c876471ac3c763",
     "retry2_result_path": "ml/markers/center/mask_preserving_v24/P1_RETRY2_RESULT.json",
-    "retry2_result_sha256": "55234e3a0beadea3de1ee49727469d4fa8196da3508fad13299a2dbb911f8193",
+    "retry2_result_sha256": "be6f93d77f6797240b3a1b149413c470221bc1f389c3bee39febdb7a642a58b2",
+    "retry2_real_dev_result_path": "docs/GOAL-22-PHASE-4-V24-RETRY2-REAL-DEV-STAGES.json",
+    "retry2_real_dev_result_sha256": "980b101d4989f441b07cd43777bbf802a4a7fcf8722c067dae125c39b4ac065e",
     "focused_tests": "17 V24 runtime passed; 11 V24 and corrected-generator passed; 3 prior synthetic audit passed; Release real harness build and no-corpus self-test passed"
   },
   "privacy": {

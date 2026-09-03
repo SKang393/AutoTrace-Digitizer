@@ -3,7 +3,7 @@
   "task": "marker-center",
   "revision": "marker-center-mask-preserving-v24",
   "candidate_id": "P1",
-  "status": "dev_passed_retry2_pending_runtime_and_real_dev",
+  "status": "dev_passed_retry2_real_dev_failed_spatial_morphology_gap",
   "model_license": "Apache-2.0",
   "candidate_consumed": false,
   "sealed_runs": 0,
@@ -98,7 +98,21 @@
     "prior_retry_result_sha256": "26bb92cbb4bf3e5e243decb527500d2b30ddf709cacd9f5d8a326703a6485b60",
     "consumed_path_exists": false
   },
+  "real_dev_confirmation": {
+    "report_path": "docs/GOAL-22-PHASE-4-V24-RETRY2-REAL-DEV-STAGES.json",
+    "report_sha256": "980b101d4989f441b07cd43777bbf802a4a7fcf8722c067dae125c39b4ac065e",
+    "projects": 120,
+    "real_sealed_reads": 0,
+    "true_positives": 1202,
+    "false_positives": 8786,
+    "false_negatives": 802,
+    "precision": 0.12034441329595515,
+    "recall": 0.5998003992015968,
+    "proposal_recall": 1.0,
+    "above_threshold_false_candidates": 21274,
+    "passed": false
+  },
   "production_approval": false,
   "release_eligible": false,
-  "next_action": "bind the retry2 ONNX in the candidate-only C# runtime and run aggregate-only real-dev before any real-sealed read"
+  "next_action": "measure aggregate spatial morphology of retry2 above-threshold false proposals on synthetic dev and real-dev, repair the synthetic topology, and re-pass synthetic gates before another model or real-sealed run"
 }
