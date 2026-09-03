@@ -190,7 +190,7 @@ def main() -> int:
     args = parser.parse_args()
     report = diagnose(args.checkpoint)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    args.output.write_bytes((json.dumps(report, indent=2, sort_keys=True) + "\n").encode("utf-8"))
     print(json.dumps({"status": "ok", "isolated_responsible_stage": report["isolated_responsible_stage"], "baseline": report["baseline_fixed_pipeline"], "best": report["postprocessing_sweep"]["best_recall_then_precision"]}, sort_keys=True))
     return 0
 
