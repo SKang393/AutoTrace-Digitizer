@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "patch_distribution_gap_measured_generator_repair_in_progress",
+  "status": "generator_repaired_pending_mask_preserving_feasibility",
   "report_scope": "aggregate_only",
   "runtime_contract": {
     "marker_frame_coordinate_space": "original_source_pixels",
@@ -100,6 +100,28 @@
     },
     "artifact_mask_topology": "synthetic artifact masks have median patch mean 0.115886 but only 2 center hard hits; real-dev has median patch mean 0.0 but 332 center hard hits, so the synthetic mask is often present away from the marker while real axis masks cross marker centers"
   },
+  "corrected_generator": {
+    "revision": "marker-center-real-range-generator-v1",
+    "train_scene_count": 167,
+    "dev_scene_count": 167,
+    "markers_per_split": 2004,
+    "train_seed_range": [4100, 4266],
+    "dev_seed_range": [5100, 5266],
+    "seeds_disjoint": true,
+    "diameter_px": {"minimum": 1.0, "p05": 6.0, "median": 12.0, "p90": 24.0, "p95": 27.0, "maximum": 48.0},
+    "measured_rendered_diameter_px": {"minimum": 1.0, "p05": 7.0, "median": 13.0, "p90": 25.0, "p95": 29.0, "maximum": 49.0},
+    "ink_patch_mean": {"minimum": 0.01285583060234785, "p05": 0.08771648910232868, "median": 0.18735565235314283, "p90": 0.5973100066184998, "p95": 0.7026954293251038, "maximum": 0.997245192527771},
+    "ocr_center_hard_hits_per_split": 75,
+    "artifact_center_hard_hits_per_split": 332,
+    "artifact_patch_mean_p90": 0.12947657704353333,
+    "artifact_patch_mean_maximum": 0.2764003673094582,
+    "hard_negative_kinds": ["text", "line_intersection", "axis"],
+    "distribution_gates_passed": 7,
+    "distribution_gates_total": 7,
+    "model_loaded": false,
+    "training_performed": false,
+    "private_data_used": false
+  },
   "finding": {
     "central_scale_coverage": "the current train distribution covers the real-dev p05 diameter of 6 px through the p90 diameter of 24 px",
     "remaining_scale_gap": "the current train distribution omits the real-dev 24 to 27 px p90-to-p95 tail and the 1 to 48 px full measured envelope",
@@ -108,7 +130,8 @@
     "harness_defect_evidence": "only 912 of 2004 truths lie inside the anchor rectangle and 1110 lie inside its 21-pixel expanded proposal search, matching raw-grid coverage of 1108 within grid quantization",
     "corrected_scope_result": "full-image grid and ink-supported recall are 1.0, but hard masks reduce recall to 0.8842315369261478 and the fixed classifier reduces it to 0.4555888223552894 while retaining 7653 false candidates",
     "patch_distribution_gap": "synthetic train contains no OCR-center hard-mask positives and only 1.19 percent artifact-center hard-mask positives, versus 3.74 percent and 16.57 percent on real-dev; its ink center lower tail is also much lighter",
-    "required_next_diagnosis": "validate a synthetic-only generator spanning the full diameter, truth-center mask topology, and ink-statistic ranges before opening or training a marker candidate"
+    "generator_repair": "the corrected synthetic generator now spans the measured diameter, rendered footprint, ink, OCR-center mask, artifact axis-crossing mask, and prohibited-structure ranges with disjoint train and dev seeds",
+    "required_next_diagnosis": "run a zero-optimizer mask-preserving V24 feasibility evaluation with the frozen V21 model before authorizing any training candidate"
   },
   "implementation": {
     "real_probe_path": "tools/private_acceptance/real_dev_distribution.py",
@@ -121,7 +144,13 @@
     "synthetic_result_sha256": "cc8bb8a99ed519d383512e87c3b90fefbe0a27f1bf6c9dc932beb526ced2d72f",
     "real_harness_path": "tools/GraphReader.RealAcceptance.Ocr/Program.cs",
     "real_harness_sha256": "9b8969356eda1506aa832c0032c69e86f0b1e0335dafab1a963f0c0cf99011b2",
-    "focused_tests": "3 synthetic passed; Release real harness build and no-corpus self-test passed"
+    "corrected_generator_path": "ml/markers/center/real_range_generator_v1/generator.py",
+    "corrected_generator_sha256": "6b380368d652e91f650b383051db1358f8c626ff2ea24219c30c6a11343a1181",
+    "corrected_generator_audit_path": "ml/markers/center/real_range_generator_v1/AUDIT.json",
+    "corrected_generator_audit_sha256": "5dc7589487ea7eb300b49db91ce950862d2ad6c3855a678439edcb2ce75aaf70",
+    "corrected_generator_test_path": "ml/markers/center/real_range_generator_v1/tests/test_generator.py",
+    "corrected_generator_test_sha256": "71fe6e9b96988d3fc3c060495198646c0463d10cfda2183f60dc046d9f6be042",
+    "focused_tests": "4 corrected-generator passed; 3 prior synthetic audit passed; Release real harness build and no-corpus self-test passed"
   },
   "privacy": {
     "case_level_output": false,

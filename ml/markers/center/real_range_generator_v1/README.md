@@ -1,0 +1,26 @@
+# Real-range marker input generator
+
+This synthetic-only diagnostic generator repairs the marker-center input gap
+identified by Phase 4R. It reuses the project-owned procedural marker and
+artifact primitives, uses disjoint deterministic train/dev seeds, and spans
+effective marker diameters from 1 through 48 px. Its aggregate quantiles are
+6 px at p05, 12 px median, 24 px at p90, and 27 px at p95.
+The rendered footprint contract is measured deterministically from the marker
+primitive, including the one-pixel point and the 48 px target (49 px raster
+span where PIL's inclusive ellipse box requires it).
+
+Each split contains 2,004 truth centers. Exactly 75 centers overlap the OCR
+hard-mask window and 332 overlap the artifact hard-mask window at the 0.35
+threshold, with the remainder serving as unmasked controls. Text,
+line-intersection, and axis negatives are included. Axis-like horizontal and
+vertical crossings cover artifact patch topology; the first OCR overlap is a
+full text-region-like patch. Only aggregate statistics
+and hashes are written; no pixels, truth rows, scene identifiers, private
+corpus data, model, or training path is used.
+
+Run from the repository root:
+
+```powershell
+python -m ml.markers.center.real_range_generator_v1.audit --output ml/markers/center/real_range_generator_v1/AUDIT.json
+python -m pytest ml/markers/center/real_range_generator_v1/tests -q
+```
