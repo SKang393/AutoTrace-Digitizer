@@ -37,3 +37,18 @@ Items stay here until resolved. Newest items are appended last.
   [Phase 3 rescore](../ml/policy/goal22-phase3-rescore-result.json),
   [current approval evidence](../artifacts/production-model-store/evidence/graph-marker-classifier/0.1.0/marker-classifier-production-approval.json)
 - **Unblocks when:** resolved by the authoritative compatibility rule
+
+## REV-003 — reauthenticate GitHub as SKang393
+
+- **Status:** open
+- **Blocks:** pushing completed Goal 22 phase commits to `origin/main`
+- **Effort:** about 2 minutes
+- **Action:** sign in to GitHub on this computer as `SKang393`, then confirm
+  `gh auth status` reports that account as valid
+- **Why:** the active cached `XpressPeach` credential was denied access to
+  `SKang393/Graph-auto-reader`, while both GitHub CLI account tokens report as
+  invalid; the local repository identity, branch, and remote are correct
+- **Files:** [Goal 22 readiness](1.0-READINESS.md),
+  [review queue](REVIEW_QUEUE.md)
+- **Unblocks when:** `git push origin main` succeeds and `origin/main` matches
+  the local `main` commit
