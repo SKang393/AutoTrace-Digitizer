@@ -1,0 +1,182 @@
+{
+  "binding": {
+    "generator_audit_sha256": "4bdfce6398dc8e83b61bdd40a30044584805dbc10a340032314a5b6747f5db36",
+    "generator_dev_split_sha256": "e61d6bfae1f5c53f3a6ac18497573dbb6b6a494ed1d9b9d5b3e1414e2a5b07c3",
+    "input_shape": [
+      "candidate_count",
+      3,
+      33,
+      33
+    ],
+    "model_path": "marker-center-mask-preserving-v24-p1.onnx",
+    "model_sha256": "aee3b4ba47197d84eeecacc631730e67fd99c261b913643f95c25a8ea2436c11",
+    "negative_sampler_priority": [
+      "hard_existing",
+      "faint_low",
+      "faint_p05",
+      "ocr_heavy",
+      "artifact",
+      "generic"
+    ],
+    "negative_sampler_seed": 20260904,
+    "negative_sampler_sha256": "227806e5cdc28f33c6c1cd41ce38069bde8f648d9063653d05bef3e393c68e76",
+    "output_shape": [
+      "candidate_count",
+      4
+    ],
+    "provider": "CPUExecutionProvider"
+  },
+  "diagnostic_conclusion": "fixed-threshold failure concentration is reported by per-stratum above-threshold rates; no threshold change is proposed",
+  "elapsed_ms": 18572.171,
+  "fixed_threshold_metrics": {
+    "accepted": 2244,
+    "accepted_false_positive_attribution": {
+      "generic": 264
+    },
+    "false_negatives": 24,
+    "false_positives": 264,
+    "precision": 0.8823529411764706,
+    "prohibited_structure_hits": 0,
+    "recall": 0.9880239520958084,
+    "true_positives": 1980
+  },
+  "proposals": {
+    "negative_strata": {
+      "artifact": {
+        "above_threshold": 27,
+        "above_threshold_rate": 0.0019047619047619048,
+        "capacity": 14175,
+        "raw_probability": {
+          "count": 14175,
+          "maximum": 0.889255702495575,
+          "median": 0.00014486908912658691,
+          "minimum": 0.0,
+          "p05": 4.76837158203125e-07,
+          "p90": 0.0037698388099670415,
+          "p95": 0.009423023462295524
+        }
+      },
+      "faint_low": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 16686,
+        "raw_probability": {
+          "count": 16686,
+          "maximum": 0.02393418550491333,
+          "median": 0.00044852495193481445,
+          "minimum": 7.748603820800781e-07,
+          "p05": 2.2172927856445312e-05,
+          "p90": 0.00310400128364563,
+          "p95": 0.0031862854957580566
+        }
+      },
+      "faint_p05": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 16575,
+        "raw_probability": {
+          "count": 16575,
+          "maximum": 0.029485493898391724,
+          "median": 0.0005076229572296143,
+          "minimum": 7.152557373046875e-07,
+          "p05": 2.300739288330078e-05,
+          "p90": 0.0030967056751251224,
+          "p95": 0.0034812897443771357
+        }
+      },
+      "generic": {
+        "above_threshold": 4081,
+        "above_threshold_rate": 0.02572085841237828,
+        "capacity": 158665,
+        "raw_probability": {
+          "count": 158665,
+          "maximum": 0.999437153339386,
+          "median": 0.0006147921085357666,
+          "minimum": 0.0,
+          "p05": 2.3245811462402344e-06,
+          "p90": 0.05464600324630738,
+          "p95": 0.1315593957901
+        }
+      },
+      "hard_existing": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 6012,
+        "raw_probability": {
+          "count": 6012,
+          "maximum": 0.012315034866333008,
+          "median": 7.370114326477051e-05,
+          "minimum": 1.1920928955078125e-07,
+          "p05": 1.6093254089355469e-06,
+          "p90": 0.0022574961185455322,
+          "p95": 0.0026483237743377686
+        }
+      },
+      "ocr_heavy": {
+        "above_threshold": 2,
+        "above_threshold_rate": 0.00016535758577924763,
+        "capacity": 12095,
+        "raw_probability": {
+          "count": 12095,
+          "maximum": 0.48234477639198303,
+          "median": 0.0005463361740112305,
+          "minimum": 6.258487701416016e-07,
+          "p05": 2.396106719970703e-05,
+          "p90": 0.005549371242523215,
+          "p95": 0.007107818126678463
+        }
+      }
+    },
+    "negative_total": 224208,
+    "positive_raw_probability": {
+      "count": 3258,
+      "maximum": 0.9999849796295166,
+      "median": 0.9941145777702332,
+      "minimum": 0.4151895344257355,
+      "p05": 0.9637171149253845,
+      "p90": 0.9990059971809387,
+      "p95": 0.9994453489780426
+    }
+  },
+  "revision": "marker-center-mask-preserving-v24",
+  "schema": "graphreader.marker-center-mask-preserving-v24-retry-diagnosis.v1",
+  "scope": {
+    "case_ids_or_pixels_emitted": false,
+    "label_positive_distance_px": 3.0,
+    "optimizer_steps": 0,
+    "private_data": false,
+    "real_dev_reads": 0,
+    "real_sealed_reads": 0,
+    "scene_count": 167,
+    "split": "real-range-generator-v1-dev",
+    "synthetic_only": true,
+    "threshold": 0.25,
+    "truth_count": 2004
+  },
+  "truth_mask_scenarios": {
+    "artifact_mask": {
+      "fn": 2,
+      "recall": 0.9937694704049844,
+      "tp": 319,
+      "truth": 321
+    },
+    "both_masks": {
+      "fn": 0,
+      "recall": 1.0,
+      "tp": 11,
+      "truth": 11
+    },
+    "ocr_mask": {
+      "fn": 0,
+      "recall": 1.0,
+      "tp": 64,
+      "truth": 64
+    },
+    "unmasked": {
+      "fn": 22,
+      "recall": 0.986318407960199,
+      "tp": 1586,
+      "truth": 1608
+    }
+  }
+}

@@ -16,6 +16,10 @@ def test_training_contract_is_fixed_and_candidate_not_run():
     assert config["optimizer_steps_expected"] == 10080
     assert config["optimizer_steps_maximum"] == 10080
     assert config["training_example_count_expected"] == 35838
+    assert config["retry_count"] == 2
+    assert config["negative_sampler"]["total_expected"] == 32580
+    assert config["negative_sampler"]["selected_index_sha256"] == "d5b7c442827dab27085b2d76bb4f7a29d53e113b039b6c97cb6b2bfb1c0ec35d"
+    assert sum(config["negative_sampler"]["quotas"].values()) == 32580
     assert config["sealed_runs"] == 0 and config["private_data"] is False
     assert config["real_dev_reads"] == 0 and config["real_sealed_reads"] == 0
 

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "negative_generator_repaired_stratified_sampling_pending",
+  "status": "v24_retry2_dev_passed_pending_runtime_and_real_dev",
   "report_scope": "aggregate_only",
   "runtime_contract": {
     "marker_frame_coordinate_space": "original_source_pixels",
@@ -268,6 +268,43 @@
     "model_loaded": false,
     "training_performed": false
   },
+  "v24_retry1_diagnosis": {
+    "fixed_threshold_precision": 0.8823529411764706,
+    "fixed_threshold_recall": 0.9880239520958084,
+    "false_positives": 264,
+    "accepted_false_positive_attribution": {"generic": 264},
+    "generic_capacity": 158665,
+    "generic_above_threshold": 4081,
+    "hard_above_threshold": 0,
+    "faint_low_above_threshold": 0,
+    "faint_p05_above_threshold": 0,
+    "ocr_heavy_above_threshold": 2,
+    "artifact_above_threshold": 27,
+    "private_data_used": false,
+    "real_sealed_reads": 0
+  },
+  "v24_retry2": {
+    "status": "dev_passed_pending_runtime_and_real_dev",
+    "retry_count": 2,
+    "negative_counts": {"hard_existing": 6012, "faint_low": 326, "faint_p05": 1303, "ocr_heavy": 1629, "artifact": 1629, "generic": 21681},
+    "selected_index_sha256": "d5b7c442827dab27085b2d76bb4f7a29d53e113b039b6c97cb6b2bfb1c0ec35d",
+    "fixed_threshold": 0.25,
+    "proposal_recall": 1.0,
+    "true_positives": 1974,
+    "false_positives": 29,
+    "false_negatives": 30,
+    "precision": 0.9855217174238642,
+    "recall": 0.9850299401197605,
+    "f1": 0.9852757674070376,
+    "duplicates": 0,
+    "prohibited_structure_hits": 0,
+    "checkpoint_sha256": "af66c1410bdfd7e3d5d8aed506210915cba533dc8375cfcf4d0450ea558cedb7",
+    "onnx_sha256": "98c605eea8a579d28ad0e5d3b355458ab1e1883c3947c4a3a442557d639f5b79",
+    "onnx_parity_maximum_absolute_error": 0.00000095367431640625,
+    "candidate_consumed": false,
+    "real_dev_reads": 0,
+    "real_sealed_reads": 0
+  },
   "finding": {
     "central_scale_coverage": "the current train distribution covers the real-dev p05 diameter of 6 px through the p90 diameter of 24 px",
     "remaining_scale_gap": "the current train distribution omits the real-dev 24 to 27 px p90-to-p95 tail and the 1 to 48 px full measured envelope",
@@ -282,7 +319,9 @@
     "real_dev_contradiction": "V24 real-dev fails at precision 0.12265 and recall 0.57036 despite complete proposal and mask-preserved coverage, with 17867 false candidates above the fixed classifier threshold",
     "negative_generator_gap": "synthetic negatives omit the real faint tail because ink-maximum p05 is 0.83375 versus real 0.19216, and omit OCR-heavy negatives because OCR-mask mean p95 is 0.02296 versus real 0.72727",
     "negative_generator_repair": "faint-line and OCR-heavy negative families now cover both measured real envelopes without changing truth counts, truth mask hits, positive distribution gates, dtype, or split isolation",
-    "required_next_diagnosis": "add deterministic stratified train-only sampling, bind exact counts and selection hash, then retry unconsumed P1 from the V21 parent before another real-dev run"
+    "retry1_diagnosis": "every final false positive came from generic negatives, so quantile-grounded retry2 restored 21681 generic samples while preserving measured tail coverage",
+    "retry2_result": "the same unconsumed P1 now clears every fixed synthetic dev gate at threshold 0.25",
+    "required_next_diagnosis": "bind the exact retry2 ONNX in the candidate-only C# runtime and run aggregate-only real-dev before any real-sealed read"
   },
   "implementation": {
     "real_probe_path": "tools/private_acceptance/real_dev_distribution.py",
@@ -322,6 +361,10 @@
     "negative_patch_harness_sha256": "07f7339eed1f0d3f420f6cba85f94d2bcf72f785970859478edd8dffce21d495",
     "real_negative_gap_path": "docs/GOAL-22-PHASE-4R-V24-NEGATIVE-PATCH-GAP.json",
     "real_negative_gap_sha256": "6a1cc4ca1cfac0fa0f2401d40f3c6c9f1c2ecfa98695e8e36e2808a799dfb9df",
+    "retry1_diagnosis_path": "ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY_DIAGNOSIS.json",
+    "retry1_diagnosis_sha256": "6d135b6d22cc1d016337fdadff439919a5934eeea34a71cb66c876471ac3c763",
+    "retry2_result_path": "ml/markers/center/mask_preserving_v24/P1_RETRY2_RESULT.json",
+    "retry2_result_sha256": "55234e3a0beadea3de1ee49727469d4fa8196da3508fad13299a2dbb911f8193",
     "focused_tests": "17 V24 runtime passed; 11 V24 and corrected-generator passed; 3 prior synthetic audit passed; Release real harness build and no-corpus self-test passed"
   },
   "privacy": {

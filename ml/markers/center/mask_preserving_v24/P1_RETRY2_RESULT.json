@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "task": "marker-center",
+  "revision": "marker-center-mask-preserving-v24",
+  "candidate_id": "P1",
+  "status": "dev_passed_retry2_pending_runtime_and_real_dev",
+  "model_license": "Apache-2.0",
+  "candidate_consumed": false,
+  "sealed_runs": 0,
+  "real_dev_reads": 0,
+  "real_sealed_reads": 0,
+  "private_data": false,
+  "parent_model": {
+    "checkpoint_sha256": "ba9722ebd3091c91749c175607a480500d3b651e6719d19b69c7e48cee4ef6c9",
+    "onnx_sha256": "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38"
+  },
+  "retry_history": {
+    "initial_result_path": "ml/markers/center/mask_preserving_v24/P1_RESULT.json",
+    "initial_result_sha256": "b4e68dde10024e60a122edad3f7645dfe1e5e2f5888dbfe4ef522383de4c6175",
+    "initial_void_attempts": 1,
+    "retry1": {
+      "status": "failed_dev",
+      "candidate_report_sha256": "134ea318ade95882e52352a899da57ab9f9dbdd05b772a17a4321dd9eaa11696",
+      "checkpoint_sha256": "070b77bb7503e6b8c0445059c9b5e20e96705b000b4abd271cfdc07ac53af401",
+      "onnx_sha256": "aee3b4ba47197d84eeecacc631730e67fd99c261b913643f95c25a8ea2436c11",
+      "fixed_threshold_precision": 0.8823529411764706,
+      "fixed_threshold_recall": 0.9880239520958084,
+      "false_positives": 264,
+      "diagnosis_path": "ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY_DIAGNOSIS.json",
+      "diagnosis_sha256": "6d135b6d22cc1d016337fdadff439919a5934eeea34a71cb66c876471ac3c763",
+      "diagnosis_result": "all 264 final false positives attributed to the generic negative stratum"
+    },
+    "retry2_count": 2
+  },
+  "negative_sampling": {
+    "seed": 20260904,
+    "split": "train",
+    "counts": {"hard_existing": 6012, "faint_low": 326, "faint_p05": 1303, "ocr_heavy": 1629, "artifact": 1629, "generic": 21681},
+    "capacities": {"artifact": 14246, "faint_low": 16686, "faint_p05": 16575, "generic": 158560, "hard_existing": 6012, "ocr_heavy": 12129},
+    "selected_index_sha256": "d5b7c442827dab27085b2d76bb4f7a29d53e113b039b6c97cb6b2bfb1c0ec35d",
+    "source_sha256": "231acc7ffbe7bf940f26e2b2c0e2da2712d8e5f46df9248a122c354aefc3d700"
+  },
+  "training": {
+    "training_example_count": 35838,
+    "positive_example_count": 3258,
+    "hard_negative_example_count": 6012,
+    "optimizer_steps": 10080,
+    "elapsed_ms": 1441331.927
+  },
+  "fixed_dev_gate": {
+    "threshold": 0.25,
+    "scene_count": 167,
+    "truth_count": 2004,
+    "proposal_recall": 1.0,
+    "true_positives": 1974,
+    "false_positives": 29,
+    "false_negatives": 30,
+    "precision": 0.9855217174238642,
+    "recall": 0.9850299401197605,
+    "f1": 0.9852757674070376,
+    "duplicates": 0,
+    "prohibited_structure_hits": 0,
+    "passed": true
+  },
+  "threshold_sensitivity": [
+    {"threshold": 0.4, "precision": 0.9919517102615694, "recall": 0.9840319361277445, "f1": 0.9879759519038076},
+    {"threshold": 0.55, "precision": 0.9939516129032258, "recall": 0.9840319361277445, "f1": 0.9889669007021064},
+    {"threshold": 0.7, "precision": 0.9969620253164557, "recall": 0.9825349301397206, "f1": 0.98969590349334}
+  ],
+  "artifacts": {
+    "checkpoint_path": "ml/markers/center/mask_preserving_v24/artifacts/P1-run/marker-center-mask-preserving-v24-p1.pt",
+    "checkpoint_sha256": "af66c1410bdfd7e3d5d8aed506210915cba533dc8375cfcf4d0450ea558cedb7",
+    "onnx_path": "ml/markers/center/mask_preserving_v24/artifacts/P1-run/marker-center-mask-preserving-v24-p1.onnx",
+    "onnx_sha256": "98c605eea8a579d28ad0e5d3b355458ab1e1883c3947c4a3a442557d639f5b79",
+    "candidate_report_path": "ml/markers/center/mask_preserving_v24/artifacts/P1-run/candidate-report.json",
+    "candidate_report_sha256": "32a914e623cf7e9c3ada23d96197efcbcfd61f671a78d4e61c10769f3f072eca"
+  },
+  "onnx_parity": {
+    "provider": "CPUExecutionProvider",
+    "tolerance": 0.00001,
+    "maximum_absolute_error": 0.00000095367431640625,
+    "passed": true,
+    "candidate_counts": [1, 8, 37]
+  },
+  "source_binding": {
+    "candidate_config_path": "ml/markers/center/mask_preserving_v24/training/p1.json",
+    "candidate_config_sha256": "57324c4168239794c17e9ba4ed0078a737baaa1a9526dfd3972218a36bf2ceae",
+    "runner_source_bundle_sha256": "7d675fb05478d153eac40ad88e88ad0d2f665bc7087c678f308fcb9ee58e2b34",
+    "generator_audit_sha256": "4bdfce6398dc8e83b61bdd40a30044584805dbc10a340032314a5b6747f5db36",
+    "negative_audit_sha256": "2d3624d42e638ead76aa97c556d08a68992ba940fb9691f298de71884e2c9d02",
+    "negative_gap_sha256": "6a1cc4ca1cfac0fa0f2401d40f3c6c9f1c2ecfa98695e8e36e2808a799dfb9df",
+    "retry_diagnosis_sha256": "6d135b6d22cc1d016337fdadff439919a5934eeea34a71cb66c876471ac3c763"
+  },
+  "training_seal": {
+    "opened_sha256": "c571d216e07a61c3b2c372a6145f40c528251fdb1dcc8431de048f0ac760a400",
+    "result_sha256": "486ca65558675285b9eb052589e8866d1dc0c9db392a92906ced3c939f799746",
+    "prior_retry_opened_sha256": "5a65fbfbbd03a9e36db5afcf3c57497caac6baca901b5f1ceda264544266d60d",
+    "prior_retry_result_sha256": "26bb92cbb4bf3e5e243decb527500d2b30ddf709cacd9f5d8a326703a6485b60",
+    "consumed_path_exists": false
+  },
+  "production_approval": false,
+  "release_eligible": false,
+  "next_action": "bind the retry2 ONNX in the candidate-only C# runtime and run aggregate-only real-dev before any real-sealed read"
+}
