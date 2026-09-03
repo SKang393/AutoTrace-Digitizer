@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Sungwoo Kang
-from ml.markers.center.real_range_generator_v1.generator import audit, build_split
+from ml.markers.center.real_range_generator_v1.generator import TOPOLOGY_TARGETS, audit, build_split
 from ml.markers.center.real_range_generator_v1.negative_proposal_audit import audit as negative_proposal_audit
 
 
@@ -60,11 +60,24 @@ def test_scope_is_aggregate_only_and_negatives_present() -> None:
                ("model_loaded", "training_performed", "private_or_article_images",
                 "candidate_revision_created", "scene_ids_emitted", "truth_rows_emitted",
                 "pixels_emitted"))
-    assert result["hard_negative_kinds"] == ["text", "line_intersection", "axis", "faint_line", "ocr_heavy"]
+    assert result["hard_negative_kinds"] == ["text", "line_intersection", "axis", "faint_line", "ocr_heavy", "topology_junction", "topology_fragment"]
     assert result["hard_negative_representatives"] == {
         "faint_line": {"x": 32.0, "y": 155.0},
         "ocr_heavy": {"x": 208.0, "y": 155.0},
     }
+
+
+def test_topology_audit_covers_real_dev_morphology_medians() -> None:
+    result = negative_proposal_audit()
+    assert result["topology"]["target_real_dev_medians"] == TOPOLOGY_TARGETS
+    assert all(result["topology_distribution_gates"].values())
+    for split in ("train", "dev"):
+        topology = result["topology"]["proposals"][split]
+        assert topology["proposal_counts"]["topology_junction"] > 0
+        assert topology["proposal_counts"]["topology_fragment"] > 0
+        for kind in ("topology_junction", "topology_fragment"):
+            for key, values in topology[kind].items():
+                assert set(values) == {"minimum", "p05", "median", "p90", "p95", "maximum"}
 
 
 def test_v24_ink_supported_proposal_stream_is_aggregate_and_deterministic() -> None:
@@ -80,7 +93,7 @@ def test_v24_ink_supported_proposal_stream_is_aggregate_and_deterministic() -> N
         for values in stream["negative_patch_feature_quantiles"].values():
             assert set(values) == {"minimum", "p05", "median", "p90", "p95", "maximum"}
     assert all(all(gates.values()) for gates in result["distribution_gates"].values())
-    assert result["hard_negative_kinds"][-2:] == ["faint_line", "ocr_heavy"]
+    assert result["hard_negative_kinds"][-2:] == ["topology_junction", "topology_fragment"]
     assert result["hard_negative_representatives"]["faint_line"]["y"] == 155.0
     assert result["hard_negative_representatives"]["ocr_heavy"]["x"] == 208.0
     assert all(len(stream["proposal_coordinates_aggregate_sha256"]) == 64 for stream in streams)

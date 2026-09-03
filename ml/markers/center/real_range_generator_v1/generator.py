@@ -27,6 +27,36 @@ MARKERS_PER_SCENE = 12
 SEED_BASE = {"train": 4100, "dev": 5100}
 MASK_THRESHOLD = 0.35
 
+# Aggregate-only topology targets measured from real-dev morphology diagnosis.
+# These are envelopes, not model-selection thresholds.
+TOPOLOGY_TARGETS = {
+    "negative_above_025": {
+        "dark_fraction_ge_05_median": 0.12489,
+        "center5x5_mean_median": 0.22212,
+        "max_row_dark_fraction_ge_012_median": 0.78788,
+        "max_col_dark_fraction_ge_012_median": 0.69697,
+        "foreground_extent_balance_median": 0.87879,
+        "covariance_eigen_ratio_median": 1.79966,
+        "border_dark_fraction_ge_012_median": 0.19531,
+        "max_ring_support_3_12_median": 6.0,
+    },
+    "negative_below_025": {
+        "max_row_dark_fraction_ge_012_median": 0.57576,
+        "max_col_dark_fraction_ge_012_median": 0.54545,
+        "foreground_extent_balance_median": 0.57143,
+        "covariance_eigen_ratio_median": 5.252,
+        "border_dark_fraction_ge_012_median": 0.10938,
+    },
+    "positives": {
+        "center5x5_mean_median": 0.78651,
+        "max_row_dark_fraction_ge_012_median": 0.78788,
+        "max_col_dark_fraction_ge_012_median": 0.60606,
+        "foreground_extent_balance_median": 0.78947,
+        "covariance_eigen_ratio_median": 2.464,
+        "max_ring_support_3_12_median": 8.0,
+    },
+}
+
 
 @dataclass(frozen=True)
 class Scene:
@@ -163,6 +193,42 @@ def _scene(split: str, index: int, diameters: list[float]) -> Scene:
         # 29/255 per-pixel ink maximum.
         draw.line((5, y, 220, y), fill=226, width=9)
     negatives.append(("faint_line", 32.0, float(faint_y[0])))
+
+    # Real proposals contain anti-aliased, off-center line fragments and
+    # junctions.  Keep them above the old faint band and below every truth
+    # center so they add topology without changing center-mask counts.  Gray
+    # values 150 and 190 map to ink values .412 and .255, respectively,
+    # spanning the real dark>=.05 and elongated-fragment tails.
+    topology_x = 12 + ((index * 31) % 72)
+    topology_y = 130 + (index % 4)
+    junction_x, junction_y = topology_x + 28, topology_y + 4
+    topology_draw = ((topology_x, topology_y, junction_x, junction_y),
+                     (junction_x, junction_y, junction_x, topology_y + 26),
+                     (topology_x + 42, topology_y + 8, topology_x + 72, topology_y + 8))
+    draw.line(topology_draw[0], fill=150, width=2)
+    draw.line(topology_draw[1], fill=150, width=2)
+    draw.line(topology_draw[2], fill=190, width=2)
+    draw.line((junction_x - 16, junction_y, junction_x + 16, junction_y), fill=150, width=2)
+    draw.ellipse((junction_x - 8, junction_y - 8, junction_x + 8, junction_y + 8), outline=150, width=2)
+    # A small multi-branch print junction supplies ring support without using
+    # a marker primitive. Its center remains off every truth center.
+    for dx, dy in ((8, 0), (-8, 0), (0, 8), (0, -8), (6, 6), (-6, -6)):
+        draw.line((junction_x, junction_y, junction_x + dx, junction_y + dy), fill=150, width=1)
+    negatives.append(("topology_junction", float(junction_x), float(junction_y)))
+
+    fragment_x = 132 + ((index * 17) % 52)
+    fragment_y = 130 + ((index * 3) % 5)
+    if index % 2:
+        draw.line((fragment_x, fragment_y, min(WIDTH - 5, fragment_x + 52), fragment_y + 6),
+                  fill=190, width=2)
+        draw.line((fragment_x + 26, fragment_y, fragment_x + 26, min(HEIGHT - 5, fragment_y + 28)),
+                  fill=190, width=2)
+        fragment_center = (fragment_x + 26, fragment_y + 3)
+    else:
+        draw.line((fragment_x, fragment_y, fragment_x + 6, min(HEIGHT - 5, fragment_y + 28)),
+                  fill=190, width=10)
+        fragment_center = (fragment_x + 3, fragment_y + 14)
+    negatives.append(("topology_fragment", float(fragment_center[0]), float(fragment_center[1])))
 
     # OCR-heavy negatives are mask-only regions over a light text-like stroke
     # cluster.  A 29 by 29 mask occupies 841/1089 of a 33 by 33 proposal
@@ -320,7 +386,7 @@ def audit() -> dict[str, object]:
             "ocr_rate": 75 / dev_markers, "artifact_rate": 332 / dev_markers,
             "unmasked_controls": dev_markers - 332,
             "threshold": MASK_THRESHOLD, "window": [5, 5]},
-        "hard_negative_kinds": ["text", "line_intersection", "axis", "faint_line", "ocr_heavy"],
+        "hard_negative_kinds": ["text", "line_intersection", "axis", "faint_line", "ocr_heavy", "topology_junction", "topology_fragment"],
         "hard_negative_representatives": {
             "faint_line": {"x": 32.0, "y": 155.0},
             "ocr_heavy": {"x": 208.0, "y": 155.0},

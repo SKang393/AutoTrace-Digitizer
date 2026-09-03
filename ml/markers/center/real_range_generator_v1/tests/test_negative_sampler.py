@@ -59,5 +59,5 @@ def test_full_train_sampler_matches_preregistered_contract():
         "artifact": 1629,
         "generic": 21681,
     }
-    assert sampled.selected_index_sha256 == "d5b7c442827dab27085b2d76bb4f7a29d53e113b039b6c97cb6b2bfb1c0ec35d"
+    assert sampled.selected_index_sha256 == "943199e6b93c7d02a3eb98506aad03ba69ee4d45024cc707c8f9efdbe71c5649"
     assert patches.shape == (35838, 3, 33, 33)

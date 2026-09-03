@@ -18,6 +18,13 @@ full text-region-like patch. Only aggregate statistics
 and hashes are written; no pixels, truth rows, scene identifiers, private
 corpus data, model, or training path is used.
 
+The generator also includes deterministic anti-aliased topology negatives:
+off-center multi-branch junctions and elongated fragments. The negative
+proposal audit records their morphology envelopes and checks that the real-dev
+medians for dark fraction, center occupancy, row and column support, extent
+balance, covariance ratio, border support, and ring support are represented.
+These checks are aggregate input-coverage checks, not model-selection rules.
+
 A separate negative-proposal audit runs the exact V24 mask-preserving ink-supported proposal
 extractor and labels proposals positive only when their centers are within 3 px
 of a truth center. It reports full train/dev proposal, positive, and negative
