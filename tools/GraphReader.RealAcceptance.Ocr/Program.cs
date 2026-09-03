@@ -303,6 +303,7 @@ internal static class Program
         var failureKinds = new Dictionary<string, int>(StringComparer.Ordinal);
         var timings = new List<double>();
         var stageCounters = new MarkerStageCounterTotals();
+        var truthPatchDistribution = new MarkerTruthPatchDistributionAccumulator();
         foreach (string path in dev)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -323,6 +324,10 @@ internal static class Program
                 float[] ocrMask = RasterizeOcrMask(raster.Width, raster.Height, ocr.Regions.Where(static region => region.ReviewStatus != OcrReviewStatus.Rejected).ToArray());
                 float[] artifactMask = RasterizeAxisMask(raster.Width, raster.Height, truth.Anchors, 2.0);
                 MarkerImageFrame frame = new(raster.Width, raster.Height, 1, luminance, MarkerSourceImage.Original, MarkerAffineTransform.Identity, new MarkerMask(raster.Width, raster.Height, ocrMask), new MarkerMask(raster.Width, raster.Height, artifactMask));
+                if (includeStageCounters)
+                {
+                    truthPatchDistribution.Add(frame, truth.Points);
+                }
                 var started = System.Diagnostics.Stopwatch.StartNew();
                 ProposalMarkerCandidateDiagnosticResult? diagnostic = includeStageCounters
                     ? await adapter.DetectCandidateWithDiagnosticsAsync(frame, ToMarkerPolygon(markerSearchBounds), cancellationToken)
@@ -437,7 +442,8 @@ internal static class Program
                 : null,
             includeStageCounters
                 ? StageMatch(aboveThresholdTruePositives, aboveThresholdFalsePositives, aboveThresholdFalseNegatives)
-                : null);
+                : null,
+            includeStageCounters ? truthPatchDistribution.ToRecord() : null);
     }
 
     private static MarkerPolygon ToMarkerPolygon(OcrRectangle rectangle) => MarkerPolygon.FromRectangle(new(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height));
@@ -1226,12 +1232,39 @@ internal static class Program
             MaximumMatching(new int[][] { [0, 1], [0] }, 2).Count(match => match >= 0) != 2 ||
             !SourceTiledProposalDetector.TileStarts(1000, 640, 128).SequenceEqual([0, 360]) ||
             RasterizeAxisMask(32, 32, [new AxisAnchor(4, 4, 0, 0), new AxisAnchor(4, 28, 0, 1), new AxisAnchor(28, 4, 1, 0)], 1).All(static value => value == 0) ||
+            !MarkerTruthPatchSelfTest() ||
             ProductionProposalMarkerCenterAdapter.MultiradiusCandidateRevision != "marker-center-multiradius-geometry-v23" ||
             ProductionProposalMarkerCenterAdapter.MultiradiusCandidateId != "P1" ||
             ProductionProposalMarkerCenterAdapter.ExpectedMultiradiusModelSha256 != "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38")
         {
             throw new InvalidOperationException("SELF_TEST_CALIBRATION_FAILED");
         }
+    }
+
+    private static bool MarkerTruthPatchSelfTest()
+    {
+        const int width = 5, height = 5;
+        float[] luminance = Enumerable.Repeat(0.5f, width * height).ToArray();
+        float[] ocr = new float[width * height];
+        float[] artifact = new float[width * height];
+        ocr[(2 * width) + 2] = 1;
+        var frame = new MarkerImageFrame(
+            width,
+            height,
+            1,
+            luminance,
+            MarkerSourceImage.Original,
+            MarkerAffineTransform.Identity,
+            new MarkerMask(width, height, ocr),
+            new MarkerMask(width, height, artifact));
+        var accumulator = new MarkerTruthPatchDistributionAccumulator();
+        accumulator.Add(frame, [new CurvePoint(2, 2)]);
+        MarkerTruthPatchDistribution report = accumulator.ToRecord();
+        return report.PatchCount == 1 &&
+            report.PatchSizePx == ProductionProposalMarkerCenterAdapter.PatchSize &&
+            Math.Abs(report.InkMaximum.Maximum - 0.5) <= 1e-12 &&
+            report.OcrCenter5x5HardRejectCount == 1 &&
+            report.ArtifactCenter5x5HardRejectCount == 0;
     }
 
     private sealed record AggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int AxisAnchorCount, int CurvePointCount, int RecognizedRegionCount, int NumericRegionCount, IReadOnlyDictionary<string, int> RoleCounts, int NumericYTickCount, int ProjectsWithAtLeastTwoYTicks, int CalibratedProjects, int MatchedPoints, int PointsWithinFiveUnits, double CalibrationProjectSuccessRate, double MeanAnchorErrorPx, double MaximumAnchorErrorPx, double PointYAccuracy, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, IReadOnlyDictionary<string, string> ModelPayloadSha256, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection);
@@ -1284,8 +1317,121 @@ internal static class Program
             finalCandidates);
     }
 
+    private sealed class MarkerTruthPatchDistributionAccumulator
+    {
+        private const int PatchSize = ProductionProposalMarkerCenterAdapter.PatchSize;
+        private const int PatchRadius = PatchSize / 2;
+        private const float HardMaskThreshold = 0.35f;
+        private readonly List<double> inkMean = [];
+        private readonly List<double> inkCenter5Mean = [];
+        private readonly List<double> inkMaximum = [];
+        private readonly List<double> ocrMaskMean = [];
+        private readonly List<double> ocrMaskMaximum = [];
+        private readonly List<double> artifactMaskMean = [];
+        private readonly List<double> artifactMaskMaximum = [];
+        private int ocrCenterHardRejectCount;
+        private int artifactCenterHardRejectCount;
+
+        public void Add(MarkerImageFrame frame, IReadOnlyList<CurvePoint> points)
+        {
+            ReadOnlySpan<float> luminance = frame.ChannelsFirstPixels.Span;
+            ReadOnlySpan<float> ocr = frame.OcrMask.Values.Span;
+            ReadOnlySpan<float> artifact = frame.ArtifactMask.Values.Span;
+            foreach (CurvePoint point in points)
+            {
+                int centerX = (int)Math.Round(point.ScreenX);
+                int centerY = (int)Math.Round(point.ScreenY);
+                double inkSum = 0, ocrSum = 0, artifactSum = 0;
+                double inkMax = 0, ocrMax = 0, artifactMax = 0;
+                double centerInkSum = 0, centerOcrMax = 0, centerArtifactMax = 0;
+                int centerCount = 0;
+                for (int dy = -PatchRadius; dy <= PatchRadius; dy++)
+                {
+                    for (int dx = -PatchRadius; dx <= PatchRadius; dx++)
+                    {
+                        double inkValue = 0, ocrValue = 0, artifactValue = 0;
+                        int x = centerX + dx;
+                        int y = centerY + dy;
+                        if ((uint)x < (uint)frame.Width && (uint)y < (uint)frame.Height)
+                        {
+                            int index = (y * frame.Width) + x;
+                            inkValue = 1 - luminance[index];
+                            ocrValue = ocr[index];
+                            artifactValue = artifact[index];
+                        }
+                        inkSum += inkValue;
+                        ocrSum += ocrValue;
+                        artifactSum += artifactValue;
+                        inkMax = Math.Max(inkMax, inkValue);
+                        ocrMax = Math.Max(ocrMax, ocrValue);
+                        artifactMax = Math.Max(artifactMax, artifactValue);
+                        if (Math.Abs(dx) <= 2 && Math.Abs(dy) <= 2)
+                        {
+                            centerInkSum += inkValue;
+                            centerOcrMax = Math.Max(centerOcrMax, ocrValue);
+                            centerArtifactMax = Math.Max(centerArtifactMax, artifactValue);
+                            centerCount++;
+                        }
+                    }
+                }
+                int pixelCount = PatchSize * PatchSize;
+                inkMean.Add(inkSum / pixelCount);
+                inkCenter5Mean.Add(centerInkSum / centerCount);
+                inkMaximum.Add(inkMax);
+                ocrMaskMean.Add(ocrSum / pixelCount);
+                ocrMaskMaximum.Add(ocrMax);
+                artifactMaskMean.Add(artifactSum / pixelCount);
+                artifactMaskMaximum.Add(artifactMax);
+                ocrCenterHardRejectCount += centerOcrMax >= HardMaskThreshold ? 1 : 0;
+                artifactCenterHardRejectCount += centerArtifactMax >= HardMaskThreshold ? 1 : 0;
+            }
+        }
+
+        public MarkerTruthPatchDistribution ToRecord() => new(
+            inkMean.Count,
+            PatchSize,
+            Summarize(inkMean),
+            Summarize(inkCenter5Mean),
+            Summarize(inkMaximum),
+            Summarize(ocrMaskMean),
+            Summarize(ocrMaskMaximum),
+            Summarize(artifactMaskMean),
+            Summarize(artifactMaskMaximum),
+            ocrCenterHardRejectCount,
+            artifactCenterHardRejectCount,
+            HardMaskThreshold);
+
+        private static DistributionSummary Summarize(List<double> values)
+        {
+            if (values.Count == 0)
+            {
+                return new DistributionSummary(0, 0, 0, 0, 0, 0, 0);
+            }
+            double[] ordered = values.Order().ToArray();
+            double Percentile(double fraction)
+            {
+                double position = (ordered.Length - 1) * fraction;
+                int lower = (int)Math.Floor(position);
+                int upper = (int)Math.Ceiling(position);
+                if (lower == upper) return ordered[lower];
+                double weight = position - lower;
+                return ordered[lower] * (1 - weight) + ordered[upper] * weight;
+            }
+            return new DistributionSummary(
+                ordered[0],
+                Percentile(0.05),
+                Percentile(0.10),
+                Percentile(0.50),
+                Percentile(0.90),
+                Percentile(0.95),
+                ordered[^1]);
+        }
+    }
+
     private sealed record MarkerStageMatch(int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall);
-    private sealed record MarkerAggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall, double TolerancePx, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, string ModelSha256, IReadOnlyDictionary<string, string> UpstreamOcrPayloadSha256, string MaskingMode, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Mode, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateRevision, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateId, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? MarkerSearchBounds, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProposalMarkerStageCounters? StageCounters, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? PreNmsTruePositives, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? PreNmsFalsePositives, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? PreNmsFalseNegatives, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] double? PreNmsPrecision, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] double? PreNmsRecall, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] MarkerStageMatch? GridProposalMatch, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] MarkerStageMatch? InkSupportedProposalMatch, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] MarkerStageMatch? OcrUnmaskedProposalMatch, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] MarkerStageMatch? EmittedProposalMatch, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] MarkerStageMatch? AboveThresholdDecodedMatch);
+    private sealed record DistributionSummary(double Minimum, double P05, double P10, double Median, double P90, double P95, double Maximum);
+    private sealed record MarkerTruthPatchDistribution(int PatchCount, int PatchSizePx, DistributionSummary InkMean, DistributionSummary InkCenter5x5Mean, DistributionSummary InkMaximum, DistributionSummary OcrMaskMean, DistributionSummary OcrMaskMaximum, DistributionSummary ArtifactMaskMean, DistributionSummary ArtifactMaskMaximum, int OcrCenter5x5HardRejectCount, int ArtifactCenter5x5HardRejectCount, double HardMaskThreshold);
+    private sealed record MarkerAggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall, double TolerancePx, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, string ModelSha256, IReadOnlyDictionary<string, string> UpstreamOcrPayloadSha256, string MaskingMode, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Mode, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateRevision, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateId, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? MarkerSearchBounds, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProposalMarkerStageCounters? StageCounters, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? PreNmsTruePositives, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? PreNmsFalsePositives, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? PreNmsFalseNegatives, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] double? PreNmsPrecision, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] double? PreNmsRecall, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] MarkerStageMatch? GridProposalMatch, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] MarkerStageMatch? InkSupportedProposalMatch, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] MarkerStageMatch? OcrUnmaskedProposalMatch, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] MarkerStageMatch? EmittedProposalMatch, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] MarkerStageMatch? AboveThresholdDecodedMatch, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] MarkerTruthPatchDistribution? TruthPatchDistribution);
     private sealed record SyntheticDimensionReport(int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, double RecognitionExact, double CharacterErrorRate, double RoleAccuracy);
     private sealed record DetectorDimensionReport(int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall);
     private sealed record TiledProposalAggregateReport(int SchemaVersion, string ReportScope, int SceneCount, int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, int TileSize, int TileOverlap, IReadOnlyDictionary<string, DetectorDimensionReport> ByDimension, double MeanSceneInferenceMs, int SuppressedCrossTileDuplicates, string ModelSha256, string DatasetManifestSha256, string AcceptancePolicySha256, string EvidencePolicySha256, IReadOnlyDictionary<string, bool> Gates, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, int PublicGateEvaluations, int RealSealedReads, bool TrainingUse);

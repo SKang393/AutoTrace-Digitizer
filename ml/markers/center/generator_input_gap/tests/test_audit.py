@@ -26,3 +26,20 @@ def test_audit_reports_both_splits_and_patch_ratios() -> None:
         assert split["marker_diameter_px"]["maximum"] <= 24.0
         assert split["marker_diameter_px"]["p05"] <= split["marker_diameter_px"]["p95"]
         assert split["diameter_to_33px_patch_ratio"]["maximum"] > 0
+
+
+def test_audit_reports_zero_padded_truth_center_patch_aggregates() -> None:
+    result = audit()
+    for split in result["truth_center_patches"].values():
+        assert split["patch_shape"] == [3, 33, 33]
+        assert split["marker_count"] > 0
+        assert set(split["channel_quantiles"]) == {
+            "ink_mean", "ink_center_5x5_mean", "ink_max",
+            "ocr_mask_mean", "ocr_mask_max",
+            "artifact_mask_mean", "artifact_mask_max",
+        }
+        for quantiles in split["channel_quantiles"].values():
+            assert set(quantiles) == {"minimum", "p05", "p10", "median", "p90", "p95", "maximum"}
+        hits = split["truth_centers_mask_window_threshold_hits"]
+        assert hits["threshold"] == 0.35
+        assert hits["window_size"] == [5, 5]

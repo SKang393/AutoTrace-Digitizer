@@ -111,5 +111,171 @@
         ]
       ]
     }
+  },
+  "truth_center_patches": {
+    "dev": {
+      "channel_quantiles": {
+        "artifact_mask_max": {
+          "maximum": 1.0,
+          "median": 1.0,
+          "minimum": 0.0,
+          "p05": 1.0,
+          "p10": 1.0,
+          "p90": 1.0,
+          "p95": 1.0
+        },
+        "artifact_mask_mean": {
+          "maximum": 0.59045,
+          "median": 0.077135,
+          "minimum": 0.0,
+          "p05": 0.001607,
+          "p10": 0.019743,
+          "p90": 0.232782,
+          "p95": 0.408861
+        },
+        "ink_center_5x5_mean": {
+          "maximum": 0.930224,
+          "median": 0.763742,
+          "minimum": 0.033757,
+          "p05": 0.034723,
+          "p10": 0.03554,
+          "p90": 0.929711,
+          "p95": 0.929875
+        },
+        "ink_max": {
+          "maximum": 0.979877,
+          "median": 0.847373,
+          "minimum": 0.712346,
+          "p05": 0.765677,
+          "p10": 0.771454,
+          "p90": 0.975263,
+          "p95": 0.976704
+        },
+        "ink_mean": {
+          "maximum": 0.497761,
+          "median": 0.21296,
+          "minimum": 0.080629,
+          "p05": 0.086197,
+          "p10": 0.102201,
+          "p90": 0.381303,
+          "p95": 0.454472
+        },
+        "ocr_mask_max": {
+          "maximum": 0.0,
+          "median": 0.0,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p10": 0.0,
+          "p90": 0.0,
+          "p95": 0.0
+        },
+        "ocr_mask_mean": {
+          "maximum": 0.0,
+          "median": 0.0,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p10": 0.0,
+          "p90": 0.0,
+          "p95": 0.0
+        }
+      },
+      "marker_count": 96,
+      "patch_shape": [
+        3,
+        33,
+        33
+      ],
+      "truth_centers_mask_window_threshold_hits": {
+        "artifact": 2,
+        "ocr": 0,
+        "threshold": 0.35,
+        "window_size": [
+          5,
+          5
+        ]
+      }
+    },
+    "train": {
+      "channel_quantiles": {
+        "artifact_mask_max": {
+          "maximum": 1.0,
+          "median": 1.0,
+          "minimum": 0.0,
+          "p05": 0.513922,
+          "p10": 0.624314,
+          "p90": 1.0,
+          "p95": 1.0
+        },
+        "artifact_mask_mean": {
+          "maximum": 0.61708,
+          "median": 0.115886,
+          "minimum": 0.0,
+          "p05": 0.029515,
+          "p10": 0.038827,
+          "p90": 0.254421,
+          "p95": 0.316523
+        },
+        "ink_center_5x5_mean": {
+          "maximum": 0.978973,
+          "median": 0.916901,
+          "minimum": 0.01442,
+          "p05": 0.032855,
+          "p10": 0.035294,
+          "p90": 0.943258,
+          "p95": 0.949062
+        },
+        "ink_max": {
+          "maximum": 1.0,
+          "median": 0.968627,
+          "minimum": 0.294118,
+          "p05": 0.526678,
+          "p10": 0.735435,
+          "p90": 1.0,
+          "p95": 1.0
+        },
+        "ink_mean": {
+          "maximum": 0.541751,
+          "median": 0.233239,
+          "minimum": 0.056177,
+          "p05": 0.075282,
+          "p10": 0.086021,
+          "p90": 0.432068,
+          "p95": 0.459425
+        },
+        "ocr_mask_max": {
+          "maximum": 0.196078,
+          "median": 0.0,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p10": 0.0,
+          "p90": 0.0,
+          "p95": 0.0
+        },
+        "ocr_mask_mean": {
+          "maximum": 0.005672,
+          "median": 0.0,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p10": 0.0,
+          "p90": 0.0,
+          "p95": 0.0
+        }
+      },
+      "marker_count": 168,
+      "patch_shape": [
+        3,
+        33,
+        33
+      ],
+      "truth_centers_mask_window_threshold_hits": {
+        "artifact": 2,
+        "ocr": 0,
+        "threshold": 0.35,
+        "window_size": [
+          5,
+          5
+        ]
+      }
+    }
   }
 }

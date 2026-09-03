@@ -22,6 +22,8 @@ from ml.markers.center.tail_coverage_v20.training_families import build_train_sc
 
 PATCH_SIZE_PX = 33
 EXPECTED_TENSOR_SHAPE = (3, 168, 224)
+MASK_REJECTION_THRESHOLD = 0.35
+MASK_WINDOW_RADIUS_PX = 2
 
 
 def _quantiles(values: Iterable[float]) -> dict[str, float]:
@@ -65,6 +67,65 @@ def _summarize_split(name: str, scenes: tuple[Any, ...]) -> dict[str, Any]:
     }
 
 
+def _patch(tensor: Any, center: tuple[float, float]) -> Any:
+    """Extract channel-first 33x33 with production-compatible zero padding."""
+    height, width = (int(tensor.shape[1]), int(tensor.shape[2]))
+    center_x, center_y = (int(round(value)) for value in center)
+    result = tensor.new_zeros((int(tensor.shape[0]), PATCH_SIZE_PX, PATCH_SIZE_PX))
+    for patch_y in range(PATCH_SIZE_PX):
+        source_y = center_y + patch_y - PATCH_SIZE_PX // 2
+        if not 0 <= source_y < height:
+            continue
+        for patch_x in range(PATCH_SIZE_PX):
+            source_x = center_x + patch_x - PATCH_SIZE_PX // 2
+            if 0 <= source_x < width:
+                result[:, patch_y, patch_x] = tensor[:, source_y, source_x]
+    return result
+
+
+def _window_max(channel: Any, center: tuple[float, float]) -> float:
+    center_x, center_y = (int(round(value)) for value in center)
+    height, width = (int(channel.shape[0]), int(channel.shape[1]))
+    values = [
+        float(channel[y, x])
+        for y in range(max(0, center_y - MASK_WINDOW_RADIUS_PX), min(height - 1, center_y + MASK_WINDOW_RADIUS_PX) + 1)
+        for x in range(max(0, center_x - MASK_WINDOW_RADIUS_PX), min(width - 1, center_x + MASK_WINDOW_RADIUS_PX) + 1)
+    ]
+    return max(values, default=0.0)
+
+
+def _patch_summary(scenes: tuple[Any, ...]) -> dict[str, Any]:
+    metrics: dict[str, list[float]] = {
+        "ink_mean": [], "ink_center_5x5_mean": [], "ink_max": [],
+        "ocr_mask_mean": [], "ocr_mask_max": [],
+        "artifact_mask_mean": [], "artifact_mask_max": [],
+    }
+    ocr_hits = artifact_hits = 0
+    for scene in scenes:
+        for center in scene.centers:
+            patch = _patch(scene.tensor, center)
+            ink, ocr, artifact = patch[0], patch[1], patch[2]
+            middle = PATCH_SIZE_PX // 2
+            metrics["ink_mean"].append(float(ink.mean()))
+            metrics["ink_center_5x5_mean"].append(float(ink[middle - 2:middle + 3, middle - 2:middle + 3].mean()))
+            metrics["ink_max"].append(float(ink.max()))
+            metrics["ocr_mask_mean"].append(float(ocr.mean()))
+            metrics["ocr_mask_max"].append(float(ocr.max()))
+            metrics["artifact_mask_mean"].append(float(artifact.mean()))
+            metrics["artifact_mask_max"].append(float(artifact.max()))
+            ocr_hits += _window_max(scene.tensor[1], center) >= MASK_REJECTION_THRESHOLD
+            artifact_hits += _window_max(scene.tensor[2], center) >= MASK_REJECTION_THRESHOLD
+    return {
+        "marker_count": sum(len(scene.centers) for scene in scenes),
+        "patch_shape": [3, PATCH_SIZE_PX, PATCH_SIZE_PX],
+        "channel_quantiles": {key: _quantiles(values) for key, values in metrics.items()},
+        "truth_centers_mask_window_threshold_hits": {
+            "threshold": MASK_REJECTION_THRESHOLD, "window_size": [5, 5],
+            "ocr": ocr_hits, "artifact": artifact_hits,
+        },
+    }
+
+
 def audit() -> dict[str, Any]:
     """Return deterministic aggregate evidence from synthetic scenes only."""
     train = build_train_scenes()
@@ -94,6 +155,7 @@ def audit() -> dict[str, Any]:
             "train": _summarize_split("train", train),
             "dev": _summarize_split("dev", dev),
         },
+        "truth_center_patches": {"train": _patch_summary(train), "dev": _patch_summary(dev)},
         "aggregate": {
             "scene_count": len(all_scenes),
             "marker_count": sum(len(scene.radii) for scene in all_scenes),
