@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "negative_patch_gap_measured_generator_repair_required",
+  "status": "negative_generator_repaired_stratified_sampling_pending",
   "report_scope": "aggregate_only",
   "runtime_contract": {
     "marker_frame_coordinate_space": "original_source_pixels",
@@ -256,6 +256,18 @@
     "truth_rows_output": false,
     "pixel_output": false
   },
+  "synthetic_negative_repair": {
+    "negative_count_per_split": 224208,
+    "ink_maximum_minimum": 0.11372548341751099,
+    "ink_maximum_p05": 0.11372548341751099,
+    "ocr_mask_mean_p95": 0.8484848737716675,
+    "real_faint_envelope_covered": true,
+    "real_ocr_heavy_envelope_covered": true,
+    "hard_negative_kinds": ["text", "line_intersection", "axis", "faint_line", "ocr_heavy"],
+    "positive_distribution_gates_passed": 7,
+    "model_loaded": false,
+    "training_performed": false
+  },
   "finding": {
     "central_scale_coverage": "the current train distribution covers the real-dev p05 diameter of 6 px through the p90 diameter of 24 px",
     "remaining_scale_gap": "the current train distribution omits the real-dev 24 to 27 px p90-to-p95 tail and the 1 to 48 px full measured envelope",
@@ -269,7 +281,8 @@
     "candidate_result": "V24 P1 clears every corrected synthetic dev gate at the fixed 0.25 threshold after one void pre-sealed dtype attempt and one valid training run",
     "real_dev_contradiction": "V24 real-dev fails at precision 0.12265 and recall 0.57036 despite complete proposal and mask-preserved coverage, with 17867 false candidates above the fixed classifier threshold",
     "negative_generator_gap": "synthetic negatives omit the real faint tail because ink-maximum p05 is 0.83375 versus real 0.19216, and omit OCR-heavy negatives because OCR-mask mean p95 is 0.02296 versus real 0.72727",
-    "required_next_diagnosis": "add deterministic faint and OCR-heavy negative families plus stratified training-only sampling, validate synthetic aggregate coverage, then retry unconsumed P1 before another real-dev run"
+    "negative_generator_repair": "faint-line and OCR-heavy negative families now cover both measured real envelopes without changing truth counts, truth mask hits, positive distribution gates, dtype, or split isolation",
+    "required_next_diagnosis": "add deterministic stratified train-only sampling, bind exact counts and selection hash, then retry unconsumed P1 from the V21 parent before another real-dev run"
   },
   "implementation": {
     "real_probe_path": "tools/private_acceptance/real_dev_distribution.py",
@@ -283,17 +296,17 @@
     "real_harness_path": "tools/GraphReader.RealAcceptance.Ocr/Program.cs",
     "real_harness_sha256": "9b8969356eda1506aa832c0032c69e86f0b1e0335dafab1a963f0c0cf99011b2",
     "corrected_generator_path": "ml/markers/center/real_range_generator_v1/generator.py",
-    "corrected_generator_sha256": "66a1fb7eedcc1e566925121412ece325cd9689b3399f911e0c737fc8da1dad5b",
+    "corrected_generator_sha256": "3162bfb4d81c748c904b19f82e45101aa44def87a684091ee2ddf28a6053b724",
     "corrected_generator_audit_path": "ml/markers/center/real_range_generator_v1/AUDIT.json",
-    "corrected_generator_audit_sha256": "57c35c2f7c270d9dedbb7e7a60c1c46b80109e7717af75086dfc83f1b24b1b7f",
+    "corrected_generator_audit_sha256": "4bdfce6398dc8e83b61bdd40a30044584805dbc10a340032314a5b6747f5db36",
     "corrected_generator_test_path": "ml/markers/center/real_range_generator_v1/tests/test_generator.py",
-    "corrected_generator_test_sha256": "c10b96f4a55b35a821a76731389213b2942f946b4ed9b5dec21cc14f1c4719d6",
+    "corrected_generator_test_sha256": "217e779266b43f8ec43164f59aed730db4a69192c54fdf0e2c3bc926a3b3fed8",
     "v24_feasibility_path": "ml/markers/center/mask_preserving_v24/FEASIBILITY.json",
     "v24_feasibility_sha256": "b653d2a0a18ce07bd68f3e3519e9fc55bc4da83e8a8279f3d48ac04aff15033a",
     "v24_feasibility_source_sha256": "252896f950e58f8e276b79f770bdf3ada1202afeb3bbb7cfb305b3ea9c6fd263",
     "v24_mask_preserving_source_sha256": "171ddcc2efbd2742f5699dad8d16ecec217ca983ee06cec4bc63e1f17e3120e2",
     "v24_p1_result_path": "ml/markers/center/mask_preserving_v24/P1_RESULT.json",
-    "v24_p1_result_sha256": "c49eba7ad2f107a90674888cd6944c351cafcbc8ee4df19725e885f2be9bd227",
+    "v24_p1_result_sha256": "b4e68dde10024e60a122edad3f7645dfe1e5e2f5888dbfe4ef522383de4c6175",
     "v24_runtime_adapter_path": "src/GraphReader.App/Integration/Workflow/ProductionProposalMarkerCenterAdapter.cs",
     "v24_runtime_adapter_sha256": "150d543b1ce1a188605ed369eca9427b1f422680b96f222dba2762e1b68e9295",
     "v24_runtime_test_path": "tests/GraphReader.App.Tests/ProductionProposalMarkerCenterAdapterTests.cs",
@@ -302,13 +315,13 @@
     "v24_real_dev_result_path": "docs/GOAL-22-PHASE-4-V24-REAL-DEV-FULL-IMAGE-STAGES.json",
     "v24_real_dev_result_sha256": "ec1c7699cd4b42adffe800cbeaa258a06d0de1060c058321fb83cae4d31b6807",
     "synthetic_negative_audit_path": "ml/markers/center/real_range_generator_v1/NEGATIVE_PROPOSAL_AUDIT.json",
-    "synthetic_negative_audit_sha256": "18d33c32397145afaceba978a0cbebb313fb4542a71417fcf8091965a454b247",
-    "synthetic_negative_audit_source_sha256": "f37739cb817d0e1397abb38f4dd2b6baeb539e5627640db0f8b33966c5c07e6f",
+    "synthetic_negative_audit_sha256": "2d3624d42e638ead76aa97c556d08a68992ba940fb9691f298de71884e2c9d02",
+    "synthetic_negative_audit_source_sha256": "f06e689e381bd17022609a2589c8bb6b4051fdbc86574400df0c503e35be17bd",
     "negative_patch_runtime_adapter_sha256": "efb92cde5559c661c182cf990de6bd00d788f03b89c7db65d4c90c69dd299aad",
     "negative_patch_runtime_test_sha256": "2f0cbee0029b00ab037a75703952f031aa3a85672ee5efcc5086fff52756a8b0",
     "negative_patch_harness_sha256": "07f7339eed1f0d3f420f6cba85f94d2bcf72f785970859478edd8dffce21d495",
     "real_negative_gap_path": "docs/GOAL-22-PHASE-4R-V24-NEGATIVE-PATCH-GAP.json",
-    "real_negative_gap_sha256": "f51db32bf4c3f7a9f7bf40fad05ab733c01bb48d24f15cf49efd3b9c4fc517d1",
+    "real_negative_gap_sha256": "6a1cc4ca1cfac0fa0f2401d40f3c6c9f1c2ecfa98695e8e36e2808a799dfb9df",
     "focused_tests": "17 V24 runtime passed; 11 V24 and corrected-generator passed; 3 prior synthetic audit passed; Release real harness build and no-corpus self-test passed"
   },
   "privacy": {

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "negative_proposal_gap_measured",
+  "status": "synthetic_negative_distribution_repaired_sampling_pending",
   "report_scope": "aggregate_only",
   "real_dev": {
     "projects": 120,
@@ -51,6 +51,35 @@
     "responsible_subsystem": "synthetic negative-proposal generation and training-only negative sampling",
     "prohibited_response": "do not tune the confidence threshold, weights, or architecture against real-dev"
   },
+  "synthetic_repair": {
+    "faint_line_family_added": true,
+    "ocr_heavy_family_added": true,
+    "hard_negative_kinds": ["text", "line_intersection", "axis", "faint_line", "ocr_heavy"],
+    "negative_proposals_per_split": 224208,
+    "ink_maximum_minimum": 0.11372548341751099,
+    "ink_maximum_p05": 0.11372548341751099,
+    "ocr_mask_mean_p95": 0.8484848737716675,
+    "faint_gate_passed": true,
+    "ocr_heavy_gate_passed": true,
+    "positive_distribution_gates_passed": 7,
+    "truth_count_per_split": 2004,
+    "truth_ocr_center_hits_per_split": 75,
+    "truth_artifact_center_hits_per_split": 332,
+    "tensor_dtype": "float32",
+    "train_dev_seeds_disjoint": true,
+    "model_loaded": false,
+    "training_performed": false
+  },
+  "implementation": {
+    "generator_path": "ml/markers/center/real_range_generator_v1/generator.py",
+    "generator_sha256": "3162bfb4d81c748c904b19f82e45101aa44def87a684091ee2ddf28a6053b724",
+    "generator_audit_path": "ml/markers/center/real_range_generator_v1/AUDIT.json",
+    "generator_audit_sha256": "4bdfce6398dc8e83b61bdd40a30044584805dbc10a340032314a5b6747f5db36",
+    "negative_audit_path": "ml/markers/center/real_range_generator_v1/NEGATIVE_PROPOSAL_AUDIT.json",
+    "negative_audit_sha256": "2d3624d42e638ead76aa97c556d08a68992ba940fb9691f298de71884e2c9d02",
+    "negative_audit_source_sha256": "f06e689e381bd17022609a2589c8bb6b4051fdbc86574400df0c503e35be17bd",
+    "focused_tests": "5 passed"
+  },
   "privacy": {
     "case_level_output": false,
     "truth_rows_output": false,
@@ -61,5 +90,5 @@
   },
   "production_approval": false,
   "release_eligible": false,
-  "next_action": "add deterministic faint-structure and OCR-mask-heavy negative families plus stratified training-only sampling, validate their aggregate synthetic distribution, then retry the unconsumed P1 candidate and re-pass synthetic dev before another real-dev run"
+  "next_action": "add a deterministic train-only stratified negative sampler, preregister exact counts and selection hash, then retry the unconsumed P1 candidate from the V21 parent and re-pass synthetic dev before another real-dev run"
 }

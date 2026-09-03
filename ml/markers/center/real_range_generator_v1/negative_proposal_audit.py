@@ -15,6 +15,12 @@ from ml.markers.center.mask_preserving_v24.mask_preserving import extract_propos
 
 from .generator import PATCH, _quantiles, build_split
 
+REAL_NEGATIVE_GATES = {
+    "ink_max_minimum": 0.11372548341751099,
+    "ink_max_p05": 0.1921568512916565,
+    "ocr_mean_p95": 0.7272727272727273,
+}
+
 
 def _proposal_distribution(split: str) -> dict[str, object]:
     feature_names = (
@@ -58,6 +64,15 @@ def _proposal_distribution(split: str) -> dict[str, object]:
     }
 
 
+def _distribution_gates(record: dict[str, object]) -> dict[str, bool]:
+    values = record["negative_patch_feature_quantiles"]
+    return {
+        "ink_max_minimum_reaches_real_dev": values["ink_max"]["minimum"] <= REAL_NEGATIVE_GATES["ink_max_minimum"],
+        "ink_max_p05_reaches_real_dev": values["ink_max"]["p05"] <= REAL_NEGATIVE_GATES["ink_max_p05"],
+        "ocr_mean_p95_reaches_real_dev": values["ocr_mean"]["p95"] >= REAL_NEGATIVE_GATES["ocr_mean_p95"],
+    }
+
+
 def audit() -> dict[str, object]:
     train = _proposal_distribution("train")
     dev = _proposal_distribution("dev")
@@ -75,6 +90,14 @@ def audit() -> dict[str, object]:
         },
         "extractor": "mask-preserving-v24 ink-supported full grid",
         "splits": {"train": train, "dev": dev},
+        "distribution_gates": {
+            split: _distribution_gates(record) for split, record in (("train", train), ("dev", dev))
+        },
+        "hard_negative_kinds": ["text", "line_intersection", "axis", "faint_line", "ocr_heavy"],
+        "hard_negative_representatives": {
+            "faint_line": {"x": 32.0, "y": 155.0},
+            "ocr_heavy": {"x": 208.0, "y": 155.0},
+        },
         "coordinate_streams_identical": (
             train["proposal_coordinates_aggregate_sha256"]
             == dev["proposal_coordinates_aggregate_sha256"]

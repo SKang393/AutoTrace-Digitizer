@@ -35,8 +35,20 @@
   "hard_negative_kinds": [
     "text",
     "line_intersection",
-    "axis"
+    "axis",
+    "faint_line",
+    "ocr_heavy"
   ],
+  "hard_negative_representatives": {
+    "faint_line": {
+      "x": 32.0,
+      "y": 155.0
+    },
+    "ocr_heavy": {
+      "x": 208.0,
+      "y": 155.0
+    }
+  },
   "mask_overlap_scenarios": {
     "artifact_hard_hits": 332,
     "artifact_rate": 0.1656686626746507,
@@ -72,7 +84,7 @@
   },
   "splits": {
     "dev": {
-      "aggregate_sha256": "2eb77f1efb641f432c5e8581b95d09c1c6a05b9f9781019f2862adfdeefc8edb",
+      "aggregate_sha256": "e61d6bfae1f5c53f3a6ac18497573dbb6b6a494ed1d9b9d5b3e1414e2a5b07c3",
       "diameter_px": {
         "maximum": 48.0,
         "median": 12.0,
@@ -112,7 +124,7 @@
       ]
     },
     "train": {
-      "aggregate_sha256": "34e086edd74a887415e972ca9eafbf6f61104ce95487350f43acb32feb6732fc",
+      "aggregate_sha256": "3a087727f2eba49f773da68b944f451277a0fd1c0bb325078232006607903c05",
       "diameter_px": {
         "maximum": 48.0,
         "median": 12.0,
@@ -153,7 +165,7 @@
     }
   },
   "truth_center_patch_distribution": {
-    "aggregate_sha256": "2eb77f1efb641f432c5e8581b95d09c1c6a05b9f9781019f2862adfdeefc8edb",
+    "aggregate_sha256": "e61d6bfae1f5c53f3a6ac18497573dbb6b6a494ed1d9b9d5b3e1414e2a5b07c3",
     "channel_mean_quantiles": {
       "artifact_mask": {
         "maximum": 0.2764003574848175,

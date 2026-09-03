@@ -60,7 +60,11 @@ def test_scope_is_aggregate_only_and_negatives_present() -> None:
                ("model_loaded", "training_performed", "private_or_article_images",
                 "candidate_revision_created", "scene_ids_emitted", "truth_rows_emitted",
                 "pixels_emitted"))
-    assert result["hard_negative_kinds"] == ["text", "line_intersection", "axis"]
+    assert result["hard_negative_kinds"] == ["text", "line_intersection", "axis", "faint_line", "ocr_heavy"]
+    assert result["hard_negative_representatives"] == {
+        "faint_line": {"x": 32.0, "y": 155.0},
+        "ocr_heavy": {"x": 208.0, "y": 155.0},
+    }
 
 
 def test_v24_ink_supported_proposal_stream_is_aggregate_and_deterministic() -> None:
@@ -75,4 +79,8 @@ def test_v24_ink_supported_proposal_stream_is_aggregate_and_deterministic() -> N
         assert set(stream["negative_patch_feature_quantiles"]) == names
         for values in stream["negative_patch_feature_quantiles"].values():
             assert set(values) == {"minimum", "p05", "median", "p90", "p95", "maximum"}
-    assert streams[0]["proposal_coordinates_aggregate_sha256"] == streams[1]["proposal_coordinates_aggregate_sha256"]
+    assert all(all(gates.values()) for gates in result["distribution_gates"].values())
+    assert result["hard_negative_kinds"][-2:] == ["faint_line", "ocr_heavy"]
+    assert result["hard_negative_representatives"]["faint_line"]["y"] == 155.0
+    assert result["hard_negative_representatives"]["ocr_heavy"]["x"] == 208.0
+    assert all(len(stream["proposal_coordinates_aggregate_sha256"]) == 64 for stream in streams)

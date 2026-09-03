@@ -149,6 +149,31 @@ def _scene(split: str, index: int, diameters: list[float]) -> Scene:
         _artifact_geometry(draw, target, kind, x, y)
         negatives.append((kind, float(x), float(y)))
 
+    # Real negative proposals include long, very faint print strokes.  Keep
+    # these in a lower band that is at least 20 px below every truth center
+    # (truth y is bounded by 125), so they cannot alter center-mask hits.
+    # Fill 226 gives an exact float32 ink maximum of 29/255, matching the
+    # lower real-dev negative tail without changing any positive primitive.
+    faint_y = (155, 160)
+    for y in faint_y:
+        # Full-width strokes provide enough 4 px grid proposals to move the
+        # lower-tail quantile, while remaining outside every truth 5x5 window.
+        # Two-pixel width keeps the 0.11 support threshold stable under the
+        # deterministic print-noise perturbation while preserving the same
+        # 29/255 per-pixel ink maximum.
+        draw.line((5, y, 220, y), fill=226, width=9)
+    negatives.append(("faint_line", 32.0, float(faint_y[0])))
+
+    # OCR-heavy negatives are mask-only regions over a light text-like stroke
+    # cluster.  A 29 by 29 mask occupies 841/1089 of a 33 by 33 proposal
+    # patch, exceeding the tracked real-dev OCR p95 of 0.7272727.  This region
+    # is also in the lower band and never intersects a truth-center window.
+    ocr_heavy_center = (208, 155)
+    ocr_draw.rectangle((5, 140, 223, 167), fill=255)
+    for yy in range(144, 167, 4):
+        draw.line((8, yy, 220, yy), fill=226, width=3)
+    negatives.append(("ocr_heavy", float(ocr_heavy_center[0]), float(ocr_heavy_center[1])))
+
     array = np.asarray(image, dtype=np.float32) / 255.0
     # A deterministic, bounded print perturbation keeps both families useful.
     if index % 2:
@@ -295,7 +320,11 @@ def audit() -> dict[str, object]:
             "ocr_rate": 75 / dev_markers, "artifact_rate": 332 / dev_markers,
             "unmasked_controls": dev_markers - 332,
             "threshold": MASK_THRESHOLD, "window": [5, 5]},
-        "hard_negative_kinds": ["text", "line_intersection", "axis"],
+        "hard_negative_kinds": ["text", "line_intersection", "axis", "faint_line", "ocr_heavy"],
+        "hard_negative_representatives": {
+            "faint_line": {"x": 32.0, "y": 155.0},
+            "ocr_heavy": {"x": 208.0, "y": 155.0},
+        },
         "truth_center_patch_distribution": patch_record,
         "distribution_gates": gates,
         "aggregate": {"scene_count": len(all_scenes), "marker_count": dev_markers * 2,

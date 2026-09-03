@@ -3,7 +3,7 @@
   "task": "marker-center",
   "revision": "marker-center-mask-preserving-v24",
   "candidate_id": "P1",
-  "status": "dev_passed_real_dev_failed_negative_generator_gap_measured",
+  "status": "dev_passed_real_dev_failed_negative_generator_repaired_sampling_pending",
   "model_license": "Apache-2.0",
   "candidate_consumed": false,
   "sealed_runs": 0,
@@ -97,7 +97,7 @@
   },
   "negative_proposal_gap": {
     "report_path": "docs/GOAL-22-PHASE-4R-V24-NEGATIVE-PATCH-GAP.json",
-    "report_sha256": "f51db32bf4c3f7a9f7bf40fad05ab733c01bb48d24f15cf49efd3b9c4fc517d1",
+    "report_sha256": "6a1cc4ca1cfac0fa0f2401d40f3c6c9f1c2ecfa98695e8e36e2808a799dfb9df",
     "real_negative_count": 1354434,
     "synthetic_negative_count": 176187,
     "real_ink_maximum_p05": 0.1921568512916565,
@@ -107,7 +107,19 @@
     "marker_model_inference_runs": 0,
     "real_sealed_reads": 0
   },
+  "negative_generator_repair": {
+    "generator_sha256": "3162bfb4d81c748c904b19f82e45101aa44def87a684091ee2ddf28a6053b724",
+    "generator_audit_sha256": "4bdfce6398dc8e83b61bdd40a30044584805dbc10a340032314a5b6747f5db36",
+    "negative_audit_sha256": "2d3624d42e638ead76aa97c556d08a68992ba940fb9691f298de71884e2c9d02",
+    "negative_count_per_split": 224208,
+    "ink_maximum_p05": 0.11372548341751099,
+    "ocr_mask_mean_p95": 0.8484848737716675,
+    "faint_gate_passed": true,
+    "ocr_heavy_gate_passed": true,
+    "model_loaded": false,
+    "training_performed": false
+  },
   "production_approval": false,
   "release_eligible": false,
-  "next_action": "add deterministic faint and OCR-heavy synthetic negative families with stratified train-only sampling, then retry unconsumed P1 and re-pass synthetic dev before another real-dev or any real-sealed read"
+  "next_action": "implement deterministic stratified train-only sampling, then retry the same unconsumed P1 from the V21 parent and re-pass synthetic dev before another real-dev or any real-sealed read"
 }
