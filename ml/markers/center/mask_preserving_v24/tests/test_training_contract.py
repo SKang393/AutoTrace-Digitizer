@@ -28,7 +28,11 @@ def test_runner_source_bundle_is_relative_and_present():
     assert all(not path.is_absolute() for path in RUNNER_SOURCE_PATHS)
     assert all((ROOT / path).is_file() for path in RUNNER_SOURCE_PATHS)
     config = json.loads((ROOT / "ml/markers/center/mask_preserving_v24/training/p1.json").read_text())
-    assert source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
+    ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text())
+    entry = next(item for item in ledger["revisions"] if item["revision"] == config["revision"])
+    assert entry["p1_runner_source_bundle_sha256"] == config["expected_runner_source_bundle_sha256"]
+    if entry["execution_authorized"] or entry["status"] == "candidate_1_preregistered":
+        assert source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
 
 def test_current_evidence_bindings_and_authorization_match_files():
     config_path = ROOT / "ml/markers/center/mask_preserving_v24/training/p1.json"
@@ -55,14 +59,45 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["synthetic_negative_proposal_count"] == 237578
     assert entry["morphology_diagnosis_sha256"] == config["morphology_diagnosis_sha256"]
     assert entry["morphology_gap_sha256"] == config["morphology_gap_sha256"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["status"] == "dev_passed_retry3_unconsumed"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["real_dev_authorized"] is False
+    assert entry["real_sealed_authorized"] is False
+    assert entry["real_sealed_reads"] == 0
+    assert entry["sealed_runs"] == 0
     assert entry["consumed_candidate_ids"] == []
-    assert entry["dev_passed_candidate_ids"] == []
-    assert entry["p1_dev_gate_passed"] is False
+    assert entry["dev_passed_candidate_ids"] == ["P1"]
+    assert entry["candidate_consumed"] is False
+    assert entry["p1_result_path"].endswith("P1_RETRY3_RESULT.json")
+    assert digest(ROOT / entry["p1_result_path"]) == entry["p1_result_sha256"]
+    assert entry["p1_result_sha256"] == "edf2ba744146fdcb6407b68d5765784f733b2f2e8739ecceedfd651edb372711"
+    assert entry["p1_candidate_report_sha256"] == entry["p1_result_sha256"]
+    assert entry["p1_runner_source_bundle_sha256"] == config["expected_runner_source_bundle_sha256"]
+    assert digest(ROOT / entry["retry3_morphology_diagnosis_path"]) == entry["retry3_morphology_diagnosis_sha256"]
+    assert entry["retry3_morphology_accepted_generic_false_positives"] == 16
+    assert entry["retry3_morphology_scene_count"] == 167
+    assert entry["retry3_morphology_optimizer_steps"] == 0
+    assert entry["retry3_morphology_private_data"] is False
+    assert entry["retry3_morphology_real_dev_reads"] == 0
+    assert entry["retry3_morphology_real_sealed_reads"] == 0
+    assert entry["retry3_morphology_sealed_runs"] == 0
+    assert entry["retry3_morphology_threshold_change_proposed"] is False
+    assert entry["p1_checkpoint_sha256"] == "70b9947bdaa78d5465f7cd2026a4bc00fd3805507551c002daf763e5dbc0b318"
+    assert entry["p1_onnx_sha256"] == "0d80d1994d7b33241c795c9e6f92c802750555a62c3cd3335777eb969fb5083a"
+    assert entry["p1_true_positives"] == 1977
+    assert entry["p1_false_positives"] == 16
+    assert entry["p1_false_negatives"] == 27
+    assert entry["p1_precision"] == 0.9919719016557953
+    assert entry["p1_recall"] == 0.9865269461077845
+    assert entry["p1_f1"] == 0.9892419314485864
+    assert entry["p1_onnx_parity_maximum_absolute_error"] == 1.9073486328125e-06
+    assert entry["p1_opened_seal_sha256"] == "33773333d6f75814c4f0801d4c86438990a8478eddb021b7912bc4ea8bb6ebee"
+    assert entry["p1_result_seal_sha256"] == "d8e830b2e384a67a1da3911ba774c707a5cac66ded3bfbabf2870e54c2043ee5"
+    assert entry["p1_dev_gate_passed"] is True
     assert entry["retry2_dev_gate_passed"] is True
     assert entry["spatial_morphology_diagnostic_required"] is False
-    assert entry["execution_blocker"] is None
+    assert entry["execution_blocker"]
 
 def test_train_examples_preserve_mask_crossing_positive():
     from ml.markers.center.mask_preserving_v24.train_p1 import _examples
