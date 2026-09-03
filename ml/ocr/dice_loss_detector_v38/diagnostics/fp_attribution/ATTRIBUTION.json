@@ -1,0 +1,166 @@
+{
+  "evidence": {
+    "case_level_output": false,
+    "private_or_article_images": false,
+    "scene_count": 5,
+    "sealed_or_public_reads": 0,
+    "split": "dev",
+    "synthetic_only": true,
+    "truth_region_count": 86
+  },
+  "false_negatives": {
+    "by_source_dimension": {
+      "1338x492": {
+        "false_negative_rate": 0.46153846153846156,
+        "false_negatives": 6,
+        "truth_boxes": 13
+      },
+      "361x240": {
+        "false_negative_rate": 0.4444444444444444,
+        "false_negatives": 8,
+        "truth_boxes": 18
+      },
+      "600x4484": {
+        "false_negative_rate": 0.875,
+        "false_negatives": 14,
+        "truth_boxes": 16
+      },
+      "6352x600": {
+        "false_negative_rate": 0.3076923076923077,
+        "false_negatives": 4,
+        "truth_boxes": 13
+      },
+      "863x395": {
+        "false_negative_rate": 0.2692307692307692,
+        "false_negatives": 7,
+        "truth_boxes": 26
+      }
+    },
+    "by_truth_box_size": {
+      "large_area_gt_1000": {
+        "false_negative_rate": 0.45454545454545453,
+        "false_negatives": 15,
+        "truth_boxes": 33
+      },
+      "medium_area_201_to_1000": {
+        "false_negative_rate": 0.6190476190476191,
+        "false_negatives": 13,
+        "truth_boxes": 21
+      },
+      "small_area_le_200": {
+        "false_negative_rate": 0.34375,
+        "false_negatives": 11,
+        "truth_boxes": 32
+      }
+    }
+  },
+  "false_positive_components": {
+    "by_category": {
+      "empty_background": {
+        "component_pixels": 1224,
+        "components": 13,
+        "pixels": 0
+      },
+      "existing_text_box_margins": {
+        "component_pixels": 4239,
+        "components": 10,
+        "pixels": 0
+      },
+      "marker_or_connecting_line_ink": {
+        "component_pixels": 47576,
+        "components": 94,
+        "pixels": 0
+      },
+      "other_dark_ink": {
+        "component_pixels": 297,
+        "components": 7,
+        "pixels": 0
+      },
+      "phase_dividers": {
+        "component_pixels": 25299,
+        "components": 26,
+        "pixels": 0
+      },
+      "within_or_near_axes_or_tick_lines": {
+        "component_pixels": 13046,
+        "components": 15,
+        "pixels": 0
+      }
+    },
+    "false_positives": 165,
+    "predicted_regions": 212,
+    "true_positives": 47,
+    "truth_regions": 86
+  },
+  "false_positive_pixels": {
+    "by_category": {
+      "empty_background": {
+        "component_pixels": 0,
+        "components": 0,
+        "pixels": 12848
+      },
+      "existing_text_box_margins": {
+        "component_pixels": 0,
+        "components": 0,
+        "pixels": 9215
+      },
+      "marker_or_connecting_line_ink": {
+        "component_pixels": 0,
+        "components": 0,
+        "pixels": 40722
+      },
+      "other_dark_ink": {
+        "component_pixels": 0,
+        "components": 0,
+        "pixels": 1323
+      },
+      "phase_dividers": {
+        "component_pixels": 0,
+        "components": 0,
+        "pixels": 22698
+      },
+      "within_or_near_axes_or_tick_lines": {
+        "component_pixels": 0,
+        "components": 0,
+        "pixels": 10251
+      }
+    },
+    "total": 97057
+  },
+  "fixed_hashes": {
+    "annotation_and_marker_mask_stream": {
+      "sha256": "7f75cd774354b2c40acb872a6857ee0159ecd39b80dbe52425d17a6859b29964"
+    },
+    "v32_dev_split": {
+      "sha256": "67952b4575972542087281b2c14958e86518ae0e12e88d43f5c47c16252a3687"
+    },
+    "v38_onnx": {
+      "path": "artifacts/goal22-worktrees/ocr-v38/ml/ocr/dice_loss_detector_v38/artifacts/P1-run/graph-text-dice-loss-detector-v38-p1.onnx",
+      "sha256": "90cb24e3c54931cf2da5213e0bcaa1208e182355187905ce0638cc7292dc1bc2"
+    }
+  },
+  "interpretation": {
+    "confidence": "Structural categories are deterministic geometric proxies; remaining pixels are split by a fixed raster darkness threshold into other dark ink and empty background.",
+    "dominant_attributable_source": "marker_or_connecting_line_ink",
+    "next_subsystem_change": "Add explicit artifact/structure suppression features to full-box pixel segmentation before another OCR detector candidate; attribution is diagnostic only and does not authorize tuning."
+  },
+  "protocol": {
+    "geometry_proxies": {
+      "axes_or_ticks_line_thickness": 7,
+      "connecting_line_thickness": 3,
+      "dark_ink_threshold": 200,
+      "divider_line_thickness": 5,
+      "marker_clearance_px": 2,
+      "text_box_margin_px": 3
+    },
+    "minimum_component_area": 8,
+    "morphology_close": true,
+    "onnx_provider": "CPUExecutionProvider",
+    "pixel_threshold": 0.4,
+    "tile_overlap": 64,
+    "tile_size": 256,
+    "truth_match_iou_minimum": 0.5
+  },
+  "revision": "graph-text-dice-loss-detector-v38",
+  "schema": "graphreader.ocr-dice-loss-detector-v38-fp-attribution.v1"
+}
