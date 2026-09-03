@@ -25,6 +25,7 @@ RUNNER_SOURCE_PATHS = (
     Path("ml/markers/center/mask_preserving_v24/FEASIBILITY.json"),
     Path("ml/markers/center/mask_preserving_v24/diagnostics/diagnose_retry.py"),
     Path("ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY_DIAGNOSIS.json"),
+    Path("ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY2_MORPHOLOGY_DIAGNOSIS.json"),
     Path("ml/markers/center/mask_preserving_v24/train_p1.py"),
     Path("ml/markers/center/focal_confidence_v21/focal_loss.py"),
     Path("ml/markers/center/scale_classifier_v16/model.py"),
@@ -33,6 +34,7 @@ RUNNER_SOURCE_PATHS = (
     Path("ml/markers/center/real_range_generator_v1/AUDIT.json"),
     Path("ml/markers/center/real_range_generator_v1/NEGATIVE_PROPOSAL_AUDIT.json"),
     Path("docs/GOAL-22-PHASE-4R-V24-NEGATIVE-PATCH-GAP.json"),
+    Path("docs/GOAL-22-PHASE-4R-V24-MORPHOLOGY-GAP.json"),
     Path("ml/markers/center/metrics.py"),
     Path("ml/policy/evidence-policy.json"),
     Path("ml/policy/acceptance-bars.json"),
@@ -120,7 +122,7 @@ def run(output_dir: Path, checkpoint: Path, v21_onnx: Path) -> dict:
     config=json.loads((REPO_ROOT/CONFIG_PATH).read_text(encoding="utf-8"))
     if _sha(checkpoint) != config["checkpoint_sha256"]: raise ValueError("V21 checkpoint hash changed")
     if _sha(v21_onnx) != config["v21_onnx_sha256"]: raise ValueError("V21 ONNX hash changed")
-    for path_key, hash_key in (("feasibility_path","feasibility_sha256"),("retry_diagnosis_path","retry_diagnosis_sha256"),("generator_audit_path","generator_audit_sha256"),("negative_audit_path","negative_audit_sha256"),("negative_gap_path","negative_gap_sha256"),("evidence_policy_path","evidence_policy_sha256"),("acceptance_bars_path","acceptance_bars_sha256")):
+    for path_key, hash_key in (("feasibility_path","feasibility_sha256"),("retry_diagnosis_path","retry_diagnosis_sha256"),("morphology_diagnosis_path","morphology_diagnosis_sha256"),("morphology_gap_path","morphology_gap_sha256"),("generator_audit_path","generator_audit_sha256"),("negative_audit_path","negative_audit_sha256"),("negative_gap_path","negative_gap_sha256"),("evidence_policy_path","evidence_policy_sha256"),("acceptance_bars_path","acceptance_bars_sha256")):
         if _sha(REPO_ROOT/str(config[path_key])) != config[hash_key]: raise ValueError(f"bound input changed: {config[path_key]}")
     if _sha(REPO_ROOT/config["negative_sampler"]["source_path"]) != config["negative_sampler"]["source_sha256"]: raise ValueError("negative sampler source changed")
     authorization=acquire_training_candidate(REPO_ROOT,task=protocol.TASK,revision=protocol.TRAINING_REVISION,candidate_id=protocol.TRAINING_CANDIDATE_ID,config_path=CONFIG_PATH,runner_source_paths=RUNNER_SOURCE_PATHS)
