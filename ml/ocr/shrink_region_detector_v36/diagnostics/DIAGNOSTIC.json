@@ -1,0 +1,529 @@
+{
+  "baseline_fixed_pipeline": {
+    "expanded_proposal": {
+      "expanded": true,
+      "false_negatives": 59,
+      "false_positives": 150,
+      "precision": 0.15254237288135594,
+      "predicted_regions": 177,
+      "recall": 0.313953488372093,
+      "threshold": 0.4,
+      "true_positives": 27,
+      "truth_regions": 86
+    },
+    "predicted_core": {
+      "expanded": false,
+      "false_negatives": 74,
+      "false_positives": 165,
+      "precision": 0.06779661016949153,
+      "predicted_regions": 177,
+      "recall": 0.13953488372093023,
+      "threshold": 0.4,
+      "true_positives": 12,
+      "truth_regions": 86
+    },
+    "threshold": 0.4
+  },
+  "core_pixel_segmentation": {
+    "best_f1": {
+      "f1": 0.4586647062754795,
+      "false_negative_pixels": 4060,
+      "false_positive_pixels": 12140,
+      "precision": 0.3611535020786192,
+      "recall": 0.6283072416002929,
+      "threshold": 0.45,
+      "true_positive_pixels": 6863
+    },
+    "best_recall_then_precision": {
+      "f1": 0.24983872803855348,
+      "false_negative_pixels": 1047,
+      "false_positive_pixels": 58260,
+      "precision": 0.144945403311025,
+      "recall": 0.904147212304312,
+      "threshold": 0.05,
+      "true_positive_pixels": 9876
+    },
+    "threshold_sweep": [
+      {
+        "f1": 0.24983872803855348,
+        "false_negative_pixels": 1047,
+        "false_positive_pixels": 58260,
+        "precision": 0.144945403311025,
+        "recall": 0.904147212304312,
+        "threshold": 0.05,
+        "true_positive_pixels": 9876
+      },
+      {
+        "f1": 0.2936370851034032,
+        "false_negative_pixels": 1488,
+        "false_positive_pixels": 43905,
+        "precision": 0.17688413948256468,
+        "recall": 0.8637736885471025,
+        "threshold": 0.1,
+        "true_positive_pixels": 9435
+      },
+      {
+        "f1": 0.328937075912754,
+        "false_negative_pixels": 1882,
+        "false_positive_pixels": 35007,
+        "precision": 0.2052533599709408,
+        "recall": 0.8277030119930422,
+        "threshold": 0.15,
+        "true_positive_pixels": 9041
+      },
+      {
+        "f1": 0.3638417133773948,
+        "false_negative_pixels": 2225,
+        "false_positive_pixels": 28191,
+        "precision": 0.2357884464203421,
+        "recall": 0.7963013824041014,
+        "threshold": 0.2,
+        "true_positive_pixels": 8698
+      },
+      {
+        "f1": 0.39402129209654296,
+        "false_negative_pixels": 2540,
+        "false_positive_pixels": 23245,
+        "precision": 0.2650499557354243,
+        "recall": 0.7674631511489518,
+        "threshold": 0.25,
+        "true_positive_pixels": 8383
+      },
+      {
+        "f1": 0.4200350116269955,
+        "false_negative_pixels": 2885,
+        "false_positive_pixels": 19312,
+        "precision": 0.29389396709323584,
+        "recall": 0.735878421679026,
+        "threshold": 0.3,
+        "true_positive_pixels": 8038
+      },
+      {
+        "f1": 0.44051805472167427,
+        "false_negative_pixels": 3219,
+        "false_positive_pixels": 16350,
+        "precision": 0.3202793714143178,
+        "recall": 0.7053007415545179,
+        "threshold": 0.35,
+        "true_positive_pixels": 7704
+      },
+      {
+        "f1": 0.45316620644720923,
+        "false_negative_pixels": 3620,
+        "false_positive_pixels": 14005,
+        "precision": 0.3427351229585132,
+        "recall": 0.66858921541701,
+        "threshold": 0.4,
+        "true_positive_pixels": 7303
+      },
+      {
+        "f1": 0.4586647062754795,
+        "false_negative_pixels": 4060,
+        "false_positive_pixels": 12140,
+        "precision": 0.3611535020786192,
+        "recall": 0.6283072416002929,
+        "threshold": 0.45,
+        "true_positive_pixels": 6863
+      },
+      {
+        "f1": 0.45765326254618505,
+        "false_negative_pixels": 4544,
+        "false_positive_pixels": 10575,
+        "precision": 0.3762533915300224,
+        "recall": 0.5839970704019042,
+        "threshold": 0.5,
+        "true_positive_pixels": 6379
+      },
+      {
+        "f1": 0.4481321395492436,
+        "false_negative_pixels": 5117,
+        "false_positive_pixels": 9183,
+        "precision": 0.3873507238641671,
+        "recall": 0.5315389544996796,
+        "threshold": 0.55,
+        "true_positive_pixels": 5806
+      },
+      {
+        "f1": 0.4306587837837838,
+        "false_negative_pixels": 5824,
+        "false_positive_pixels": 7658,
+        "precision": 0.3997021243239006,
+        "recall": 0.46681314657145473,
+        "threshold": 0.6,
+        "true_positive_pixels": 5099
+      },
+      {
+        "f1": 0.39506055568748516,
+        "false_negative_pixels": 6764,
+        "false_positive_pixels": 5973,
+        "precision": 0.4104816423213581,
+        "recall": 0.38075620250846837,
+        "threshold": 0.65,
+        "true_positive_pixels": 4159
+      },
+      {
+        "f1": 0.33197111347478026,
+        "false_negative_pixels": 7958,
+        "false_positive_pixels": 3975,
+        "precision": 0.4272334293948127,
+        "recall": 0.2714455735603772,
+        "threshold": 0.7,
+        "true_positive_pixels": 2965
+      },
+      {
+        "f1": 0.19159044174998227,
+        "false_negative_pixels": 9572,
+        "false_positive_pixels": 1829,
+        "precision": 0.4248427672955975,
+        "recall": 0.12368396960541976,
+        "threshold": 0.75,
+        "true_positive_pixels": 1351
+      },
+      {
+        "f1": 0.03721739130434783,
+        "false_negative_pixels": 10709,
+        "false_positive_pixels": 363,
+        "precision": 0.3708838821490468,
+        "recall": 0.01959168726540328,
+        "threshold": 0.8,
+        "true_positive_pixels": 214
+      },
+      {
+        "f1": 0.0009134922809902257,
+        "false_negative_pixels": 10918,
+        "false_positive_pixels": 19,
+        "precision": 0.20833333333333334,
+        "recall": 0.0004577497024626934,
+        "threshold": 0.85,
+        "true_positive_pixels": 5
+      },
+      {
+        "f1": 0.0,
+        "false_negative_pixels": 10923,
+        "false_positive_pixels": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "threshold": 0.9,
+        "true_positive_pixels": 0
+      },
+      {
+        "f1": 0.0,
+        "false_negative_pixels": 10923,
+        "false_positive_pixels": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "threshold": 0.95,
+        "true_positive_pixels": 0
+      }
+    ]
+  },
+  "evidence": {
+    "case_level_output": false,
+    "private_or_article_images": false,
+    "scene_count": 5,
+    "sealed_or_public_reads": 0,
+    "split": "dev",
+    "synthetic_only": true,
+    "truth_region_count": 86
+  },
+  "expanded_proposals": {
+    "best_recall_then_precision": {
+      "expanded": true,
+      "false_negatives": 54,
+      "false_positives": 114,
+      "precision": 0.2191780821917808,
+      "predicted_regions": 146,
+      "recall": 0.37209302325581395,
+      "threshold": 0.5,
+      "true_positives": 32,
+      "truth_regions": 86
+    },
+    "threshold_sweep": [
+      {
+        "expanded": true,
+        "false_negatives": 77,
+        "false_positives": 177,
+        "precision": 0.04838709677419355,
+        "predicted_regions": 186,
+        "recall": 0.10465116279069768,
+        "threshold": 0.1,
+        "true_positives": 9,
+        "truth_regions": 86
+      },
+      {
+        "expanded": true,
+        "false_negatives": 74,
+        "false_positives": 192,
+        "precision": 0.058823529411764705,
+        "predicted_regions": 204,
+        "recall": 0.13953488372093023,
+        "threshold": 0.2,
+        "true_positives": 12,
+        "truth_regions": 86
+      },
+      {
+        "expanded": true,
+        "false_negatives": 73,
+        "false_positives": 200,
+        "precision": 0.06103286384976526,
+        "predicted_regions": 213,
+        "recall": 0.1511627906976744,
+        "threshold": 0.3,
+        "true_positives": 13,
+        "truth_regions": 86
+      },
+      {
+        "expanded": true,
+        "false_negatives": 59,
+        "false_positives": 150,
+        "precision": 0.15254237288135594,
+        "predicted_regions": 177,
+        "recall": 0.313953488372093,
+        "threshold": 0.4,
+        "true_positives": 27,
+        "truth_regions": 86
+      },
+      {
+        "expanded": true,
+        "false_negatives": 54,
+        "false_positives": 114,
+        "precision": 0.2191780821917808,
+        "predicted_regions": 146,
+        "recall": 0.37209302325581395,
+        "threshold": 0.5,
+        "true_positives": 32,
+        "truth_regions": 86
+      },
+      {
+        "expanded": true,
+        "false_negatives": 60,
+        "false_positives": 151,
+        "precision": 0.14689265536723164,
+        "predicted_regions": 177,
+        "recall": 0.3023255813953488,
+        "threshold": 0.6,
+        "true_positives": 26,
+        "truth_regions": 86
+      },
+      {
+        "expanded": true,
+        "false_negatives": 64,
+        "false_positives": 205,
+        "precision": 0.09691629955947137,
+        "predicted_regions": 227,
+        "recall": 0.2558139534883721,
+        "threshold": 0.7,
+        "true_positives": 22,
+        "truth_regions": 86
+      },
+      {
+        "expanded": true,
+        "false_negatives": 84,
+        "false_positives": 165,
+        "precision": 0.011976047904191617,
+        "predicted_regions": 167,
+        "recall": 0.023255813953488372,
+        "threshold": 0.8,
+        "true_positives": 2,
+        "truth_regions": 86
+      },
+      {
+        "expanded": true,
+        "false_negatives": 86,
+        "false_positives": 0,
+        "precision": 0.0,
+        "predicted_regions": 0,
+        "recall": 0.0,
+        "threshold": 0.9,
+        "true_positives": 0,
+        "truth_regions": 86
+      }
+    ]
+  },
+  "fixed_hashes": {
+    "checkpoint_onnx": {
+      "path": "artifacts/goal22-worktrees/ocr-v36/ml/ocr/shrink_region_detector_v36/artifacts/P1-run/graph-text-shrink-region-detector-v36-p1.onnx",
+      "sha256": "2d7fe408a93ef7928d27afe86e6f2f402a278d17bb0cbafef5e497ef8e7c4f14"
+    },
+    "checkpoint_pt": {
+      "path": "artifacts/goal22-worktrees/ocr-v36/ml/ocr/shrink_region_detector_v36/artifacts/P1-run/graph-text-shrink-region-detector-v36-p1.pt",
+      "sha256": "6b1cd28bd86f52be69bf8140e95a471acd423884e9f18c396031010f86dc9483"
+    },
+    "v32_data_module": {
+      "path": "ml/ocr/real_range_classifier_finetune_v32/dataset.py",
+      "sha256": "e6db83da51ea2ff66ee9885cee2cde3451900df7be6ecca06259534cf2989b6a"
+    },
+    "v36_dataset": {
+      "path": "ml/ocr/shrink_region_detector_v36/dataset.py",
+      "sha256": "e071fbe9c20367464eb1201badee1e00e9fb19d754030bb1105a572373371012"
+    },
+    "v36_pipeline": {
+      "path": "ml/ocr/shrink_region_detector_v36/pipeline.py",
+      "sha256": "4aefe39c2359db4f113ed1b93d5f247cc9a0efa48fb8beaf860caf0fd3702704"
+    },
+    "v36_protocol": {
+      "path": "ml/ocr/shrink_region_detector_v36/protocol.py",
+      "sha256": "7c030b6c0cc82f151cd457cd591c4588295c24cb131b3a21643d808d3d576d4d"
+    },
+    "v36_result": {
+      "path": "ml/ocr/shrink_region_detector_v36/P1_RESULT.json",
+      "sha256": "95f30817aa12908eca46e9871c0517e3905b047c4bde0fbf80c98da0e15e47d9"
+    }
+  },
+  "ground_truth_core_expansion_oracle": {
+    "false_negatives": 0,
+    "false_positives": 0,
+    "mean_source_box_iou": 0.9130460877064696,
+    "minimum_source_box_iou": 0.7456648887988618,
+    "precision": 1.0,
+    "predicted_regions": 86,
+    "recall": 1.0,
+    "true_positives": 86,
+    "truth_regions": 86
+  },
+  "interpretation": {
+    "core_component_extraction": "Connected core extraction remains below the 0.95 proposal recall bar after pixel thresholding.",
+    "core_expansion": "Ground-truth-core expansion passes perfectly, so deterministic expansion is not the responsible stage.",
+    "core_pixel_segmentation": "Core probability separation remains below the 0.95 recall bar.",
+    "tiling": "Source coverage is complete; overlap mapping is not the recall bottleneck."
+  },
+  "isolated_responsible_stage": "core_pixel_segmentation",
+  "next_revision_startable": true,
+  "predicted_core_proposals": {
+    "best_recall_then_precision": {
+      "expanded": false,
+      "false_negatives": 68,
+      "false_positives": 159,
+      "precision": 0.1016949152542373,
+      "predicted_regions": 177,
+      "recall": 0.20930232558139536,
+      "threshold": 0.6,
+      "true_positives": 18,
+      "truth_regions": 86
+    },
+    "threshold_sweep": [
+      {
+        "expanded": false,
+        "false_negatives": 82,
+        "false_positives": 182,
+        "precision": 0.021505376344086023,
+        "predicted_regions": 186,
+        "recall": 0.046511627906976744,
+        "threshold": 0.1,
+        "true_positives": 4,
+        "truth_regions": 86
+      },
+      {
+        "expanded": false,
+        "false_negatives": 82,
+        "false_positives": 200,
+        "precision": 0.0196078431372549,
+        "predicted_regions": 204,
+        "recall": 0.046511627906976744,
+        "threshold": 0.2,
+        "true_positives": 4,
+        "truth_regions": 86
+      },
+      {
+        "expanded": false,
+        "false_negatives": 78,
+        "false_positives": 205,
+        "precision": 0.03755868544600939,
+        "predicted_regions": 213,
+        "recall": 0.09302325581395349,
+        "threshold": 0.3,
+        "true_positives": 8,
+        "truth_regions": 86
+      },
+      {
+        "expanded": false,
+        "false_negatives": 74,
+        "false_positives": 165,
+        "precision": 0.06779661016949153,
+        "predicted_regions": 177,
+        "recall": 0.13953488372093023,
+        "threshold": 0.4,
+        "true_positives": 12,
+        "truth_regions": 86
+      },
+      {
+        "expanded": false,
+        "false_negatives": 72,
+        "false_positives": 132,
+        "precision": 0.0958904109589041,
+        "predicted_regions": 146,
+        "recall": 0.16279069767441862,
+        "threshold": 0.5,
+        "true_positives": 14,
+        "truth_regions": 86
+      },
+      {
+        "expanded": false,
+        "false_negatives": 68,
+        "false_positives": 159,
+        "precision": 0.1016949152542373,
+        "predicted_regions": 177,
+        "recall": 0.20930232558139536,
+        "threshold": 0.6,
+        "true_positives": 18,
+        "truth_regions": 86
+      },
+      {
+        "expanded": false,
+        "false_negatives": 77,
+        "false_positives": 218,
+        "precision": 0.039647577092511016,
+        "predicted_regions": 227,
+        "recall": 0.10465116279069768,
+        "threshold": 0.7,
+        "true_positives": 9,
+        "truth_regions": 86
+      },
+      {
+        "expanded": false,
+        "false_negatives": 86,
+        "false_positives": 167,
+        "precision": 0.0,
+        "predicted_regions": 167,
+        "recall": 0.0,
+        "threshold": 0.8,
+        "true_positives": 0,
+        "truth_regions": 86
+      },
+      {
+        "expanded": false,
+        "false_negatives": 86,
+        "false_positives": 0,
+        "precision": 0.0,
+        "predicted_regions": 0,
+        "recall": 0.0,
+        "threshold": 0.9,
+        "true_positives": 0,
+        "truth_regions": 86
+      }
+    ]
+  },
+  "protocol": {
+    "db_shrink_ratio": 0.4,
+    "minimum_component_area": 1,
+    "onnx_provider": "CPUExecutionProvider",
+    "tile_overlap": 64,
+    "tile_size": 256,
+    "truth_match_iou_minimum": 0.5
+  },
+  "revision": "graph-text-shrink-region-detector-v36",
+  "schema": "graphreader.ocr-shrink-region-detector-v36-diagnostic.v1",
+  "tiling_overlap_mapping": {
+    "covered_pixel_fraction": 1.0,
+    "fraction_overlap_std_gt_0_1": 0.0006512185717708791,
+    "maximum_coverage": 6,
+    "maximum_overlap_prediction_std": 0.33707186952233315,
+    "mean_overlap_prediction_std": 0.00031906323125366977,
+    "minimum_coverage": 1,
+    "overlap_pixel_count": 4110755,
+    "p95_overlap_prediction_std": 3.274339001109175e-05,
+    "tile_count": 204,
+    "tile_overlap": 64,
+    "tile_size": 256
+  }
+}
