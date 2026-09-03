@@ -156,6 +156,11 @@ def diagnose(root: Path, *, sealed_target: int = 51, expected_real_dev: int | No
     modes: Counter[str] = Counter()
     diameters: list[float] = []
     truth_marker_count = 0
+    points_inside_image = 0
+    points_inside_anchor_x = 0
+    points_inside_anchor_y = 0
+    points_inside_anchor_plot = 0
+    points_inside_expanded_proposal_search = 0
     for path in dev_paths:
         before = _sha256(path)
         from tools.private_acceptance.real_corpus import parse_dig
@@ -170,6 +175,24 @@ def diagnose(root: Path, *, sealed_target: int = 51, expected_real_dev: int | No
         modes[image.mode] += 1
         scales.append(float(production_resize_dimensions(image.width, image.height)["scale"]))
         diameters.extend(_effective_marker_diameters(image, truth.points))
+        left = min(anchor.screen_x for anchor in truth.anchors)
+        right = max(anchor.screen_x for anchor in truth.anchors)
+        top = min(anchor.screen_y for anchor in truth.anchors)
+        bottom = max(anchor.screen_y for anchor in truth.anchors)
+        proposal_search_margin = (MARKER_PROPOSAL_PATCH_SIZE_PX // 2) + 5
+        for point in truth.points:
+            inside_x = left <= point.screen_x <= right
+            inside_y = top <= point.screen_y <= bottom
+            points_inside_image += int(
+                0 <= point.screen_x < image.width and 0 <= point.screen_y < image.height
+            )
+            points_inside_anchor_x += int(inside_x)
+            points_inside_anchor_y += int(inside_y)
+            points_inside_anchor_plot += int(inside_x and inside_y)
+            points_inside_expanded_proposal_search += int(
+                left - proposal_search_margin <= point.screen_x <= right + proposal_search_margin
+                and top - proposal_search_margin <= point.screen_y <= bottom + proposal_search_margin
+            )
 
     if not widths or not diameters:
         raise ValueError("REAL_DEV_NO_MEASURABLE_DATA")
@@ -196,6 +219,15 @@ def diagnose(root: Path, *, sealed_target: int = 51, expected_real_dev: int | No
                 [diameter / MARKER_PROPOSAL_PATCH_SIZE_PX for diameter in diameters]
             ),
             "coverage_definition": "effective source-space marker diameter divided by the identity 33x33 MarkerImageFrame proposal patch side",
+        },
+        "anchor_plot_point_coverage": {
+            "truth_marker_count": truth_marker_count,
+            "inside_image_count": points_inside_image,
+            "inside_anchor_x_count": points_inside_anchor_x,
+            "inside_anchor_y_count": points_inside_anchor_y,
+            "inside_anchor_plot_count": points_inside_anchor_plot,
+            "inside_expanded_proposal_search_count": points_inside_expanded_proposal_search,
+            "expanded_proposal_search_margin_px": (MARKER_PROPOSAL_PATCH_SIZE_PX // 2) + 5,
         },
         "measured_marker_count": len(diameters),
         "truth_marker_count": truth_marker_count,

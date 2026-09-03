@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "scale_gap_measured_stage_attribution_pending",
+  "status": "harness_plot_scope_defect_confirmed",
   "report_scope": "aggregate_only",
   "runtime_contract": {
     "marker_frame_coordinate_space": "original_source_pixels",
@@ -63,17 +63,29 @@
     "resize_degradation_roundtrip_restored": true,
     "production_marker_frame_resize_observed": false
   },
+  "real_dev_v23_stage_coverage": {
+    "raw_grid": {"true_positives": 1108, "false_negatives": 896, "recall": 0.5528942115768463},
+    "ink_supported": {"true_positives": 1108, "false_negatives": 896, "recall": 0.5528942115768463},
+    "ocr_unmasked": {"true_positives": 1042, "false_negatives": 962, "recall": 0.5199600798403193},
+    "artifact_unmasked_emitted": {"true_positives": 885, "false_negatives": 1119, "recall": 0.4416167664670659},
+    "above_threshold_decoded": {"true_positives": 356, "false_negatives": 1648, "recall": 0.17764471057884232},
+    "pre_nms": {"true_positives": 316, "false_negatives": 1688, "recall": 0.15768463073852296},
+    "final": {"true_positives": 312, "false_negatives": 1692, "recall": 0.15568862275449102},
+    "real_sealed_reads": 0
+  },
   "finding": {
     "central_scale_coverage": "the current train distribution covers the real-dev p05 diameter of 6 px through the p90 diameter of 24 px",
     "remaining_scale_gap": "the current train distribution omits the real-dev 24 to 27 px p90-to-p95 tail and the 1 to 48 px full measured envelope",
     "failure_explanation": "scale coverage alone is insufficient to explain V23 real-dev recall 0.15568862275449102 because most of the measured central distribution is already inside the synthetic train range",
-    "required_next_diagnosis": "aggregate truth coverage at emitted-proposal and above-threshold decoded stages before changing the generator or opening a candidate"
+    "harness_defect": "the marker diagnostic used the minimum and maximum calibration-anchor coordinates as plot extents even though calibration anchors are not plot-boundary annotations",
+    "harness_defect_evidence": "only 912 of 2004 truths lie inside the anchor rectangle and 1110 lie inside its 21-pixel expanded proposal search, matching raw-grid coverage of 1108 within grid quantization",
+    "required_next_diagnosis": "rerun the marker stage independently over the full immutable source image while retaining the same model, masks, threshold, postprocessing, and real-dev assignment"
   },
   "implementation": {
     "real_probe_path": "tools/private_acceptance/real_dev_distribution.py",
-    "real_probe_sha256": "a4f089b79a2cde4fd8d8479f5d95301a8d654b27c8041146e4caaa943a76ae7d",
+    "real_probe_sha256": "f01c62ee0f6e988ba688792d8a236011765dc3fe8e4d4507d610baa2275aff22",
     "real_probe_test_path": "tools/private_acceptance/tests/test_real_dev_distribution.py",
-    "real_probe_test_sha256": "744eab67c79be6f207c62a001ae6e9955a6d879c1c8b4c43a20614b748641a4d",
+    "real_probe_test_sha256": "93bb56617ade7b872544b51a83aaf44140b7f5c68604c7cf82edf1d49dab48b4",
     "synthetic_audit_path": "ml/markers/center/generator_input_gap/audit.py",
     "synthetic_audit_sha256": "4c018971961616f83eba3e5b47c20404831a17d617b17ae4917afb65391240d7",
     "synthetic_result_path": "ml/markers/center/generator_input_gap/AUDIT.json",

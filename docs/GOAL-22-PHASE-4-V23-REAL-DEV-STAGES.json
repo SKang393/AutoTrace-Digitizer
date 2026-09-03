@@ -17,8 +17,8 @@
     "marker_center_precision": false,
     "marker_center_recall": false
   },
-  "mean_project_inference_ms": 947.2457875,
-  "total_runtime_ms": 113669.4945,
+  "mean_project_inference_ms": 962.3167033333331,
+  "total_runtime_ms": 115478.00439999996,
   "assignments_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
   "model_sha256": "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38",
   "upstream_ocr_payload_sha256": {
@@ -59,10 +59,45 @@
   "pre_nms_false_negatives": 1688,
   "pre_nms_precision": 0.21703296703296704,
   "pre_nms_recall": 0.15768463073852296,
+  "grid_proposal_match": {
+    "true_positives": 1108,
+    "false_positives": 1664688,
+    "false_negatives": 896,
+    "precision": 0.0006651474730399161,
+    "recall": 0.5528942115768463
+  },
+  "ink_supported_proposal_match": {
+    "true_positives": 1108,
+    "false_positives": 370718,
+    "false_negatives": 896,
+    "precision": 0.0029798884424435085,
+    "recall": 0.5528942115768463
+  },
+  "ocr_unmasked_proposal_match": {
+    "true_positives": 1042,
+    "false_positives": 352331,
+    "false_negatives": 962,
+    "precision": 0.002948725567601373,
+    "recall": 0.5199600798403193
+  },
+  "emitted_proposal_match": {
+    "true_positives": 885,
+    "false_positives": 318302,
+    "false_negatives": 1119,
+    "precision": 0.002772669312973273,
+    "recall": 0.4416167664670659
+  },
+  "above_threshold_decoded_match": {
+    "true_positives": 356,
+    "false_positives": 1476,
+    "false_negatives": 1648,
+    "precision": 0.1943231441048035,
+    "recall": 0.17764471057884232
+  },
   "nms_true_positive_cost": 4,
   "nms_recall_cost": 0.001996007984031936,
-  "diagnosis": "NMS is not the primary real-dev failure source. The proposal, masking, scoring, geometry, and plot-bound stages retain only 316 of 2004 truths before NMS while also retaining 1140 false positives.",
+  "diagnosis": "The harness anchor rectangle limits raw-grid recall to 0.5528942115768463 because calibration anchors are not plot-boundary annotations. Ink support loses no additional truths. OCR and artifact masks reduce recall to 0.4416167664670659, the classifier threshold reduces it to 0.17764471057884232, and NMS is not the primary failure source.",
   "production_approval": false,
   "release_eligible": false,
-  "next_action": "measure aggregate real-dev marker scale and proposal-input distributions against the synthetic generator, correct the synthetic generator, and re-pass synthetic gates before any real-sealed run"
+  "next_action": "fix the independent marker diagnostic to search the full immutable source image, then rerun the same real-dev stage attribution before any generator, candidate, or real-sealed action"
 }

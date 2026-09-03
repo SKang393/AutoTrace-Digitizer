@@ -45,6 +45,15 @@
     },
     "coverage_definition": "effective source-space marker diameter divided by the identity 33x33 MarkerImageFrame proposal patch side"
   },
+  "anchor_plot_point_coverage": {
+    "truth_marker_count": 2004,
+    "inside_image_count": 2004,
+    "inside_anchor_x_count": 1066,
+    "inside_anchor_y_count": 1535,
+    "inside_anchor_plot_count": 912,
+    "inside_expanded_proposal_search_count": 1110,
+    "expanded_proposal_search_margin_px": 21
+  },
   "finding": {
     "resize_collapse_confirmed": true,
     "marker_scale_gap": "the prior synthetic 8.5 to 13.5 pixel diameter range covered the real-dev median but not p90",
@@ -53,9 +62,9 @@
   },
   "implementation": {
     "path": "tools/private_acceptance/real_dev_distribution.py",
-    "sha256": "a4f089b79a2cde4fd8d8479f5d95301a8d654b27c8041146e4caaa943a76ae7d",
+    "sha256": "f01c62ee0f6e988ba688792d8a236011765dc3fe8e4d4507d610baa2275aff22",
     "test_path": "tools/private_acceptance/tests/test_real_dev_distribution.py",
-    "test_sha256": "744eab67c79be6f207c62a001ae6e9955a6d879c1c8b4c43a20614b748641a4d",
+    "test_sha256": "93bb56617ade7b872544b51a83aaf44140b7f5c68604c7cf82edf1d49dab48b4",
     "focused_test_result": "2 passed"
   },
   "execution": {

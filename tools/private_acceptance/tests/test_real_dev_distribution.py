@@ -64,6 +64,12 @@ def test_diagnose_reads_only_real_dev_and_is_private_aggregate(tmp_path: Path, m
     assert patch["diameter_to_patch_ratio"]["median"] == diameter["median"] / 33
     assert patch["diameter_to_patch_ratio"]["p95"] >= patch["diameter_to_patch_ratio"]["p90"]
     assert "identity 33x33" in patch["coverage_definition"]
+    coverage = result["anchor_plot_point_coverage"]
+    assert coverage["truth_marker_count"] == result["truth_marker_count"]
+    assert coverage["inside_image_count"] == result["truth_marker_count"]
+    assert coverage["inside_anchor_plot_count"] == result["truth_marker_count"]
+    assert coverage["inside_expanded_proposal_search_count"] == result["truth_marker_count"]
+    assert coverage["expanded_proposal_search_margin_px"] == 21
     serialized = json.dumps(result, sort_keys=True)
     assert "Study" not in serialized
     assert str(tmp_path) not in serialized
