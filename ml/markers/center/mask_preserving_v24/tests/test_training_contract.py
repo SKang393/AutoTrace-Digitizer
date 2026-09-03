@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ml.markers.center.mask_preserving_v24.train_p1 import RUNNER_SOURCE_PATHS
 from ml.markers.gate_seal import source_bundle_sha256
+from ml.markers.center.real_range_generator_v1.negative_sampler import TOPOLOGY_RADIUS_PX
 
 ROOT = Path(__file__).resolve().parents[5]
 
@@ -17,12 +18,16 @@ def test_training_contract_is_fixed_and_candidate_not_run():
     assert config["optimizer_steps_expected"] == 10080
     assert config["optimizer_steps_maximum"] == 10080
     assert config["training_example_count_expected"] == 35838
-    assert config["retry_count"] == 3
+    assert config["retry_count"] == 4
     assert config["negative_sampler"]["total_expected"] == 32580
-    assert config["negative_sampler"]["selected_index_sha256"] == "943199e6b93c7d02a3eb98506aad03ba69ee4d45024cc707c8f9efdbe71c5649"
+    assert config["negative_sampler"]["selected_index_sha256"] == "c45caa550038aa5044bbe1454f536f34154e947c4d49ff1f1f650b08c02668da"
+    assert config["negative_sampler"]["expected_capacities"] == {"artifact": 13509, "faint_low": 8598, "faint_p05": 5127, "generic": 179217, "hard_existing": 6012, "ocr_heavy": 18748}
+    assert config["negative_sampler"]["topology"] == {"radius_px": 16.0, "expected_capacity": {"topology_junction": 8331, "topology_fragment": 8049}, "expected_selected": {"topology_junction": 8331, "topology_fragment": 8049}, "selected_index_sha256": "df24e495a76d485adcef07defd96ee723da3e029ededd5009e9c34e7ac58325d"}
+    assert config["negative_sampler"]["topology"]["radius_px"] == TOPOLOGY_RADIUS_PX
     assert sum(config["negative_sampler"]["quotas"].values()) == 32580
     assert config["sealed_runs"] == 0 and config["private_data"] is False
     assert config["real_dev_reads"] == 0 and config["real_sealed_reads"] == 0
+    assert config["retry3_morphology_gap_sha256"] == "3b0e9981eb3d21787679f1df1151a3c0bc395ce7966e6c681c6de5755c3fb769"
 
 def test_runner_source_bundle_is_relative_and_present():
     assert all(not path.is_absolute() for path in RUNNER_SOURCE_PATHS)
@@ -31,8 +36,9 @@ def test_runner_source_bundle_is_relative_and_present():
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text())
     entry = next(item for item in ledger["revisions"] if item["revision"] == config["revision"])
     assert entry["p1_runner_source_bundle_sha256"] == config["expected_runner_source_bundle_sha256"]
-    if entry["execution_authorized"] or entry["status"] == "candidate_1_preregistered":
-        assert source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
+    assert entry["execution_authorized"] is True
+    assert entry["status"] == "candidate_1_preregistered"
+    assert source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
 
 def test_current_evidence_bindings_and_authorization_match_files():
     config_path = ROOT / "ml/markers/center/mask_preserving_v24/training/p1.json"
@@ -41,6 +47,7 @@ def test_current_evidence_bindings_and_authorization_match_files():
     for path_key, hash_key in (
         ("morphology_diagnosis_path", "morphology_diagnosis_sha256"),
         ("morphology_gap_path", "morphology_gap_sha256"),
+        ("retry3_morphology_gap_path", "retry3_morphology_gap_sha256"),
         ("generator_audit_path", "generator_audit_sha256"),
         ("negative_audit_path", "negative_audit_sha256"),
     ):
@@ -56,18 +63,18 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert digest(ROOT / "ml/markers/center/real_range_generator_v1/negative_proposal_audit.py") == entry["synthetic_negative_audit_source_sha256"]
     assert digest(ROOT / "ml/markers/center/real_range_generator_v1/AUDIT.json") == entry["negative_generator_audit_sha256"]
     assert digest(ROOT / "ml/markers/center/real_range_generator_v1/NEGATIVE_PROPOSAL_AUDIT.json") == entry["synthetic_negative_audit_sha256"]
-    assert entry["synthetic_negative_proposal_count"] == 237578
+    assert entry["synthetic_negative_proposal_count"] == 231211
     assert entry["morphology_diagnosis_sha256"] == config["morphology_diagnosis_sha256"]
     assert entry["morphology_gap_sha256"] == config["morphology_gap_sha256"]
-    assert entry["status"] == "dev_passed_retry3_unconsumed_real_dev_failed_generator_distribution_gap"
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
     assert entry["real_dev_authorized"] is False
     assert entry["real_sealed_authorized"] is False
     assert entry["real_sealed_reads"] == 0
     assert entry["sealed_runs"] == 0
     assert entry["consumed_candidate_ids"] == []
-    assert entry["dev_passed_candidate_ids"] == ["P1"]
+    assert entry["dev_passed_candidate_ids"] == []
     assert entry["candidate_consumed"] is False
     assert entry["p1_result_path"].endswith("P1_RETRY3_RESULT.json")
     assert digest(ROOT / entry["p1_result_path"]) == entry["p1_result_sha256"]
@@ -112,7 +119,7 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["p1_onnx_parity_maximum_absolute_error"] == 1.9073486328125e-06
     assert entry["p1_opened_seal_sha256"] == "33773333d6f75814c4f0801d4c86438990a8478eddb021b7912bc4ea8bb6ebee"
     assert entry["p1_result_seal_sha256"] == "d8e830b2e384a67a1da3911ba774c707a5cac66ded3bfbabf2870e54c2043ee5"
-    assert entry["p1_dev_gate_passed"] is True
+    assert entry["p1_dev_gate_passed"] is False
     assert entry["real_dev_result_path"].endswith("V24-RETRY3-REAL-DEV-STAGES.json")
     assert entry["real_dev_result_sha256"] == "1e471a179114e078f101edffcf04aea9e3b29ab72a3d31649695726465661c90"
     assert digest(ROOT / entry["real_dev_result_path"]) == entry["real_dev_result_sha256"]
@@ -144,7 +151,7 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["retry3_vs_retry2_above_threshold_false_candidates_delta"] == -9920
     assert entry["spatial_morphology_diagnostic_required"] is False
     assert entry["retry2_dev_gate_passed"] is True
-    assert entry["execution_blocker"]
+    assert entry["execution_blocker"] is None
 
 def test_train_examples_preserve_mask_crossing_positive():
     from ml.markers.center.mask_preserving_v24.train_p1 import _examples

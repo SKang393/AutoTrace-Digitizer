@@ -10,7 +10,7 @@ import onnx, onnxruntime as ort, torch
 from ml.markers.center.focal_confidence_v21.focal_loss import v21_loss
 from ml.markers.center.scale_classifier_v16.model import ModelConfig, ScaleClassifierNet
 from ml.markers.center.real_range_generator_v1.generator import audit as generator_audit, build_split
-from ml.markers.center.real_range_generator_v1.negative_sampler import SampledNegatives, sample_negatives
+from ml.markers.center.real_range_generator_v1.negative_sampler import TOPOLOGY_RADIUS_PX, SampledNegatives, sample_negatives
 from ml.markers.center.metrics import center_metrics
 from ml.markers.gate_seal import canonical_json_bytes, sha256_file
 from ml.markers.training_budget import acquire_training_candidate, complete_training_candidate, void_candidate
@@ -35,6 +35,7 @@ RUNNER_SOURCE_PATHS = (
     Path("ml/markers/center/real_range_generator_v1/NEGATIVE_PROPOSAL_AUDIT.json"),
     Path("docs/GOAL-22-PHASE-4R-V24-NEGATIVE-PATCH-GAP.json"),
     Path("docs/GOAL-22-PHASE-4R-V24-MORPHOLOGY-GAP.json"),
+    Path("docs/GOAL-22-PHASE-4R-V24-RETRY3-MORPHOLOGY-GAP.json"),
     Path("ml/markers/center/metrics.py"),
     Path("ml/policy/evidence-policy.json"),
     Path("ml/policy/acceptance-bars.json"),
@@ -122,7 +123,7 @@ def run(output_dir: Path, checkpoint: Path, v21_onnx: Path) -> dict:
     config=json.loads((REPO_ROOT/CONFIG_PATH).read_text(encoding="utf-8"))
     if _sha(checkpoint) != config["checkpoint_sha256"]: raise ValueError("V21 checkpoint hash changed")
     if _sha(v21_onnx) != config["v21_onnx_sha256"]: raise ValueError("V21 ONNX hash changed")
-    for path_key, hash_key in (("feasibility_path","feasibility_sha256"),("retry_diagnosis_path","retry_diagnosis_sha256"),("morphology_diagnosis_path","morphology_diagnosis_sha256"),("morphology_gap_path","morphology_gap_sha256"),("generator_audit_path","generator_audit_sha256"),("negative_audit_path","negative_audit_sha256"),("negative_gap_path","negative_gap_sha256"),("evidence_policy_path","evidence_policy_sha256"),("acceptance_bars_path","acceptance_bars_sha256")):
+    for path_key, hash_key in (("feasibility_path","feasibility_sha256"),("retry_diagnosis_path","retry_diagnosis_sha256"),("morphology_diagnosis_path","morphology_diagnosis_sha256"),("morphology_gap_path","morphology_gap_sha256"),("retry3_morphology_gap_path","retry3_morphology_gap_sha256"),("generator_audit_path","generator_audit_sha256"),("negative_audit_path","negative_audit_sha256"),("negative_gap_path","negative_gap_sha256"),("evidence_policy_path","evidence_policy_sha256"),("acceptance_bars_path","acceptance_bars_sha256")):
         if _sha(REPO_ROOT/str(config[path_key])) != config[hash_key]: raise ValueError(f"bound input changed: {config[path_key]}")
     if _sha(REPO_ROOT/config["negative_sampler"]["source_path"]) != config["negative_sampler"]["source_sha256"]: raise ValueError("negative sampler source changed")
     authorization=acquire_training_candidate(REPO_ROOT,task=protocol.TASK,revision=protocol.TRAINING_REVISION,candidate_id=protocol.TRAINING_CANDIDATE_ID,config_path=CONFIG_PATH,runner_source_paths=RUNNER_SOURCE_PATHS)
@@ -134,6 +135,11 @@ def run(output_dir: Path, checkpoint: Path, v21_onnx: Path) -> dict:
         sampler_config = config["negative_sampler"]
         if sampling.capacities != sampler_config["expected_capacities"] or sampling.selected_index_sha256 != sampler_config["selected_index_sha256"] or sampling.counts != sampler_config["quotas"]:
             raise RuntimeError("negative sampler contract changed")
+        topology_config = sampler_config["topology"]
+        if float(topology_config["radius_px"]) != TOPOLOGY_RADIUS_PX:
+            raise RuntimeError("topology radius contract changed")
+        if sampling.topology_capacity != topology_config["expected_capacity"] or sampling.topology_selected != topology_config["expected_selected"] or sampling.topology_selected_index_sha256 != topology_config["selected_index_sha256"]:
+            raise RuntimeError("topology sampling contract changed")
         if len(labels) != config["training_example_count_expected"] or int((labels>.5).sum()) != config["positive_example_count_expected"] or int(hard.sum()) != config["hard_negative_example_count_expected"]: raise RuntimeError("training example contract changed")
         payload=torch.load(checkpoint,map_location="cpu",weights_only=False); model=ScaleClassifierNet(ModelConfig(seed=20260902)); model.load_state_dict(payload["state_dict"]); optimizer=torch.optim.AdamW(model.parameters(),lr=config["learning_rate"],weight_decay=config["weight_decay"]); steps=0; phase="training"; model.train()
         for _ in range(config["epochs"]):
@@ -147,7 +153,7 @@ def run(output_dir: Path, checkpoint: Path, v21_onnx: Path) -> dict:
         parity=[]; parity_source=extract_proposals(dev[0].tensor).patches
         for count in [1,8,37]:
             x=parity_source[:count].contiguous(); expected=model(x).detach().numpy(); actual=session.run(["candidate_predictions"],{"candidate_patches":x.numpy()})[0]; parity.append({"candidate_count":count,"maximum_absolute_error":float(np.max(np.abs(expected-actual)))})
-        report={"schema":"graphreader.marker-center-mask-preserving-v24-candidate.v1","task":protocol.TASK,"revision":protocol.TRAINING_REVISION,"candidate_id":protocol.TRAINING_CANDIDATE_ID,"status":"dev_passed" if dev_passed and max(r["maximum_absolute_error"] for r in parity)<=config["onnx_parity_tolerance"] else "failed_dev","synthetic_only":True,"private_data":False,"real_dev_reads":0,"real_sealed_reads":0,"sealed_runs":0,"optimizer_steps":steps,"training_example_count":len(labels),"positive_example_count":int((labels>.5).sum()),"hard_negative_example_count":int(hard.sum()),"negative_sampling":{"seed":20260904,"split":"train","capacities":sampling.capacities,"counts":sampling.counts,"selected_index_sha256":sampling.selected_index_sha256},"dev_comparisons":comparisons,"selected":selected,"dev_gate_passed":dev_passed,"checkpoint_sha256":_sha(out_pt),"onnx_sha256":_sha(out_onnx),"v21_checkpoint_sha256":config["checkpoint_sha256"],"v21_onnx_sha256":config["v21_onnx_sha256"],"onnx_provider":protocol.PROVIDER,"onnx_dynamic_candidate_counts":parity,"onnx_parity_maximum_absolute_error":max(r["maximum_absolute_error"] for r in parity),"elapsed_ms":round((time.perf_counter()-started)*1000,3),"production_approval":False,"release_eligible":False}
+        report={"schema":"graphreader.marker-center-mask-preserving-v24-candidate.v1","task":protocol.TASK,"revision":protocol.TRAINING_REVISION,"candidate_id":protocol.TRAINING_CANDIDATE_ID,"status":"dev_passed" if dev_passed and max(r["maximum_absolute_error"] for r in parity)<=config["onnx_parity_tolerance"] else "failed_dev","synthetic_only":True,"private_data":False,"real_dev_reads":0,"real_sealed_reads":0,"sealed_runs":0,"optimizer_steps":steps,"training_example_count":len(labels),"positive_example_count":int((labels>.5).sum()),"hard_negative_example_count":int(hard.sum()),"negative_sampling":{"seed":20260904,"split":"train","capacities":sampling.capacities,"counts":sampling.counts,"selected_index_sha256":sampling.selected_index_sha256,"topology_radius_px":topology_config["radius_px"],"topology_capacity":sampling.topology_capacity,"topology_selected":sampling.topology_selected,"topology_selected_index_sha256":sampling.topology_selected_index_sha256},"dev_comparisons":comparisons,"selected":selected,"dev_gate_passed":dev_passed,"checkpoint_sha256":_sha(out_pt),"onnx_sha256":_sha(out_onnx),"v21_checkpoint_sha256":config["checkpoint_sha256"],"v21_onnx_sha256":config["v21_onnx_sha256"],"onnx_provider":protocol.PROVIDER,"onnx_dynamic_candidate_counts":parity,"onnx_parity_maximum_absolute_error":max(r["maximum_absolute_error"] for r in parity),"elapsed_ms":round((time.perf_counter()-started)*1000,3),"production_approval":False,"release_eligible":False}
     except Exception as error:
         report={"schema":"graphreader.marker-center-mask-preserving-v24-failure.v1","task":protocol.TASK,"revision":protocol.TRAINING_REVISION,"candidate_id":protocol.TRAINING_CANDIDATE_ID,"status":"failed_runner","phase":phase,"exception_type":type(error).__name__,"exception_message":str(error),"synthetic_only":True,"private_data":False,"real_dev_reads":0,"real_sealed_reads":0,"sealed_runs":0}
         report_path.write_bytes(canonical_json_bytes(report)); void_candidate(authorization,error); raise
