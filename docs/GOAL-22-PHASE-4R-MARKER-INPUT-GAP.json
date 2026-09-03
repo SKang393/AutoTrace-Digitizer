@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "v24_runtime_integrated_pending_real_dev",
+  "status": "v24_real_dev_failed_negative_generator_gap",
   "report_scope": "aggregate_only",
   "runtime_contract": {
     "marker_frame_coordinate_space": "original_source_pixels",
@@ -190,6 +190,27 @@
     "release_tool_build_errors": 0,
     "no_corpus_self_test": "pass"
   },
+  "v24_real_dev": {
+    "status": "fail",
+    "projects": 120,
+    "real_sealed_reads": 0,
+    "true_positives": 1143,
+    "false_positives": 8176,
+    "false_negatives": 861,
+    "precision": 0.12265264513359803,
+    "recall": 0.5703592814371258,
+    "grid_proposal_recall": 1.0,
+    "ink_supported_proposal_recall": 1.0,
+    "mask_preserved_proposal_recall": 1.0,
+    "above_threshold_true_positives": 1170,
+    "above_threshold_false_positives": 17867,
+    "above_threshold_recall": 0.5838323353293413,
+    "final_candidates": 9319,
+    "precision_gate_passed": false,
+    "recall_gate_passed": false,
+    "candidate_consumed": false,
+    "real_sealed_authorized": false
+  },
   "finding": {
     "central_scale_coverage": "the current train distribution covers the real-dev p05 diameter of 6 px through the p90 diameter of 24 px",
     "remaining_scale_gap": "the current train distribution omits the real-dev 24 to 27 px p90-to-p95 tail and the 1 to 48 px full measured envelope",
@@ -201,7 +222,8 @@
     "generator_repair": "the corrected synthetic generator now spans the measured diameter, rendered footprint, ink, OCR-center mask, artifact axis-crossing mask, and prohibited-structure ranges with disjoint train and dev seeds",
     "feasibility_result": "mask-preserving proposal coverage is complete, but the frozen V21 classifier fails the corrected synthetic dev gate and hits one prohibited structure per scene",
     "candidate_result": "V24 P1 clears every corrected synthetic dev gate at the fixed 0.25 threshold after one void pre-sealed dtype attempt and one valid training run",
-    "required_next_diagnosis": "run the exact V24 candidate-only C# runtime on aggregate-only real-dev before any real-sealed read"
+    "real_dev_contradiction": "V24 real-dev fails at precision 0.12265 and recall 0.57036 despite complete proposal and mask-preserved coverage, with 17867 false candidates above the fixed classifier threshold",
+    "required_next_diagnosis": "measure aggregate real-dev negative proposal patch statistics against corrected synthetic negatives, repair the generator, and re-pass synthetic gates before another real-dev or any real-sealed read"
   },
   "implementation": {
     "real_probe_path": "tools/private_acceptance/real_dev_distribution.py",
@@ -225,12 +247,14 @@
     "v24_feasibility_source_sha256": "252896f950e58f8e276b79f770bdf3ada1202afeb3bbb7cfb305b3ea9c6fd263",
     "v24_mask_preserving_source_sha256": "171ddcc2efbd2742f5699dad8d16ecec217ca983ee06cec4bc63e1f17e3120e2",
     "v24_p1_result_path": "ml/markers/center/mask_preserving_v24/P1_RESULT.json",
-    "v24_p1_result_sha256": "c8da9cc7456f45489a1a306c6da72536dd75aa20b0ebf6b6c96052ff0400b5f5",
+    "v24_p1_result_sha256": "af741293f1cd628204674f24eb24d764ace877e1efd6f8563f9a8efe6a69e917",
     "v24_runtime_adapter_path": "src/GraphReader.App/Integration/Workflow/ProductionProposalMarkerCenterAdapter.cs",
     "v24_runtime_adapter_sha256": "150d543b1ce1a188605ed369eca9427b1f422680b96f222dba2762e1b68e9295",
     "v24_runtime_test_path": "tests/GraphReader.App.Tests/ProductionProposalMarkerCenterAdapterTests.cs",
     "v24_runtime_test_sha256": "e75a3f55aa358a3afe1cb976e27e9abab789a4be959db7d7c4ca33687273bcd6",
     "v24_real_dev_harness_sha256": "e912a8f683902ccca762ffb1f4558d7c6086d011292c3cee8525e5ee0ea53c10",
+    "v24_real_dev_result_path": "docs/GOAL-22-PHASE-4-V24-REAL-DEV-FULL-IMAGE-STAGES.json",
+    "v24_real_dev_result_sha256": "ec1c7699cd4b42adffe800cbeaa258a06d0de1060c058321fb83cae4d31b6807",
     "focused_tests": "16 V24 runtime passed; 10 V24 and corrected-generator passed; 3 prior synthetic audit passed; Release real harness build and no-corpus self-test passed"
   },
   "privacy": {

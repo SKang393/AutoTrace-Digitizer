@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "status": "fail",
+  "report_scope": "real_dev_marker_v24_mask_preserving_aggregate_only",
+  "real_dev_projects": 120,
+  "real_sealed_projects": 51,
+  "real_sealed_reads": 0,
+  "successful_projects": 120,
+  "failure_count": 0,
+  "true_positives": 1143,
+  "false_positives": 8176,
+  "false_negatives": 861,
+  "precision": 0.12265264513359803,
+  "recall": 0.5703592814371258,
+  "tolerance_px": 5,
+  "gates": {
+    "marker_center_precision": false,
+    "marker_center_recall": false
+  },
+  "mean_project_inference_ms": 3802.525895,
+  "total_runtime_ms": 456303.10740000004,
+  "assignments_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
+  "model_sha256": "35a0e5563228cfa384a3c4ce4d9c68afaeb57db8dd859f77fcbf5c3d2980bd9e",
+  "upstream_ocr_payload_sha256": {
+    "detector": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+    "official_recognizer": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+    "numeric_recognizer": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+    "ambiguity_recognizer": "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096",
+    "official_alphabet": "8b31115bc8675a58b670879950b550e7d9840984954d9584d251fd72a764477a"
+  },
+  "masking_mode": "mask-preserving_v24_ink_supported_with_ocr_and_artifact_channels",
+  "policy_sha256": "aab9f2ab60cf166828f0928b8496f537341870fd457d0408952e22549fc53a56",
+  "case_level_output": false,
+  "truth_rows_output": false,
+  "pixel_output": false,
+  "training_use": false,
+  "candidate_selection": false,
+  "candidate_revision": "marker-center-mask-preserving-v24",
+  "candidate_id": "P1",
+  "candidate_consumed": false,
+  "marker_search_bounds": "full_immutable_source_image",
+  "stage_counters": {
+    "proposal_grid_positions_considered": 6043845,
+    "low_ink_rejects": 4685835,
+    "ocr_mask_rejects": 0,
+    "artifact_mask_rejects": 0,
+    "emitted_proposals": 1358010,
+    "inference_outputs": 1358010,
+    "outputs_above_0_25": 19037,
+    "decoded_points_masked": 0,
+    "geometry_consensus_rejects_after_1px_refinement_attempts": 192,
+    "decoded_points_outside_plot": 0,
+    "candidates_before_nms": 18845,
+    "nms_suppressions": 9526,
+    "final_candidates": 9319
+  },
+  "grid_proposal_match": {"true_positives": 2004, "false_positives": 6041841, "false_negatives": 0, "recall": 1.0},
+  "ink_supported_proposal_match": {"true_positives": 2004, "false_positives": 1356006, "false_negatives": 0, "recall": 1.0},
+  "emitted_proposal_match": {"true_positives": 2004, "false_positives": 1356006, "false_negatives": 0, "recall": 1.0},
+  "above_threshold_decoded_match": {
+    "true_positives": 1170,
+    "false_positives": 17867,
+    "false_negatives": 834,
+    "precision": 0.06145926353942323,
+    "recall": 0.5838323353293413
+  },
+  "pre_nms_match": {
+    "true_positives": 1170,
+    "false_positives": 17675,
+    "false_negatives": 834,
+    "precision": 0.06208543380206952,
+    "recall": 0.5838323353293413
+  },
+  "v23_comparison": {
+    "precision_change": -0.07837828270145352,
+    "recall_change": 0.1227544910179641,
+    "v23_precision": 0.20103092783505155,
+    "v23_recall": 0.4476047904191617
+  },
+  "diagnosis": {
+    "proposal_and_ink_coverage": "complete",
+    "mask_preservation": "complete",
+    "classifier_truth_recall_before_postprocessing": 0.5838323353293413,
+    "classifier_false_candidates_before_postprocessing": 17867,
+    "primary_failure": "the corrected synthetic generator does not span the real non-marker proposal distribution; real-dev contradicts a passing synthetic dev gate",
+    "prohibited_response": "do not select a new threshold or candidate against real-dev"
+  },
+  "production_approval": false,
+  "real_sealed_authorized": false,
+  "release_eligible": false,
+  "next_action": "measure aggregate real-dev negative proposal patch statistics and compare them with corrected synthetic negative examples, then repair the synthetic generator and re-pass synthetic gates before another real-dev or any real-sealed run"
+}

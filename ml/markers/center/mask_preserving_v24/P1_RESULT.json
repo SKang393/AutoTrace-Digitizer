@@ -3,7 +3,7 @@
   "task": "marker-center",
   "revision": "marker-center-mask-preserving-v24",
   "candidate_id": "P1",
-  "status": "dev_passed_pending_runtime_and_real_dev",
+  "status": "dev_passed_real_dev_failed_generator_gap",
   "model_license": "Apache-2.0",
   "candidate_consumed": false,
   "sealed_runs": 0,
@@ -81,7 +81,21 @@
     "void_record_sha256": "8e716507a4c3007bae17532b15b1511ace9f0974af0dd07162cea65c75782856",
     "opened_record_sha256": "fd270207692e8bcfd550174b07f808b72b75e264b5d71621d415a2bccb7af035"
   },
+  "real_dev_confirmation": {
+    "report_path": "docs/GOAL-22-PHASE-4-V24-REAL-DEV-FULL-IMAGE-STAGES.json",
+    "report_sha256": "ec1c7699cd4b42adffe800cbeaa258a06d0de1060c058321fb83cae4d31b6807",
+    "projects": 120,
+    "real_sealed_reads": 0,
+    "true_positives": 1143,
+    "false_positives": 8176,
+    "false_negatives": 861,
+    "precision": 0.12265264513359803,
+    "recall": 0.5703592814371258,
+    "proposal_recall": 1.0,
+    "above_threshold_false_candidates": 17867,
+    "passed": false
+  },
   "production_approval": false,
   "release_eligible": false,
-  "next_action": "bind the exact V24 ONNX in a candidate-only C# adapter, verify runtime parity, then run one aggregate-only real-dev confirmation before any real-sealed read"
+  "next_action": "measure aggregate real-dev negative proposal patches against corrected synthetic negatives, repair the generator, and re-pass synthetic gates before another real-dev or any real-sealed read"
 }
