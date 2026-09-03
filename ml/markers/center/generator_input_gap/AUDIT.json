@@ -1,0 +1,115 @@
+{
+  "aggregate": {
+    "evidence": "V20 _augment_scene resizes channels down then back to the source tensor dimensions; proposal inputs remain fixed 224x168",
+    "fixed_224x168_tensor": true,
+    "marker_count": 264,
+    "production_marker_frame_resize_observed": false,
+    "resize_degradation_roundtrip_restored": true,
+    "scene_count": 33,
+    "tensor_shapes": [
+      [
+        3,
+        168,
+        224
+      ]
+    ]
+  },
+  "schema": "graphreader.marker-center-generator-input-gap-audit.v1",
+  "scope": {
+    "candidate_revision_created": false,
+    "model_loaded": false,
+    "pixels_emitted": false,
+    "private_or_article_images": false,
+    "scene_ids_emitted": false,
+    "synthetic_only": true,
+    "training_performed": false,
+    "truth_rows_emitted": false
+  },
+  "sources": {
+    "dev_builder": "ml/markers/center/proposal_geometry_v13/dataset.py",
+    "proposal_patch_size_px": 33,
+    "train_builder": "ml/markers/center/tail_coverage_v20/training_families.py"
+  },
+  "splits": {
+    "dev": {
+      "diameter_to_33px_patch_ratio": {
+        "maximum": 0.727273,
+        "median": 0.545455,
+        "minimum": 0.181818,
+        "p05": 0.181818,
+        "p10": 0.242424,
+        "p90": 0.727273,
+        "p95": 0.727273
+      },
+      "fixed_tensor_shape": true,
+      "marker_count": 96,
+      "marker_diameter_px": {
+        "maximum": 24.0,
+        "median": 18.0,
+        "minimum": 6.0,
+        "p05": 6.0,
+        "p10": 8.0,
+        "p90": 24.0,
+        "p95": 24.0
+      },
+      "marker_radius_px": {
+        "maximum": 12.0,
+        "median": 9.0,
+        "minimum": 3.0,
+        "p05": 3.0,
+        "p10": 4.0,
+        "p90": 12.0,
+        "p95": 12.0
+      },
+      "scene_count": 12,
+      "split": "dev",
+      "tensor_shapes": [
+        [
+          3,
+          168,
+          224
+        ]
+      ]
+    },
+    "train": {
+      "diameter_to_33px_patch_ratio": {
+        "maximum": 0.727273,
+        "median": 0.424242,
+        "minimum": 0.181818,
+        "p05": 0.181818,
+        "p10": 0.181818,
+        "p90": 0.727273,
+        "p95": 0.727273
+      },
+      "fixed_tensor_shape": true,
+      "marker_count": 168,
+      "marker_diameter_px": {
+        "maximum": 24.0,
+        "median": 14.0,
+        "minimum": 6.0,
+        "p05": 6.0,
+        "p10": 6.0,
+        "p90": 24.0,
+        "p95": 24.0
+      },
+      "marker_radius_px": {
+        "maximum": 12.0,
+        "median": 7.0,
+        "minimum": 3.0,
+        "p05": 3.0,
+        "p10": 3.0,
+        "p90": 12.0,
+        "p95": 12.0
+      },
+      "scene_count": 21,
+      "split": "train",
+      "tensor_shapes": [
+        [
+          3,
+          168,
+          224
+        ]
+      ]
+    }
+  }
+}

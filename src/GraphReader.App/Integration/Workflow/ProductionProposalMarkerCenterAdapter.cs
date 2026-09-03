@@ -37,7 +37,9 @@ public sealed record ProposalMarkerStageCounters(
 public sealed record ProposalMarkerCandidateDiagnosticResult(
     IReadOnlyList<MarkerCenter> Candidates,
     ProposalMarkerStageCounters StageCounters,
-    [property: JsonIgnore] IReadOnlyList<MarkerCenter> PreNmsCandidates);
+    [property: JsonIgnore] IReadOnlyList<MarkerCenter> PreNmsCandidates,
+    [property: JsonIgnore] IReadOnlyList<MarkerPoint> EmittedProposalCenters,
+    [property: JsonIgnore] IReadOnlyList<MarkerPoint> AboveThresholdDecodedPoints);
 
 /// <summary>
 /// Candidate-only integration for the checksum-bound runtime-consistency-v2 P2
@@ -212,6 +214,8 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
 
         var counters = new ProposalMarkerStageCounterAccumulator();
         var predictions = new List<ProposalMarkerPrediction>();
+        var emittedProposalCenters = new List<MarkerPoint>();
+        var aboveThresholdDecodedPoints = new List<MarkerPoint>();
         var batch = new List<Proposal>(BatchSize);
         int batchOffset = 0;
 
@@ -285,6 +289,8 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                 Proposal proposal = proposals[index];
                 double x = proposal.X + (offsetX * ProposalStride);
                 double y = proposal.Y + (offsetY * ProposalStride);
+                aboveThresholdDecodedPoints.Add(
+                    frame.OriginalToFrame.MapToOriginal(new MarkerPoint(x, y)));
                 double decodedRadius = Math.Clamp(radius, 2.5, 8.0);
                 if (!TryRefine(frame, x, y, decodedRadius, multiradiusGeometry, out MarkerPoint refined, out RefinementFailure failure))
                 {
@@ -317,7 +323,12 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             batchOffset += count;
         }
 
-        foreach (Proposal proposal in EnumerateProposals(frame, plotPolygon, counters, cancellationToken))
+        foreach (Proposal proposal in EnumerateProposals(
+                     frame,
+                     plotPolygon,
+                     counters,
+                     emittedProposalCenters,
+                     cancellationToken))
         {
             batch.Add(proposal);
             if (batch.Count == BatchSize)
@@ -344,7 +355,12 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             .ThenByDescending(candidate => candidate.Confidence)
             .Select((candidate, index) => ToMarkerCenter(frame, candidate, index, multiradiusGeometry, suffix: null))
             .ToArray();
-        return new ProposalMarkerCandidateDiagnosticResult(candidates, counters.ToRecord(), preNmsCandidates);
+        return new ProposalMarkerCandidateDiagnosticResult(
+            candidates,
+            counters.ToRecord(),
+            preNmsCandidates,
+            emittedProposalCenters,
+            aboveThresholdDecodedPoints);
     }
 
     private static MarkerCenter ToMarkerCenter(
@@ -410,6 +426,7 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
         MarkerImageFrame frame,
         MarkerPolygon plotPolygon,
         ProposalMarkerStageCounterAccumulator counters,
+        List<MarkerPoint> emittedProposalCenters,
         CancellationToken cancellationToken)
     {
         int width = frame.Width;
@@ -471,6 +488,8 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                     }
                 }
                 counters.EmittedProposals++;
+                emittedProposalCenters.Add(
+                    frame.OriginalToFrame.MapToOriginal(new MarkerPoint(x, y)));
                 yield return new Proposal(x, y, patch);
             }
         }

@@ -295,6 +295,8 @@ internal static class Program
         string stageId = multiradiusGeometry ? "real-dev-marker-v23-aggregate" : "real-dev-marker-aggregate";
         int succeeded = 0, failed = 0, truePositives = 0, falsePositives = 0, falseNegatives = 0;
         int preNmsTruePositives = 0, preNmsFalsePositives = 0, preNmsFalseNegatives = 0;
+        int emittedTruePositives = 0, emittedFalsePositives = 0, emittedFalseNegatives = 0;
+        int aboveThresholdTruePositives = 0, aboveThresholdFalsePositives = 0, aboveThresholdFalseNegatives = 0;
         var failureKinds = new Dictionary<string, int>(StringComparer.Ordinal);
         var timings = new List<double>();
         var stageCounters = new MarkerStageCounterTotals();
@@ -335,6 +337,20 @@ internal static class Program
                     preNmsTruePositives += preTp;
                     preNmsFalsePositives += preFp;
                     preNmsFalseNegatives += preFn;
+                    (int emittedTp, int emittedFp, int emittedFn) = MatchPoints(
+                        diagnostic.EmittedProposalCenters,
+                        truth.Points,
+                        5.0);
+                    emittedTruePositives += emittedTp;
+                    emittedFalsePositives += emittedFp;
+                    emittedFalseNegatives += emittedFn;
+                    (int aboveTp, int aboveFp, int aboveFn) = MatchPoints(
+                        diagnostic.AboveThresholdDecodedPoints,
+                        truth.Points,
+                        5.0);
+                    aboveThresholdTruePositives += aboveTp;
+                    aboveThresholdFalsePositives += aboveFp;
+                    aboveThresholdFalseNegatives += aboveFn;
                 }
                 if (!before.AsSpan().SequenceEqual(SHA256.HashData(File.ReadAllBytes(path)))) throw new InvalidDataException("REAL_DEV_SOURCE_MUTATED");
                 succeeded++;
@@ -378,7 +394,13 @@ internal static class Program
             includeStageCounters ? preNmsFalsePositives : null,
             includeStageCounters ? preNmsFalseNegatives : null,
             preNmsPrecision,
-            preNmsRecall);
+            preNmsRecall,
+            includeStageCounters
+                ? StageMatch(emittedTruePositives, emittedFalsePositives, emittedFalseNegatives)
+                : null,
+            includeStageCounters
+                ? StageMatch(aboveThresholdTruePositives, aboveThresholdFalsePositives, aboveThresholdFalseNegatives)
+                : null);
     }
 
     private static MarkerPolygon ToMarkerPolygon(OcrRectangle rectangle) => MarkerPolygon.FromRectangle(new(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height));
@@ -433,11 +455,14 @@ internal static class Program
     }
 
     private static (int TruePositives, int FalsePositives, int FalseNegatives) MatchCenters(IReadOnlyList<MarkerCenter> predictions, IReadOnlyList<CurvePoint> truth, double tolerance)
+        => MatchPoints(predictions.Select(static prediction => prediction.Center).ToArray(), truth, tolerance);
+
+    private static (int TruePositives, int FalsePositives, int FalseNegatives) MatchPoints(IReadOnlyList<MarkerPoint> predictions, IReadOnlyList<CurvePoint> truth, double tolerance)
     {
         int[][] edges = predictions.Select(prediction => truth
             .Select((point, truthIndex) => (truthIndex, distance: Math.Sqrt(
-                Math.Pow(prediction.Center.X - point.ScreenX, 2) +
-                Math.Pow(prediction.Center.Y - point.ScreenY, 2))))
+                Math.Pow(prediction.X - point.ScreenX, 2) +
+                Math.Pow(prediction.Y - point.ScreenY, 2))))
             .Where(edge => edge.distance <= tolerance)
             .OrderBy(edge => edge.distance)
             .Select(edge => edge.truthIndex)
@@ -445,6 +470,14 @@ internal static class Program
         int truePositives = MaximumMatching(edges, truth.Count).Count(match => match >= 0);
         return (truePositives, predictions.Count - truePositives, truth.Count - truePositives);
     }
+
+    private static MarkerStageMatch StageMatch(int truePositives, int falsePositives, int falseNegatives) =>
+        new(
+            truePositives,
+            falsePositives,
+            falseNegatives,
+            truePositives / (double)Math.Max(1, truePositives + falsePositives),
+            truePositives / (double)Math.Max(1, truePositives + falseNegatives));
 
     private static int[] MaximumMatching(int[][] edges, int truthCount)
     {
@@ -1152,6 +1185,7 @@ internal static class Program
             Math.Abs(IoU(new OcrRectangle(0, 0, 10, 10), new OcrRectangle(0, 0, 10, 10)) - 1) > 1e-9 ||
             Levenshtein("20", "70") != 1 || RoleName(OcrTextRole.YTick) != "y_tick" ||
             MatchCenters([new MarkerCenter("m", new MarkerPoint(5, 5), 3, 0, 1, MarkerSourceImage.Original)], [new CurvePoint(5, 5)], 5) != (1, 0, 0) ||
+            MatchPoints([new MarkerPoint(5, 5)], [new CurvePoint(5, 5)], 5) != (1, 0, 0) ||
             MaximumMatching(new int[][] { [0, 1], [0] }, 2).Count(match => match >= 0) != 2 ||
             !SourceTiledProposalDetector.TileStarts(1000, 640, 128).SequenceEqual([0, 360]) ||
             RasterizeAxisMask(32, 32, [new AxisAnchor(4, 4, 0, 0), new AxisAnchor(4, 28, 0, 1), new AxisAnchor(28, 4, 1, 0)], 1).All(static value => value == 0) ||
@@ -1213,7 +1247,8 @@ internal static class Program
             finalCandidates);
     }
 
-    private sealed record MarkerAggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall, double TolerancePx, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, string ModelSha256, IReadOnlyDictionary<string, string> UpstreamOcrPayloadSha256, string MaskingMode, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Mode, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateRevision, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateId, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProposalMarkerStageCounters? StageCounters, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? PreNmsTruePositives, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? PreNmsFalsePositives, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? PreNmsFalseNegatives, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] double? PreNmsPrecision, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] double? PreNmsRecall);
+    private sealed record MarkerStageMatch(int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall);
+    private sealed record MarkerAggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall, double TolerancePx, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, string ModelSha256, IReadOnlyDictionary<string, string> UpstreamOcrPayloadSha256, string MaskingMode, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Mode, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateRevision, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateId, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProposalMarkerStageCounters? StageCounters, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? PreNmsTruePositives, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? PreNmsFalsePositives, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? PreNmsFalseNegatives, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] double? PreNmsPrecision, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] double? PreNmsRecall, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] MarkerStageMatch? EmittedProposalMatch, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] MarkerStageMatch? AboveThresholdDecodedMatch);
     private sealed record SyntheticDimensionReport(int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, double RecognitionExact, double CharacterErrorRate, double RoleAccuracy);
     private sealed record DetectorDimensionReport(int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall);
     private sealed record TiledProposalAggregateReport(int SchemaVersion, string ReportScope, int SceneCount, int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, int TileSize, int TileOverlap, IReadOnlyDictionary<string, DetectorDimensionReport> ByDimension, double MeanSceneInferenceMs, int SuppressedCrossTileDuplicates, string ModelSha256, string DatasetManifestSha256, string AcceptancePolicySha256, string EvidencePolicySha256, IReadOnlyDictionary<string, bool> Gates, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, int PublicGateEvaluations, int RealSealedReads, bool TrainingUse);

@@ -66,6 +66,8 @@ public sealed class ProductionProposalMarkerCenterAdapterTests
         Assert.AreEqual(diagnostic.Candidates.Count, counters.FinalCandidates);
         Assert.AreEqual(counters.CandidatesBeforeNms, diagnostic.PreNmsCandidates.Count);
         Assert.IsTrue(diagnostic.PreNmsCandidates.Count >= diagnostic.Candidates.Count);
+        Assert.AreEqual(counters.EmittedProposals, diagnostic.EmittedProposalCenters.Count);
+        Assert.AreEqual(counters.OutputsAbove025, diagnostic.AboveThresholdDecodedPoints.Count);
     }
 
     [TestMethod]

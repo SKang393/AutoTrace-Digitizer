@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "status": "scale_gap_measured_stage_attribution_pending",
+  "report_scope": "aggregate_only",
+  "runtime_contract": {
+    "marker_frame_coordinate_space": "original_source_pixels",
+    "marker_frame_transform": "identity",
+    "proposal_patch_width_px": 33,
+    "proposal_patch_height_px": 33,
+    "ocr_960px_resize_applies_to_marker_frame": false
+  },
+  "real_dev": {
+    "project_count": 120,
+    "real_sealed_project_count": 51,
+    "real_sealed_reads": 0,
+    "truth_marker_count": 2004,
+    "measured_marker_count": 1968,
+    "measurement_coverage": 0.9820359281437125,
+    "effective_marker_diameter_px": {
+      "minimum": 1.0,
+      "p05": 6.0,
+      "p10": 7.0,
+      "median": 12.0,
+      "p90": 24.0,
+      "p95": 27.0,
+      "maximum": 48.0
+    },
+    "diameter_to_33px_patch_ratio": {
+      "minimum": 0.030303030303030304,
+      "p05": 0.18181818181818182,
+      "p10": 0.21212121212121213,
+      "median": 0.36363636363636365,
+      "p90": 0.7272727272727273,
+      "p95": 0.8181818181818183,
+      "maximum": 1.4545454545454546
+    },
+    "assignment_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a"
+  },
+  "synthetic_marker_inputs": {
+    "train_scene_count": 21,
+    "train_marker_count": 168,
+    "dev_scene_count": 12,
+    "dev_marker_count": 96,
+    "tensor_shapes": [[3, 168, 224]],
+    "train_marker_diameter_px": {
+      "minimum": 6.0,
+      "p05": 6.0,
+      "p10": 6.0,
+      "median": 14.0,
+      "p90": 24.0,
+      "p95": 24.0,
+      "maximum": 24.0
+    },
+    "train_diameter_to_33px_patch_ratio": {
+      "minimum": 0.181818,
+      "p05": 0.181818,
+      "p10": 0.181818,
+      "median": 0.424242,
+      "p90": 0.727273,
+      "p95": 0.727273,
+      "maximum": 0.727273
+    },
+    "resize_degradation_roundtrip_restored": true,
+    "production_marker_frame_resize_observed": false
+  },
+  "finding": {
+    "central_scale_coverage": "the current train distribution covers the real-dev p05 diameter of 6 px through the p90 diameter of 24 px",
+    "remaining_scale_gap": "the current train distribution omits the real-dev 24 to 27 px p90-to-p95 tail and the 1 to 48 px full measured envelope",
+    "failure_explanation": "scale coverage alone is insufficient to explain V23 real-dev recall 0.15568862275449102 because most of the measured central distribution is already inside the synthetic train range",
+    "required_next_diagnosis": "aggregate truth coverage at emitted-proposal and above-threshold decoded stages before changing the generator or opening a candidate"
+  },
+  "implementation": {
+    "real_probe_path": "tools/private_acceptance/real_dev_distribution.py",
+    "real_probe_sha256": "a4f089b79a2cde4fd8d8479f5d95301a8d654b27c8041146e4caaa943a76ae7d",
+    "real_probe_test_path": "tools/private_acceptance/tests/test_real_dev_distribution.py",
+    "real_probe_test_sha256": "744eab67c79be6f207c62a001ae6e9955a6d879c1c8b4c43a20614b748641a4d",
+    "synthetic_audit_path": "ml/markers/center/generator_input_gap/audit.py",
+    "synthetic_audit_sha256": "4c018971961616f83eba3e5b47c20404831a17d617b17ae4917afb65391240d7",
+    "synthetic_result_path": "ml/markers/center/generator_input_gap/AUDIT.json",
+    "synthetic_result_sha256": "d8e10fdc01cce4d9972102df00db1ad91f568bf5e760b67495acfc99b50de9f4",
+    "focused_tests": "4 passed"
+  },
+  "privacy": {
+    "case_level_output": false,
+    "study_identifiers_output": false,
+    "truth_rows_output": false,
+    "pixel_output": false,
+    "training_use": false,
+    "candidate_selection": false,
+    "optimizer_steps": 0
+  },
+  "production_approval": false,
+  "release_eligible": false
+}

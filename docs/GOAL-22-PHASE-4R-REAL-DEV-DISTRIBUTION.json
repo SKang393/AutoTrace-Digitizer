@@ -20,14 +20,30 @@
   },
   "effective_marker_diameter_px": {
     "minimum": 1.0,
+    "p05": 6.0,
     "p10": 7.0,
     "median": 12.0,
     "p90": 24.0,
+    "p95": 27.0,
     "maximum": 48.0,
     "truth_marker_count": 2004,
     "measured_marker_count": 1968,
     "measurement_coverage": 0.9820359281437125,
     "method": "outermost radius with at least 65 percent dark angular occupancy across 72 truth-centred rays"
+  },
+  "marker_proposal_patch": {
+    "width_px": 33,
+    "height_px": 33,
+    "diameter_to_patch_ratio": {
+      "minimum": 0.030303030303030304,
+      "p05": 0.18181818181818182,
+      "p10": 0.21212121212121213,
+      "median": 0.36363636363636365,
+      "p90": 0.7272727272727273,
+      "p95": 0.8181818181818183,
+      "maximum": 1.4545454545454546
+    },
+    "coverage_definition": "effective source-space marker diameter divided by the identity 33x33 MarkerImageFrame proposal patch side"
   },
   "finding": {
     "resize_collapse_confirmed": true,
@@ -37,9 +53,9 @@
   },
   "implementation": {
     "path": "tools/private_acceptance/real_dev_distribution.py",
-    "sha256": "9ce86e5e18b7f1ee12a70c2e0d0640c00df45687b1035483ee8b9eabd5501168",
+    "sha256": "a4f089b79a2cde4fd8d8479f5d95301a8d654b27c8041146e4caaa943a76ae7d",
     "test_path": "tools/private_acceptance/tests/test_real_dev_distribution.py",
-    "test_sha256": "26995b9b6022e5b80c5062e33554ccf01e6e6a609adaf211c671fdcbc6ba5103",
+    "test_sha256": "744eab67c79be6f207c62a001ae6e9955a6d879c1c8b4c43a20614b748641a4d",
     "focused_test_result": "2 passed"
   },
   "execution": {

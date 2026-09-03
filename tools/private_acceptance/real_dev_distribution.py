@@ -36,6 +36,7 @@ RAY_STEP_PX = 0.5
 MAX_MARKER_RADIUS_PX = 24.0
 DARK_PIXEL_THRESHOLD = 160
 MINIMUM_DARK_ANGULAR_FRACTION = 0.65
+MARKER_PROPOSAL_PATCH_SIZE_PX = 33
 
 
 def _sha256(path: Path) -> str:
@@ -126,6 +127,19 @@ def _percentile(values: Sequence[float], fraction: float) -> float:
     return ordered[lower] * (1 - weight) + ordered[upper] * weight
 
 
+def _distribution_summary(values: Sequence[float]) -> dict[str, float]:
+    """Return stable aggregate quantiles without exposing individual values."""
+    return {
+        "minimum": min(values),
+        "p05": _percentile(values, 0.05),
+        "p10": _percentile(values, 0.10),
+        "median": median(values),
+        "p90": _percentile(values, 0.90),
+        "p95": _percentile(values, 0.95),
+        "maximum": max(values),
+    }
+
+
 def diagnose(root: Path, *, sealed_target: int = 51, expected_real_dev: int | None = None) -> dict[str, Any]:
     """Read only the deterministic real-dev assignment and emit aggregates."""
     root = root.resolve(strict=True)
@@ -174,12 +188,14 @@ def diagnose(root: Path, *, sealed_target: int = 51, expected_real_dev: int | No
         },
         "source_modes": dict(sorted(modes.items())),
         "production_resize_scale_before_padding": [min(scales), median(scales), max(scales)],
-        "effective_marker_diameter_px": {
-            "minimum": min(diameters),
-            "p10": _percentile(diameters, 0.10),
-            "median": median(diameters),
-            "p90": _percentile(diameters, 0.90),
-            "maximum": max(diameters),
+        "effective_marker_diameter_px": _distribution_summary(diameters),
+        "marker_proposal_patch": {
+            "width_px": MARKER_PROPOSAL_PATCH_SIZE_PX,
+            "height_px": MARKER_PROPOSAL_PATCH_SIZE_PX,
+            "diameter_to_patch_ratio": _distribution_summary(
+                [diameter / MARKER_PROPOSAL_PATCH_SIZE_PX for diameter in diameters]
+            ),
+            "coverage_definition": "effective source-space marker diameter divided by the identity 33x33 MarkerImageFrame proposal patch side",
         },
         "measured_marker_count": len(diameters),
         "truth_marker_count": truth_marker_count,
