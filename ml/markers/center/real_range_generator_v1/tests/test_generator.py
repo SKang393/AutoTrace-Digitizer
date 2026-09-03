@@ -26,6 +26,8 @@ def test_range_and_masks_match_required_aggregate() -> None:
         assert split["mask_center_hits"] == {"ocr": 75, "artifact": 332}
         assert split["mask_center_hit_rates"]["ocr"] == 75 / 2004
         assert split["mask_center_hit_rates"]["artifact"] == 332 / 2004
+    assert all(scene.tensor.dtype.is_floating_point for name in ("train", "dev") for scene in build_split(name))
+    assert {str(scene.tensor.dtype) for name in ("train", "dev") for scene in build_split(name)} == {"torch.float32"}
     masks = result["mask_overlap_scenarios"]
     assert masks["markers_per_split"] == 2004
     assert (masks["ocr_hard_hits"], masks["artifact_hard_hits"]) == (75, 332)

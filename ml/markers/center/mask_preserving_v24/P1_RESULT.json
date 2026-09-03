@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "task": "marker-center",
+  "revision": "marker-center-mask-preserving-v24",
+  "candidate_id": "P1",
+  "status": "dev_passed_pending_runtime_and_real_dev",
+  "model_license": "Apache-2.0",
+  "candidate_consumed": false,
+  "sealed_runs": 0,
+  "real_dev_reads": 0,
+  "real_sealed_reads": 0,
+  "private_data": false,
+  "synthetic_only": true,
+  "training": {
+    "parent_checkpoint_sha256": "ba9722ebd3091c91749c175607a480500d3b651e6719d19b69c7e48cee4ef6c9",
+    "parent_onnx_sha256": "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38",
+    "train_split_sha256": "34e086edd74a887415e972ca9eafbf6f61104ce95487350f43acb32feb6732fc",
+    "training_example_count": 35838,
+    "positive_example_count": 3258,
+    "hard_negative_example_count": 5347,
+    "optimizer_steps": 10080,
+    "elapsed_ms": 1450100.972
+  },
+  "fixed_dev_gate": {
+    "threshold": 0.25,
+    "scene_count": 167,
+    "truth_count": 2004,
+    "proposal_true_positives": 2004,
+    "proposal_recall": 1.0,
+    "true_positives": 1982,
+    "false_positives": 22,
+    "false_negatives": 22,
+    "precision": 0.9890219560878244,
+    "recall": 0.9890219560878244,
+    "f1": 0.9890219560878244,
+    "duplicates": 0,
+    "prohibited_structure_hits": 0,
+    "passed": true
+  },
+  "threshold_sensitivity": [
+    {"threshold": 0.4, "precision": 0.9934738955823293, "recall": 0.9875249500998003, "f1": 0.9904904904904905},
+    {"threshold": 0.55, "precision": 0.9944640161046804, "recall": 0.9860279441117764, "f1": 0.9902280130293158},
+    {"threshold": 0.7, "precision": 0.9954545454545455, "recall": 0.9835329341317365, "f1": 0.9894578313253013}
+  ],
+  "artifacts": {
+    "checkpoint_path": "ml/markers/center/mask_preserving_v24/artifacts/P1-run/marker-center-mask-preserving-v24-p1.pt",
+    "checkpoint_sha256": "b2825aa54ec98075f2fd16893f78ccdd59a4379d33588921d2117a03be64b2e2",
+    "onnx_path": "ml/markers/center/mask_preserving_v24/artifacts/P1-run/marker-center-mask-preserving-v24-p1.onnx",
+    "onnx_sha256": "35a0e5563228cfa384a3c4ce4d9c68afaeb57db8dd859f77fcbf5c3d2980bd9e",
+    "candidate_report_path": "ml/markers/center/mask_preserving_v24/artifacts/P1-run/candidate-report.json",
+    "candidate_report_sha256": "c675e2186ac34ff0859451d54ef5e489a541704c3efaf00ca4e1e218d2c6c8d1"
+  },
+  "onnx_parity": {
+    "provider": "CPUExecutionProvider",
+    "tolerance": 0.00001,
+    "maximum_absolute_error": 0.000002384185791015625,
+    "passed": true,
+    "candidate_counts": [1, 8, 37]
+  },
+  "source_binding": {
+    "candidate_config_path": "ml/markers/center/mask_preserving_v24/training/p1.json",
+    "candidate_config_sha256": "420303d5d3e83c0bc51ea9e9c93d87e93dad0563b14e2681ba01c83416346a71",
+    "runner_source_bundle_sha256": "8c01a9849f6d4a6c8128a9cd46aa182e97e7ac40ccb43cdd41cc698e61a2fb0d",
+    "generator_audit_sha256": "57c35c2f7c270d9dedbb7e7a60c1c46b80109e7717af75086dfc83f1b24b1b7f",
+    "evidence_policy_sha256": "4dc18136c284b0b1805d3a3b22a9197ad06e6a41f4e43b4e1d4d9245b97e0aed",
+    "acceptance_bars_sha256": "aab9f2ab60cf166828f0928b8496f537341870fd457d0408952e22549fc53a56"
+  },
+  "training_seal": {
+    "opened_path": "ml/markers/training-seals/marker-center/marker-center-mask-preserving-v24/P1/opened.json",
+    "opened_sha256": "c7662f793cd242a98795965c6a0812bd07a6eca870f244b67cf21b5f29527462",
+    "result_path": "ml/markers/training-seals/marker-center/marker-center-mask-preserving-v24/P1/result.json",
+    "result_sha256": "0ca49a1510f8aa607c8439dc62e938680e37413f97bbaed63e2abaeadcb7d015",
+    "consumed_path_exists": false
+  },
+  "void_attempt": {
+    "count": 1,
+    "sealed_split_read": false,
+    "budget_consumed": false,
+    "exception_type": "RuntimeError",
+    "exception_message": "expected scalar type Double but found Float",
+    "void_record_sha256": "8e716507a4c3007bae17532b15b1511ace9f0974af0dd07162cea65c75782856",
+    "opened_record_sha256": "fd270207692e8bcfd550174b07f808b72b75e264b5d71621d415a2bccb7af035"
+  },
+  "production_approval": false,
+  "release_eligible": false,
+  "next_action": "bind the exact V24 ONNX in a candidate-only C# adapter, verify runtime parity, then run one aggregate-only real-dev confirmation before any real-sealed read"
+}

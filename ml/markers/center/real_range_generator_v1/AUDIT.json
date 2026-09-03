@@ -72,7 +72,7 @@
   },
   "splits": {
     "dev": {
-      "aggregate_sha256": "e35907f44226e26cdb718d17705986bc7c84da53ea81a29971694d6c659e59bd",
+      "aggregate_sha256": "2eb77f1efb641f432c5e8581b95d09c1c6a05b9f9781019f2862adfdeefc8edb",
       "diameter_px": {
         "maximum": 48.0,
         "median": 12.0,
@@ -112,7 +112,7 @@
       ]
     },
     "train": {
-      "aggregate_sha256": "8eccd4688ca41ab4decfaff2f1859066ad67ae7cc6f6c055f4eb60c0d9e3ba43",
+      "aggregate_sha256": "34e086edd74a887415e972ca9eafbf6f61104ce95487350f43acb32feb6732fc",
       "diameter_px": {
         "maximum": 48.0,
         "median": 12.0,
@@ -153,21 +153,21 @@
     }
   },
   "truth_center_patch_distribution": {
-    "aggregate_sha256": "e35907f44226e26cdb718d17705986bc7c84da53ea81a29971694d6c659e59bd",
+    "aggregate_sha256": "2eb77f1efb641f432c5e8581b95d09c1c6a05b9f9781019f2862adfdeefc8edb",
     "channel_mean_quantiles": {
       "artifact_mask": {
-        "maximum": 0.2764003673094582,
+        "maximum": 0.2764003574848175,
         "median": 0.0,
         "minimum": 0.0,
         "p05": 0.0,
         "p90": 0.12947657704353333,
-        "p95": 0.12947658402203857
+        "p95": 0.12947657704353333
       },
       "ink": {
         "maximum": 0.997245192527771,
-        "median": 0.18735565235314283,
+        "median": 0.1873556524515152,
         "minimum": 0.01285583060234785,
-        "p05": 0.08771648910232868,
+        "p05": 0.08771648146212101,
         "p90": 0.5973100066184998,
         "p95": 0.7026954293251038
       },
@@ -175,8 +175,8 @@
         "maximum": 1.0,
         "median": 0.7247058749198914,
         "minimum": 0.0,
-        "p05": 0.10094877215793896,
-        "p90": 0.96935802702811,
+        "p05": 0.1009487733244896,
+        "p90": 0.9693580448627472,
         "p95": 0.9788235425949097
       },
       "ocr_mask": {

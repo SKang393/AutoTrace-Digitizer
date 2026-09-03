@@ -153,6 +153,7 @@ def _scene(split: str, index: int, diameters: list[float]) -> Scene:
     # A deterministic, bounded print perturbation keeps both families useful.
     if index % 2:
         array = np.clip(array + rng.normal(0.0, 0.006, array.shape), 0.0, 1.0)
+    array = array.astype(np.float32, copy=False)
     tensor = torch.from_numpy(np.stack((1.0 - array,
                                         np.asarray(ocr, dtype=np.float32) / 255.0,
                                         np.asarray(artifact, dtype=np.float32) / 255.0), axis=0).copy())

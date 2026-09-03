@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "mask_preserving_feasibility_failed_training_candidate_startable",
+  "status": "v24_p1_dev_passed_pending_runtime_and_real_dev",
   "report_scope": "aggregate_only",
   "runtime_contract": {
     "marker_frame_coordinate_space": "original_source_pixels",
@@ -142,11 +142,37 @@
     "artifact_only_mask_recall": 0.08411214953271028,
     "both_masks_recall": 0.0,
     "provider": "CPUExecutionProvider",
-    "elapsed_ms": 11391.798,
+    "elapsed_ms": 10780.632,
     "candidate_consumed": false,
     "optimizer_steps": 0,
     "private_data_used": false,
     "real_sealed_reads": 0
+  },
+  "mask_preserving_v24_p1": {
+    "status": "dev_passed_pending_runtime_and_real_dev",
+    "parent_checkpoint_sha256": "ba9722ebd3091c91749c175607a480500d3b651e6719d19b69c7e48cee4ef6c9",
+    "optimizer_steps": 10080,
+    "training_example_count": 35838,
+    "fixed_threshold": 0.25,
+    "proposal_recall": 1.0,
+    "true_positives": 1982,
+    "false_positives": 22,
+    "false_negatives": 22,
+    "precision": 0.9890219560878244,
+    "recall": 0.9890219560878244,
+    "f1": 0.9890219560878244,
+    "duplicates": 0,
+    "prohibited_structure_hits": 0,
+    "checkpoint_sha256": "b2825aa54ec98075f2fd16893f78ccdd59a4379d33588921d2117a03be64b2e2",
+    "onnx_sha256": "35a0e5563228cfa384a3c4ce4d9c68afaeb57db8dd859f77fcbf5c3d2980bd9e",
+    "onnx_provider": "CPUExecutionProvider",
+    "onnx_parity_maximum_absolute_error": 0.000002384185791015625,
+    "candidate_consumed": false,
+    "sealed_runs": 0,
+    "real_dev_reads": 0,
+    "real_sealed_reads": 0,
+    "void_attempts": 1,
+    "void_reason": "generator emitted float64 on alternating scenes before the float32 repair; no sealed split was read and the same candidate authorization was retried"
   },
   "finding": {
     "central_scale_coverage": "the current train distribution covers the real-dev p05 diameter of 6 px through the p90 diameter of 24 px",
@@ -158,7 +184,8 @@
     "patch_distribution_gap": "synthetic train contains no OCR-center hard-mask positives and only 1.19 percent artifact-center hard-mask positives, versus 3.74 percent and 16.57 percent on real-dev; its ink center lower tail is also much lighter",
     "generator_repair": "the corrected synthetic generator now spans the measured diameter, rendered footprint, ink, OCR-center mask, artifact axis-crossing mask, and prohibited-structure ranges with disjoint train and dev seeds",
     "feasibility_result": "mask-preserving proposal coverage is complete, but the frozen V21 classifier fails the corrected synthetic dev gate and hits one prohibited structure per scene",
-    "required_next_diagnosis": "preregister and execute exactly one V24 P1 training candidate on the corrected synthetic train split, then evaluate once on corrected synthetic dev"
+    "candidate_result": "V24 P1 clears every corrected synthetic dev gate at the fixed 0.25 threshold after one void pre-sealed dtype attempt and one valid training run",
+    "required_next_diagnosis": "bind the exact V24 P1 ONNX in the candidate-only C# runtime and run aggregate-only real-dev before any real-sealed read"
   },
   "implementation": {
     "real_probe_path": "tools/private_acceptance/real_dev_distribution.py",
@@ -172,16 +199,18 @@
     "real_harness_path": "tools/GraphReader.RealAcceptance.Ocr/Program.cs",
     "real_harness_sha256": "9b8969356eda1506aa832c0032c69e86f0b1e0335dafab1a963f0c0cf99011b2",
     "corrected_generator_path": "ml/markers/center/real_range_generator_v1/generator.py",
-    "corrected_generator_sha256": "6b380368d652e91f650b383051db1358f8c626ff2ea24219c30c6a11343a1181",
+    "corrected_generator_sha256": "66a1fb7eedcc1e566925121412ece325cd9689b3399f911e0c737fc8da1dad5b",
     "corrected_generator_audit_path": "ml/markers/center/real_range_generator_v1/AUDIT.json",
-    "corrected_generator_audit_sha256": "5dc7589487ea7eb300b49db91ce950862d2ad6c3855a678439edcb2ce75aaf70",
+    "corrected_generator_audit_sha256": "57c35c2f7c270d9dedbb7e7a60c1c46b80109e7717af75086dfc83f1b24b1b7f",
     "corrected_generator_test_path": "ml/markers/center/real_range_generator_v1/tests/test_generator.py",
-    "corrected_generator_test_sha256": "71fe6e9b96988d3fc3c060495198646c0463d10cfda2183f60dc046d9f6be042",
+    "corrected_generator_test_sha256": "73aa8c1a073cc7f3c1c3335bed991020f50c84e4fd482f3f6bd56eedfa5e2e75",
     "v24_feasibility_path": "ml/markers/center/mask_preserving_v24/FEASIBILITY.json",
-    "v24_feasibility_sha256": "ad0f0c170474b75e7b7175951f5d214fd16bc716af8b5ad798b3fef7281903cd",
+    "v24_feasibility_sha256": "b653d2a0a18ce07bd68f3e3519e9fc55bc4da83e8a8279f3d48ac04aff15033a",
     "v24_feasibility_source_sha256": "252896f950e58f8e276b79f770bdf3ada1202afeb3bbb7cfb305b3ea9c6fd263",
     "v24_mask_preserving_source_sha256": "171ddcc2efbd2742f5699dad8d16ecec217ca983ee06cec4bc63e1f17e3120e2",
-    "focused_tests": "3 V24 feasibility passed; 4 corrected-generator passed; 3 prior synthetic audit passed; Release real harness build and no-corpus self-test passed"
+    "v24_p1_result_path": "ml/markers/center/mask_preserving_v24/P1_RESULT.json",
+    "v24_p1_result_sha256": "c8da9cc7456f45489a1a306c6da72536dd75aa20b0ebf6b6c96052ff0400b5f5",
+    "focused_tests": "10 V24 and corrected-generator passed; 3 prior synthetic audit passed; Release real harness build and no-corpus self-test passed"
   },
   "privacy": {
     "case_level_output": false,
