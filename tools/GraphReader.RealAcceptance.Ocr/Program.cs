@@ -6,6 +6,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -47,6 +48,22 @@ internal static class Program
         string? syntheticArg = GetOption(args, "--synthetic-real-range");
         string? officialArg = GetOption(args, "--synthetic-official-db");
         string? tiledArg = GetOption(args, "--synthetic-tiled-proposals");
+        if (args.Contains("--run-real-dev-marker-v23", StringComparer.Ordinal))
+        {
+            string? markerRoot = GetOption(args, "--root");
+            string? markerModel = GetOption(args, "--marker-model");
+            if (string.IsNullOrWhiteSpace(markerRoot) || markerRoot.StartsWith("--", StringComparison.Ordinal) ||
+                string.IsNullOrWhiteSpace(markerModel) || markerModel.StartsWith("--", StringComparison.Ordinal))
+            {
+                Console.Error.WriteLine("REAL_DEV_MARKER_V23_ROOT_AND_MODEL_REQUIRED");
+                return 2;
+            }
+
+            MarkerAggregateReport markerReport = await RunRealDevMarkerV23Async(
+                Path.GetFullPath(markerRoot), Path.GetFullPath(markerModel), CancellationToken.None);
+            Console.WriteLine(JsonSerializer.Serialize(markerReport, JsonOptions));
+            return markerReport.FailureCount == 0 && markerReport.Gates.Values.All(value => value) ? 0 : 1;
+        }
         if (args.Contains("--run-real-dev-marker", StringComparer.Ordinal))
         {
             string? markerRoot = GetOption(args, "--root");
@@ -212,6 +229,14 @@ internal static class Program
     }
 
     private static async Task<MarkerAggregateReport> RunRealDevMarkerAsync(string rootPath, CancellationToken cancellationToken)
+        => await RunRealDevMarkerAsync(rootPath, markerModelPath: null, multiradiusGeometry: false, cancellationToken: cancellationToken);
+
+    private static async Task<MarkerAggregateReport> RunRealDevMarkerV23Async(
+        string rootPath, string markerModelPath, CancellationToken cancellationToken)
+        => await RunRealDevMarkerAsync(rootPath, markerModelPath, multiradiusGeometry: true, cancellationToken: cancellationToken);
+
+    private static async Task<MarkerAggregateReport> RunRealDevMarkerAsync(
+        string rootPath, string? markerModelPath, bool multiradiusGeometry, CancellationToken cancellationToken)
     {
         string root = Path.GetFullPath(rootPath);
         string[] paths = Directory.EnumerateFiles(root, "*.dig", SearchOption.AllDirectories)
@@ -222,9 +247,28 @@ internal static class Program
 
         await using InferenceRuntime runtime = CreateRuntime();
         OcrV8ProductionCompositionPipeline pipeline = CreatePipeline(runtime);
-        string modelPath = Path.GetFullPath("ml/markers/center/artifacts/runtime-consistency-v2/P2-run/marker-center-runtime-consistency-p2.onnx");
-        var model = new ModelIdentity("marker-center-runtime-consistency-v2", "P2", "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b", modelPath);
-        ProductionProposalMarkerCenterAdapter adapter = ProductionProposalMarkerCenterAdapter.CreateCandidate(model, runtime);
+        string modelPath = multiradiusGeometry
+            ? Path.GetFullPath(markerModelPath ?? throw new InvalidDataException("REAL_DEV_MARKER_V23_MODEL_REQUIRED"))
+            : Path.GetFullPath("ml/markers/center/artifacts/runtime-consistency-v2/P2-run/marker-center-runtime-consistency-p2.onnx");
+        ModelIdentity model = multiradiusGeometry
+            ? new ModelIdentity(
+                ProductionProposalMarkerCenterAdapter.MultiradiusCandidateRevision,
+                ProductionProposalMarkerCenterAdapter.MultiradiusCandidateId,
+                ProductionProposalMarkerCenterAdapter.ExpectedMultiradiusModelSha256,
+                modelPath)
+            : new ModelIdentity(
+                "marker-center-runtime-consistency-v2",
+                "P2",
+                "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b",
+                modelPath);
+        ProductionProposalMarkerCenterAdapter adapter = multiradiusGeometry
+            ? ProductionProposalMarkerCenterAdapter.CreateMultiradiusCandidate(model, runtime)
+            : ProductionProposalMarkerCenterAdapter.CreateCandidate(model, runtime);
+        string runMode = multiradiusGeometry ? "v23-multiradius" : "historical-p2";
+        string reportScope = multiradiusGeometry
+            ? "real_dev_marker_v23_aggregate_only"
+            : "real_dev_marker_aggregate_only";
+        string stageId = multiradiusGeometry ? "real-dev-marker-v23-aggregate" : "real-dev-marker-aggregate";
         int succeeded = 0, failed = 0, truePositives = 0, falsePositives = 0, falseNegatives = 0;
         var failureKinds = new Dictionary<string, int>(StringComparer.Ordinal);
         var timings = new List<double>();
@@ -239,7 +283,7 @@ internal static class Program
                 OcrImage ocrImage = ToOcrImage(raster);
                 OcrRectangle plot = PlotBounds(truth.Anchors, raster);
                 OcrResult ocr = await pipeline.RecognizeAsync(new OcrRequest(
-                    "real-dev-marker-aggregate", "real-dev-marker-panel", Convert.ToHexStringLower(SHA256.HashData(truth.ImageBytes)), ocrImage, plot), cancellationToken);
+                    stageId, "real-dev-marker-panel", Convert.ToHexStringLower(SHA256.HashData(truth.ImageBytes)), ocrImage, plot), cancellationToken);
                 if (!ocr.Succeeded) throw new InvalidDataException("OCR_RESULT_FAILURE");
                 float[] luminance = raster.Gray.Select(static value => value / 255f).ToArray();
                 float[] ocrMask = RasterizeOcrMask(raster.Width, raster.Height, ocr.Regions.Where(static region => region.ReviewStatus != OcrReviewStatus.Rejected).ToArray());
@@ -271,14 +315,17 @@ internal static class Program
         };
 
         return new MarkerAggregateReport(
-            1, "real_dev_marker_aggregate_only", dev.Length, SealedTarget, 0, succeeded, failed,
+            1, reportScope, dev.Length, SealedTarget, 0, succeeded, failed,
             truePositives, falsePositives, falseNegatives,
             precision, recall, 5.0, gates,
             timings.Count == 0 ? 0 : timings.Average(),
             timings.Sum(), AssignmentHash(paths, assignments, root), model.Sha256,
             OcrPayloadSha256(), "v8_accepted_regions_plus_anchor_axes",
             AcceptancePolicySha256(),
-            new Dictionary<string, int>(failureKinds, StringComparer.Ordinal), false, false, false, false, false);
+            new Dictionary<string, int>(failureKinds, StringComparer.Ordinal), false, false, false, false, false,
+            multiradiusGeometry ? runMode : null,
+            multiradiusGeometry ? model.ModelId : null,
+            multiradiusGeometry ? model.Version : null);
     }
 
     private static MarkerPolygon ToMarkerPolygon(OcrRectangle rectangle) => MarkerPolygon.FromRectangle(new(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height));
@@ -1054,14 +1101,17 @@ internal static class Program
             MatchCenters([new MarkerCenter("m", new MarkerPoint(5, 5), 3, 0, 1, MarkerSourceImage.Original)], [new CurvePoint(5, 5)], 5) != (1, 0, 0) ||
             MaximumMatching(new int[][] { [0, 1], [0] }, 2).Count(match => match >= 0) != 2 ||
             !SourceTiledProposalDetector.TileStarts(1000, 640, 128).SequenceEqual([0, 360]) ||
-            RasterizeAxisMask(32, 32, [new AxisAnchor(4, 4, 0, 0), new AxisAnchor(4, 28, 0, 1), new AxisAnchor(28, 4, 1, 0)], 1).All(static value => value == 0))
+            RasterizeAxisMask(32, 32, [new AxisAnchor(4, 4, 0, 0), new AxisAnchor(4, 28, 0, 1), new AxisAnchor(28, 4, 1, 0)], 1).All(static value => value == 0) ||
+            ProductionProposalMarkerCenterAdapter.MultiradiusCandidateRevision != "marker-center-multiradius-geometry-v23" ||
+            ProductionProposalMarkerCenterAdapter.MultiradiusCandidateId != "P1" ||
+            ProductionProposalMarkerCenterAdapter.ExpectedMultiradiusModelSha256 != "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38")
         {
             throw new InvalidOperationException("SELF_TEST_CALIBRATION_FAILED");
         }
     }
 
     private sealed record AggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int AxisAnchorCount, int CurvePointCount, int RecognizedRegionCount, int NumericRegionCount, IReadOnlyDictionary<string, int> RoleCounts, int NumericYTickCount, int ProjectsWithAtLeastTwoYTicks, int CalibratedProjects, int MatchedPoints, int PointsWithinFiveUnits, double CalibrationProjectSuccessRate, double MeanAnchorErrorPx, double MaximumAnchorErrorPx, double PointYAccuracy, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, IReadOnlyDictionary<string, string> ModelPayloadSha256, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection);
-    private sealed record MarkerAggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall, double TolerancePx, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, string ModelSha256, IReadOnlyDictionary<string, string> UpstreamOcrPayloadSha256, string MaskingMode, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection);
+    private sealed record MarkerAggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall, double TolerancePx, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, string ModelSha256, IReadOnlyDictionary<string, string> UpstreamOcrPayloadSha256, string MaskingMode, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Mode, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateRevision, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateId);
     private sealed record SyntheticDimensionReport(int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, double RecognitionExact, double CharacterErrorRate, double RoleAccuracy);
     private sealed record DetectorDimensionReport(int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall);
     private sealed record TiledProposalAggregateReport(int SchemaVersion, string ReportScope, int SceneCount, int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, int TileSize, int TileOverlap, IReadOnlyDictionary<string, DetectorDimensionReport> ByDimension, double MeanSceneInferenceMs, int SuppressedCrossTileDuplicates, string ModelSha256, string DatasetManifestSha256, string AcceptancePolicySha256, string EvidencePolicySha256, IReadOnlyDictionary<string, bool> Gates, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, int PublicGateEvaluations, int RealSealedReads, bool TrainingUse);
