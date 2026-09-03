@@ -58,6 +58,19 @@ public sealed record ProposalMarkerNegativePatchDiagnosticResult(
     ProposalMarkerStageCounters StageCounters,
     [property: JsonIgnore] IReadOnlyList<ProposalMarkerPatchFeatureSummary> EmittedProposalFeatures);
 
+public sealed record ProposalMarkerMorphologyScoreSummary(
+    MarkerPoint OriginalBaseCenter,
+    double Probability,
+    double DarkFractionAt012,
+    double DarkFractionAt05,
+    double InkCenter5x5Mean,
+    double MaximumRowDarkFraction,
+    double MaximumColumnDarkFraction,
+    double ForegroundExtentBalance,
+    double CovarianceEigenvalueRatio,
+    double BorderDarkFraction,
+    int MaximumRingSupportCount);
+
 /// <summary>
 /// Candidate-only integration for the checksum-bound runtime-consistency-v2 P2
 /// proposal payload. It is intentionally never composed into production unless
@@ -458,6 +471,90 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
         }
         return new ProposalMarkerNegativePatchDiagnosticResult(counters.ToRecord(), summaries);
     }
+
+    public async Task<IReadOnlyList<ProposalMarkerMorphologyScoreSummary>> DetectMaskPreservingMorphologyScoresAsync(
+        MarkerImageFrame frame,
+        MarkerPolygon plotPolygon,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(frame);
+        ArgumentNullException.ThrowIfNull(plotPolygon);
+        ValidateFrame(frame);
+        cancellationToken.ThrowIfCancellationRequested();
+        var counters = new ProposalMarkerStageCounterAccumulator();
+        var scores = new List<ProposalMarkerMorphologyScoreSummary>();
+        var batch = new List<Proposal>(BatchSize);
+        int offset = 0;
+        async Task InferBatchAsync(List<Proposal> proposals)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            int plane = PatchSize * PatchSize;
+            float[] input = new float[checked(proposals.Count * 3 * plane)];
+            for (int i = 0; i < proposals.Count; i++) proposals[i].Patch.CopyTo(input.AsSpan(i * 3 * plane));
+            InferenceResponse response = await inference.RunAsync(new InferenceRequest(
+                Model,
+                new InferenceInput(input, [proposals.Count, 3, PatchSize, PatchSize], "candidate_patches", "candidate_predictions"),
+                new StageCacheMaterial("candidate-only", "proposal-patches", frame.SourceImage.ToString(), "marker_center_candidate_v24_morphology", MaskPreservingCandidateRevision,
+                    new Dictionary<string, object?>(StringComparer.Ordinal) { ["candidate_id"] = MaskPreservingCandidateId, ["threshold"] = CenterThreshold, ["batch_offset"] = offset }, MarkerContract.Version),
+                TimeSpan.FromSeconds(30), [InferenceProvider.Cpu], BypassCache: true), cancellationToken).ConfigureAwait(false);
+            if (!response.Succeeded || response.Execution is null || response.Execution.Provider != InferenceProvider.Cpu || response.Execution.Output.Count != proposals.Count * 4)
+                throw new InvalidDataException("The V24 morphology diagnostic requires successful CPU inference with [N,4] output.");
+            for (int i = 0; i < proposals.Count; i++)
+            {
+                float probability = response.Execution.Output[i * 4];
+                if (!float.IsFinite(probability) || probability is < 0 or > 1) throw new InvalidDataException("The V24 morphology diagnostic returned an invalid probability.");
+                scores.Add(SummarizeMorphology(frame, proposals[i], probability));
+            }
+        }
+        foreach (Proposal proposal in EnumerateProposals(frame, plotPolygon, counters, [], [], [], [], cancellationToken, true))
+        {
+            batch.Add(proposal);
+            if (batch.Count == BatchSize) { await InferBatchAsync(batch).ConfigureAwait(false); offset += batch.Count; batch.Clear(); }
+        }
+        if (batch.Count > 0) await InferBatchAsync(batch).ConfigureAwait(false);
+        return scores;
+    }
+
+    private static ProposalMarkerMorphologyScoreSummary SummarizeMorphology(MarkerImageFrame frame, Proposal proposal, double probability)
+    {
+        int n = PatchSize, plane = n * n;
+        ReadOnlySpan<float> ink = proposal.Patch.AsSpan(0, plane);
+        int dark012 = 0, dark05 = 0, border = 0, borderCount = 0, maxRing = 0;
+        double center = 0; int centerCount = 0; double sumX = 0, sumY = 0, sumXX = 0, sumYY = 0, sumXY = 0, foreground = 0;
+        int minX = n, minY = n, maxX = -1, maxY = -1;
+        for (int y = 0; y < n; y++) for (int x = 0; x < n; x++)
+        {
+            double value = ink[y * n + x]; bool is012 = value >= 0.12, is05 = value >= 0.5;
+            if (is012) { dark012++; sumX += x; sumY += y; sumXX += x * x; sumYY += y * y; sumXY += x * y; minX = Math.Min(minX, x); maxX = Math.Max(maxX, x); minY = Math.Min(minY, y); maxY = Math.Max(maxY, y); foreground++; }
+            if (is05) dark05++;
+            if (Math.Abs(x - n / 2) <= 2 && Math.Abs(y - n / 2) <= 2) { center += value; centerCount++; }
+            if (x == 0 || y == 0 || x == n - 1 || y == n - 1) { border += is012 ? 1 : 0; borderCount++; }
+        }
+        for (int radius = 3; radius <= 12; radius++)
+        {
+            int support = 0;
+            foreach ((int x, int y) in RingPoints(n / 2, radius)) if ((uint)x < n && (uint)y < n && ink[y * n + x] >= 0.12) support++;
+            maxRing = Math.Max(maxRing, support);
+        }
+        double ratio = 1;
+        if (dark012 > 1)
+        {
+            double meanX = sumX / foreground, meanY = sumY / foreground;
+            double a = sumXX / foreground - meanX * meanX, c = sumYY / foreground - meanY * meanY, b = sumXY / foreground - meanX * meanY;
+            double root = Math.Sqrt(Math.Max(0, ((a - c) * (a - c)) + (4 * b * b))), high = Math.Max(0, (a + c + root) / 2), low = Math.Max(1e-12, (a + c - root) / 2);
+            ratio = Math.Clamp(high / low, 1, 1e6);
+        }
+        double width = maxX < 0 ? 0 : maxX - minX + 1, height = maxY < 0 ? 0 : maxY - minY + 1;
+        return new(frame.OriginalToFrame.MapToOriginal(new MarkerPoint(proposal.X, proposal.Y)), probability, dark012 / (double)plane, dark05 / (double)plane, center / centerCount,
+            MaximumRowFraction(ink, n, 0.12), MaximumColumnFraction(ink, n, 0.12), Math.Min(width, height) / Math.Max(1, Math.Max(width, height)), ratio, border / (double)Math.Max(1, borderCount), maxRing);
+    }
+
+    private static IEnumerable<(int X, int Y)> RingPoints(int center, int radius)
+    {
+        for (int i = 0; i < 8; i++) { double angle = i * Math.PI / 4; yield return (center + (int)Math.Round(Math.Cos(angle) * radius), center + (int)Math.Round(Math.Sin(angle) * radius)); }
+    }
+    private static double MaximumRowFraction(ReadOnlySpan<float> values, int n, double threshold) { double max = 0; for (int y = 0; y < n; y++) { int count = 0; for (int x = 0; x < n; x++) if (values[y * n + x] >= threshold) count++; max = Math.Max(max, count / (double)n); } return max; }
+    private static double MaximumColumnFraction(ReadOnlySpan<float> values, int n, double threshold) { double max = 0; for (int x = 0; x < n; x++) { int count = 0; for (int y = 0; y < n; y++) if (values[y * n + x] >= threshold) count++; max = Math.Max(max, count / (double)n); } return max; }
 
     private static ProposalMarkerPatchFeatureSummary SummarizeProposal(MarkerImageFrame frame, Proposal proposal)
     {

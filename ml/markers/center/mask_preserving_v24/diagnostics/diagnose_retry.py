@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[5]
 THRESHOLD = 0.25
 TOLERANCE = 5.0
 STRATA = ("hard_existing", "faint_low", "faint_p05", "ocr_heavy", "artifact", "generic")
+MORPHOLOGY_KEYS = ("dark_fraction_ge_012", "dark_fraction_ge_05", "center5x5_mean", "max_row_dark_fraction_ge_012", "max_col_dark_fraction_ge_012", "max_row_dark_fraction_ge_05", "max_col_dark_fraction_ge_05", "foreground_extent_balance", "covariance_eigen_ratio", "border_dark_fraction_ge_012", "max_ring_support_3_12")
 
 
 def _sha(path: Path) -> str:
@@ -33,6 +34,18 @@ def _quantiles(values: list[float]) -> dict[str, float | int]:
     return {"count": len(values), "minimum": float(q[0]), "p05": float(q[1]),
             "median": float(q[2]), "p90": float(q[3]), "p95": float(q[4]),
             "maximum": float(q[5])}
+
+def _patch_morphology(patch: torch.Tensor) -> dict[str, float]:
+    ink = patch[0].detach().cpu().numpy().astype(np.float64, copy=False); d12, d05 = ink >= .12, ink >= .5; center = ink[14:19, 14:19]; ys, xs = np.where(d12)
+    if len(xs): width, height = xs.max()-xs.min()+1, ys.max()-ys.min()+1; extent = min(width,height)/max(width,height)
+    else: extent = 0.0
+    if len(xs) >= 2:
+        eigen = np.linalg.eigvalsh(np.cov(np.stack((xs,ys)), bias=True)); ratio = float(np.clip(eigen[1]/max(eigen[0], 1e-12), 1.0, 1e6))
+    else: ratio = 1.0
+    border = np.concatenate((d12[0], d12[-1], d12[1:-1,0], d12[1:-1,-1])); ring = []
+    for radius in range(3,13):
+        points = tuple((int(round(16 + radius * np.cos(i*np.pi/4))), int(round(16 + radius * np.sin(i*np.pi/4)))) for i in range(8)); ring.append(sum(0 <= x < 33 and 0 <= y < 33 and ink[y,x] >= .12 for x,y in points))
+    return {"dark_fraction_ge_012":float(d12.mean()),"dark_fraction_ge_05":float(d05.mean()),"center5x5_mean":float(center.mean()),"max_row_dark_fraction_ge_012":float(d12.mean(1).max()),"max_col_dark_fraction_ge_012":float(d12.mean(0).max()),"max_row_dark_fraction_ge_05":float(d05.mean(1).max()),"max_col_dark_fraction_ge_05":float(d05.mean(0).max()),"foreground_extent_balance":float(extent),"covariance_eigen_ratio":ratio,"border_dark_fraction_ge_012":float(border.mean()),"max_ring_support_3_12":float(max(ring,default=0))}
 
 
 def _labels(scene, coordinates: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
@@ -166,9 +179,33 @@ def summarize(model_path: Path) -> dict:
     return report
 
 
+def summarize_morphology(model_path: Path) -> dict:
+    started = time.perf_counter(); expected = "98c605eea8a579d28ad0e5d3b355458ab1e1883c3947c4a3a442557d639f5b79"
+    if _sha(model_path) != expected: raise ValueError("retry2 ONNX hash mismatch")
+    config_path=ROOT/"ml/markers/center/mask_preserving_v24/training/p1.json"; sampler_path=ROOT/"ml/markers/center/real_range_generator_v1/negative_sampler.py"; audit_path=ROOT/"ml/markers/center/real_range_generator_v1/AUDIT.json"
+    session=ort.InferenceSession(str(model_path),providers=["CPUExecutionProvider"])
+    if session.get_providers()[0] != "CPUExecutionProvider": raise RuntimeError("CPUExecutionProvider was not selected")
+    inp,out=session.get_inputs()[0].name,session.get_outputs()[0].name
+    buckets={name:{key:[] for key in MORPHOLOGY_KEYS} for name in ("positives","negative_below_025","negative_above_025","accepted_generic_false_positives")}; capacities=defaultdict(int); above=defaultdict(int)
+    for scene in build_split("dev"):
+        proposals=extract_proposals(scene.tensor); labels,hard=_labels(scene,proposals.coordinates); names=_strata(proposals.patches,hard,labels); output=session.run([out],{inp:proposals.patches.numpy().astype(np.float32,copy=False)})[0]
+        for i,name in enumerate(names):
+            bucket="positives" if name is None else "negative_above_025" if output[i,0]>=THRESHOLD else "negative_below_025"
+            if name is not None: capacities[name]+=1; above[name]+=int(output[i,0]>=THRESHOLD)
+            features=_patch_morphology(proposals.patches[i])
+            for key in MORPHOLOGY_KEYS: buckets[bucket][key].append(features[key])
+        predictions=postprocess(scene,proposals,output); used_p,_=_matched_truths(predictions,scene.centers); decoded=[(float(x+output[i,1]*4),float(y+output[i,2]*4),i) for i,(x,y) in enumerate(proposals.coordinates.tolist()) if output[i,0]>=THRESHOLD]
+        for pi,prediction in enumerate(predictions):
+            if pi in used_p or not decoded: continue
+            source=min(decoded,key=lambda item:math.hypot(prediction.x-item[0],prediction.y-item[1]))[2]
+            if names[source]=="generic":
+                features=_patch_morphology(proposals.patches[source])
+                for key in MORPHOLOGY_KEYS: buckets["accepted_generic_false_positives"][key].append(features[key])
+    return {"schema":"graphreader.marker-center-mask-preserving-v24-retry2-morphology-diagnosis.v1","revision":"marker-center-mask-preserving-v24","scope":{"synthetic_only":True,"split":"real-range-generator-v1-dev","scene_count":167,"threshold":THRESHOLD,"private_data":False,"real_dev_reads":0,"real_sealed_reads":0,"optimizer_steps":0,"case_ids_or_pixels_emitted":False},"binding":{"model_sha256":_sha(model_path),"provider":session.get_providers()[0],"input_shape":["candidate_count",3,33,33],"output_shape":["candidate_count",4],"generator_audit_sha256":_sha(audit_path),"generator_dev_split_sha256":json.loads(config_path.read_text())["dev_split_sha256"],"negative_sampler_sha256":_sha(sampler_path),"negative_sampler_priority":list(STRATA)},"negative_strata_counts":{name:{"capacity":capacities[name],"above_threshold":above[name],"above_threshold_rate":above[name]/max(1,capacities[name])} for name in STRATA},"morphology_quantiles":{bucket:{key:_quantiles(values) for key,values in values_by_key.items()} for bucket,values_by_key in buckets.items()},"accepted_generic_false_positive_count":len(buckets["accepted_generic_false_positives"][MORPHOLOGY_KEYS[0]]),"elapsed_ms":round((time.perf_counter()-started)*1000,3),"threshold_change_proposed":False}
+
 def main() -> int:
-    parser = argparse.ArgumentParser(); parser.add_argument("--model", type=Path, required=True); parser.add_argument("--output", type=Path, required=True)
-    args = parser.parse_args(); report = summarize(args.model.resolve()); args.output.parent.mkdir(parents=True, exist_ok=True); args.output.write_bytes((json.dumps(report, indent=2, sort_keys=True) + "\n").encode("utf-8")); print(json.dumps(report, indent=2, sort_keys=True)); return 0
+    parser = argparse.ArgumentParser(); parser.add_argument("--model", type=Path, required=True); parser.add_argument("--output", type=Path, required=True); parser.add_argument("--morphology", action="store_true")
+    args = parser.parse_args(); report = summarize_morphology(args.model.resolve()) if args.morphology else summarize(args.model.resolve()); args.output.parent.mkdir(parents=True, exist_ok=True); args.output.write_bytes((json.dumps(report, indent=2, sort_keys=True) + "\n").encode("utf-8")); print(json.dumps(report, indent=2, sort_keys=True)); return 0
 
 
 if __name__ == "__main__":

@@ -24,6 +24,7 @@ internal static class Program
     private const int ExpectedDev = 120;
     private const string OfficialDbDetectorSha256 = "d4aa24d408cd70b8b9f66cc758e20f397fc31a9c69d8477cf8887fc53bd5fceb";
     private const string CorrectedRealRangeSeedManifestSha256 = "123f4f6973588b3294b11237e6e6deac1b8f812a5b1bbab55b1315a546ef5329";
+    private const double MorphologyPositiveLabelDistancePx = 5.0;
     private static readonly string[] CiNames = ["CI", "TF_BUILD", "GITHUB_ACTIONS", "GITLAB_CI", "BUILD_BUILDID", "JENKINS_URL", "TEAMCITY_VERSION"];
 
     public static async Task<int> Main(string[] args)
@@ -48,6 +49,21 @@ internal static class Program
         string? syntheticArg = GetOption(args, "--synthetic-real-range");
         string? officialArg = GetOption(args, "--synthetic-official-db");
         string? tiledArg = GetOption(args, "--synthetic-tiled-proposals");
+        if (args.Contains("--run-real-dev-marker-v24-morphology", StringComparer.Ordinal))
+        {
+            string? markerRoot = GetOption(args, "--root");
+            string? markerModel = GetOption(args, "--marker-model");
+            if (string.IsNullOrWhiteSpace(markerRoot) || markerRoot.StartsWith("--", StringComparison.Ordinal) ||
+                string.IsNullOrWhiteSpace(markerModel) || markerModel.StartsWith("--", StringComparison.Ordinal))
+            {
+                Console.Error.WriteLine("REAL_DEV_MARKER_V24_MORPHOLOGY_ROOT_AND_MODEL_REQUIRED");
+                return 2;
+            }
+            MarkerMorphologyAggregateReport morphologyReport = await RunRealDevMarkerV24MorphologyAsync(
+                Path.GetFullPath(markerRoot), Path.GetFullPath(markerModel), CancellationToken.None);
+            Console.WriteLine(JsonSerializer.Serialize(morphologyReport, JsonOptions));
+            return morphologyReport.FailureCount == 0 ? 0 : 1;
+        }
         if (args.Contains("--run-real-dev-marker-v24-negative-patches", StringComparer.Ordinal))
         {
             string? markerRoot = GetOption(args, "--root");
@@ -287,6 +303,47 @@ internal static class Program
     private static async Task<MarkerAggregateReport> RunRealDevMarkerV24DiagnosticAsync(
         string rootPath, string markerModelPath, CancellationToken cancellationToken)
         => await RunRealDevMarkerAsync(rootPath, markerModelPath, multiradiusGeometry: true, includeStageCounters: true, maskPreservingCandidate: true, cancellationToken: cancellationToken);
+
+    private static async Task<MarkerMorphologyAggregateReport> RunRealDevMarkerV24MorphologyAsync(string rootPath, string modelPath, CancellationToken cancellationToken)
+    {
+        string root = Path.GetFullPath(rootPath);
+        string[] paths = Directory.EnumerateFiles(root, "*.dig", SearchOption.AllDirectories).OrderBy(path => Path.GetFullPath(path), StringComparer.Ordinal).ToArray();
+        Dictionary<string, string> assignments = Assign(paths, root);
+        string[] dev = paths.Where(path => assignments[Path.GetFullPath(path)] == "real-dev").ToArray();
+        if (dev.Length != ExpectedDev) throw new InvalidDataException($"REAL_DEV_COUNT:{dev.Length}");
+        await using InferenceRuntime runtime = CreateRuntime();
+        ProductionProposalMarkerCenterAdapter adapter = ProductionProposalMarkerCenterAdapter.CreateMaskPreservingCandidate(
+            new ModelIdentity(ProductionProposalMarkerCenterAdapter.MaskPreservingCandidateRevision, ProductionProposalMarkerCenterAdapter.MaskPreservingCandidateId, ProductionProposalMarkerCenterAdapter.ExpectedMaskPreservingModelSha256, modelPath), runtime);
+        OcrV8ProductionCompositionPipeline pipeline = CreatePipeline(runtime);
+        var positive = new MorphologyTotals(); var negativeBelow = new MorphologyTotals(); var negativeAbove = new MorphologyTotals();
+        int succeeded = 0, failed = 0, proposalCount = 0; var timings = new List<double>(); var failureKinds = new Dictionary<string, int>(StringComparer.Ordinal);
+        foreach (string path in dev)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                DigTruth truth = ReadDig(path); Raster raster = DecodePng(truth.ImageBytes); OcrRectangle plot = PlotBounds(truth.Anchors, raster);
+                OcrResult ocr = await pipeline.RecognizeAsync(new OcrRequest("real-dev-marker-v24-morphology", "real-dev-marker-panel", Convert.ToHexStringLower(SHA256.HashData(truth.ImageBytes)), ToOcrImage(raster), plot), cancellationToken);
+                if (!ocr.Succeeded) throw new InvalidDataException("OCR_RESULT_FAILURE");
+                float[] luminance = raster.Gray.Select(static value => value / 255f).ToArray();
+                MarkerImageFrame frame = new(raster.Width, raster.Height, 1, luminance, MarkerSourceImage.Original, MarkerAffineTransform.Identity,
+                    new MarkerMask(raster.Width, raster.Height, RasterizeOcrMask(raster.Width, raster.Height, ocr.Regions.Where(static region => region.ReviewStatus != OcrReviewStatus.Rejected).ToArray())),
+                    new MarkerMask(raster.Width, raster.Height, RasterizeAxisMask(raster.Width, raster.Height, truth.Anchors, 2.0)));
+                System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                IReadOnlyList<ProposalMarkerMorphologyScoreSummary> scores = await adapter.DetectMaskPreservingMorphologyScoresAsync(frame, MarkerPolygon.FromRectangle(new(0, 0, raster.Width, raster.Height)), cancellationToken);
+                stopwatch.Stop(); timings.Add(stopwatch.Elapsed.TotalMilliseconds); proposalCount += scores.Count;
+                foreach (ProposalMarkerMorphologyScoreSummary score in scores)
+                {
+                    bool positiveMatch = truth.Points.Any(point => Math.Sqrt(Math.Pow(score.OriginalBaseCenter.X - point.ScreenX, 2) + Math.Pow(score.OriginalBaseCenter.Y - point.ScreenY, 2)) <= MorphologyPositiveLabelDistancePx);
+                    (positiveMatch ? positive : score.Probability < 0.25 ? negativeBelow : negativeAbove).Add(score);
+                }
+                succeeded++;
+            }
+            catch (Exception exception) when (exception is InvalidDataException or FormatException or InvalidOperationException)
+            { failed++; string key = exception.Message.Split(':', 2)[0]; failureKinds[key] = failureKinds.GetValueOrDefault(key) + 1; }
+        }
+        return new MarkerMorphologyAggregateReport(1, "real_dev_marker_v24_scored_morphology_aggregate_only", dev.Length, SealedTarget, 0, succeeded, failed, proposalCount, MorphologyPositiveLabelDistancePx, positive.ToRecord(), negativeBelow.ToRecord(), negativeAbove.ToRecord(), timings.Count == 0 ? 0 : timings.Average(), timings.Sum(), AssignmentHash(paths, assignments, root), ProductionProposalMarkerCenterAdapter.ExpectedMaskPreservingModelSha256, OcrPayloadSha256(), AcceptancePolicySha256(), new Dictionary<string, int>(failureKinds, StringComparer.Ordinal), false, false, false, false, false);
+    }
 
     private static async Task<MarkerNegativePatchAggregateReport> RunRealDevMarkerV24NegativePatchesAsync(
         string rootPath, CancellationToken cancellationToken)
@@ -1583,6 +1640,17 @@ internal static class Program
             return new(ordered[0], At(0.05), At(0.25), At(0.50), At(0.75), At(0.95), ordered[^1]);
         }
     }
+
+    private sealed class MorphologyTotals
+    {
+        private readonly List<double>[] values = Enumerable.Range(0, 10).Select(static _ => new List<double>()).ToArray();
+        public void Add(ProposalMarkerMorphologyScoreSummary s) { values[0].Add(s.Probability); values[1].Add(s.DarkFractionAt012); values[2].Add(s.DarkFractionAt05); values[3].Add(s.InkCenter5x5Mean); values[4].Add(s.MaximumRowDarkFraction); values[5].Add(s.MaximumColumnDarkFraction); values[6].Add(s.ForegroundExtentBalance); values[7].Add(s.CovarianceEigenvalueRatio); values[8].Add(s.BorderDarkFraction); values[9].Add(s.MaximumRingSupportCount); }
+        public MarkerMorphologyQuantiles ToRecord() => new(values[0].Count, Quantiles(values[0]), Quantiles(values[1]), Quantiles(values[2]), Quantiles(values[3]), Quantiles(values[4]), Quantiles(values[5]), Quantiles(values[6]), Quantiles(values[7]), Quantiles(values[8]), Quantiles(values[9]));
+        private static MarkerQuantiles Quantiles(List<double> source) { if (source.Count == 0) return new(0, 0, 0, 0, 0, 0, 0); double[] v = source.Order().ToArray(); double At(double f) { double p = (v.Length - 1) * f; int l = (int)Math.Floor(p), u = (int)Math.Ceiling(p); return l == u ? v[l] : v[l] + (v[u] - v[l]) * (p - l); } return new(v[0], At(.05), At(.25), At(.5), At(.75), At(.95), v[^1]); }
+    }
+    private sealed record MarkerQuantiles(double Minimum, double P05, double P25, double Median, double P75, double P95, double Maximum);
+    private sealed record MarkerMorphologyQuantiles(int Count, MarkerQuantiles Probability, MarkerQuantiles DarkFractionAt012, MarkerQuantiles DarkFractionAt05, MarkerQuantiles InkCenter5x5Mean, MarkerQuantiles MaximumRowDarkFraction, MarkerQuantiles MaximumColumnDarkFraction, MarkerQuantiles ForegroundExtentBalance, MarkerQuantiles CovarianceEigenvalueRatio, MarkerQuantiles BorderDarkFraction, MarkerQuantiles MaximumRingSupportCount);
+    private sealed record MarkerMorphologyAggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int ProposalCount, double PositiveLabelDistancePx, MarkerMorphologyQuantiles Positive, MarkerMorphologyQuantiles NegativeBelow025, MarkerMorphologyQuantiles NegativeAbove025, double MeanProjectRuntimeMs, double TotalRuntimeMs, string AssignmentsSha256, string ModelSha256, IReadOnlyDictionary<string, string> UpstreamOcrPayloadSha256, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection);
 
     private sealed record MarkerFeatureQuantiles(double Minimum, double P05, double P25, double Median, double P75, double P95, double Maximum);
     private sealed record MarkerNegativePatchFeatureQuantiles(MarkerFeatureQuantiles InkMean, MarkerFeatureQuantiles InkCenter5x5Mean, MarkerFeatureQuantiles InkMaximum, MarkerFeatureQuantiles OcrMaskMean, MarkerFeatureQuantiles OcrMaskMaximum, MarkerFeatureQuantiles ArtifactMaskMean, MarkerFeatureQuantiles ArtifactMaskMaximum);

@@ -352,6 +352,23 @@ public sealed class ProductionProposalMarkerCenterAdapterTests
         Assert.IsFalse(serialized.Contains("Patch", StringComparison.Ordinal));
     }
 
+    [TestMethod]
+    public async Task MorphologyScoresAreBoundedAndDoNotExposePixels()
+    {
+        var runner = new FakeRunner(static count => Enumerable.Repeat(0.8f, count * 4).ToArray());
+        var adapter = CreateMaskPreservingAdapter(runner);
+        IReadOnlyList<ProposalMarkerMorphologyScoreSummary> scores = await adapter.DetectMaskPreservingMorphologyScoresAsync(
+            FrameWithOuterRadiusMarker(), MarkerPolygon.FromRectangle(new(0, 0, 512, 512)), CancellationToken.None);
+        Assert.IsTrue(scores.Count > 0);
+        Assert.IsTrue(scores.All(score => score.CovarianceEigenvalueRatio is >= 1 and <= 1e6));
+        Assert.IsTrue(scores.All(score => score.MaximumRingSupportCount is >= 0 and <= 8));
+        string serialized = System.Text.Json.JsonSerializer.Serialize(scores);
+        Assert.IsFalse(serialized.Contains("Patch", StringComparison.Ordinal));
+        StringAssert.Contains(serialized, "MaximumRingSupportCount");
+        StringAssert.Contains(serialized, "CovarianceEigenvalueRatio");
+        Assert.IsTrue(runner.TotalCalls > 0);
+    }
+
     private static ProductionProposalMarkerCenterAdapter CreateAdapter(FakeRunner runner, int? maximumDecodedCandidates = null) =>
         new(new ModelIdentity("marker-center-runtime-consistency-v2", "P2", ProductionProposalMarkerCenterAdapter.ExpectedModelSha256, "candidate-p2.onnx"), runner, maximumDecodedCandidates: maximumDecodedCandidates);
 

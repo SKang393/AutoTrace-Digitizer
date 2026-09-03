@@ -1,0 +1,188 @@
+{
+  "schema": "graphreader.goal22.phase4r.marker-v24-morphology-gap.v1",
+  "recorded_at": "2026-09-03",
+  "status": "generator_gap_confirmed",
+  "scope": {
+    "purpose": "Compare retry2 synthetic-dev proposal morphology with aggregate-only real-dev proposal morphology.",
+    "synthetic_scene_count": 167,
+    "real_dev_projects": 120,
+    "real_sealed_projects": 51,
+    "real_sealed_reads": 0,
+    "private_case_output": false,
+    "truth_row_output": false,
+    "pixel_output": false,
+    "optimizer_steps_on_private_data": 0,
+    "threshold_change_proposed": false,
+    "candidate_selected_on_real_dev": false
+  },
+  "bindings": {
+    "revision": "marker-center-mask-preserving-v24",
+    "candidate": "P1",
+    "threshold": 0.25,
+    "positive_label_distance_px": 5.0,
+    "model_sha256": "98c605eea8a579d28ad0e5d3b355458ab1e1883c3947c4a3a442557d639f5b79",
+    "assignment_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
+    "synthetic_report": "../ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY2_MORPHOLOGY_DIAGNOSIS.json",
+    "synthetic_report_sha256": "01c7fc31f393feaff2c46a46670a73095cf5c5a6111d7fff745f166cb1cf3a24",
+    "real_dev_stage_report": "GOAL-22-PHASE-4-V24-RETRY2-REAL-DEV-STAGES.json",
+    "real_dev_command": "dotnet run --project tools\\GraphReader.RealAcceptance.Ocr\\GraphReader.RealAcceptance.Ocr.csproj -c Release --no-build -- --explicit-opt-in --run-real-dev-marker-v24-morphology --root data\\manual data --marker-model artifacts\\goal22-worktrees\\marker-v24-retry\\ml\\markers\\center\\mask_preserving_v24\\artifacts\\P1-run\\marker-center-mask-preserving-v24-p1.onnx"
+  },
+  "real_dev_run": {
+    "successful_projects": 120,
+    "failure_count": 0,
+    "proposal_count": 1358010,
+    "positive_proposal_count": 9849,
+    "negative_below_threshold_count": 1328044,
+    "negative_above_threshold_count": 20117,
+    "mean_project_runtime_ms": 3851.3244883333327,
+    "total_runtime_ms": 462158.93859999994,
+    "case_level_output": false,
+    "truth_rows_output": false,
+    "pixel_output": false,
+    "training_use": false,
+    "candidate_selection": false
+  },
+  "rate_comparison": {
+    "synthetic_negative_above_threshold_rate": 0.003782202240776422,
+    "real_negative_above_threshold_rate": 0.01492180830034395,
+    "real_to_synthetic_rate_ratio": 3.945269805900373,
+    "synthetic_unique_truth_above_threshold_rate": 0.9850299401197605,
+    "real_unique_truth_above_threshold_rate": 0.6167664670658682,
+    "real_final_precision": 0.12034441329695635,
+    "real_final_recall": 0.5998003992015968
+  },
+  "shared_quantiles": {
+    "positive_proposals": {
+      "synthetic_count": 3258,
+      "real_count": 9849,
+      "dark_fraction_at_012": {
+        "synthetic": {"p05": 0.08999081726354453, "median": 0.19054178145087236, "p95": 0.6841138659320477},
+        "real": {"p05": 0.1248852157943067, "median": 0.2516069788797062, "p95": 0.7052341597796143}
+      },
+      "dark_fraction_at_05": {
+        "synthetic": {"p05": 0.08999081726354453, "median": 0.19054178145087236, "p95": 0.6841138659320477},
+        "real": {"p05": 0.07621671258034894, "median": 0.19008264462809918, "p95": 0.6124885215794307}
+      },
+      "center5x5_mean": {
+        "synthetic": {"p05": 0.032941176891326904, "median": 0.4729411768913269, "p95": 0.9910228048563003},
+        "real": {"p05": 0.08658823347091675, "median": 0.7865098142623901, "p95": 1.0}
+      },
+      "maximum_row_dark_fraction": {
+        "synthetic": {"p05": 0.2727272727272727, "median": 0.5151515151515151, "p95": 0.9393939393939394},
+        "real": {"p05": 0.3939393939393939, "median": 0.7878787878787878, "p95": 1.0}
+      },
+      "maximum_column_dark_fraction": {
+        "synthetic": {"p05": 0.2727272727272727, "median": 0.45454545454545453, "p95": 0.9136363636363526},
+        "real": {"p05": 0.30303030303030304, "median": 0.6060606060606061, "p95": 1.0}
+      },
+      "foreground_extent_balance": {
+        "synthetic": {"p05": 0.696969696969697, "median": 0.8787878787878788, "p95": 1.0},
+        "real": {"p05": 0.36363636363636365, "median": 0.7894736842105263, "p95": 1.0}
+      },
+      "covariance_eigenvalue_ratio": {
+        "synthetic": {"p05": 1.0970067519860256, "median": 1.7271263082526263, "p95": 3.645122300922486},
+        "real": {"p05": 1.0743572901829708, "median": 2.4640268072419267, "p95": 13.308178335910693}
+      },
+      "border_dark_fraction": {
+        "synthetic": {"p05": 0.015625, "median": 0.09375, "p95": 0.3125},
+        "real": {"p05": 0.015625, "median": 0.1171875, "p95": 0.3984375}
+      },
+      "maximum_ring_support_count": {
+        "synthetic": {"p05": 2.0, "median": 6.0, "p95": 8.0},
+        "real": {"p05": 4.0, "median": 8.0, "p95": 8.0}
+      }
+    },
+    "negative_below_threshold": {
+      "synthetic_count": 223360,
+      "real_count": 1328044,
+      "dark_fraction_at_012": {
+        "synthetic": {"p05": 0.0, "median": 0.09274563820018365, "p95": 0.38934802571166205},
+        "real": {"p05": 0.030303030303030304, "median": 0.15794306703397612, "p95": 0.4325068870523416}
+      },
+      "dark_fraction_at_05": {
+        "synthetic": {"p05": 0.0, "median": 0.08172635445362718, "p95": 0.38934802571166205},
+        "real": {"p05": 0.0, "median": 0.09641873278236915, "p95": 0.3269054178145087}
+      },
+      "center5x5_mean": {
+        "synthetic": {"p05": 0.0, "median": 0.06823529005050659, "p95": 0.7788235306739807},
+        "real": {"p05": 0.0, "median": 0.03247058629989624, "p95": 0.6618039226531982}
+      },
+      "maximum_row_dark_fraction": {
+        "synthetic": {"p05": 0.0, "median": 0.30303030303030304, "p95": 0.8484848484848485},
+        "real": {"p05": 0.09090909090909091, "median": 0.5757575757575758, "p95": 1.0}
+      },
+      "maximum_column_dark_fraction": {
+        "synthetic": {"p05": 0.0, "median": 0.2727272727272727, "p95": 0.7575757575757576},
+        "real": {"p05": 0.12121212121212122, "median": 0.5454545454545454, "p95": 1.0}
+      },
+      "foreground_extent_balance": {
+        "synthetic": {"p05": 0.0, "median": 0.7272727272727273, "p95": 1.0},
+        "real": {"p05": 0.09090909090909091, "median": 0.5714285714285714, "p95": 1.0}
+      },
+      "covariance_eigenvalue_ratio": {
+        "synthetic": {"p05": 1.0, "median": 2.507531933444973, "p95": 1194.2769838660083},
+        "real": {"p05": 1.271014396029688, "median": 5.252382347692003, "p95": 165.40405562700954}
+      },
+      "border_dark_fraction": {
+        "synthetic": {"p05": 0.0, "median": 0.078125, "p95": 0.3359375},
+        "real": {"p05": 0.0078125, "median": 0.109375, "p95": 0.40625}
+      },
+      "maximum_ring_support_count": {
+        "synthetic": {"p05": 0.0, "median": 2.0, "p95": 5.0},
+        "real": {"p05": 1.0, "median": 3.0, "p95": 7.0}
+      }
+    },
+    "negative_above_threshold": {
+      "synthetic_count": 848,
+      "real_count": 20117,
+      "dark_fraction_at_012": {
+        "synthetic": {"p05": 0.06827364554637282, "median": 0.330119375573921, "p95": 0.9696969696969697},
+        "real": {"p05": 0.05968778696051423, "median": 0.3397612488521579, "p95": 0.8282828282828283}
+      },
+      "dark_fraction_at_05": {
+        "synthetic": {"p05": 0.06827364554637282, "median": 0.330119375573921, "p95": 0.9696969696969697},
+        "real": {"p05": 0.0, "median": 0.1248852157943067, "p95": 0.6640955004591376}
+      },
+      "center5x5_mean": {
+        "synthetic": {"p05": 0.0, "median": 0.9647058844566345, "p95": 1.0},
+        "real": {"p05": 0.008784313201904297, "median": 0.22211763858795167, "p95": 0.9170196080207824}
+      },
+      "maximum_row_dark_fraction": {
+        "synthetic": {"p05": 0.21212121212121213, "median": 0.7878787878787878, "p95": 1.0},
+        "real": {"p05": 0.18181818181818182, "median": 0.7878787878787878, "p95": 1.0}
+      },
+      "maximum_column_dark_fraction": {
+        "synthetic": {"p05": 0.18181818181818182, "median": 0.7575757575757576, "p95": 1.0},
+        "real": {"p05": 0.2727272727272727, "median": 0.696969696969697, "p95": 1.0}
+      },
+      "foreground_extent_balance": {
+        "synthetic": {"p05": 0.6843076923076924, "median": 0.9333333333333333, "p95": 1.0},
+        "real": {"p05": 0.18181818181818182, "median": 0.8787878787878788, "p95": 1.0}
+      },
+      "covariance_eigenvalue_ratio": {
+        "synthetic": {"p05": 1.0543494061816563, "median": 1.47372576274946, "p95": 4.962552242868145},
+        "real": {"p05": 1.0821210523368499, "median": 1.7996583146593372, "p95": 42.29486873625251}
+      },
+      "border_dark_fraction": {
+        "synthetic": {"p05": 0.015625, "median": 0.1796875, "p95": 0.8800781249999998},
+        "real": {"p05": 0.0, "median": 0.1953125, "p95": 0.734375}
+      },
+      "maximum_ring_support_count": {
+        "synthetic": {"p05": 2.0, "median": 8.0, "p95": 8.0},
+        "real": {"p05": 2.0, "median": 6.0, "p95": 8.0}
+      }
+    }
+  },
+  "diagnosis": {
+    "responsible_subsystem": "synthetic marker proposal generator",
+    "findings": [
+      "Real negatives cross the fixed threshold at 3.945 times the synthetic rate.",
+      "Real above-threshold negatives are strongly anti-aliased: their median dark fraction falls from 0.340 at 0.12 to 0.125 at 0.5, while synthetic medians remain 0.330 at both thresholds.",
+      "Real above-threshold negatives are less center-filled and more anisotropic than synthetic negatives: center5x5 median 0.222 versus 0.965 and covariance ratio p95 42.295 versus 4.963.",
+      "Real below-threshold negatives contain longer, more off-center row and column fragments than synthetic negatives.",
+      "Real positive proposals are denser at the center, more elongated, and have greater ring support than synthetic positives."
+    ],
+    "permitted_next_change": "Add deterministic anti-aliased grayscale, off-center, elongated line, text-fragment, and junction topology to the synthetic generator, then re-run synthetic dev gates.",
+    "prohibited_inference": "Do not select a threshold, model architecture, or candidate from this real-dev report."
+  }
+}
