@@ -279,6 +279,56 @@ public sealed class ProductionProposalMarkerCenterAdapterTests
             CancellationToken.None));
     }
 
+    [TestMethod]
+    public void MaskPreservingCandidateFactoryBindsExactIdentityAndBytes()
+    {
+        var wrongIdentity = new ModelIdentity(
+            ProductionProposalMarkerCenterAdapter.MultiradiusCandidateRevision,
+            ProductionProposalMarkerCenterAdapter.MaskPreservingCandidateId,
+            ProductionProposalMarkerCenterAdapter.ExpectedMaskPreservingModelSha256,
+            Path.Combine(Path.GetTempPath(), "missing-marker-v24.onnx"));
+        Assert.ThrowsExactly<InvalidDataException>(() => ProductionProposalMarkerCenterAdapter.CreateMaskPreservingCandidate(wrongIdentity, null!));
+
+        string path = Path.Combine(Path.GetTempPath(), $"changed-marker-v24-{Guid.NewGuid():N}.onnx");
+        File.WriteAllBytes(path, [1, 2, 3]);
+        try
+        {
+            var model = new ModelIdentity(
+                ProductionProposalMarkerCenterAdapter.MaskPreservingCandidateRevision,
+                ProductionProposalMarkerCenterAdapter.MaskPreservingCandidateId,
+                ProductionProposalMarkerCenterAdapter.ExpectedMaskPreservingModelSha256,
+                path);
+            Assert.ThrowsExactly<InvalidDataException>(() => ProductionProposalMarkerCenterAdapter.CreateMaskPreservingCandidate(model, null!));
+        }
+        finally { File.Delete(path); }
+    }
+
+    [TestMethod]
+    public async Task MaskPreservingCandidateKeepsMaskedInkAndBothMaskChannels()
+    {
+        var runner = new FakeRunner(static count => Enumerable.Repeat(1f, count * 4).ToArray());
+        var adapter = CreateMaskPreservingAdapter(runner);
+        float[] mask = Enumerable.Repeat(1f, 512 * 512).ToArray();
+        ProposalMarkerCandidateDiagnosticResult result = await adapter.DetectCandidateWithDiagnosticsAsync(
+            FrameWithOuterRadiusMarker() with
+            {
+                OcrMask = new MarkerMask(512, 512, mask),
+                ArtifactMask = new MarkerMask(512, 512, mask.ToArray()),
+            },
+            MarkerPolygon.FromRectangle(new(0, 0, 512, 512)),
+            CancellationToken.None);
+
+        Assert.IsTrue(result.Candidates.Any(static marker => Math.Abs(marker.Center.X - 100) <= 2 && Math.Abs(marker.Center.Y - 100) <= 2));
+        Assert.AreEqual(0, result.StageCounters.OcrMaskRejects);
+        Assert.AreEqual(0, result.StageCounters.ArtifactMaskRejects);
+        Assert.AreEqual(result.StageCounters.EmittedProposals, result.StageCounters.InferenceOutputs);
+        int planeSize = ProductionProposalMarkerCenterAdapter.PatchSize * ProductionProposalMarkerCenterAdapter.PatchSize;
+        Assert.IsTrue(runner.LastInputValues.Length >= 3 * planeSize);
+        Assert.AreEqual(1f, runner.LastInputValues[planeSize]);
+        Assert.AreEqual(1f, runner.LastInputValues[2 * planeSize]);
+        Assert.IsFalse(adapter.IsApproved);
+    }
+
     private static ProductionProposalMarkerCenterAdapter CreateAdapter(FakeRunner runner, int? maximumDecodedCandidates = null) =>
         new(new ModelIdentity("marker-center-runtime-consistency-v2", "P2", ProductionProposalMarkerCenterAdapter.ExpectedModelSha256, "candidate-p2.onnx"), runner, maximumDecodedCandidates: maximumDecodedCandidates);
 
@@ -291,6 +341,16 @@ public sealed class ProductionProposalMarkerCenterAdapterTests
             runner,
             maximumDecodedCandidates: maximumDecodedCandidates,
             multiradiusGeometry: true);
+
+    private static ProductionProposalMarkerCenterAdapter CreateMaskPreservingAdapter(FakeRunner runner) =>
+        new(new ModelIdentity(
+            ProductionProposalMarkerCenterAdapter.MaskPreservingCandidateRevision,
+            ProductionProposalMarkerCenterAdapter.MaskPreservingCandidateId,
+            ProductionProposalMarkerCenterAdapter.ExpectedMaskPreservingModelSha256,
+            "candidate-v24.onnx"),
+            runner,
+            multiradiusGeometry: true,
+            maskPreservingCandidate: true);
 
     private static MarkerImageFrame FrameWithMarkers()
     {
@@ -358,11 +418,13 @@ public sealed class ProductionProposalMarkerCenterAdapterTests
         public List<int> BatchSizes { get; } = [];
         public int TotalCalls => BatchSizes.Count;
         public int TotalPatches => BatchSizes.Sum();
+        public float[] LastInputValues { get; private set; } = [];
 
         public ValueTask<InferenceResponse> RunAsync(InferenceRequest request, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             int count = checked((int)request.Input.Shape[0]);
+            LastInputValues = request.Input.Values.ToArray();
             BatchSizes.Add(count);
             return ValueTask.FromResult(new InferenceResponse(
                 true,

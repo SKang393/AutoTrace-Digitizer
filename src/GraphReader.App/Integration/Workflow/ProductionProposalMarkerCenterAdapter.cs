@@ -57,6 +57,9 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
     public const string MultiradiusCandidateRevision = "marker-center-multiradius-geometry-v23";
     public const string MultiradiusCandidateId = "P1";
     public const string ExpectedMultiradiusModelSha256 = "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38";
+    public const string MaskPreservingCandidateRevision = "marker-center-mask-preserving-v24";
+    public const string MaskPreservingCandidateId = "P1";
+    public const string ExpectedMaskPreservingModelSha256 = "35a0e5563228cfa384a3c4ce4d9c68afaeb57db8dd859f77fcbf5c3d2980bd9e";
     public const float CenterThreshold = 0.25f;
     public const int PatchSize = 33;
     public const int ProposalStride = 4;
@@ -71,6 +74,7 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
     private readonly IProposalMarkerInferenceRunner inference;
     private readonly int maximumDecodedCandidates;
     private readonly bool multiradiusGeometry;
+    private readonly bool maskPreservingCandidate;
 
     public static ProductionProposalMarkerCenterAdapter CreateCandidate(
         ModelIdentity model,
@@ -95,19 +99,38 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             multiradiusGeometry: true);
     }
 
+    public static ProductionProposalMarkerCenterAdapter CreateMaskPreservingCandidate(
+        ModelIdentity model,
+        InferenceRuntime runtime)
+    {
+        VerifyMaskPreservingPayload(model);
+        ArgumentNullException.ThrowIfNull(runtime);
+        return new ProductionProposalMarkerCenterAdapter(
+            model,
+            new RuntimeProposalMarkerInferenceRunner(runtime),
+            multiradiusGeometry: true,
+            maskPreservingCandidate: true);
+    }
+
     internal ProductionProposalMarkerCenterAdapter(
         ModelIdentity model,
         IProposalMarkerInferenceRunner inference,
         bool multiradiusGeometry = false,
-        int? maximumDecodedCandidates = null)
+        int? maximumDecodedCandidates = null,
+        bool maskPreservingCandidate = false)
     {
         Model = model ?? throw new ArgumentNullException(nameof(model));
         Model.Validate();
         this.multiradiusGeometry = multiradiusGeometry;
-        string expectedModelSha256 = multiradiusGeometry ? ExpectedMultiradiusModelSha256 : ExpectedModelSha256;
+        this.maskPreservingCandidate = maskPreservingCandidate;
+        string expectedModelSha256 = maskPreservingCandidate
+            ? ExpectedMaskPreservingModelSha256
+            : multiradiusGeometry ? ExpectedMultiradiusModelSha256 : ExpectedModelSha256;
         if (!string.Equals(Model.Sha256, expectedModelSha256, StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidDataException(multiradiusGeometry
+            throw new InvalidDataException(maskPreservingCandidate
+                ? "The proposal marker payload is not the checksum-bound mask-preserving V24 P1 model."
+                : multiradiusGeometry
                 ? "The proposal marker payload is not the checksum-bound multiradius V23 P1 model."
                 : "The proposal marker payload is not the checksum-bound runtime-consistency-v2 P2 model.");
         }
@@ -173,6 +196,29 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
         if (!string.Equals(actual, ExpectedMultiradiusModelSha256, StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidDataException("The proposal marker model bytes do not match the checksum-bound multiradius V23 P1 payload.");
+        }
+    }
+
+    private static void VerifyMaskPreservingPayload(ModelIdentity model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        model.Validate();
+        if (!string.Equals(model.ModelId, MaskPreservingCandidateRevision, StringComparison.Ordinal) ||
+            !string.Equals(model.Version, MaskPreservingCandidateId, StringComparison.Ordinal) ||
+            !string.Equals(model.Sha256, ExpectedMaskPreservingModelSha256, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidDataException("The proposal marker payload identity is not the checksum-bound mask-preserving V24 P1 model.");
+        }
+
+        if (!File.Exists(model.FilePath))
+        {
+            throw new FileNotFoundException("The checksum-bound mask-preserving proposal marker model is missing.", model.FilePath);
+        }
+
+        string actual = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(model.FilePath)));
+        if (!string.Equals(actual, ExpectedMaskPreservingModelSha256, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidDataException("The proposal marker model bytes do not match the checksum-bound mask-preserving V24 P1 payload.");
         }
     }
 
@@ -243,11 +289,11 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                             "candidate-only",
                             "proposal-patches",
                             frame.SourceImage.ToString(),
-                            multiradiusGeometry ? "marker_center_candidate_v23" : "marker_center_candidate_p2",
-                            multiradiusGeometry ? MultiradiusCandidateRevision : CandidateRevision,
+                            maskPreservingCandidate ? "marker_center_candidate_v24" : multiradiusGeometry ? "marker_center_candidate_v23" : "marker_center_candidate_p2",
+                            maskPreservingCandidate ? MaskPreservingCandidateRevision : multiradiusGeometry ? MultiradiusCandidateRevision : CandidateRevision,
                             new Dictionary<string, object?>(StringComparer.Ordinal)
                             {
-                                ["candidate_id"] = multiradiusGeometry ? MultiradiusCandidateId : CandidateId,
+                                ["candidate_id"] = maskPreservingCandidate ? MaskPreservingCandidateId : multiradiusGeometry ? MultiradiusCandidateId : CandidateId,
                                 ["threshold"] = CenterThreshold,
                                 ["batch_offset"] = batchOffset,
                                 ["batch_count"] = count,
@@ -298,7 +344,7 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                 aboveThresholdDecodedPoints.Add(
                     frame.OriginalToFrame.MapToOriginal(new MarkerPoint(x, y)));
                 double decodedRadius = Math.Clamp(radius, 2.5, 8.0);
-                if (!TryRefine(frame, x, y, decodedRadius, multiradiusGeometry, out MarkerPoint refined, out RefinementFailure failure))
+                if (!TryRefine(frame, x, y, decodedRadius, multiradiusGeometry, maskPreservingCandidate, out MarkerPoint refined, out RefinementFailure failure))
                 {
                     if (failure == RefinementFailure.Masked)
                     {
@@ -337,7 +383,8 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                      inkSupportedProposalCenters,
                      ocrUnmaskedProposalCenters,
                      emittedProposalCenters,
-                     cancellationToken))
+                     cancellationToken,
+                     maskPreservingCandidate))
         {
             batch.Add(proposal);
             if (batch.Count == BatchSize)
@@ -356,13 +403,13 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
         counters.NmsSuppressions = nmsSuppressions;
         counters.FinalCandidates = accepted.Count;
         IReadOnlyList<MarkerCenter> preNmsCandidates = predictions
-            .Select((candidate, index) => ToMarkerCenter(frame, candidate, index, multiradiusGeometry, "pre-nms"))
+            .Select((candidate, index) => ToMarkerCenter(frame, candidate, index, multiradiusGeometry, maskPreservingCandidate, "pre-nms"))
             .ToArray();
         IReadOnlyList<MarkerCenter> candidates = accepted
             .OrderBy(candidate => candidate.Center.Y)
             .ThenBy(candidate => candidate.Center.X)
             .ThenByDescending(candidate => candidate.Confidence)
-            .Select((candidate, index) => ToMarkerCenter(frame, candidate, index, multiradiusGeometry, suffix: null))
+            .Select((candidate, index) => ToMarkerCenter(frame, candidate, index, multiradiusGeometry, maskPreservingCandidate, suffix: null))
             .ToArray();
         return new ProposalMarkerCandidateDiagnosticResult(
             candidates,
@@ -380,9 +427,10 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
         ProposalMarkerPrediction candidate,
         int index,
         bool multiradiusGeometry,
+        bool maskPreservingCandidate,
         string? suffix)
     {
-        string prefix = multiradiusGeometry ? "candidate-v23-p1" : "candidate-p2";
+        string prefix = maskPreservingCandidate ? "candidate-v24-p1" : multiradiusGeometry ? "candidate-v23-p1" : "candidate-p2";
         string markerId = $"{prefix}{(suffix is null ? string.Empty : $"-{suffix}")}-{index.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
         return new MarkerCenter(
             markerId,
@@ -442,7 +490,8 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
         List<MarkerPoint> inkSupportedProposalCenters,
         List<MarkerPoint> ocrUnmaskedProposalCenters,
         List<MarkerPoint> emittedProposalCenters,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool maskPreservingCandidate = false)
     {
         int width = frame.Width;
         int height = frame.Height;
@@ -477,13 +526,13 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                     continue;
                 }
                 inkSupportedProposalCenters.Add(originalCenter);
-                if (WindowMax(text, width, height, x, y, 2) >= MaskRejectionThreshold)
+                if (!maskPreservingCandidate && WindowMax(text, width, height, x, y, 2) >= MaskRejectionThreshold)
                 {
                     counters.OcrMaskRejects++;
                     continue;
                 }
                 ocrUnmaskedProposalCenters.Add(originalCenter);
-                if (WindowMax(artifact, width, height, x, y, 2) >= MaskRejectionThreshold)
+                if (!maskPreservingCandidate && WindowMax(artifact, width, height, x, y, 2) >= MaskRejectionThreshold)
                 {
                     counters.ArtifactMaskRejects++;
                     continue;
@@ -546,10 +595,11 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
         double y,
         double radius,
         bool multiradiusGeometry,
+        bool maskPreservingCandidate,
         out MarkerPoint refined,
         out RefinementFailure failure)
     {
-        if (!CenterIsUnmasked(frame, x, y))
+        if (!maskPreservingCandidate && !CenterIsUnmasked(frame, x, y))
         {
             refined = default;
             failure = RefinementFailure.Masked;
@@ -570,7 +620,7 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             {
                 double candidateX = x + dx;
                 double candidateY = y + dy;
-                if (CenterIsUnmasked(frame, candidateX, candidateY) &&
+                if ((maskPreservingCandidate || CenterIsUnmasked(frame, candidateX, candidateY)) &&
                     GeometryConsensus(frame, candidateX, candidateY, radius, multiradiusGeometry))
                 {
                     candidates.Add((dx * dx + dy * dy, Math.Abs(dy), Math.Abs(dx), dy, dx, candidateX, candidateY));

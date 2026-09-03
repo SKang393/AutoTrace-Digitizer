@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "v24_p1_dev_passed_pending_runtime_and_real_dev",
+  "status": "v24_runtime_integrated_pending_real_dev",
   "report_scope": "aggregate_only",
   "runtime_contract": {
     "marker_frame_coordinate_space": "original_source_pixels",
@@ -174,6 +174,22 @@
     "void_attempts": 1,
     "void_reason": "generator emitted float64 on alternating scenes before the float32 repair; no sealed split was read and the same candidate authorization was retried"
   },
+  "v24_candidate_runtime": {
+    "candidate_revision": "marker-center-mask-preserving-v24",
+    "candidate_id": "P1",
+    "onnx_sha256": "35a0e5563228cfa384a3c4ce4d9c68afaeb57db8dd859f77fcbf5c3d2980bd9e",
+    "mask_channels_retained": true,
+    "hard_center_mask_rejection": false,
+    "multiradius_geometry_retained": true,
+    "threshold": 0.25,
+    "radius_clip_px": [2.5, 8.0],
+    "candidate_only": true,
+    "production_approved": false,
+    "focused_tests_passed": 16,
+    "release_tool_build_warnings": 0,
+    "release_tool_build_errors": 0,
+    "no_corpus_self_test": "pass"
+  },
   "finding": {
     "central_scale_coverage": "the current train distribution covers the real-dev p05 diameter of 6 px through the p90 diameter of 24 px",
     "remaining_scale_gap": "the current train distribution omits the real-dev 24 to 27 px p90-to-p95 tail and the 1 to 48 px full measured envelope",
@@ -185,7 +201,7 @@
     "generator_repair": "the corrected synthetic generator now spans the measured diameter, rendered footprint, ink, OCR-center mask, artifact axis-crossing mask, and prohibited-structure ranges with disjoint train and dev seeds",
     "feasibility_result": "mask-preserving proposal coverage is complete, but the frozen V21 classifier fails the corrected synthetic dev gate and hits one prohibited structure per scene",
     "candidate_result": "V24 P1 clears every corrected synthetic dev gate at the fixed 0.25 threshold after one void pre-sealed dtype attempt and one valid training run",
-    "required_next_diagnosis": "bind the exact V24 P1 ONNX in the candidate-only C# runtime and run aggregate-only real-dev before any real-sealed read"
+    "required_next_diagnosis": "run the exact V24 candidate-only C# runtime on aggregate-only real-dev before any real-sealed read"
   },
   "implementation": {
     "real_probe_path": "tools/private_acceptance/real_dev_distribution.py",
@@ -210,7 +226,12 @@
     "v24_mask_preserving_source_sha256": "171ddcc2efbd2742f5699dad8d16ecec217ca983ee06cec4bc63e1f17e3120e2",
     "v24_p1_result_path": "ml/markers/center/mask_preserving_v24/P1_RESULT.json",
     "v24_p1_result_sha256": "c8da9cc7456f45489a1a306c6da72536dd75aa20b0ebf6b6c96052ff0400b5f5",
-    "focused_tests": "10 V24 and corrected-generator passed; 3 prior synthetic audit passed; Release real harness build and no-corpus self-test passed"
+    "v24_runtime_adapter_path": "src/GraphReader.App/Integration/Workflow/ProductionProposalMarkerCenterAdapter.cs",
+    "v24_runtime_adapter_sha256": "150d543b1ce1a188605ed369eca9427b1f422680b96f222dba2762e1b68e9295",
+    "v24_runtime_test_path": "tests/GraphReader.App.Tests/ProductionProposalMarkerCenterAdapterTests.cs",
+    "v24_runtime_test_sha256": "e75a3f55aa358a3afe1cb976e27e9abab789a4be959db7d7c4ca33687273bcd6",
+    "v24_real_dev_harness_sha256": "e912a8f683902ccca762ffb1f4558d7c6086d011292c3cee8525e5ee0ea53c10",
+    "focused_tests": "16 V24 runtime passed; 10 V24 and corrected-generator passed; 3 prior synthetic audit passed; Release real harness build and no-corpus self-test passed"
   },
   "privacy": {
     "case_level_output": false,

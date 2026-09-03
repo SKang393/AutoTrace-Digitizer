@@ -48,6 +48,22 @@ internal static class Program
         string? syntheticArg = GetOption(args, "--synthetic-real-range");
         string? officialArg = GetOption(args, "--synthetic-official-db");
         string? tiledArg = GetOption(args, "--synthetic-tiled-proposals");
+        if (args.Contains("--run-real-dev-marker-v24-diagnostic", StringComparer.Ordinal))
+        {
+            string? markerRoot = GetOption(args, "--root");
+            string? markerModel = GetOption(args, "--marker-model");
+            if (string.IsNullOrWhiteSpace(markerRoot) || markerRoot.StartsWith("--", StringComparison.Ordinal) ||
+                string.IsNullOrWhiteSpace(markerModel) || markerModel.StartsWith("--", StringComparison.Ordinal))
+            {
+                Console.Error.WriteLine("REAL_DEV_MARKER_V24_DIAGNOSTIC_ROOT_AND_MODEL_REQUIRED");
+                return 2;
+            }
+
+            MarkerAggregateReport markerReport = await RunRealDevMarkerV24DiagnosticAsync(
+                Path.GetFullPath(markerRoot), Path.GetFullPath(markerModel), CancellationToken.None);
+            Console.WriteLine(JsonSerializer.Serialize(markerReport, JsonOptions));
+            return markerReport.FailureCount == 0 && markerReport.Gates.Values.All(value => value) ? 0 : 1;
+        }
         if (args.Contains("--run-real-dev-marker-v23", StringComparer.Ordinal))
         {
             string? markerRoot = GetOption(args, "--root");
@@ -255,12 +271,17 @@ internal static class Program
         string rootPath, string markerModelPath, CancellationToken cancellationToken)
         => await RunRealDevMarkerAsync(rootPath, markerModelPath, multiradiusGeometry: true, includeStageCounters: true, cancellationToken: cancellationToken);
 
+    private static async Task<MarkerAggregateReport> RunRealDevMarkerV24DiagnosticAsync(
+        string rootPath, string markerModelPath, CancellationToken cancellationToken)
+        => await RunRealDevMarkerAsync(rootPath, markerModelPath, multiradiusGeometry: true, includeStageCounters: true, maskPreservingCandidate: true, cancellationToken: cancellationToken);
+
     private static async Task<MarkerAggregateReport> RunRealDevMarkerAsync(
         string rootPath,
         string? markerModelPath,
         bool multiradiusGeometry,
         bool includeStageCounters,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool maskPreservingCandidate = false)
     {
         string root = Path.GetFullPath(rootPath);
         string[] paths = Directory.EnumerateFiles(root, "*.dig", SearchOption.AllDirectories)
@@ -272,9 +293,17 @@ internal static class Program
         await using InferenceRuntime runtime = CreateRuntime();
         OcrV8ProductionCompositionPipeline pipeline = CreatePipeline(runtime);
         string modelPath = multiradiusGeometry
-            ? Path.GetFullPath(markerModelPath ?? throw new InvalidDataException("REAL_DEV_MARKER_V23_MODEL_REQUIRED"))
+            ? Path.GetFullPath(markerModelPath ?? throw new InvalidDataException(maskPreservingCandidate
+                ? "REAL_DEV_MARKER_V24_MODEL_REQUIRED"
+                : "REAL_DEV_MARKER_V23_MODEL_REQUIRED"))
             : Path.GetFullPath("ml/markers/center/artifacts/runtime-consistency-v2/P2-run/marker-center-runtime-consistency-p2.onnx");
-        ModelIdentity model = multiradiusGeometry
+        ModelIdentity model = maskPreservingCandidate
+            ? new ModelIdentity(
+                ProductionProposalMarkerCenterAdapter.MaskPreservingCandidateRevision,
+                ProductionProposalMarkerCenterAdapter.MaskPreservingCandidateId,
+                ProductionProposalMarkerCenterAdapter.ExpectedMaskPreservingModelSha256,
+                modelPath)
+            : multiradiusGeometry
             ? new ModelIdentity(
                 ProductionProposalMarkerCenterAdapter.MultiradiusCandidateRevision,
                 ProductionProposalMarkerCenterAdapter.MultiradiusCandidateId,
@@ -285,14 +314,18 @@ internal static class Program
                 "P2",
                 "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b",
                 modelPath);
-        ProductionProposalMarkerCenterAdapter adapter = multiradiusGeometry
+        ProductionProposalMarkerCenterAdapter adapter = maskPreservingCandidate
+            ? ProductionProposalMarkerCenterAdapter.CreateMaskPreservingCandidate(model, runtime)
+            : multiradiusGeometry
             ? ProductionProposalMarkerCenterAdapter.CreateMultiradiusCandidate(model, runtime)
             : ProductionProposalMarkerCenterAdapter.CreateCandidate(model, runtime);
-        string runMode = multiradiusGeometry ? "v23-multiradius" : "historical-p2";
-        string reportScope = multiradiusGeometry
+        string runMode = maskPreservingCandidate ? "v24-mask-preserving" : multiradiusGeometry ? "v23-multiradius" : "historical-p2";
+        string reportScope = maskPreservingCandidate
+            ? "real_dev_marker_v24_mask_preserving_aggregate_only"
+            : multiradiusGeometry
             ? "real_dev_marker_v23_aggregate_only"
             : "real_dev_marker_aggregate_only";
-        string stageId = multiradiusGeometry ? "real-dev-marker-v23-aggregate" : "real-dev-marker-aggregate";
+        string stageId = maskPreservingCandidate ? "real-dev-marker-v24-aggregate" : multiradiusGeometry ? "real-dev-marker-v23-aggregate" : "real-dev-marker-aggregate";
         int succeeded = 0, failed = 0, truePositives = 0, falsePositives = 0, falseNegatives = 0;
         int preNmsTruePositives = 0, preNmsFalsePositives = 0, preNmsFalseNegatives = 0;
         int gridTruePositives = 0, gridFalsePositives = 0, gridFalseNegatives = 0;
@@ -415,7 +448,9 @@ internal static class Program
             precision, recall, 5.0, gates,
             timings.Count == 0 ? 0 : timings.Average(),
             timings.Sum(), AssignmentHash(paths, assignments, root), model.Sha256,
-            OcrPayloadSha256(), "v8_accepted_regions_plus_anchor_axes",
+            OcrPayloadSha256(), maskPreservingCandidate
+                ? "mask-preserving_v24_ink_supported_with_ocr_and_artifact_channels"
+                : "v8_accepted_regions_plus_anchor_axes",
             AcceptancePolicySha256(),
             new Dictionary<string, int>(failureKinds, StringComparer.Ordinal), false, false, false, false, false,
             multiradiusGeometry ? runMode : null,
@@ -1235,7 +1270,10 @@ internal static class Program
             !MarkerTruthPatchSelfTest() ||
             ProductionProposalMarkerCenterAdapter.MultiradiusCandidateRevision != "marker-center-multiradius-geometry-v23" ||
             ProductionProposalMarkerCenterAdapter.MultiradiusCandidateId != "P1" ||
-            ProductionProposalMarkerCenterAdapter.ExpectedMultiradiusModelSha256 != "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38")
+            ProductionProposalMarkerCenterAdapter.ExpectedMultiradiusModelSha256 != "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38" ||
+            ProductionProposalMarkerCenterAdapter.MaskPreservingCandidateRevision != "marker-center-mask-preserving-v24" ||
+            ProductionProposalMarkerCenterAdapter.MaskPreservingCandidateId != "P1" ||
+            ProductionProposalMarkerCenterAdapter.ExpectedMaskPreservingModelSha256 != "35a0e5563228cfa384a3c4ce4d9c68afaeb57db8dd859f77fcbf5c3d2980bd9e")
         {
             throw new InvalidOperationException("SELF_TEST_CALIBRATION_FAILED");
         }
