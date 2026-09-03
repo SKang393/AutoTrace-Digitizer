@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "v24_retry2_dev_passed_pending_runtime_and_real_dev",
+  "status": "v24_retry2_runtime_integrated_pending_real_dev",
   "report_scope": "aggregate_only",
   "runtime_contract": {
     "marker_frame_coordinate_space": "original_source_pixels",
@@ -164,7 +164,7 @@
     "duplicates": 0,
     "prohibited_structure_hits": 0,
     "checkpoint_sha256": "b2825aa54ec98075f2fd16893f78ccdd59a4379d33588921d2117a03be64b2e2",
-    "onnx_sha256": "35a0e5563228cfa384a3c4ce4d9c68afaeb57db8dd859f77fcbf5c3d2980bd9e",
+    "onnx_sha256": "98c605eea8a579d28ad0e5d3b355458ab1e1883c3947c4a3a442557d639f5b79",
     "onnx_provider": "CPUExecutionProvider",
     "onnx_parity_maximum_absolute_error": 0.000002384185791015625,
     "candidate_consumed": false,
@@ -321,7 +321,8 @@
     "negative_generator_repair": "faint-line and OCR-heavy negative families now cover both measured real envelopes without changing truth counts, truth mask hits, positive distribution gates, dtype, or split isolation",
     "retry1_diagnosis": "every final false positive came from generic negatives, so quantile-grounded retry2 restored 21681 generic samples while preserving measured tail coverage",
     "retry2_result": "the same unconsumed P1 now clears every fixed synthetic dev gate at threshold 0.25",
-    "required_next_diagnosis": "bind the exact retry2 ONNX in the candidate-only C# runtime and run aggregate-only real-dev before any real-sealed read"
+    "retry2_runtime": "candidate-only C# binding, mask preservation, multiradius geometry, fixed threshold, CPU execution, and fail-closed production behavior all pass focused verification",
+    "required_next_diagnosis": "run the exact retry2 candidate-only C# runtime on aggregate-only real-dev before any real-sealed read"
   },
   "implementation": {
     "real_probe_path": "tools/private_acceptance/real_dev_distribution.py",
@@ -347,10 +348,10 @@
     "v24_p1_result_path": "ml/markers/center/mask_preserving_v24/P1_RESULT.json",
     "v24_p1_result_sha256": "b4e68dde10024e60a122edad3f7645dfe1e5e2f5888dbfe4ef522383de4c6175",
     "v24_runtime_adapter_path": "src/GraphReader.App/Integration/Workflow/ProductionProposalMarkerCenterAdapter.cs",
-    "v24_runtime_adapter_sha256": "150d543b1ce1a188605ed369eca9427b1f422680b96f222dba2762e1b68e9295",
+    "v24_runtime_adapter_sha256": "bc710a71e9948c4dfbfba4b0548743c2b7b6799451fcdb8180b448e4188610c5",
     "v24_runtime_test_path": "tests/GraphReader.App.Tests/ProductionProposalMarkerCenterAdapterTests.cs",
     "v24_runtime_test_sha256": "e75a3f55aa358a3afe1cb976e27e9abab789a4be959db7d7c4ca33687273bcd6",
-    "v24_real_dev_harness_sha256": "e912a8f683902ccca762ffb1f4558d7c6086d011292c3cee8525e5ee0ea53c10",
+    "v24_real_dev_harness_sha256": "3baaa705d3d10246ba61082d5a78f624273e6338b3e52be93c81cfd3e692dbfd",
     "v24_real_dev_result_path": "docs/GOAL-22-PHASE-4-V24-REAL-DEV-FULL-IMAGE-STAGES.json",
     "v24_real_dev_result_sha256": "ec1c7699cd4b42adffe800cbeaa258a06d0de1060c058321fb83cae4d31b6807",
     "synthetic_negative_audit_path": "ml/markers/center/real_range_generator_v1/NEGATIVE_PROPOSAL_AUDIT.json",
@@ -358,7 +359,7 @@
     "synthetic_negative_audit_source_sha256": "f06e689e381bd17022609a2589c8bb6b4051fdbc86574400df0c503e35be17bd",
     "negative_patch_runtime_adapter_sha256": "efb92cde5559c661c182cf990de6bd00d788f03b89c7db65d4c90c69dd299aad",
     "negative_patch_runtime_test_sha256": "2f0cbee0029b00ab037a75703952f031aa3a85672ee5efcc5086fff52756a8b0",
-    "negative_patch_harness_sha256": "07f7339eed1f0d3f420f6cba85f94d2bcf72f785970859478edd8dffce21d495",
+    "negative_patch_harness_sha256": "3baaa705d3d10246ba61082d5a78f624273e6338b3e52be93c81cfd3e692dbfd",
     "real_negative_gap_path": "docs/GOAL-22-PHASE-4R-V24-NEGATIVE-PATCH-GAP.json",
     "real_negative_gap_sha256": "6a1cc4ca1cfac0fa0f2401d40f3c6c9f1c2ecfa98695e8e36e2808a799dfb9df",
     "retry1_diagnosis_path": "ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY_DIAGNOSIS.json",

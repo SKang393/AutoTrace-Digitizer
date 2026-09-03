@@ -73,7 +73,7 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
     public const string ExpectedMultiradiusModelSha256 = "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38";
     public const string MaskPreservingCandidateRevision = "marker-center-mask-preserving-v24";
     public const string MaskPreservingCandidateId = "P1";
-    public const string ExpectedMaskPreservingModelSha256 = "35a0e5563228cfa384a3c4ce4d9c68afaeb57db8dd859f77fcbf5c3d2980bd9e";
+    public const string ExpectedMaskPreservingModelSha256 = "98c605eea8a579d28ad0e5d3b355458ab1e1883c3947c4a3a442557d639f5b79";
     public const float CenterThreshold = 0.25f;
     public const int PatchSize = 33;
     public const int ProposalStride = 4;
