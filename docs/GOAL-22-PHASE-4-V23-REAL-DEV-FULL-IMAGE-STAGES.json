@@ -18,8 +18,8 @@
     "marker_center_precision": false,
     "marker_center_recall": false
   },
-  "mean_project_inference_ms": 3251.1093050000004,
-  "total_runtime_ms": 390133.11660000007,
+  "mean_project_inference_ms": 3142.4011083333316,
+  "total_runtime_ms": 377088.1329999998,
   "assignments_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
   "model_sha256": "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38",
   "upstream_ocr_payload_sha256": {
@@ -97,6 +97,20 @@
     "false_negatives": 1096,
     "precision": 0.10769778199501838,
     "recall": 0.4530938123752495
+  },
+  "truth_patch_distribution": {
+    "patch_count": 2004,
+    "patch_size_px": 33,
+    "ink_mean": {"minimum": 0.025405570549960527, "p05": 0.08884549530358135, "p10": 0.10441851490566334, "median": 0.18972253479248236, "p90": 0.47732296304159805, "p95": 0.5558205991956047, "maximum": 0.9142620501658367},
+    "ink_center5x5_mean": {"minimum": 0.0, "p05": 0.007058823108673095, "p10": 0.36376468896865843, "median": 0.9659607827663421, "p90": 1.0, "p95": 1.0, "maximum": 1.0},
+    "ink_maximum": {"minimum": 0.4156862497329712, "p05": 0.7921568751335144, "p10": 0.8078431487083435, "median": 1.0, "p90": 1.0, "p95": 1.0, "maximum": 1.0},
+    "ocr_mask_mean": {"minimum": 0.0, "p05": 0.0, "p10": 0.0, "median": 0.0, "p90": 0.0, "p95": 0.0, "maximum": 1.0},
+    "ocr_mask_maximum": {"minimum": 0.0, "p05": 0.0, "p10": 0.0, "median": 0.0, "p90": 0.0, "p95": 0.0, "maximum": 1.0},
+    "artifact_mask_mean": {"minimum": 0.0, "p05": 0.0, "p10": 0.0, "median": 0.0, "p90": 0.12121212121212122, "p95": 0.12121212121212122, "maximum": 0.2396694214876033},
+    "artifact_mask_maximum": {"minimum": 0.0, "p05": 0.0, "p10": 0.0, "median": 0.0, "p90": 1.0, "p95": 1.0, "maximum": 1.0},
+    "ocr_center5x5_hard_reject_count": 75,
+    "artifact_center5x5_hard_reject_count": 332,
+    "hard_mask_threshold": 0.3499999940395355
   },
   "diagnosis": {
     "proposal_grid": "complete truth coverage",

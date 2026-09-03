@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "corrected_full_image_candidate_failed",
+  "status": "patch_distribution_gap_measured_generator_repair_in_progress",
   "report_scope": "aggregate_only",
   "runtime_contract": {
     "marker_frame_coordinate_space": "original_source_pixels",
@@ -74,6 +74,32 @@
     "final": {"true_positives": 897, "false_negatives": 1107, "recall": 0.4476047904191617},
     "real_sealed_reads": 0
   },
+  "truth_patch_comparison": {
+    "patch_shape": [3, 33, 33],
+    "real_dev_patch_count": 2004,
+    "synthetic_train_patch_count": 168,
+    "ink_mean": {
+      "real_dev": {"p05": 0.08884549530358135, "median": 0.18972253479248236, "p95": 0.5558205991956047},
+      "synthetic_train": {"p05": 0.075282, "median": 0.233239, "p95": 0.459425}
+    },
+    "ink_center5x5_mean": {
+      "real_dev": {"p10": 0.36376468896865843, "median": 0.9659607827663421, "p95": 1.0},
+      "synthetic_train": {"p10": 0.035294, "median": 0.916901, "p95": 0.949062}
+    },
+    "ocr_center5x5_hard_reject": {
+      "real_dev_count": 75,
+      "real_dev_rate": 0.0374251497005988,
+      "synthetic_train_count": 0,
+      "synthetic_train_rate": 0.0
+    },
+    "artifact_center5x5_hard_reject": {
+      "real_dev_count": 332,
+      "real_dev_rate": 0.1656686626746507,
+      "synthetic_train_count": 2,
+      "synthetic_train_rate": 0.011904761904761904
+    },
+    "artifact_mask_topology": "synthetic artifact masks have median patch mean 0.115886 but only 2 center hard hits; real-dev has median patch mean 0.0 but 332 center hard hits, so the synthetic mask is often present away from the marker while real axis masks cross marker centers"
+  },
   "finding": {
     "central_scale_coverage": "the current train distribution covers the real-dev p05 diameter of 6 px through the p90 diameter of 24 px",
     "remaining_scale_gap": "the current train distribution omits the real-dev 24 to 27 px p90-to-p95 tail and the 1 to 48 px full measured envelope",
@@ -81,7 +107,8 @@
     "harness_defect": "the marker diagnostic used the minimum and maximum calibration-anchor coordinates as plot extents even though calibration anchors are not plot-boundary annotations",
     "harness_defect_evidence": "only 912 of 2004 truths lie inside the anchor rectangle and 1110 lie inside its 21-pixel expanded proposal search, matching raw-grid coverage of 1108 within grid quantization",
     "corrected_scope_result": "full-image grid and ink-supported recall are 1.0, but hard masks reduce recall to 0.8842315369261478 and the fixed classifier reduces it to 0.4555888223552894 while retaining 7653 false candidates",
-    "required_next_diagnosis": "compare aggregate three-channel patches at real-dev truth centers with synthetic train marker centers, then correct synthetic marker and hard-mask scenarios without training on or selecting against private data"
+    "patch_distribution_gap": "synthetic train contains no OCR-center hard-mask positives and only 1.19 percent artifact-center hard-mask positives, versus 3.74 percent and 16.57 percent on real-dev; its ink center lower tail is also much lighter",
+    "required_next_diagnosis": "validate a synthetic-only generator spanning the full diameter, truth-center mask topology, and ink-statistic ranges before opening or training a marker candidate"
   },
   "implementation": {
     "real_probe_path": "tools/private_acceptance/real_dev_distribution.py",
@@ -89,10 +116,12 @@
     "real_probe_test_path": "tools/private_acceptance/tests/test_real_dev_distribution.py",
     "real_probe_test_sha256": "93bb56617ade7b872544b51a83aaf44140b7f5c68604c7cf82edf1d49dab48b4",
     "synthetic_audit_path": "ml/markers/center/generator_input_gap/audit.py",
-    "synthetic_audit_sha256": "4c018971961616f83eba3e5b47c20404831a17d617b17ae4917afb65391240d7",
+    "synthetic_audit_sha256": "239cfe0c6685cbfcdc664b575b37be55c880457724e282bf116b8930d1f79be4",
     "synthetic_result_path": "ml/markers/center/generator_input_gap/AUDIT.json",
-    "synthetic_result_sha256": "d8e10fdc01cce4d9972102df00db1ad91f568bf5e760b67495acfc99b50de9f4",
-    "focused_tests": "4 passed"
+    "synthetic_result_sha256": "cc8bb8a99ed519d383512e87c3b90fefbe0a27f1bf6c9dc932beb526ced2d72f",
+    "real_harness_path": "tools/GraphReader.RealAcceptance.Ocr/Program.cs",
+    "real_harness_sha256": "9b8969356eda1506aa832c0032c69e86f0b1e0335dafab1a963f0c0cf99011b2",
+    "focused_tests": "3 synthetic passed; Release real harness build and no-corpus self-test passed"
   },
   "privacy": {
     "case_level_output": false,
