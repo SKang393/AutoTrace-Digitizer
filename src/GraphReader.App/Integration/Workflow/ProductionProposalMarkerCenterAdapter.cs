@@ -38,6 +38,9 @@ public sealed record ProposalMarkerCandidateDiagnosticResult(
     IReadOnlyList<MarkerCenter> Candidates,
     ProposalMarkerStageCounters StageCounters,
     [property: JsonIgnore] IReadOnlyList<MarkerCenter> PreNmsCandidates,
+    [property: JsonIgnore] IReadOnlyList<MarkerPoint> GridProposalCenters,
+    [property: JsonIgnore] IReadOnlyList<MarkerPoint> InkSupportedProposalCenters,
+    [property: JsonIgnore] IReadOnlyList<MarkerPoint> OcrUnmaskedProposalCenters,
     [property: JsonIgnore] IReadOnlyList<MarkerPoint> EmittedProposalCenters,
     [property: JsonIgnore] IReadOnlyList<MarkerPoint> AboveThresholdDecodedPoints);
 
@@ -214,6 +217,9 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
 
         var counters = new ProposalMarkerStageCounterAccumulator();
         var predictions = new List<ProposalMarkerPrediction>();
+        var gridProposalCenters = new List<MarkerPoint>();
+        var inkSupportedProposalCenters = new List<MarkerPoint>();
+        var ocrUnmaskedProposalCenters = new List<MarkerPoint>();
         var emittedProposalCenters = new List<MarkerPoint>();
         var aboveThresholdDecodedPoints = new List<MarkerPoint>();
         var batch = new List<Proposal>(BatchSize);
@@ -327,6 +333,9 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                      frame,
                      plotPolygon,
                      counters,
+                     gridProposalCenters,
+                     inkSupportedProposalCenters,
+                     ocrUnmaskedProposalCenters,
                      emittedProposalCenters,
                      cancellationToken))
         {
@@ -359,6 +368,9 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             candidates,
             counters.ToRecord(),
             preNmsCandidates,
+            gridProposalCenters,
+            inkSupportedProposalCenters,
+            ocrUnmaskedProposalCenters,
             emittedProposalCenters,
             aboveThresholdDecodedPoints);
     }
@@ -426,6 +438,9 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
         MarkerImageFrame frame,
         MarkerPolygon plotPolygon,
         ProposalMarkerStageCounterAccumulator counters,
+        List<MarkerPoint> gridProposalCenters,
+        List<MarkerPoint> inkSupportedProposalCenters,
+        List<MarkerPoint> ocrUnmaskedProposalCenters,
         List<MarkerPoint> emittedProposalCenters,
         CancellationToken cancellationToken)
     {
@@ -452,17 +467,22 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             {
                 int x = gx * ProposalStride;
                 int y = gy * ProposalStride;
+                MarkerPoint originalCenter =
+                    frame.OriginalToFrame.MapToOriginal(new MarkerPoint(x, y));
                 counters.ProposalGridPositionsConsidered++;
+                gridProposalCenters.Add(originalCenter);
                 if (WindowMaxInk(luminance, width, height, x, y, 8) < InkSupportThreshold)
                 {
                     counters.LowInkRejects++;
                     continue;
                 }
+                inkSupportedProposalCenters.Add(originalCenter);
                 if (WindowMax(text, width, height, x, y, 2) >= MaskRejectionThreshold)
                 {
                     counters.OcrMaskRejects++;
                     continue;
                 }
+                ocrUnmaskedProposalCenters.Add(originalCenter);
                 if (WindowMax(artifact, width, height, x, y, 2) >= MaskRejectionThreshold)
                 {
                     counters.ArtifactMaskRejects++;
@@ -488,8 +508,7 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                     }
                 }
                 counters.EmittedProposals++;
-                emittedProposalCenters.Add(
-                    frame.OriginalToFrame.MapToOriginal(new MarkerPoint(x, y)));
+                emittedProposalCenters.Add(originalCenter);
                 yield return new Proposal(x, y, patch);
             }
         }

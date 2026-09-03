@@ -66,6 +66,16 @@ public sealed class ProductionProposalMarkerCenterAdapterTests
         Assert.AreEqual(diagnostic.Candidates.Count, counters.FinalCandidates);
         Assert.AreEqual(counters.CandidatesBeforeNms, diagnostic.PreNmsCandidates.Count);
         Assert.IsTrue(diagnostic.PreNmsCandidates.Count >= diagnostic.Candidates.Count);
+        Assert.AreEqual(counters.ProposalGridPositionsConsidered, diagnostic.GridProposalCenters.Count);
+        Assert.AreEqual(
+            counters.ProposalGridPositionsConsidered - counters.LowInkRejects,
+            diagnostic.InkSupportedProposalCenters.Count);
+        Assert.AreEqual(
+            diagnostic.InkSupportedProposalCenters.Count - counters.OcrMaskRejects,
+            diagnostic.OcrUnmaskedProposalCenters.Count);
+        Assert.AreEqual(
+            diagnostic.OcrUnmaskedProposalCenters.Count - counters.ArtifactMaskRejects,
+            diagnostic.EmittedProposalCenters.Count);
         Assert.AreEqual(counters.EmittedProposals, diagnostic.EmittedProposalCenters.Count);
         Assert.AreEqual(counters.OutputsAbove025, diagnostic.AboveThresholdDecodedPoints.Count);
     }
