@@ -56,6 +56,39 @@ public sealed class ProductionProposalMarkerCenterAdapterTests
     }
 
     [TestMethod]
+    public async Task MultiradiusCandidateRecoversSupportOutsideLegacyRadiusClip()
+    {
+        var runner = new FakeRunner(static count => Enumerable.Repeat(1f, count * 4).ToArray());
+        var legacy = CreateAdapter(runner);
+        var multiradius = CreateMultiradiusAdapter(runner);
+        MarkerImageFrame frame = FrameWithOuterRadiusMarker();
+        var polygon = MarkerPolygon.FromRectangle(new(0, 0, 512, 512));
+
+        IReadOnlyList<MarkerCenter> legacyMarkers = await legacy.DetectCandidateAsync(frame, polygon, CancellationToken.None);
+        IReadOnlyList<MarkerCenter> multiradiusMarkers = await multiradius.DetectCandidateAsync(frame, polygon, CancellationToken.None);
+
+        Assert.IsFalse(legacyMarkers.Any(static marker => Math.Abs(marker.Center.X - 100) <= 2 && Math.Abs(marker.Center.Y - 100) <= 2));
+        Assert.IsTrue(multiradiusMarkers.Any(static marker => Math.Abs(marker.Center.X - 100) <= 2 && Math.Abs(marker.Center.Y - 100) <= 2));
+    }
+
+    [TestMethod]
+    public async Task ArtifactMaskStillRejectsMultiradiusCandidate()
+    {
+        var adapter = CreateMultiradiusAdapter(new FakeRunner(static count => Enumerable.Repeat(1f, count * 4).ToArray()));
+        MarkerImageFrame frame = FrameWithOuterRadiusMarker() with
+        {
+            ArtifactMask = new MarkerMask(512, 512, Enumerable.Repeat(1f, 512 * 512).ToArray()),
+        };
+
+        IReadOnlyList<MarkerCenter> markers = await adapter.DetectCandidateAsync(
+            frame,
+            MarkerPolygon.FromRectangle(new(0, 0, 512, 512)),
+            CancellationToken.None);
+
+        Assert.AreEqual(0, markers.Count);
+    }
+
+    [TestMethod]
     public async Task CandidateOutputMapsThroughFrameTransformAndProductionFailsClosedWhenUnapproved()
     {
         var runner = new FakeRunner(static count => Enumerable.Repeat(1f, count * 4).ToArray());
@@ -135,8 +168,60 @@ public sealed class ProductionProposalMarkerCenterAdapterTests
         }
     }
 
+    [TestMethod]
+    public void MultiradiusCandidateFactoryRejectsIdentityOrHashMismatch()
+    {
+        var wrongIdentity = new ModelIdentity(
+            ProductionProposalMarkerCenterAdapter.CandidateRevision,
+            ProductionProposalMarkerCenterAdapter.CandidateId,
+            ProductionProposalMarkerCenterAdapter.ExpectedMultiradiusModelSha256,
+            Path.Combine(Path.GetTempPath(), "missing-marker-v23.onnx"));
+        Assert.ThrowsExactly<InvalidDataException>(() => ProductionProposalMarkerCenterAdapter.CreateMultiradiusCandidate(wrongIdentity, null!));
+
+        string path = Path.Combine(Path.GetTempPath(), $"changed-marker-v23-{Guid.NewGuid():N}.onnx");
+        File.WriteAllBytes(path, [1, 2, 3]);
+        try
+        {
+            var wrongHash = new ModelIdentity(
+                ProductionProposalMarkerCenterAdapter.MultiradiusCandidateRevision,
+                ProductionProposalMarkerCenterAdapter.MultiradiusCandidateId,
+                ProductionProposalMarkerCenterAdapter.ExpectedMultiradiusModelSha256,
+                path);
+            Assert.ThrowsExactly<InvalidDataException>(() => ProductionProposalMarkerCenterAdapter.CreateMultiradiusCandidate(wrongHash, null!));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [TestMethod]
+    public async Task MultiradiusCandidateDoesNotImplyProductionApproval()
+    {
+        var adapter = CreateMultiradiusAdapter(new FakeRunner(static count => Enumerable.Repeat(1f, count * 4).ToArray()));
+        Assert.IsFalse(adapter.IsApproved);
+
+        await Assert.ThrowsAsync<ProductionWorkflowStageException>(() => adapter.DetectAsync(
+            CreateRequest(),
+            FrameWithMarkers(),
+            MarkerPolygon.FromRectangle(new(0, 0, 512, 512)),
+            null,
+            null,
+            CancellationToken.None));
+    }
+
     private static ProductionProposalMarkerCenterAdapter CreateAdapter(FakeRunner runner, int? maximumDecodedCandidates = null) =>
         new(new ModelIdentity("marker-center-runtime-consistency-v2", "P2", ProductionProposalMarkerCenterAdapter.ExpectedModelSha256, "candidate-p2.onnx"), runner, maximumDecodedCandidates: maximumDecodedCandidates);
+
+    private static ProductionProposalMarkerCenterAdapter CreateMultiradiusAdapter(FakeRunner runner, int? maximumDecodedCandidates = null) =>
+        new(new ModelIdentity(
+            ProductionProposalMarkerCenterAdapter.MultiradiusCandidateRevision,
+            ProductionProposalMarkerCenterAdapter.MultiradiusCandidateId,
+            ProductionProposalMarkerCenterAdapter.ExpectedMultiradiusModelSha256,
+            "candidate-v23.onnx"),
+            runner,
+            maximumDecodedCandidates: maximumDecodedCandidates,
+            multiradiusGeometry: true);
 
     private static MarkerImageFrame FrameWithMarkers()
     {
@@ -159,6 +244,35 @@ public sealed class ProductionProposalMarkerCenterAdapterTests
             }
         }
         return new MarkerImageFrame(512, 512, 1, ink, MarkerSourceImage.Original, MarkerAffineTransform.Identity, MarkerMask.Empty(512, 512), MarkerMask.Empty(512, 512));
+    }
+
+    private static MarkerImageFrame FrameWithOuterRadiusMarker()
+    {
+        float[] ink = new float[512 * 512];
+        Array.Fill(ink, 1f);
+        const int centerX = 100;
+        const int centerY = 100;
+        ink[(centerY * 512) + centerX] = 0;
+        foreach ((int x, int y) in new[]
+                 {
+                     (centerX - 10, centerY), (centerX + 10, centerY),
+                     (centerX, centerY - 10), (centerX, centerY + 10),
+                     (centerX - 10, centerY - 10), (centerX + 10, centerY - 10),
+                     (centerX - 10, centerY + 10), (centerX + 10, centerY + 10),
+                 })
+        {
+            ink[(y * 512) + x] = 0;
+        }
+
+        return new MarkerImageFrame(
+            512,
+            512,
+            1,
+            ink,
+            MarkerSourceImage.Original,
+            MarkerAffineTransform.Identity,
+            MarkerMask.Empty(512, 512),
+            MarkerMask.Empty(512, 512));
     }
 
     private static ProductionWorkflowDetectionRequest CreateRequest()

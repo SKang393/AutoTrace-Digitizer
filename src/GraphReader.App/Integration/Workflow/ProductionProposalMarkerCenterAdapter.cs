@@ -28,6 +28,9 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
     public const string CandidateRevision = "marker-center-runtime-consistency-v2";
     public const string CandidateId = "P2";
     public const string ExpectedModelSha256 = "924c555e2f27955c644143125d7abd3b05859ea9928ab9d1e741e0544fa19e8b";
+    public const string MultiradiusCandidateRevision = "marker-center-multiradius-geometry-v23";
+    public const string MultiradiusCandidateId = "P1";
+    public const string ExpectedMultiradiusModelSha256 = "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38";
     public const float CenterThreshold = 0.25f;
     public const int PatchSize = 33;
     public const int ProposalStride = 4;
@@ -41,6 +44,7 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
 
     private readonly IProposalMarkerInferenceRunner inference;
     private readonly int maximumDecodedCandidates;
+    private readonly bool multiradiusGeometry;
 
     public static ProductionProposalMarkerCenterAdapter CreateCandidate(
         ModelIdentity model,
@@ -53,17 +57,33 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             new RuntimeProposalMarkerInferenceRunner(runtime));
     }
 
+    public static ProductionProposalMarkerCenterAdapter CreateMultiradiusCandidate(
+        ModelIdentity model,
+        InferenceRuntime runtime)
+    {
+        VerifyMultiradiusPayload(model);
+        ArgumentNullException.ThrowIfNull(runtime);
+        return new ProductionProposalMarkerCenterAdapter(
+            model,
+            new RuntimeProposalMarkerInferenceRunner(runtime),
+            multiradiusGeometry: true);
+    }
+
     internal ProductionProposalMarkerCenterAdapter(
         ModelIdentity model,
         IProposalMarkerInferenceRunner inference,
-        bool _ = false,
+        bool multiradiusGeometry = false,
         int? maximumDecodedCandidates = null)
     {
         Model = model ?? throw new ArgumentNullException(nameof(model));
         Model.Validate();
-        if (!string.Equals(Model.Sha256, ExpectedModelSha256, StringComparison.OrdinalIgnoreCase))
+        this.multiradiusGeometry = multiradiusGeometry;
+        string expectedModelSha256 = multiradiusGeometry ? ExpectedMultiradiusModelSha256 : ExpectedModelSha256;
+        if (!string.Equals(Model.Sha256, expectedModelSha256, StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidDataException("The proposal marker payload is not the checksum-bound runtime-consistency-v2 P2 model.");
+            throw new InvalidDataException(multiradiusGeometry
+                ? "The proposal marker payload is not the checksum-bound multiradius V23 P1 model."
+                : "The proposal marker payload is not the checksum-bound runtime-consistency-v2 P2 model.");
         }
 
         this.inference = inference ?? throw new ArgumentNullException(nameof(inference));
@@ -104,6 +124,29 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             !string.Equals(model.Sha256, ExpectedModelSha256, StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidDataException("The proposal marker model bytes do not match the checksum-bound P2 payload.");
+        }
+    }
+
+    private static void VerifyMultiradiusPayload(ModelIdentity model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        model.Validate();
+        if (!string.Equals(model.ModelId, MultiradiusCandidateRevision, StringComparison.Ordinal) ||
+            !string.Equals(model.Version, MultiradiusCandidateId, StringComparison.Ordinal) ||
+            !string.Equals(model.Sha256, ExpectedMultiradiusModelSha256, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidDataException("The proposal marker payload identity is not the checksum-bound multiradius V23 P1 model.");
+        }
+
+        if (!File.Exists(model.FilePath))
+        {
+            throw new FileNotFoundException("The checksum-bound multiradius proposal marker model is missing.", model.FilePath);
+        }
+
+        string actual = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(model.FilePath)));
+        if (!string.Equals(actual, ExpectedMultiradiusModelSha256, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidDataException("The proposal marker model bytes do not match the checksum-bound multiradius V23 P1 payload.");
         }
     }
 
@@ -162,11 +205,11 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                             "candidate-only",
                             "proposal-patches",
                             frame.SourceImage.ToString(),
-                            "marker_center_candidate_p2",
-                            CandidateRevision,
+                            multiradiusGeometry ? "marker_center_candidate_v23" : "marker_center_candidate_p2",
+                            multiradiusGeometry ? MultiradiusCandidateRevision : CandidateRevision,
                             new Dictionary<string, object?>(StringComparer.Ordinal)
                             {
-                                ["candidate_id"] = CandidateId,
+                                ["candidate_id"] = multiradiusGeometry ? MultiradiusCandidateId : CandidateId,
                                 ["threshold"] = CenterThreshold,
                                 ["batch_offset"] = batchOffset,
                                 ["batch_count"] = count,
@@ -211,7 +254,7 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                 double x = proposal.X + (offsetX * ProposalStride);
                 double y = proposal.Y + (offsetY * ProposalStride);
                 double decodedRadius = Math.Clamp(radius, 2.5, 8.0);
-                if (TryRefine(frame, x, y, decodedRadius, out MarkerPoint refined))
+                if (TryRefine(frame, x, y, decodedRadius, multiradiusGeometry, out MarkerPoint refined))
                 {
                     if (plotPolygon.Contains(frame.OriginalToFrame.MapToOriginal(refined)))
                     {
@@ -247,7 +290,7 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             .ThenBy(candidate => candidate.Center.X)
             .ThenByDescending(candidate => candidate.Confidence)
             .Select((candidate, index) => new MarkerCenter(
-                $"candidate-p2-{index.ToString(System.Globalization.CultureInfo.InvariantCulture)}",
+                $"{(multiradiusGeometry ? "candidate-v23-p1" : "candidate-p2")}-{index.ToString(System.Globalization.CultureInfo.InvariantCulture)}",
                 frame.OriginalToFrame.MapToOriginal(candidate.Center),
                 frame.OriginalToFrame.MapFrameRadiusToOriginal(candidate.Radius),
                 0,
@@ -343,7 +386,13 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
         return maximum;
     }
 
-    private static bool TryRefine(MarkerImageFrame frame, double x, double y, double radius, out MarkerPoint refined)
+    private static bool TryRefine(
+        MarkerImageFrame frame,
+        double x,
+        double y,
+        double radius,
+        bool multiradiusGeometry,
+        out MarkerPoint refined)
     {
         if (!CenterIsUnmasked(frame, x, y))
         {
@@ -351,7 +400,7 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             return false;
         }
 
-        if (GeometryConsensus(frame, x, y, radius))
+        if (GeometryConsensus(frame, x, y, radius, multiradiusGeometry))
         {
             refined = new MarkerPoint(x, y);
             return true;
@@ -364,7 +413,8 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             {
                 double candidateX = x + dx;
                 double candidateY = y + dy;
-                if (CenterIsUnmasked(frame, candidateX, candidateY) && GeometryConsensus(frame, candidateX, candidateY, radius))
+                if (CenterIsUnmasked(frame, candidateX, candidateY) &&
+                    GeometryConsensus(frame, candidateX, candidateY, radius, multiradiusGeometry))
                 {
                     candidates.Add((dx * dx + dy * dy, Math.Abs(dy), Math.Abs(dx), dy, dx, candidateX, candidateY));
                 }
@@ -389,7 +439,30 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             WindowMax(frame.ArtifactMask.Values, frame.Width, frame.Height, ix, iy, 2) < MaskRejectionThreshold;
     }
 
-    private static bool GeometryConsensus(MarkerImageFrame frame, double x, double y, double radius)
+    private static bool GeometryConsensus(
+        MarkerImageFrame frame,
+        double x,
+        double y,
+        double radius,
+        bool multiradiusGeometry)
+    {
+        if (multiradiusGeometry)
+        {
+            for (int ring = 3; ring <= 12; ring++)
+            {
+                if (GeometryConsensusAtRadius(frame, x, y, ring))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return GeometryConsensusAtRadius(frame, x, y, radius);
+    }
+
+    private static bool GeometryConsensusAtRadius(MarkerImageFrame frame, double x, double y, double radius)
     {
         int ix = (int)Math.Round(x);
         int iy = (int)Math.Round(y);
