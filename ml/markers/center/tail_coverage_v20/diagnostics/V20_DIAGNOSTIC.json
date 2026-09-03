@@ -1,0 +1,332 @@
+{
+  "artifacts": {
+    "candidate_report": {
+      "exists": true,
+      "path": "artifacts/goal22-worktrees/marker-v20/ml/markers/center/tail_coverage_v20/artifacts/P1-run/candidate-report.json",
+      "sha256": "3a58fce541c35df592455ce0b91a041e1d3107edb3d8bb13e98211f42e7a7ca5"
+    },
+    "checkpoint": {
+      "exists": true,
+      "path": "artifacts/goal22-worktrees/marker-v20/ml/markers/center/tail_coverage_v20/artifacts/P1-run/marker-center-tail-coverage-v20-p1.pt",
+      "sha256": "f2caa70861e28276f9ea5f692020057831752f6f3d8d6f866b3ed27a891cb0df"
+    },
+    "onnx": {
+      "exists": true,
+      "path": "artifacts/goal22-worktrees/marker-v20/ml/markers/center/tail_coverage_v20/artifacts/P1-run/marker-center-tail-coverage-v20-p1.onnx",
+      "sha256": "862ad1f4c3be53714ab9ccd2e745783f778c0f194846f1dfe85f9fbaf5a4701b"
+    }
+  },
+  "candidate_id": "P1",
+  "dimensions": {
+    "family": {
+      "geometry_intersection_dev": {
+        "false_negatives": 5,
+        "max_confidence": {
+          "maximum": 0.999995,
+          "median": 0.995425,
+          "minimum": 0.014921
+        },
+        "miss_max_confidence": {
+          "maximum": 0.997742,
+          "median": 0.215514,
+          "minimum": 0.014921
+        },
+        "true_positives": 27,
+        "truth_count": 32,
+        "truth_with_geometry_proposal_3px": 32,
+        "truth_with_geometry_proposal_5px": 32,
+        "truth_with_raw_proposal_3px": 32
+      },
+      "geometry_mixed_dev": {
+        "false_negatives": 5,
+        "max_confidence": {
+          "maximum": 0.999995,
+          "median": 0.99892,
+          "minimum": 0.027396
+        },
+        "miss_max_confidence": {
+          "maximum": 0.581274,
+          "median": 0.113482,
+          "minimum": 0.027396
+        },
+        "true_positives": 27,
+        "truth_count": 32,
+        "truth_with_geometry_proposal_3px": 32,
+        "truth_with_geometry_proposal_5px": 32,
+        "truth_with_raw_proposal_3px": 32
+      },
+      "geometry_wide_dev": {
+        "false_negatives": 3,
+        "max_confidence": {
+          "maximum": 0.999985,
+          "median": 0.997513,
+          "minimum": 0.014304
+        },
+        "miss_max_confidence": {
+          "maximum": 0.18582,
+          "median": 0.029004,
+          "minimum": 0.014304
+        },
+        "true_positives": 29,
+        "truth_count": 32,
+        "truth_with_geometry_proposal_3px": 32,
+        "truth_with_geometry_proposal_5px": 32,
+        "truth_with_raw_proposal_3px": 32
+      }
+    },
+    "marker_radius_px": {
+      "11-12": {
+        "false_negatives": 9,
+        "max_confidence": {
+          "maximum": 0.99989,
+          "median": 0.927248,
+          "minimum": 0.014304
+        },
+        "miss_max_confidence": {
+          "maximum": 0.581274,
+          "median": 0.061033,
+          "minimum": 0.014304
+        },
+        "true_positives": 15,
+        "truth_count": 24,
+        "truth_with_geometry_proposal_3px": 24,
+        "truth_with_geometry_proposal_5px": 24,
+        "truth_with_raw_proposal_3px": 24
+      },
+      "3-4": {
+        "false_negatives": 1,
+        "max_confidence": {
+          "maximum": 0.999995,
+          "median": 0.999288,
+          "minimum": 0.113482
+        },
+        "miss_max_confidence": {
+          "maximum": 0.113482,
+          "median": 0.113482,
+          "minimum": 0.113482
+        },
+        "true_positives": 15,
+        "truth_count": 16,
+        "truth_with_geometry_proposal_3px": 16,
+        "truth_with_geometry_proposal_5px": 16,
+        "truth_with_raw_proposal_3px": 16
+      },
+      "5-7": {
+        "false_negatives": 1,
+        "max_confidence": {
+          "maximum": 0.999981,
+          "median": 0.999149,
+          "minimum": 0.206287
+        },
+        "miss_max_confidence": {
+          "maximum": 0.206287,
+          "median": 0.206287,
+          "minimum": 0.206287
+        },
+        "true_positives": 15,
+        "truth_count": 16,
+        "truth_with_geometry_proposal_3px": 16,
+        "truth_with_geometry_proposal_5px": 16,
+        "truth_with_raw_proposal_3px": 16
+      },
+      "8-10": {
+        "false_negatives": 2,
+        "max_confidence": {
+          "maximum": 0.999995,
+          "median": 0.997675,
+          "minimum": 0.215514
+        },
+        "miss_max_confidence": {
+          "maximum": 0.997742,
+          "median": 0.606628,
+          "minimum": 0.215514
+        },
+        "true_positives": 38,
+        "truth_count": 40,
+        "truth_with_geometry_proposal_3px": 40,
+        "truth_with_geometry_proposal_5px": 40,
+        "truth_with_raw_proposal_3px": 40
+      }
+    },
+    "marker_shape": {
+      "filled_circle": {
+        "false_negatives": 2,
+        "max_confidence": {
+          "maximum": 0.999995,
+          "median": 0.997742,
+          "minimum": 0.215514
+        },
+        "miss_max_confidence": {
+          "maximum": 0.997742,
+          "median": 0.606628,
+          "minimum": 0.215514
+        },
+        "true_positives": 31,
+        "truth_count": 33,
+        "truth_with_geometry_proposal_3px": 33,
+        "truth_with_geometry_proposal_5px": 33,
+        "truth_with_raw_proposal_3px": 33
+      },
+      "filled_diamond": {
+        "false_negatives": 2,
+        "max_confidence": {
+          "maximum": 0.999985,
+          "median": 0.997546,
+          "minimum": 0.113482
+        },
+        "miss_max_confidence": {
+          "maximum": 0.206287,
+          "median": 0.159884,
+          "minimum": 0.113482
+        },
+        "true_positives": 28,
+        "truth_count": 30,
+        "truth_with_geometry_proposal_3px": 30,
+        "truth_with_geometry_proposal_5px": 30,
+        "truth_with_raw_proposal_3px": 30
+      },
+      "open_square": {
+        "false_negatives": 9,
+        "max_confidence": {
+          "maximum": 0.999995,
+          "median": 0.994027,
+          "minimum": 0.014304
+        },
+        "miss_max_confidence": {
+          "maximum": 0.581274,
+          "median": 0.061033,
+          "minimum": 0.014304
+        },
+        "true_positives": 24,
+        "truth_count": 33,
+        "truth_with_geometry_proposal_3px": 33,
+        "truth_with_geometry_proposal_5px": 33,
+        "truth_with_raw_proposal_3px": 33
+      }
+    }
+  },
+  "inference": {
+    "confidence_threshold": 0.25,
+    "match_tolerance_px": 5.0,
+    "matched_truth_max_confidence": {
+      "maximum": 0.999995,
+      "median": 0.99783,
+      "minimum": 0.298064
+    },
+    "max_confidence_over_truth_proposals": {
+      "maximum": 0.999995,
+      "median": 0.997249,
+      "minimum": 0.014304
+    },
+    "missed_truth_max_confidence": {
+      "maximum": 0.997742,
+      "median": 0.18239,
+      "minimum": 0.014304
+    },
+    "prediction_count": 83,
+    "proposal_counts": {
+      "geometry_filtered": 5822,
+      "raw": 8314
+    },
+    "proposal_funnel": {
+      "geometry_3px": 96,
+      "geometry_5px": 96,
+      "raw_3px": 96,
+      "truth_count": 96
+    },
+    "provider": "CPUExecutionProvider",
+    "truth_count": 96
+  },
+  "miss_stage": {
+    "counts": {
+      "confidence_below_threshold": 10,
+      "marker_geometry_veto": 2,
+      "unmasked_artifact_veto": 1
+    },
+    "responsible_stage": "classifier_confidence_with_unmasked_artifact_and_marker_geometry_residual",
+    "total_misses": 13
+  },
+  "next_revision": {
+    "geometry_veto_defect": true,
+    "nms_defect": false,
+    "proposal_availability_defect": false,
+    "recommended_isolated_change": "diagnose and repair the confidence tail while preserving the V13 proposal and geometry contracts",
+    "requires_new_candidate_authorization": true,
+    "responsible_stage": "classifier_confidence_tail; three downstream vetoes remain and proposal coverage/NMS are clear",
+    "startable": true
+  },
+  "revision": "marker-center-tail-coverage-v20",
+  "schema": "graphreader.marker-center-tail-coverage-v20-diagnostic.v1",
+  "scope": {
+    "case_level_details_emitted": false,
+    "fixed_dev_manifest_sha256": "771141bd5d22d2ffdb56e63f193c16c0775a0f47c02313ef67b06bbce9603126",
+    "fixed_dev_split": "marker-center-proposal-geometry-v13-dev",
+    "private_or_article_images": false,
+    "public_gate_archive_opened": false,
+    "scene_ids_emitted": false,
+    "sealed_runs": 0,
+    "synthetic_only": true
+  },
+  "thresholds": {
+    "0.0": {
+      "duplicate_count": 0,
+      "f1": 0.3177257525083612,
+      "false_negatives": 1,
+      "false_positives": 407,
+      "precision": 0.1892430278884462,
+      "recall": 0.9895833333333334,
+      "threshold": 0.0,
+      "true_positives": 95
+    },
+    "0.1": {
+      "duplicate_count": 0,
+      "f1": 0.9565217391304348,
+      "false_negatives": 8,
+      "false_positives": 0,
+      "precision": 1.0,
+      "recall": 0.9166666666666666,
+      "threshold": 0.1,
+      "true_positives": 88
+    },
+    "0.25": {
+      "duplicate_count": 0,
+      "f1": 0.9273743016759777,
+      "false_negatives": 13,
+      "false_positives": 0,
+      "precision": 1.0,
+      "recall": 0.8645833333333334,
+      "threshold": 0.25,
+      "true_positives": 83
+    },
+    "0.4": {
+      "duplicate_count": 0,
+      "f1": 0.9028571428571429,
+      "false_negatives": 17,
+      "false_positives": 0,
+      "precision": 1.0,
+      "recall": 0.8229166666666666,
+      "threshold": 0.4,
+      "true_positives": 79
+    },
+    "0.55": {
+      "duplicate_count": 0,
+      "f1": 0.9028571428571429,
+      "false_negatives": 17,
+      "false_positives": 0,
+      "precision": 1.0,
+      "recall": 0.8229166666666666,
+      "threshold": 0.55,
+      "true_positives": 79
+    },
+    "0.7": {
+      "duplicate_count": 0,
+      "f1": 0.8901734104046243,
+      "false_negatives": 19,
+      "false_positives": 0,
+      "precision": 1.0,
+      "recall": 0.8020833333333334,
+      "threshold": 0.7,
+      "true_positives": 77
+    }
+  }
+}
