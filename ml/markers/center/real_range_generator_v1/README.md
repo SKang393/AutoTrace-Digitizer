@@ -18,9 +18,17 @@ full text-region-like patch. Only aggregate statistics
 and hashes are written; no pixels, truth rows, scene identifiers, private
 corpus data, model, or training path is used.
 
+A separate negative-proposal audit runs the exact V24 mask-preserving ink-supported proposal
+extractor and labels proposals positive only when their centers are within 3 px
+of a truth center. It reports full train/dev proposal, positive, and negative
+counts plus aggregate quantiles for ink, OCR-mask, and artifact-mask proposal
+patch features. A deterministic ten-negatives-per-positive sample count is
+reported for comparison with the V24 training rule.
+
 Run from the repository root:
 
 ```powershell
 python -m ml.markers.center.real_range_generator_v1.audit --output ml/markers/center/real_range_generator_v1/AUDIT.json
+python -m ml.markers.center.real_range_generator_v1.negative_proposal_audit --output ml/markers/center/real_range_generator_v1/NEGATIVE_PROPOSAL_AUDIT.json
 python -m pytest ml/markers/center/real_range_generator_v1/tests -q
 ```

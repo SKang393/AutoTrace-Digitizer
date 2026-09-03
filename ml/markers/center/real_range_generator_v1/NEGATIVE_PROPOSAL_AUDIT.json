@@ -1,0 +1,149 @@
+{
+  "coordinate_streams_identical": true,
+  "extractor": "mask-preserving-v24 ink-supported full grid",
+  "schema": "graphreader.marker-center-negative-proposal-audit.v1",
+  "scope": {
+    "aggregate_only": true,
+    "model_loaded": false,
+    "pixels_emitted": false,
+    "private_or_article_images": false,
+    "scene_ids_emitted": false,
+    "synthetic_only": true,
+    "training_performed": false,
+    "truth_rows_emitted": false
+  },
+  "splits": {
+    "dev": {
+      "negative_count": 176187,
+      "negative_patch_feature_quantiles": {
+        "artifact_max": {
+          "maximum": 1.0,
+          "median": 0.0,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p90": 1.0,
+          "p95": 1.0
+        },
+        "artifact_mean": {
+          "maximum": 0.547291100025177,
+          "median": 0.0,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p90": 0.14049586653709412,
+          "p95": 0.21487602591514587
+        },
+        "ink_center_5x5_mean": {
+          "maximum": 1.0,
+          "median": 0.0030915404204279184,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p90": 0.48388246297836285,
+          "p95": 0.9529411196708679
+        },
+        "ink_max": {
+          "maximum": 1.0,
+          "median": 1.0,
+          "minimum": 0.8235294222831726,
+          "p05": 0.8337485790252686,
+          "p90": 1.0,
+          "p95": 1.0
+        },
+        "ink_mean": {
+          "maximum": 0.9980555176734924,
+          "median": 0.10055533796548843,
+          "minimum": 0.008318479172885418,
+          "p05": 0.02883739396929741,
+          "p90": 0.3062369465827941,
+          "p95": 0.42676535844802765
+        },
+        "ocr_max": {
+          "maximum": 1.0,
+          "median": 0.0,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p90": 0.0,
+          "p95": 1.0
+        },
+        "ocr_mean": {
+          "maximum": 0.8815426826477051,
+          "median": 0.0,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p90": 0.0,
+          "p95": 0.022956840693950653
+        }
+      },
+      "positive_count": 3258,
+      "positive_rule": "proposal center within <=3 px of a truth center",
+      "proposal_coordinates_aggregate_sha256": "2805ee4d6f7723aa92c75a1ed09602fcce5469b196462253f39dd8e18c55d8c5",
+      "proposal_count": 179445,
+      "sampled_negative_count_max10_per_positive": 32580
+    },
+    "train": {
+      "negative_count": 176187,
+      "negative_patch_feature_quantiles": {
+        "artifact_max": {
+          "maximum": 1.0,
+          "median": 0.0,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p90": 1.0,
+          "p95": 1.0
+        },
+        "artifact_mean": {
+          "maximum": 0.552800714969635,
+          "median": 0.0,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p90": 0.14049586653709412,
+          "p95": 0.21487602591514587
+        },
+        "ink_center_5x5_mean": {
+          "maximum": 1.0,
+          "median": 0.0030887031462043524,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p90": 0.483936309814453,
+          "p95": 0.9529411196708679
+        },
+        "ink_max": {
+          "maximum": 1.0,
+          "median": 1.0,
+          "minimum": 0.8235294222831726,
+          "p05": 0.8338009119033813,
+          "p90": 1.0,
+          "p95": 1.0
+        },
+        "ink_mean": {
+          "maximum": 0.9980555176734924,
+          "median": 0.10057796537876129,
+          "minimum": 0.008318479172885418,
+          "p05": 0.02883739396929741,
+          "p90": 0.30625706315040585,
+          "p95": 0.4267496466636657
+        },
+        "ocr_max": {
+          "maximum": 1.0,
+          "median": 0.0,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p90": 0.0,
+          "p95": 1.0
+        },
+        "ocr_mean": {
+          "maximum": 0.8815426826477051,
+          "median": 0.0,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p90": 0.0,
+          "p95": 0.022956840693950653
+        }
+      },
+      "positive_count": 3258,
+      "positive_rule": "proposal center within <=3 px of a truth center",
+      "proposal_coordinates_aggregate_sha256": "2805ee4d6f7723aa92c75a1ed09602fcce5469b196462253f39dd8e18c55d8c5",
+      "proposal_count": 179445,
+      "sampled_negative_count_max10_per_positive": 32580
+    }
+  }
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "v24_real_dev_failed_negative_generator_gap",
+  "status": "negative_patch_diagnostics_ready",
   "report_scope": "aggregate_only",
   "runtime_contract": {
     "marker_frame_coordinate_space": "original_source_pixels",
@@ -185,7 +185,7 @@
     "radius_clip_px": [2.5, 8.0],
     "candidate_only": true,
     "production_approved": false,
-    "focused_tests_passed": 16,
+    "focused_tests_passed": 17,
     "release_tool_build_warnings": 0,
     "release_tool_build_errors": 0,
     "no_corpus_self_test": "pass"
@@ -211,6 +211,33 @@
     "candidate_consumed": false,
     "real_sealed_authorized": false
   },
+  "synthetic_negative_proposals": {
+    "proposal_count_per_split": 179445,
+    "positive_count_per_split": 3258,
+    "negative_count_per_split": 176187,
+    "sampled_negative_count_for_p1": 32580,
+    "positive_label_distance_px": 3.0,
+    "dev_negative_features": {
+      "ink_mean": {"p05": 0.02883739396929741, "median": 0.10055533796548843, "p95": 0.42676535844802765},
+      "ink_center5x5_mean": {"p05": 0.0, "median": 0.0030915404204279184, "p95": 0.9529411196708679},
+      "ink_max": {"minimum": 0.8235294222831726, "median": 1.0, "maximum": 1.0},
+      "ocr_mean": {"p05": 0.0, "median": 0.0, "p95": 0.022956840693950653},
+      "artifact_mean": {"p05": 0.0, "median": 0.0, "p95": 0.21487602591514587}
+    },
+    "model_loaded": false,
+    "training_performed": false,
+    "private_data_used": false
+  },
+  "negative_patch_diagnostic": {
+    "real_dev_authorized": true,
+    "real_sealed_authorized": false,
+    "marker_model_inference_runs": 0,
+    "positive_label_distance_px": 3.0,
+    "features": ["ink_mean", "ink_center5x5_mean", "ink_max", "ocr_mean", "ocr_max", "artifact_mean", "artifact_max"],
+    "case_level_output": false,
+    "truth_rows_output": false,
+    "pixel_output": false
+  },
   "finding": {
     "central_scale_coverage": "the current train distribution covers the real-dev p05 diameter of 6 px through the p90 diameter of 24 px",
     "remaining_scale_gap": "the current train distribution omits the real-dev 24 to 27 px p90-to-p95 tail and the 1 to 48 px full measured envelope",
@@ -223,7 +250,7 @@
     "feasibility_result": "mask-preserving proposal coverage is complete, but the frozen V21 classifier fails the corrected synthetic dev gate and hits one prohibited structure per scene",
     "candidate_result": "V24 P1 clears every corrected synthetic dev gate at the fixed 0.25 threshold after one void pre-sealed dtype attempt and one valid training run",
     "real_dev_contradiction": "V24 real-dev fails at precision 0.12265 and recall 0.57036 despite complete proposal and mask-preserved coverage, with 17867 false candidates above the fixed classifier threshold",
-    "required_next_diagnosis": "measure aggregate real-dev negative proposal patch statistics against corrected synthetic negatives, repair the generator, and re-pass synthetic gates before another real-dev or any real-sealed read"
+    "required_next_diagnosis": "run the no-marker-inference aggregate real-dev negative patch probe, compare directly with the synthetic audit, then repair the generator before another model or real-dev run"
   },
   "implementation": {
     "real_probe_path": "tools/private_acceptance/real_dev_distribution.py",
@@ -241,7 +268,7 @@
     "corrected_generator_audit_path": "ml/markers/center/real_range_generator_v1/AUDIT.json",
     "corrected_generator_audit_sha256": "57c35c2f7c270d9dedbb7e7a60c1c46b80109e7717af75086dfc83f1b24b1b7f",
     "corrected_generator_test_path": "ml/markers/center/real_range_generator_v1/tests/test_generator.py",
-    "corrected_generator_test_sha256": "73aa8c1a073cc7f3c1c3335bed991020f50c84e4fd482f3f6bd56eedfa5e2e75",
+    "corrected_generator_test_sha256": "c10b96f4a55b35a821a76731389213b2942f946b4ed9b5dec21cc14f1c4719d6",
     "v24_feasibility_path": "ml/markers/center/mask_preserving_v24/FEASIBILITY.json",
     "v24_feasibility_sha256": "b653d2a0a18ce07bd68f3e3519e9fc55bc4da83e8a8279f3d48ac04aff15033a",
     "v24_feasibility_source_sha256": "252896f950e58f8e276b79f770bdf3ada1202afeb3bbb7cfb305b3ea9c6fd263",
@@ -255,7 +282,13 @@
     "v24_real_dev_harness_sha256": "e912a8f683902ccca762ffb1f4558d7c6086d011292c3cee8525e5ee0ea53c10",
     "v24_real_dev_result_path": "docs/GOAL-22-PHASE-4-V24-REAL-DEV-FULL-IMAGE-STAGES.json",
     "v24_real_dev_result_sha256": "ec1c7699cd4b42adffe800cbeaa258a06d0de1060c058321fb83cae4d31b6807",
-    "focused_tests": "16 V24 runtime passed; 10 V24 and corrected-generator passed; 3 prior synthetic audit passed; Release real harness build and no-corpus self-test passed"
+    "synthetic_negative_audit_path": "ml/markers/center/real_range_generator_v1/NEGATIVE_PROPOSAL_AUDIT.json",
+    "synthetic_negative_audit_sha256": "18d33c32397145afaceba978a0cbebb313fb4542a71417fcf8091965a454b247",
+    "synthetic_negative_audit_source_sha256": "f37739cb817d0e1397abb38f4dd2b6baeb539e5627640db0f8b33966c5c07e6f",
+    "negative_patch_runtime_adapter_sha256": "efb92cde5559c661c182cf990de6bd00d788f03b89c7db65d4c90c69dd299aad",
+    "negative_patch_runtime_test_sha256": "2f0cbee0029b00ab037a75703952f031aa3a85672ee5efcc5086fff52756a8b0",
+    "negative_patch_harness_sha256": "07f7339eed1f0d3f420f6cba85f94d2bcf72f785970859478edd8dffce21d495",
+    "focused_tests": "17 V24 runtime passed; 11 V24 and corrected-generator passed; 3 prior synthetic audit passed; Release real harness build and no-corpus self-test passed"
   },
   "privacy": {
     "case_level_output": false,

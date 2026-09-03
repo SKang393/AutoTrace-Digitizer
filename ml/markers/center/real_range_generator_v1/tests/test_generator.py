@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Sungwoo Kang
 from ml.markers.center.real_range_generator_v1.generator import audit, build_split
+from ml.markers.center.real_range_generator_v1.negative_proposal_audit import audit as negative_proposal_audit
 
 
 def test_determinism_and_disjoint_seeds() -> None:
@@ -60,3 +61,18 @@ def test_scope_is_aggregate_only_and_negatives_present() -> None:
                 "candidate_revision_created", "scene_ids_emitted", "truth_rows_emitted",
                 "pixels_emitted"))
     assert result["hard_negative_kinds"] == ["text", "line_intersection", "axis"]
+
+
+def test_v24_ink_supported_proposal_stream_is_aggregate_and_deterministic() -> None:
+    result = negative_proposal_audit()
+    names = {"ink_mean", "ink_center_5x5_mean", "ink_max", "ocr_mean",
+             "ocr_max", "artifact_mean", "artifact_max"}
+    streams = [result["splits"][name] for name in ("train", "dev")]
+    for stream in streams:
+        assert stream["proposal_count"] > stream["positive_count"] > 0
+        assert stream["negative_count"] == stream["proposal_count"] - stream["positive_count"]
+        assert stream["sampled_negative_count_max10_per_positive"] == stream["positive_count"] * 10
+        assert set(stream["negative_patch_feature_quantiles"]) == names
+        for values in stream["negative_patch_feature_quantiles"].values():
+            assert set(values) == {"minimum", "p05", "median", "p90", "p95", "maximum"}
+    assert streams[0]["proposal_coordinates_aggregate_sha256"] == streams[1]["proposal_coordinates_aggregate_sha256"]

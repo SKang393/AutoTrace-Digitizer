@@ -44,6 +44,20 @@ public sealed record ProposalMarkerCandidateDiagnosticResult(
     [property: JsonIgnore] IReadOnlyList<MarkerPoint> EmittedProposalCenters,
     [property: JsonIgnore] IReadOnlyList<MarkerPoint> AboveThresholdDecodedPoints);
 
+public sealed record ProposalMarkerPatchFeatureSummary(
+    MarkerPoint OriginalBaseCenter,
+    double InkMean,
+    double InkCenter5x5Mean,
+    double InkMaximum,
+    double OcrMaskMean,
+    double OcrMaskMaximum,
+    double ArtifactMaskMean,
+    double ArtifactMaskMaximum);
+
+public sealed record ProposalMarkerNegativePatchDiagnosticResult(
+    ProposalMarkerStageCounters StageCounters,
+    [property: JsonIgnore] IReadOnlyList<ProposalMarkerPatchFeatureSummary> EmittedProposalFeatures);
+
 /// <summary>
 /// Candidate-only integration for the checksum-bound runtime-consistency-v2 P2
 /// proposal payload. It is intentionally never composed into production unless
@@ -420,6 +434,60 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             ocrUnmaskedProposalCenters,
             emittedProposalCenters,
             aboveThresholdDecodedPoints);
+    }
+
+    /// <summary>Enumerates V24 proposals and summarizes their channels without model inference.</summary>
+    public static ProposalMarkerNegativePatchDiagnosticResult DiagnoseMaskPreservingProposals(
+        MarkerImageFrame frame,
+        MarkerPolygon plotPolygon,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(frame);
+        ArgumentNullException.ThrowIfNull(plotPolygon);
+        ValidateFrame(frame);
+        cancellationToken.ThrowIfCancellationRequested();
+        var counters = new ProposalMarkerStageCounterAccumulator();
+        var grid = new List<MarkerPoint>();
+        var ink = new List<MarkerPoint>();
+        var unmasked = new List<MarkerPoint>();
+        var emitted = new List<MarkerPoint>();
+        var summaries = new List<ProposalMarkerPatchFeatureSummary>();
+        foreach (Proposal proposal in EnumerateProposals(frame, plotPolygon, counters, grid, ink, unmasked, emitted, cancellationToken, maskPreservingCandidate: true))
+        {
+            summaries.Add(SummarizeProposal(frame, proposal));
+        }
+        return new ProposalMarkerNegativePatchDiagnosticResult(counters.ToRecord(), summaries);
+    }
+
+    private static ProposalMarkerPatchFeatureSummary SummarizeProposal(MarkerImageFrame frame, Proposal proposal)
+    {
+        int planeSize = PatchSize * PatchSize;
+        ReadOnlySpan<float> patch = proposal.Patch;
+        static (double Mean, double Maximum) Statistics(ReadOnlySpan<float> values)
+        {
+            double sum = 0, maximum = double.NegativeInfinity;
+            foreach (float value in values)
+            {
+                sum += value;
+                maximum = Math.Max(maximum, value);
+            }
+            return (sum / values.Length, maximum);
+        }
+        double centerSum = 0;
+        int centerCount = 0;
+        for (int y = 0; y < PatchSize; y++) for (int x = 0; x < PatchSize; x++)
+            if (Math.Abs(x - PatchSize / 2) <= 2 && Math.Abs(y - PatchSize / 2) <= 2)
+            {
+                centerSum += patch[y * PatchSize + x];
+                centerCount++;
+            }
+        (double inkMean, double inkMaximum) = Statistics(patch[..planeSize]);
+        (double ocrMean, double ocrMaximum) = Statistics(patch.Slice(planeSize, planeSize));
+        (double artifactMean, double artifactMaximum) = Statistics(patch.Slice(2 * planeSize, planeSize));
+        return new ProposalMarkerPatchFeatureSummary(
+            frame.OriginalToFrame.MapToOriginal(new MarkerPoint(proposal.X, proposal.Y)),
+            inkMean, centerSum / centerCount, inkMaximum,
+            ocrMean, ocrMaximum, artifactMean, artifactMaximum);
     }
 
     private static MarkerCenter ToMarkerCenter(

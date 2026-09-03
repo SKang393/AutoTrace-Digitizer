@@ -48,6 +48,19 @@ internal static class Program
         string? syntheticArg = GetOption(args, "--synthetic-real-range");
         string? officialArg = GetOption(args, "--synthetic-official-db");
         string? tiledArg = GetOption(args, "--synthetic-tiled-proposals");
+        if (args.Contains("--run-real-dev-marker-v24-negative-patches", StringComparer.Ordinal))
+        {
+            string? markerRoot = GetOption(args, "--root");
+            if (string.IsNullOrWhiteSpace(markerRoot) || markerRoot.StartsWith("--", StringComparison.Ordinal))
+            {
+                Console.Error.WriteLine("REAL_DEV_MARKER_V24_NEGATIVE_PATCHES_ROOT_REQUIRED");
+                return 2;
+            }
+            MarkerNegativePatchAggregateReport negativeReport = await RunRealDevMarkerV24NegativePatchesAsync(
+                Path.GetFullPath(markerRoot), CancellationToken.None);
+            Console.WriteLine(JsonSerializer.Serialize(negativeReport, JsonOptions));
+            return negativeReport.FailureCount == 0 ? 0 : 1;
+        }
         if (args.Contains("--run-real-dev-marker-v24-diagnostic", StringComparer.Ordinal))
         {
             string? markerRoot = GetOption(args, "--root");
@@ -274,6 +287,71 @@ internal static class Program
     private static async Task<MarkerAggregateReport> RunRealDevMarkerV24DiagnosticAsync(
         string rootPath, string markerModelPath, CancellationToken cancellationToken)
         => await RunRealDevMarkerAsync(rootPath, markerModelPath, multiradiusGeometry: true, includeStageCounters: true, maskPreservingCandidate: true, cancellationToken: cancellationToken);
+
+    private static async Task<MarkerNegativePatchAggregateReport> RunRealDevMarkerV24NegativePatchesAsync(
+        string rootPath, CancellationToken cancellationToken)
+    {
+        string root = Path.GetFullPath(rootPath);
+        string[] paths = Directory.EnumerateFiles(root, "*.dig", SearchOption.AllDirectories)
+            .OrderBy(path => Path.GetFullPath(path), StringComparer.Ordinal).ToArray();
+        Dictionary<string, string> assignments = Assign(paths, root);
+        string[] dev = paths.Where(path => assignments[Path.GetFullPath(path)] == "real-dev").ToArray();
+        if (dev.Length != ExpectedDev) throw new InvalidDataException($"REAL_DEV_COUNT:{dev.Length}");
+        await using InferenceRuntime runtime = CreateRuntime();
+        OcrV8ProductionCompositionPipeline pipeline = CreatePipeline(runtime);
+        var positive = new FeatureTotals();
+        var negative = new FeatureTotals();
+        int grid = 0, ink = 0, ocrRejects = 0, artifactRejects = 0, emitted = 0, succeeded = 0, failed = 0;
+        var failureKinds = new Dictionary<string, int>(StringComparer.Ordinal);
+        var timings = new List<double>();
+        foreach (string path in dev)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                byte[] before = SHA256.HashData(File.ReadAllBytes(path));
+                DigTruth truth = ReadDig(path);
+                Raster raster = DecodePng(truth.ImageBytes);
+                OcrImage ocrImage = ToOcrImage(raster);
+                OcrRectangle plot = PlotBounds(truth.Anchors, raster);
+                OcrResult ocr = await pipeline.RecognizeAsync(new OcrRequest(
+                    "real-dev-marker-v24-negative-patches", "real-dev-marker-panel",
+                    Convert.ToHexStringLower(SHA256.HashData(truth.ImageBytes)), ocrImage, plot), cancellationToken);
+                if (!ocr.Succeeded) throw new InvalidDataException("OCR_RESULT_FAILURE");
+                float[] luminance = raster.Gray.Select(static value => value / 255f).ToArray();
+                float[] ocrMask = RasterizeOcrMask(raster.Width, raster.Height, ocr.Regions.Where(static region => region.ReviewStatus != OcrReviewStatus.Rejected).ToArray());
+                float[] artifactMask = RasterizeAxisMask(raster.Width, raster.Height, truth.Anchors, 2.0);
+                MarkerImageFrame frame = new(raster.Width, raster.Height, 1, luminance, MarkerSourceImage.Original,
+                    MarkerAffineTransform.Identity, new MarkerMask(raster.Width, raster.Height, ocrMask),
+                    new MarkerMask(raster.Width, raster.Height, artifactMask));
+                System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                ProposalMarkerNegativePatchDiagnosticResult diagnostic = ProductionProposalMarkerCenterAdapter.DiagnoseMaskPreservingProposals(
+                    frame, MarkerPolygon.FromRectangle(new(0, 0, raster.Width, raster.Height)), cancellationToken);
+                stopwatch.Stop(); timings.Add(stopwatch.Elapsed.TotalMilliseconds);
+                ProposalMarkerStageCounters counters = diagnostic.StageCounters;
+                grid += counters.ProposalGridPositionsConsidered; ink += counters.ProposalGridPositionsConsidered - counters.LowInkRejects;
+                ocrRejects += counters.OcrMaskRejects; artifactRejects += counters.ArtifactMaskRejects; emitted += counters.EmittedProposals;
+                foreach (ProposalMarkerPatchFeatureSummary feature in diagnostic.EmittedProposalFeatures)
+                {
+                    bool isPositive = truth.Points.Any(point => Math.Sqrt(Math.Pow(feature.OriginalBaseCenter.X - point.ScreenX, 2) + Math.Pow(feature.OriginalBaseCenter.Y - point.ScreenY, 2)) <= 3.0);
+                    (isPositive ? positive : negative).Add(feature);
+                }
+                if (!before.AsSpan().SequenceEqual(SHA256.HashData(File.ReadAllBytes(path)))) throw new InvalidDataException("REAL_DEV_SOURCE_MUTATED");
+                succeeded++;
+            }
+            catch (Exception exception) when (exception is InvalidDataException or FormatException or InvalidOperationException)
+            {
+                failed++; string key = exception.Message.Split(':', 2)[0]; failureKinds[key] = failureKinds.GetValueOrDefault(key) + 1;
+            }
+        }
+        return new MarkerNegativePatchAggregateReport(
+            1, "real_dev_marker_v24_negative_patch_features_aggregate_only", dev.Length, SealedTarget, 0,
+            succeeded, failed, grid, grid, ink, ocrRejects, artifactRejects, emitted, positive.Count, negative.Count,
+            positive.ToRecord(), negative.ToRecord(), timings.Count == 0 ? 0 : timings.Average(), timings.Sum(),
+            AssignmentHash(paths, assignments, root), OcrPayloadSha256(), AcceptancePolicySha256(),
+            EvidencePolicySha256(), 0, 3.0, 0,
+            new Dictionary<string, int>(failureKinds, StringComparer.Ordinal), false, false, false, false, false);
+    }
 
     private static async Task<MarkerAggregateReport> RunRealDevMarkerAsync(
         string rootPath,
@@ -1268,6 +1346,7 @@ internal static class Program
             !SourceTiledProposalDetector.TileStarts(1000, 640, 128).SequenceEqual([0, 360]) ||
             RasterizeAxisMask(32, 32, [new AxisAnchor(4, 4, 0, 0), new AxisAnchor(4, 28, 0, 1), new AxisAnchor(28, 4, 1, 0)], 1).All(static value => value == 0) ||
             !MarkerTruthPatchSelfTest() ||
+            !NegativePatchFeatureSelfTest() ||
             ProductionProposalMarkerCenterAdapter.MultiradiusCandidateRevision != "marker-center-multiradius-geometry-v23" ||
             ProductionProposalMarkerCenterAdapter.MultiradiusCandidateId != "P1" ||
             ProductionProposalMarkerCenterAdapter.ExpectedMultiradiusModelSha256 != "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38" ||
@@ -1303,6 +1382,18 @@ internal static class Program
             Math.Abs(report.InkMaximum.Maximum - 0.5) <= 1e-12 &&
             report.OcrCenter5x5HardRejectCount == 1 &&
             report.ArtifactCenter5x5HardRejectCount == 0;
+    }
+
+    private static bool NegativePatchFeatureSelfTest()
+    {
+        var totals = new FeatureTotals();
+        totals.Add(new ProposalMarkerPatchFeatureSummary(new MarkerPoint(1, 1), 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7));
+        totals.Add(new ProposalMarkerPatchFeatureSummary(new MarkerPoint(2, 2), 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9));
+        MarkerNegativePatchFeatureQuantiles report = totals.ToRecord();
+        return totals.Count == 2 &&
+            Math.Abs(report.InkMean.Minimum - 0.1) <= 1e-12 &&
+            Math.Abs(report.InkMean.Median - 0.2) <= 1e-12 &&
+            Math.Abs(report.ArtifactMaskMaximum.Maximum - 0.9) <= 1e-12;
     }
 
     private sealed record AggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int AxisAnchorCount, int CurvePointCount, int RecognizedRegionCount, int NumericRegionCount, IReadOnlyDictionary<string, int> RoleCounts, int NumericYTickCount, int ProjectsWithAtLeastTwoYTicks, int CalibratedProjects, int MatchedPoints, int PointsWithinFiveUnits, double CalibrationProjectSuccessRate, double MeanAnchorErrorPx, double MaximumAnchorErrorPx, double PointYAccuracy, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, IReadOnlyDictionary<string, string> ModelPayloadSha256, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection);
@@ -1466,6 +1557,36 @@ internal static class Program
         }
     }
 
+    private sealed class FeatureTotals
+    {
+        private readonly List<double>[] values = Enumerable.Range(0, 7).Select(static _ => new List<double>()).ToArray();
+        public int Count => values[0].Count;
+        public void Add(ProposalMarkerPatchFeatureSummary feature)
+        {
+            values[0].Add(feature.InkMean); values[1].Add(feature.InkCenter5x5Mean); values[2].Add(feature.InkMaximum);
+            values[3].Add(feature.OcrMaskMean); values[4].Add(feature.OcrMaskMaximum);
+            values[5].Add(feature.ArtifactMaskMean); values[6].Add(feature.ArtifactMaskMaximum);
+        }
+        public MarkerNegativePatchFeatureQuantiles ToRecord() => new(
+            Quantiles(values[0]), Quantiles(values[1]), Quantiles(values[2]), Quantiles(values[3]),
+            Quantiles(values[4]), Quantiles(values[5]), Quantiles(values[6]));
+        private static MarkerFeatureQuantiles Quantiles(List<double> source)
+        {
+            if (source.Count == 0) return new(0, 0, 0, 0, 0, 0, 0);
+            double[] ordered = source.Order().ToArray();
+            double At(double fraction)
+            {
+                double position = (ordered.Length - 1) * fraction;
+                int lower = (int)Math.Floor(position), upper = (int)Math.Ceiling(position);
+                return lower == upper ? ordered[lower] : ordered[lower] + ((ordered[upper] - ordered[lower]) * (position - lower));
+            }
+            return new(ordered[0], At(0.05), At(0.25), At(0.50), At(0.75), At(0.95), ordered[^1]);
+        }
+    }
+
+    private sealed record MarkerFeatureQuantiles(double Minimum, double P05, double P25, double Median, double P75, double P95, double Maximum);
+    private sealed record MarkerNegativePatchFeatureQuantiles(MarkerFeatureQuantiles InkMean, MarkerFeatureQuantiles InkCenter5x5Mean, MarkerFeatureQuantiles InkMaximum, MarkerFeatureQuantiles OcrMaskMean, MarkerFeatureQuantiles OcrMaskMaximum, MarkerFeatureQuantiles ArtifactMaskMean, MarkerFeatureQuantiles ArtifactMaskMaximum);
+    private sealed record MarkerNegativePatchAggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int ProposalGridPositionsConsidered, int RawProposalCount, int InkSupportedProposals, int OcrMaskRejects, int ArtifactMaskRejects, int EmittedProposals, int PositiveProposalCount, int NegativeProposalCount, MarkerNegativePatchFeatureQuantiles PositiveFeatures, MarkerNegativePatchFeatureQuantiles NegativeFeatures, double MeanProjectRuntimeMs, double TotalRuntimeMs, string AssignmentsSha256, IReadOnlyDictionary<string, string> UpstreamOcrPayloadSha256, string PolicySha256, string EvidencePolicySha256, int MarkerModelInferenceRuns, double PositiveLabelDistancePx, int SourceMutationCount, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection);
     private sealed record MarkerStageMatch(int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall);
     private sealed record DistributionSummary(double Minimum, double P05, double P10, double Median, double P90, double P95, double Maximum);
     private sealed record MarkerTruthPatchDistribution(int PatchCount, int PatchSizePx, DistributionSummary InkMean, DistributionSummary InkCenter5x5Mean, DistributionSummary InkMaximum, DistributionSummary OcrMaskMean, DistributionSummary OcrMaskMaximum, DistributionSummary ArtifactMaskMean, DistributionSummary ArtifactMaskMaximum, int OcrCenter5x5HardRejectCount, int ArtifactCenter5x5HardRejectCount, double HardMaskThreshold);

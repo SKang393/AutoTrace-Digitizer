@@ -329,6 +329,29 @@ public sealed class ProductionProposalMarkerCenterAdapterTests
         Assert.IsFalse(adapter.IsApproved);
     }
 
+    [TestMethod]
+    public void NegativePatchDiagnosticSummarizesWithoutInferenceOrPixels()
+    {
+        MarkerImageFrame frame = FrameWithOuterRadiusMarker() with
+        {
+            OcrMask = new MarkerMask(512, 512, Enumerable.Repeat(0.5f, 512 * 512).ToArray()),
+            ArtifactMask = new MarkerMask(512, 512, Enumerable.Repeat(0.25f, 512 * 512).ToArray()),
+        };
+        ProposalMarkerNegativePatchDiagnosticResult result = ProductionProposalMarkerCenterAdapter.DiagnoseMaskPreservingProposals(
+            frame, MarkerPolygon.FromRectangle(new(0, 0, 512, 512)), CancellationToken.None);
+
+        Assert.AreEqual(result.StageCounters.EmittedProposals, result.EmittedProposalFeatures.Count);
+        Assert.IsTrue(result.EmittedProposalFeatures.Count > 0);
+        ProposalMarkerPatchFeatureSummary feature = result.EmittedProposalFeatures[0];
+        Assert.AreEqual(0.5, feature.OcrMaskMean, 1e-6);
+        Assert.AreEqual(0.5, feature.OcrMaskMaximum, 1e-6);
+        Assert.AreEqual(0.25, feature.ArtifactMaskMean, 1e-6);
+        Assert.AreEqual(0.25, feature.ArtifactMaskMaximum, 1e-6);
+        string serialized = System.Text.Json.JsonSerializer.Serialize(result);
+        Assert.IsFalse(serialized.Contains("EmittedProposalFeatures", StringComparison.Ordinal));
+        Assert.IsFalse(serialized.Contains("Patch", StringComparison.Ordinal));
+    }
+
     private static ProductionProposalMarkerCenterAdapter CreateAdapter(FakeRunner runner, int? maximumDecodedCandidates = null) =>
         new(new ModelIdentity("marker-center-runtime-consistency-v2", "P2", ProductionProposalMarkerCenterAdapter.ExpectedModelSha256, "candidate-p2.onnx"), runner, maximumDecodedCandidates: maximumDecodedCandidates);
 
