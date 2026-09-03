@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "status": "negative_proposal_gap_measured",
+  "report_scope": "aggregate_only",
+  "real_dev": {
+    "projects": 120,
+    "real_sealed_projects": 51,
+    "real_sealed_reads": 0,
+    "successful_projects": 120,
+    "failure_count": 0,
+    "proposal_grid_positions_considered": 6043845,
+    "ink_supported_proposals": 1358010,
+    "positive_proposal_count": 3576,
+    "negative_proposal_count": 1354434,
+    "positive_label_distance_px": 3.0,
+    "marker_model_inference_runs": 0,
+    "mean_project_runtime_ms": 173.7802991666667,
+    "total_runtime_ms": 20853.635900000005,
+    "assignments_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
+    "source_mutation_count": 0
+  },
+  "real_negative_features": {
+    "ink_mean": {"minimum": 0.00011163326005961941, "p05": 0.023993948767007875, "p25": 0.06626334263711375, "median": 0.10835629017447199, "p75": 0.17059633380727443, "p95": 0.3160517824938584, "maximum": 0.8922306842712003},
+    "ink_center5x5_mean": {"minimum": 0.0, "p05": 0.0, "p25": 0.004705882072448731, "median": 0.0349803900718689, "p75": 0.21254901885986327, "p95": 0.6836078405380249, "maximum": 1.0},
+    "ink_maximum": {"minimum": 0.11372548341751099, "p05": 0.1921568512916565, "p25": 0.7882353067398071, "median": 0.8745098114013672, "p75": 1.0, "p95": 1.0, "maximum": 1.0},
+    "ocr_mask_mean": {"minimum": 0.0, "p05": 0.0, "p25": 0.0, "median": 0.0, "p75": 0.0, "p95": 0.7272727272727273, "maximum": 1.0},
+    "ocr_mask_maximum": {"minimum": 0.0, "p05": 0.0, "p25": 0.0, "median": 0.0, "p75": 0.0, "p95": 1.0, "maximum": 1.0},
+    "artifact_mask_mean": {"minimum": 0.0, "p05": 0.0, "p25": 0.0, "median": 0.0, "p75": 0.0, "p95": 0.12121212121212122, "maximum": 0.2956841138659321},
+    "artifact_mask_maximum": {"minimum": 0.0, "p05": 0.0, "p25": 0.0, "median": 0.0, "p75": 0.0, "p95": 1.0, "maximum": 1.0}
+  },
+  "synthetic_dev": {
+    "proposal_count": 179445,
+    "positive_proposal_count": 3258,
+    "negative_proposal_count": 176187,
+    "sampled_negative_count_for_p1": 32580,
+    "negative_features": {
+      "ink_mean": {"minimum": 0.008318479172885418, "p05": 0.02883739396929741, "median": 0.10055533796548843, "p90": 0.3062369465827941, "p95": 0.42676535844802765, "maximum": 0.9980555176734924},
+      "ink_center5x5_mean": {"minimum": 0.0, "p05": 0.0, "median": 0.0030915404204279184, "p90": 0.48388246297836285, "p95": 0.9529411196708679, "maximum": 1.0},
+      "ink_maximum": {"minimum": 0.8235294222831726, "p05": 0.8337485790252686, "median": 1.0, "p90": 1.0, "p95": 1.0, "maximum": 1.0},
+      "ocr_mask_mean": {"minimum": 0.0, "p05": 0.0, "median": 0.0, "p90": 0.0, "p95": 0.022956840693950653, "maximum": 0.8815426826477051},
+      "ocr_mask_maximum": {"minimum": 0.0, "p05": 0.0, "median": 0.0, "p90": 0.0, "p95": 1.0, "maximum": 1.0},
+      "artifact_mask_mean": {"minimum": 0.0, "p05": 0.0, "median": 0.0, "p90": 0.14049586653709412, "p95": 0.21487602591514587, "maximum": 0.547291100025177},
+      "artifact_mask_maximum": {"minimum": 0.0, "p05": 0.0, "median": 0.0, "p90": 1.0, "p95": 1.0, "maximum": 1.0}
+    }
+  },
+  "finding": {
+    "matched": "negative ink-mean central range, ink-center range, ink-max upper range, and artifact-mask range overlap real-dev",
+    "missing_faint_negative_family": "real ink-maximum minimum/p05 are 0.113725/0.192157, while synthetic minimum/p05 are 0.823529/0.833749",
+    "missing_ocr_heavy_negative_family": "real OCR-mask mean p95 is 0.727273, while synthetic p95 is 0.022957",
+    "sampling_gap": "P1 samples at most 32580 of 176187 synthetic negatives and does not explicitly stratify the missing faint or OCR-heavy families",
+    "responsible_subsystem": "synthetic negative-proposal generation and training-only negative sampling",
+    "prohibited_response": "do not tune the confidence threshold, weights, or architecture against real-dev"
+  },
+  "privacy": {
+    "case_level_output": false,
+    "truth_rows_output": false,
+    "pixel_output": false,
+    "training_use": false,
+    "candidate_selection": false,
+    "real_sealed_reads": 0
+  },
+  "production_approval": false,
+  "release_eligible": false,
+  "next_action": "add deterministic faint-structure and OCR-mask-heavy negative families plus stratified training-only sampling, validate their aggregate synthetic distribution, then retry the unconsumed P1 candidate and re-pass synthetic dev before another real-dev run"
+}

@@ -3,7 +3,7 @@
   "task": "marker-center",
   "revision": "marker-center-mask-preserving-v24",
   "candidate_id": "P1",
-  "status": "dev_passed_real_dev_failed_generator_gap",
+  "status": "dev_passed_real_dev_failed_negative_generator_gap_measured",
   "model_license": "Apache-2.0",
   "candidate_consumed": false,
   "sealed_runs": 0,
@@ -95,7 +95,19 @@
     "above_threshold_false_candidates": 17867,
     "passed": false
   },
+  "negative_proposal_gap": {
+    "report_path": "docs/GOAL-22-PHASE-4R-V24-NEGATIVE-PATCH-GAP.json",
+    "report_sha256": "f51db32bf4c3f7a9f7bf40fad05ab733c01bb48d24f15cf49efd3b9c4fc517d1",
+    "real_negative_count": 1354434,
+    "synthetic_negative_count": 176187,
+    "real_ink_maximum_p05": 0.1921568512916565,
+    "synthetic_ink_maximum_p05": 0.8337485790252686,
+    "real_ocr_mask_mean_p95": 0.7272727272727273,
+    "synthetic_ocr_mask_mean_p95": 0.022956840693950653,
+    "marker_model_inference_runs": 0,
+    "real_sealed_reads": 0
+  },
   "production_approval": false,
   "release_eligible": false,
-  "next_action": "measure aggregate real-dev negative proposal patches against corrected synthetic negatives, repair the generator, and re-pass synthetic gates before another real-dev or any real-sealed read"
+  "next_action": "add deterministic faint and OCR-heavy synthetic negative families with stratified train-only sampling, then retry unconsumed P1 and re-pass synthetic dev before another real-dev or any real-sealed read"
 }

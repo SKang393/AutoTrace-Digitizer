@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "negative_patch_diagnostics_ready",
+  "status": "negative_patch_gap_measured_generator_repair_required",
   "report_scope": "aggregate_only",
   "runtime_contract": {
     "marker_frame_coordinate_space": "original_source_pixels",
@@ -229,11 +229,29 @@
     "private_data_used": false
   },
   "negative_patch_diagnostic": {
-    "real_dev_authorized": true,
+    "real_dev_authorized": false,
     "real_sealed_authorized": false,
     "marker_model_inference_runs": 0,
     "positive_label_distance_px": 3.0,
     "features": ["ink_mean", "ink_center5x5_mean", "ink_max", "ocr_mean", "ocr_max", "artifact_mean", "artifact_max"],
+    "case_level_output": false,
+    "truth_rows_output": false,
+    "pixel_output": false
+  },
+  "real_negative_proposals": {
+    "proposal_count": 1358010,
+    "positive_count": 3576,
+    "negative_count": 1354434,
+    "marker_model_inference_runs": 0,
+    "real_sealed_reads": 0,
+    "negative_features": {
+      "ink_mean": {"p05": 0.023993948767007875, "median": 0.10835629017447199, "p95": 0.3160517824938584},
+      "ink_center5x5_mean": {"p05": 0.0, "median": 0.0349803900718689, "p95": 0.6836078405380249},
+      "ink_maximum": {"minimum": 0.11372548341751099, "p05": 0.1921568512916565, "median": 0.8745098114013672, "p95": 1.0},
+      "ocr_mask_mean": {"p05": 0.0, "median": 0.0, "p95": 0.7272727272727273},
+      "artifact_mask_mean": {"p05": 0.0, "median": 0.0, "p95": 0.12121212121212122}
+    },
+    "source_mutations": 0,
     "case_level_output": false,
     "truth_rows_output": false,
     "pixel_output": false
@@ -250,7 +268,8 @@
     "feasibility_result": "mask-preserving proposal coverage is complete, but the frozen V21 classifier fails the corrected synthetic dev gate and hits one prohibited structure per scene",
     "candidate_result": "V24 P1 clears every corrected synthetic dev gate at the fixed 0.25 threshold after one void pre-sealed dtype attempt and one valid training run",
     "real_dev_contradiction": "V24 real-dev fails at precision 0.12265 and recall 0.57036 despite complete proposal and mask-preserved coverage, with 17867 false candidates above the fixed classifier threshold",
-    "required_next_diagnosis": "run the no-marker-inference aggregate real-dev negative patch probe, compare directly with the synthetic audit, then repair the generator before another model or real-dev run"
+    "negative_generator_gap": "synthetic negatives omit the real faint tail because ink-maximum p05 is 0.83375 versus real 0.19216, and omit OCR-heavy negatives because OCR-mask mean p95 is 0.02296 versus real 0.72727",
+    "required_next_diagnosis": "add deterministic faint and OCR-heavy negative families plus stratified training-only sampling, validate synthetic aggregate coverage, then retry unconsumed P1 before another real-dev run"
   },
   "implementation": {
     "real_probe_path": "tools/private_acceptance/real_dev_distribution.py",
@@ -274,7 +293,7 @@
     "v24_feasibility_source_sha256": "252896f950e58f8e276b79f770bdf3ada1202afeb3bbb7cfb305b3ea9c6fd263",
     "v24_mask_preserving_source_sha256": "171ddcc2efbd2742f5699dad8d16ecec217ca983ee06cec4bc63e1f17e3120e2",
     "v24_p1_result_path": "ml/markers/center/mask_preserving_v24/P1_RESULT.json",
-    "v24_p1_result_sha256": "af741293f1cd628204674f24eb24d764ace877e1efd6f8563f9a8efe6a69e917",
+    "v24_p1_result_sha256": "c49eba7ad2f107a90674888cd6944c351cafcbc8ee4df19725e885f2be9bd227",
     "v24_runtime_adapter_path": "src/GraphReader.App/Integration/Workflow/ProductionProposalMarkerCenterAdapter.cs",
     "v24_runtime_adapter_sha256": "150d543b1ce1a188605ed369eca9427b1f422680b96f222dba2762e1b68e9295",
     "v24_runtime_test_path": "tests/GraphReader.App.Tests/ProductionProposalMarkerCenterAdapterTests.cs",
@@ -288,6 +307,8 @@
     "negative_patch_runtime_adapter_sha256": "efb92cde5559c661c182cf990de6bd00d788f03b89c7db65d4c90c69dd299aad",
     "negative_patch_runtime_test_sha256": "2f0cbee0029b00ab037a75703952f031aa3a85672ee5efcc5086fff52756a8b0",
     "negative_patch_harness_sha256": "07f7339eed1f0d3f420f6cba85f94d2bcf72f785970859478edd8dffce21d495",
+    "real_negative_gap_path": "docs/GOAL-22-PHASE-4R-V24-NEGATIVE-PATCH-GAP.json",
+    "real_negative_gap_sha256": "f51db32bf4c3f7a9f7bf40fad05ab733c01bb48d24f15cf49efd3b9c4fc517d1",
     "focused_tests": "17 V24 runtime passed; 11 V24 and corrected-generator passed; 3 prior synthetic audit passed; Release real harness build and no-corpus self-test passed"
   },
   "privacy": {
