@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "harness_plot_scope_defect_confirmed",
+  "status": "corrected_full_image_candidate_failed",
   "report_scope": "aggregate_only",
   "runtime_contract": {
     "marker_frame_coordinate_space": "original_source_pixels",
@@ -64,13 +64,14 @@
     "production_marker_frame_resize_observed": false
   },
   "real_dev_v23_stage_coverage": {
-    "raw_grid": {"true_positives": 1108, "false_negatives": 896, "recall": 0.5528942115768463},
-    "ink_supported": {"true_positives": 1108, "false_negatives": 896, "recall": 0.5528942115768463},
-    "ocr_unmasked": {"true_positives": 1042, "false_negatives": 962, "recall": 0.5199600798403193},
-    "artifact_unmasked_emitted": {"true_positives": 885, "false_negatives": 1119, "recall": 0.4416167664670659},
-    "above_threshold_decoded": {"true_positives": 356, "false_negatives": 1648, "recall": 0.17764471057884232},
-    "pre_nms": {"true_positives": 316, "false_negatives": 1688, "recall": 0.15768463073852296},
-    "final": {"true_positives": 312, "false_negatives": 1692, "recall": 0.15568862275449102},
+    "marker_search_bounds": "full_immutable_source_image",
+    "raw_grid": {"true_positives": 2004, "false_negatives": 0, "recall": 1.0},
+    "ink_supported": {"true_positives": 2004, "false_negatives": 0, "recall": 1.0},
+    "ocr_unmasked": {"true_positives": 1929, "false_negatives": 75, "recall": 0.9625748502994012},
+    "artifact_unmasked_emitted": {"true_positives": 1772, "false_negatives": 232, "recall": 0.8842315369261478},
+    "above_threshold_decoded": {"true_positives": 913, "false_negatives": 1091, "recall": 0.4555888223552894},
+    "pre_nms": {"true_positives": 908, "false_negatives": 1096, "recall": 0.4530938123752495},
+    "final": {"true_positives": 897, "false_negatives": 1107, "recall": 0.4476047904191617},
     "real_sealed_reads": 0
   },
   "finding": {
@@ -79,7 +80,8 @@
     "failure_explanation": "scale coverage alone is insufficient to explain V23 real-dev recall 0.15568862275449102 because most of the measured central distribution is already inside the synthetic train range",
     "harness_defect": "the marker diagnostic used the minimum and maximum calibration-anchor coordinates as plot extents even though calibration anchors are not plot-boundary annotations",
     "harness_defect_evidence": "only 912 of 2004 truths lie inside the anchor rectangle and 1110 lie inside its 21-pixel expanded proposal search, matching raw-grid coverage of 1108 within grid quantization",
-    "required_next_diagnosis": "rerun the marker stage independently over the full immutable source image while retaining the same model, masks, threshold, postprocessing, and real-dev assignment"
+    "corrected_scope_result": "full-image grid and ink-supported recall are 1.0, but hard masks reduce recall to 0.8842315369261478 and the fixed classifier reduces it to 0.4555888223552894 while retaining 7653 false candidates",
+    "required_next_diagnosis": "compare aggregate three-channel patches at real-dev truth centers with synthetic train marker centers, then correct synthetic marker and hard-mask scenarios without training on or selecting against private data"
   },
   "implementation": {
     "real_probe_path": "tools/private_acceptance/real_dev_distribution.py",
