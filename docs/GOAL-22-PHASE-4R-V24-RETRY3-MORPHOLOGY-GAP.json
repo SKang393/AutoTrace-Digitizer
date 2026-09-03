@@ -1,0 +1,111 @@
+{
+  "schema": "graphreader.goal22.phase4r.marker-v24-retry3-morphology-gap.v1",
+  "recorded_at": "2026-09-03",
+  "status": "generator_distribution_still_underweights_real_morphology",
+  "scope": {
+    "synthetic_scene_count": 167,
+    "real_dev_projects": 120,
+    "real_sealed_projects": 51,
+    "real_sealed_reads": 0,
+    "private_case_output": false,
+    "truth_row_output": false,
+    "pixel_output": false,
+    "optimizer_steps_on_private_data": 0,
+    "threshold_change_proposed": false,
+    "candidate_selected_on_real_dev": false
+  },
+  "bindings": {
+    "revision": "marker-center-mask-preserving-v24",
+    "candidate": "P1",
+    "retry": 3,
+    "threshold": 0.25,
+    "positive_label_distance_px": 5.0,
+    "model_sha256": "0d80d1994d7b33241c795c9e6f92c802750555a62c3cd3335777eb969fb5083a",
+    "assignment_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
+    "synthetic_morphology_report": "../ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY3_MORPHOLOGY_DIAGNOSIS.json",
+    "synthetic_morphology_report_sha256": "2d12a9191ed323bdea85e990c323588a380fef87a687a95fb4a5a89206b6d74e",
+    "real_dev_stage_report": "GOAL-22-PHASE-4-V24-RETRY3-REAL-DEV-STAGES.json",
+    "real_dev_stage_report_sha256": "1e471a179114e078f101edffcf04aea9e3b29ab72a3d31649695726465661c90"
+  },
+  "real_dev_morphology_run": {
+    "successful_projects": 120,
+    "failure_count": 0,
+    "proposal_count": 1358010,
+    "positive_proposal_count": 9849,
+    "negative_below_threshold_count": 1337707,
+    "negative_above_threshold_count": 10454,
+    "mean_project_runtime_ms": 3707.656063333334,
+    "total_runtime_ms": 444918.72760000004,
+    "case_level_output": false,
+    "truth_rows_output": false,
+    "pixel_output": false,
+    "training_use": false,
+    "candidate_selection": false
+  },
+  "rate_comparison": {
+    "synthetic_negative_below_threshold_count": 233674,
+    "synthetic_negative_above_threshold_count": 646,
+    "synthetic_negative_above_threshold_rate": 0.0027569136223967224,
+    "real_negative_above_threshold_rate": 0.00775426673817148,
+    "real_to_synthetic_rate_ratio": 2.812662201375141,
+    "retry3_real_above_threshold_reduction_from_retry2": 0.4803400109360243,
+    "retry3_synthetic_above_threshold_reduction_from_retry2": 0.2382075471698113
+  },
+  "shared_medians": {
+    "positive_proposals": {
+      "synthetic_count": 3258,
+      "real_count": 9849,
+      "dark_fraction_at_012": {"synthetic": 0.1919191919191919, "real": 0.2516069788797062},
+      "dark_fraction_at_05": {"synthetic": 0.19008264462809918, "real": 0.19008264462809918},
+      "center5x5_mean": {"synthetic": 0.4729411768913269, "real": 0.7865098142623901},
+      "maximum_row_dark_fraction": {"synthetic": 0.5151515151515151, "real": 0.7878787878787878},
+      "maximum_column_dark_fraction": {"synthetic": 0.45454545454545453, "real": 0.6060606060606061},
+      "foreground_extent_balance": {"synthetic": 0.8823076923076922, "real": 0.7894736842105263},
+      "covariance_eigenvalue_ratio": {"synthetic": 1.7141034243884996, "real": 2.4640268072419267},
+      "border_dark_fraction": {"synthetic": 0.1015625, "real": 0.1171875},
+      "maximum_ring_support_count": {"synthetic": 6.0, "real": 8.0},
+      "real_retry2_probability_median": 0.015462875366210938,
+      "real_retry3_probability_median": 0.008674472570419312,
+      "real_retry2_probability_p95": 0.9528251886367798,
+      "real_retry3_probability_p95": 0.8956212520599366
+    },
+    "negative_below_threshold": {
+      "synthetic_count": 233674,
+      "real_count": 1337707,
+      "dark_fraction_at_012": {"synthetic": 0.10376492194674013, "real": 0.1588613406795225},
+      "dark_fraction_at_05": {"synthetic": 0.07621671258034894, "real": 0.09641873278236915},
+      "center5x5_mean": {"synthetic": 0.06823529005050659, "real": 0.033568625450134275},
+      "maximum_row_dark_fraction": {"synthetic": 0.3333333333333333, "real": 0.5757575757575758},
+      "maximum_column_dark_fraction": {"synthetic": 0.30303030303030304, "real": 0.5454545454545454},
+      "foreground_extent_balance": {"synthetic": 0.7894736842105263, "real": 0.5757575757575758},
+      "covariance_eigenvalue_ratio": {"synthetic": 2.526344394455518, "real": 5.194465825377108},
+      "border_dark_fraction": {"synthetic": 0.09375, "real": 0.1171875},
+      "maximum_ring_support_count": {"synthetic": 2.0, "real": 3.0}
+    },
+    "negative_above_threshold": {
+      "synthetic_count": 646,
+      "real_count": 10454,
+      "dark_fraction_at_012": {"synthetic": 0.2130394857667585, "real": 0.2800734618916437},
+      "dark_fraction_at_05": {"synthetic": 0.21074380165289255, "real": 0.18732782369146006},
+      "center5x5_mean": {"synthetic": 0.8184149253368378, "real": 0.32},
+      "maximum_row_dark_fraction": {"synthetic": 0.7272727272727273, "real": 0.6666666666666666},
+      "maximum_column_dark_fraction": {"synthetic": 0.7575757575757576, "real": 0.696969696969697},
+      "foreground_extent_balance": {"synthetic": 0.9375, "real": 0.8},
+      "covariance_eigenvalue_ratio": {"synthetic": 1.5421714254370213, "real": 1.9506876306838161},
+      "border_dark_fraction": {"synthetic": 0.1484375, "real": 0.125},
+      "maximum_ring_support_count": {"synthetic": 6.0, "real": 6.0}
+    }
+  },
+  "diagnosis": {
+    "responsible_subsystem": "synthetic marker proposal generator and train-only negative sampler",
+    "findings": [
+      "Retry3 reduced real above-threshold negatives by 48.0 percent, confirming that topology coverage was causal, but real negatives still cross threshold at 2.813 times the synthetic rate.",
+      "Remaining real above-threshold negatives are substantially less center-filled and more anisotropic than synthetic above-threshold negatives: center5x5 median 0.320 versus 0.818 and covariance ratio 1.951 versus 1.542.",
+      "The complete synthetic negative pool still underweights elongated off-center fragments: below-threshold row and column medians are 0.333 and 0.303 versus real 0.576 and 0.545.",
+      "Synthetic positives remain less center-filled, less elongated, and lower-ring-support than real positives; retry3 real positive probability shifted downward and recall fell.",
+      "The next repair must change synthetic input frequency and train-only sampling coverage, not the fixed threshold, architecture, or real-data selection rule."
+    ],
+    "permitted_next_change": "Increase deterministic real-like positive morphology frequency and explicitly audit and sample off-center elongated topology negatives on train, then re-pass synthetic gates.",
+    "prohibited_inference": "Do not select a threshold, loss weight, architecture, or candidate from this real-dev report."
+  }
+}

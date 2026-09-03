@@ -59,7 +59,7 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["synthetic_negative_proposal_count"] == 237578
     assert entry["morphology_diagnosis_sha256"] == config["morphology_diagnosis_sha256"]
     assert entry["morphology_gap_sha256"] == config["morphology_gap_sha256"]
-    assert entry["status"] == "dev_passed_retry3_unconsumed_real_dev_failed"
+    assert entry["status"] == "dev_passed_retry3_unconsumed_real_dev_failed_generator_distribution_gap"
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["real_dev_authorized"] is False
@@ -83,6 +83,24 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["retry3_morphology_real_sealed_reads"] == 0
     assert entry["retry3_morphology_sealed_runs"] == 0
     assert entry["retry3_morphology_threshold_change_proposed"] is False
+    assert digest(ROOT / entry["retry3_morphology_gap_path"]) == entry["retry3_morphology_gap_sha256"]
+    assert entry["retry3_morphology_gap_sha256"] == "3b0e9981eb3d21787679f1df1151a3c0bc395ce7966e6c681c6de5755c3fb769"
+    assert entry["retry3_morphology_gap_real_dev_projects"] == 120
+    assert entry["retry3_morphology_gap_real_dev_failures"] == 0
+    assert entry["retry3_morphology_gap_real_sealed_reads"] == 0
+    assert entry["retry3_morphology_gap_real_dev_proposals"] == 1358010
+    assert entry["retry3_morphology_gap_real_dev_positive_proposals"] == 9849
+    assert entry["retry3_morphology_gap_real_dev_negative_below_threshold"] == 1337707
+    assert entry["retry3_morphology_gap_real_dev_negative_above_threshold"] == 10454
+    assert entry["retry3_morphology_gap_real_dev_runtime_ms"] == 444918.7276
+    assert entry["retry3_morphology_gap_synthetic_negative_below_threshold"] == 233674
+    assert entry["retry3_morphology_gap_synthetic_negative_above_threshold"] == 646
+    assert entry["retry3_morphology_gap_real_to_synthetic_above_rate_ratio"] == 2.812662201375141
+    assert entry["retry3_morphology_gap_case_level_output"] is False
+    assert entry["retry3_morphology_gap_truth_rows_output"] is False
+    assert entry["retry3_morphology_gap_pixel_output"] is False
+    assert entry["retry3_morphology_gap_training_use"] is False
+    assert entry["retry3_morphology_gap_candidate_selection"] is False
     assert entry["p1_checkpoint_sha256"] == "70b9947bdaa78d5465f7cd2026a4bc00fd3805507551c002daf763e5dbc0b318"
     assert entry["p1_onnx_sha256"] == "0d80d1994d7b33241c795c9e6f92c802750555a62c3cd3335777eb969fb5083a"
     assert entry["p1_true_positives"] == 1977
@@ -124,7 +142,7 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["retry3_vs_retry2_recall_delta"] == -0.04940119760479042
     assert entry["retry3_vs_retry2_false_positives_delta"] == -2808
     assert entry["retry3_vs_retry2_above_threshold_false_candidates_delta"] == -9920
-    assert entry["spatial_morphology_diagnostic_required"] is True
+    assert entry["spatial_morphology_diagnostic_required"] is False
     assert entry["retry2_dev_gate_passed"] is True
     assert entry["execution_blocker"]
 
