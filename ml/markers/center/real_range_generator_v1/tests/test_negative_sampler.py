@@ -4,7 +4,7 @@ import pytest
 import torch
 
 from ml.markers.center.real_range_generator_v1.negative_sampler import (
-    LOW_FAINT, P05_FAINT, OCR_P95, ARTIFACT_P95, _features, _stable_key,
+    LOW_FAINT, P05_FAINT, OCR_P95, ARTIFACT_P95, CONNECTOR_ANCHOR_MAX_DISTANCE_PX, _features, _stable_key,
     sample_negatives,
 )
 
@@ -59,8 +59,13 @@ def test_full_train_sampler_matches_preregistered_contract():
         "artifact": 1629,
         "generic": 21681,
     }
-    assert sampled.selected_index_sha256 == "c45caa550038aa5044bbe1454f536f34154e947c4d49ff1f1f650b08c02668da"
+    assert sampled.selected_index_sha256 == "a81fb8127cda6819f1d0da318dc34ea2891dec5e3c6c767eb756af68bd2f869f"
     assert sampled.topology_capacity == {"topology_junction": 8331, "topology_fragment": 8049}
     assert sampled.topology_selected == sampled.topology_capacity
     assert sampled.topology_selected_index_sha256 == "df24e495a76d485adcef07defd96ee723da3e029ededd5009e9c34e7ac58325d"
+    assert sampled.connector_anchor_target_count == 3674
+    assert sampled.connector_anchor_capacity == 3661
+    assert sampled.connector_anchor_selected == 3661
+    assert sampled.connector_anchor_max_distance_px == CONNECTOR_ANCHOR_MAX_DISTANCE_PX == 4.0
+    assert sampled.connector_anchor_selected_index_sha256 == "40a14e3becc3f793a590cc2b37fdd92107a97f71f59c6fc1cf9d22d4d124116d"
     assert patches.shape == (35838, 3, 33, 33)

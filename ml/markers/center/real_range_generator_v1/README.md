@@ -35,9 +35,12 @@ of a truth center. It reports full train/dev proposal, positive, and negative
 counts plus aggregate quantiles for ink, OCR-mask, and artifact-mask proposal
 patch features. Positive morphology gates use the central p25 to p75 envelope
 of both train and dev. The train-only sampler retains every declared topology
-junction and fragment proposal within 16 px, then fills the existing generic
-quota to keep exactly 32,580 negatives; the audit records selected counts and
-aggregate selection hashes.
+junction and fragment proposal within 16 px, then retains the nearest eligible
+negative proposal within 4 px of the one-third and two-thirds anchors on every
+consecutive truth-center connector. It fills the existing generic quota to keep
+exactly 32,580 negatives and fails closed when an anchor has no nearby eligible
+proposal. The audit records anchor coverage, selected counts, and aggregate
+selection hashes.
 
 Run from the repository root:
 

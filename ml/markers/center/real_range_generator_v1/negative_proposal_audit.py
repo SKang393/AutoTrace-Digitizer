@@ -16,7 +16,7 @@ import torch
 from ml.markers.center.mask_preserving_v24.mask_preserving import extract_proposals
 
 from .generator import PATCH, TOPOLOGY_TARGETS, _quantiles, build_split
-from .negative_sampler import sample_negatives
+from .negative_sampler import CONNECTOR_ANCHOR_FRACTIONS, CONNECTOR_ANCHOR_MAX_DISTANCE_PX, sample_negatives
 
 REAL_NEGATIVE_GATES = {
     "ink_max_minimum": 0.11372548341751099,
@@ -276,6 +276,13 @@ def audit() -> dict[str, object]:
             "topology_all_eligible_retained": sampled.topology_capacity == sampled.topology_selected,
             "selected_index_sha256": sampled.selected_index_sha256,
             "topology_selected_index_sha256": sampled.topology_selected_index_sha256,
+            "connector_anchor_fractions": list(CONNECTOR_ANCHOR_FRACTIONS),
+            "connector_anchor_max_distance_px": CONNECTOR_ANCHOR_MAX_DISTANCE_PX,
+            "connector_anchor_target_count": sampled.connector_anchor_target_count,
+            "connector_anchor_capacity": sampled.connector_anchor_capacity,
+            "connector_anchor_selected": sampled.connector_anchor_selected,
+            "connector_anchor_all_eligible_retained": sampled.connector_anchor_capacity == sampled.connector_anchor_selected,
+            "connector_anchor_selected_index_sha256": sampled.connector_anchor_selected_index_sha256,
         },
         "coordinate_streams_identical": (
             train["proposal_coordinates_aggregate_sha256"]

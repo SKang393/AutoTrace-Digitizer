@@ -17,6 +17,8 @@ ARTIFACT_P95 = 0.12121212121212122
 SAMPLER_SEED = 20260904
 TOPOLOGY_RADIUS_PX = 16.0
 TOPOLOGY_KINDS = ("topology_junction", "topology_fragment")
+CONNECTOR_ANCHOR_FRACTIONS = (1.0 / 3.0, 2.0 / 3.0)
+CONNECTOR_ANCHOR_MAX_DISTANCE_PX = 4.0
 QUOTAS = {
     "hard_existing": 6012,
     "faint_low": 326,
@@ -36,6 +38,11 @@ class SampledNegatives:
     topology_capacity: dict[str, int] | None = None
     topology_selected: dict[str, int] | None = None
     topology_selected_index_sha256: str = ""
+    connector_anchor_target_count: int = 0
+    connector_anchor_capacity: int = 0
+    connector_anchor_selected: int = 0
+    connector_anchor_selected_index_sha256: str = ""
+    connector_anchor_max_distance_px: float = CONNECTOR_ANCHOR_MAX_DISTANCE_PX
 
     @property
     def total(self) -> int:
@@ -82,6 +89,27 @@ def _topology_indices(scene: Any, coordinates: torch.Tensor, labels: torch.Tenso
     return result
 
 
+def _connector_anchor_indices(scene: Any, coordinates: torch.Tensor, labels: torch.Tensor) -> set[int]:
+    """Select nearest negative proposals to fixed one-third/two-thirds anchors."""
+    centers = tuple((float(x), float(y)) for x, y in scene.centers)
+    eligible = labels <= 0.5
+    selected: set[int] = set()
+    for first, second in zip(centers, centers[1:]):
+        for fraction in CONNECTOR_ANCHOR_FRACTIONS:
+            anchor = torch.tensor(
+                ((1.0 - fraction) * first[0] + fraction * second[0],
+                 (1.0 - fraction) * first[1] + fraction * second[1]),
+                dtype=coordinates.dtype,
+            )
+            distances = torch.linalg.vector_norm(coordinates - anchor, dim=1)
+            distances = torch.where(eligible, distances, torch.full_like(distances, float("inf")))
+            index = int(torch.argmin(distances).item())
+            if not bool(torch.isfinite(distances[index])) or float(distances[index]) > CONNECTOR_ANCHOR_MAX_DISTANCE_PX:
+                raise ValueError("connector anchor lacks an eligible proposal within 4 px")
+            selected.add(index)
+    return selected
+
+
 def sample_negatives(
     records: Iterable[tuple[Any, torch.Tensor, torch.Tensor, torch.Tensor]],
     *,
@@ -102,6 +130,8 @@ def sample_negatives(
         raise ValueError("negative quotas must total 32580")
     pools: dict[str, list[tuple[str, int, int]]] = {name: [] for name in target}
     topology_pools: dict[str, set[tuple[str, int, int]]] = {kind: set() for kind in TOPOLOGY_KINDS}
+    connector_pools: set[tuple[str, int, int]] = set()
+    connector_anchor_target_count = 0
     selections: list[list[int]] = []
     capacities = {name: 0 for name in target}
     for scene_number, (scene, proposals, labels, hard) in enumerate(records):
@@ -111,11 +141,13 @@ def sample_negatives(
         positive = labels > 0.5
         hard_mask = hard & ~positive
         topology = _topology_indices(scene, proposals.coordinates, labels)
+        connector_indices = _connector_anchor_indices(scene, proposals.coordinates, labels)
+        connector_anchor_target_count += max(0, (len(scene.centers) - 1) * len(CONNECTOR_ANCHOR_FRACTIONS))
         topology_by_index = {index: kind for kind in TOPOLOGY_KINDS for index in topology[kind]}
         for index in torch.nonzero(~positive, as_tuple=False).flatten().tolist():
             if bool(hard_mask[index]):
                 name = "hard_existing"
-            elif index in topology_by_index:
+            elif index in topology_by_index or index in connector_indices:
                 name = "generic"
             elif bool(features["faint_low"][index]):
                 name = "faint_low"
@@ -131,6 +163,8 @@ def sample_negatives(
             for kind in TOPOLOGY_KINDS:
                 if index in topology[kind]:
                     topology_pools[kind].add((_stable_key(seed, split, int(scene.seed), index, name), scene_number, index))
+            if index in connector_indices:
+                connector_pools.add((_stable_key(seed, split, int(scene.seed), index, name), scene_number, index))
             capacities[name] += 1
         selections.append([])
     for name, quota in target.items():
@@ -143,13 +177,16 @@ def sample_negatives(
     selected_topology: dict[str, int] = {kind: 0 for kind in TOPOLOGY_KINDS}
     generic_entries = set(pools["generic"])
     topology_entries = (set().union(*topology_pools.values()) if topology_pools else set()) & generic_entries
-    if len(topology_entries) > target["generic"]:
-        raise ValueError("topology coverage exceeds generic quota")
+    connector_entries = connector_pools & generic_entries
+    retained_generic_entries = topology_entries | connector_entries
+    if len(retained_generic_entries) > target["generic"]:
+        raise ValueError("topology plus connector coverage exceeds generic quota")
     for name, quota in target.items():
         if name == "generic":
             ranked_topology = sorted(topology_entries)
-            generic_remaining = [item for item in sorted(pools[name]) if item not in topology_entries]
-            ranked = ranked_topology + generic_remaining[: quota - len(ranked_topology)]
+            ranked_connectors = sorted(connector_entries - topology_entries)
+            generic_remaining = [item for item in sorted(pools[name]) if item not in retained_generic_entries]
+            ranked = ranked_topology + ranked_connectors + generic_remaining[: quota - len(ranked_topology) - len(ranked_connectors)]
         else:
             ranked = sorted(pools[name])[:quota]
         for _, scene_number, index in ranked:
@@ -177,9 +214,20 @@ def sample_negatives(
         for _, scene_number, index in sorted(topology_pools[kind]):
             if index in selected[scene_number]:
                 topology_digest.update(f"{kind}:{scene_number}:{index}\n".encode("ascii"))
+    connector_digest = hashlib.sha256()
+    connector_selected = 0
+    for _, scene_number, index in sorted(connector_pools):
+        if index in selected_sets[scene_number]:
+            connector_selected += 1
+            connector_digest.update(f"{scene_number}:{index}\n".encode("ascii"))
     return SampledNegatives(
         selected, capacities, counts, digest.hexdigest(),
         {kind: len(topology_pools[kind]) for kind in TOPOLOGY_KINDS},
         selected_topology,
         topology_digest.hexdigest(),
+        connector_anchor_target_count,
+        len(connector_pools),
+        connector_selected,
+        connector_digest.hexdigest(),
+        CONNECTOR_ANCHOR_MAX_DISTANCE_PX,
     )
