@@ -6,7 +6,7 @@ from pathlib import Path
 
 from ml.markers.center.mask_preserving_v24.train_p1 import RUNNER_SOURCE_PATHS
 from ml.markers.gate_seal import source_bundle_sha256
-from ml.markers.center.real_range_generator_v1.negative_sampler import TOPOLOGY_RADIUS_PX
+from ml.markers.center.real_range_generator_v1.negative_sampler import CONNECTOR_ENDPOINT_OFFSET_PX, TOPOLOGY_RADIUS_PX, TOPOLOGY_SAMPLER_RADIUS_PX
 
 ROOT = Path(__file__).resolve().parents[5]
 
@@ -18,20 +18,24 @@ def test_training_contract_is_fixed_and_candidate_not_run():
     assert config["optimizer_steps_expected"] == 10080
     assert config["optimizer_steps_maximum"] == 10080
     assert config["training_example_count_expected"] == 35838
-    assert config["retry_count"] == 5
+    assert config["retry_count"] == 6
     assert config["negative_sampler"]["total_expected"] == 32580
-    assert config["negative_sampler"]["source_sha256"] == "ca608bba006dd4ff5a0b525829e9a61f9b64673cf82fca06cc087f1e9654a858"
-    assert config["negative_sampler"]["selected_index_sha256"] == "a81fb8127cda6819f1d0da318dc34ea2891dec5e3c6c767eb756af68bd2f869f"
-    assert config["negative_sampler"]["expected_capacities"] == {"artifact": 13488, "faint_low": 8598, "faint_p05": 5127, "generic": 179238, "hard_existing": 6012, "ocr_heavy": 18748}
-    assert config["negative_sampler"]["topology"] == {"radius_px": 16.0, "expected_capacity": {"topology_junction": 8331, "topology_fragment": 8049}, "expected_selected": {"topology_junction": 8331, "topology_fragment": 8049}, "selected_index_sha256": "df24e495a76d485adcef07defd96ee723da3e029ededd5009e9c34e7ac58325d"}
-    assert config["negative_sampler"]["topology"]["radius_px"] == TOPOLOGY_RADIUS_PX
+    assert config["negative_sampler"]["source_sha256"] == "437fe46be142cd9eb5fd52e13a73ba54716752c1c5e08c72a21de52eed4c1729"
+    assert config["negative_sampler"]["selected_index_sha256"] == "d2e1c5f22ba8657b04031242c1528a165730f56b50ccc56fdd89eb2e0c01bf1c"
+    assert config["negative_sampler"]["expected_capacities"] == {"artifact": 14477, "faint_low": 8598, "faint_p05": 5127, "generic": 176403, "hard_existing": 6012, "ocr_heavy": 20594}
+    assert config["negative_sampler"]["topology"] == {"radius_px": 12.0, "input_audit_radius_px": 16.0, "expected_capacity": {"topology_junction": 4505, "topology_fragment": 4574}, "expected_selected": {"topology_junction": 4505, "topology_fragment": 4574}, "selected_index_sha256": "92d8075523ac528eebf8777b9fbe77d7eb254aebbc4521e0b45967f6e3b78ea8"}
+    assert config["negative_sampler"]["topology"]["radius_px"] == TOPOLOGY_SAMPLER_RADIUS_PX
+    assert config["negative_sampler"]["topology"]["input_audit_radius_px"] == TOPOLOGY_RADIUS_PX
     assert sum(config["negative_sampler"]["quotas"].values()) == 32580
     assert config["sealed_runs"] == 0 and config["private_data"] is False
     assert config["real_dev_reads"] == 0 and config["real_sealed_reads"] == 0
     assert config["retry3_morphology_gap_sha256"] == "3b0e9981eb3d21787679f1df1151a3c0bc395ce7966e6c681c6de5755c3fb769"
     assert config["retry4_diagnosis_sha256"] == "a19745f7904c8ec316a78a4e220e3133fc5f77fa80f471ed5337976bdbb6594b"
     assert config["retry4_generic_fp_diagnosis_sha256"] == "24d86878dc335803b2aacd6bab5105496cbb2fb51734b4eb0d8ead4feea5d172"
-    assert config["negative_sampler"]["connector"] == {"fractions": [0.3333333333333333, 0.6666666666666666], "max_distance_px": 4.0, "target_count": 3674, "expected_capacity": 3661, "expected_selected": 3661, "selected_index_sha256": "40a14e3becc3f793a590cc2b37fdd92107a97f71f59c6fc1cf9d22d4d124116d"}
+    assert config["retry5_diagnosis_sha256"] == "8f38fd10be6130c34b05aa9544491f59c9c95d8b962bd0010f9dbdf287c8228a"
+    assert config["retry5_generic_fp_diagnosis_sha256"] == "701f43ec266ae63689200610ea68d4e5a18b1017fd0951d88f496252ef1076d8"
+    assert config["negative_sampler"]["connector"] == {"endpoint_offset_px": 8.0, "max_distance_px": 4.0, "target_count": 3674, "expected_capacity": 3671, "expected_selected": 3671, "selected_index_sha256": "2d9b5b6ffa7e70c390a7aa38ffe851871e8a5cebac3831aac616f60a0e141c84", "generic_remainder_selected": 9409}
+    assert config["negative_sampler"]["connector"]["endpoint_offset_px"] == CONNECTOR_ENDPOINT_OFFSET_PX
 
 def test_runner_source_bundle_is_relative_and_present():
     assert all(not path.is_absolute() for path in RUNNER_SOURCE_PATHS)
@@ -40,9 +44,9 @@ def test_runner_source_bundle_is_relative_and_present():
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text())
     entry = next(item for item in ledger["revisions"] if item["revision"] == config["revision"])
     assert entry["p1_runner_source_bundle_sha256"] == config["expected_runner_source_bundle_sha256"]
-    assert entry["execution_authorized"] is False
-    assert entry["status"] == "failed_dev_retry5_unconsumed_connector_anchor_coverage_gap"
-    assert entry["p1_runner_source_bundle_sha256"] == config["expected_runner_source_bundle_sha256"]
+    assert entry["execution_authorized"] is True
+    assert entry["status"] == "candidate_1_preregistered"
+    assert source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
 
 def test_current_evidence_bindings_and_authorization_match_files():
     config_path = ROOT / "ml/markers/center/mask_preserving_v24/training/p1.json"
@@ -54,6 +58,8 @@ def test_current_evidence_bindings_and_authorization_match_files():
         ("retry3_morphology_gap_path", "retry3_morphology_gap_sha256"),
         ("retry4_diagnosis_path", "retry4_diagnosis_sha256"),
         ("retry4_generic_fp_diagnosis_path", "retry4_generic_fp_diagnosis_sha256"),
+        ("retry5_diagnosis_path", "retry5_diagnosis_sha256"),
+        ("retry5_generic_fp_diagnosis_path", "retry5_generic_fp_diagnosis_sha256"),
         ("generator_audit_path", "generator_audit_sha256"),
         ("negative_audit_path", "negative_audit_sha256"),
     ):
@@ -72,9 +78,9 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["synthetic_negative_proposal_count"] == 231211
     assert entry["morphology_diagnosis_sha256"] == config["morphology_diagnosis_sha256"]
     assert entry["morphology_gap_sha256"] == config["morphology_gap_sha256"]
-    assert entry["status"] == "failed_dev_retry5_unconsumed_connector_anchor_coverage_gap"
-    assert entry["execution_authorized"] is False
-    assert entry["authorized_candidate_id"] is None
+    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
     assert entry["real_dev_authorized"] is False
     assert entry["real_sealed_authorized"] is False
     assert entry["real_sealed_reads"] == 0
@@ -169,17 +175,19 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["retry5_generic_root_cause_marker_field"] == 45
     assert entry["retry5_generic_root_cause_exhaustive_count"] == 183
     assert entry["p1_dev_gate_passed"] is False
-    assert entry["negative_sampler_selected_index_sha256"] == "a81fb8127cda6819f1d0da318dc34ea2891dec5e3c6c767eb756af68bd2f869f"
-    assert entry["negative_sampler_connector_anchor_fractions"] == [0.3333333333333333, 0.6666666666666666]
+    assert entry["negative_sampler_selected_index_sha256"] == "d2e1c5f22ba8657b04031242c1528a165730f56b50ccc56fdd89eb2e0c01bf1c"
+    assert entry["negative_sampler_connector_endpoint_offset_px"] == 8.0
     assert entry["negative_sampler_connector_anchor_max_distance_px"] == 4.0
     assert entry["negative_sampler_connector_anchor_target_count"] == 3674
-    assert entry["negative_sampler_connector_anchor_capacity"] == 3661
-    assert entry["negative_sampler_connector_anchor_selected"] == 3661
-    assert entry["negative_sampler_connector_anchor_selected_index_sha256"] == "40a14e3becc3f793a590cc2b37fdd92107a97f71f59c6fc1cf9d22d4d124116d"
-    assert entry["negative_sampler_topology_radius_px"] == 16.0
-    assert entry["negative_sampler_topology_capacity"] == {"topology_junction": 8331, "topology_fragment": 8049}
-    assert entry["negative_sampler_topology_selected"] == {"topology_junction": 8331, "topology_fragment": 8049}
-    assert entry["negative_sampler_topology_selected_index_sha256"] == "df24e495a76d485adcef07defd96ee723da3e029ededd5009e9c34e7ac58325d"
+    assert entry["negative_sampler_connector_anchor_capacity"] == 3671
+    assert entry["negative_sampler_connector_anchor_selected"] == 3671
+    assert entry["negative_sampler_connector_anchor_selected_index_sha256"] == "2d9b5b6ffa7e70c390a7aa38ffe851871e8a5cebac3831aac616f60a0e141c84"
+    assert entry["negative_sampler_topology_radius_px"] == 12.0
+    assert entry["negative_sampler_topology_input_audit_radius_px"] == 16.0
+    assert entry["negative_sampler_topology_capacity"] == {"topology_junction": 4505, "topology_fragment": 4574}
+    assert entry["negative_sampler_topology_selected"] == {"topology_junction": 4505, "topology_fragment": 4574}
+    assert entry["negative_sampler_topology_selected_index_sha256"] == "92d8075523ac528eebf8777b9fbe77d7eb254aebbc4521e0b45967f6e3b78ea8"
+    assert entry["negative_sampler_generic_remainder_selected"] == 9409
     assert entry["real_dev_result_path"].endswith("V24-RETRY3-REAL-DEV-STAGES.json")
     assert entry["real_dev_result_sha256"] == "1e471a179114e078f101edffcf04aea9e3b29ab72a3d31649695726465661c90"
     assert digest(ROOT / entry["real_dev_result_path"]) == entry["real_dev_result_sha256"]
@@ -211,7 +219,7 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["retry3_vs_retry2_above_threshold_false_candidates_delta"] == -9920
     assert entry["spatial_morphology_diagnostic_required"] is False
     assert entry["retry2_dev_gate_passed"] is True
-    assert entry["execution_blocker"] == "Retry5 diagnosis shows overretained topology competing with broad generic coverage: accepted false positives are generic 183 and topology fragment 1, while connector anchors contribute zero accepted false positives. Rebalance overretained topology versus broad generic coverage and replace middle connector anchors with endpoint-adjacent structural coverage, then re-pass synthetic without changing the threshold or model. No real-dev or sealed execution is authorized."
+    assert entry["execution_blocker"] is None
 
 def test_train_examples_preserve_mask_crossing_positive():
     from ml.markers.center.mask_preserving_v24.train_p1 import _examples
