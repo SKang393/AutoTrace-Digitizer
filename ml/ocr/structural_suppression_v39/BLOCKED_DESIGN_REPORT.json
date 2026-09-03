@@ -1,0 +1,174 @@
+{
+  "schema": "graphreader.ocr-structural-suppression-v39-blocked-design.v1",
+  "task": "ocr-detection",
+  "revision": "graph-text-structural-suppression-v39",
+  "status": "blocked_before_candidate_creation",
+  "candidate_created": false,
+  "candidate_startable": false,
+  "synthetic_only": true,
+  "real_reads": 0,
+  "private_or_article_reads": 0,
+  "public_or_sealed_reads": 0,
+  "production_approval": false,
+  "release_eligible": false,
+  "trigger_evidence": {
+    "v38_result": {
+      "path": "ml/ocr/dice_loss_detector_v38/P1_RESULT.json",
+      "sha256": "ef7f22b77a6b803684dac5b13a835e0dbce9b21f3776b305406723107ae22474"
+    },
+    "v38_diagnostic": {
+      "path": "ml/ocr/dice_loss_detector_v38/diagnostics/DIAGNOSTIC.json",
+      "sha256": "8b0d0624e7780eca03afcfc48db079ce88eb14dffe33ab851b44a50c6eae5b7b"
+    },
+    "v38_fp_attribution": {
+      "path": "ml/ocr/dice_loss_detector_v38/diagnostics/fp_attribution/ATTRIBUTION.json",
+      "sha256": "3914f837b1a667d5da5e529ab72b9673c1306fb6382741afd979a9a6277f95c3"
+    },
+    "v37_result": {
+      "path": "ml/ocr/degradation_coverage_detector_v37/P1_RESULT.json",
+      "sha256": "dbc6978b3bcd7ca722c73442d440d56ee047f162d4e903ea5f2992e009a4cb5e"
+    },
+    "v37_diagnostic": {
+      "path": "ml/ocr/degradation_coverage_detector_v37/diagnostics/DIAGNOSTIC.json",
+      "sha256": "73f2a248a2b86d60cb5ddb04f75b10c5a09244b905135289d64773208e6129ba"
+    },
+    "v38_attribution_annotation_and_marker_mask_stream": {
+      "sha256": "7f75cd774354b2c40acb872a6857ee0159ecd39b80dbe52425d17a6859b29964"
+    }
+  },
+  "v38_attribution": {
+    "false_positive_pixels": 97057,
+    "by_category": {
+      "marker_or_connecting_line_ink": 40722,
+      "phase_dividers": 22698,
+      "within_or_near_axes_or_tick_lines": 10251,
+      "existing_text_box_margins": 9215,
+      "empty_background": 12848,
+      "other_dark_ink": 1323
+    },
+    "dominant_category": "marker_or_connecting_line_ink",
+    "attribution_scope": "synthetic dev only; geometric proxies, not production masks"
+  },
+  "production_pre_ocr_inputs": {
+    "raster": {
+      "available": true,
+      "source": "ProductionRasterFrameDecoder decoded immutable original Gray8 and BGR24 planes"
+    },
+    "axis_geometry": {
+      "available": true,
+      "source": "ProductionAxisGeometryAdapter output consumed before ProductionOcrAdapter",
+      "fields": [
+        "XAxis.Line",
+        "YAxis.Line",
+        "Ticks.Line",
+        "PhaseDividers.Line",
+        "AmbiguousGridOrDividers.Line"
+      ]
+    },
+    "marker_centers": {
+      "available": false,
+      "reason": "ProductionMarkerCenterAdapter runs after OCR and receives the post-OCR marker frame."
+    },
+    "connecting_line_geometry": {
+      "available": false,
+      "reason": "Connection graph construction runs after OCR and marker detection; no pre-OCR edge geometry input exists."
+    },
+    "ocr_text_boxes": {
+      "available": false,
+      "reason": "Detected regions and masks are produced by OCR; no prior text-box input exists before detector inference."
+    },
+    "truth_annotations": {
+      "available": false,
+      "reason": "Synthetic annotation records are evaluation-only and real/private truth cannot enter production preprocessing."
+    },
+    "semantic_phase_truth": {
+      "available": false,
+      "reason": "Phase semantics are resolved after OCR and marker grouping; only axis-provided line geometry is pre-OCR."
+    }
+  },
+  "category_derivability": [
+    {
+      "category": "within_or_near_axes_or_tick_lines",
+      "pre_ocr_derivable": true,
+      "production_evidence": "CreateOcrDetectorImage rasterizes XAxis, YAxis, tick, phase-divider, and ambiguous-grid lines with a fixed 2-pixel radius into the detector-only derivative.",
+      "v39_action": "no new suppression; already covered by existing production path"
+    },
+    {
+      "category": "phase_dividers",
+      "pre_ocr_derivable": "partial",
+      "production_evidence": "AxisGeometryResult.PhaseDividers and AmbiguousGridOrDividers are available before OCR and already included in CreateOcrDetectorImage.",
+      "limitation": "Undetected or semantically inferred dividers are not available without future phase evidence.",
+      "v39_action": "no new suppression"
+    },
+    {
+      "category": "marker_or_connecting_line_ink",
+      "pre_ocr_derivable": false,
+      "production_evidence": "The V38 proxy uses marker annotations and marker masks, while production marker centers and connections occur after OCR.",
+      "v39_action": "blocked; do not use future marker outputs or truth annotations as detector inputs"
+    },
+    {
+      "category": "existing_text_box_margins",
+      "pre_ocr_derivable": false,
+      "production_evidence": "The V38 proxy expands synthetic text truth boxes; production OCR boxes do not exist until detector inference completes.",
+      "v39_action": "blocked; do not use truth boxes or a circular OCR-derived mask"
+    },
+    {
+      "category": "other_dark_ink",
+      "pre_ocr_derivable": false,
+      "production_evidence": "V38 assigns residual dark pixels by a diagnostic raster threshold, not a runtime structural identity.",
+      "v39_action": "blocked; darkness alone would risk suppressing text"
+    },
+    {
+      "category": "empty_background",
+      "pre_ocr_derivable": false,
+      "production_evidence": "The category is a residual attribution bucket, not a known structure mask.",
+      "v39_action": "blocked; no safe structural suppression is defined"
+    }
+  ],
+  "retained_candidate_contract_if_unblocked": {
+    "data_revision": "graph-text-real-range-classifier-finetune-v32",
+    "train_scenes": "V37 train scenes and deterministic V37 degradation variants",
+    "dev_split": "V37/V38 fixed V32 dev passthrough",
+    "model": "V38 checkpoint and model contract",
+    "targets": "V37 full-box targets",
+    "tiling": {
+      "tile_size": 256,
+      "tile_overlap": 64
+    },
+    "threshold": 0.4,
+    "minimum_component_area": 8,
+    "truth_match_iou_minimum": 0.5,
+    "gates": {
+      "raw_proposal_precision_minimum": 0.95,
+      "raw_proposal_recall_minimum": 0.95,
+      "onnx_parity_maximum_absolute_error": 0.00001,
+      "provider": "CPUExecutionProvider"
+    },
+    "single_change": "one deterministic suppression derived solely from an existing pre-OCR production input"
+  },
+  "source_hashes": {
+    "v37_dataset": {
+      "path": "ml/ocr/degradation_coverage_detector_v37/dataset.py",
+      "sha256": "480eba6b775a41509725126f16d40010ee5166f195bf39b04b1e441c6cd6110a"
+    },
+    "production_raster_decoder": {
+      "path": "src/GraphReader.App/Integration/Workflow/ProductionRasterFrameDecoder.cs",
+      "sha256": "29e93889ca0da9f98d2070aaa8a22d24d6b9975a7bb873a3c82832f8eff1a931"
+    },
+    "production_mask_composer": {
+      "path": "src/GraphReader.App/Integration/Workflow/ProductionDetectionMaskComposer.cs",
+      "sha256": "cf39ce51d142ad96095efa043c95cdd413f21be1ac7e38e416e0ca934c4c34f6"
+    },
+    "production_ocr_adapter": {
+      "path": "src/GraphReader.App/Integration/Workflow/ProductionOcrAdapter.cs",
+      "sha256": "cb7b1648c3de0a846895bfa1b75a224d7ff3f1cd781f0251cd4c59a728a02542"
+    },
+    "candidate_source_bundle": null
+  },
+  "decision": {
+    "blocked": true,
+    "reason": "The V38 dominant false-positive category requires marker or connecting-line outputs that run after OCR, while text-margin and residual categories rely on truth-only or post-OCR data. Existing axis/tick/divider suppression is already applied before OCR, so no distinct runtime-compatible single change remains.",
+    "next_safe_action": "Add a new pre-OCR structural provider contract only after an approved production design identifies inputs available before OCR; then prepare one synthetic candidate retaining the frozen V37/V38 contract.",
+    "no_candidate_created": true
+  }
+}
