@@ -52,3 +52,19 @@ Items stay here until resolved. Newest items are appended last.
   [review queue](REVIEW_QUEUE.md)
 - **Unblocks when:** `git push origin main` succeeds and `origin/main` matches
   the local `main` commit
+
+## REV-004 — approve a pre-OCR structural provider design
+
+- **Status:** open
+- **Blocks:** OCR V39 candidate creation and OCR production approval
+- **Effort:** about 10 minutes
+- **Action:** choose whether the production workflow may add a raster-derived
+  structural provider before OCR to estimate marker and connecting-line masks
+- **Why:** V38 attributes 40,722 false-positive pixels to marker or connecting
+  lines, but marker centers and connection graphs currently run after OCR;
+  available axis, tick, and divider geometry is already masked
+- **Files:** [blocked V39 design](../ml/ocr/structural_suppression_v39/BLOCKED_DESIGN_REPORT.json),
+  [V38 attribution](../ml/ocr/dice_loss_detector_v38/diagnostics/fp_attribution/ATTRIBUTION.json),
+  [current readiness](1.0-READINESS.md)
+- **Unblocks when:** the maintainer approves one pre-OCR input contract or
+  explicitly rejects this direction
