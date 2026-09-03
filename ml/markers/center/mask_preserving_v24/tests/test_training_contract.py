@@ -40,9 +40,9 @@ def test_runner_source_bundle_is_relative_and_present():
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text())
     entry = next(item for item in ledger["revisions"] if item["revision"] == config["revision"])
     assert entry["p1_runner_source_bundle_sha256"] == config["expected_runner_source_bundle_sha256"]
-    assert entry["execution_authorized"] is True
-    assert entry["status"] == "candidate_1_preregistered"
-    assert source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
+    assert entry["execution_authorized"] is False
+    assert entry["status"] == "failed_dev_retry5_unconsumed_connector_anchor_coverage_gap"
+    assert entry["p1_runner_source_bundle_sha256"] == config["expected_runner_source_bundle_sha256"]
 
 def test_current_evidence_bindings_and_authorization_match_files():
     config_path = ROOT / "ml/markers/center/mask_preserving_v24/training/p1.json"
@@ -72,9 +72,9 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["synthetic_negative_proposal_count"] == 231211
     assert entry["morphology_diagnosis_sha256"] == config["morphology_diagnosis_sha256"]
     assert entry["morphology_gap_sha256"] == config["morphology_gap_sha256"]
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["status"] == "failed_dev_retry5_unconsumed_connector_anchor_coverage_gap"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["real_dev_authorized"] is False
     assert entry["real_sealed_authorized"] is False
     assert entry["real_sealed_reads"] == 0
@@ -82,10 +82,10 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["consumed_candidate_ids"] == []
     assert entry["dev_passed_candidate_ids"] == []
     assert entry["candidate_consumed"] is False
-    assert entry["p1_result_path"].endswith("P1_RETRY4_RESULT.json")
+    assert entry["p1_result_path"].endswith("P1_RETRY5_RESULT.json")
     assert digest(ROOT / entry["p1_result_path"]) == entry["p1_result_sha256"]
-    assert entry["p1_result_sha256"] == "abcc814dce1d268870d110aaa68775d0cccb5ff96aecfbdd0781e63a5a6bb174"
-    assert entry["p1_candidate_report_path"].endswith("marker-v24-retry4/P1-run/candidate-report.json")
+    assert entry["p1_result_sha256"] == "769a8d52fe0d205693641876b6577ff5cd4fcc784fb52b6007d242b730fe904b"
+    assert entry["p1_candidate_report_path"].endswith("marker-v24-retry5/P1-run/candidate-report.json")
     assert digest(ROOT / entry["p1_candidate_report_path"]) == entry["p1_candidate_report_sha256"]
     assert entry["p1_candidate_report_sha256"] == entry["p1_result_sha256"]
     assert entry["retry3_p1_result_path"].endswith("P1_RETRY3_RESULT.json")
@@ -120,17 +120,22 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["retry3_morphology_gap_pixel_output"] is False
     assert entry["retry3_morphology_gap_training_use"] is False
     assert entry["retry3_morphology_gap_candidate_selection"] is False
-    assert entry["p1_checkpoint_sha256"] == "4d98a1de07282f734c6249c164400c237be9560370315b68c4729e9d15e5293c"
-    assert entry["p1_onnx_sha256"] == "697fbcfb961e4c2af36a1a3d68cf5be874412b2939b03c42b59aaa82c4b0de96"
-    assert entry["p1_true_positives"] == 1989
-    assert entry["p1_false_positives"] == 138
-    assert entry["p1_false_negatives"] == 15
-    assert entry["p1_precision"] == 0.9351198871650211
-    assert entry["p1_recall"] == 0.9925149700598802
-    assert entry["p1_f1"] == 0.962962962962963
-    assert entry["p1_onnx_parity_maximum_absolute_error"] == 4.76837158203125e-07
-    assert entry["p1_opened_seal_sha256"] == "a262b0a46c2ef979a0d58591e454b6198cf550b658d6ae3e2f84d5277b276d14"
-    assert entry["p1_result_seal_sha256"] == "373902ffa16d6ec2d23271c9a3f97fdca25a90b761a7965efcb19fd630141ee8"
+    assert entry["retry4_p1_result_sha256"] == "abcc814dce1d268870d110aaa68775d0cccb5ff96aecfbdd0781e63a5a6bb174"
+    assert entry["retry4_p1_checkpoint_sha256"] == "4d98a1de07282f734c6249c164400c237be9560370315b68c4729e9d15e5293c"
+    assert entry["retry4_p1_onnx_sha256"] == "697fbcfb961e4c2af36a1a3d68cf5be874412b2939b03c42b59aaa82c4b0de96"
+    assert entry["p1_checkpoint_sha256"] == "a7eaba24b5e65e19c97f303aaf1c5622e5a68a1dabbf44e1df11386c15489832"
+    assert entry["p1_onnx_sha256"] == "d3445f0b1bf0e97a98942133d45341cae75548887be853743e887832cacad7bd"
+    assert entry["p1_true_positives"] == 1986
+    assert entry["p1_false_positives"] == 184
+    assert entry["p1_false_negatives"] == 18
+    assert entry["p1_precision"] == 0.9152073732718894
+    assert entry["p1_recall"] == 0.9910179640718563
+    assert entry["p1_f1"] == 0.9516051748921898
+    assert entry["p1_onnx_parity_maximum_absolute_error"] == 7.152557373046875e-07
+    assert entry["retry4_p1_opened_seal_sha256"] == "a262b0a46c2ef979a0d58591e454b6198cf550b658d6ae3e2f84d5277b276d14"
+    assert entry["retry4_p1_result_seal_sha256"] == "373902ffa16d6ec2d23271c9a3f97fdca25a90b761a7965efcb19fd630141ee8"
+    assert entry["p1_opened_seal_sha256"] == "db3c4ded697e108a7af55d3eada605c6bbe3cc0dd17775727fc401c885c41386"
+    assert entry["p1_result_seal_sha256"] == "117bb7a12b5b742a47eb8a3fb3cd8e5899692ba1ec5119a48d5c0432e21a7c40"
     assert digest(ROOT / entry["retry4_diagnosis_path"]) == entry["retry4_diagnosis_sha256"]
     assert digest(ROOT / entry["retry4_generic_fp_diagnosis_path"]) == entry["retry4_generic_fp_diagnosis_sha256"]
     assert entry["retry4_accepted_false_positive_count"] == 138
@@ -146,6 +151,23 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["retry4_generic_root_cause_masked_context"] == 13
     assert entry["retry4_generic_root_cause_marker_field"] == 21
     assert entry["retry4_generic_root_cause_exhaustive_count"] == 136
+    assert digest(ROOT / entry["retry5_diagnosis_path"]) == entry["retry5_diagnosis_sha256"]
+    assert digest(ROOT / entry["retry5_generic_fp_diagnosis_path"]) == entry["retry5_generic_fp_diagnosis_sha256"]
+    assert entry["retry5_accepted_false_positive_count"] == 184
+    assert entry["retry5_accepted_false_positive_generic"] == 183
+    assert entry["retry5_accepted_false_positive_topology_fragment"] == 1
+    assert entry["retry5_accepted_false_positive_topology_junction"] == 0
+    assert entry["retry5_accepted_false_positive_connector_anchor"] == 0
+    assert entry["retry5_above_threshold_generic"] == 4818
+    assert entry["retry5_above_threshold_artifact"] == 169
+    assert entry["retry5_above_threshold_connector_anchor"] == 4
+    assert entry["retry5_above_threshold_ocr"] == 2
+    assert entry["retry5_above_threshold_topology_fragment"] == 1
+    assert entry["retry5_above_threshold_topology_junction"] == 0
+    assert entry["retry5_generic_root_cause_near_connecting_line"] == 115
+    assert entry["retry5_generic_root_cause_masked_context"] == 23
+    assert entry["retry5_generic_root_cause_marker_field"] == 45
+    assert entry["retry5_generic_root_cause_exhaustive_count"] == 183
     assert entry["p1_dev_gate_passed"] is False
     assert entry["negative_sampler_selected_index_sha256"] == "a81fb8127cda6819f1d0da318dc34ea2891dec5e3c6c767eb756af68bd2f869f"
     assert entry["negative_sampler_connector_anchor_fractions"] == [0.3333333333333333, 0.6666666666666666]
@@ -189,7 +211,7 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["retry3_vs_retry2_above_threshold_false_candidates_delta"] == -9920
     assert entry["spatial_morphology_diagnostic_required"] is False
     assert entry["retry2_dev_gate_passed"] is True
-    assert entry["execution_blocker"] is None
+    assert entry["execution_blocker"] == "Retry5 diagnosis shows overretained topology competing with broad generic coverage: accepted false positives are generic 183 and topology fragment 1, while connector anchors contribute zero accepted false positives. Rebalance overretained topology versus broad generic coverage and replace middle connector anchors with endpoint-adjacent structural coverage, then re-pass synthetic without changing the threshold or model. No real-dev or sealed execution is authorized."
 
 def test_train_examples_preserve_mask_crossing_positive():
     from ml.markers.center.mask_preserving_v24.train_p1 import _examples

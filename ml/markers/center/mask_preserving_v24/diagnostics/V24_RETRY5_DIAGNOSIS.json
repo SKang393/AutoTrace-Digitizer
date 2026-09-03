@@ -1,0 +1,221 @@
+{
+  "binding": {
+    "generator_audit_sha256": "9562044526bce45b48254472346ccc1640c6e254915b9e744525154144121748",
+    "generator_dev_split_sha256": "f453e50e228f54e15bafba83b1a5dda422c435a555e9083dfea18457ed38204d",
+    "input_shape": [
+      "candidate_count",
+      3,
+      33,
+      33
+    ],
+    "model_path": "marker-center-mask-preserving-v24-p1.onnx",
+    "model_sha256": "d3445f0b1bf0e97a98942133d45341cae75548887be853743e887832cacad7bd",
+    "negative_sampler_priority": [
+      "hard_existing",
+      "faint_low",
+      "faint_p05",
+      "ocr_heavy",
+      "artifact",
+      "generic"
+    ],
+    "negative_sampler_seed": 20260904,
+    "negative_sampler_sha256": "ca608bba006dd4ff5a0b525829e9a61f9b64673cf82fca06cc087f1e9654a858",
+    "output_shape": [
+      "candidate_count",
+      4
+    ],
+    "provider": "CPUExecutionProvider"
+  },
+  "diagnostic_conclusion": "fixed-threshold failure concentration is reported by per-stratum above-threshold rates; no threshold change is proposed",
+  "elapsed_ms": 18704.011,
+  "fixed_threshold_metrics": {
+    "accepted": 2170,
+    "accepted_false_positive_attribution": {
+      "generic": 183,
+      "topology_fragment": 1
+    },
+    "false_negatives": 18,
+    "false_positives": 184,
+    "precision": 0.9152073732718894,
+    "prohibited_structure_hits": 0,
+    "recall": 0.9910179640718563,
+    "true_positives": 1986
+  },
+  "proposals": {
+    "negative_strata": {
+      "artifact": {
+        "above_threshold": 170,
+        "above_threshold_rate": 0.00995491011301751,
+        "capacity": 17077,
+        "raw_probability": {
+          "count": 17077,
+          "maximum": 0.9815964698791504,
+          "median": 2.1159648895263672e-05,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p90": 0.0023906230926513655,
+          "p95": 0.014063030481338478
+        }
+      },
+      "faint_low": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 8598,
+        "raw_probability": {
+          "count": 8598,
+          "maximum": 0.009420275688171387,
+          "median": 0.0003407597541809082,
+          "minimum": 0.0,
+          "p05": 1.7881393432617188e-07,
+          "p90": 0.002120673656463623,
+          "p95": 0.002559155225753784
+        }
+      },
+      "faint_p05": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 5127,
+        "raw_probability": {
+          "count": 5127,
+          "maximum": 0.011084437370300293,
+          "median": 0.00044205784797668457,
+          "minimum": 0.0,
+          "p05": 1.1622905731201172e-06,
+          "p90": 0.002275305986404419,
+          "p95": 0.0027005046606063837
+        }
+      },
+      "generic": {
+        "above_threshold": 4822,
+        "above_threshold_rate": 0.02789653636326821,
+        "capacity": 172853,
+        "raw_probability": {
+          "count": 172853,
+          "maximum": 0.9983466863632202,
+          "median": 0.00045564770698547363,
+          "minimum": 0.0,
+          "p05": 3.2782554626464844e-07,
+          "p90": 0.02130693793296814,
+          "p95": 0.07913426160812362
+        }
+      },
+      "hard_existing": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 6012,
+        "raw_probability": {
+          "count": 6012,
+          "maximum": 0.014861494302749634,
+          "median": 5.5789947509765625e-05,
+          "minimum": 2.9802322387695312e-08,
+          "p05": 1.0132789611816406e-06,
+          "p90": 0.001835441589355469,
+          "p95": 0.0029630064964294434
+        }
+      },
+      "ocr_heavy": {
+        "above_threshold": 2,
+        "above_threshold_rate": 9.28332714444857e-05,
+        "capacity": 21544,
+        "raw_probability": {
+          "count": 21544,
+          "maximum": 0.8237037062644958,
+          "median": 0.0002489835023880005,
+          "minimum": 0.0,
+          "p05": 5.994737148284915e-06,
+          "p90": 0.0030197083950042726,
+          "p95": 0.004401147365570068
+        }
+      }
+    },
+    "negative_total": 231211,
+    "positive_raw_probability": {
+      "count": 3258,
+      "maximum": 0.99998939037323,
+      "median": 0.9921673834323883,
+      "minimum": 0.5445284843444824,
+      "p05": 0.9509920954704285,
+      "p90": 0.9989300906658173,
+      "p95": 0.9994620978832245
+    }
+  },
+  "retry5_attribution": {
+    "above_threshold": {
+      "artifact": 169,
+      "connector_anchor": 4,
+      "generic": 4818,
+      "ocr_heavy": 2,
+      "topology_fragment": 1,
+      "topology_junction": 0
+    },
+    "accepted_false_positives": {
+      "connector_anchor": 0,
+      "generic": 183,
+      "topology_fragment": 1,
+      "topology_junction": 0
+    },
+    "connector_anchor_capacity": 3661,
+    "connector_anchor_fractions": [
+      0.3333333333333333,
+      0.6666666666666666
+    ],
+    "connector_anchor_max_distance_px": 4.0
+  },
+  "revision": "marker-center-mask-preserving-v24",
+  "schema": "graphreader.marker-center-mask-preserving-v24-retry5-diagnosis.v1",
+  "scope": {
+    "case_ids_or_pixels_emitted": false,
+    "label_positive_distance_px": 3.0,
+    "optimizer_steps": 0,
+    "private_data": false,
+    "real_dev_reads": 0,
+    "real_sealed_reads": 0,
+    "retry_mode": "retry5",
+    "scene_count": 167,
+    "split": "real-range-generator-v1-dev",
+    "synthetic_only": true,
+    "threshold": 0.25,
+    "truth_count": 2004
+  },
+  "topology": {
+    "above_threshold": {
+      "topology_fragment": 1,
+      "topology_junction": 0
+    },
+    "accepted_false_positive_attribution": {
+      "topology_fragment": 1,
+      "topology_junction": 0
+    },
+    "capacity": {
+      "topology_fragment": 8049,
+      "topology_junction": 8331
+    },
+    "radius_px": 16.0
+  },
+  "truth_mask_scenarios": {
+    "artifact_mask": {
+      "fn": 1,
+      "recall": 0.9968847352024922,
+      "tp": 320,
+      "truth": 321
+    },
+    "both_masks": {
+      "fn": 0,
+      "recall": 1.0,
+      "tp": 11,
+      "truth": 11
+    },
+    "ocr_mask": {
+      "fn": 0,
+      "recall": 1.0,
+      "tp": 64,
+      "truth": 64
+    },
+    "unmasked": {
+      "fn": 17,
+      "recall": 0.9894278606965174,
+      "tp": 1591,
+      "truth": 1608
+    }
+  }
+}

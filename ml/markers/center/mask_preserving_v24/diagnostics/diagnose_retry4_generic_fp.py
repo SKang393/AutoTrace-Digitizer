@@ -15,13 +15,16 @@ import numpy as np
 import onnxruntime as ort
 
 from ml.markers.center.mask_preserving_v24.mask_preserving import extract_proposals, postprocess
-from ml.markers.center.real_range_generator_v1.negative_sampler import TOPOLOGY_KINDS, TOPOLOGY_RADIUS_PX, _topology_indices
+from ml.markers.center.real_range_generator_v1.negative_sampler import CONNECTOR_ANCHOR_FRACTIONS, CONNECTOR_ANCHOR_MAX_DISTANCE_PX, TOPOLOGY_KINDS, TOPOLOGY_RADIUS_PX, _connector_anchor_indices, _topology_indices
 from ml.markers.center.real_range_generator_v1.generator import build_split
 
 from .diagnose_retry import (
     RETRY4_DEV_SPLIT_SHA256,
     RETRY4_GENERATOR_AUDIT_SHA256,
     RETRY4_ONNX_SHA256,
+    RETRY5_DEV_SPLIT_SHA256,
+    RETRY5_GENERATOR_AUDIT_SHA256,
+    RETRY5_ONNX_SHA256,
     ROOT,
     THRESHOLD,
     _labels,
@@ -79,20 +82,26 @@ def _mask_bin(value: float) -> str:
     return ">75pct"
 
 
-def summarize(model_path: Path) -> dict[str, Any]:
+def summarize(model_path: Path, *, retry5: bool = False) -> dict[str, Any]:
     if not model_path.is_file():
         raise FileNotFoundError(model_path)
     model_hash = _sha(model_path)
-    if model_hash != RETRY4_ONNX_SHA256:
-        raise ValueError(f"retry4 ONNX hash mismatch: expected {RETRY4_ONNX_SHA256}, got {model_hash}")
+    expected_model = RETRY5_ONNX_SHA256 if retry5 else RETRY4_ONNX_SHA256
+    if model_hash != expected_model:
+        mode = "retry5" if retry5 else "retry4"
+        raise ValueError(f"{mode} ONNX hash mismatch: expected {expected_model}, got {model_hash}")
     audit_path = ROOT / "ml/markers/center/real_range_generator_v1/AUDIT.json"
     audit_hash = _sha(audit_path)
-    if audit_hash != RETRY4_GENERATOR_AUDIT_SHA256:
-        raise ValueError(f"retry4 generator audit hash mismatch: expected {RETRY4_GENERATOR_AUDIT_SHA256}, got {audit_hash}")
+    expected_audit = RETRY5_GENERATOR_AUDIT_SHA256 if retry5 else RETRY4_GENERATOR_AUDIT_SHA256
+    if audit_hash != expected_audit:
+        mode = "retry5" if retry5 else "retry4"
+        raise ValueError(f"{mode} generator audit hash mismatch: expected {expected_audit}, got {audit_hash}")
     audit_record = json.loads(audit_path.read_text(encoding="utf-8"))
     dev_split_hash = audit_record["splits"]["dev"]["aggregate_sha256"]
-    if dev_split_hash != RETRY4_DEV_SPLIT_SHA256:
-        raise ValueError(f"retry4 dev split hash mismatch: expected {RETRY4_DEV_SPLIT_SHA256}, got {dev_split_hash}")
+    expected_dev = RETRY5_DEV_SPLIT_SHA256 if retry5 else RETRY4_DEV_SPLIT_SHA256
+    if dev_split_hash != expected_dev:
+        mode = "retry5" if retry5 else "retry4"
+        raise ValueError(f"{mode} dev split hash mismatch: expected {expected_dev}, got {dev_split_hash}")
 
     sampler_path = ROOT / "ml/markers/center/real_range_generator_v1/negative_sampler.py"
     session = ort.InferenceSession(str(model_path), providers=["CPUExecutionProvider"])
@@ -118,6 +127,8 @@ def summarize(model_path: Path) -> dict[str, Any]:
         names = _strata(proposals.patches, hard, labels)
         topology = _topology_indices(scene, proposals.coordinates, labels)
         topology_by_index = {index: kind for kind in TOPOLOGY_KINDS for index in topology[kind]}
+        connector_indices = _connector_anchor_indices(scene, proposals.coordinates, labels) if retry5 else set()
+        connector_indices -= set(topology_by_index)
         output = session.run([output_name], {input_name: proposals.patches.numpy().astype(np.float32, copy=False)})[0]
         predictions = postprocess(scene, proposals, output)
         used_predictions, _ = _matched_truths(predictions, scene.centers)
@@ -131,7 +142,7 @@ def summarize(model_path: Path) -> dict[str, Any]:
             if prediction_index in used_predictions or not decoded:
                 continue
             _, _, source = min(decoded, key=lambda item: math.hypot(prediction.x - item[0], prediction.y - item[1]))
-            source_name = topology_by_index.get(source, names[source])
+            source_name = topology_by_index.get(source, "connector_anchor" if retry5 and source in connector_indices else names[source])
             if source_name != "generic":
                 continue
             generic_count += 1
@@ -169,17 +180,19 @@ def summarize(model_path: Path) -> dict[str, Any]:
             else:
                 root_causes["marker_field_generic"] += 1
 
-    if generic_count != 136:
-        raise RuntimeError(f"retry4 generic accepted false-positive count changed: {generic_count}")
+    expected_generic_count = 183 if retry5 else 136
+    if generic_count != expected_generic_count:
+        mode = "retry5" if retry5 else "retry4"
+        raise RuntimeError(f"{mode} generic accepted false-positive count changed: {generic_count}")
     if sum(root_causes.values()) != generic_count:
         raise RuntimeError("generic false-positive root-cause partition is not exhaustive")
 
-    return {
-        "schema": "graphreader.marker-center-mask-preserving-v24-retry4-generic-fp-diagnosis.v1",
+    result = {
+        "schema": "graphreader.marker-center-mask-preserving-v24-retry5-generic-fp-diagnosis.v1" if retry5 else "graphreader.marker-center-mask-preserving-v24-retry4-generic-fp-diagnosis.v1",
         "revision": "marker-center-mask-preserving-v24",
-        "scope": {"synthetic_only": True, "split": "real-range-generator-v1-dev", "scene_count": len(scenes), "truth_count": sum(len(scene.centers) for scene in scenes), "threshold": THRESHOLD, "private_data": False, "real_dev_reads": 0, "real_sealed_reads": 0, "optimizer_steps": 0, "case_ids_or_pixels_emitted": False, "retry_mode": "retry4"},
-        "binding": {"model_path": model_path.name, "model_sha256": model_hash, "provider": session.get_providers()[0], "generator_audit_sha256": audit_hash, "generator_dev_split_sha256": dev_split_hash, "negative_sampler_sha256": _sha(sampler_path), "topology_radius_px": TOPOLOGY_RADIUS_PX},
-        "fixed_threshold_metrics": {"accepted_false_positive_count": all_fp_count, "generic_accepted_false_positive_count": generic_count, "retry4_expected_generic_count": 136, "root_cause_partition_exhaustive": True},
+        "scope": {"synthetic_only": True, "split": "real-range-generator-v1-dev", "scene_count": len(scenes), "truth_count": sum(len(scene.centers) for scene in scenes), "threshold": THRESHOLD, "private_data": False, "real_dev_reads": 0, "real_sealed_reads": 0, "optimizer_steps": 0, "case_ids_or_pixels_emitted": False, "retry_mode": "retry5" if retry5 else "retry4"},
+        "binding": {"model_path": model_path.name, "model_sha256": model_hash, "provider": session.get_providers()[0], "generator_audit_sha256": audit_hash, "generator_dev_split_sha256": dev_split_hash, "negative_sampler_sha256": _sha(sampler_path), "topology_radius_px": TOPOLOGY_RADIUS_PX, "connector_anchor_fractions": list(CONNECTOR_ANCHOR_FRACTIONS) if retry5 else None, "connector_anchor_max_distance_px": CONNECTOR_ANCHOR_MAX_DISTANCE_PX if retry5 else None},
+        "fixed_threshold_metrics": {"accepted_false_positive_count": all_fp_count, "generic_accepted_false_positive_count": generic_count, "expected_generic_count": expected_generic_count, "root_cause_partition_exhaustive": True},
         "root_cause_counts": dict(sorted(root_causes.items())),
         "source_geometry": {"nearest_truth_distance_bins": dict(sorted(truth_distances.items())), "declared_hard_negative_distance_bins": {kind: dict(sorted(values.items())) for kind, values in hard_distances.items()}, "connecting_line_distance_bins": dict(sorted(line_distances.items())), "source_band": dict(sorted(band_counts.items()))},
         "mask_occupancy_bins": {key: dict(sorted(values.items())) for key, values in mask_counts.items()},
@@ -187,14 +200,19 @@ def summarize(model_path: Path) -> dict[str, Any]:
         "probability_quantiles": _quantiles(confidence),
         "diagnostic_conclusion": "retry4 generic accepted false positives are partitioned by fixed source geometry, masks, morphology, and confidence; no threshold or model change is proposed",
     }
+    if retry5:
+        result["comparison_to_retry4"] = {"root_cause_counts": {"near_connecting_line": 102, "masked_context": 13, "marker_field_generic": 21}}
+        result["diagnostic_conclusion"] = "retry5 remaining generic accepted false positives are partitioned by fixed source geometry, masks, morphology, and confidence; retry4 root-cause counts are reported for comparison and no threshold or model change is proposed"
+    return result
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--retry5", action="store_true")
     args = parser.parse_args()
-    report = summarize(args.model.resolve())
+    report = summarize(args.model.resolve(), retry5=args.retry5)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2, sort_keys=True))
