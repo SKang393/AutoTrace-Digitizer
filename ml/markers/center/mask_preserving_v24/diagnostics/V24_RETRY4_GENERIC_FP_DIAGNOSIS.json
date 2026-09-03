@@ -1,0 +1,200 @@
+{
+  "binding": {
+    "generator_audit_sha256": "9562044526bce45b48254472346ccc1640c6e254915b9e744525154144121748",
+    "generator_dev_split_sha256": "f453e50e228f54e15bafba83b1a5dda422c435a555e9083dfea18457ed38204d",
+    "model_path": "marker-center-mask-preserving-v24-p1.onnx",
+    "model_sha256": "697fbcfb961e4c2af36a1a3d68cf5be874412b2939b03c42b59aaa82c4b0de96",
+    "negative_sampler_sha256": "13ad1f5d907cd3ac04a921c4ca532d13ea2cf2626489e404e4a8f662c4719ef2",
+    "provider": "CPUExecutionProvider",
+    "topology_radius_px": 16.0
+  },
+  "diagnostic_conclusion": "retry4 generic accepted false positives are partitioned by fixed source geometry, masks, morphology, and confidence; no threshold or model change is proposed",
+  "fixed_threshold_metrics": {
+    "accepted_false_positive_count": 138,
+    "generic_accepted_false_positive_count": 136,
+    "retry4_expected_generic_count": 136,
+    "root_cause_partition_exhaustive": true
+  },
+  "mask_occupancy_bins": {
+    "artifact_mean": {
+      "0-25pct": 35,
+      "zero": 101
+    },
+    "ocr_mean": {
+      "0-25pct": 5,
+      "zero": 131
+    }
+  },
+  "morphology_quantiles": {
+    "border_dark_fraction_ge_012": {
+      "count": 136,
+      "maximum": 0.8671875,
+      "median": 0.1015625,
+      "minimum": 0.03125,
+      "p05": 0.03125,
+      "p90": 0.47265625,
+      "p95": 0.640625
+    },
+    "center5x5_mean": {
+      "count": 136,
+      "maximum": 1.0,
+      "median": 0.2974297893047333,
+      "minimum": 0.0,
+      "p05": 0.0021338582038879393,
+      "p90": 0.9704231536388397,
+      "p95": 1.0
+    },
+    "covariance_eigen_ratio": {
+      "count": 136,
+      "maximum": 51.979416621616956,
+      "median": 2.5427035505685858,
+      "minimum": 1.0481222770486294,
+      "p05": 1.1445272238424022,
+      "p90": 7.396279844702281,
+      "p95": 50.84187812781556
+    },
+    "dark_fraction_ge_012": {
+      "count": 136,
+      "maximum": 0.9586776859504132,
+      "median": 0.1147842056932966,
+      "minimum": 0.05968778696051423,
+      "p05": 0.06060606060606061,
+      "p90": 0.6680440771349863,
+      "p95": 0.8693755739210285
+    },
+    "dark_fraction_ge_05": {
+      "count": 136,
+      "maximum": 0.9586776859504132,
+      "median": 0.1143250688705234,
+      "minimum": 0.05968778696051423,
+      "p05": 0.06060606060606061,
+      "p90": 0.6680440771349863,
+      "p95": 0.8693755739210285
+    },
+    "foreground_extent_balance": {
+      "count": 136,
+      "maximum": 1.0,
+      "median": 1.0,
+      "minimum": 0.24242424242424243,
+      "p05": 0.3333333333333333,
+      "p90": 1.0,
+      "p95": 1.0
+    },
+    "max_col_dark_fraction_ge_012": {
+      "count": 136,
+      "maximum": 1.0,
+      "median": 0.36363636363636365,
+      "minimum": 0.06060606060606061,
+      "p05": 0.06060606060606061,
+      "p90": 0.9393939393939394,
+      "p95": 1.0
+    },
+    "max_col_dark_fraction_ge_05": {
+      "count": 136,
+      "maximum": 1.0,
+      "median": 0.36363636363636365,
+      "minimum": 0.06060606060606061,
+      "p05": 0.06060606060606061,
+      "p90": 0.9393939393939394,
+      "p95": 1.0
+    },
+    "max_ring_support_3_12": {
+      "count": 136,
+      "maximum": 8.0,
+      "median": 3.0,
+      "minimum": 1.0,
+      "p05": 1.0,
+      "p90": 8.0,
+      "p95": 8.0
+    },
+    "max_row_dark_fraction_ge_012": {
+      "count": 136,
+      "maximum": 1.0,
+      "median": 0.36363636363636365,
+      "minimum": 0.12121212121212122,
+      "p05": 0.18181818181818182,
+      "p90": 0.9090909090909091,
+      "p95": 1.0
+    },
+    "max_row_dark_fraction_ge_05": {
+      "count": 136,
+      "maximum": 1.0,
+      "median": 0.36363636363636365,
+      "minimum": 0.12121212121212122,
+      "p05": 0.18181818181818182,
+      "p90": 0.9090909090909091,
+      "p95": 1.0
+    }
+  },
+  "probability_quantiles": {
+    "count": 136,
+    "maximum": 0.9700815677642822,
+    "median": 0.4312436431646347,
+    "minimum": 0.2500210404396057,
+    "p05": 0.25353648513555527,
+    "p90": 0.8655935823917389,
+    "p95": 0.9268956929445267
+  },
+  "revision": "marker-center-mask-preserving-v24",
+  "root_cause_counts": {
+    "marker_field_generic": 21,
+    "masked_context": 13,
+    "near_connecting_line": 102
+  },
+  "schema": "graphreader.marker-center-mask-preserving-v24-retry4-generic-fp-diagnosis.v1",
+  "scope": {
+    "case_ids_or_pixels_emitted": false,
+    "optimizer_steps": 0,
+    "private_data": false,
+    "real_dev_reads": 0,
+    "real_sealed_reads": 0,
+    "retry_mode": "retry4",
+    "scene_count": 167,
+    "split": "real-range-generator-v1-dev",
+    "synthetic_only": true,
+    "threshold": 0.25,
+    "truth_count": 2004
+  },
+  "source_geometry": {
+    "connecting_line_distance_bins": {
+      "2-4": 4,
+      "4-8": 12,
+      "<=2": 86,
+      ">8": 34
+    },
+    "declared_hard_negative_distance_bins": {
+      "axis": {
+        ">32": 136
+      },
+      "faint_line": {
+        ">32": 136
+      },
+      "line_intersection": {
+        ">32": 136
+      },
+      "ocr_heavy": {
+        ">32": 136
+      },
+      "text": {
+        "16-32": 2,
+        ">32": 134
+      },
+      "topology_fragment": {
+        "16-32": 1,
+        ">32": 135
+      },
+      "topology_junction": {
+        "16-32": 1,
+        ">32": 135
+      }
+    },
+    "nearest_truth_distance_bins": {
+      "15-30": 65,
+      "5-15": 64,
+      ">30": 7
+    },
+    "source_band": {
+      "marker_field": 136
+    }
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "candidate_id": "P1",
+  "checkpoint_sha256": "4d98a1de07282f734c6249c164400c237be9560370315b68c4729e9d15e5293c",
+  "dev_comparisons": [
+    {
+      "duplicate_count": 0,
+      "f1": 0.962962962962963,
+      "false_negatives": 15,
+      "false_positives": 138,
+      "precision": 0.9351198871650211,
+      "prohibited_structure_hits": 0,
+      "proposal_recall": 1.0,
+      "proposal_true_positives": 2004,
+      "recall": 0.9925149700598802,
+      "scene_count": 167,
+      "threshold": 0.25,
+      "true_positives": 1989
+    },
+    {
+      "duplicate_count": 0,
+      "f1": 0.9773844641101278,
+      "false_negatives": 16,
+      "false_positives": 76,
+      "precision": 0.9631782945736435,
+      "prohibited_structure_hits": 0,
+      "proposal_recall": 1.0,
+      "proposal_true_positives": 2004,
+      "recall": 0.9920159680638723,
+      "scene_count": 167,
+      "threshold": 0.4,
+      "true_positives": 1988
+    },
+    {
+      "duplicate_count": 0,
+      "f1": 0.9844020797227037,
+      "false_negatives": 16,
+      "false_positives": 47,
+      "precision": 0.9769041769041769,
+      "prohibited_structure_hits": 0,
+      "proposal_recall": 1.0,
+      "proposal_true_positives": 2004,
+      "recall": 0.9920159680638723,
+      "scene_count": 167,
+      "threshold": 0.55,
+      "true_positives": 1988
+    },
+    {
+      "duplicate_count": 0,
+      "f1": 0.9868388378445493,
+      "false_negatives": 17,
+      "false_positives": 36,
+      "precision": 0.9822046465645081,
+      "prohibited_structure_hits": 0,
+      "proposal_recall": 1.0,
+      "proposal_true_positives": 2004,
+      "recall": 0.9915169660678643,
+      "scene_count": 167,
+      "threshold": 0.7,
+      "true_positives": 1987
+    }
+  ],
+  "dev_gate_passed": false,
+  "elapsed_ms": 1405223.372,
+  "hard_negative_example_count": 6012,
+  "negative_sampling": {
+    "capacities": {
+      "artifact": 13509,
+      "faint_low": 8598,
+      "faint_p05": 5127,
+      "generic": 179217,
+      "hard_existing": 6012,
+      "ocr_heavy": 18748
+    },
+    "counts": {
+      "artifact": 1629,
+      "faint_low": 326,
+      "faint_p05": 1303,
+      "generic": 21681,
+      "hard_existing": 6012,
+      "ocr_heavy": 1629
+    },
+    "seed": 20260904,
+    "selected_index_sha256": "c45caa550038aa5044bbe1454f536f34154e947c4d49ff1f1f650b08c02668da",
+    "split": "train",
+    "topology_capacity": {
+      "topology_fragment": 8049,
+      "topology_junction": 8331
+    },
+    "topology_radius_px": 16.0,
+    "topology_selected": {
+      "topology_fragment": 8049,
+      "topology_junction": 8331
+    },
+    "topology_selected_index_sha256": "df24e495a76d485adcef07defd96ee723da3e029ededd5009e9c34e7ac58325d"
+  },
+  "onnx_dynamic_candidate_counts": [
+    {
+      "candidate_count": 1,
+      "maximum_absolute_error": 1.7881393432617188e-07
+    },
+    {
+      "candidate_count": 8,
+      "maximum_absolute_error": 2.384185791015625e-07
+    },
+    {
+      "candidate_count": 37,
+      "maximum_absolute_error": 4.76837158203125e-07
+    }
+  ],
+  "onnx_parity_maximum_absolute_error": 4.76837158203125e-07,
+  "onnx_provider": "CPUExecutionProvider",
+  "onnx_sha256": "697fbcfb961e4c2af36a1a3d68cf5be874412b2939b03c42b59aaa82c4b0de96",
+  "optimizer_steps": 10080,
+  "positive_example_count": 3258,
+  "private_data": false,
+  "production_approval": false,
+  "real_dev_reads": 0,
+  "real_sealed_reads": 0,
+  "release_eligible": false,
+  "revision": "marker-center-mask-preserving-v24",
+  "schema": "graphreader.marker-center-mask-preserving-v24-candidate.v1",
+  "sealed_runs": 0,
+  "selected": {
+    "duplicate_count": 0,
+    "f1": 0.962962962962963,
+    "false_negatives": 15,
+    "false_positives": 138,
+    "precision": 0.9351198871650211,
+    "prohibited_structure_hits": 0,
+    "proposal_recall": 1.0,
+    "proposal_true_positives": 2004,
+    "recall": 0.9925149700598802,
+    "scene_count": 167,
+    "threshold": 0.25,
+    "true_positives": 1989
+  },
+  "status": "failed_dev",
+  "synthetic_only": true,
+  "task": "marker-center",
+  "training_example_count": 35838,
+  "v21_checkpoint_sha256": "ba9722ebd3091c91749c175607a480500d3b651e6719d19b69c7e48cee4ef6c9",
+  "v21_onnx_sha256": "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38"
+}

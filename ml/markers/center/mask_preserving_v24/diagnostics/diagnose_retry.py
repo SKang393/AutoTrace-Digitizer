@@ -14,6 +14,7 @@ import torch
 
 from ml.markers.center.real_range_generator_v1.generator import build_split
 from ml.markers.center.real_range_generator_v1.negative_sampler import _features
+from ml.markers.center.real_range_generator_v1.negative_sampler import TOPOLOGY_KINDS, TOPOLOGY_RADIUS_PX, _topology_indices
 from ..mask_preserving import extract_proposals, postprocess, prohibited_hits
 
 ROOT = Path(__file__).resolve().parents[5]
@@ -25,6 +26,9 @@ RETRY2_ONNX_SHA256 = "98c605eea8a579d28ad0e5d3b355458ab1e1883c3947c4a3a442557d63
 RETRY3_ONNX_SHA256 = "0d80d1994d7b33241c795c9e6f92c802750555a62c3cd3335777eb969fb5083a"
 RETRY3_GENERATOR_AUDIT_SHA256 = "3568fff359e3541be14bf1f02774887c8110ded9f02fd95a8f4ff680e8639d69"
 RETRY3_DEV_SPLIT_SHA256 = "050df194849c9e787d786624b26fd268e7f7a1832c271868521d89bf6588e960"
+RETRY4_ONNX_SHA256 = "697fbcfb961e4c2af36a1a3d68cf5be874412b2939b03c42b59aaa82c4b0de96"
+RETRY4_GENERATOR_AUDIT_SHA256 = "9562044526bce45b48254472346ccc1640c6e254915b9e744525154144121748"
+RETRY4_DEV_SPLIT_SHA256 = "f453e50e228f54e15bafba83b1a5dda422c435a555e9083dfea18457ed38204d"
 
 
 def _sha(path: Path) -> str:
@@ -96,17 +100,25 @@ def _matched_truths(predictions, centers):
     return used_p, used_t
 
 
-def summarize(model_path: Path) -> dict:
+def summarize(model_path: Path, *, retry4: bool = False) -> dict:
     started = time.perf_counter()
     if not model_path.is_file():
         raise FileNotFoundError(model_path)
     model_hash = _sha(model_path)
-    expected_model = "aee3b4ba47197d84eeecacc631730e67fd99c261b913643f95c25a8ea2436c11"
+    expected_model = RETRY4_ONNX_SHA256 if retry4 else "aee3b4ba47197d84eeecacc631730e67fd99c261b913643f95c25a8ea2436c11"
     if model_hash != expected_model:
-        raise ValueError(f"retry ONNX hash mismatch: {model_hash}")
+        mode = "retry4" if retry4 else "retry1"
+        raise ValueError(f"{mode} ONNX hash mismatch: expected {expected_model}, got {model_hash}")
     sampler_path = ROOT / "ml/markers/center/real_range_generator_v1/negative_sampler.py"
     audit_path = ROOT / "ml/markers/center/real_range_generator_v1/AUDIT.json"
     config_path = ROOT / "ml/markers/center/mask_preserving_v24/training/p1.json"
+    audit_hash = _sha(audit_path)
+    audit_record = json.loads(audit_path.read_text(encoding="utf-8"))
+    actual_dev_split_sha256 = audit_record["splits"]["dev"]["aggregate_sha256"]
+    if retry4 and audit_hash != RETRY4_GENERATOR_AUDIT_SHA256:
+        raise ValueError(f"retry4 generator audit hash mismatch: expected {RETRY4_GENERATOR_AUDIT_SHA256}, got {audit_hash}")
+    if retry4 and actual_dev_split_sha256 != RETRY4_DEV_SPLIT_SHA256:
+        raise ValueError(f"retry4 dev split hash mismatch: expected {RETRY4_DEV_SPLIT_SHA256}, got {actual_dev_split_sha256}")
     session = ort.InferenceSession(str(model_path), providers=["CPUExecutionProvider"])
     if session.get_providers()[0] != "CPUExecutionProvider":
         raise RuntimeError("CPUExecutionProvider was not selected")
@@ -117,12 +129,20 @@ def summarize(model_path: Path) -> dict:
     positives: list[float] = []
     scenario = {name: {"truth": 0, "tp": 0, "fn": 0} for name in ("unmasked", "ocr_mask", "artifact_mask", "both_masks")}
     accepted_fp = defaultdict(int); totals = defaultdict(int)
+    topology_capacity = {kind: 0 for kind in TOPOLOGY_KINDS}
+    topology_above = {kind: 0 for kind in TOPOLOGY_KINDS}
     for scene in scenes:
         proposals = extract_proposals(scene.tensor)
         labels, hard = _labels(scene, proposals.coordinates)
         names = _strata(proposals.patches, hard, labels)
+        topology = _topology_indices(scene, proposals.coordinates, labels) if retry4 else {kind: set() for kind in TOPOLOGY_KINDS}
+        topology_by_index = {index: kind for kind in TOPOLOGY_KINDS for index in topology[kind]}
         output = session.run([output_name], {input_name: proposals.patches.numpy().astype(np.float32, copy=False)})[0]
         probabilities = output[:, 0].astype(np.float64)
+        if retry4:
+            for kind in TOPOLOGY_KINDS:
+                topology_capacity[kind] += len(topology[kind])
+                topology_above[kind] += sum(int(probabilities[index] >= THRESHOLD) for index in topology[kind])
         for i, name in enumerate(names):
             if name is None:
                 positives.append(float(probabilities[i]))
@@ -142,7 +162,7 @@ def summarize(model_path: Path) -> dict:
                 continue
             if decoded:
                 _, _, source = min(decoded, key=lambda item: math.hypot(prediction.x-item[0], prediction.y-item[1]))
-                name = names[source]
+                name = topology_by_index.get(source, names[source]) if retry4 else names[source]
                 accepted_fp[name or "unattributed"] += 1
             else:
                 accepted_fp["unattributed"] += 1
@@ -156,15 +176,15 @@ def summarize(model_path: Path) -> dict:
         value["recall"] = value["tp"] / max(1, value["truth"])
     total_accepted = totals["tp"] + totals["fp"]
     report = {
-        "schema": "graphreader.marker-center-mask-preserving-v24-retry-diagnosis.v1",
+        "schema": "graphreader.marker-center-mask-preserving-v24-retry4-diagnosis.v1" if retry4 else "graphreader.marker-center-mask-preserving-v24-retry-diagnosis.v1",
         "revision": "marker-center-mask-preserving-v24",
         "scope": {"synthetic_only": True, "split": "real-range-generator-v1-dev", "scene_count": len(scenes),
                   "truth_count": totals["truth"], "label_positive_distance_px": 3.0, "threshold": THRESHOLD,
                   "private_data": False, "real_dev_reads": 0, "real_sealed_reads": 0, "optimizer_steps": 0,
-                  "case_ids_or_pixels_emitted": False},
+                  "case_ids_or_pixels_emitted": False, "retry_mode": "retry4" if retry4 else "retry1"},
         "binding": {"model_path": model_path.name, "model_sha256": model_hash, "provider": session.get_providers()[0],
                     "input_shape": ["candidate_count", 3, 33, 33], "output_shape": ["candidate_count", 4],
-                    "generator_audit_sha256": _sha(audit_path), "generator_dev_split_sha256": json.loads(config_path.read_text())["dev_split_sha256"],
+                    "generator_audit_sha256": audit_hash, "generator_dev_split_sha256": actual_dev_split_sha256 if retry4 else json.loads(config_path.read_text())["dev_split_sha256"],
                     "negative_sampler_sha256": _sha(sampler_path), "negative_sampler_seed": 20260904,
                     "negative_sampler_priority": list(STRATA)},
         "proposals": {"positive_raw_probability": _quantiles(positives),
@@ -180,6 +200,8 @@ def summarize(model_path: Path) -> dict:
         "diagnostic_conclusion": "fixed-threshold failure concentration is reported by per-stratum above-threshold rates; no threshold change is proposed",
         "elapsed_ms": round((time.perf_counter() - started) * 1000, 3),
     }
+    if retry4:
+        report["topology"] = {"radius_px": TOPOLOGY_RADIUS_PX, "capacity": topology_capacity, "above_threshold": topology_above, "accepted_false_positive_attribution": {kind: int(accepted_fp.get(kind, 0)) for kind in TOPOLOGY_KINDS}}
     return report
 
 
@@ -221,11 +243,15 @@ def summarize_morphology(model_path: Path, *, retry3: bool = False) -> dict:
     return {"schema":f"graphreader.marker-center-mask-preserving-v24-{mode}-morphology-diagnosis.v1","revision":"marker-center-mask-preserving-v24","scope":{"synthetic_only":True,"split":"real-range-generator-v1-dev","scene_count":len(scenes),"threshold":THRESHOLD,"private_data":False,"real_dev_reads":0,"real_sealed_reads":0,"optimizer_steps":0,"case_ids_or_pixels_emitted":False,"retry_mode":mode},"binding":{"model_sha256":model_hash,"provider":session.get_providers()[0],"input_shape":["candidate_count",3,33,33],"output_shape":["candidate_count",4],"generator_audit_sha256":audit_hash,"generator_dev_split_sha256":actual_dev_split_sha256 if retry3 else json.loads(config_path.read_text())["dev_split_sha256"],"negative_sampler_sha256":_sha(sampler_path),"negative_sampler_priority":list(STRATA)},"negative_strata_counts":{name:{"capacity":capacities[name],"above_threshold":above[name],"above_threshold_rate":above[name]/max(1,capacities[name])} for name in STRATA},"morphology_quantiles":{bucket:{key:_quantiles(values) for key,values in values_by_key.items()} for bucket,values_by_key in buckets.items()},"accepted_generic_false_positive_count":len(buckets["accepted_generic_false_positives"][MORPHOLOGY_KEYS[0]]),"elapsed_ms":round((time.perf_counter()-started)*1000,3),"threshold_change_proposed":False}
 
 def main() -> int:
-    parser = argparse.ArgumentParser(); parser.add_argument("--model", type=Path, required=True); parser.add_argument("--output", type=Path, required=True); parser.add_argument("--morphology", action="store_true"); parser.add_argument("--retry3", action="store_true")
+    parser = argparse.ArgumentParser(); parser.add_argument("--model", type=Path, required=True); parser.add_argument("--output", type=Path, required=True); parser.add_argument("--morphology", action="store_true"); parser.add_argument("--retry3", action="store_true"); parser.add_argument("--retry4", action="store_true")
     args = parser.parse_args()
+    if args.retry3 and args.retry4:
+        parser.error("--retry3 and --retry4 are mutually exclusive")
     if args.retry3 and not args.morphology:
         parser.error("--retry3 requires --morphology")
-    report = summarize_morphology(args.model.resolve(), retry3=args.retry3) if args.morphology else summarize(args.model.resolve()); args.output.parent.mkdir(parents=True, exist_ok=True); args.output.write_bytes((json.dumps(report, indent=2, sort_keys=True) + "\n").encode("utf-8")); print(json.dumps(report, indent=2, sort_keys=True)); return 0
+    if args.retry4 and args.morphology:
+        parser.error("--retry4 is a standard diagnosis mode")
+    report = summarize_morphology(args.model.resolve(), retry3=args.retry3) if args.morphology else summarize(args.model.resolve(), retry4=args.retry4); args.output.parent.mkdir(parents=True, exist_ok=True); args.output.write_bytes((json.dumps(report, indent=2, sort_keys=True) + "\n").encode("utf-8")); print(json.dumps(report, indent=2, sort_keys=True)); return 0
 
 
 if __name__ == "__main__":
