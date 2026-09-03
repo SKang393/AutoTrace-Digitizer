@@ -4,7 +4,7 @@ import pytest
 import torch
 
 from ml.markers.center.real_range_generator_v1.negative_sampler import (
-    LOW_FAINT, P05_FAINT, OCR_P95, ARTIFACT_P95, CONNECTOR_ANCHOR_MAX_DISTANCE_PX, _features, _stable_key,
+    LOW_FAINT, P05_FAINT, OCR_P95, ARTIFACT_P95, CONNECTOR_ANCHOR_MAX_DISTANCE_PX, CONNECTOR_ENDPOINT_OFFSET_PX, TOPOLOGY_SAMPLER_RADIUS_PX, _features, _stable_key,
     sample_negatives,
 )
 
@@ -59,13 +59,16 @@ def test_full_train_sampler_matches_preregistered_contract():
         "artifact": 1629,
         "generic": 21681,
     }
-    assert sampled.selected_index_sha256 == "a81fb8127cda6819f1d0da318dc34ea2891dec5e3c6c767eb756af68bd2f869f"
-    assert sampled.topology_capacity == {"topology_junction": 8331, "topology_fragment": 8049}
+    assert sampled.selected_index_sha256 == "d2e1c5f22ba8657b04031242c1528a165730f56b50ccc56fdd89eb2e0c01bf1c"
+    assert sampled.topology_capacity == {"topology_junction": 4505, "topology_fragment": 4574}
     assert sampled.topology_selected == sampled.topology_capacity
-    assert sampled.topology_selected_index_sha256 == "df24e495a76d485adcef07defd96ee723da3e029ededd5009e9c34e7ac58325d"
+    assert sampled.topology_selected_index_sha256 == "92d8075523ac528eebf8777b9fbe77d7eb254aebbc4521e0b45967f6e3b78ea8"
+    assert sampled.topology_sampler_radius_px == TOPOLOGY_SAMPLER_RADIUS_PX == 12.0
     assert sampled.connector_anchor_target_count == 3674
-    assert sampled.connector_anchor_capacity == 3661
-    assert sampled.connector_anchor_selected == 3661
+    assert sampled.connector_anchor_capacity == 3671
+    assert sampled.connector_anchor_selected == 3671
+    assert sampled.connector_endpoint_offset_px == CONNECTOR_ENDPOINT_OFFSET_PX == 8.0
     assert sampled.connector_anchor_max_distance_px == CONNECTOR_ANCHOR_MAX_DISTANCE_PX == 4.0
-    assert sampled.connector_anchor_selected_index_sha256 == "40a14e3becc3f793a590cc2b37fdd92107a97f71f59c6fc1cf9d22d4d124116d"
+    assert sampled.connector_anchor_selected_index_sha256 == "2d9b5b6ffa7e70c390a7aa38ffe851871e8a5cebac3831aac616f60a0e141c84"
+    assert sampled.generic_remainder_selected == 9409
     assert patches.shape == (35838, 3, 33, 33)

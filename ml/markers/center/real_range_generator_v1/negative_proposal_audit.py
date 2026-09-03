@@ -16,7 +16,7 @@ import torch
 from ml.markers.center.mask_preserving_v24.mask_preserving import extract_proposals
 
 from .generator import PATCH, TOPOLOGY_TARGETS, _quantiles, build_split
-from .negative_sampler import CONNECTOR_ANCHOR_FRACTIONS, CONNECTOR_ANCHOR_MAX_DISTANCE_PX, sample_negatives
+from .negative_sampler import CONNECTOR_ANCHOR_MAX_DISTANCE_PX, CONNECTOR_ENDPOINT_OFFSET_PX, TOPOLOGY_SAMPLER_RADIUS_PX, sample_negatives
 
 REAL_NEGATIVE_GATES = {
     "ink_max_minimum": 0.11372548341751099,
@@ -271,18 +271,20 @@ def audit() -> dict[str, object]:
             "seed": 20260904,
             "negative_total": sampled.total,
             "topology_radius_px": 16.0,
+            "topology_sampler_radius_px": sampled.topology_sampler_radius_px,
             "topology_capacity": sampled.topology_capacity,
             "topology_selected": sampled.topology_selected,
             "topology_all_eligible_retained": sampled.topology_capacity == sampled.topology_selected,
             "selected_index_sha256": sampled.selected_index_sha256,
             "topology_selected_index_sha256": sampled.topology_selected_index_sha256,
-            "connector_anchor_fractions": list(CONNECTOR_ANCHOR_FRACTIONS),
+            "connector_endpoint_offset_px": CONNECTOR_ENDPOINT_OFFSET_PX,
             "connector_anchor_max_distance_px": CONNECTOR_ANCHOR_MAX_DISTANCE_PX,
             "connector_anchor_target_count": sampled.connector_anchor_target_count,
             "connector_anchor_capacity": sampled.connector_anchor_capacity,
             "connector_anchor_selected": sampled.connector_anchor_selected,
             "connector_anchor_all_eligible_retained": sampled.connector_anchor_capacity == sampled.connector_anchor_selected,
             "connector_anchor_selected_index_sha256": sampled.connector_anchor_selected_index_sha256,
+            "generic_remainder_selected": sampled.generic_remainder_selected,
         },
         "coordinate_streams_identical": (
             train["proposal_coordinates_aggregate_sha256"]

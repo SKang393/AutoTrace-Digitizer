@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import hashlib
+import math
 from dataclasses import dataclass
 from typing import Any, Iterable
 
@@ -16,9 +17,13 @@ OCR_P95 = 0.7272727272727273
 ARTIFACT_P95 = 0.12121212121212122
 SAMPLER_SEED = 20260904
 TOPOLOGY_RADIUS_PX = 16.0
+TOPOLOGY_SAMPLER_RADIUS_PX = 12.0
 TOPOLOGY_KINDS = ("topology_junction", "topology_fragment")
-CONNECTOR_ANCHOR_FRACTIONS = (1.0 / 3.0, 2.0 / 3.0)
+CONNECTOR_ENDPOINT_OFFSET_PX = 8.0
 CONNECTOR_ANCHOR_MAX_DISTANCE_PX = 4.0
+# Compatibility export for the deferred V24 trainer; endpoint selection no
+# longer consumes these legacy fractional anchors.
+CONNECTOR_ANCHOR_FRACTIONS = (1.0 / 3.0, 2.0 / 3.0)
 QUOTAS = {
     "hard_existing": 6012,
     "faint_low": 326,
@@ -43,6 +48,9 @@ class SampledNegatives:
     connector_anchor_selected: int = 0
     connector_anchor_selected_index_sha256: str = ""
     connector_anchor_max_distance_px: float = CONNECTOR_ANCHOR_MAX_DISTANCE_PX
+    topology_sampler_radius_px: float = TOPOLOGY_SAMPLER_RADIUS_PX
+    connector_endpoint_offset_px: float = CONNECTOR_ENDPOINT_OFFSET_PX
+    generic_remainder_selected: int = 0
 
     @property
     def total(self) -> int:
@@ -77,7 +85,7 @@ def _hard_indices(scene: Any, coordinates: torch.Tensor, labels: torch.Tensor) -
     return torch.nonzero(hard & (labels <= 0.5)).flatten()
 
 
-def _topology_indices(scene: Any, coordinates: torch.Tensor, labels: torch.Tensor) -> dict[str, set[int]]:
+def _topology_indices(scene: Any, coordinates: torch.Tensor, labels: torch.Tensor, *, radius_px: float = TOPOLOGY_RADIUS_PX) -> dict[str, set[int]]:
     result = {kind: set() for kind in TOPOLOGY_KINDS}
     for kind, x, y in scene.hard_negatives:
         if kind not in result:
@@ -85,7 +93,7 @@ def _topology_indices(scene: Any, coordinates: torch.Tensor, labels: torch.Tenso
         distance = torch.linalg.vector_norm(
             coordinates - torch.tensor((x, y), dtype=coordinates.dtype), dim=1
         )
-        result[kind].update(torch.nonzero((distance <= TOPOLOGY_RADIUS_PX) & (labels <= 0.5)).flatten().tolist())
+        result[kind].update(torch.nonzero((distance <= radius_px) & (labels <= 0.5)).flatten().tolist())
     return result
 
 
@@ -95,12 +103,16 @@ def _connector_anchor_indices(scene: Any, coordinates: torch.Tensor, labels: tor
     eligible = labels <= 0.5
     selected: set[int] = set()
     for first, second in zip(centers, centers[1:]):
-        for fraction in CONNECTOR_ANCHOR_FRACTIONS:
-            anchor = torch.tensor(
-                ((1.0 - fraction) * first[0] + fraction * second[0],
-                 (1.0 - fraction) * first[1] + fraction * second[1]),
-                dtype=coordinates.dtype,
-            )
+        dx, dy = second[0] - first[0], second[1] - first[1]
+        length = math.hypot(dx, dy)
+        if length == 0.0:
+            raise ValueError("connector segment has zero length")
+        unit_x, unit_y = dx / length, dy / length
+        for anchor_x, anchor_y in (
+            (first[0] + CONNECTOR_ENDPOINT_OFFSET_PX * unit_x, first[1] + CONNECTOR_ENDPOINT_OFFSET_PX * unit_y),
+            (second[0] - CONNECTOR_ENDPOINT_OFFSET_PX * unit_x, second[1] - CONNECTOR_ENDPOINT_OFFSET_PX * unit_y),
+        ):
+            anchor = torch.tensor((anchor_x, anchor_y), dtype=coordinates.dtype)
             distances = torch.linalg.vector_norm(coordinates - anchor, dim=1)
             distances = torch.where(eligible, distances, torch.full_like(distances, float("inf")))
             index = int(torch.argmin(distances).item())
@@ -132,6 +144,7 @@ def sample_negatives(
     topology_pools: dict[str, set[tuple[str, int, int]]] = {kind: set() for kind in TOPOLOGY_KINDS}
     connector_pools: set[tuple[str, int, int]] = set()
     connector_anchor_target_count = 0
+    generic_remainder_selected = 0
     selections: list[list[int]] = []
     capacities = {name: 0 for name in target}
     for scene_number, (scene, proposals, labels, hard) in enumerate(records):
@@ -140,9 +153,9 @@ def sample_negatives(
         features = _features(proposals.patches)
         positive = labels > 0.5
         hard_mask = hard & ~positive
-        topology = _topology_indices(scene, proposals.coordinates, labels)
+        topology = _topology_indices(scene, proposals.coordinates, labels, radius_px=TOPOLOGY_SAMPLER_RADIUS_PX)
         connector_indices = _connector_anchor_indices(scene, proposals.coordinates, labels)
-        connector_anchor_target_count += max(0, (len(scene.centers) - 1) * len(CONNECTOR_ANCHOR_FRACTIONS))
+        connector_anchor_target_count += max(0, (len(scene.centers) - 1) * 2)
         topology_by_index = {index: kind for kind in TOPOLOGY_KINDS for index in topology[kind]}
         for index in torch.nonzero(~positive, as_tuple=False).flatten().tolist():
             if bool(hard_mask[index]):
@@ -186,7 +199,9 @@ def sample_negatives(
             ranked_topology = sorted(topology_entries)
             ranked_connectors = sorted(connector_entries - topology_entries)
             generic_remaining = [item for item in sorted(pools[name]) if item not in retained_generic_entries]
-            ranked = ranked_topology + ranked_connectors + generic_remaining[: quota - len(ranked_topology) - len(ranked_connectors)]
+            generic_remainder = generic_remaining[: quota - len(ranked_topology) - len(ranked_connectors)]
+            generic_remainder_selected = len(generic_remainder)
+            ranked = ranked_topology + ranked_connectors + generic_remainder
         else:
             ranked = sorted(pools[name])[:quota]
         for _, scene_number, index in ranked:
@@ -230,4 +245,7 @@ def sample_negatives(
         connector_selected,
         connector_digest.hexdigest(),
         CONNECTOR_ANCHOR_MAX_DISTANCE_PX,
+        TOPOLOGY_SAMPLER_RADIUS_PX,
+        CONNECTOR_ENDPOINT_OFFSET_PX,
+        generic_remainder_selected,
     )
