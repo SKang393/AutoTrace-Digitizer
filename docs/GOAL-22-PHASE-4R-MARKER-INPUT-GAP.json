@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "generator_repaired_pending_mask_preserving_feasibility",
+  "status": "mask_preserving_feasibility_failed_training_candidate_startable",
   "report_scope": "aggregate_only",
   "runtime_contract": {
     "marker_frame_coordinate_space": "original_source_pixels",
@@ -122,6 +122,32 @@
     "training_performed": false,
     "private_data_used": false
   },
+  "mask_preserving_v24_feasibility": {
+    "status": "failed_frozen_model_training_candidate_startable",
+    "scene_count": 167,
+    "truth_count": 2004,
+    "proposal_count": 179445,
+    "proposal_truth_coverage": 2004,
+    "proposal_recall": 1.0,
+    "true_positives": 1001,
+    "false_positives": 442,
+    "false_negatives": 1003,
+    "precision": 0.6936936936936937,
+    "recall": 0.499500998003992,
+    "f1": 0.5807948941108211,
+    "duplicates": 0,
+    "prohibited_structure_hits": 167,
+    "unmasked_recall": 0.5914179104477612,
+    "ocr_only_mask_recall": 0.359375,
+    "artifact_only_mask_recall": 0.08411214953271028,
+    "both_masks_recall": 0.0,
+    "provider": "CPUExecutionProvider",
+    "elapsed_ms": 11391.798,
+    "candidate_consumed": false,
+    "optimizer_steps": 0,
+    "private_data_used": false,
+    "real_sealed_reads": 0
+  },
   "finding": {
     "central_scale_coverage": "the current train distribution covers the real-dev p05 diameter of 6 px through the p90 diameter of 24 px",
     "remaining_scale_gap": "the current train distribution omits the real-dev 24 to 27 px p90-to-p95 tail and the 1 to 48 px full measured envelope",
@@ -131,7 +157,8 @@
     "corrected_scope_result": "full-image grid and ink-supported recall are 1.0, but hard masks reduce recall to 0.8842315369261478 and the fixed classifier reduces it to 0.4555888223552894 while retaining 7653 false candidates",
     "patch_distribution_gap": "synthetic train contains no OCR-center hard-mask positives and only 1.19 percent artifact-center hard-mask positives, versus 3.74 percent and 16.57 percent on real-dev; its ink center lower tail is also much lighter",
     "generator_repair": "the corrected synthetic generator now spans the measured diameter, rendered footprint, ink, OCR-center mask, artifact axis-crossing mask, and prohibited-structure ranges with disjoint train and dev seeds",
-    "required_next_diagnosis": "run a zero-optimizer mask-preserving V24 feasibility evaluation with the frozen V21 model before authorizing any training candidate"
+    "feasibility_result": "mask-preserving proposal coverage is complete, but the frozen V21 classifier fails the corrected synthetic dev gate and hits one prohibited structure per scene",
+    "required_next_diagnosis": "preregister and execute exactly one V24 P1 training candidate on the corrected synthetic train split, then evaluate once on corrected synthetic dev"
   },
   "implementation": {
     "real_probe_path": "tools/private_acceptance/real_dev_distribution.py",
@@ -150,7 +177,11 @@
     "corrected_generator_audit_sha256": "5dc7589487ea7eb300b49db91ce950862d2ad6c3855a678439edcb2ce75aaf70",
     "corrected_generator_test_path": "ml/markers/center/real_range_generator_v1/tests/test_generator.py",
     "corrected_generator_test_sha256": "71fe6e9b96988d3fc3c060495198646c0463d10cfda2183f60dc046d9f6be042",
-    "focused_tests": "4 corrected-generator passed; 3 prior synthetic audit passed; Release real harness build and no-corpus self-test passed"
+    "v24_feasibility_path": "ml/markers/center/mask_preserving_v24/FEASIBILITY.json",
+    "v24_feasibility_sha256": "ad0f0c170474b75e7b7175951f5d214fd16bc716af8b5ad798b3fef7281903cd",
+    "v24_feasibility_source_sha256": "252896f950e58f8e276b79f770bdf3ada1202afeb3bbb7cfb305b3ea9c6fd263",
+    "v24_mask_preserving_source_sha256": "171ddcc2efbd2742f5699dad8d16ecec217ca983ee06cec4bc63e1f17e3120e2",
+    "focused_tests": "3 V24 feasibility passed; 4 corrected-generator passed; 3 prior synthetic audit passed; Release real harness build and no-corpus self-test passed"
   },
   "privacy": {
     "case_level_output": false,

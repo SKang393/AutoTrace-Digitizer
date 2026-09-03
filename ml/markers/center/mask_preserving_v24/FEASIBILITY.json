@@ -1,0 +1,115 @@
+{
+  "acceptance_bar": {
+    "duplicates_maximum": 0,
+    "precision_minimum": 0.95,
+    "prohibited_hits_maximum": 0,
+    "proposal_recall_minimum": 0.95,
+    "recall_minimum": 0.95
+  },
+  "binding": {
+    "acceptance_bars_sha256": "aab9f2ab60cf166828f0928b8496f537341870fd457d0408952e22549fc53a56",
+    "evidence_policy_sha256": "4dc18136c284b0b1805d3a3b22a9197ad06e6a41f4e43b4e1d4d9245b97e0aed",
+    "generator_audit_path": "ml/markers/center/real_range_generator_v1/AUDIT.json",
+    "generator_audit_sha256": "5dc7589487ea7eb300b49db91ce950862d2ad6c3855a678439edcb2ce75aaf70",
+    "generator_split_sha256": "e35907f44226e26cdb718d17705986bc7c84da53ea81a29971694d6c659e59bd",
+    "proposal_source": "real_range_generator_v1 ink-supported full-grid; masks retained as channels",
+    "v21_onnx_path": "artifacts/goal22-worktrees/marker-v21/ml/markers/center/focal_confidence_v21/artifacts/P1-run/marker-center-focal-confidence-v21-p1.onnx",
+    "v21_onnx_sha256": "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38"
+  },
+  "mask_scenarios": {
+    "artifact_mask": {
+      "fn": 294,
+      "recall": 0.08411214953271028,
+      "tp": 27,
+      "truth": 321
+    },
+    "both_masks": {
+      "fn": 11,
+      "recall": 0.0,
+      "tp": 0,
+      "truth": 11
+    },
+    "ocr_mask": {
+      "fn": 41,
+      "recall": 0.359375,
+      "tp": 23,
+      "truth": 64
+    },
+    "unmasked": {
+      "fn": 657,
+      "recall": 0.5914179104477612,
+      "tp": 951,
+      "truth": 1608
+    }
+  },
+  "metrics": {
+    "accepted": 1443,
+    "duplicates": 0,
+    "f1": 0.5807948941108211,
+    "false_negatives": 1003,
+    "false_positives": 442,
+    "precision": 0.6936936936936937,
+    "prohibited_structure_hits": 167,
+    "recall": 0.499500998003992,
+    "true_positives": 1001
+  },
+  "production_approval": false,
+  "proposal_coverage": {
+    "false_negatives": 0,
+    "ink_supported_emitted": 179445,
+    "mask_channels_retained": true,
+    "pre_inference_geometry_filter": false,
+    "recall": 1.0,
+    "truths_covered": 2004
+  },
+  "release_eligible": false,
+  "revision": "marker-center-mask-preserving-v24-feasibility",
+  "runtime": {
+    "confidence_threshold": 0.25,
+    "elapsed_ms": 11391.798,
+    "input_shape": [
+      "candidate_count",
+      3,
+      33,
+      33
+    ],
+    "nms": "V21 unchanged radius-aware NMS",
+    "offset_scale": 4.0,
+    "output_shape": [
+      "candidate_count",
+      4
+    ],
+    "prohibited_structure_checks": "retained",
+    "provider": "CPUExecutionProvider",
+    "radius_clip_px": [
+      2.5,
+      8.0
+    ],
+    "ring_radii_px": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ]
+  },
+  "schema": "graphreader.marker-center-mask-preserving-v24-feasibility.v1",
+  "scope": {
+    "candidate_consumed": false,
+    "case_ids_or_pixels_emitted": false,
+    "fixed_dev_split": "real-range-generator-v1-dev",
+    "optimizer_steps": 0,
+    "private_or_article_images": false,
+    "real_sealed_reads": 0,
+    "scene_count": 167,
+    "synthetic_only": true,
+    "training_performed": false,
+    "truth_count": 2004
+  },
+  "status": "failed_frozen_model_training_candidate_startable"
+}

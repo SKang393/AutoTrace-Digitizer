@@ -1,0 +1,22 @@
+{
+  "schema": "graphreader.marker-center-mask-preserving-v24-feasibility-config.v1",
+  "task": "marker-center",
+  "revision": "marker-center-mask-preserving-v24-feasibility",
+  "candidate_consumed": false,
+  "optimizer_steps": 0,
+  "training_performed": false,
+  "split": "real-range-generator-v1-dev",
+  "generator_audit_path": "ml/markers/center/real_range_generator_v1/AUDIT.json",
+  "generator_audit_sha256": "5dc7589487ea7eb300b49db91ce950862d2ad6c3855a678439edcb2ce75aaf70",
+  "generator_dev_split_sha256": "e35907f44226e26cdb718d17705986bc7c84da53ea81a29971694d6c659e59bd",
+  "evidence_policy_path": "ml/policy/evidence-policy.json",
+  "evidence_policy_sha256": "4dc18136c284b0b1805d3a3b22a9197ad06e6a41f4e43b4e1d4d9245b97e0aed",
+  "acceptance_bars_path": "ml/policy/acceptance-bars.json",
+  "acceptance_bars_sha256": "aab9f2ab60cf166828f0928b8496f537341870fd457d0408952e22549fc53a56",
+  "confidence_threshold": 0.25,
+  "provider": "CPUExecutionProvider",
+  "input_shape": ["candidate_count", 3, 33, 33],
+  "output_shape": ["candidate_count", 4],
+  "acceptance_bar": {"proposal_recall_minimum": 0.95, "precision_minimum": 0.95, "recall_minimum": 0.95, "duplicates_maximum": 0, "prohibited_hits_maximum": 0},
+  "model_sha256": "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38"
+}
