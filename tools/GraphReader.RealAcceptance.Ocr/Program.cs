@@ -294,6 +294,7 @@ internal static class Program
             : "real_dev_marker_aggregate_only";
         string stageId = multiradiusGeometry ? "real-dev-marker-v23-aggregate" : "real-dev-marker-aggregate";
         int succeeded = 0, failed = 0, truePositives = 0, falsePositives = 0, falseNegatives = 0;
+        int preNmsTruePositives = 0, preNmsFalsePositives = 0, preNmsFalseNegatives = 0;
         var failureKinds = new Dictionary<string, int>(StringComparer.Ordinal);
         var timings = new List<double>();
         var stageCounters = new MarkerStageCounterTotals();
@@ -328,6 +329,13 @@ internal static class Program
                 timings.Add(started.Elapsed.TotalMilliseconds);
                 (int tp, int fp, int fn) = MatchCenters(predictions, truth.Points, 5.0);
                 truePositives += tp; falsePositives += fp; falseNegatives += fn;
+                if (diagnostic is not null)
+                {
+                    (int preTp, int preFp, int preFn) = MatchCenters(diagnostic.PreNmsCandidates, truth.Points, 5.0);
+                    preNmsTruePositives += preTp;
+                    preNmsFalsePositives += preFp;
+                    preNmsFalseNegatives += preFn;
+                }
                 if (!before.AsSpan().SequenceEqual(SHA256.HashData(File.ReadAllBytes(path)))) throw new InvalidDataException("REAL_DEV_SOURCE_MUTATED");
                 succeeded++;
             }
@@ -339,6 +347,12 @@ internal static class Program
 
         double precision = truePositives / (double)Math.Max(1, truePositives + falsePositives);
         double recall = truePositives / (double)Math.Max(1, truePositives + falseNegatives);
+        double? preNmsPrecision = includeStageCounters
+            ? preNmsTruePositives / (double)Math.Max(1, preNmsTruePositives + preNmsFalsePositives)
+            : null;
+        double? preNmsRecall = includeStageCounters
+            ? preNmsTruePositives / (double)Math.Max(1, preNmsTruePositives + preNmsFalseNegatives)
+            : null;
         using JsonDocument policy = JsonDocument.Parse(File.ReadAllText(Path.GetFullPath("ml/policy/acceptance-bars.json")));
         JsonElement bars = policy.RootElement.GetProperty("tier1_reviewable_error");
         var gates = new Dictionary<string, bool>(StringComparer.Ordinal)
@@ -359,7 +373,12 @@ internal static class Program
             multiradiusGeometry ? runMode : null,
             multiradiusGeometry ? model.ModelId : null,
             multiradiusGeometry ? model.Version : null,
-            includeStageCounters ? stageCounters.ToRecord() : null);
+            includeStageCounters ? stageCounters.ToRecord() : null,
+            includeStageCounters ? preNmsTruePositives : null,
+            includeStageCounters ? preNmsFalsePositives : null,
+            includeStageCounters ? preNmsFalseNegatives : null,
+            preNmsPrecision,
+            preNmsRecall);
     }
 
     private static MarkerPolygon ToMarkerPolygon(OcrRectangle rectangle) => MarkerPolygon.FromRectangle(new(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height));
@@ -1194,7 +1213,7 @@ internal static class Program
             finalCandidates);
     }
 
-    private sealed record MarkerAggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall, double TolerancePx, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, string ModelSha256, IReadOnlyDictionary<string, string> UpstreamOcrPayloadSha256, string MaskingMode, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Mode, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateRevision, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateId, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProposalMarkerStageCounters? StageCounters);
+    private sealed record MarkerAggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall, double TolerancePx, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, string ModelSha256, IReadOnlyDictionary<string, string> UpstreamOcrPayloadSha256, string MaskingMode, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Mode, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateRevision, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateId, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProposalMarkerStageCounters? StageCounters, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? PreNmsTruePositives, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? PreNmsFalsePositives, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? PreNmsFalseNegatives, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] double? PreNmsPrecision, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] double? PreNmsRecall);
     private sealed record SyntheticDimensionReport(int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, double RecognitionExact, double CharacterErrorRate, double RoleAccuracy);
     private sealed record DetectorDimensionReport(int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall);
     private sealed record TiledProposalAggregateReport(int SchemaVersion, string ReportScope, int SceneCount, int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, int TileSize, int TileOverlap, IReadOnlyDictionary<string, DetectorDimensionReport> ByDimension, double MeanSceneInferenceMs, int SuppressedCrossTileDuplicates, string ModelSha256, string DatasetManifestSha256, string AcceptancePolicySha256, string EvidencePolicySha256, IReadOnlyDictionary<string, bool> Gates, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, int PublicGateEvaluations, int RealSealedReads, bool TrainingUse);

@@ -36,7 +36,8 @@ public sealed record ProposalMarkerStageCounters(
 
 public sealed record ProposalMarkerCandidateDiagnosticResult(
     IReadOnlyList<MarkerCenter> Candidates,
-    ProposalMarkerStageCounters StageCounters);
+    ProposalMarkerStageCounters StageCounters,
+    [property: JsonIgnore] IReadOnlyList<MarkerCenter> PreNmsCandidates);
 
 /// <summary>
 /// Candidate-only integration for the checksum-bound runtime-consistency-v2 P2
@@ -334,20 +335,35 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
         counters.CandidatesBeforeNms = predictions.Count;
         counters.NmsSuppressions = nmsSuppressions;
         counters.FinalCandidates = accepted.Count;
+        IReadOnlyList<MarkerCenter> preNmsCandidates = predictions
+            .Select((candidate, index) => ToMarkerCenter(frame, candidate, index, multiradiusGeometry, "pre-nms"))
+            .ToArray();
         IReadOnlyList<MarkerCenter> candidates = accepted
             .OrderBy(candidate => candidate.Center.Y)
             .ThenBy(candidate => candidate.Center.X)
             .ThenByDescending(candidate => candidate.Confidence)
-            .Select((candidate, index) => new MarkerCenter(
-                $"{(multiradiusGeometry ? "candidate-v23-p1" : "candidate-p2")}-{index.ToString(System.Globalization.CultureInfo.InvariantCulture)}",
-                frame.OriginalToFrame.MapToOriginal(candidate.Center),
-                frame.OriginalToFrame.MapFrameRadiusToOriginal(candidate.Radius),
-                0,
-                candidate.Confidence,
-                frame.SourceImage,
-                MarkerContract.CoordinateSpace))
+            .Select((candidate, index) => ToMarkerCenter(frame, candidate, index, multiradiusGeometry, suffix: null))
             .ToArray();
-        return new ProposalMarkerCandidateDiagnosticResult(candidates, counters.ToRecord());
+        return new ProposalMarkerCandidateDiagnosticResult(candidates, counters.ToRecord(), preNmsCandidates);
+    }
+
+    private static MarkerCenter ToMarkerCenter(
+        MarkerImageFrame frame,
+        ProposalMarkerPrediction candidate,
+        int index,
+        bool multiradiusGeometry,
+        string? suffix)
+    {
+        string prefix = multiradiusGeometry ? "candidate-v23-p1" : "candidate-p2";
+        string markerId = $"{prefix}{(suffix is null ? string.Empty : $"-{suffix}")}-{index.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+        return new MarkerCenter(
+            markerId,
+            frame.OriginalToFrame.MapToOriginal(candidate.Center),
+            frame.OriginalToFrame.MapFrameRadiusToOriginal(candidate.Radius),
+            0,
+            candidate.Confidence,
+            frame.SourceImage,
+            MarkerContract.CoordinateSpace);
     }
 
     private sealed record Proposal(int X, int Y, float[] Patch);
