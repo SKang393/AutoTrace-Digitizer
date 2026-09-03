@@ -1,0 +1,167 @@
+{
+  "binding": {
+    "proposal_revision": "marker-center-proposal-geometry-v13",
+    "v21_diagnostic_path": "ml/markers/center/focal_confidence_v21/diagnostics/V21_DIAGNOSTIC.json",
+    "v21_diagnostic_sha256": "41a7aea0432f11891c5d1c0c641ff637ccea93e073d007ea37044bf89c4b5785",
+    "v21_onnx_sha256": "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38",
+    "v21_result_path": "ml/markers/center/focal_confidence_v21/P1_RESULT.json",
+    "v21_result_sha256": "a78710ee13da02ec45c26a216524a90b261b0fbc17017491d525a59fe9ecdacb"
+  },
+  "candidate": null,
+  "feasibility": {
+    "reason": "no swept floor clears both 0.95 precision and recall bars with zero prohibited hits",
+    "startable": false
+  },
+  "inference": {
+    "elapsed_ms": 3471.039,
+    "geometry_filtered_proposal_count": 5822,
+    "nms": "V21 unchanged radius-aware NMS",
+    "offset_scale": 4.0,
+    "ordinary_vetoes": [
+      "artifact-mask",
+      "marker-geometry"
+    ],
+    "provider": "CPUExecutionProvider",
+    "radius_clip_px": [
+      2.5,
+      8.0
+    ],
+    "raw_proposal_count": 8314,
+    "retained_threshold": 0.25,
+    "scene_count": 12,
+    "truth_count": 96
+  },
+  "override_floors": {
+    "0.9": {
+      "acceptance_bars": {
+        "precision_minimum": 0.95,
+        "prohibited_hits_maximum": 0,
+        "recall_minimum": 0.95
+      },
+      "bypassed_candidates": 1,
+      "bypassed_candidates_after_nms": 1,
+      "center_threshold": 0.25,
+      "clears_both_bars": false,
+      "duplicate_count": 0,
+      "f1": 0.9621621621621621,
+      "false_negatives": 7,
+      "false_positives": 0,
+      "match_tolerance_px": 5.0,
+      "override_floor": 0.9,
+      "precision": 1.0,
+      "prohibited_hits_by_kind": {},
+      "prohibited_structure_hit_rate": 0.0,
+      "prohibited_structure_hits": 0,
+      "recall": 0.9270833333333334,
+      "true_positives": 89
+    },
+    "0.95": {
+      "acceptance_bars": {
+        "precision_minimum": 0.95,
+        "prohibited_hits_maximum": 0,
+        "recall_minimum": 0.95
+      },
+      "bypassed_candidates": 0,
+      "bypassed_candidates_after_nms": 0,
+      "center_threshold": 0.25,
+      "clears_both_bars": false,
+      "duplicate_count": 0,
+      "f1": 0.9565217391304348,
+      "false_negatives": 8,
+      "false_positives": 0,
+      "match_tolerance_px": 5.0,
+      "override_floor": 0.95,
+      "precision": 1.0,
+      "prohibited_hits_by_kind": {},
+      "prohibited_structure_hit_rate": 0.0,
+      "prohibited_structure_hits": 0,
+      "recall": 0.9166666666666666,
+      "true_positives": 88
+    },
+    "0.99": {
+      "acceptance_bars": {
+        "precision_minimum": 0.95,
+        "prohibited_hits_maximum": 0,
+        "recall_minimum": 0.95
+      },
+      "bypassed_candidates": 0,
+      "bypassed_candidates_after_nms": 0,
+      "center_threshold": 0.25,
+      "clears_both_bars": false,
+      "duplicate_count": 0,
+      "f1": 0.9565217391304348,
+      "false_negatives": 8,
+      "false_positives": 0,
+      "match_tolerance_px": 5.0,
+      "override_floor": 0.99,
+      "precision": 1.0,
+      "prohibited_hits_by_kind": {},
+      "prohibited_structure_hit_rate": 0.0,
+      "prohibited_structure_hits": 0,
+      "recall": 0.9166666666666666,
+      "true_positives": 88
+    },
+    "0.995": {
+      "acceptance_bars": {
+        "precision_minimum": 0.95,
+        "prohibited_hits_maximum": 0,
+        "recall_minimum": 0.95
+      },
+      "bypassed_candidates": 0,
+      "bypassed_candidates_after_nms": 0,
+      "center_threshold": 0.25,
+      "clears_both_bars": false,
+      "duplicate_count": 0,
+      "f1": 0.9565217391304348,
+      "false_negatives": 8,
+      "false_positives": 0,
+      "match_tolerance_px": 5.0,
+      "override_floor": 0.995,
+      "precision": 1.0,
+      "prohibited_hits_by_kind": {},
+      "prohibited_structure_hit_rate": 0.0,
+      "prohibited_structure_hits": 0,
+      "recall": 0.9166666666666666,
+      "true_positives": 88
+    },
+    "0.999": {
+      "acceptance_bars": {
+        "precision_minimum": 0.95,
+        "prohibited_hits_maximum": 0,
+        "recall_minimum": 0.95
+      },
+      "bypassed_candidates": 0,
+      "bypassed_candidates_after_nms": 0,
+      "center_threshold": 0.25,
+      "clears_both_bars": false,
+      "duplicate_count": 0,
+      "f1": 0.9565217391304348,
+      "false_negatives": 8,
+      "false_positives": 0,
+      "match_tolerance_px": 5.0,
+      "override_floor": 0.999,
+      "precision": 1.0,
+      "prohibited_hits_by_kind": {},
+      "prohibited_structure_hit_rate": 0.0,
+      "prohibited_structure_hits": 0,
+      "recall": 0.9166666666666666,
+      "true_positives": 88
+    }
+  },
+  "passing_floors": [],
+  "revision": "marker-center-veto-override-v22-feasibility",
+  "schema": "graphreader.marker-center-veto-override-v22-feasibility.v1",
+  "scope": {
+    "case_level_details_emitted": false,
+    "fixed_dev_manifest_sha256": "771141bd5d22d2ffdb56e63f193c16c0775a0f47c02313ef67b06bbce9603126",
+    "fixed_dev_split": "marker-center-proposal-geometry-v13-dev",
+    "optimizer_steps": 0,
+    "private_or_article_images": false,
+    "public_gate_archive_opened": false,
+    "scene_ids_emitted": false,
+    "sealed_runs": 0,
+    "synthetic_only": true,
+    "training_performed": false
+  },
+  "status": "failed_feasibility_no_candidate"
+}
