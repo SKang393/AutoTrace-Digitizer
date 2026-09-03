@@ -1,0 +1,96 @@
+{
+  "acceptance_bars": {
+    "precision_minimum": 0.95,
+    "prohibited_hits_maximum": 0,
+    "recall_minimum": 0.95
+  },
+  "binding": {
+    "proposal_revision": "marker-center-proposal-geometry-v13",
+    "v21_diagnostic_path": "ml/markers/center/focal_confidence_v21/diagnostics/V21_DIAGNOSTIC.json",
+    "v21_diagnostic_sha256": "41a7aea0432f11891c5d1c0c641ff637ccea93e073d007ea37044bf89c4b5785",
+    "v21_onnx_path": "artifacts/goal22-worktrees/marker-v21/ml/markers/center/focal_confidence_v21/artifacts/P1-run/marker-center-focal-confidence-v21-p1.onnx",
+    "v21_onnx_sha256": "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38",
+    "v21_result_path": "ml/markers/center/focal_confidence_v21/P1_RESULT.json",
+    "v21_result_sha256": "a78710ee13da02ec45c26a216524a90b261b0fbc17017491d525a59fe9ecdacb",
+    "v22_diagnostic_path": "ml/markers/center/veto_override_v22/V22_FEASIBILITY_DIAGNOSTIC.json",
+    "v22_diagnostic_sha256": "03e58dca4fcfdb18aeee369b908e33eebbc45d58844b14dfbd289c2ca69401d7"
+  },
+  "candidate": {
+    "optimizer_steps": 0,
+    "ring_radii_px": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ]
+  },
+  "feasibility": {
+    "reason": "multiradius geometry clears both 0.95 bars with zero prohibited hits",
+    "startable": true
+  },
+  "inference": {
+    "accepted_candidate_count": 93,
+    "artifact_mask_veto": "V21 unchanged",
+    "confidence_threshold": 0.25,
+    "elapsed_ms": 3519.04,
+    "geometry_filtered_proposal_count": 5822,
+    "geometry_rule": "any radius 3..12 has ring support>=3 or center density>=0.28",
+    "nms": "V21 unchanged radius-aware NMS",
+    "offset_scale": 4.0,
+    "provider": "CPUExecutionProvider",
+    "radius_clip_px": [
+      2.5,
+      8.0
+    ],
+    "raw_proposal_count": 8314,
+    "ring_radii_px": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "scene_count": 12,
+    "truth_count": 96
+  },
+  "metrics": {
+    "accepted_candidate_count": 93,
+    "duplicate_count": 0,
+    "f1": 0.9841269841269841,
+    "false_negatives": 3,
+    "false_positives": 0,
+    "miss_count": 3,
+    "precision": 1.0,
+    "prohibited_hits_by_kind": {},
+    "prohibited_structure_hit_rate": 0.0,
+    "prohibited_structure_hits": 0,
+    "recall": 0.96875,
+    "true_positives": 93
+  },
+  "revision": "marker-center-multiradius-geometry-v23-feasibility",
+  "schema": "graphreader.marker-center-multiradius-geometry-v23-feasibility.v1",
+  "scope": {
+    "case_level_details_emitted": false,
+    "fixed_dev_manifest_sha256": "771141bd5d22d2ffdb56e63f193c16c0775a0f47c02313ef67b06bbce9603126",
+    "fixed_dev_split": "marker-center-proposal-geometry-v13-dev",
+    "optimizer_steps": 0,
+    "private_or_article_images": false,
+    "public_gate_archive_opened": false,
+    "scene_ids_emitted": false,
+    "sealed_runs": 0,
+    "synthetic_only": true,
+    "training_performed": false
+  },
+  "status": "feasible_startable"
+}
