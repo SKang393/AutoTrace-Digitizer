@@ -59,7 +59,7 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["synthetic_negative_proposal_count"] == 237578
     assert entry["morphology_diagnosis_sha256"] == config["morphology_diagnosis_sha256"]
     assert entry["morphology_gap_sha256"] == config["morphology_gap_sha256"]
-    assert entry["status"] == "dev_passed_retry3_unconsumed"
+    assert entry["status"] == "dev_passed_retry3_unconsumed_real_dev_failed"
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["real_dev_authorized"] is False
@@ -95,8 +95,37 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["p1_opened_seal_sha256"] == "33773333d6f75814c4f0801d4c86438990a8478eddb021b7912bc4ea8bb6ebee"
     assert entry["p1_result_seal_sha256"] == "d8e830b2e384a67a1da3911ba774c707a5cac66ded3bfbabf2870e54c2043ee5"
     assert entry["p1_dev_gate_passed"] is True
+    assert entry["real_dev_result_path"].endswith("V24-RETRY3-REAL-DEV-STAGES.json")
+    assert entry["real_dev_result_sha256"] == "1e471a179114e078f101edffcf04aea9e3b29ab72a3d31649695726465661c90"
+    assert digest(ROOT / entry["real_dev_result_path"]) == entry["real_dev_result_sha256"]
+    assert entry["real_dev_projects"] == 120
+    assert entry["real_dev_successful_projects"] == 120
+    assert entry["real_dev_failure_count"] == 0
+    assert entry["real_dev_true_positives"] == 1103
+    assert entry["real_dev_false_positives"] == 5978
+    assert entry["real_dev_false_negatives"] == 901
+    assert entry["real_dev_precision"] == 0.15576895918655556
+    assert entry["real_dev_recall"] == 0.5503992015968064
+    assert entry["real_dev_pre_nms_true_positives"] == 1126
+    assert entry["real_dev_pre_nms_false_positives"] == 11273
+    assert entry["real_dev_pre_nms_false_negatives"] == 878
+    assert entry["real_dev_above_threshold_outputs"] == 12480
+    assert entry["real_dev_above_threshold_true_positives"] == 1126
+    assert entry["real_dev_above_threshold_false_positives"] == 11354
+    assert entry["real_dev_final_outputs"] == 7081
+    assert entry["real_dev_elapsed_ms"] == 436819.2499
+    assert entry["real_dev_model_sha256"] == entry["p1_onnx_sha256"]
+    assert entry["real_dev_case_level_output"] is False
+    assert entry["real_dev_truth_rows_output"] is False
+    assert entry["real_dev_pixel_output"] is False
+    assert entry["real_dev_training_use"] is False
+    assert entry["real_dev_candidate_selection"] is False
+    assert entry["retry3_vs_retry2_precision_delta"] == 0.03542454589060041
+    assert entry["retry3_vs_retry2_recall_delta"] == -0.04940119760479042
+    assert entry["retry3_vs_retry2_false_positives_delta"] == -2808
+    assert entry["retry3_vs_retry2_above_threshold_false_candidates_delta"] == -9920
+    assert entry["spatial_morphology_diagnostic_required"] is True
     assert entry["retry2_dev_gate_passed"] is True
-    assert entry["spatial_morphology_diagnostic_required"] is False
     assert entry["execution_blocker"]
 
 def test_train_examples_preserve_mask_crossing_positive():
