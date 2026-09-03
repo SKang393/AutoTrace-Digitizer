@@ -77,6 +77,12 @@
     "truth_rows_emitted": false
   },
   "sources": {
+    "marker_morphology_modes": {
+      "base_primitive_only_modes": 2,
+      "elongated_overlay_modes": 2,
+      "filled_overlay_modes": 3
+    },
+    "marker_morphology_revision": "filled-elongated-range-v1",
     "patch_shape": [
       3,
       33,
@@ -86,7 +92,7 @@
   },
   "splits": {
     "dev": {
-      "aggregate_sha256": "050df194849c9e787d786624b26fd268e7f7a1832c271868521d89bf6588e960",
+      "aggregate_sha256": "f453e50e228f54e15bafba83b1a5dda422c435a555e9083dfea18457ed38204d",
       "diameter_px": {
         "maximum": 48.0,
         "median": 12.0,
@@ -126,7 +132,7 @@
       ]
     },
     "train": {
-      "aggregate_sha256": "ca06241dcfbb5fc5ddf8fc4f04a564d0604d87b983595e7860978e5199cd0942",
+      "aggregate_sha256": "dd8ea4c798b7c96564603e30449f9a8f805b8d770e519ce652f194a4a35e2549",
       "diameter_px": {
         "maximum": 48.0,
         "median": 12.0,
@@ -167,7 +173,7 @@
     }
   },
   "truth_center_patch_distribution": {
-    "aggregate_sha256": "050df194849c9e787d786624b26fd268e7f7a1832c271868521d89bf6588e960",
+    "aggregate_sha256": "f453e50e228f54e15bafba83b1a5dda422c435a555e9083dfea18457ed38204d",
     "channel_mean_quantiles": {
       "artifact_mask": {
         "maximum": 0.2764003574848175,
@@ -179,18 +185,18 @@
       },
       "ink": {
         "maximum": 0.997245192527771,
-        "median": 0.18829024583101273,
+        "median": 0.23428086936473846,
         "minimum": 0.01285583060234785,
-        "p05": 0.0894896574318409,
-        "p90": 0.5973269462585449,
-        "p95": 0.7026954293251038
+        "p05": 0.08225112669169903,
+        "p90": 0.6106723427772522,
+        "p95": 0.7087398141622543
       },
       "ink_center_5x5": {
         "maximum": 1.0,
-        "median": 0.7247058749198914,
+        "median": 0.9637784659862518,
         "minimum": 0.0,
-        "p05": 0.1009487733244896,
-        "p90": 0.9693580448627472,
+        "p05": 0.16470588743686676,
+        "p90": 0.9772946417331696,
         "p95": 0.9788235425949097
       },
       "ocr_mask": {

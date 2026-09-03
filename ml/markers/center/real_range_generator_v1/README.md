@@ -18,7 +18,11 @@ full text-region-like patch. Only aggregate statistics
 and hashes are written; no pixels, truth rows, scene identifiers, private
 corpus data, model, or training path is used.
 
-The generator also includes deterministic anti-aliased topology negatives:
+Both disjoint splits use the same deterministic marker family: two modes keep
+the existing project marker primitive unchanged, three add filled overlays,
+and two use filled elongated overlays. This increases center occupancy, row
+support, and ring support while retaining hollow-marker cases. The generator also includes
+deterministic anti-aliased topology negatives:
 off-center multi-branch junctions and elongated fragments. The negative
 proposal audit records their morphology envelopes and checks that the real-dev
 medians for dark fraction, center occupancy, row and column support, extent
@@ -29,8 +33,11 @@ A separate negative-proposal audit runs the exact V24 mask-preserving ink-suppor
 extractor and labels proposals positive only when their centers are within 3 px
 of a truth center. It reports full train/dev proposal, positive, and negative
 counts plus aggregate quantiles for ink, OCR-mask, and artifact-mask proposal
-patch features. A deterministic ten-negatives-per-positive sample count is
-reported for comparison with the V24 training rule.
+patch features. Positive morphology gates use the central p25 to p75 envelope
+of both train and dev. The train-only sampler retains every declared topology
+junction and fragment proposal within 16 px, then fills the existing generic
+quota to keep exactly 32,580 negatives; the audit records selected counts and
+aggregate selection hashes.
 
 Run from the repository root:
 

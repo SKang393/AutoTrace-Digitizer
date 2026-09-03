@@ -56,6 +56,41 @@ TOPOLOGY_TARGETS = {
         "max_ring_support_3_12_median": 8.0,
     },
 }
+MARKER_MORPHOLOGY_REVISION = "filled-elongated-range-v1"
+
+
+def _draw_range_marker(
+    draw: ImageDraw.ImageDraw,
+    center: tuple[int, int],
+    radius: int,
+    index: int,
+    source_index: int,
+) -> None:
+    """Use a deterministic filled/elongated majority while retaining hollow glyphs."""
+    x, y = center
+    box = (x - radius, y - radius, x + radius, y + radius)
+    mode = index % 7
+    if mode <= 4:
+        _draw_marker(draw, center, radius, source_index)
+    if mode == 0:
+        return
+    elif mode == 1:
+        return
+    elif mode == 2:
+        draw.ellipse(box, fill=0)
+    elif mode == 3:
+        draw.rectangle(box, fill=0)
+    elif mode == 4:
+        draw.ellipse(box, fill=0)
+        draw.line((x - radius, y, x + radius, y), fill=0, width=max(1, radius // 3))
+    elif mode == 5:
+        half_height = max(1, radius // 2 - 1)
+        draw.rectangle((x - radius, y - half_height, x + radius, y + half_height), fill=0)
+        draw.rectangle((x - half_height, y - half_height, x + half_height, y + half_height), fill=0)
+    else:
+        half_width = max(1, radius // 2 - 1)
+        draw.rectangle((x - half_width, y - radius, x + half_width, y + radius), fill=0)
+        draw.rectangle((x - half_width, y - half_width, x + half_width, y + half_width), fill=0)
 
 
 @dataclass(frozen=True)
@@ -149,7 +184,8 @@ def _scene(split: str, index: int, diameters: list[float]) -> Scene:
         if diameters[local] == 1.0:
             draw.point((x, y), fill=0)
         else:
-            _draw_marker(draw, (x, y), radius, local + index)
+            marker_index = local + index * per_scene
+            _draw_range_marker(draw, (x, y), radius, marker_index, local + index)
         if local:
             px, py = (int(value) for value in centers[-2])
             draw.line((px, py, x, y), fill=45, width=1)
@@ -378,7 +414,9 @@ def audit() -> dict[str, object]:
                   "scene_ids_emitted": False, "truth_rows_emitted": False,
                   "pixels_emitted": False},
         "sources": {"procedural_primitives": "ml/markers/center/dataset.py",
-                    "patch_shape": [3, PATCH, PATCH]},
+                    "patch_shape": [3, PATCH, PATCH],
+                    "marker_morphology_revision": MARKER_MORPHOLOGY_REVISION,
+                    "marker_morphology_modes": {"base_primitive_only_modes": 2, "filled_overlay_modes": 3, "elongated_overlay_modes": 2}},
         "splits": {"train": train_record, "dev": dev_record},
         "mask_overlap_scenarios": {"markers_per_split": dev_markers,
             "ocr_hard_hits": dev_record["mask_center_hits"]["ocr"],

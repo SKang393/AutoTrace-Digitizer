@@ -16,6 +16,7 @@ import torch
 from ml.markers.center.mask_preserving_v24.mask_preserving import extract_proposals
 
 from .generator import PATCH, TOPOLOGY_TARGETS, _quantiles, build_split
+from .negative_sampler import sample_negatives
 
 REAL_NEGATIVE_GATES = {
     "ink_max_minimum": 0.11372548341751099,
@@ -29,6 +30,12 @@ MORPHOLOGY_KEYS = (
     "foreground_extent_balance", "covariance_eigen_ratio",
     "border_dark_fraction_ge_012", "max_ring_support_3_12",
 )
+
+
+def _central_quantiles(values: list[float]) -> dict[str, float]:
+    ordered = np.asarray(values, dtype=np.float64)
+    q25, q50, q75 = np.quantile(ordered, (0.25, 0.50, 0.75))
+    return {"p25": float(q25), "median": float(q50), "p75": float(q75)}
 
 
 def _patch_morphology(patch: torch.Tensor) -> dict[str, float]:
@@ -105,7 +112,8 @@ def _positive_proposal_distribution(split: str) -> dict[str, object]:
                 values[key].append(features[key])
             count += 1
     return {"label_distance_px": 5.0, "proposal_count": count,
-            "morphology_quantiles": {key: _quantiles(items) for key, items in values.items()}}
+            "morphology_quantiles": {key: _quantiles(items) for key, items in values.items()},
+            "central_morphology_quantiles": {key: _central_quantiles(items) for key, items in values.items()}}
 
 
 def _topology_gates(topology: dict[str, object]) -> dict[str, bool]:
@@ -136,11 +144,12 @@ def _topology_gates(topology: dict[str, object]) -> dict[str, bool]:
 
 
 def _positive_gates(positives: dict[str, object]) -> dict[str, bool]:
-    values = positives["morphology_quantiles"]
+    values = positives["central_morphology_quantiles"]
     targets = TOPOLOGY_TARGETS["positives"]
     def covered(field: str, target_name: str) -> bool:
         quantiles = values[field]
-        return quantiles["p05"] <= targets[target_name] <= quantiles["p95"]
+        target = targets[target_name]
+        return quantiles["p25"] <= target <= quantiles["p75"]
     return {
         "center5_covers_real_median": covered("center5x5_mean", "center5x5_mean_median"),
         "row_covers_real_median": covered("max_row_dark_fraction_ge_012", "max_row_dark_fraction_ge_012_median"),
@@ -149,6 +158,20 @@ def _positive_gates(positives: dict[str, object]) -> dict[str, bool]:
         "covariance_covers_real_median": covered("covariance_eigen_ratio", "covariance_eigen_ratio_median"),
         "ring_covers_real_median": covered("max_ring_support_3_12", "max_ring_support_3_12_median"),
     }
+
+
+def _train_sampler_records() -> list[tuple[object, object, torch.Tensor, torch.Tensor]]:
+    records = []
+    for scene in build_split("train"):
+        batch = extract_proposals(scene.tensor)
+        centers = torch.tensor(scene.centers, dtype=batch.coordinates.dtype)
+        labels = torch.cdist(batch.coordinates, centers).min(dim=1).values.le(3.0).float()
+        hard = torch.zeros(len(batch.coordinates), dtype=torch.bool)
+        for kind, x, y in scene.hard_negatives:
+            if kind in {"text", "line_intersection", "axis"}:
+                hard |= torch.cdist(batch.coordinates, torch.tensor(((x, y),), dtype=batch.coordinates.dtype)).squeeze(1).le(8.0)
+        records.append((scene, batch, labels, hard))
+    return records
 
 
 def _proposal_distribution(split: str) -> dict[str, object]:
@@ -209,6 +232,7 @@ def audit() -> dict[str, object]:
     topology_dev = _topology_proposal_distribution("dev")
     positive_train = _positive_proposal_distribution("train")
     positive_dev = _positive_proposal_distribution("dev")
+    sampled = sample_negatives(_train_sampler_records(), split="train", seed=20260904)
     return {
         "schema": "graphreader.marker-center-negative-proposal-audit.v1",
         "scope": {
@@ -237,7 +261,22 @@ def audit() -> dict[str, object]:
         },
         "topology_distribution_gates": _topology_gates(topology_dev),
         "positive_morphology": {"train": positive_train, "dev": positive_dev},
-        "positive_morphology_gates": _positive_gates(positive_dev),
+        "positive_morphology_gates": {
+            "train": _positive_gates(positive_train),
+            "dev": _positive_gates(positive_dev),
+        },
+        "positive_morphology_gate_split": "train_and_dev",
+        "sampler": {
+            "split": "train",
+            "seed": 20260904,
+            "negative_total": sampled.total,
+            "topology_radius_px": 16.0,
+            "topology_capacity": sampled.topology_capacity,
+            "topology_selected": sampled.topology_selected,
+            "topology_all_eligible_retained": sampled.topology_capacity == sampled.topology_selected,
+            "selected_index_sha256": sampled.selected_index_sha256,
+            "topology_selected_index_sha256": sampled.topology_selected_index_sha256,
+        },
         "coordinate_streams_identical": (
             train["proposal_coordinates_aggregate_sha256"]
             == dev["proposal_coordinates_aggregate_sha256"]

@@ -36,7 +36,7 @@ def test_range_and_masks_match_required_aggregate() -> None:
     quantiles = result["truth_center_patch_distribution"]["channel_mean_quantiles"]
     assert "ink_center_5x5" in quantiles
     assert .07 <= quantiles["ink"]["p05"] <= .11
-    assert .15 <= quantiles["ink"]["median"] <= .23
+    assert .20 <= quantiles["ink"]["median"] <= .30
     assert quantiles["artifact_mask"]["p90"] >= .12121
     assert quantiles["artifact_mask"]["maximum"] >= .23967
     assert all(result["distribution_gates"].values())
@@ -97,3 +97,7 @@ def test_v24_ink_supported_proposal_stream_is_aggregate_and_deterministic() -> N
     assert result["hard_negative_representatives"]["faint_line"]["y"] == 155.0
     assert result["hard_negative_representatives"]["ocr_heavy"]["x"] == 208.0
     assert all(len(stream["proposal_coordinates_aggregate_sha256"]) == 64 for stream in streams)
+    assert all(all(gates.values()) for gates in result["positive_morphology_gates"].values())
+    assert result["positive_morphology_gate_split"] == "train_and_dev"
+    assert result["sampler"]["negative_total"] == 32580
+    assert result["sampler"]["topology_all_eligible_retained"] is True
