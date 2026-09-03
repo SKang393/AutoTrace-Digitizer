@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Security.Cryptography;
+using System.Text.Json.Serialization;
 using GraphReader.Inference;
 using GraphReader.Markers.Detection;
 
@@ -17,6 +18,25 @@ internal sealed record ProposalMarkerPrediction(
     MarkerPoint Center,
     double Radius,
     double Confidence);
+
+public sealed record ProposalMarkerStageCounters(
+    int ProposalGridPositionsConsidered,
+    int LowInkRejects,
+    int OcrMaskRejects,
+    int ArtifactMaskRejects,
+    int EmittedProposals,
+    int InferenceOutputs,
+    [property: JsonPropertyName("outputs_above_0_25")] int OutputsAbove025,
+    int DecodedPointsMasked,
+    [property: JsonPropertyName("geometry_consensus_rejects_after_1px_refinement_attempts")] int GeometryConsensusRejectsAfterRefinementAttempts,
+    int DecodedPointsOutsidePlot,
+    int CandidatesBeforeNms,
+    int NmsSuppressions,
+    int FinalCandidates);
+
+public sealed record ProposalMarkerCandidateDiagnosticResult(
+    IReadOnlyList<MarkerCenter> Candidates,
+    ProposalMarkerStageCounters StageCounters);
 
 /// <summary>
 /// Candidate-only integration for the checksum-bound runtime-consistency-v2 P2
@@ -177,12 +197,19 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
         MarkerImageFrame frame,
         MarkerPolygon plotPolygon,
         CancellationToken cancellationToken)
+        => (await DetectCandidateWithDiagnosticsAsync(frame, plotPolygon, cancellationToken).ConfigureAwait(false)).Candidates;
+
+    public async Task<ProposalMarkerCandidateDiagnosticResult> DetectCandidateWithDiagnosticsAsync(
+        MarkerImageFrame frame,
+        MarkerPolygon plotPolygon,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(frame);
         ArgumentNullException.ThrowIfNull(plotPolygon);
         ValidateFrame(frame);
         cancellationToken.ThrowIfCancellationRequested();
 
+        var counters = new ProposalMarkerStageCounterAccumulator();
         var predictions = new List<ProposalMarkerPrediction>();
         var batch = new List<Proposal>(BatchSize);
         int batchOffset = 0;
@@ -231,6 +258,8 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                 throw new InvalidDataException("The proposal marker candidate must return [N,4] output.");
             }
 
+            counters.InferenceOutputs += count;
+
             for (int index = 0; index < count; index++)
             {
                 int baseIndex = index * 4;
@@ -250,28 +279,44 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                     continue;
                 }
 
+                counters.OutputsAbove025++;
+
                 Proposal proposal = proposals[index];
                 double x = proposal.X + (offsetX * ProposalStride);
                 double y = proposal.Y + (offsetY * ProposalStride);
                 double decodedRadius = Math.Clamp(radius, 2.5, 8.0);
-                if (TryRefine(frame, x, y, decodedRadius, multiradiusGeometry, out MarkerPoint refined))
+                if (!TryRefine(frame, x, y, decodedRadius, multiradiusGeometry, out MarkerPoint refined, out RefinementFailure failure))
                 {
-                    if (plotPolygon.Contains(frame.OriginalToFrame.MapToOriginal(refined)))
+                    if (failure == RefinementFailure.Masked)
                     {
-                        if (predictions.Count >= maximumDecodedCandidates)
-                        {
-                            throw new InvalidDataException("The proposal marker candidate exceeded its decoded-candidate limit.");
-                        }
-
-                        predictions.Add(new ProposalMarkerPrediction(refined, decodedRadius, probability));
+                        counters.DecodedPointsMasked++;
                     }
+                    else
+                    {
+                        counters.GeometryConsensusRejectsAfterRefinementAttempts++;
+                    }
+                    continue;
+                }
+
+                if (plotPolygon.Contains(frame.OriginalToFrame.MapToOriginal(refined)))
+                {
+                    if (predictions.Count >= maximumDecodedCandidates)
+                    {
+                        throw new InvalidDataException("The proposal marker candidate exceeded its decoded-candidate limit.");
+                    }
+
+                    predictions.Add(new ProposalMarkerPrediction(refined, decodedRadius, probability));
+                }
+                else
+                {
+                    counters.DecodedPointsOutsidePlot++;
                 }
             }
 
             batchOffset += count;
         }
 
-        foreach (Proposal proposal in EnumerateProposals(frame, plotPolygon, cancellationToken))
+        foreach (Proposal proposal in EnumerateProposals(frame, plotPolygon, counters, cancellationToken))
         {
             batch.Add(proposal);
             if (batch.Count == BatchSize)
@@ -285,7 +330,11 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             await InferBatchAsync(batch).ConfigureAwait(false);
         }
 
-        return ApplyNms(predictions)
+        List<ProposalMarkerPrediction> accepted = ApplyNms(predictions, out int nmsSuppressions);
+        counters.CandidatesBeforeNms = predictions.Count;
+        counters.NmsSuppressions = nmsSuppressions;
+        counters.FinalCandidates = accepted.Count;
+        IReadOnlyList<MarkerCenter> candidates = accepted
             .OrderBy(candidate => candidate.Center.Y)
             .ThenBy(candidate => candidate.Center.X)
             .ThenByDescending(candidate => candidate.Confidence)
@@ -298,13 +347,53 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                 frame.SourceImage,
                 MarkerContract.CoordinateSpace))
             .ToArray();
+        return new ProposalMarkerCandidateDiagnosticResult(candidates, counters.ToRecord());
     }
 
     private sealed record Proposal(int X, int Y, float[] Patch);
 
+    private enum RefinementFailure
+    {
+        Masked,
+        GeometryConsensus,
+    }
+
+    private sealed class ProposalMarkerStageCounterAccumulator
+    {
+        public int ProposalGridPositionsConsidered;
+        public int LowInkRejects;
+        public int OcrMaskRejects;
+        public int ArtifactMaskRejects;
+        public int EmittedProposals;
+        public int InferenceOutputs;
+        public int OutputsAbove025;
+        public int DecodedPointsMasked;
+        public int GeometryConsensusRejectsAfterRefinementAttempts;
+        public int DecodedPointsOutsidePlot;
+        public int CandidatesBeforeNms;
+        public int NmsSuppressions;
+        public int FinalCandidates;
+
+        public ProposalMarkerStageCounters ToRecord() => new(
+            ProposalGridPositionsConsidered,
+            LowInkRejects,
+            OcrMaskRejects,
+            ArtifactMaskRejects,
+            EmittedProposals,
+            InferenceOutputs,
+            OutputsAbove025,
+            DecodedPointsMasked,
+            GeometryConsensusRejectsAfterRefinementAttempts,
+            DecodedPointsOutsidePlot,
+            CandidatesBeforeNms,
+            NmsSuppressions,
+            FinalCandidates);
+    }
+
     private static IEnumerable<Proposal> EnumerateProposals(
         MarkerImageFrame frame,
         MarkerPolygon plotPolygon,
+        ProposalMarkerStageCounterAccumulator counters,
         CancellationToken cancellationToken)
     {
         int width = frame.Width;
@@ -330,10 +419,20 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             {
                 int x = gx * ProposalStride;
                 int y = gy * ProposalStride;
-                if (WindowMaxInk(luminance, width, height, x, y, 8) < InkSupportThreshold ||
-                    WindowMax(text, width, height, x, y, 2) >= MaskRejectionThreshold ||
-                    WindowMax(artifact, width, height, x, y, 2) >= MaskRejectionThreshold)
+                counters.ProposalGridPositionsConsidered++;
+                if (WindowMaxInk(luminance, width, height, x, y, 8) < InkSupportThreshold)
                 {
+                    counters.LowInkRejects++;
+                    continue;
+                }
+                if (WindowMax(text, width, height, x, y, 2) >= MaskRejectionThreshold)
+                {
+                    counters.OcrMaskRejects++;
+                    continue;
+                }
+                if (WindowMax(artifact, width, height, x, y, 2) >= MaskRejectionThreshold)
+                {
+                    counters.ArtifactMaskRejects++;
                     continue;
                 }
 
@@ -355,6 +454,7 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                         }
                     }
                 }
+                counters.EmittedProposals++;
                 yield return new Proposal(x, y, patch);
             }
         }
@@ -392,17 +492,20 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
         double y,
         double radius,
         bool multiradiusGeometry,
-        out MarkerPoint refined)
+        out MarkerPoint refined,
+        out RefinementFailure failure)
     {
         if (!CenterIsUnmasked(frame, x, y))
         {
             refined = default;
+            failure = RefinementFailure.Masked;
             return false;
         }
 
         if (GeometryConsensus(frame, x, y, radius, multiradiusGeometry))
         {
             refined = new MarkerPoint(x, y);
+            failure = default;
             return true;
         }
 
@@ -424,9 +527,11 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
         {
             var best = candidates.Min();
             refined = new MarkerPoint(best.X, best.Y);
+            failure = default;
             return true;
         }
         refined = default;
+        failure = RefinementFailure.GeometryConsensus;
         return false;
     }
 
@@ -499,9 +604,12 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
         return support >= 3 || (count > 0 && sum / count >= 0.28);
     }
 
-    private static List<ProposalMarkerPrediction> ApplyNms(IEnumerable<ProposalMarkerPrediction> values)
+    private static List<ProposalMarkerPrediction> ApplyNms(
+        IEnumerable<ProposalMarkerPrediction> values,
+        out int suppressions)
     {
         var accepted = new List<ProposalMarkerPrediction>();
+        suppressions = 0;
         var buckets = new Dictionary<(int X, int Y), List<ProposalMarkerPrediction>>();
         foreach (ProposalMarkerPrediction candidate in values
                      .OrderByDescending(static item => item.Confidence)
@@ -526,6 +634,7 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
             }
             if (suppressed)
             {
+                suppressions++;
                 continue;
             }
 

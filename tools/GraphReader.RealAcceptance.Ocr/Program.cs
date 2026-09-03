@@ -64,6 +64,22 @@ internal static class Program
             Console.WriteLine(JsonSerializer.Serialize(markerReport, JsonOptions));
             return markerReport.FailureCount == 0 && markerReport.Gates.Values.All(value => value) ? 0 : 1;
         }
+        if (args.Contains("--run-real-dev-marker-v23-diagnostic", StringComparer.Ordinal))
+        {
+            string? markerRoot = GetOption(args, "--root");
+            string? markerModel = GetOption(args, "--marker-model");
+            if (string.IsNullOrWhiteSpace(markerRoot) || markerRoot.StartsWith("--", StringComparison.Ordinal) ||
+                string.IsNullOrWhiteSpace(markerModel) || markerModel.StartsWith("--", StringComparison.Ordinal))
+            {
+                Console.Error.WriteLine("REAL_DEV_MARKER_V23_DIAGNOSTIC_ROOT_AND_MODEL_REQUIRED");
+                return 2;
+            }
+
+            MarkerAggregateReport markerReport = await RunRealDevMarkerV23DiagnosticAsync(
+                Path.GetFullPath(markerRoot), Path.GetFullPath(markerModel), CancellationToken.None);
+            Console.WriteLine(JsonSerializer.Serialize(markerReport, JsonOptions));
+            return markerReport.FailureCount == 0 && markerReport.Gates.Values.All(value => value) ? 0 : 1;
+        }
         if (args.Contains("--run-real-dev-marker", StringComparer.Ordinal))
         {
             string? markerRoot = GetOption(args, "--root");
@@ -229,14 +245,22 @@ internal static class Program
     }
 
     private static async Task<MarkerAggregateReport> RunRealDevMarkerAsync(string rootPath, CancellationToken cancellationToken)
-        => await RunRealDevMarkerAsync(rootPath, markerModelPath: null, multiradiusGeometry: false, cancellationToken: cancellationToken);
+        => await RunRealDevMarkerAsync(rootPath, markerModelPath: null, multiradiusGeometry: false, includeStageCounters: false, cancellationToken: cancellationToken);
 
     private static async Task<MarkerAggregateReport> RunRealDevMarkerV23Async(
         string rootPath, string markerModelPath, CancellationToken cancellationToken)
-        => await RunRealDevMarkerAsync(rootPath, markerModelPath, multiradiusGeometry: true, cancellationToken: cancellationToken);
+        => await RunRealDevMarkerAsync(rootPath, markerModelPath, multiradiusGeometry: true, includeStageCounters: false, cancellationToken: cancellationToken);
+
+    private static async Task<MarkerAggregateReport> RunRealDevMarkerV23DiagnosticAsync(
+        string rootPath, string markerModelPath, CancellationToken cancellationToken)
+        => await RunRealDevMarkerAsync(rootPath, markerModelPath, multiradiusGeometry: true, includeStageCounters: true, cancellationToken: cancellationToken);
 
     private static async Task<MarkerAggregateReport> RunRealDevMarkerAsync(
-        string rootPath, string? markerModelPath, bool multiradiusGeometry, CancellationToken cancellationToken)
+        string rootPath,
+        string? markerModelPath,
+        bool multiradiusGeometry,
+        bool includeStageCounters,
+        CancellationToken cancellationToken)
     {
         string root = Path.GetFullPath(rootPath);
         string[] paths = Directory.EnumerateFiles(root, "*.dig", SearchOption.AllDirectories)
@@ -272,6 +296,7 @@ internal static class Program
         int succeeded = 0, failed = 0, truePositives = 0, falsePositives = 0, falseNegatives = 0;
         var failureKinds = new Dictionary<string, int>(StringComparer.Ordinal);
         var timings = new List<double>();
+        var stageCounters = new MarkerStageCounterTotals();
         foreach (string path in dev)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -290,7 +315,15 @@ internal static class Program
                 float[] artifactMask = RasterizeAxisMask(raster.Width, raster.Height, truth.Anchors, 2.0);
                 MarkerImageFrame frame = new(raster.Width, raster.Height, 1, luminance, MarkerSourceImage.Original, MarkerAffineTransform.Identity, new MarkerMask(raster.Width, raster.Height, ocrMask), new MarkerMask(raster.Width, raster.Height, artifactMask));
                 var started = System.Diagnostics.Stopwatch.StartNew();
-                IReadOnlyList<MarkerCenter> predictions = await adapter.DetectCandidateAsync(frame, ToMarkerPolygon(plot), cancellationToken);
+                ProposalMarkerCandidateDiagnosticResult? diagnostic = includeStageCounters
+                    ? await adapter.DetectCandidateWithDiagnosticsAsync(frame, ToMarkerPolygon(plot), cancellationToken)
+                    : null;
+                IReadOnlyList<MarkerCenter> predictions = diagnostic?.Candidates ??
+                    await adapter.DetectCandidateAsync(frame, ToMarkerPolygon(plot), cancellationToken);
+                if (diagnostic is not null)
+                {
+                    stageCounters.Add(diagnostic.StageCounters);
+                }
                 started.Stop();
                 timings.Add(started.Elapsed.TotalMilliseconds);
                 (int tp, int fp, int fn) = MatchCenters(predictions, truth.Points, 5.0);
@@ -325,7 +358,8 @@ internal static class Program
             new Dictionary<string, int>(failureKinds, StringComparer.Ordinal), false, false, false, false, false,
             multiradiusGeometry ? runMode : null,
             multiradiusGeometry ? model.ModelId : null,
-            multiradiusGeometry ? model.Version : null);
+            multiradiusGeometry ? model.Version : null,
+            includeStageCounters ? stageCounters.ToRecord() : null);
     }
 
     private static MarkerPolygon ToMarkerPolygon(OcrRectangle rectangle) => MarkerPolygon.FromRectangle(new(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height));
@@ -1111,7 +1145,56 @@ internal static class Program
     }
 
     private sealed record AggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int AxisAnchorCount, int CurvePointCount, int RecognizedRegionCount, int NumericRegionCount, IReadOnlyDictionary<string, int> RoleCounts, int NumericYTickCount, int ProjectsWithAtLeastTwoYTicks, int CalibratedProjects, int MatchedPoints, int PointsWithinFiveUnits, double CalibrationProjectSuccessRate, double MeanAnchorErrorPx, double MaximumAnchorErrorPx, double PointYAccuracy, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, IReadOnlyDictionary<string, string> ModelPayloadSha256, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection);
-    private sealed record MarkerAggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall, double TolerancePx, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, string ModelSha256, IReadOnlyDictionary<string, string> UpstreamOcrPayloadSha256, string MaskingMode, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Mode, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateRevision, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateId);
+    private sealed class MarkerStageCounterTotals
+    {
+        private int proposalGridPositionsConsidered;
+        private int lowInkRejects;
+        private int ocrMaskRejects;
+        private int artifactMaskRejects;
+        private int emittedProposals;
+        private int inferenceOutputs;
+        private int outputsAbove025;
+        private int decodedPointsMasked;
+        private int geometryConsensusRejectsAfterRefinementAttempts;
+        private int decodedPointsOutsidePlot;
+        private int candidatesBeforeNms;
+        private int nmsSuppressions;
+        private int finalCandidates;
+
+        public void Add(ProposalMarkerStageCounters counters)
+        {
+            proposalGridPositionsConsidered += counters.ProposalGridPositionsConsidered;
+            lowInkRejects += counters.LowInkRejects;
+            ocrMaskRejects += counters.OcrMaskRejects;
+            artifactMaskRejects += counters.ArtifactMaskRejects;
+            emittedProposals += counters.EmittedProposals;
+            inferenceOutputs += counters.InferenceOutputs;
+            outputsAbove025 += counters.OutputsAbove025;
+            decodedPointsMasked += counters.DecodedPointsMasked;
+            geometryConsensusRejectsAfterRefinementAttempts += counters.GeometryConsensusRejectsAfterRefinementAttempts;
+            decodedPointsOutsidePlot += counters.DecodedPointsOutsidePlot;
+            candidatesBeforeNms += counters.CandidatesBeforeNms;
+            nmsSuppressions += counters.NmsSuppressions;
+            finalCandidates += counters.FinalCandidates;
+        }
+
+        public ProposalMarkerStageCounters ToRecord() => new(
+            proposalGridPositionsConsidered,
+            lowInkRejects,
+            ocrMaskRejects,
+            artifactMaskRejects,
+            emittedProposals,
+            inferenceOutputs,
+            outputsAbove025,
+            decodedPointsMasked,
+            geometryConsensusRejectsAfterRefinementAttempts,
+            decodedPointsOutsidePlot,
+            candidatesBeforeNms,
+            nmsSuppressions,
+            finalCandidates);
+    }
+
+    private sealed record MarkerAggregateReport(int SchemaVersion, string ReportScope, int RealDevProjects, int RealSealedProjects, int RealSealedReads, int SuccessfulProjects, int FailureCount, int TruePositives, int FalsePositives, int FalseNegatives, double Precision, double Recall, double TolerancePx, IReadOnlyDictionary<string, bool> Gates, double MeanProjectInferenceMs, double TotalRuntimeMs, string AssignmentsSha256, string ModelSha256, IReadOnlyDictionary<string, string> UpstreamOcrPayloadSha256, string MaskingMode, string PolicySha256, IReadOnlyDictionary<string, int> FailureKinds, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, bool TrainingUse, bool CandidateSelection, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Mode, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateRevision, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? CandidateId, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProposalMarkerStageCounters? StageCounters);
     private sealed record SyntheticDimensionReport(int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, double RecognitionExact, double CharacterErrorRate, double RoleAccuracy);
     private sealed record DetectorDimensionReport(int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall);
     private sealed record TiledProposalAggregateReport(int SchemaVersion, string ReportScope, int SceneCount, int TruthRegionCount, int TruePositives, int FalsePositives, int FalseNegatives, double DetectionPrecision, double DetectionRecall, int TileSize, int TileOverlap, IReadOnlyDictionary<string, DetectorDimensionReport> ByDimension, double MeanSceneInferenceMs, int SuppressedCrossTileDuplicates, string ModelSha256, string DatasetManifestSha256, string AcceptancePolicySha256, string EvidencePolicySha256, IReadOnlyDictionary<string, bool> Gates, bool CaseLevelOutput, bool TruthRowsOutput, bool PixelOutput, int PublicGateEvaluations, int RealSealedReads, bool TrainingUse);

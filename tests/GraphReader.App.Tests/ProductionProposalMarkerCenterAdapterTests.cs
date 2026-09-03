@@ -38,6 +38,61 @@ public sealed class ProductionProposalMarkerCenterAdapterTests
     }
 
     [TestMethod]
+    public async Task CandidateDiagnosticsPreserveCandidateOutputAndReportStageCounts()
+    {
+        var runner = new FakeRunner(static count => Enumerable.Repeat(1f, count * 4).ToArray());
+        var adapter = CreateAdapter(runner);
+        MarkerImageFrame frame = FrameWithMarkers();
+        MarkerPolygon polygon = MarkerPolygon.FromRectangle(new(0, 0, 512, 512));
+
+        IReadOnlyList<MarkerCenter> legacy = await adapter.DetectCandidateAsync(frame, polygon, CancellationToken.None);
+        ProposalMarkerCandidateDiagnosticResult diagnostic = await adapter.DetectCandidateWithDiagnosticsAsync(frame, polygon, CancellationToken.None);
+
+        CollectionAssert.AreEqual(legacy.Select(static item => item.Center).ToArray(), diagnostic.Candidates.Select(static item => item.Center).ToArray());
+        CollectionAssert.AreEqual(legacy.Select(static item => item.Radius).ToArray(), diagnostic.Candidates.Select(static item => item.Radius).ToArray());
+        CollectionAssert.AreEqual(legacy.Select(static item => item.CenterConfidence).ToArray(), diagnostic.Candidates.Select(static item => item.CenterConfidence).ToArray());
+        ProposalMarkerStageCounters counters = diagnostic.StageCounters;
+        Assert.IsTrue(counters.ProposalGridPositionsConsidered > 0);
+        Assert.IsTrue(counters.EmittedProposals > 0);
+        Assert.AreEqual(counters.EmittedProposals, counters.InferenceOutputs);
+        Assert.AreEqual(counters.OutputsAbove025, counters.InferenceOutputs);
+        Assert.AreEqual(
+            counters.OutputsAbove025,
+            counters.DecodedPointsMasked +
+            counters.GeometryConsensusRejectsAfterRefinementAttempts +
+            counters.DecodedPointsOutsidePlot +
+            counters.CandidatesBeforeNms);
+        Assert.AreEqual(counters.CandidatesBeforeNms, counters.FinalCandidates + counters.NmsSuppressions);
+        Assert.AreEqual(diagnostic.Candidates.Count, counters.FinalCandidates);
+    }
+
+    [TestMethod]
+    public async Task CandidateDiagnosticsCountLowInkAndMaskRejectStages()
+    {
+        MarkerPolygon polygon = MarkerPolygon.FromRectangle(new(0, 0, 512, 512));
+        var clearAdapter = CreateAdapter(new FakeRunner(static count => Enumerable.Repeat(1f, count * 4).ToArray()));
+        ProposalMarkerStageCounters lowInk = (await clearAdapter.DetectCandidateWithDiagnosticsAsync(
+            new MarkerImageFrame(512, 512, 1, Enumerable.Repeat(1f, 512 * 512).ToArray(), MarkerSourceImage.Original,
+                MarkerAffineTransform.Identity, MarkerMask.Empty(512, 512), MarkerMask.Empty(512, 512)), polygon, CancellationToken.None)).StageCounters;
+        Assert.IsTrue(lowInk.ProposalGridPositionsConsidered > 0);
+        Assert.AreEqual(lowInk.ProposalGridPositionsConsidered, lowInk.LowInkRejects);
+        Assert.AreEqual(0, lowInk.EmittedProposals);
+
+        MarkerImageFrame frame = FrameWithMarkers();
+        var ocrMaskedAdapter = CreateAdapter(new FakeRunner(static count => Enumerable.Repeat(1f, count * 4).ToArray()));
+        ProposalMarkerStageCounters ocrMasked = (await ocrMaskedAdapter.DetectCandidateWithDiagnosticsAsync(
+            frame with { OcrMask = new MarkerMask(512, 512, Enumerable.Repeat(1f, 512 * 512).ToArray()) }, polygon, CancellationToken.None)).StageCounters;
+        Assert.IsTrue(ocrMasked.OcrMaskRejects > 0);
+        Assert.AreEqual(0, ocrMasked.InferenceOutputs);
+
+        var artifactMaskedAdapter = CreateAdapter(new FakeRunner(static count => Enumerable.Repeat(1f, count * 4).ToArray()));
+        ProposalMarkerStageCounters artifactMasked = (await artifactMaskedAdapter.DetectCandidateWithDiagnosticsAsync(
+            frame with { ArtifactMask = new MarkerMask(512, 512, Enumerable.Repeat(1f, 512 * 512).ToArray()) }, polygon, CancellationToken.None)).StageCounters;
+        Assert.IsTrue(artifactMasked.ArtifactMaskRejects > 0);
+        Assert.AreEqual(0, artifactMasked.InferenceOutputs);
+    }
+
+    [TestMethod]
     public async Task MasksRejectProposalSupport()
     {
         var runner = new FakeRunner(static count => Enumerable.Repeat(1f, count * 4).ToArray());
