@@ -214,7 +214,7 @@ def main() -> int:
     args = parser.parse_args()
     report = summarize(args.model.resolve(), retry5=args.retry5)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    args.output.write_bytes((json.dumps(report, indent=2, sort_keys=True) + "\n").encode("utf-8"))
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0
 
