@@ -329,21 +329,30 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False, r
     return report
 
 
-def summarize_morphology(model_path: Path, *, retry3: bool = False) -> dict:
+def summarize_morphology(model_path: Path, *, retry3: bool = False, retry7: bool = False) -> dict:
     started = time.perf_counter()
-    expected = RETRY3_ONNX_SHA256 if retry3 else RETRY2_ONNX_SHA256
+    if retry3 and retry7:
+        raise ValueError("retry morphology modes are mutually exclusive")
+    expected = RETRY7_ONNX_SHA256 if retry7 else RETRY3_ONNX_SHA256 if retry3 else RETRY2_ONNX_SHA256
     model_hash = _sha(model_path)
     if model_hash != expected:
-        mode = "retry3" if retry3 else "retry2"
+        mode = "retry7" if retry7 else "retry3" if retry3 else "retry2"
         raise ValueError(f"{mode} ONNX hash mismatch: expected {expected}, got {model_hash}")
     config_path=ROOT/"ml/markers/center/mask_preserving_v24/training/p1.json"; sampler_path=ROOT/"ml/markers/center/real_range_generator_v1/negative_sampler.py"; audit_path=ROOT/"ml/markers/center/real_range_generator_v1/AUDIT.json"
     audit_hash = _sha(audit_path)
-    if retry3 and audit_hash != RETRY3_GENERATOR_AUDIT_SHA256:
-        raise ValueError(f"retry3 generator audit hash mismatch: expected {RETRY3_GENERATOR_AUDIT_SHA256}, got {audit_hash}")
+    expected_audit = RETRY7_GENERATOR_AUDIT_SHA256 if retry7 else RETRY3_GENERATOR_AUDIT_SHA256
+    if (retry3 or retry7) and audit_hash != expected_audit:
+        mode = "retry7" if retry7 else "retry3"
+        raise ValueError(f"{mode} generator audit hash mismatch: expected {expected_audit}, got {audit_hash}")
     audit_record = json.loads(audit_path.read_text(encoding="utf-8"))
     actual_dev_split_sha256 = audit_record["splits"]["dev"]["aggregate_sha256"]
-    if retry3 and actual_dev_split_sha256 != RETRY3_DEV_SPLIT_SHA256:
-        raise ValueError(f"retry3 dev split hash mismatch: expected {RETRY3_DEV_SPLIT_SHA256}, got {actual_dev_split_sha256}")
+    expected_dev = RETRY7_DEV_SPLIT_SHA256 if retry7 else RETRY3_DEV_SPLIT_SHA256
+    if (retry3 or retry7) and actual_dev_split_sha256 != expected_dev:
+        mode = "retry7" if retry7 else "retry3"
+        raise ValueError(f"{mode} dev split hash mismatch: expected {expected_dev}, got {actual_dev_split_sha256}")
+    sampler_hash = _sha(sampler_path)
+    if retry7 and sampler_hash != RETRY7_SAMPLER_SHA256:
+        raise ValueError(f"retry7 sampler hash mismatch: expected {RETRY7_SAMPLER_SHA256}, got {sampler_hash}")
     session=ort.InferenceSession(str(model_path),providers=["CPUExecutionProvider"])
     if session.get_providers()[0] != "CPUExecutionProvider": raise RuntimeError("CPUExecutionProvider was not selected")
     inp,out=session.get_inputs()[0].name,session.get_outputs()[0].name
@@ -363,8 +372,8 @@ def summarize_morphology(model_path: Path, *, retry3: bool = False) -> dict:
             if names[source]=="generic":
                 features=_patch_morphology(proposals.patches[source])
                 for key in MORPHOLOGY_KEYS: buckets["accepted_generic_false_positives"][key].append(features[key])
-    mode = "retry3" if retry3 else "retry2"
-    return {"schema":f"graphreader.marker-center-mask-preserving-v24-{mode}-morphology-diagnosis.v1","revision":"marker-center-mask-preserving-v24","scope":{"synthetic_only":True,"split":"real-range-generator-v1-dev","scene_count":len(scenes),"threshold":THRESHOLD,"private_data":False,"real_dev_reads":0,"real_sealed_reads":0,"optimizer_steps":0,"case_ids_or_pixels_emitted":False,"retry_mode":mode},"binding":{"model_sha256":model_hash,"provider":session.get_providers()[0],"input_shape":["candidate_count",3,33,33],"output_shape":["candidate_count",4],"generator_audit_sha256":audit_hash,"generator_dev_split_sha256":actual_dev_split_sha256 if retry3 else json.loads(config_path.read_text())["dev_split_sha256"],"negative_sampler_sha256":_sha(sampler_path),"negative_sampler_priority":list(STRATA)},"negative_strata_counts":{name:{"capacity":capacities[name],"above_threshold":above[name],"above_threshold_rate":above[name]/max(1,capacities[name])} for name in STRATA},"morphology_quantiles":{bucket:{key:_quantiles(values) for key,values in values_by_key.items()} for bucket,values_by_key in buckets.items()},"accepted_generic_false_positive_count":len(buckets["accepted_generic_false_positives"][MORPHOLOGY_KEYS[0]]),"elapsed_ms":round((time.perf_counter()-started)*1000,3),"threshold_change_proposed":False}
+    mode = "retry7" if retry7 else "retry3" if retry3 else "retry2"
+    return {"schema":f"graphreader.marker-center-mask-preserving-v24-{mode}-morphology-diagnosis.v1","revision":"marker-center-mask-preserving-v24","scope":{"synthetic_only":True,"split":"real-range-generator-v1-dev","scene_count":len(scenes),"threshold":THRESHOLD,"private_data":False,"real_dev_reads":0,"real_sealed_reads":0,"optimizer_steps":0,"case_ids_or_pixels_emitted":False,"retry_mode":mode},"binding":{"model_sha256":model_hash,"provider":session.get_providers()[0],"input_shape":["candidate_count",3,33,33],"output_shape":["candidate_count",4],"generator_audit_sha256":audit_hash,"generator_dev_split_sha256":actual_dev_split_sha256 if (retry3 or retry7) else json.loads(config_path.read_text())["dev_split_sha256"],"negative_sampler_sha256":sampler_hash,"negative_sampler_priority":list(STRATA)},"negative_strata_counts":{name:{"capacity":capacities[name],"above_threshold":above[name],"above_threshold_rate":above[name]/max(1,capacities[name])} for name in STRATA},"morphology_quantiles":{bucket:{key:_quantiles(values) for key,values in values_by_key.items()} for bucket,values_by_key in buckets.items()},"accepted_generic_false_positive_count":len(buckets["accepted_generic_false_positives"][MORPHOLOGY_KEYS[0]]),"elapsed_ms":round((time.perf_counter()-started)*1000,3),"threshold_change_proposed":False}
 
 def main() -> int:
     parser = argparse.ArgumentParser(); parser.add_argument("--model", type=Path, required=True); parser.add_argument("--output", type=Path, required=True); parser.add_argument("--morphology", action="store_true"); parser.add_argument("--retry3", action="store_true"); parser.add_argument("--retry4", action="store_true"); parser.add_argument("--retry5", action="store_true"); parser.add_argument("--retry6", action="store_true"); parser.add_argument("--retry7", action="store_true")
@@ -375,9 +384,9 @@ def main() -> int:
         parser.error("--retry3 requires --morphology")
     if args.retry4 and args.morphology:
         parser.error("--retry4 is a standard diagnosis mode")
-    if (args.retry5 or args.retry6 or args.retry7) and args.morphology:
+    if (args.retry5 or args.retry6) and args.morphology:
         parser.error("--retry5 is a standard diagnosis mode")
-    report = summarize_morphology(args.model.resolve(), retry3=args.retry3) if args.morphology else summarize(args.model.resolve(), retry4=args.retry4, retry5=args.retry5, retry6=args.retry6, retry7=args.retry7); args.output.parent.mkdir(parents=True, exist_ok=True); args.output.write_bytes((json.dumps(report, indent=2, sort_keys=True) + "\n").encode("utf-8")); print(json.dumps(report, indent=2, sort_keys=True)); return 0
+    report = summarize_morphology(args.model.resolve(), retry3=args.retry3, retry7=args.retry7) if args.morphology else summarize(args.model.resolve(), retry4=args.retry4, retry5=args.retry5, retry6=args.retry6, retry7=args.retry7); args.output.parent.mkdir(parents=True, exist_ok=True); args.output.write_bytes((json.dumps(report, indent=2, sort_keys=True) + "\n").encode("utf-8")); print(json.dumps(report, indent=2, sort_keys=True)); return 0
 
 
 if __name__ == "__main__":

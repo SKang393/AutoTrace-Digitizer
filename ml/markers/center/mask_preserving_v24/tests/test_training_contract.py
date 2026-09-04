@@ -49,7 +49,7 @@ def test_runner_source_bundle_is_relative_and_present():
     assert entry["p1_runner_source_bundle_sha256"] == config["expected_runner_source_bundle_sha256"]
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert entry["status"] == "dev_passed_retry7_unconsumed_real_dev_failed"
+    assert entry["status"] == "dev_passed_retry7_unconsumed_real_dev_failed_antialiasing_gap"
     if entry["execution_authorized"]:
         assert source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
 
@@ -85,7 +85,7 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["synthetic_negative_proposal_count"] == 231211
     assert entry["morphology_diagnosis_sha256"] == config["morphology_diagnosis_sha256"]
     assert entry["morphology_gap_sha256"] == config["morphology_gap_sha256"]
-    assert entry["status"] == "dev_passed_retry7_unconsumed_real_dev_failed"
+    assert entry["status"] == "dev_passed_retry7_unconsumed_real_dev_failed_antialiasing_gap"
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["real_dev_authorized"] is False
@@ -247,8 +247,8 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["retry3_vs_retry2_recall_delta"] == -0.04940119760479042
     assert entry["retry3_vs_retry2_false_positives_delta"] == -2808
     assert entry["retry3_vs_retry2_above_threshold_false_candidates_delta"] == -9920
-    assert entry["spatial_morphology_diagnostic_required"] is True
-    assert entry["retry7_morphology_diagnosis_required"] is True
+    assert entry["spatial_morphology_diagnostic_required"] is False
+    assert entry["retry7_morphology_diagnosis_required"] is False
     assert entry["retry7_vs_retry3_precision_delta"] == -0.09009361841827799
     assert entry["retry7_vs_retry3_recall_delta"] == 0.190119760479042
     assert entry["retry7_vs_retry3_false_positives_delta"] == 15134
@@ -256,7 +256,7 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["retry3_real_dev_result_path"].endswith("V24-RETRY3-REAL-DEV-STAGES.json")
     assert entry["retry3_real_dev_model_sha256"] == "0d80d1994d7b33241c795c9e6f92c802750555a62c3cd3335777eb969fb5083a"
     assert entry["retry2_dev_gate_passed"] is True
-    assert entry["execution_blocker"] is None
+    assert entry["execution_blocker"] == "deterministic anti-aliased marker and line rendering across both synthetic splits, regenerate audits, and re-pass synthetic gates before another model or real-dev run"
 
 def test_train_examples_preserve_mask_crossing_positive():
     from ml.markers.center.mask_preserving_v24.train_p1 import _examples
@@ -308,7 +308,7 @@ def test_retry7_records_unconsumed_synthetic_dev_pass():
     assert result["real_sealed_reads"] == 0
     assert result["sealed_runs"] == 0
     assert digest(result_path) == "6fc74bc7e0aa6c36d7dd0aac51af014ad5875261f9e7a1cb113e13727287d9be"
-    assert entry["status"] == "dev_passed_retry7_unconsumed_real_dev_failed"
+    assert entry["status"] == "dev_passed_retry7_unconsumed_real_dev_failed_antialiasing_gap"
     assert entry["dev_passed_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
     assert entry["candidate_consumed"] is False
@@ -410,3 +410,65 @@ def test_retry7_records_unconsumed_synthetic_dev_pass():
     assert real_dev["pixel_output"] is False
     assert real_dev["training_use"] is False
     assert real_dev["candidate_selection"] is False
+    morphology_path = ROOT / "ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY7_MORPHOLOGY_DIAGNOSIS.json"
+    morphology = json.loads(morphology_path.read_text())
+    assert digest(morphology_path) == "16b9ed50655b6767affdb927106c5b2661d2fce388849d8c80aa5ac0165ebf78"
+    assert morphology["accepted_generic_false_positive_count"] == 46
+    assert morphology["binding"]["model_sha256"] == "7932b008a9c4372c832215f2f8732c59c59012a25aa4ad2d12cfeaed404bbe3c"
+    assert morphology["scope"]["scene_count"] == 167
+    assert morphology["scope"]["threshold"] == 0.25
+    assert morphology["scope"]["optimizer_steps"] == 0
+    assert morphology["scope"]["private_data"] is False
+    assert morphology["scope"]["real_dev_reads"] == 0
+    assert morphology["scope"]["real_sealed_reads"] == 0
+    assert morphology["scope"]["synthetic_only"] is True
+    assert morphology["threshold_change_proposed"] is False
+    gap_path = ROOT / "docs/GOAL-22-PHASE-4R-V24-RETRY7-MORPHOLOGY-GAP.json"
+    gap = json.loads(gap_path.read_text())
+    assert digest(gap_path) == "163ae1471792925b6b23c3a6fd26d1ae6d16637864180eaafd179875964afa36"
+    assert gap["real_dev_morphology_run"] == {
+        "successful_projects": 120,
+        "failure_count": 0,
+        "proposal_count": 1358010,
+        "positive_proposal_count": 9849,
+        "negative_below_threshold_count": 1283477,
+        "negative_above_threshold_count": 64684,
+        "mean_project_runtime_ms": 3828.7179225000004,
+        "total_runtime_ms": 459446.15070000006,
+        "case_level_output": False,
+        "truth_rows_output": False,
+        "pixel_output": False,
+        "training_use": False,
+        "candidate_selection": False,
+    }
+    assert gap["rate_comparison"]["synthetic_negative_below_threshold_count"] == 229465
+    assert gap["rate_comparison"]["synthetic_negative_above_threshold_count"] == 1746
+    assert gap["rate_comparison"]["real_to_synthetic_rate_ratio"] == 6.353592565545439
+    assert gap["confidence_comparison"]["synthetic_positive_probability"]["median"] == 0.9933367967605591
+    assert gap["confidence_comparison"]["real_positive_probability"]["median"] == 0.07347214221954346
+    assert gap["scope"]["real_sealed_reads"] == 0
+    assert gap["scope"]["optimizer_steps_on_private_data"] == 0
+    assert gap["scope"]["threshold_change_proposed"] is False
+    assert gap["scope"]["candidate_selected_on_real_dev"] is False
+    assert gap["diagnosis"]["responsible_subsystem"] == "synthetic marker proposal generator"
+    assert "anti-aliased marker and line rendering" in gap["diagnosis"]["permitted_next_change"]
+    assert entry["retry7_morphology_diagnosis_path"].endswith("V24_RETRY7_MORPHOLOGY_DIAGNOSIS.json")
+    assert entry["retry7_morphology_diagnosis_sha256"] == "16b9ed50655b6767affdb927106c5b2661d2fce388849d8c80aa5ac0165ebf78"
+    assert entry["retry7_morphology_gap_path"].endswith("V24-RETRY7-MORPHOLOGY-GAP.json")
+    assert entry["retry7_morphology_gap_sha256"] == "163ae1471792925b6b23c3a6fd26d1ae6d16637864180eaafd179875964afa36"
+    assert entry["retry7_morphology_synthetic_positive_count"] == 3258
+    assert entry["retry7_morphology_synthetic_negative_below_threshold"] == 229465
+    assert entry["retry7_morphology_synthetic_negative_above_threshold"] == 1746
+    assert entry["retry7_morphology_accepted_generic_false_positives"] == 46
+    assert entry["retry7_morphology_real_dev_projects"] == 120
+    assert entry["retry7_morphology_real_dev_failures"] == 0
+    assert entry["retry7_morphology_real_dev_proposals"] == 1358010
+    assert entry["retry7_morphology_real_dev_positive_proposals"] == 9849
+    assert entry["retry7_morphology_real_dev_negative_below_threshold"] == 1283477
+    assert entry["retry7_morphology_real_dev_negative_above_threshold"] == 64684
+    assert entry["retry7_morphology_real_dev_runtime_ms"] == 459446.1507
+    assert entry["retry7_morphology_real_to_synthetic_above_rate_ratio"] == 6.353592565545439
+    assert entry["retry7_morphology_synthetic_positive_median_probability"] == 0.9933367967605591
+    assert entry["retry7_morphology_real_positive_median_probability"] == 0.07347214221954346
+    assert entry["retry7_morphology_gap_blocker"] == "deterministic anti-aliased marker and line rendering across both synthetic splits, regenerate audits, and re-pass synthetic gates before another model or real-dev run"
+    assert entry["execution_blocker"] == entry["retry7_morphology_gap_blocker"]
