@@ -16,7 +16,7 @@ import torch
 from ml.markers.center.mask_preserving_v24.mask_preserving import extract_proposals
 
 from .generator import ANTI_ALIAS_BLUR_RADII, PATCH, SCENE_COUNT, TOPOLOGY_TARGETS, _quantiles, build_split
-from .negative_sampler import CONNECTOR_ANCHOR_MAX_DISTANCE_PX, CONNECTOR_ENDPOINT_OFFSET_PX, TOPOLOGY_HARD_RADIUS_PX, TOPOLOGY_KINDS, TOPOLOGY_SAMPLER_RADIUS_PX, sample_negatives
+from .negative_sampler import CONNECTOR_ANCHOR_MAX_DISTANCE_PX, CONNECTOR_ENDPOINT_OFFSET_PX, GENERIC_CONNECTOR_BAND_RADIUS_PX, TOPOLOGY_HARD_RADIUS_PX, TOPOLOGY_KINDS, TOPOLOGY_SAMPLER_RADIUS_PX, sample_negatives
 
 REAL_NEGATIVE_GATES = {
     "ink_max_minimum": 0.11372548341751099,
@@ -294,6 +294,10 @@ def audit() -> dict[str, object]:
             "topology_hard_capacity": sampled.topology_hard_capacity,
             "topology_hard_selected": sampled.topology_hard_selected,
             "topology_hard_all_eligible_retained": sampled.topology_hard_capacity == sampled.topology_hard_selected,
+            "generic_connector_band_radius_px": GENERIC_CONNECTOR_BAND_RADIUS_PX,
+            "generic_connector_band_capacity": sampled.capacities["generic_connector_band"],
+            "generic_connector_band_selected": sampled.counts["generic_connector_band"],
+            "generic_connector_band_selected_index_sha256": sampled.generic_connector_band_selected_index_sha256,
             "hard_training_total": sampled.hard_training_total,
             "selected_index_sha256": sampled.selected_index_sha256,
             "topology_selected_index_sha256": sampled.topology_selected_index_sha256,

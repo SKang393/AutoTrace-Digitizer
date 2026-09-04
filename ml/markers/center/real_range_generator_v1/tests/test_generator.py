@@ -101,3 +101,7 @@ def test_v24_ink_supported_proposal_stream_is_aggregate_and_deterministic() -> N
     assert result["positive_morphology_gate_split"] == "train_and_dev"
     assert result["sampler"]["negative_total"] == 32580
     assert result["sampler"]["topology_all_eligible_retained"] is True
+    assert result["sampler"]["generic_connector_band_radius_px"] == 4.0
+    assert result["sampler"]["generic_connector_band_capacity"] == 50373
+    assert result["sampler"]["generic_connector_band_selected"] == 6720
+    assert result["sampler"]["generic_connector_band_selected_index_sha256"] == "4e58e9e353a0ff912bccb28845e7e1d619d4903929f9cf49c6244dc5017fc96a"

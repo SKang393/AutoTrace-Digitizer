@@ -24,6 +24,7 @@ LEGACY_HARD_KINDS = ("text", "line_intersection", "axis")
 LEGACY_HARD_RADIUS_PX = 8.0
 CONNECTOR_ENDPOINT_OFFSET_PX = 8.0
 CONNECTOR_ANCHOR_MAX_DISTANCE_PX = 4.0
+GENERIC_CONNECTOR_BAND_RADIUS_PX = 4.0
 # Compatibility export for the deferred V24 trainer; endpoint selection no
 # longer consumes these legacy fractional anchors.
 CONNECTOR_ANCHOR_FRACTIONS = (1.0 / 3.0, 2.0 / 3.0)
@@ -33,7 +34,8 @@ QUOTAS = {
     "faint_p05": 1303,
     "ocr_heavy": 1629,
     "artifact": 1629,
-    "generic": 21681,
+    "generic_connector_band": 6720,
+    "generic": 14961,
 }
 
 
@@ -57,6 +59,7 @@ class SampledNegatives:
     topology_hard_capacity: dict[str, int] | None = None
     topology_hard_selected: dict[str, int] | None = None
     hard_training_total: int = 0
+    generic_connector_band_selected_index_sha256: str = ""
 
     @property
     def total(self) -> int:
@@ -130,6 +133,46 @@ def _connector_anchor_indices(scene: Any, coordinates: torch.Tensor, labels: tor
     return selected
 
 
+def _connecting_segment_distances(scene: Any, coordinates: torch.Tensor) -> torch.Tensor:
+    """Return each proposal's distance to the nearest center-to-center segment."""
+    centers = torch.tensor(scene.centers, dtype=coordinates.dtype, device=coordinates.device)
+    starts, vectors = centers[:-1], centers[1:] - centers[:-1]
+    points = coordinates.unsqueeze(1)
+    offset = points - starts.unsqueeze(0)
+    lengths_squared = (vectors * vectors).sum(dim=1).clamp_min(1e-12)
+    projection = (offset * vectors.unsqueeze(0)).sum(dim=2) / lengths_squared.unsqueeze(0)
+    projection = projection.clamp(0.0, 1.0)
+    nearest = starts.unsqueeze(0) + projection.unsqueeze(2) * vectors.unsqueeze(0)
+    return torch.linalg.vector_norm(points - nearest, dim=2).amin(dim=1)
+
+
+def _generic_connector_band_indices(
+    scene: Any,
+    coordinates: torch.Tensor,
+    labels: torch.Tensor,
+    features: dict[str, torch.Tensor],
+    legacy_hard_indices: set[int],
+    topology_by_index: dict[int, str],
+    connector_indices: set[int],
+) -> set[int]:
+    """Select nonpositive, nonreserved proposals in the fixed connector band."""
+    eligible = labels <= 0.5
+    eligible &= ~torch.tensor(
+        [index in legacy_hard_indices or index in topology_by_index or index in connector_indices
+         for index in range(len(coordinates))],
+        dtype=torch.bool,
+        device=coordinates.device,
+    )
+    eligible &= ~(
+        features["faint_low"]
+        | features["faint_p05"]
+        | features["ocr_heavy"]
+        | features["artifact"]
+    )
+    eligible &= _connecting_segment_distances(scene, coordinates) <= GENERIC_CONNECTOR_BAND_RADIUS_PX
+    return set(torch.nonzero(eligible, as_tuple=False).flatten().tolist())
+
+
 def sample_negatives(
     records: Iterable[tuple[Any, torch.Tensor, torch.Tensor, torch.Tensor]],
     *,
@@ -155,6 +198,7 @@ def sample_negatives(
     connector_pools: set[tuple[str, int, int]] = set()
     connector_anchor_target_count = 0
     generic_remainder_selected = 0
+    generic_connector_band_selected_index_sha256 = ""
     selections: list[list[int]] = []
     capacities = {name: 0 for name in target}
     for scene_number, (scene, proposals, labels, hard) in enumerate(records):
@@ -168,6 +212,9 @@ def sample_negatives(
         connector_indices = _connector_anchor_indices(scene, proposals.coordinates, labels)
         connector_anchor_target_count += max(0, (len(scene.centers) - 1) * 2)
         topology_by_index = {index: kind for kind in TOPOLOGY_KINDS for index in topology[kind]}
+        generic_connector_band_indices = _generic_connector_band_indices(
+            scene, proposals.coordinates, labels, features, legacy_hard_indices,
+            topology_by_index, connector_indices)
         for index in torch.nonzero(~positive, as_tuple=False).flatten().tolist():
             if index in legacy_hard_indices:
                 hard_existing_pool.add((_stable_key(seed, split, int(scene.seed), index, "hard_existing"), scene_number, index))
@@ -183,6 +230,8 @@ def sample_negatives(
                 name = "ocr_heavy"
             elif bool(features["artifact"][index]):
                 name = "artifact"
+            elif index in generic_connector_band_indices:
+                name = "generic_connector_band"
             else:
                 name = "generic"
             pools[name].append((_stable_key(seed, split, int(scene.seed), index, name), scene_number, index))
@@ -231,6 +280,8 @@ def sample_negatives(
             generic_remainder = generic_remaining[: quota - len(ranked_topology) - len(ranked_connectors)]
             generic_remainder_selected = len(generic_remainder)
             ranked = ranked_topology + ranked_connectors + generic_remainder
+        elif name == "generic_connector_band":
+            ranked = sorted(pools[name])[:quota]
         else:
             ranked = sorted(pools[name])[:quota]
         for _, scene_number, index in ranked:
@@ -276,6 +327,13 @@ def sample_negatives(
         if index in selected_sets[scene_number]:
             connector_selected += 1
             connector_digest.update(f"{scene_number}:{index}\n".encode("ascii"))
+    generic_connector_band_digest = hashlib.sha256()
+    for _, scene_number, index in sorted(
+        pools["generic_connector_band"], key=lambda item: (item[1], item[2])
+    ):
+        if index in selected_sets[scene_number]:
+            generic_connector_band_digest.update(f"{scene_number}:{index}\n".encode("ascii"))
+    generic_connector_band_selected_index_sha256 = generic_connector_band_digest.hexdigest()
     return SampledNegatives(
         selected, capacities, counts, digest.hexdigest(),
         {kind: len(topology_pools[kind]) for kind in TOPOLOGY_KINDS},
@@ -292,4 +350,5 @@ def sample_negatives(
         topology_hard_capacity,
         selected_topology_hard,
         len(selected_hard_pairs | set().union(*selected_topology_hard_pairs.values())),
+        generic_connector_band_selected_index_sha256,
     )
