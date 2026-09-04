@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "report_scope": "real_dev_marker_v24_mask_preserving_aggregate_only",
+  "real_dev_projects": 120,
+  "real_sealed_projects": 51,
+  "real_sealed_reads": 0,
+  "successful_projects": 120,
+  "failure_count": 0,
+  "true_positives": 1484,
+  "false_positives": 21112,
+  "false_negatives": 520,
+  "precision": 0.06567534076827757,
+  "recall": 0.7405189620758483,
+  "tolerance_px": 5,
+  "gates": {
+    "marker_center_precision": false,
+    "marker_center_recall": false
+  },
+  "mean_project_inference_ms": 3771.655806666668,
+  "total_runtime_ms": 452598.69680000015,
+  "assignments_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
+  "model_sha256": "7932b008a9c4372c832215f2f8732c59c59012a25aa4ad2d12cfeaed404bbe3c",
+  "upstream_ocr_payload_sha256": {
+    "detector": "474b8468dbd91416f4e4978dafc46cb2317775d59d821c0470e0cd3e0f6203db",
+    "official_recognizer": "7839f12b644f574eaf677e92a11bd3e337f4b2f910160666073888783fece743",
+    "numeric_recognizer": "9db95c41ce396e8b2dff3b525556615528a00ca87f4cc531274374b961417c84",
+    "ambiguity_recognizer": "b8e2773ca3966469081875fc36b3981ef4eb458356d8dfdae2be2722602f0096",
+    "official_alphabet": "8b31115bc8675a58b670879950b550e7d9840984954d9584d251fd72a764477a"
+  },
+  "masking_mode": "mask-preserving_v24_ink_supported_with_ocr_and_artifact_channels",
+  "policy_sha256": "aab9f2ab60cf166828f0928b8496f537341870fd457d0408952e22549fc53a56",
+  "failure_kinds": {},
+  "case_level_output": false,
+  "truth_rows_output": false,
+  "pixel_output": false,
+  "training_use": false,
+  "candidate_selection": false,
+  "mode": "v24-mask-preserving",
+  "candidate_revision": "marker-center-mask-preserving-v24",
+  "candidate_id": "P1",
+  "marker_search_bounds": "full_immutable_source_image",
+  "stage_counters": {
+    "proposal_grid_positions_considered": 6043845,
+    "low_ink_rejects": 4685835,
+    "ocr_mask_rejects": 0,
+    "artifact_mask_rejects": 0,
+    "emitted_proposals": 1358010,
+    "inference_outputs": 1358010,
+    "outputs_above_0_25": 68275,
+    "decoded_points_masked": 0,
+    "geometry_consensus_rejects_after_1px_refinement_attempts": 668,
+    "decoded_points_outside_plot": 1,
+    "candidates_before_nms": 67606,
+    "nms_suppressions": 45010,
+    "final_candidates": 22596
+  },
+  "pre_nms_true_positives": 1619,
+  "pre_nms_false_positives": 65987,
+  "pre_nms_false_negatives": 385,
+  "pre_nms_precision": 0.02394757861728249,
+  "pre_nms_recall": 0.8078842315369261,
+  "grid_proposal_match": {
+    "true_positives": 2004,
+    "false_positives": 6041841,
+    "false_negatives": 0,
+    "precision": 0.00033157700106471955,
+    "recall": 1
+  },
+  "ink_supported_proposal_match": {
+    "true_positives": 2004,
+    "false_positives": 1356006,
+    "false_negatives": 0,
+    "precision": 0.0014756886915412994,
+    "recall": 1
+  },
+  "ocr_unmasked_proposal_match": {
+    "true_positives": 2004,
+    "false_positives": 1356006,
+    "false_negatives": 0,
+    "precision": 0.0014756886915412994,
+    "recall": 1
+  },
+  "emitted_proposal_match": {
+    "true_positives": 2004,
+    "false_positives": 1356006,
+    "false_negatives": 0,
+    "precision": 0.0014756886915412994,
+    "recall": 1
+  },
+  "above_threshold_decoded_match": {
+    "true_positives": 1619,
+    "false_positives": 66656,
+    "false_negatives": 385,
+    "precision": 0.023712925668253386,
+    "recall": 0.8078842315369261
+  },
+  "truth_patch_distribution": {
+    "patch_count": 2004,
+    "patch_size_px": 33,
+    "ink_mean": {
+      "minimum": 0.025405570549960527,
+      "p05": 0.08884549530358135,
+      "p10": 0.10441851490566334,
+      "median": 0.18972253479248236,
+      "p90": 0.47732296304159805,
+      "p95": 0.5558205991956047,
+      "maximum": 0.9142620501658367
+    },
+    "ink_center5x5_mean": {
+      "minimum": 0,
+      "p05": 0.007058823108673095,
+      "p10": 0.36376468896865843,
+      "median": 0.9659607827663421,
+      "p90": 1,
+      "p95": 1,
+      "maximum": 1
+    },
+    "ink_maximum": {
+      "minimum": 0.4156862497329712,
+      "p05": 0.7921568751335144,
+      "p10": 0.8078431487083435,
+      "median": 1,
+      "p90": 1,
+      "p95": 1,
+      "maximum": 1
+    },
+    "ocr_mask_mean": {
+      "minimum": 0,
+      "p05": 0,
+      "p10": 0,
+      "median": 0,
+      "p90": 0,
+      "p95": 0,
+      "maximum": 1
+    },
+    "ocr_mask_maximum": {
+      "minimum": 0,
+      "p05": 0,
+      "p10": 0,
+      "median": 0,
+      "p90": 0,
+      "p95": 0,
+      "maximum": 1
+    },
+    "artifact_mask_mean": {
+      "minimum": 0,
+      "p05": 0,
+      "p10": 0,
+      "median": 0,
+      "p90": 0.12121212121212122,
+      "p95": 0.12121212121212122,
+      "maximum": 0.2396694214876033
+    },
+    "artifact_mask_maximum": {
+      "minimum": 0,
+      "p05": 0,
+      "p10": 0,
+      "median": 0,
+      "p90": 1,
+      "p95": 1,
+      "maximum": 1
+    },
+    "ocr_center5x5_hard_reject_count": 75,
+    "artifact_center5x5_hard_reject_count": 332,
+    "hard_mask_threshold": 0.3499999940395355
+  }
+}

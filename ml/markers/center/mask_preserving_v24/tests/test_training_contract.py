@@ -49,7 +49,7 @@ def test_runner_source_bundle_is_relative_and_present():
     assert entry["p1_runner_source_bundle_sha256"] == config["expected_runner_source_bundle_sha256"]
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert entry["status"] == "dev_passed_retry7_unconsumed"
+    assert entry["status"] == "dev_passed_retry7_unconsumed_real_dev_failed"
     if entry["execution_authorized"]:
         assert source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
 
@@ -85,7 +85,7 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["synthetic_negative_proposal_count"] == 231211
     assert entry["morphology_diagnosis_sha256"] == config["morphology_diagnosis_sha256"]
     assert entry["morphology_gap_sha256"] == config["morphology_gap_sha256"]
-    assert entry["status"] == "dev_passed_retry7_unconsumed"
+    assert entry["status"] == "dev_passed_retry7_unconsumed_real_dev_failed"
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["real_dev_authorized"] is False
@@ -218,26 +218,26 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["negative_sampler_topology_hard_selected"] == {"topology_junction": 417, "topology_fragment": 484}
     assert entry["negative_sampler_hard_training_total"] == 6856
     assert entry["negative_sampler_generic_remainder_selected"] == 9409
-    assert entry["real_dev_result_path"].endswith("V24-RETRY3-REAL-DEV-STAGES.json")
-    assert entry["real_dev_result_sha256"] == "1e471a179114e078f101edffcf04aea9e3b29ab72a3d31649695726465661c90"
+    assert entry["real_dev_result_path"].endswith("V24-RETRY7-REAL-DEV-STAGES.json")
+    assert entry["real_dev_result_sha256"] == "a127305927e73f73450c351a60d6835e90f9125468a7bcb7f7a098cfe80ce4ff"
     assert digest(ROOT / entry["real_dev_result_path"]) == entry["real_dev_result_sha256"]
     assert entry["real_dev_projects"] == 120
     assert entry["real_dev_successful_projects"] == 120
     assert entry["real_dev_failure_count"] == 0
-    assert entry["real_dev_true_positives"] == 1103
-    assert entry["real_dev_false_positives"] == 5978
-    assert entry["real_dev_false_negatives"] == 901
-    assert entry["real_dev_precision"] == 0.15576895918655556
-    assert entry["real_dev_recall"] == 0.5503992015968064
-    assert entry["real_dev_pre_nms_true_positives"] == 1126
-    assert entry["real_dev_pre_nms_false_positives"] == 11273
-    assert entry["real_dev_pre_nms_false_negatives"] == 878
-    assert entry["real_dev_above_threshold_outputs"] == 12480
-    assert entry["real_dev_above_threshold_true_positives"] == 1126
-    assert entry["real_dev_above_threshold_false_positives"] == 11354
-    assert entry["real_dev_final_outputs"] == 7081
-    assert entry["real_dev_elapsed_ms"] == 436819.2499
-    assert entry["real_dev_model_sha256"] == "0d80d1994d7b33241c795c9e6f92c802750555a62c3cd3335777eb969fb5083a"
+    assert entry["real_dev_true_positives"] == 1484
+    assert entry["real_dev_false_positives"] == 21112
+    assert entry["real_dev_false_negatives"] == 520
+    assert entry["real_dev_precision"] == 0.06567534076827757
+    assert entry["real_dev_recall"] == 0.7405189620758483
+    assert entry["real_dev_pre_nms_true_positives"] == 1619
+    assert entry["real_dev_pre_nms_false_positives"] == 65987
+    assert entry["real_dev_pre_nms_false_negatives"] == 385
+    assert entry["real_dev_above_threshold_outputs"] == 68275
+    assert entry["real_dev_above_threshold_true_positives"] == 1619
+    assert entry["real_dev_above_threshold_false_positives"] == 66656
+    assert entry["real_dev_final_outputs"] == 22596
+    assert entry["real_dev_elapsed_ms"] == 452598.6968
+    assert entry["real_dev_model_sha256"] == "7932b008a9c4372c832215f2f8732c59c59012a25aa4ad2d12cfeaed404bbe3c"
     assert entry["real_dev_case_level_output"] is False
     assert entry["real_dev_truth_rows_output"] is False
     assert entry["real_dev_pixel_output"] is False
@@ -247,7 +247,14 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["retry3_vs_retry2_recall_delta"] == -0.04940119760479042
     assert entry["retry3_vs_retry2_false_positives_delta"] == -2808
     assert entry["retry3_vs_retry2_above_threshold_false_candidates_delta"] == -9920
-    assert entry["spatial_morphology_diagnostic_required"] is False
+    assert entry["spatial_morphology_diagnostic_required"] is True
+    assert entry["retry7_morphology_diagnosis_required"] is True
+    assert entry["retry7_vs_retry3_precision_delta"] == -0.09009361841827799
+    assert entry["retry7_vs_retry3_recall_delta"] == 0.190119760479042
+    assert entry["retry7_vs_retry3_false_positives_delta"] == 15134
+    assert entry["retry7_vs_retry3_above_threshold_false_candidates_delta"] == 55302
+    assert entry["retry3_real_dev_result_path"].endswith("V24-RETRY3-REAL-DEV-STAGES.json")
+    assert entry["retry3_real_dev_model_sha256"] == "0d80d1994d7b33241c795c9e6f92c802750555a62c3cd3335777eb969fb5083a"
     assert entry["retry2_dev_gate_passed"] is True
     assert entry["execution_blocker"] is None
 
@@ -301,14 +308,14 @@ def test_retry7_records_unconsumed_synthetic_dev_pass():
     assert result["real_sealed_reads"] == 0
     assert result["sealed_runs"] == 0
     assert digest(result_path) == "6fc74bc7e0aa6c36d7dd0aac51af014ad5875261f9e7a1cb113e13727287d9be"
-    assert entry["status"] == "dev_passed_retry7_unconsumed"
+    assert entry["status"] == "dev_passed_retry7_unconsumed_real_dev_failed"
     assert entry["dev_passed_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
     assert entry["candidate_consumed"] is False
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["real_dev_authorized"] is False
-    assert entry["real_dev_reads"] == 0
+    assert entry["real_dev_reads"] == 120
     assert entry["real_dev_gate_passed"] is False
     assert entry["real_sealed_authorized"] is False
     assert entry["real_sealed_reads"] == 0
@@ -376,3 +383,30 @@ def test_retry7_records_unconsumed_synthetic_dev_pass():
     assert entry["retry7_accepted_false_positive_connector_anchor"] == 0
     assert entry["retry7_prohibited_structure_hits"] == 0
     assert entry["p1_runner_source_bundle_sha256"] == "f884c1cbaa51ff8a0a859cf89662c9bba3dcc7c94a0f2d920184ddbcdab68951"
+    real_dev_path = ROOT / "docs/GOAL-22-PHASE-4-V24-RETRY7-REAL-DEV-STAGES.json"
+    real_dev = json.loads(real_dev_path.read_text())
+    assert digest(real_dev_path) == "a127305927e73f73450c351a60d6835e90f9125468a7bcb7f7a098cfe80ce4ff"
+    assert real_dev["real_dev_projects"] == 120
+    assert real_dev["successful_projects"] == 120
+    assert real_dev["failure_count"] == 0
+    assert real_dev["real_sealed_reads"] == 0
+    assert real_dev["true_positives"] == 1484
+    assert real_dev["false_positives"] == 21112
+    assert real_dev["false_negatives"] == 520
+    assert real_dev["precision"] == 0.06567534076827757
+    assert real_dev["recall"] == 0.7405189620758483
+    assert real_dev["stage_counters"]["outputs_above_0_25"] == 68275
+    assert real_dev["stage_counters"]["final_candidates"] == 22596
+    assert real_dev["pre_nms_true_positives"] == 1619
+    assert real_dev["pre_nms_false_positives"] == 65987
+    assert real_dev["pre_nms_false_negatives"] == 385
+    assert real_dev["above_threshold_decoded_match"]["true_positives"] == 1619
+    assert real_dev["above_threshold_decoded_match"]["false_positives"] == 66656
+    assert real_dev["above_threshold_decoded_match"]["false_negatives"] == 385
+    assert real_dev["total_runtime_ms"] == 452598.69680000015
+    assert real_dev["model_sha256"] == "7932b008a9c4372c832215f2f8732c59c59012a25aa4ad2d12cfeaed404bbe3c"
+    assert real_dev["case_level_output"] is False
+    assert real_dev["truth_rows_output"] is False
+    assert real_dev["pixel_output"] is False
+    assert real_dev["training_use"] is False
+    assert real_dev["candidate_selection"] is False
