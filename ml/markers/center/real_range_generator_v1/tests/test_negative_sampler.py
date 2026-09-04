@@ -60,9 +60,10 @@ def test_full_train_sampler_matches_preregistered_contract():
         "generic": 21681,
     }
     assert sampled.selected_index_sha256 == "d2e1c5f22ba8657b04031242c1528a165730f56b50ccc56fdd89eb2e0c01bf1c"
+    assert sampled.capacities["hard_existing"] == 6012
     assert sampled.topology_capacity == {"topology_junction": 4505, "topology_fragment": 4574}
     assert sampled.topology_selected == sampled.topology_capacity
-    assert sampled.topology_selected_index_sha256 == "92d8075523ac528eebf8777b9fbe77d7eb254aebbc4521e0b45967f6e3b78ea8"
+    assert sampled.topology_selected_index_sha256 == "b160b1dcfd9b0e4af8653bc8126ab26af31532754fd74045dabaf7badc6c6bf5"
     assert sampled.topology_sampler_radius_px == TOPOLOGY_SAMPLER_RADIUS_PX == 12.0
     assert sampled.connector_anchor_target_count == 3674
     assert sampled.connector_anchor_capacity == 3671
@@ -71,4 +72,7 @@ def test_full_train_sampler_matches_preregistered_contract():
     assert sampled.connector_anchor_max_distance_px == CONNECTOR_ANCHOR_MAX_DISTANCE_PX == 4.0
     assert sampled.connector_anchor_selected_index_sha256 == "2d9b5b6ffa7e70c390a7aa38ffe851871e8a5cebac3831aac616f60a0e141c84"
     assert sampled.generic_remainder_selected == 9409
+    assert sampled.topology_hard_capacity == {"topology_junction": 417, "topology_fragment": 484}
+    assert sampled.topology_hard_selected == sampled.topology_hard_capacity
+    assert sampled.hard_training_total == 6856
     assert patches.shape == (35838, 3, 33, 33)

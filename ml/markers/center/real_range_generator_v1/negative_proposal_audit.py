@@ -16,7 +16,7 @@ import torch
 from ml.markers.center.mask_preserving_v24.mask_preserving import extract_proposals
 
 from .generator import PATCH, TOPOLOGY_TARGETS, _quantiles, build_split
-from .negative_sampler import CONNECTOR_ANCHOR_MAX_DISTANCE_PX, CONNECTOR_ENDPOINT_OFFSET_PX, TOPOLOGY_SAMPLER_RADIUS_PX, sample_negatives
+from .negative_sampler import CONNECTOR_ANCHOR_MAX_DISTANCE_PX, CONNECTOR_ENDPOINT_OFFSET_PX, TOPOLOGY_HARD_RADIUS_PX, TOPOLOGY_KINDS, TOPOLOGY_SAMPLER_RADIUS_PX, sample_negatives
 
 REAL_NEGATIVE_GATES = {
     "ink_max_minimum": 0.11372548341751099,
@@ -170,6 +170,8 @@ def _train_sampler_records() -> list[tuple[object, object, torch.Tensor, torch.T
         for kind, x, y in scene.hard_negatives:
             if kind in {"text", "line_intersection", "axis"}:
                 hard |= torch.cdist(batch.coordinates, torch.tensor(((x, y),), dtype=batch.coordinates.dtype)).squeeze(1).le(8.0)
+            elif kind in TOPOLOGY_KINDS:
+                hard |= torch.cdist(batch.coordinates, torch.tensor(((x, y),), dtype=batch.coordinates.dtype)).squeeze(1).le(TOPOLOGY_HARD_RADIUS_PX)
         records.append((scene, batch, labels, hard))
     return records
 
@@ -270,11 +272,17 @@ def audit() -> dict[str, object]:
             "split": "train",
             "seed": 20260904,
             "negative_total": sampled.total,
+            "hard_existing_capacity": sampled.capacities["hard_existing"],
             "topology_radius_px": 16.0,
             "topology_sampler_radius_px": sampled.topology_sampler_radius_px,
             "topology_capacity": sampled.topology_capacity,
             "topology_selected": sampled.topology_selected,
             "topology_all_eligible_retained": sampled.topology_capacity == sampled.topology_selected,
+            "topology_hard_radius_px": 4.0,
+            "topology_hard_capacity": sampled.topology_hard_capacity,
+            "topology_hard_selected": sampled.topology_hard_selected,
+            "topology_hard_all_eligible_retained": sampled.topology_hard_capacity == sampled.topology_hard_selected,
+            "hard_training_total": sampled.hard_training_total,
             "selected_index_sha256": sampled.selected_index_sha256,
             "topology_selected_index_sha256": sampled.topology_selected_index_sha256,
             "connector_endpoint_offset_px": CONNECTOR_ENDPOINT_OFFSET_PX,

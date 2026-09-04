@@ -17,8 +17,10 @@ from ml.markers.center.real_range_generator_v1.negative_sampler import _features
 from ml.markers.center.real_range_generator_v1.negative_sampler import (
     CONNECTOR_ANCHOR_FRACTIONS,
     CONNECTOR_ANCHOR_MAX_DISTANCE_PX,
+    CONNECTOR_ENDPOINT_OFFSET_PX,
     TOPOLOGY_KINDS,
     TOPOLOGY_RADIUS_PX,
+    TOPOLOGY_SAMPLER_RADIUS_PX,
     _connector_anchor_indices,
     _topology_indices,
 )
@@ -39,6 +41,9 @@ RETRY4_DEV_SPLIT_SHA256 = "f453e50e228f54e15bafba83b1a5dda422c435a555e9083dfea18
 RETRY5_ONNX_SHA256 = "d3445f0b1bf0e97a98942133d45341cae75548887be853743e887832cacad7bd"
 RETRY5_GENERATOR_AUDIT_SHA256 = "9562044526bce45b48254472346ccc1640c6e254915b9e744525154144121748"
 RETRY5_DEV_SPLIT_SHA256 = "f453e50e228f54e15bafba83b1a5dda422c435a555e9083dfea18457ed38204d"
+RETRY6_ONNX_SHA256 = "31d473d6c24bf21edc1cbfb25f7da35eabfed7cbf8afc13bf52bef23d06bfeb9"
+RETRY6_GENERATOR_AUDIT_SHA256 = "9562044526bce45b48254472346ccc1640c6e254915b9e744525154144121748"
+RETRY6_DEV_SPLIT_SHA256 = "f453e50e228f54e15bafba83b1a5dda422c435a555e9083dfea18457ed38204d"
 
 
 def _sha(path: Path) -> str:
@@ -110,16 +115,16 @@ def _matched_truths(predictions, centers):
     return used_p, used_t
 
 
-def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False) -> dict:
+def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False, retry6: bool = False) -> dict:
     started = time.perf_counter()
     if not model_path.is_file():
         raise FileNotFoundError(model_path)
     model_hash = _sha(model_path)
-    if retry4 and retry5:
-        raise ValueError("retry4 and retry5 modes are mutually exclusive")
-    expected_model = RETRY5_ONNX_SHA256 if retry5 else RETRY4_ONNX_SHA256 if retry4 else "aee3b4ba47197d84eeecacc631730e67fd99c261b913643f95c25a8ea2436c11"
+    if sum((retry4, retry5, retry6)) > 1:
+        raise ValueError("retry modes are mutually exclusive")
+    expected_model = RETRY6_ONNX_SHA256 if retry6 else RETRY5_ONNX_SHA256 if retry5 else RETRY4_ONNX_SHA256 if retry4 else "aee3b4ba47197d84eeecacc631730e67fd99c261b913643f95c25a8ea2436c11"
     if model_hash != expected_model:
-        mode = "retry5" if retry5 else "retry4" if retry4 else "retry1"
+        mode = "retry6" if retry6 else "retry5" if retry5 else "retry4" if retry4 else "retry1"
         raise ValueError(f"{mode} ONNX hash mismatch: expected {expected_model}, got {model_hash}")
     sampler_path = ROOT / "ml/markers/center/real_range_generator_v1/negative_sampler.py"
     audit_path = ROOT / "ml/markers/center/real_range_generator_v1/AUDIT.json"
@@ -127,11 +132,11 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False) -
     audit_hash = _sha(audit_path)
     audit_record = json.loads(audit_path.read_text(encoding="utf-8"))
     actual_dev_split_sha256 = audit_record["splits"]["dev"]["aggregate_sha256"]
-    expected_audit = RETRY5_GENERATOR_AUDIT_SHA256 if retry5 else RETRY4_GENERATOR_AUDIT_SHA256
-    expected_dev = RETRY5_DEV_SPLIT_SHA256 if retry5 else RETRY4_DEV_SPLIT_SHA256
-    if (retry4 or retry5) and audit_hash != expected_audit:
+    expected_audit = RETRY6_GENERATOR_AUDIT_SHA256 if retry6 else RETRY5_GENERATOR_AUDIT_SHA256 if retry5 else RETRY4_GENERATOR_AUDIT_SHA256
+    expected_dev = RETRY6_DEV_SPLIT_SHA256 if retry6 else RETRY5_DEV_SPLIT_SHA256 if retry5 else RETRY4_DEV_SPLIT_SHA256
+    if (retry4 or retry5 or retry6) and audit_hash != expected_audit:
         raise ValueError(f"retry audit hash mismatch: expected {expected_audit}, got {audit_hash}")
-    if (retry4 or retry5) and actual_dev_split_sha256 != expected_dev:
+    if (retry4 or retry5 or retry6) and actual_dev_split_sha256 != expected_dev:
         raise ValueError(f"retry dev split hash mismatch: expected {expected_dev}, got {actual_dev_split_sha256}")
     session = ort.InferenceSession(str(model_path), providers=["CPUExecutionProvider"])
     if session.get_providers()[0] != "CPUExecutionProvider":
@@ -148,21 +153,30 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False) -
     connector_capacity = connector_above = 0
     retry5_above = defaultdict(int)
     retry5_fp = defaultdict(int)
+    retry6_above = defaultdict(int)
+    retry6_fp = defaultdict(int)
+    prohibited_by_kind = defaultdict(int)
+    prohibited_by_source = defaultdict(int)
+    prohibited_confidence = []
+    prohibited_distance = []
+    prohibited_ocr = []
+    prohibited_artifact = []
+    prohibited_morphology = defaultdict(list)
     for scene in scenes:
         proposals = extract_proposals(scene.tensor)
         labels, hard = _labels(scene, proposals.coordinates)
         names = _strata(proposals.patches, hard, labels)
-        topology = _topology_indices(scene, proposals.coordinates, labels) if (retry4 or retry5) else {kind: set() for kind in TOPOLOGY_KINDS}
+        topology = _topology_indices(scene, proposals.coordinates, labels) if (retry4 or retry5 or retry6) else {kind: set() for kind in TOPOLOGY_KINDS}
         topology_by_index = {index: kind for kind in TOPOLOGY_KINDS for index in topology[kind]}
-        connector_indices = _connector_anchor_indices(scene, proposals.coordinates, labels) if retry5 else set()
+        connector_indices = _connector_anchor_indices(scene, proposals.coordinates, labels) if (retry5 or retry6) else set()
         connector_indices -= set(topology_by_index)
         output = session.run([output_name], {input_name: proposals.patches.numpy().astype(np.float32, copy=False)})[0]
         probabilities = output[:, 0].astype(np.float64)
-        if retry4 or retry5:
+        if retry4 or retry5 or retry6:
             for kind in TOPOLOGY_KINDS:
                 topology_capacity[kind] += len(topology[kind])
                 topology_above[kind] += sum(int(probabilities[index] >= THRESHOLD) for index in topology[kind])
-        if retry5:
+        if retry5 or retry6:
             connector_capacity += len(connector_indices)
             connector_above += sum(int(probabilities[index] >= THRESHOLD) for index in connector_indices)
         for i, name in enumerate(names):
@@ -173,6 +187,8 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False) -
                 strata_above[name] += int(probabilities[i] >= THRESHOLD)
                 if retry5 and probabilities[i] >= THRESHOLD:
                     retry5_above[topology_by_index.get(i, "connector_anchor" if i in connector_indices else name)] += 1
+                if retry6 and probabilities[i] >= THRESHOLD:
+                    retry6_above[topology_by_index.get(i, "connector_anchor" if i in connector_indices else name)] += 1
         predictions = postprocess(scene, proposals, output)
         used_p, used_t = _matched_truths(predictions, scene.centers)
         totals["truth"] += len(scene.centers); totals["accepted"] += len(predictions)
@@ -186,10 +202,12 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False) -
                 continue
             if decoded:
                 _, _, source = min(decoded, key=lambda item: math.hypot(prediction.x-item[0], prediction.y-item[1]))
-                name = topology_by_index.get(source, "connector_anchor" if retry5 and source in connector_indices else names[source]) if (retry4 or retry5) else names[source]
+                name = topology_by_index.get(source, "connector_anchor" if (retry5 or retry6) and source in connector_indices else names[source]) if (retry4 or retry5 or retry6) else names[source]
                 accepted_fp[name or "unattributed"] += 1
                 if retry5:
                     retry5_fp[name or "unattributed"] += 1
+                if retry6:
+                    retry6_fp[name or "unattributed"] += 1
             else:
                 accepted_fp["unattributed"] += 1
         for local, center in enumerate(scene.centers):
@@ -198,19 +216,38 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False) -
             artifact = float(scene.tensor[2, max(0, y-2):y+3, max(0, x-2):x+3].max()) >= .35
             key = "both_masks" if ocr and artifact else "ocr_mask" if ocr else "artifact_mask" if artifact else "unmasked"
             scenario[key]["truth"] += 1; scenario[key]["tp"] += int(local in used_t); scenario[key]["fn"] += int(local not in used_t)
+        if retry6:
+            for prediction in predictions:
+                source = min(decoded, key=lambda item: math.hypot(prediction.x-item[0], prediction.y-item[1]))[2] if decoded else None
+                if source is None:
+                    continue
+                patch = proposals.patches[source]
+                source_name = topology_by_index.get(source, "connector_anchor" if source in connector_indices else names[source])
+                for kind, x, y in scene.hard_negatives:
+                    distance = math.hypot(prediction.x - x, prediction.y - y)
+                    if distance > TOLERANCE:
+                        continue
+                    prohibited_by_kind[kind] += 1
+                    prohibited_by_source[source_name or "unattributed"] += 1
+                    prohibited_confidence.append(float(output[source, 0]))
+                    prohibited_distance.append(distance)
+                    prohibited_ocr.append(float(patch[1].mean()))
+                    prohibited_artifact.append(float(patch[2].mean()))
+                    for key, value in _patch_morphology(patch).items():
+                        prohibited_morphology[key].append(float(value))
     for value in scenario.values():
         value["recall"] = value["tp"] / max(1, value["truth"])
     total_accepted = totals["tp"] + totals["fp"]
     report = {
-        "schema": "graphreader.marker-center-mask-preserving-v24-retry5-diagnosis.v1" if retry5 else "graphreader.marker-center-mask-preserving-v24-retry4-diagnosis.v1" if retry4 else "graphreader.marker-center-mask-preserving-v24-retry-diagnosis.v1",
+        "schema": "graphreader.marker-center-mask-preserving-v24-retry6-diagnosis.v1" if retry6 else "graphreader.marker-center-mask-preserving-v24-retry5-diagnosis.v1" if retry5 else "graphreader.marker-center-mask-preserving-v24-retry4-diagnosis.v1" if retry4 else "graphreader.marker-center-mask-preserving-v24-retry-diagnosis.v1",
         "revision": "marker-center-mask-preserving-v24",
         "scope": {"synthetic_only": True, "split": "real-range-generator-v1-dev", "scene_count": len(scenes),
                   "truth_count": totals["truth"], "label_positive_distance_px": 3.0, "threshold": THRESHOLD,
                   "private_data": False, "real_dev_reads": 0, "real_sealed_reads": 0, "optimizer_steps": 0,
-                  "case_ids_or_pixels_emitted": False, "retry_mode": "retry5" if retry5 else "retry4" if retry4 else "retry1"},
+                  "case_ids_or_pixels_emitted": False, "retry_mode": "retry6" if retry6 else "retry5" if retry5 else "retry4" if retry4 else "retry1"},
         "binding": {"model_path": model_path.name, "model_sha256": model_hash, "provider": session.get_providers()[0],
                     "input_shape": ["candidate_count", 3, 33, 33], "output_shape": ["candidate_count", 4],
-                    "generator_audit_sha256": audit_hash, "generator_dev_split_sha256": actual_dev_split_sha256 if retry4 else json.loads(config_path.read_text())["dev_split_sha256"],
+                    "generator_audit_sha256": audit_hash, "generator_dev_split_sha256": actual_dev_split_sha256 if (retry4 or retry5 or retry6) else json.loads(config_path.read_text())["dev_split_sha256"],
                     "negative_sampler_sha256": _sha(sampler_path), "negative_sampler_seed": 20260904,
                     "negative_sampler_priority": list(STRATA)},
         "proposals": {"positive_raw_probability": _quantiles(positives),
@@ -226,7 +263,7 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False) -
         "diagnostic_conclusion": "fixed-threshold failure concentration is reported by per-stratum above-threshold rates; no threshold change is proposed",
         "elapsed_ms": round((time.perf_counter() - started) * 1000, 3),
     }
-    if retry4 or retry5:
+    if retry4 or retry5 or retry6:
         report["topology"] = {"radius_px": TOPOLOGY_RADIUS_PX, "capacity": topology_capacity, "above_threshold": topology_above, "accepted_false_positive_attribution": {kind: int(accepted_fp.get(kind, 0)) for kind in TOPOLOGY_KINDS}}
     if retry5:
         report["retry5_attribution"] = {
@@ -235,6 +272,26 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False) -
             "connector_anchor_fractions": list(CONNECTOR_ANCHOR_FRACTIONS),
             "connector_anchor_max_distance_px": CONNECTOR_ANCHOR_MAX_DISTANCE_PX,
             "connector_anchor_capacity": int(connector_capacity),
+        }
+    if retry6:
+        report["retry6_attribution"] = {
+            "above_threshold": {**{kind: int(topology_above[kind]) for kind in TOPOLOGY_KINDS}, "connector_anchor": int(connector_above), **{name: int(value) for name, value in retry6_above.items() if name not in TOPOLOGY_KINDS and name != "connector_anchor"}},
+            "accepted_false_positives": {**{kind: int(accepted_fp.get(kind, 0)) for kind in TOPOLOGY_KINDS}, "connector_anchor": int(retry6_fp.get("connector_anchor", 0)), **{name: int(value) for name, value in retry6_fp.items() if name not in TOPOLOGY_KINDS and name != "connector_anchor"}},
+            "topology_capacity": {kind: int(topology_capacity[kind]) for kind in TOPOLOGY_KINDS},
+            "connector_anchor_capacity": int(connector_capacity),
+            "topology_sampler_radius_px": TOPOLOGY_SAMPLER_RADIUS_PX,
+            "connector_endpoint_offset_px": CONNECTOR_ENDPOINT_OFFSET_PX,
+            "connector_anchor_max_distance_px": CONNECTOR_ANCHOR_MAX_DISTANCE_PX,
+        }
+        report["prohibited_hit_attribution"] = {
+            "total": int(sum(prohibited_by_kind.values())),
+            "by_prohibited_kind": dict(sorted(prohibited_by_kind.items())),
+            "by_source_group": dict(sorted(prohibited_by_source.items())),
+            "confidence": _quantiles(prohibited_confidence),
+            "distance_px": _quantiles(prohibited_distance),
+            "ocr_mean": _quantiles(prohibited_ocr),
+            "artifact_mean": _quantiles(prohibited_artifact),
+            "morphology": {key: _quantiles(values) for key, values in sorted(prohibited_morphology.items())},
         }
     return report
 
@@ -277,17 +334,17 @@ def summarize_morphology(model_path: Path, *, retry3: bool = False) -> dict:
     return {"schema":f"graphreader.marker-center-mask-preserving-v24-{mode}-morphology-diagnosis.v1","revision":"marker-center-mask-preserving-v24","scope":{"synthetic_only":True,"split":"real-range-generator-v1-dev","scene_count":len(scenes),"threshold":THRESHOLD,"private_data":False,"real_dev_reads":0,"real_sealed_reads":0,"optimizer_steps":0,"case_ids_or_pixels_emitted":False,"retry_mode":mode},"binding":{"model_sha256":model_hash,"provider":session.get_providers()[0],"input_shape":["candidate_count",3,33,33],"output_shape":["candidate_count",4],"generator_audit_sha256":audit_hash,"generator_dev_split_sha256":actual_dev_split_sha256 if retry3 else json.loads(config_path.read_text())["dev_split_sha256"],"negative_sampler_sha256":_sha(sampler_path),"negative_sampler_priority":list(STRATA)},"negative_strata_counts":{name:{"capacity":capacities[name],"above_threshold":above[name],"above_threshold_rate":above[name]/max(1,capacities[name])} for name in STRATA},"morphology_quantiles":{bucket:{key:_quantiles(values) for key,values in values_by_key.items()} for bucket,values_by_key in buckets.items()},"accepted_generic_false_positive_count":len(buckets["accepted_generic_false_positives"][MORPHOLOGY_KEYS[0]]),"elapsed_ms":round((time.perf_counter()-started)*1000,3),"threshold_change_proposed":False}
 
 def main() -> int:
-    parser = argparse.ArgumentParser(); parser.add_argument("--model", type=Path, required=True); parser.add_argument("--output", type=Path, required=True); parser.add_argument("--morphology", action="store_true"); parser.add_argument("--retry3", action="store_true"); parser.add_argument("--retry4", action="store_true"); parser.add_argument("--retry5", action="store_true")
+    parser = argparse.ArgumentParser(); parser.add_argument("--model", type=Path, required=True); parser.add_argument("--output", type=Path, required=True); parser.add_argument("--morphology", action="store_true"); parser.add_argument("--retry3", action="store_true"); parser.add_argument("--retry4", action="store_true"); parser.add_argument("--retry5", action="store_true"); parser.add_argument("--retry6", action="store_true")
     args = parser.parse_args()
-    if sum((args.retry3, args.retry4, args.retry5)) > 1:
+    if sum((args.retry3, args.retry4, args.retry5, args.retry6)) > 1:
         parser.error("retry modes are mutually exclusive")
     if args.retry3 and not args.morphology:
         parser.error("--retry3 requires --morphology")
     if args.retry4 and args.morphology:
         parser.error("--retry4 is a standard diagnosis mode")
-    if args.retry5 and args.morphology:
+    if (args.retry5 or args.retry6) and args.morphology:
         parser.error("--retry5 is a standard diagnosis mode")
-    report = summarize_morphology(args.model.resolve(), retry3=args.retry3) if args.morphology else summarize(args.model.resolve(), retry4=args.retry4, retry5=args.retry5); args.output.parent.mkdir(parents=True, exist_ok=True); args.output.write_bytes((json.dumps(report, indent=2, sort_keys=True) + "\n").encode("utf-8")); print(json.dumps(report, indent=2, sort_keys=True)); return 0
+    report = summarize_morphology(args.model.resolve(), retry3=args.retry3) if args.morphology else summarize(args.model.resolve(), retry4=args.retry4, retry5=args.retry5, retry6=args.retry6); args.output.parent.mkdir(parents=True, exist_ok=True); args.output.write_bytes((json.dumps(report, indent=2, sort_keys=True) + "\n").encode("utf-8")); print(json.dumps(report, indent=2, sort_keys=True)); return 0
 
 
 if __name__ == "__main__":

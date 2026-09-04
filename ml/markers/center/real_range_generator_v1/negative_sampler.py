@@ -18,7 +18,10 @@ ARTIFACT_P95 = 0.12121212121212122
 SAMPLER_SEED = 20260904
 TOPOLOGY_RADIUS_PX = 16.0
 TOPOLOGY_SAMPLER_RADIUS_PX = 12.0
+TOPOLOGY_HARD_RADIUS_PX = 4.0
 TOPOLOGY_KINDS = ("topology_junction", "topology_fragment")
+LEGACY_HARD_KINDS = ("text", "line_intersection", "axis")
+LEGACY_HARD_RADIUS_PX = 8.0
 CONNECTOR_ENDPOINT_OFFSET_PX = 8.0
 CONNECTOR_ANCHOR_MAX_DISTANCE_PX = 4.0
 # Compatibility export for the deferred V24 trainer; endpoint selection no
@@ -51,6 +54,9 @@ class SampledNegatives:
     topology_sampler_radius_px: float = TOPOLOGY_SAMPLER_RADIUS_PX
     connector_endpoint_offset_px: float = CONNECTOR_ENDPOINT_OFFSET_PX
     generic_remainder_selected: int = 0
+    topology_hard_capacity: dict[str, int] | None = None
+    topology_hard_selected: dict[str, int] | None = None
+    hard_training_total: int = 0
 
     @property
     def total(self) -> int:
@@ -78,10 +84,12 @@ def _features(patches: torch.Tensor) -> dict[str, torch.Tensor]:
 
 def _hard_indices(scene: Any, coordinates: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
     hard = torch.zeros(len(coordinates), dtype=torch.bool)
-    for _, x, y in scene.hard_negatives:
+    for kind, x, y in scene.hard_negatives:
+        if kind not in LEGACY_HARD_KINDS:
+            continue
         hard |= torch.cdist(
             coordinates, torch.tensor(((x, y),), dtype=coordinates.dtype)
-        ).squeeze(1).le(8.0)
+        ).squeeze(1).le(LEGACY_HARD_RADIUS_PX)
     return torch.nonzero(hard & (labels <= 0.5)).flatten()
 
 
@@ -142,6 +150,8 @@ def sample_negatives(
         raise ValueError("negative quotas must total 32580")
     pools: dict[str, list[tuple[str, int, int]]] = {name: [] for name in target}
     topology_pools: dict[str, set[tuple[str, int, int]]] = {kind: set() for kind in TOPOLOGY_KINDS}
+    topology_hard_pools: dict[str, set[tuple[str, int, int]]] = {kind: set() for kind in TOPOLOGY_KINDS}
+    hard_existing_pool: set[tuple[str, int, int]] = set()
     connector_pools: set[tuple[str, int, int]] = set()
     connector_anchor_target_count = 0
     generic_remainder_selected = 0
@@ -152,13 +162,16 @@ def sample_negatives(
             raise ValueError("proposal, label, and hard arrays must have equal length")
         features = _features(proposals.patches)
         positive = labels > 0.5
-        hard_mask = hard & ~positive
+        legacy_hard_indices = set(_hard_indices(scene, proposals.coordinates, labels).tolist())
         topology = _topology_indices(scene, proposals.coordinates, labels, radius_px=TOPOLOGY_SAMPLER_RADIUS_PX)
+        topology_hard = _topology_indices(scene, proposals.coordinates, labels, radius_px=TOPOLOGY_HARD_RADIUS_PX)
         connector_indices = _connector_anchor_indices(scene, proposals.coordinates, labels)
         connector_anchor_target_count += max(0, (len(scene.centers) - 1) * 2)
         topology_by_index = {index: kind for kind in TOPOLOGY_KINDS for index in topology[kind]}
         for index in torch.nonzero(~positive, as_tuple=False).flatten().tolist():
-            if bool(hard_mask[index]):
+            if index in legacy_hard_indices:
+                hard_existing_pool.add((_stable_key(seed, split, int(scene.seed), index, "hard_existing"), scene_number, index))
+            if index in legacy_hard_indices:
                 name = "hard_existing"
             elif index in topology_by_index or index in connector_indices:
                 name = "generic"
@@ -176,10 +189,14 @@ def sample_negatives(
             for kind in TOPOLOGY_KINDS:
                 if index in topology[kind]:
                     topology_pools[kind].add((_stable_key(seed, split, int(scene.seed), index, name), scene_number, index))
+                if index in topology_hard[kind]:
+                    topology_hard_pools[kind].add((_stable_key(seed, split, int(scene.seed), index, name), scene_number, index))
             if index in connector_indices:
                 connector_pools.add((_stable_key(seed, split, int(scene.seed), index, name), scene_number, index))
-            capacities[name] += 1
-        selections.append([])
+            if name != "hard_existing":
+                capacities[name] += 1
+            selections.append([])
+    capacities["hard_existing"] = len(hard_existing_pool)
     for name, quota in target.items():
         if capacities[name] < quota:
             raise ValueError(f"negative stratum under-capacity: {name} {capacities[name]} < {quota}")
@@ -188,17 +205,29 @@ def sample_negatives(
     if capacities["hard_existing"] != target["hard_existing"]:
         raise ValueError("all existing hard negatives must be retained")
     selected_topology: dict[str, int] = {kind: 0 for kind in TOPOLOGY_KINDS}
+    selected_hard = sorted(hard_existing_pool)[: target["hard_existing"]]
+    for _, scene_number, index in selected_hard:
+        selections[scene_number].append(index)
+    selected_hard_pairs = {(scene_number, index) for _, scene_number, index in selected_hard}
     generic_entries = set(pools["generic"])
-    topology_entries = (set().union(*topology_pools.values()) if topology_pools else set()) & generic_entries
-    connector_entries = connector_pools & generic_entries
+    topology_entries = {
+        entry for entry in (set().union(*topology_pools.values()) if topology_pools else set()) & generic_entries
+        if (entry[1], entry[2]) not in selected_hard_pairs
+    }
+    connector_entries = {
+        entry for entry in connector_pools & generic_entries
+        if (entry[1], entry[2]) not in selected_hard_pairs
+    }
     retained_generic_entries = topology_entries | connector_entries
     if len(retained_generic_entries) > target["generic"]:
         raise ValueError("topology plus connector coverage exceeds generic quota")
     for name, quota in target.items():
+        if name == "hard_existing":
+            continue
         if name == "generic":
             ranked_topology = sorted(topology_entries)
             ranked_connectors = sorted(connector_entries - topology_entries)
-            generic_remaining = [item for item in sorted(pools[name]) if item not in retained_generic_entries]
+            generic_remaining = [item for item in sorted(pools[name]) if item not in retained_generic_entries and (item[1], item[2]) not in selected_hard_pairs]
             generic_remainder = generic_remaining[: quota - len(ranked_topology) - len(ranked_connectors)]
             generic_remainder_selected = len(generic_remainder)
             ranked = ranked_topology + ranked_connectors + generic_remainder
@@ -213,6 +242,18 @@ def sample_negatives(
             int(index in selected_sets[scene_number])
             for _, scene_number, index in topology_pools[kind]
         )
+    selected_topology_hard_pairs = {
+        kind: {
+            (scene_number, index)
+            for _, scene_number, index in topology_hard_pools[kind]
+            if index in selected_sets[scene_number]
+        }
+        for kind in TOPOLOGY_KINDS
+    }
+    selected_topology_hard = {kind: len(pairs) for kind, pairs in selected_topology_hard_pairs.items()}
+    topology_hard_capacity = {kind: len(topology_hard_pools[kind]) for kind in TOPOLOGY_KINDS}
+    if selected_topology_hard != topology_hard_capacity:
+        raise ValueError("hard topology proposal was not selected")
     counts = {name: target[name] for name in target}
     if counts["hard_existing"] != sum(
         len(indices) for indices in selected
@@ -226,7 +267,7 @@ def sample_negatives(
         raise ValueError("selected negative total mismatch")
     topology_digest = hashlib.sha256()
     for kind in TOPOLOGY_KINDS:
-        for _, scene_number, index in sorted(topology_pools[kind]):
+        for _, scene_number, index in sorted(topology_pools[kind], key=lambda item: (item[1], item[2])):
             if index in selected[scene_number]:
                 topology_digest.update(f"{kind}:{scene_number}:{index}\n".encode("ascii"))
     connector_digest = hashlib.sha256()
@@ -248,4 +289,7 @@ def sample_negatives(
         TOPOLOGY_SAMPLER_RADIUS_PX,
         CONNECTOR_ENDPOINT_OFFSET_PX,
         generic_remainder_selected,
+        topology_hard_capacity,
+        selected_topology_hard,
+        len(selected_hard_pairs | set().union(*selected_topology_hard_pairs.values())),
     )

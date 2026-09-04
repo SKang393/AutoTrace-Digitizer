@@ -35,7 +35,9 @@ of a truth center. It reports full train/dev proposal, positive, and negative
 counts plus aggregate quantiles for ink, OCR-mask, and artifact-mask proposal
 patch features. Positive morphology gates use the central p25 to p75 envelope
 of both train and dev. The train-only sampler retains every declared topology
-junction and fragment proposal within the 12 px train-sampler radius, then
+junction and fragment proposal within the 12 px train-sampler radius. The
+central 4 px around those topology declarations is also marked hard for loss
+weighting while remaining in the topology-reserved pool. The sampler then
 retains the nearest eligible negative proposal within 4 px of fixed 8 px
 endpoint offsets on both ends of every consecutive truth-center connector. The
 input audit still measures the topology envelope at 16 px. It fills the

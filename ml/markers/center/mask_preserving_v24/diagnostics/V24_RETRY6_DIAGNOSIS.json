@@ -1,0 +1,368 @@
+{
+  "binding": {
+    "generator_audit_sha256": "9562044526bce45b48254472346ccc1640c6e254915b9e744525154144121748",
+    "generator_dev_split_sha256": "f453e50e228f54e15bafba83b1a5dda422c435a555e9083dfea18457ed38204d",
+    "input_shape": [
+      "candidate_count",
+      3,
+      33,
+      33
+    ],
+    "model_path": "marker-center-mask-preserving-v24-p1.onnx",
+    "model_sha256": "31d473d6c24bf21edc1cbfb25f7da35eabfed7cbf8afc13bf52bef23d06bfeb9",
+    "negative_sampler_priority": [
+      "hard_existing",
+      "faint_low",
+      "faint_p05",
+      "ocr_heavy",
+      "artifact",
+      "generic"
+    ],
+    "negative_sampler_seed": 20260904,
+    "negative_sampler_sha256": "437fe46be142cd9eb5fd52e13a73ba54716752c1c5e08c72a21de52eed4c1729",
+    "output_shape": [
+      "candidate_count",
+      4
+    ],
+    "provider": "CPUExecutionProvider"
+  },
+  "diagnostic_conclusion": "fixed-threshold failure concentration is reported by per-stratum above-threshold rates; no threshold change is proposed",
+  "elapsed_ms": 20262.281,
+  "fixed_threshold_metrics": {
+    "accepted": 2074,
+    "accepted_false_positive_attribution": {
+      "generic": 85,
+      "topology_junction": 1
+    },
+    "false_negatives": 16,
+    "false_positives": 86,
+    "precision": 0.9585342333654774,
+    "prohibited_structure_hits": 1,
+    "recall": 0.9920159680638723,
+    "true_positives": 1988
+  },
+  "prohibited_hit_attribution": {
+    "artifact_mean": {
+      "count": 1,
+      "maximum": 0.14049586653709412,
+      "median": 0.14049586653709412,
+      "minimum": 0.14049586653709412,
+      "p05": 0.14049586653709412,
+      "p90": 0.14049586653709412,
+      "p95": 0.14049586653709412
+    },
+    "by_prohibited_kind": {
+      "topology_junction": 1
+    },
+    "by_source_group": {
+      "topology_junction": 1
+    },
+    "confidence": {
+      "count": 1,
+      "maximum": 0.3208221197128296,
+      "median": 0.3208221197128296,
+      "minimum": 0.3208221197128296,
+      "p05": 0.3208221197128296,
+      "p90": 0.3208221197128296,
+      "p95": 0.3208221197128296
+    },
+    "distance_px": {
+      "count": 1,
+      "maximum": 1.9674727110252526,
+      "median": 1.9674727110252526,
+      "minimum": 1.9674727110252526,
+      "p05": 1.9674727110252526,
+      "p90": 1.9674727110252526,
+      "p95": 1.9674727110252526
+    },
+    "morphology": {
+      "border_dark_fraction_ge_012": {
+        "count": 1,
+        "maximum": 0.1171875,
+        "median": 0.1171875,
+        "minimum": 0.1171875,
+        "p05": 0.1171875,
+        "p90": 0.1171875,
+        "p95": 0.1171875
+      },
+      "center5x5_mean": {
+        "count": 1,
+        "maximum": 0.2799999833106995,
+        "median": 0.2799999833106995,
+        "minimum": 0.2799999833106995,
+        "p05": 0.2799999833106995,
+        "p90": 0.2799999833106995,
+        "p95": 0.2799999833106995
+      },
+      "covariance_eigen_ratio": {
+        "count": 1,
+        "maximum": 2.3802125888028343,
+        "median": 2.3802125888028343,
+        "minimum": 2.3802125888028343,
+        "p05": 2.3802125888028343,
+        "p90": 2.3802125888028343,
+        "p95": 2.3802125888028343
+      },
+      "dark_fraction_ge_012": {
+        "count": 1,
+        "maximum": 0.21487603305785125,
+        "median": 0.21487603305785125,
+        "minimum": 0.21487603305785125,
+        "p05": 0.21487603305785125,
+        "p90": 0.21487603305785125,
+        "p95": 0.21487603305785125
+      },
+      "dark_fraction_ge_05": {
+        "count": 1,
+        "maximum": 0.0440771349862259,
+        "median": 0.0440771349862259,
+        "minimum": 0.0440771349862259,
+        "p05": 0.0440771349862259,
+        "p90": 0.0440771349862259,
+        "p95": 0.0440771349862259
+      },
+      "foreground_extent_balance": {
+        "count": 1,
+        "maximum": 0.9393939393939394,
+        "median": 0.9393939393939394,
+        "minimum": 0.9393939393939394,
+        "p05": 0.9393939393939394,
+        "p90": 0.9393939393939394,
+        "p95": 0.9393939393939394
+      },
+      "max_col_dark_fraction_ge_012": {
+        "count": 1,
+        "maximum": 0.6060606060606061,
+        "median": 0.6060606060606061,
+        "minimum": 0.6060606060606061,
+        "p05": 0.6060606060606061,
+        "p90": 0.6060606060606061,
+        "p95": 0.6060606060606061
+      },
+      "max_col_dark_fraction_ge_05": {
+        "count": 1,
+        "maximum": 0.12121212121212122,
+        "median": 0.12121212121212122,
+        "minimum": 0.12121212121212122,
+        "p05": 0.12121212121212122,
+        "p90": 0.12121212121212122,
+        "p95": 0.12121212121212122
+      },
+      "max_ring_support_3_12": {
+        "count": 1,
+        "maximum": 5.0,
+        "median": 5.0,
+        "minimum": 5.0,
+        "p05": 5.0,
+        "p90": 5.0,
+        "p95": 5.0
+      },
+      "max_row_dark_fraction_ge_012": {
+        "count": 1,
+        "maximum": 1.0,
+        "median": 1.0,
+        "minimum": 1.0,
+        "p05": 1.0,
+        "p90": 1.0,
+        "p95": 1.0
+      },
+      "max_row_dark_fraction_ge_05": {
+        "count": 1,
+        "maximum": 0.30303030303030304,
+        "median": 0.30303030303030304,
+        "minimum": 0.30303030303030304,
+        "p05": 0.30303030303030304,
+        "p90": 0.30303030303030304,
+        "p95": 0.30303030303030304
+      }
+    },
+    "ocr_mean": {
+      "count": 1,
+      "maximum": 0.39393940567970276,
+      "median": 0.39393940567970276,
+      "minimum": 0.39393940567970276,
+      "p05": 0.39393940567970276,
+      "p90": 0.39393940567970276,
+      "p95": 0.39393940567970276
+    },
+    "total": 1
+  },
+  "proposals": {
+    "negative_strata": {
+      "artifact": {
+        "above_threshold": 101,
+        "above_threshold_rate": 0.00591438777302805,
+        "capacity": 17077,
+        "raw_probability": {
+          "count": 17077,
+          "maximum": 0.9605640769004822,
+          "median": 1.6450881958007812e-05,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p90": 0.0019131958484649655,
+          "p95": 0.007221746444702126
+        }
+      },
+      "faint_low": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 8598,
+        "raw_probability": {
+          "count": 8598,
+          "maximum": 0.0012139081954956055,
+          "median": 5.46574592590332e-05,
+          "minimum": 0.0,
+          "p05": 1.4901161193847656e-07,
+          "p90": 0.00019505620002746582,
+          "p95": 0.0005753040313720703
+        }
+      },
+      "faint_p05": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 5127,
+        "raw_probability": {
+          "count": 5127,
+          "maximum": 0.00140303373336792,
+          "median": 7.051229476928711e-05,
+          "minimum": 0.0,
+          "p05": 1.1920928955078125e-07,
+          "p90": 0.00022653937339782716,
+          "p95": 0.0006038457155227659
+        }
+      },
+      "generic": {
+        "above_threshold": 2212,
+        "above_threshold_rate": 0.012797000919856756,
+        "capacity": 172853,
+        "raw_probability": {
+          "count": 172853,
+          "maximum": 0.999321699142456,
+          "median": 0.00011906027793884277,
+          "minimum": 0.0,
+          "p05": 8.642673492431641e-07,
+          "p90": 0.005745989084243825,
+          "p95": 0.0221394658088684
+        }
+      },
+      "hard_existing": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 6012,
+        "raw_probability": {
+          "count": 6012,
+          "maximum": 0.010037004947662354,
+          "median": 2.8461217880249023e-06,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p90": 0.00017696619033813477,
+          "p95": 0.00029350370168685887
+        }
+      },
+      "ocr_heavy": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 21544,
+        "raw_probability": {
+          "count": 21544,
+          "maximum": 0.045540302991867065,
+          "median": 2.181529998779297e-05,
+          "minimum": 0.0,
+          "p05": 5.960464477539063e-08,
+          "p90": 0.00020065009593963625,
+          "p95": 0.0003610551357269287
+        }
+      }
+    },
+    "negative_total": 231211,
+    "positive_raw_probability": {
+      "count": 3258,
+      "maximum": 0.9999918937683105,
+      "median": 0.9883880615234375,
+      "minimum": 0.0877804160118103,
+      "p05": 0.8118527442216873,
+      "p90": 0.9986488103866578,
+      "p95": 0.9994210749864578
+    }
+  },
+  "retry6_attribution": {
+    "above_threshold": {
+      "artifact": 98,
+      "connector_anchor": 33,
+      "generic": 2171,
+      "topology_fragment": 3,
+      "topology_junction": 8
+    },
+    "accepted_false_positives": {
+      "connector_anchor": 0,
+      "generic": 85,
+      "topology_fragment": 0,
+      "topology_junction": 1
+    },
+    "connector_anchor_capacity": 3666,
+    "connector_anchor_max_distance_px": 4.0,
+    "connector_endpoint_offset_px": 8.0,
+    "topology_capacity": {
+      "topology_fragment": 8049,
+      "topology_junction": 8331
+    },
+    "topology_sampler_radius_px": 12.0
+  },
+  "revision": "marker-center-mask-preserving-v24",
+  "schema": "graphreader.marker-center-mask-preserving-v24-retry6-diagnosis.v1",
+  "scope": {
+    "case_ids_or_pixels_emitted": false,
+    "label_positive_distance_px": 3.0,
+    "optimizer_steps": 0,
+    "private_data": false,
+    "real_dev_reads": 0,
+    "real_sealed_reads": 0,
+    "retry_mode": "retry6",
+    "scene_count": 167,
+    "split": "real-range-generator-v1-dev",
+    "synthetic_only": true,
+    "threshold": 0.25,
+    "truth_count": 2004
+  },
+  "topology": {
+    "above_threshold": {
+      "topology_fragment": 3,
+      "topology_junction": 8
+    },
+    "accepted_false_positive_attribution": {
+      "topology_fragment": 0,
+      "topology_junction": 1
+    },
+    "capacity": {
+      "topology_fragment": 8049,
+      "topology_junction": 8331
+    },
+    "radius_px": 16.0
+  },
+  "truth_mask_scenarios": {
+    "artifact_mask": {
+      "fn": 1,
+      "recall": 0.9968847352024922,
+      "tp": 320,
+      "truth": 321
+    },
+    "both_masks": {
+      "fn": 0,
+      "recall": 1.0,
+      "tp": 11,
+      "truth": 11
+    },
+    "ocr_mask": {
+      "fn": 0,
+      "recall": 1.0,
+      "tp": 64,
+      "truth": 64
+    },
+    "unmasked": {
+      "fn": 15,
+      "recall": 0.9906716417910447,
+      "tp": 1593,
+      "truth": 1608
+    }
+  }
+}
