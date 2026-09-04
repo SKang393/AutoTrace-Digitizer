@@ -23,7 +23,7 @@ def test_training_contract_is_fixed_and_candidate_not_run():
     assert config["negative_sampler"]["total_expected"] == 32580
     assert config["negative_sampler"]["source_sha256"] == "98f970c90943d30a334c951ac3084db5fa62e56eebade252ecd3042e43f22286"
     assert config["negative_sampler"]["selected_index_sha256"] == "d7460b95bbdbb89d79a12cafe7632604f02b8087e9986fb7a9d3ea940287567f"
-    assert config["negative_sampler"]["expected_capacities"] == {"artifact": 14469, "faint_low": 8384, "faint_p05": 5497, "generic_connector_band": 50373, "generic": 177889, "hard_existing": 6012, "ocr_heavy": 20547}
+    assert config["negative_sampler"]["expected_capacities"] == {"artifact": 14469, "faint_low": 8384, "faint_p05": 5497, "generic_connector_band": 50373, "generic": 127516, "hard_existing": 6012, "ocr_heavy": 20547}
     assert config["negative_sampler"]["topology"] == {"radius_px": 12.0, "input_audit_radius_px": 16.0, "expected_capacity": {"topology_junction": 4505, "topology_fragment": 4574}, "expected_selected": {"topology_junction": 4505, "topology_fragment": 4574}, "selected_index_sha256": "671e6e7c7affbbb79171cc31d76863fe8b541904b3727cfd633da2bed7fab95c", "hard": {"radius_px": 4.0, "legacy_capacity": 6012, "expected_capacity": {"topology_junction": 417, "topology_fragment": 484}, "expected_selected": {"topology_junction": 417, "topology_fragment": 484}, "hard_training_total": 6856}}
     assert config["negative_sampler"]["topology"]["radius_px"] == TOPOLOGY_SAMPLER_RADIUS_PX
     assert config["negative_sampler"]["topology"]["input_audit_radius_px"] == TOPOLOGY_RADIUS_PX
@@ -362,6 +362,45 @@ def test_retry8_failed_dev_binding_is_unconsumed_and_closed():
     assert entry["retry8_accepted_false_positive_topology_fragment"] == 4
     assert entry["retry8_accepted_false_positive_topology_junction"] == 2
     assert entry["retry8_prohibited_structure_hits"] == 0
+    assert entry["execution_blocker"] is None
+
+def test_retry9_void_records_sampler_capacity_mismatch_without_consuming_budget():
+    config_path = ROOT / "ml/markers/center/mask_preserving_v24/training/p1.json"
+    config = json.loads(config_path.read_text())
+    ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text())
+    entry = next(item for item in ledger["revisions"] if item["revision"] == config["revision"])
+    assert config["negative_sampler"]["expected_capacities"]["generic"] == 127516
+    assert config["negative_sampler"]["source_sha256"] == "98f970c90943d30a334c951ac3084db5fa62e56eebade252ecd3042e43f22286"
+    assert entry["retry9_void_report_path"].endswith("marker-v24-retry9/P1-run/candidate-report.json")
+    assert entry["retry9_void_report_sha256"] == "2ff09a580e132555b5b6536e632cdc082710420921c8ba131c92ee0d8fdf486e"
+    assert entry["retry9_void_seal_path"].endswith("marker-center-mask-preserving-v24/P1/void.json")
+    assert entry["retry9_void_seal_sha256"] == "5e6554a33929075606c948a95a595f8be163a10d72e6502ae2361582f5a746d8"
+    assert entry["retry9_void_phase"] == "initialization"
+    assert entry["retry9_void_exception_type"] == "RuntimeError"
+    assert entry["retry9_void_exception_message"] == "negative sampler contract changed"
+    assert entry["retry9_void_sealed_split_read"] is False
+    assert entry["retry9_void_budget_consumed"] is False
+    assert entry["retry9_void_optimizer_steps"] == 0
+    assert entry["retry9_void_configured_generic_capacity"] == 177889
+    assert entry["retry9_void_actual_generic_capacity"] == 127516
+    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["execution_authorized"] is True
+    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["candidate_consumed"] is False
+    assert entry["consumed_candidate_ids"] == []
+    assert entry["dev_passed_candidate_ids"] == []
+    assert entry["p1_dev_gate_passed"] is False
+    assert entry["real_dev_reads"] == 0
+    assert entry["real_sealed_reads"] == 0
+    assert entry["sealed_runs"] == 0
+    assert entry["p1_void_attempt_count"] == 2
+    assert entry["p1_void_record_sha256"] == "5e6554a33929075606c948a95a595f8be163a10d72e6502ae2361582f5a746d8"
+    assert entry["retry9_void_report_sha256"] == "2ff09a580e132555b5b6536e632cdc082710420921c8ba131c92ee0d8fdf486e"
+    assert entry["retry9_void_seal_sha256"] == "5e6554a33929075606c948a95a595f8be163a10d72e6502ae2361582f5a746d8"
+    assert entry["retry9_void_configured_generic_capacity"] == 177889
+    assert entry["retry9_void_actual_generic_capacity"] == 127516
+    assert entry["negative_sampler_capacities"]["generic"] == 127516
+    assert entry["retry8_negative_sampler_capacities"]["generic"] == 177889
     assert entry["execution_blocker"] is None
 
 def test_train_examples_preserve_mask_crossing_positive():

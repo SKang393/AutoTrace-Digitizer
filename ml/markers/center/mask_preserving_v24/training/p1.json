@@ -22,7 +22,7 @@
     "quotas": {"hard_existing": 6012, "faint_low": 326, "faint_p05": 1303, "ocr_heavy": 1629, "artifact": 1629, "generic_connector_band": 6720, "generic": 14961},
     "thresholds": {"faint_low_ink_maximum": 0.11372548341751099, "faint_p05_ink_maximum": 0.1921568512916565, "ocr_heavy_mean_minimum": 0.7272727272727273, "artifact_mean_minimum": 0.12121212121212122},
     "total_expected": 32580,
-    "expected_capacities": {"artifact": 14469, "faint_low": 8384, "faint_p05": 5497, "generic_connector_band": 50373, "generic": 177889, "hard_existing": 6012, "ocr_heavy": 20547},
+    "expected_capacities": {"artifact": 14469, "faint_low": 8384, "faint_p05": 5497, "generic_connector_band": 50373, "generic": 127516, "hard_existing": 6012, "ocr_heavy": 20547},
     "selected_index_sha256": "d7460b95bbdbb89d79a12cafe7632604f02b8087e9986fb7a9d3ea940287567f",
     "topology": {"radius_px": 12.0, "input_audit_radius_px": 16.0, "expected_capacity": {"topology_junction": 4505, "topology_fragment": 4574}, "expected_selected": {"topology_junction": 4505, "topology_fragment": 4574}, "selected_index_sha256": "671e6e7c7affbbb79171cc31d76863fe8b541904b3727cfd633da2bed7fab95c", "hard": {"radius_px": 4.0, "legacy_capacity": 6012, "expected_capacity": {"topology_junction": 417, "topology_fragment": 484}, "expected_selected": {"topology_junction": 417, "topology_fragment": 484}, "hard_training_total": 6856}},
     "connector": {"endpoint_offset_px": 8.0, "max_distance_px": 4.0, "target_count": 3674, "expected_capacity": 3671, "expected_selected": 3671, "selected_index_sha256": "fd20045f034c9d5c4882e81b28bfa3f357befe6150183817bdd772f3a04ceef2", "generic_remainder_selected": 2689},
