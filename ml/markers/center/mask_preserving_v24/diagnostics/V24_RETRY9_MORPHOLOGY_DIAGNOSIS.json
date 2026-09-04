@@ -1,0 +1,495 @@
+{
+  "accepted_generic_false_positive_count": 69,
+  "binding": {
+    "configuration_sha256": "9d6f9da5c3f0526cb2719c3425bb2bb64a98cdbf78bfb6b7162ab0adefba239c",
+    "generator_audit_sha256": "1d71d76956e24f0c1a230c9c27e59aecc0d0cd64a04ca9c0d26ef171838ce26b",
+    "generator_dev_split_sha256": "72dda9b9031f3050d72f5946105576cad89fe938f36f619f84ef4c9cafa8e566",
+    "input_shape": [
+      "candidate_count",
+      3,
+      33,
+      33
+    ],
+    "model_sha256": "4dece2eeb87229d5d57e0d2d714c1915ebecf8e9475b0d466a03dd970993fdb4",
+    "negative_sampler_priority": [
+      "hard_existing",
+      "faint_low",
+      "faint_p05",
+      "ocr_heavy",
+      "artifact",
+      "generic",
+      "generic_connector_band"
+    ],
+    "negative_sampler_sha256": "98f970c90943d30a334c951ac3084db5fa62e56eebade252ecd3042e43f22286",
+    "opened_seal_path": "ml/markers/training-seals/marker-center/marker-center-mask-preserving-v24/P1/opened.json",
+    "opened_seal_sha256": "0fc36f3ec59d2ff1c785f926d33aa762a67c336c5f50a97ab5eb195540b6d611",
+    "opened_seal_status": "opened",
+    "output_shape": [
+      "candidate_count",
+      4
+    ],
+    "provider": "CPUExecutionProvider",
+    "runner_source_bundle_sha256": "b8736824df79aadeacded8fec996c932b92f8c1802fd6aced73907958c6f1cf3",
+    "seal_budget_status": "pending_sealed_read"
+  },
+  "elapsed_ms": 177461.414,
+  "morphology_quantiles": {
+    "accepted_generic_false_positives": {
+      "border_dark_fraction_ge_012": {
+        "count": 69,
+        "maximum": 1.0,
+        "median": 0.265625,
+        "minimum": 0.0390625,
+        "p05": 0.046875,
+        "p90": 0.753125,
+        "p95": 0.8718749999999997
+      },
+      "center5x5_mean": {
+        "count": 69,
+        "maximum": 1.0,
+        "median": 0.23981709241867066,
+        "minimum": 0.0,
+        "p05": 0.0,
+        "p90": 0.9987807598114014,
+        "p95": 1.0
+      },
+      "covariance_eigen_ratio": {
+        "count": 69,
+        "maximum": 9.773093342514791,
+        "median": 2.634740347985943,
+        "minimum": 1.0,
+        "p05": 1.0536277155977176,
+        "p90": 7.0621461851885,
+        "p95": 7.672513688662022
+      },
+      "dark_fraction_ge_012": {
+        "count": 69,
+        "maximum": 1.0,
+        "median": 0.24793388429752067,
+        "minimum": 0.06336088154269973,
+        "p05": 0.07860422405876952,
+        "p90": 0.7919191919191919,
+        "p95": 0.97465564738292
+      },
+      "dark_fraction_ge_05": {
+        "count": 69,
+        "maximum": 0.9880624426078971,
+        "median": 0.18824609733700642,
+        "minimum": 0.06152433425160698,
+        "p05": 0.07713498622589532,
+        "p90": 0.7831037649219468,
+        "p95": 0.9355371900826446
+      },
+      "foreground_extent_balance": {
+        "count": 69,
+        "maximum": 1.0,
+        "median": 1.0,
+        "minimum": 0.3793103448275862,
+        "p05": 0.4266129032258065,
+        "p90": 1.0,
+        "p95": 1.0
+      },
+      "max_col_dark_fraction_ge_012": {
+        "count": 69,
+        "maximum": 1.0,
+        "median": 0.6060606060606061,
+        "minimum": 0.12121212121212122,
+        "p05": 0.16363636363636366,
+        "p90": 1.0,
+        "p95": 1.0
+      },
+      "max_col_dark_fraction_ge_05": {
+        "count": 69,
+        "maximum": 1.0,
+        "median": 0.5151515151515151,
+        "minimum": 0.12121212121212122,
+        "p05": 0.16363636363636366,
+        "p90": 1.0,
+        "p95": 1.0
+      },
+      "max_ring_support_3_12": {
+        "count": 69,
+        "maximum": 8.0,
+        "median": 3.0,
+        "minimum": 1.0,
+        "p05": 2.0,
+        "p90": 8.0,
+        "p95": 8.0
+      },
+      "max_row_dark_fraction_ge_012": {
+        "count": 69,
+        "maximum": 1.0,
+        "median": 0.6666666666666666,
+        "minimum": 0.12121212121212122,
+        "p05": 0.18181818181818182,
+        "p90": 1.0,
+        "p95": 1.0
+      },
+      "max_row_dark_fraction_ge_05": {
+        "count": 69,
+        "maximum": 1.0,
+        "median": 0.6060606060606061,
+        "minimum": 0.12121212121212122,
+        "p05": 0.18181818181818182,
+        "p90": 1.0,
+        "p95": 1.0
+      }
+    },
+    "negative_above_025": {
+      "border_dark_fraction_ge_012": {
+        "count": 1512,
+        "maximum": 1.0,
+        "median": 0.25,
+        "minimum": 0.0078125,
+        "p05": 0.03125,
+        "p90": 0.7265625,
+        "p95": 0.8507812500000007
+      },
+      "center5x5_mean": {
+        "count": 1512,
+        "maximum": 1.0,
+        "median": 0.9716200649738311,
+        "minimum": 0.0,
+        "p05": 0.0,
+        "p90": 1.0,
+        "p95": 1.0
+      },
+      "covariance_eigen_ratio": {
+        "count": 1512,
+        "maximum": 2861.2897764604745,
+        "median": 1.6684595643857898,
+        "minimum": 1.0,
+        "p05": 1.0602786996842433,
+        "p90": 3.4969591376012668,
+        "p95": 4.852297031650766
+      },
+      "dark_fraction_ge_012": {
+        "count": 1512,
+        "maximum": 1.0,
+        "median": 0.45316804407713496,
+        "minimum": 0.030303030303030304,
+        "p05": 0.07897153351698806,
+        "p90": 0.9182736455463728,
+        "p95": 0.9622589531680442
+      },
+      "dark_fraction_ge_05": {
+        "count": 1512,
+        "maximum": 1.0,
+        "median": 0.41368227731864093,
+        "minimum": 0.01928374655647383,
+        "p05": 0.06336088154269973,
+        "p90": 0.9025711662075299,
+        "p95": 0.9430670339761249
+      },
+      "foreground_extent_balance": {
+        "count": 1512,
+        "maximum": 1.0,
+        "median": 0.9259259259259259,
+        "minimum": 0.3333333333333333,
+        "p05": 0.6538461538461539,
+        "p90": 1.0,
+        "p95": 1.0
+      },
+      "max_col_dark_fraction_ge_012": {
+        "count": 1512,
+        "maximum": 1.0,
+        "median": 0.8181818181818182,
+        "minimum": 0.06060606060606061,
+        "p05": 0.24242424242424243,
+        "p90": 1.0,
+        "p95": 1.0
+      },
+      "max_col_dark_fraction_ge_05": {
+        "count": 1512,
+        "maximum": 1.0,
+        "median": 0.7878787878787878,
+        "minimum": 0.06060606060606061,
+        "p05": 0.24242424242424243,
+        "p90": 1.0,
+        "p95": 1.0
+      },
+      "max_ring_support_3_12": {
+        "count": 1512,
+        "maximum": 8.0,
+        "median": 8.0,
+        "minimum": 0.0,
+        "p05": 2.0,
+        "p90": 8.0,
+        "p95": 8.0
+      },
+      "max_row_dark_fraction_ge_012": {
+        "count": 1512,
+        "maximum": 1.0,
+        "median": 0.8181818181818182,
+        "minimum": 0.030303030303030304,
+        "p05": 0.2727272727272727,
+        "p90": 1.0,
+        "p95": 1.0
+      },
+      "max_row_dark_fraction_ge_05": {
+        "count": 1512,
+        "maximum": 1.0,
+        "median": 0.7878787878787878,
+        "minimum": 0.030303030303030304,
+        "p05": 0.24242424242424243,
+        "p90": 1.0,
+        "p95": 1.0
+      }
+    },
+    "negative_below_025": {
+      "border_dark_fraction_ge_012": {
+        "count": 231275,
+        "maximum": 0.9765625,
+        "median": 0.109375,
+        "minimum": 0.0,
+        "p05": 0.0,
+        "p90": 0.3203125,
+        "p95": 0.3984375
+      },
+      "center5x5_mean": {
+        "count": 231275,
+        "maximum": 1.0,
+        "median": 0.07058823108673096,
+        "minimum": 0.0,
+        "p05": 0.0,
+        "p90": 0.40247017526626594,
+        "p95": 0.9410196113586425
+      },
+      "covariance_eigen_ratio": {
+        "count": 231275,
+        "maximum": 1000000.0,
+        "median": 2.589243124101442,
+        "minimum": 1.0,
+        "p05": 1.1024335886020402,
+        "p90": 11.146921663139931,
+        "p95": 25.64537130519295
+      },
+      "dark_fraction_ge_012": {
+        "count": 231275,
+        "maximum": 0.967860422405877,
+        "median": 0.12213039485766758,
+        "minimum": 0.0,
+        "p05": 0.008264462809917356,
+        "p90": 0.34894398530762166,
+        "p95": 0.4563820018365473
+      },
+      "dark_fraction_ge_05": {
+        "count": 231275,
+        "maximum": 0.9540863177226814,
+        "median": 0.07897153351698806,
+        "minimum": 0.0,
+        "p05": 0.0,
+        "p90": 0.3149678604224059,
+        "p95": 0.42424242424242425
+      },
+      "foreground_extent_balance": {
+        "count": 231275,
+        "maximum": 1.0,
+        "median": 0.7878787878787878,
+        "minimum": 0.0,
+        "p05": 0.25,
+        "p90": 1.0,
+        "p95": 1.0
+      },
+      "max_col_dark_fraction_ge_012": {
+        "count": 231275,
+        "maximum": 1.0,
+        "median": 0.36363636363636365,
+        "minimum": 0.0,
+        "p05": 0.06060606060606061,
+        "p90": 0.7272727272727273,
+        "p95": 0.8181818181818182
+      },
+      "max_col_dark_fraction_ge_05": {
+        "count": 231275,
+        "maximum": 1.0,
+        "median": 0.24242424242424243,
+        "minimum": 0.0,
+        "p05": 0.0,
+        "p90": 0.6363636363636364,
+        "p95": 0.7575757575757576
+      },
+      "max_ring_support_3_12": {
+        "count": 231275,
+        "maximum": 8.0,
+        "median": 2.0,
+        "minimum": 0.0,
+        "p05": 0.0,
+        "p90": 5.0,
+        "p95": 7.0
+      },
+      "max_row_dark_fraction_ge_012": {
+        "count": 231275,
+        "maximum": 1.0,
+        "median": 0.3939393939393939,
+        "minimum": 0.0,
+        "p05": 0.06060606060606061,
+        "p90": 0.8484848484848485,
+        "p95": 0.9393939393939394
+      },
+      "max_row_dark_fraction_ge_05": {
+        "count": 231275,
+        "maximum": 1.0,
+        "median": 0.2727272727272727,
+        "minimum": 0.0,
+        "p05": 0.0,
+        "p90": 0.7575757575757576,
+        "p95": 0.8787878787878788
+      }
+    },
+    "positives": {
+      "border_dark_fraction_ge_012": {
+        "count": 3258,
+        "maximum": 1.0,
+        "median": 0.1328125,
+        "minimum": 0.0078125,
+        "p05": 0.015625,
+        "p90": 0.3125,
+        "p95": 0.40625
+      },
+      "center5x5_mean": {
+        "count": 3258,
+        "maximum": 1.0,
+        "median": 0.96136749625206,
+        "minimum": 0.0,
+        "p05": 0.10220120406150819,
+        "p90": 0.9904608097076416,
+        "p95": 0.9930980396270752
+      },
+      "covariance_eigen_ratio": {
+        "count": 3258,
+        "maximum": 963.1009798906756,
+        "median": 1.826316832731969,
+        "minimum": 1.0,
+        "p05": 1.1296862928378542,
+        "p90": 3.217596153693635,
+        "p95": 3.834657061578853
+      },
+      "dark_fraction_ge_012": {
+        "count": 3258,
+        "maximum": 1.0,
+        "median": 0.27180899908172634,
+        "minimum": 0.013774104683195593,
+        "p05": 0.0945821854912764,
+        "p90": 0.6366391184573005,
+        "p95": 0.752203856749311
+      },
+      "dark_fraction_ge_05": {
+        "count": 3258,
+        "maximum": 1.0,
+        "median": 0.23461891643709826,
+        "minimum": 0.013774104683195593,
+        "p05": 0.08356290174471992,
+        "p90": 0.6124885215794307,
+        "p95": 0.7254361799816346
+      },
+      "foreground_extent_balance": {
+        "count": 3258,
+        "maximum": 1.0,
+        "median": 0.8787878787878788,
+        "minimum": 0.4090909090909091,
+        "p05": 0.6666666666666666,
+        "p90": 1.0,
+        "p95": 1.0
+      },
+      "max_col_dark_fraction_ge_012": {
+        "count": 3258,
+        "maximum": 1.0,
+        "median": 0.5454545454545454,
+        "minimum": 0.06060606060606061,
+        "p05": 0.2727272727272727,
+        "p90": 0.9090909090909091,
+        "p95": 0.9696969696969697
+      },
+      "max_col_dark_fraction_ge_05": {
+        "count": 3258,
+        "maximum": 1.0,
+        "median": 0.48484848484848486,
+        "minimum": 0.06060606060606061,
+        "p05": 0.2727272727272727,
+        "p90": 0.8787878787878788,
+        "p95": 0.9393939393939394
+      },
+      "max_ring_support_3_12": {
+        "count": 3258,
+        "maximum": 8.0,
+        "median": 8.0,
+        "minimum": 0.0,
+        "p05": 3.0,
+        "p90": 8.0,
+        "p95": 8.0
+      },
+      "max_row_dark_fraction_ge_012": {
+        "count": 3258,
+        "maximum": 1.0,
+        "median": 0.6666666666666666,
+        "minimum": 0.030303030303030304,
+        "p05": 0.30303030303030304,
+        "p90": 0.9393939393939394,
+        "p95": 0.9696969696969697
+      },
+      "max_row_dark_fraction_ge_05": {
+        "count": 3258,
+        "maximum": 1.0,
+        "median": 0.6363636363636364,
+        "minimum": 0.030303030303030304,
+        "p05": 0.2727272727272727,
+        "p90": 0.9090909090909091,
+        "p95": 0.9696969696969697
+      }
+    }
+  },
+  "negative_strata_counts": {
+    "artifact": {
+      "above_threshold": 80,
+      "above_threshold_rate": 0.006140620202640466,
+      "capacity": 13028
+    },
+    "faint_low": {
+      "above_threshold": 0,
+      "above_threshold_rate": 0.0,
+      "capacity": 8384
+    },
+    "faint_p05": {
+      "above_threshold": 0,
+      "above_threshold_rate": 0.0,
+      "capacity": 5515
+    },
+    "generic": {
+      "above_threshold": 466,
+      "above_threshold_rate": 0.0035587188612099642,
+      "capacity": 130946
+    },
+    "generic_connector_band": {
+      "above_threshold": 965,
+      "above_threshold_rate": 0.019207420234469856,
+      "capacity": 50241
+    },
+    "hard_existing": {
+      "above_threshold": 0,
+      "above_threshold_rate": 0.0,
+      "capacity": 6012
+    },
+    "ocr_heavy": {
+      "above_threshold": 1,
+      "above_threshold_rate": 5.358769626493757e-05,
+      "capacity": 18661
+    }
+  },
+  "revision": "marker-center-mask-preserving-v24",
+  "schema": "graphreader.marker-center-mask-preserving-v24-retry9-morphology-diagnosis.v1",
+  "scope": {
+    "case_ids_or_pixels_emitted": false,
+    "optimizer_steps": 0,
+    "positive_label_distance_px": 3.0,
+    "private_data": false,
+    "real_dev_reads": 0,
+    "real_sealed_reads": 0,
+    "retry_mode": "retry9",
+    "scene_count": 167,
+    "split": "real-range-generator-v1-dev",
+    "synthetic_only": true,
+    "threshold": 0.25
+  },
+  "threshold_change_proposed": false
+}

@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[5]
 REAL_DEV_REPORT_RELATIVE = Path("docs/GOAL-22-PHASE-4-V24-RETRY9-REAL-DEV-STAGES.json")
 REAL_DEV_REPORT_PATH = ROOT / REAL_DEV_REPORT_RELATIVE
 REAL_DEV_REPORT_SHA256 = "64984bb2ffd25fa596a41965fb4975e6991446fe80cc4df389649303717d5019"
-REAL_DEV_BLOCKER = "Retry9 passes synthetic dev but fails the aggregate-only real-dev marker gate at precision 0.07516660639561916 and recall 0.7260479041916168. Measure and repair the synthetic-to-real morphology or generator gap, re-pass synthetic gates, then run another real-dev check; do not tune thresholds or select candidates on private data."
+REAL_DEV_BLOCKER = "Retry9 passes synthetic dev but fails the aggregate-only real-dev marker gate at precision 0.07516660639561916 and recall 0.7260479041916168. Aggregate morphology diagnosis measures a 5.496320014967361 real-to-synthetic negative threshold-crossing ratio and confirms sparse, anti-aliased, elongated, off-center negative coverage is still insufficient. Repair the synthetic generator and train-only sampler, re-pass synthetic gates, then run another real-dev check; do not tune thresholds or select candidates on private data."
 
 def test_training_contract_is_fixed_and_candidate_not_run():
     config = json.loads((ROOT / "ml/markers/center/mask_preserving_v24/training/p1.json").read_text())
@@ -322,6 +322,28 @@ def test_retry9_real_dev_report_is_clone_safe_aggregate_only_and_bound():
     assert entry["real_sealed_reads"] == 0
     assert entry["production_approval"] is False
     assert entry["execution_blocker"] == REAL_DEV_BLOCKER
+
+    morphology_path = ROOT / entry["retry9_morphology_diagnosis_path"]
+    morphology = json.loads(morphology_path.read_text())
+    assert digest(morphology_path) == "a6a2c23f706722c9e5e26af3a4c14ab7f92f9e0f21e7329c9bb03f5112b5b4de"
+    assert morphology["scope"]["synthetic_only"] is True
+    assert morphology["scope"]["positive_label_distance_px"] == 3.0
+    assert morphology["scope"]["real_dev_reads"] == 0
+    assert morphology["scope"]["real_sealed_reads"] == 0
+    assert morphology["negative_strata_counts"]["generic_connector_band"]["above_threshold"] == 965
+
+    gap_path = ROOT / entry["retry9_morphology_gap_path"]
+    gap = json.loads(gap_path.read_text())
+    assert digest(gap_path) == "39be76515633016310fcccc1baabb06c4379c43cbdb3485537f65aee628047d0"
+    assert gap["scope"]["real_sealed_reads"] == 0
+    assert gap["scope"]["optimizer_steps_on_private_data"] == 0
+    assert gap["scope"]["candidate_selected_on_real_dev"] is False
+    assert gap["rate_comparison"]["real_to_synthetic_rate_ratio"] == 5.496320014967361
+    assert gap["real_dev_morphology_run"]["negative_above_threshold_count"] == 48129
+    assert gap["comparison_constraints"]["label_radius_difference"].startswith("Synthetic proposal labels use a 3-pixel radius")
+    assert entry["retry9_morphology_real_sealed_reads"] == 0
+    assert entry["retry9_morphology_threshold_change_proposed"] is False
+    assert entry["retry9_morphology_candidate_selection"] is False
 
 def test_retry8_failed_dev_binding_is_unconsumed_and_closed():
     result_path = ROOT / "ml/markers/center/mask_preserving_v24/P1_RETRY8_RESULT.json"

@@ -1,0 +1,131 @@
+{
+  "schema": "graphreader.goal22.phase4r.marker-v24-retry9-morphology-gap.v1",
+  "recorded_at": "2026-09-04",
+  "status": "generator_sparse_antialiased_negative_gap_confirmed",
+  "scope": {
+    "synthetic_scene_count": 167,
+    "real_dev_projects": 120,
+    "real_sealed_projects": 51,
+    "real_sealed_reads": 0,
+    "private_case_output": false,
+    "truth_row_output": false,
+    "pixel_output": false,
+    "optimizer_steps_on_private_data": 0,
+    "threshold_change_proposed": false,
+    "candidate_selected_on_real_dev": false
+  },
+  "bindings": {
+    "revision": "marker-center-mask-preserving-v24",
+    "candidate": "P1",
+    "retry": 9,
+    "threshold": 0.25,
+    "synthetic_positive_label_distance_px": 3.0,
+    "real_positive_label_distance_px": 5.0,
+    "model_sha256": "4dece2eeb87229d5d57e0d2d714c1915ebecf8e9475b0d466a03dd970993fdb4",
+    "assignment_sha256": "decdac87c0c6d8ee8350b4e26bee2256c551ce20c518732f62fb6d990ea5850a",
+    "synthetic_morphology_report": "../ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY9_MORPHOLOGY_DIAGNOSIS.json",
+    "synthetic_morphology_report_sha256": "a6a2c23f706722c9e5e26af3a4c14ab7f92f9e0f21e7329c9bb03f5112b5b4de",
+    "synthetic_gate_report": "../ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY9_DIAGNOSIS.json",
+    "real_dev_stage_report": "GOAL-22-PHASE-4-V24-RETRY9-REAL-DEV-STAGES.json",
+    "real_dev_stage_report_sha256": "64984bb2ffd25fa596a41965fb4975e6991446fe80cc4df389649303717d5019",
+    "real_morphology_command": "dotnet run --project tools\\GraphReader.RealAcceptance.Ocr\\GraphReader.RealAcceptance.Ocr.csproj -c Release --no-build -- --explicit-opt-in --run-real-dev-marker-v24-morphology --root data\\manual data --marker-model artifacts\\goal22-runs\\marker-v24-retry9\\P1-rerun\\marker-center-mask-preserving-v24-p1.onnx"
+  },
+  "real_dev_morphology_run": {
+    "successful_projects": 120,
+    "failure_count": 0,
+    "proposal_count": 1358010,
+    "positive_proposal_count": 9849,
+    "negative_below_threshold_count": 1300032,
+    "negative_above_threshold_count": 48129,
+    "mean_project_runtime_ms": 3672.6670825,
+    "total_runtime_ms": 440720.04990000016,
+    "case_level_output": false,
+    "truth_rows_output": false,
+    "pixel_output": false,
+    "training_use": false,
+    "candidate_selection": false
+  },
+  "rate_comparison": {
+    "synthetic_negative_below_threshold_count": 231275,
+    "synthetic_negative_above_threshold_count": 1512,
+    "synthetic_negative_above_threshold_rate": 0.006495208065742503,
+    "real_negative_above_threshold_rate": 0.03569974209311796,
+    "real_to_synthetic_rate_ratio": 5.496320014967361
+  },
+  "fixed_threshold_outcomes": {
+    "synthetic": {
+      "true_positives": 1992,
+      "false_positives": 69,
+      "false_negatives": 12,
+      "precision": 0.9665211062590975,
+      "recall": 0.9940119760479041,
+      "prohibited_structure_hits": 0
+    },
+    "real_dev": {
+      "true_positives": 1455,
+      "false_positives": 17902,
+      "false_negatives": 549,
+      "precision": 0.07516660639561916,
+      "recall": 0.7260479041916168,
+      "acceptance_precision": false,
+      "acceptance_recall": false
+    }
+  },
+  "confidence_comparison": {
+    "synthetic_positive_probability": {
+      "p05": 0.9417693734169006,
+      "median": 0.9931110143661499,
+      "p95": 0.9996361851692199
+    },
+    "real_positive_probability": {
+      "p05": 0.00003119707107543946,
+      "median": 0.048750221729278564,
+      "p95": 0.9750368118286132
+    },
+    "finding": "The synthetic positive distribution remains nearly saturated while the median real positive proposal remains below the fixed threshold."
+  },
+  "shared_medians": {
+    "positive_proposals": {
+      "synthetic_count": 3258,
+      "real_count": 9849,
+      "dark_fraction_at_012": {"synthetic": 0.27180899908172634, "real": 0.2516069788797062},
+      "dark_fraction_at_05": {"synthetic": 0.23461891643709826, "real": 0.19008264462809918},
+      "center5x5_mean": {"synthetic": 0.96136749625206, "real": 0.7865098142623901},
+      "maximum_row_dark_fraction": {"synthetic": 0.6666666666666666, "real": 0.7878787878787878},
+      "maximum_column_dark_fraction": {"synthetic": 0.5454545454545454, "real": 0.6060606060606061},
+      "foreground_extent_balance": {"synthetic": 0.8787878787878788, "real": 0.7894736842105263},
+      "covariance_eigenvalue_ratio": {"synthetic": 1.826316832731969, "real": 2.4640268072419267},
+      "border_dark_fraction": {"synthetic": 0.1328125, "real": 0.1171875},
+      "maximum_ring_support_count": {"synthetic": 8.0, "real": 8.0}
+    },
+    "negative_above_threshold": {
+      "synthetic_count": 1512,
+      "real_count": 48129,
+      "dark_fraction_at_012": {"synthetic": 0.45316804407713496, "real": 0.23140495867768596},
+      "dark_fraction_at_05": {"synthetic": 0.41368227731864093, "real": 0.15059687786960513},
+      "center5x5_mean": {"synthetic": 0.9716200649738311, "real": 0.42729412317276005},
+      "maximum_row_dark_fraction": {"synthetic": 0.8181818181818182, "real": 0.6666666666666666},
+      "maximum_column_dark_fraction": {"synthetic": 0.8181818181818182, "real": 0.696969696969697},
+      "foreground_extent_balance": {"synthetic": 0.9259259259259259, "real": 0.6666666666666666},
+      "covariance_eigenvalue_ratio": {"synthetic": 1.6684595643857898, "real": 3.708286974966204},
+      "border_dark_fraction": {"synthetic": 0.25, "real": 0.109375},
+      "maximum_ring_support_count": {"synthetic": 8.0, "real": 6.0}
+    }
+  },
+  "comparison_constraints": {
+    "label_radius_difference": "Synthetic proposal labels use a 3-pixel radius from the frozen training contract; the real acceptance diagnostic uses a 5-pixel radius for digitization uncertainty.",
+    "interpretation": "The radius difference can move boundary proposals between buckets, but it cannot explain the 5.50-times threshold-crossing-rate gap or the large center-fill and anisotropy gaps."
+  },
+  "diagnosis": {
+    "responsible_subsystem": "synthetic marker proposal generator and train-only negative sampler",
+    "findings": [
+      "Retry 9 passes the synthetic gate but fails real-dev precision and recall, so real-sealed evaluation remains unauthorized.",
+      "Real negatives cross the fixed threshold at 5.496 times the synthetic rate.",
+      "Real above-threshold negatives are much less center-filled: median center5x5 mean 0.427 versus 0.972 synthetic.",
+      "Real above-threshold negatives are sparser and more elongated: median dark fraction at 0.12 is 0.231 versus 0.453, and median covariance eigenvalue ratio is 3.708 versus 1.668.",
+      "Generic connector-band coverage reduced the synthetic fixed-threshold error but did not span the dominant real negative morphology."
+    ],
+    "permitted_next_change": "Increase deterministic train and dev coverage of sparse, anti-aliased, elongated, and off-center negative fragments while preserving the fixed model architecture, loss, threshold, positive truths, and split identities; regenerate the aggregate audit before opening another candidate.",
+    "prohibited_inference": "Do not select a threshold, loss weight, architecture, or candidate from real-dev."
+  }
+}
