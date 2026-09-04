@@ -48,6 +48,13 @@ RETRY7_ONNX_SHA256 = "7932b008a9c4372c832215f2f8732c59c59012a25aa4ad2d12cfeaed40
 RETRY7_GENERATOR_AUDIT_SHA256 = "9562044526bce45b48254472346ccc1640c6e254915b9e744525154144121748"
 RETRY7_DEV_SPLIT_SHA256 = "f453e50e228f54e15bafba83b1a5dda422c435a555e9083dfea18457ed38204d"
 RETRY7_SAMPLER_SHA256 = "623ddb69cff4b6c0247d6389bbf803d6fcfe3b3eb9856fc9c83fdf2b469662ee"
+RETRY8_ONNX_SHA256 = "d6f8e9bc64c34f1bb646b6d150e1ccead45e26684836a413a5b904da7f40b5ab"
+RETRY8_CONFIG_SHA256 = "80624cf563b4a547b8c81c5021b785da9cfee8739b4e512ab33c79d1bd7fdb88"
+RETRY8_GENERATOR_AUDIT_SHA256 = "1d71d76956e24f0c1a230c9c27e59aecc0d0cd64a04ca9c0d26ef171838ce26b"
+RETRY8_DEV_SPLIT_SHA256 = "72dda9b9031f3050d72f5946105576cad89fe938f36f619f84ef4c9cafa8e566"
+RETRY8_SAMPLER_SHA256 = "623ddb69cff4b6c0247d6389bbf803d6fcfe3b3eb9856fc9c83fdf2b469662ee"
+RETRY8_RUNNER_SOURCE_BUNDLE_SHA256 = "ffd479f41f0fe6525b24e1ac6df1d2e2acd187d58313b526feea3e1c4008dab7"
+RETRY8_OPENED_SEAL_SHA256 = "7d462c8c400a5d2b021ee239e5e192d96dfebdf2415c82d5a5e5fadff1a9832a"
 
 
 def _sha(path: Path) -> str:
@@ -119,16 +126,16 @@ def _matched_truths(predictions, centers):
     return used_p, used_t
 
 
-def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False, retry6: bool = False, retry7: bool = False) -> dict:
+def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False, retry6: bool = False, retry7: bool = False, retry8: bool = False) -> dict:
     started = time.perf_counter()
     if not model_path.is_file():
         raise FileNotFoundError(model_path)
     model_hash = _sha(model_path)
-    if sum((retry4, retry5, retry6, retry7)) > 1:
+    if sum((retry4, retry5, retry6, retry7, retry8)) > 1:
         raise ValueError("retry modes are mutually exclusive")
-    expected_model = RETRY7_ONNX_SHA256 if retry7 else RETRY6_ONNX_SHA256 if retry6 else RETRY5_ONNX_SHA256 if retry5 else RETRY4_ONNX_SHA256 if retry4 else "aee3b4ba47197d84eeecacc631730e67fd99c261b913643f95c25a8ea2436c11"
+    expected_model = RETRY8_ONNX_SHA256 if retry8 else RETRY7_ONNX_SHA256 if retry7 else RETRY6_ONNX_SHA256 if retry6 else RETRY5_ONNX_SHA256 if retry5 else RETRY4_ONNX_SHA256 if retry4 else "aee3b4ba47197d84eeecacc631730e67fd99c261b913643f95c25a8ea2436c11"
     if model_hash != expected_model:
-        mode = "retry7" if retry7 else "retry6" if retry6 else "retry5" if retry5 else "retry4" if retry4 else "retry1"
+        mode = "retry8" if retry8 else "retry7" if retry7 else "retry6" if retry6 else "retry5" if retry5 else "retry4" if retry4 else "retry1"
         raise ValueError(f"{mode} ONNX hash mismatch: expected {expected_model}, got {model_hash}")
     sampler_path = ROOT / "ml/markers/center/real_range_generator_v1/negative_sampler.py"
     audit_path = ROOT / "ml/markers/center/real_range_generator_v1/AUDIT.json"
@@ -137,14 +144,33 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False, r
     audit_record = json.loads(audit_path.read_text(encoding="utf-8"))
     actual_dev_split_sha256 = audit_record["splits"]["dev"]["aggregate_sha256"]
     sampler_hash = _sha(sampler_path)
-    expected_audit = RETRY7_GENERATOR_AUDIT_SHA256 if retry7 else RETRY6_GENERATOR_AUDIT_SHA256 if retry6 else RETRY5_GENERATOR_AUDIT_SHA256 if retry5 else RETRY4_GENERATOR_AUDIT_SHA256
-    expected_dev = RETRY7_DEV_SPLIT_SHA256 if retry7 else RETRY6_DEV_SPLIT_SHA256 if retry6 else RETRY5_DEV_SPLIT_SHA256 if retry5 else RETRY4_DEV_SPLIT_SHA256
-    if (retry4 or retry5 or retry6 or retry7) and audit_hash != expected_audit:
+    config_hash = _sha(config_path)
+    expected_audit = RETRY8_GENERATOR_AUDIT_SHA256 if retry8 else RETRY7_GENERATOR_AUDIT_SHA256 if retry7 else RETRY6_GENERATOR_AUDIT_SHA256 if retry6 else RETRY5_GENERATOR_AUDIT_SHA256 if retry5 else RETRY4_GENERATOR_AUDIT_SHA256
+    expected_dev = RETRY8_DEV_SPLIT_SHA256 if retry8 else RETRY7_DEV_SPLIT_SHA256 if retry7 else RETRY6_DEV_SPLIT_SHA256 if retry6 else RETRY5_DEV_SPLIT_SHA256 if retry5 else RETRY4_DEV_SPLIT_SHA256
+    if (retry4 or retry5 or retry6 or retry7 or retry8) and audit_hash != expected_audit:
         raise ValueError(f"retry audit hash mismatch: expected {expected_audit}, got {audit_hash}")
-    if (retry4 or retry5 or retry6 or retry7) and actual_dev_split_sha256 != expected_dev:
-        raise ValueError(f"retry dev split hash mismatch: expected {expected_dev}, got {actual_dev_split_sha256}")
     if retry7 and sampler_hash != RETRY7_SAMPLER_SHA256:
         raise ValueError(f"retry7 sampler hash mismatch: expected {RETRY7_SAMPLER_SHA256}, got {sampler_hash}")
+    if retry8:
+        if config_hash != RETRY8_CONFIG_SHA256:
+            raise ValueError(f"retry8 config hash mismatch: expected {RETRY8_CONFIG_SHA256}, got {config_hash}")
+        if sampler_hash != RETRY8_SAMPLER_SHA256:
+            raise ValueError(f"retry8 sampler hash mismatch: expected {RETRY8_SAMPLER_SHA256}, got {sampler_hash}")
+        config_record = json.loads(config_path.read_text(encoding="utf-8"))
+        if config_record.get("expected_runner_source_bundle_sha256") != RETRY8_RUNNER_SOURCE_BUNDLE_SHA256:
+            raise ValueError("retry8 runner source bundle binding mismatch")
+        opened_seal_path = ROOT / "ml/markers/training-seals/marker-center/marker-center-mask-preserving-v24/P1/opened.json"
+        opened_seal_hash = _sha(opened_seal_path)
+        if opened_seal_hash != RETRY8_OPENED_SEAL_SHA256:
+            raise ValueError(f"retry8 opened seal hash mismatch: expected {RETRY8_OPENED_SEAL_SHA256}, got {opened_seal_hash}")
+        opened_seal_record = json.loads(opened_seal_path.read_text(encoding="utf-8"))
+        if opened_seal_record.get("status") != "opened" or opened_seal_record.get("budget_status") != "pending_sealed_read":
+            raise ValueError("retry8 opened seal is not pending sealed read")
+        seal_binding = opened_seal_record.get("binding", {})
+        if seal_binding.get("candidate_config_sha256") != RETRY8_CONFIG_SHA256 or seal_binding.get("runner_source_bundle_sha256") != RETRY8_RUNNER_SOURCE_BUNDLE_SHA256:
+            raise ValueError("retry8 opened seal binding mismatch")
+    if (retry4 or retry5 or retry6 or retry7 or retry8) and actual_dev_split_sha256 != expected_dev:
+        raise ValueError(f"{('retry8' if retry8 else 'retry7' if retry7 else 'retry')} dev split hash mismatch: expected {expected_dev}, got {actual_dev_split_sha256}")
     session = ort.InferenceSession(str(model_path), providers=["CPUExecutionProvider"])
     if session.get_providers()[0] != "CPUExecutionProvider":
         raise RuntimeError("CPUExecutionProvider was not selected")
@@ -164,6 +190,8 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False, r
     retry6_fp = defaultdict(int)
     retry7_above = defaultdict(int)
     retry7_fp = defaultdict(int)
+    retry8_above = defaultdict(int)
+    retry8_fp = defaultdict(int)
     prohibited_by_kind = defaultdict(int)
     prohibited_by_source = defaultdict(int)
     prohibited_confidence = []
@@ -175,17 +203,17 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False, r
         proposals = extract_proposals(scene.tensor)
         labels, hard = _labels(scene, proposals.coordinates)
         names = _strata(proposals.patches, hard, labels)
-        topology = _topology_indices(scene, proposals.coordinates, labels) if (retry4 or retry5 or retry6 or retry7) else {kind: set() for kind in TOPOLOGY_KINDS}
+        topology = _topology_indices(scene, proposals.coordinates, labels) if (retry4 or retry5 or retry6 or retry7 or retry8) else {kind: set() for kind in TOPOLOGY_KINDS}
         topology_by_index = {index: kind for kind in TOPOLOGY_KINDS for index in topology[kind]}
-        connector_indices = _connector_anchor_indices(scene, proposals.coordinates, labels) if (retry5 or retry6 or retry7) else set()
+        connector_indices = _connector_anchor_indices(scene, proposals.coordinates, labels) if (retry5 or retry6 or retry7 or retry8) else set()
         connector_indices -= set(topology_by_index)
         output = session.run([output_name], {input_name: proposals.patches.numpy().astype(np.float32, copy=False)})[0]
         probabilities = output[:, 0].astype(np.float64)
-        if retry4 or retry5 or retry6 or retry7:
+        if retry4 or retry5 or retry6 or retry7 or retry8:
             for kind in TOPOLOGY_KINDS:
                 topology_capacity[kind] += len(topology[kind])
                 topology_above[kind] += sum(int(probabilities[index] >= THRESHOLD) for index in topology[kind])
-        if retry5 or retry6 or retry7:
+        if retry5 or retry6 or retry7 or retry8:
             connector_capacity += len(connector_indices)
             connector_above += sum(int(probabilities[index] >= THRESHOLD) for index in connector_indices)
         for i, name in enumerate(names):
@@ -200,6 +228,8 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False, r
                     retry6_above[topology_by_index.get(i, "connector_anchor" if i in connector_indices else name)] += 1
                 if retry7 and probabilities[i] >= THRESHOLD:
                     retry7_above[topology_by_index.get(i, "connector_anchor" if i in connector_indices else name)] += 1
+                if retry8 and probabilities[i] >= THRESHOLD:
+                    retry8_above[topology_by_index.get(i, "connector_anchor" if i in connector_indices else name)] += 1
         predictions = postprocess(scene, proposals, output)
         used_p, used_t = _matched_truths(predictions, scene.centers)
         totals["truth"] += len(scene.centers); totals["accepted"] += len(predictions)
@@ -213,7 +243,7 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False, r
                 continue
             if decoded:
                 _, _, source = min(decoded, key=lambda item: math.hypot(prediction.x-item[0], prediction.y-item[1]))
-                name = topology_by_index.get(source, "connector_anchor" if (retry5 or retry6 or retry7) and source in connector_indices else names[source]) if (retry4 or retry5 or retry6 or retry7) else names[source]
+                name = topology_by_index.get(source, "connector_anchor" if (retry5 or retry6 or retry7 or retry8) and source in connector_indices else names[source]) if (retry4 or retry5 or retry6 or retry7 or retry8) else names[source]
                 accepted_fp[name or "unattributed"] += 1
                 if retry5:
                     retry5_fp[name or "unattributed"] += 1
@@ -221,6 +251,8 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False, r
                     retry6_fp[name or "unattributed"] += 1
                 if retry7:
                     retry7_fp[name or "unattributed"] += 1
+                if retry8:
+                    retry8_fp[name or "unattributed"] += 1
             else:
                 accepted_fp["unattributed"] += 1
         for local, center in enumerate(scene.centers):
@@ -229,7 +261,7 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False, r
             artifact = float(scene.tensor[2, max(0, y-2):y+3, max(0, x-2):x+3].max()) >= .35
             key = "both_masks" if ocr and artifact else "ocr_mask" if ocr else "artifact_mask" if artifact else "unmasked"
             scenario[key]["truth"] += 1; scenario[key]["tp"] += int(local in used_t); scenario[key]["fn"] += int(local not in used_t)
-        if retry6 or retry7:
+        if retry6 or retry7 or retry8:
             for prediction in predictions:
                 source = min(decoded, key=lambda item: math.hypot(prediction.x-item[0], prediction.y-item[1]))[2] if decoded else None
                 if source is None:
@@ -252,15 +284,15 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False, r
         value["recall"] = value["tp"] / max(1, value["truth"])
     total_accepted = totals["tp"] + totals["fp"]
     report = {
-        "schema": "graphreader.marker-center-mask-preserving-v24-retry7-diagnosis.v1" if retry7 else "graphreader.marker-center-mask-preserving-v24-retry6-diagnosis.v1" if retry6 else "graphreader.marker-center-mask-preserving-v24-retry5-diagnosis.v1" if retry5 else "graphreader.marker-center-mask-preserving-v24-retry4-diagnosis.v1" if retry4 else "graphreader.marker-center-mask-preserving-v24-retry-diagnosis.v1",
+        "schema": "graphreader.marker-center-mask-preserving-v24-retry8-diagnosis.v1" if retry8 else "graphreader.marker-center-mask-preserving-v24-retry7-diagnosis.v1" if retry7 else "graphreader.marker-center-mask-preserving-v24-retry6-diagnosis.v1" if retry6 else "graphreader.marker-center-mask-preserving-v24-retry5-diagnosis.v1" if retry5 else "graphreader.marker-center-mask-preserving-v24-retry4-diagnosis.v1" if retry4 else "graphreader.marker-center-mask-preserving-v24-retry-diagnosis.v1",
         "revision": "marker-center-mask-preserving-v24",
         "scope": {"synthetic_only": True, "split": "real-range-generator-v1-dev", "scene_count": len(scenes),
                   "truth_count": totals["truth"], "label_positive_distance_px": 3.0, "threshold": THRESHOLD,
                   "private_data": False, "real_dev_reads": 0, "real_sealed_reads": 0, "optimizer_steps": 0,
-                  "case_ids_or_pixels_emitted": False, "retry_mode": "retry7" if retry7 else "retry6" if retry6 else "retry5" if retry5 else "retry4" if retry4 else "retry1"},
+                  "case_ids_or_pixels_emitted": False, "retry_mode": "retry8" if retry8 else "retry7" if retry7 else "retry6" if retry6 else "retry5" if retry5 else "retry4" if retry4 else "retry1"},
         "binding": {"model_path": model_path.name, "model_sha256": model_hash, "provider": session.get_providers()[0],
                     "input_shape": ["candidate_count", 3, 33, 33], "output_shape": ["candidate_count", 4],
-                    "generator_audit_sha256": audit_hash, "generator_dev_split_sha256": actual_dev_split_sha256 if (retry4 or retry5 or retry6 or retry7) else json.loads(config_path.read_text())["dev_split_sha256"],
+                    "generator_audit_sha256": audit_hash, "generator_dev_split_sha256": actual_dev_split_sha256 if (retry4 or retry5 or retry6 or retry7 or retry8) else json.loads(config_path.read_text())["dev_split_sha256"],
                     "negative_sampler_sha256": sampler_hash, "negative_sampler_seed": 20260904,
                     "negative_sampler_priority": list(STRATA)},
         "proposals": {"positive_raw_probability": _quantiles(positives),
@@ -276,7 +308,7 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False, r
         "diagnostic_conclusion": "fixed-threshold failure concentration is reported by per-stratum above-threshold rates; no threshold change is proposed",
         "elapsed_ms": round((time.perf_counter() - started) * 1000, 3),
     }
-    if retry4 or retry5 or retry6 or retry7:
+    if retry4 or retry5 or retry6 or retry7 or retry8:
         report["topology"] = {"radius_px": TOPOLOGY_RADIUS_PX, "capacity": topology_capacity, "above_threshold": topology_above, "accepted_false_positive_attribution": {kind: int(accepted_fp.get(kind, 0)) for kind in TOPOLOGY_KINDS}}
     if retry5:
         report["retry5_attribution"] = {
@@ -326,6 +358,33 @@ def summarize(model_path: Path, *, retry4: bool = False, retry5: bool = False, r
             "by_prohibited_kind": dict(sorted(prohibited_by_kind.items())),
             "by_source_group": dict(sorted(prohibited_by_source.items())),
         }
+    if retry8:
+        report["binding"]["configuration_sha256"] = config_hash
+        report["binding"]["runner_source_bundle_sha256"] = RETRY8_RUNNER_SOURCE_BUNDLE_SHA256
+        report["binding"]["opened_seal_path"] = "ml/markers/training-seals/marker-center/marker-center-mask-preserving-v24/P1/opened.json"
+        report["binding"]["opened_seal_sha256"] = opened_seal_hash
+        report["binding"]["opened_seal_status"] = opened_seal_record["status"]
+        report["binding"]["seal_budget_status"] = opened_seal_record["budget_status"]
+        report["scope"]["sealed_runs"] = 0
+        above = {**{kind: int(topology_above[kind]) for kind in TOPOLOGY_KINDS}, "connector_anchor": int(connector_above), **{name: int(value) for name, value in retry8_above.items() if name not in TOPOLOGY_KINDS and name != "connector_anchor"}}
+        accepted = {**{kind: int(retry8_fp.get(kind, 0)) for kind in TOPOLOGY_KINDS}, "connector_anchor": int(retry8_fp.get("connector_anchor", 0)), **{name: int(value) for name, value in retry8_fp.items() if name not in TOPOLOGY_KINDS and name != "connector_anchor"}}
+        report["retry8_attribution"] = {
+            "above_threshold": above,
+            "accepted_false_positives": accepted,
+            "legacy_strata": {name: int(retry8_above.get(name, 0)) for name in STRATA},
+            "topology": {kind: int(retry8_above.get(kind, 0)) for kind in TOPOLOGY_KINDS},
+            "connector": {"connector_anchor": int(retry8_above.get("connector_anchor", 0))},
+            "topology_capacity": {kind: int(topology_capacity[kind]) for kind in TOPOLOGY_KINDS},
+            "connector_anchor_capacity": int(connector_capacity),
+            "topology_sampler_radius_px": TOPOLOGY_SAMPLER_RADIUS_PX,
+            "connector_endpoint_offset_px": CONNECTOR_ENDPOINT_OFFSET_PX,
+            "connector_anchor_max_distance_px": CONNECTOR_ANCHOR_MAX_DISTANCE_PX,
+        }
+        report["prohibited_hit_attribution"] = {
+            "total": int(sum(prohibited_by_kind.values())),
+            "by_prohibited_kind": dict(sorted(prohibited_by_kind.items())),
+            "by_source_group": dict(sorted(prohibited_by_source.items())),
+        }
     return report
 
 
@@ -347,12 +406,12 @@ def summarize_morphology(model_path: Path, *, retry3: bool = False, retry7: bool
     audit_record = json.loads(audit_path.read_text(encoding="utf-8"))
     actual_dev_split_sha256 = audit_record["splits"]["dev"]["aggregate_sha256"]
     expected_dev = RETRY7_DEV_SPLIT_SHA256 if retry7 else RETRY3_DEV_SPLIT_SHA256
-    if (retry3 or retry7) and actual_dev_split_sha256 != expected_dev:
-        mode = "retry7" if retry7 else "retry3"
-        raise ValueError(f"{mode} dev split hash mismatch: expected {expected_dev}, got {actual_dev_split_sha256}")
     sampler_hash = _sha(sampler_path)
     if retry7 and sampler_hash != RETRY7_SAMPLER_SHA256:
         raise ValueError(f"retry7 sampler hash mismatch: expected {RETRY7_SAMPLER_SHA256}, got {sampler_hash}")
+    if (retry3 or retry7) and actual_dev_split_sha256 != expected_dev:
+        mode = "retry7" if retry7 else "retry3"
+        raise ValueError(f"{mode} dev split hash mismatch: expected {expected_dev}, got {actual_dev_split_sha256}")
     session=ort.InferenceSession(str(model_path),providers=["CPUExecutionProvider"])
     if session.get_providers()[0] != "CPUExecutionProvider": raise RuntimeError("CPUExecutionProvider was not selected")
     inp,out=session.get_inputs()[0].name,session.get_outputs()[0].name
@@ -376,17 +435,17 @@ def summarize_morphology(model_path: Path, *, retry3: bool = False, retry7: bool
     return {"schema":f"graphreader.marker-center-mask-preserving-v24-{mode}-morphology-diagnosis.v1","revision":"marker-center-mask-preserving-v24","scope":{"synthetic_only":True,"split":"real-range-generator-v1-dev","scene_count":len(scenes),"threshold":THRESHOLD,"private_data":False,"real_dev_reads":0,"real_sealed_reads":0,"optimizer_steps":0,"case_ids_or_pixels_emitted":False,"retry_mode":mode},"binding":{"model_sha256":model_hash,"provider":session.get_providers()[0],"input_shape":["candidate_count",3,33,33],"output_shape":["candidate_count",4],"generator_audit_sha256":audit_hash,"generator_dev_split_sha256":actual_dev_split_sha256 if (retry3 or retry7) else json.loads(config_path.read_text())["dev_split_sha256"],"negative_sampler_sha256":sampler_hash,"negative_sampler_priority":list(STRATA)},"negative_strata_counts":{name:{"capacity":capacities[name],"above_threshold":above[name],"above_threshold_rate":above[name]/max(1,capacities[name])} for name in STRATA},"morphology_quantiles":{bucket:{key:_quantiles(values) for key,values in values_by_key.items()} for bucket,values_by_key in buckets.items()},"accepted_generic_false_positive_count":len(buckets["accepted_generic_false_positives"][MORPHOLOGY_KEYS[0]]),"elapsed_ms":round((time.perf_counter()-started)*1000,3),"threshold_change_proposed":False}
 
 def main() -> int:
-    parser = argparse.ArgumentParser(); parser.add_argument("--model", type=Path, required=True); parser.add_argument("--output", type=Path, required=True); parser.add_argument("--morphology", action="store_true"); parser.add_argument("--retry3", action="store_true"); parser.add_argument("--retry4", action="store_true"); parser.add_argument("--retry5", action="store_true"); parser.add_argument("--retry6", action="store_true"); parser.add_argument("--retry7", action="store_true")
+    parser = argparse.ArgumentParser(); parser.add_argument("--model", type=Path, required=True); parser.add_argument("--output", type=Path, required=True); parser.add_argument("--morphology", action="store_true"); parser.add_argument("--retry3", action="store_true"); parser.add_argument("--retry4", action="store_true"); parser.add_argument("--retry5", action="store_true"); parser.add_argument("--retry6", action="store_true"); parser.add_argument("--retry7", action="store_true"); parser.add_argument("--retry8", action="store_true")
     args = parser.parse_args()
-    if sum((args.retry3, args.retry4, args.retry5, args.retry6, args.retry7)) > 1:
+    if sum((args.retry3, args.retry4, args.retry5, args.retry6, args.retry7, args.retry8)) > 1:
         parser.error("retry modes are mutually exclusive")
     if args.retry3 and not args.morphology:
         parser.error("--retry3 requires --morphology")
     if args.retry4 and args.morphology:
         parser.error("--retry4 is a standard diagnosis mode")
-    if (args.retry5 or args.retry6) and args.morphology:
+    if (args.retry5 or args.retry6 or args.retry8) and args.morphology:
         parser.error("--retry5 is a standard diagnosis mode")
-    report = summarize_morphology(args.model.resolve(), retry3=args.retry3, retry7=args.retry7) if args.morphology else summarize(args.model.resolve(), retry4=args.retry4, retry5=args.retry5, retry6=args.retry6, retry7=args.retry7); args.output.parent.mkdir(parents=True, exist_ok=True); args.output.write_bytes((json.dumps(report, indent=2, sort_keys=True) + "\n").encode("utf-8")); print(json.dumps(report, indent=2, sort_keys=True)); return 0
+    report = summarize_morphology(args.model.resolve(), retry3=args.retry3, retry7=args.retry7) if args.morphology else summarize(args.model.resolve(), retry4=args.retry4, retry5=args.retry5, retry6=args.retry6, retry7=args.retry7, retry8=args.retry8); args.output.parent.mkdir(parents=True, exist_ok=True); args.output.write_bytes((json.dumps(report, indent=2, sort_keys=True) + "\n").encode("utf-8")); print(json.dumps(report, indent=2, sort_keys=True)); return 0
 
 
 if __name__ == "__main__":

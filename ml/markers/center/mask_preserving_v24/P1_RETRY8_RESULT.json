@@ -1,0 +1,160 @@
+{
+  "candidate_id": "P1",
+  "checkpoint_sha256": "f66e8d83a14d48220468f7af934130660ac78dd901c04e1d48ade157b385e2d2",
+  "dev_comparisons": [
+    {
+      "duplicate_count": 0,
+      "f1": 0.953750299544692,
+      "false_negatives": 14,
+      "false_positives": 179,
+      "precision": 0.9174734900875979,
+      "prohibited_structure_hits": 0,
+      "proposal_recall": 1.0,
+      "proposal_true_positives": 2004,
+      "recall": 0.9930139720558883,
+      "scene_count": 167,
+      "threshold": 0.25,
+      "true_positives": 1990
+    },
+    {
+      "duplicate_count": 0,
+      "f1": 0.9700073152889539,
+      "false_negatives": 15,
+      "false_positives": 108,
+      "precision": 0.9484978540772532,
+      "prohibited_structure_hits": 0,
+      "proposal_recall": 1.0,
+      "proposal_true_positives": 2004,
+      "recall": 0.9925149700598802,
+      "scene_count": 167,
+      "threshold": 0.4,
+      "true_positives": 1989
+    },
+    {
+      "duplicate_count": 0,
+      "f1": 0.980517879161529,
+      "false_negatives": 16,
+      "false_positives": 63,
+      "precision": 0.9692832764505119,
+      "prohibited_structure_hits": 0,
+      "proposal_recall": 1.0,
+      "proposal_true_positives": 2004,
+      "recall": 0.9920159680638723,
+      "scene_count": 167,
+      "threshold": 0.55,
+      "true_positives": 1988
+    },
+    {
+      "duplicate_count": 0,
+      "f1": 0.9853706917927102,
+      "false_negatives": 17,
+      "false_positives": 42,
+      "precision": 0.9793001478560868,
+      "prohibited_structure_hits": 0,
+      "proposal_recall": 1.0,
+      "proposal_true_positives": 2004,
+      "recall": 0.9915169660678643,
+      "scene_count": 167,
+      "threshold": 0.7,
+      "true_positives": 1987
+    }
+  ],
+  "dev_gate_passed": false,
+  "elapsed_ms": 1479275.054,
+  "hard_negative_example_count": 6856,
+  "negative_sampling": {
+    "capacities": {
+      "artifact": 14469,
+      "faint_low": 8384,
+      "faint_p05": 5497,
+      "generic": 177889,
+      "hard_existing": 6012,
+      "ocr_heavy": 20547
+    },
+    "connector_anchor_capacity": 3671,
+    "connector_anchor_max_distance_px": 4.0,
+    "connector_anchor_selected": 3671,
+    "connector_anchor_selected_index_sha256": "fd20045f034c9d5c4882e81b28bfa3f357befe6150183817bdd772f3a04ceef2",
+    "connector_anchor_target_count": 3674,
+    "connector_endpoint_offset_px": 8.0,
+    "counts": {
+      "artifact": 1629,
+      "faint_low": 326,
+      "faint_p05": 1303,
+      "generic": 21681,
+      "hard_existing": 6012,
+      "ocr_heavy": 1629
+    },
+    "generic_remainder_selected": 9409,
+    "hard_training_total": 6856,
+    "seed": 20260904,
+    "selected_index_sha256": "5d04be23e9adefd6d4c4066c8f7a487beb9d385d58c48cbf1e6248d2578d0dc9",
+    "split": "train",
+    "topology_capacity": {
+      "topology_fragment": 4574,
+      "topology_junction": 4505
+    },
+    "topology_hard_capacity": {
+      "topology_fragment": 484,
+      "topology_junction": 417
+    },
+    "topology_hard_radius_px": 4.0,
+    "topology_hard_selected": {
+      "topology_fragment": 484,
+      "topology_junction": 417
+    },
+    "topology_radius_px": 12.0,
+    "topology_selected": {
+      "topology_fragment": 4574,
+      "topology_junction": 4505
+    },
+    "topology_selected_index_sha256": "671e6e7c7affbbb79171cc31d76863fe8b541904b3727cfd633da2bed7fab95c"
+  },
+  "onnx_dynamic_candidate_counts": [
+    {
+      "candidate_count": 1,
+      "maximum_absolute_error": 1.1920928955078125e-07
+    },
+    {
+      "candidate_count": 8,
+      "maximum_absolute_error": 9.5367431640625e-07
+    },
+    {
+      "candidate_count": 37,
+      "maximum_absolute_error": 1.430511474609375e-06
+    }
+  ],
+  "onnx_parity_maximum_absolute_error": 1.430511474609375e-06,
+  "onnx_provider": "CPUExecutionProvider",
+  "onnx_sha256": "d6f8e9bc64c34f1bb646b6d150e1ccead45e26684836a413a5b904da7f40b5ab",
+  "optimizer_steps": 10080,
+  "positive_example_count": 3258,
+  "private_data": false,
+  "production_approval": false,
+  "real_dev_reads": 0,
+  "real_sealed_reads": 0,
+  "release_eligible": false,
+  "revision": "marker-center-mask-preserving-v24",
+  "schema": "graphreader.marker-center-mask-preserving-v24-candidate.v1",
+  "sealed_runs": 0,
+  "selected": {
+    "duplicate_count": 0,
+    "f1": 0.953750299544692,
+    "false_negatives": 14,
+    "false_positives": 179,
+    "precision": 0.9174734900875979,
+    "prohibited_structure_hits": 0,
+    "proposal_recall": 1.0,
+    "proposal_true_positives": 2004,
+    "recall": 0.9930139720558883,
+    "scene_count": 167,
+    "threshold": 0.25,
+    "true_positives": 1990
+  },
+  "status": "failed_dev",
+  "synthetic_only": true,
+  "task": "marker-center",
+  "training_example_count": 35838,
+  "v21_checkpoint_sha256": "ba9722ebd3091c91749c175607a480500d3b651e6719d19b69c7e48cee4ef6c9",
+  "v21_onnx_sha256": "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38"
+}
