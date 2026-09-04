@@ -114,52 +114,48 @@ function Get-CheckpointLedgerState {
     }
 }
 
-function Test-HistoricalLedgerCorrection {
-    param(
-        [object]$Ledger,
-        [Parameter(Mandatory)][object]$WorkingVersion,
-        [Parameter(Mandatory)][string]$HeadCommit
-    )
-
-    return $HeadCommit -ceq '1a1f4aa87329ec0040bff68d03d0855281d5078f' -and
-        $null -ne $Ledger -and
-        $Ledger.Count -eq 432 -and
-        $Ledger.MaxBuildNumber -eq 432 -and
-        $Ledger.MaxVersion.Value -ceq '0.4.32' -and
-        $WorkingVersion.Value -ceq '0.4.32'
-}
-
 if ($CheckHead.IsPresent) {
     $ledger = Get-CheckpointLedgerState
-    $headCommit = Invoke-GitText -Arguments @('rev-parse', 'HEAD')
-    if (Test-HistoricalLedgerCorrection -Ledger $ledger -WorkingVersion $workingVersion -HeadCommit $headCommit) {
-        Write-Host 'Checkpoint version verified: 0.4.32 (historical 432-build ledger correction)'
-        exit 0
-    }
-
-    $parent = Invoke-GitText -Arguments @('rev-parse', 'HEAD^')
-    if ([string]::IsNullOrWhiteSpace($parent)) {
-        $expected = '0.0.1'
-        $validTransition = $workingVersion.Value -eq $expected
-        $stablePromotion = $false
+    if ($null -ne $ledger) {
+        $ledgerVersion = $ledger.MaxVersion.Value
+        $ledgerSuccessor = Get-NextGraphReaderVersion -Version $ledgerVersion
+        $committedVersionForCheck = Get-CommittedVersion -Revision 'HEAD'
+        $stablePromotion = Test-GraphReaderStablePromotion `
+            -FromVersion $committedVersionForCheck.Value `
+            -ToVersion $workingVersion.Value
+        $validTransition = $workingVersion.Value -ceq $ledgerVersion -or
+            $workingVersion.Value -ceq $ledgerSuccessor -or
+            $stablePromotion
+        $expected = "ledger max '$ledgerVersion' or successor '$ledgerSuccessor'"
+        $hasParent = $true
     }
     else {
-        $parentVersion = Get-CommittedVersion -Revision $parent
-        $expected = Get-NextGraphReaderVersion -Version $parentVersion.Value
-        $stablePromotion = Test-GraphReaderStablePromotion `
-            -FromVersion $parentVersion.Value `
-            -ToVersion $workingVersion.Value
-        $validTransition = $workingVersion.Value -eq $expected -or $stablePromotion
+        $parent = Invoke-GitText -Arguments @('rev-parse', 'HEAD^')
+        $hasParent = -not [string]::IsNullOrWhiteSpace($parent)
+        if ([string]::IsNullOrWhiteSpace($parent)) {
+            $expected = '0.0.1'
+            $validTransition = $workingVersion.Value -eq $expected
+            $stablePromotion = $false
+        }
+        else {
+            $parentVersion = Get-CommittedVersion -Revision $parent
+            $expected = Get-NextGraphReaderVersion -Version $parentVersion.Value
+            $stablePromotion = Test-GraphReaderStablePromotion `
+                -FromVersion $parentVersion.Value `
+                -ToVersion $workingVersion.Value
+            $validTransition = $workingVersion.Value -eq $expected -or $stablePromotion
+        }
     }
 
     if (-not $validTransition) {
-        $promotionHint = if ([string]::IsNullOrWhiteSpace($parent)) {
+        $promotionHint = if (-not $hasParent) {
             ''
         }
         else {
             " The only nonsequential transition is an explicit pre-1.0 promotion to '$(Get-GraphReaderStablePromotionVersion)'."
         }
-        throw "Checkpoint version '$($workingVersion.Value)' is invalid for HEAD. Expected '$expected' from its first parent.$promotionHint Run packaging/Prepare-CheckpointVersion.ps1 before committing."
+        $sourceHint = if ($null -ne $ledger) { ' from the checkpoint ledger.' } else { ' from its first parent.' }
+        throw "Checkpoint version '$($workingVersion.Value)' is invalid for HEAD. Expected '$expected'$sourceHint$promotionHint Run packaging/Prepare-CheckpointVersion.ps1 before committing."
     }
 
     $transitionName = if ($stablePromotion) { 'stable promotion' } else { 'sequential checkpoint' }
@@ -188,21 +184,28 @@ if ($PromoteStable.IsPresent) {
     exit 0
 }
 
-$nextVersion = Get-NextGraphReaderVersion -Version $committedVersion.Value
-if ($workingVersion.Value -eq $committedVersion.Value) {
-    $preparedVersion = $nextVersion
-}
-elseif ($workingVersion.Value -eq $nextVersion) {
-    $ledgerRecordedWorkingVersion = $null -ne $ledger -and
-        $ledger.MaxVersion.Value -ceq $workingVersion.Value
-    if (-not $ledgerRecordedWorkingVersion) {
+if ($null -eq $ledger) {
+    $nextVersion = Get-NextGraphReaderVersion -Version $committedVersion.Value
+    if ($workingVersion.Value -eq $nextVersion) {
         Write-Host "Checkpoint version already prepared: $nextVersion"
         exit 0
     }
-    $preparedVersion = Get-NextGraphReaderVersion -Version $workingVersion.Value
+    if ($workingVersion.Value -ne $committedVersion.Value) {
+        throw "Working version '$($workingVersion.Value)' is neither committed version '$($committedVersion.Value)' nor its successor '$nextVersion'."
+    }
+    $preparedVersion = $nextVersion
 }
 else {
-    throw "Working version '$($workingVersion.Value)' is neither committed version '$($committedVersion.Value)' nor its successor '$nextVersion'."
+    $ledgerVersion = $ledger.MaxVersion.Value
+    $nextVersion = Get-NextGraphReaderVersion -Version $ledgerVersion
+    if ($workingVersion.Value -eq $nextVersion) {
+        Write-Host "Checkpoint version already prepared: $nextVersion"
+        exit 0
+    }
+    if ($workingVersion.Value -ne $ledgerVersion) {
+        throw "Working version '$($workingVersion.Value)' is neither ledger max '$ledgerVersion' nor its successor '$nextVersion'."
+    }
+    $preparedVersion = $nextVersion
 }
 
 Set-VersionFields -Version $preparedVersion

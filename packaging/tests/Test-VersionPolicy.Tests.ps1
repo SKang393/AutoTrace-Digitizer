@@ -19,9 +19,8 @@ $invalidPromotionRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReade
 $rolloverRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionRollover-' + [Guid]::NewGuid().ToString('N'))
 $identicalRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionIdentical-' + [Guid]::NewGuid().ToString('N'))
 $releaseRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionRelease-' + [Guid]::NewGuid().ToString('N'))
-$historicalRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionHistorical-' + [Guid]::NewGuid().ToString('N'))
-$testRoots = @($testRoot, $ordinaryRoot, $promotionRoot, $invalidPromotionRoot, $rolloverRoot, $identicalRoot, $releaseRoot, $historicalRoot)
-$historicalWorktreeCreated = $false
+$ledgerRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('GraphReader-VersionLedger-' + [Guid]::NewGuid().ToString('N'))
+$testRoots = @($testRoot, $ordinaryRoot, $promotionRoot, $invalidPromotionRoot, $rolloverRoot, $identicalRoot, $releaseRoot, $ledgerRoot)
 $passed = 0
 . $policyScript
 
@@ -260,6 +259,8 @@ try {
     Initialize-TestRepository -Root $identicalRoot -Version '0.4.32'
     Write-TestLedger -Root $identicalRoot -MaxVersion '0.4.32'
     Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $identicalRoot, '-PrepareNext') -ShouldPass $true
+    Invoke-Git -Root $identicalRoot -Arguments @('add', 'Directory.Build.props')
+    Invoke-Git -Root $identicalRoot -Arguments @('commit', '-m', 'Record prepared successor')
     Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $identicalRoot, '-PrepareNext') -ShouldPass $true
     Assert-Equal (Get-GraphReaderCentralVersion -RepositoryRoot $identicalRoot).Value '0.4.33' 'Unrecorded identical-commit preparation was not idempotent.'
     Write-TestLedger -Root $identicalRoot -MaxVersion '0.4.33'
@@ -285,14 +286,18 @@ try {
     Invoke-Git -Root $releaseRoot -Arguments @('tag', '-d', 'v0.0.21')
     $passed += 2
 
-    $historicalCorrectionCommit = '1a1f4aa87329ec0040bff68d03d0855281d5078f'
-    Invoke-Git -Root $repositoryRoot -Arguments @('worktree', 'add', '--detach', $historicalRoot, $historicalCorrectionCommit)
-    $historicalWorktreeCreated = $true
-    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $historicalRoot, '-CheckHead') -ShouldPass $true
-    Assert-Equal (Get-GraphReaderCentralVersion -RepositoryRoot $historicalRoot).Value '0.4.32' 'Historical correction worktree version differs.'
-    Invoke-Git -Root $historicalRoot -Arguments @('commit', '--allow-empty', '-m', 'Retain historical checkpoint version')
-    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $historicalRoot, '-CheckHead') -ShouldPass $false
-    $passed += 2
+    Initialize-TestRepository -Root $ledgerRoot -Version '0.4.32'
+    Write-TestLedger -Root $ledgerRoot -MaxVersion '0.4.32'
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $ledgerRoot, '-CheckHead') -ShouldPass $true
+    [System.IO.File]::WriteAllText((Join-Path $ledgerRoot 'source-change.txt'), 'ledger is authoritative')
+    Invoke-Git -Root $ledgerRoot -Arguments @('add', 'source-change.txt')
+    Invoke-Git -Root $ledgerRoot -Arguments @('commit', '-m', 'Retain ledger checkpoint version')
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $ledgerRoot, '-CheckHead') -ShouldPass $true
+    Write-TestProps -Root $ledgerRoot -Version '0.4.33'
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $ledgerRoot, '-CheckHead') -ShouldPass $true
+    Write-TestProps -Root $ledgerRoot -Version '0.4.34'
+    Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $ledgerRoot, '-CheckHead') -ShouldPass $false
+    $passed += 4
 
     Initialize-TestRepository -Root $ordinaryRoot -Version '0.23.58'
     Invoke-Child -Script $prepareScript -Arguments @('-RepositoryRoot', $ordinaryRoot, '-PrepareNext') -ShouldPass $true
@@ -327,9 +332,6 @@ try {
     Write-Host "Version policy tests passed: $passed"
 }
 finally {
-    if ($historicalWorktreeCreated) {
-        Invoke-Git -Root $repositoryRoot -Arguments @('worktree', 'remove', '--force', $historicalRoot)
-    }
     foreach ($root in $testRoots) {
         if (Test-Path -LiteralPath $root) {
             Remove-Item -LiteralPath $root -Recurse -Force

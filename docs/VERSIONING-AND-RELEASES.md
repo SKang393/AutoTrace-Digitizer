@@ -130,8 +130,8 @@ in their existing chronological lexical order. Their binaries and folder names
 are not changed. `docs/BUILD_LEDGER.json` preserves each stamped version,
 commit, build time, executable checksum, and retention state.
 
-Build 432 maps to the corrected ledger version `0.4.32`. The central checkpoint
-is prepared at `0.4.33` for the next produced build. The 22 historical release-eligible builds are marked
+Build 432 maps to the corrected ledger version `0.4.32`. The first corrected
+successor is `0.4.33`; later builds continue one ordinal at a time. The 22 historical release-eligible builds are marked
 `missed-historical`; no retroactive tags, artifacts, or releases are fabricated.
 The live public cadence resumes at build 441, version `0.4.41`.
 
