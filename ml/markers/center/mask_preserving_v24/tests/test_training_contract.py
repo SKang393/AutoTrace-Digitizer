@@ -9,6 +9,10 @@ from ml.markers.gate_seal import source_bundle_sha256
 from ml.markers.center.real_range_generator_v1.negative_sampler import CONNECTOR_ENDPOINT_OFFSET_PX, TOPOLOGY_HARD_RADIUS_PX, TOPOLOGY_RADIUS_PX, TOPOLOGY_SAMPLER_RADIUS_PX
 
 ROOT = Path(__file__).resolve().parents[5]
+REAL_DEV_REPORT_RELATIVE = Path("docs/GOAL-22-PHASE-4-V24-RETRY9-REAL-DEV-STAGES.json")
+REAL_DEV_REPORT_PATH = ROOT / REAL_DEV_REPORT_RELATIVE
+REAL_DEV_REPORT_SHA256 = "64984bb2ffd25fa596a41965fb4975e6991446fe80cc4df389649303717d5019"
+REAL_DEV_BLOCKER = "Retry9 passes synthetic dev but fails the aggregate-only real-dev marker gate at precision 0.07516660639561916 and recall 0.7260479041916168. Measure and repair the synthetic-to-real morphology or generator gap, re-pass synthetic gates, then run another real-dev check; do not tune thresholds or select candidates on private data."
 
 def test_training_contract_is_fixed_and_candidate_not_run():
     config = json.loads((ROOT / "ml/markers/center/mask_preserving_v24/training/p1.json").read_text())
@@ -63,7 +67,7 @@ def test_runner_source_bundle_is_relative_and_present():
     assert entry["p1_runner_source_bundle_sha256"] == config["expected_runner_source_bundle_sha256"]
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
-    assert entry["status"] == "dev_passed_retry9_unconsumed"
+    assert entry["status"] == "dev_passed_retry9_unconsumed_real_dev_failed"
     if entry["execution_authorized"]:
         assert source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
 
@@ -99,10 +103,11 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["synthetic_negative_proposal_count"] == 232798
     assert entry["morphology_diagnosis_sha256"] == config["morphology_diagnosis_sha256"]
     assert entry["morphology_gap_sha256"] == config["morphology_gap_sha256"]
-    assert entry["status"] == "dev_passed_retry9_unconsumed"
+    assert entry["status"] == "dev_passed_retry9_unconsumed_real_dev_failed"
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["real_dev_authorized"] is False
+    assert entry["real_dev_reads"] == 120
     assert entry["real_sealed_authorized"] is False
     assert entry["real_sealed_reads"] == 0
     assert entry["sealed_runs"] == 0
@@ -236,26 +241,26 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["generic_connector_band_capacity"] == 50373
     assert entry["generic_connector_band_selected"] == 6720
     assert entry["generic_connector_band_selected_index_sha256"] == "4e58e9e353a0ff912bccb28845e7e1d619d4903929f9cf49c6244dc5017fc96a"
-    assert entry["real_dev_result_path"].endswith("V24-RETRY7-REAL-DEV-STAGES.json")
-    assert entry["real_dev_result_sha256"] == "a127305927e73f73450c351a60d6835e90f9125468a7bcb7f7a098cfe80ce4ff"
+    assert entry["real_dev_result_path"] == "docs/GOAL-22-PHASE-4-V24-RETRY9-REAL-DEV-STAGES.json"
+    assert entry["real_dev_result_sha256"] == REAL_DEV_REPORT_SHA256
     assert digest(ROOT / entry["real_dev_result_path"]) == entry["real_dev_result_sha256"]
     assert entry["real_dev_projects"] == 120
     assert entry["real_dev_successful_projects"] == 120
     assert entry["real_dev_failure_count"] == 0
-    assert entry["real_dev_true_positives"] == 1484
-    assert entry["real_dev_false_positives"] == 21112
-    assert entry["real_dev_false_negatives"] == 520
-    assert entry["real_dev_precision"] == 0.06567534076827757
-    assert entry["real_dev_recall"] == 0.7405189620758483
-    assert entry["real_dev_pre_nms_true_positives"] == 1619
-    assert entry["real_dev_pre_nms_false_positives"] == 65987
-    assert entry["real_dev_pre_nms_false_negatives"] == 385
-    assert entry["real_dev_above_threshold_outputs"] == 68275
-    assert entry["real_dev_above_threshold_true_positives"] == 1619
-    assert entry["real_dev_above_threshold_false_positives"] == 66656
-    assert entry["real_dev_final_outputs"] == 22596
-    assert entry["real_dev_elapsed_ms"] == 452598.6968
-    assert entry["real_dev_model_sha256"] == "7932b008a9c4372c832215f2f8732c59c59012a25aa4ad2d12cfeaed404bbe3c"
+    assert entry["real_dev_true_positives"] == 1455
+    assert entry["real_dev_false_positives"] == 17902
+    assert entry["real_dev_false_negatives"] == 549
+    assert entry["real_dev_precision"] == 0.07516660639561916
+    assert entry["real_dev_recall"] == 0.7260479041916168
+    assert entry["real_dev_pre_nms_true_positives"] == 1586
+    assert entry["real_dev_pre_nms_false_positives"] == 48994
+    assert entry["real_dev_pre_nms_false_negatives"] == 418
+    assert entry["real_dev_above_threshold_outputs"] == 51444
+    assert entry["real_dev_above_threshold_true_positives"] == 1586
+    assert entry["real_dev_above_threshold_false_positives"] == 49858
+    assert entry["real_dev_final_outputs"] == 19357
+    assert entry["real_dev_elapsed_ms"] == 449148.3793999999
+    assert entry["real_dev_model_sha256"] == "4dece2eeb87229d5d57e0d2d714c1915ebecf8e9475b0d466a03dd970993fdb4"
     assert entry["real_dev_case_level_output"] is False
     assert entry["real_dev_truth_rows_output"] is False
     assert entry["real_dev_pixel_output"] is False
@@ -274,7 +279,49 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["retry3_real_dev_result_path"].endswith("V24-RETRY3-REAL-DEV-STAGES.json")
     assert entry["retry3_real_dev_model_sha256"] == "0d80d1994d7b33241c795c9e6f92c802750555a62c3cd3335777eb969fb5083a"
     assert entry["retry2_dev_gate_passed"] is True
-    assert entry["execution_blocker"] is None
+    assert entry["execution_blocker"] == REAL_DEV_BLOCKER
+
+def test_retry9_real_dev_report_is_clone_safe_aggregate_only_and_bound():
+    report = json.loads(REAL_DEV_REPORT_PATH.read_text())
+    ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text())
+    entry = next(item for item in ledger["revisions"] if item["revision"] == "marker-center-mask-preserving-v24")
+    digest = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+
+    assert not REAL_DEV_REPORT_RELATIVE.is_absolute()
+    assert REAL_DEV_REPORT_PATH.is_file()
+    assert digest(REAL_DEV_REPORT_PATH) == REAL_DEV_REPORT_SHA256
+    assert entry["real_dev_result_path"] == "docs/GOAL-22-PHASE-4-V24-RETRY9-REAL-DEV-STAGES.json"
+    assert entry["real_dev_result_sha256"] == REAL_DEV_REPORT_SHA256
+    assert report["real_dev_projects"] == 120
+    assert report["successful_projects"] == 120
+    assert report["real_sealed_reads"] == 0
+    assert report["true_positives"] == 1455
+    assert report["false_positives"] == 17902
+    assert report["false_negatives"] == 549
+    assert report["precision"] == 0.07516660639561916
+    assert report["recall"] == 0.7260479041916168
+    assert report["stage_counters"]["outputs_above_0_25"] == 51444
+    assert report["stage_counters"]["final_candidates"] == 19357
+    assert report["pre_nms_true_positives"] == 1586
+    assert report["pre_nms_false_positives"] == 48994
+    assert report["pre_nms_false_negatives"] == 418
+    assert report["total_runtime_ms"] == 449148.3793999999
+    assert report["model_sha256"] == "4dece2eeb87229d5d57e0d2d714c1915ebecf8e9475b0d466a03dd970993fdb4"
+    assert report["case_level_output"] is False
+    assert report["truth_rows_output"] is False
+    assert report["pixel_output"] is False
+    assert report["training_use"] is False
+    assert report["candidate_selection"] is False
+    assert entry["status"] == "dev_passed_retry9_unconsumed_real_dev_failed"
+    assert entry["retry9_status"] == "dev_passed_retry9_unconsumed_real_dev_failed"
+    assert entry["candidate_consumed"] is False
+    assert entry["execution_authorized"] is False
+    assert entry["real_dev_authorized"] is False
+    assert entry["real_dev_reads"] == 120
+    assert entry["real_sealed_authorized"] is False
+    assert entry["real_sealed_reads"] == 0
+    assert entry["production_approval"] is False
+    assert entry["execution_blocker"] == REAL_DEV_BLOCKER
 
 def test_retry8_failed_dev_binding_is_unconsumed_and_closed():
     result_path = ROOT / "ml/markers/center/mask_preserving_v24/P1_RETRY8_RESULT.json"
@@ -308,14 +355,14 @@ def test_retry8_failed_dev_binding_is_unconsumed_and_closed():
     assert result["real_dev_reads"] == 0
     assert result["real_sealed_reads"] == 0
     assert result["sealed_runs"] == 0
-    assert entry["status"] == "dev_passed_retry9_unconsumed"
+    assert entry["status"] == "dev_passed_retry9_unconsumed_real_dev_failed"
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["consumed_candidate_ids"] == []
     assert entry["dev_passed_candidate_ids"] == ["P1"]
     assert entry["candidate_consumed"] is False
     assert entry["p1_dev_gate_passed"] is True
-    assert entry["real_dev_reads"] == 0
+    assert entry["real_dev_reads"] == 120
     assert entry["real_dev_authorized"] is False
     assert entry["real_sealed_reads"] == 0
     assert entry["real_sealed_authorized"] is False
@@ -362,7 +409,7 @@ def test_retry8_failed_dev_binding_is_unconsumed_and_closed():
     assert entry["retry8_accepted_false_positive_topology_fragment"] == 4
     assert entry["retry8_accepted_false_positive_topology_junction"] == 2
     assert entry["retry8_prohibited_structure_hits"] == 0
-    assert entry["execution_blocker"] is None
+    assert entry["execution_blocker"] == REAL_DEV_BLOCKER
 
 def test_retry9_void_records_sampler_capacity_mismatch_without_consuming_budget():
     config_path = ROOT / "ml/markers/center/mask_preserving_v24/training/p1.json"
@@ -383,14 +430,14 @@ def test_retry9_void_records_sampler_capacity_mismatch_without_consuming_budget(
     assert entry["retry9_void_optimizer_steps"] == 0
     assert entry["retry9_void_configured_generic_capacity"] == 177889
     assert entry["retry9_void_actual_generic_capacity"] == 127516
-    assert entry["status"] == "dev_passed_retry9_unconsumed"
+    assert entry["status"] == "dev_passed_retry9_unconsumed_real_dev_failed"
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["candidate_consumed"] is False
     assert entry["consumed_candidate_ids"] == []
     assert entry["dev_passed_candidate_ids"] == ["P1"]
     assert entry["p1_dev_gate_passed"] is True
-    assert entry["real_dev_reads"] == 0
+    assert entry["real_dev_reads"] == 120
     assert entry["real_sealed_reads"] == 0
     assert entry["sealed_runs"] == 0
     assert entry["p1_void_attempt_count"] == 2
@@ -401,7 +448,7 @@ def test_retry9_void_records_sampler_capacity_mismatch_without_consuming_budget(
     assert entry["retry9_void_actual_generic_capacity"] == 127516
     assert entry["negative_sampler_capacities"]["generic"] == 127516
     assert entry["retry8_negative_sampler_capacities"]["generic"] == 177889
-    assert entry["execution_blocker"] is None
+    assert entry["execution_blocker"] == REAL_DEV_BLOCKER
 
 def test_train_examples_preserve_mask_crossing_positive():
     from ml.markers.center.mask_preserving_v24.train_p1 import _examples
@@ -453,14 +500,14 @@ def test_retry7_records_unconsumed_synthetic_dev_pass():
     assert result["real_sealed_reads"] == 0
     assert result["sealed_runs"] == 0
     assert digest(result_path) == "6fc74bc7e0aa6c36d7dd0aac51af014ad5875261f9e7a1cb113e13727287d9be"
-    assert entry["status"] == "dev_passed_retry9_unconsumed"
+    assert entry["status"] == "dev_passed_retry9_unconsumed_real_dev_failed"
     assert entry["dev_passed_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
     assert entry["candidate_consumed"] is False
     assert entry["execution_authorized"] is False
     assert entry["authorized_candidate_id"] is None
     assert entry["real_dev_authorized"] is False
-    assert entry["real_dev_reads"] == 0
+    assert entry["real_dev_reads"] == 120
     assert entry["real_dev_gate_passed"] is False
     assert entry["real_sealed_authorized"] is False
     assert entry["real_sealed_reads"] == 0
@@ -617,4 +664,4 @@ def test_retry7_records_unconsumed_synthetic_dev_pass():
     assert entry["retry7_morphology_synthetic_positive_median_probability"] == 0.9933367967605591
     assert entry["retry7_morphology_real_positive_median_probability"] == 0.07347214221954346
     assert entry["retry7_morphology_gap_blocker"] == "deterministic anti-aliased marker and line rendering across both synthetic splits, regenerate audits, and re-pass synthetic gates before another model or real-dev run"
-    assert entry["execution_blocker"] is None
+    assert entry["execution_blocker"] == REAL_DEV_BLOCKER
