@@ -1,0 +1,242 @@
+{
+  "binding": {
+    "generator_audit_sha256": "9562044526bce45b48254472346ccc1640c6e254915b9e744525154144121748",
+    "generator_dev_split_sha256": "f453e50e228f54e15bafba83b1a5dda422c435a555e9083dfea18457ed38204d",
+    "input_shape": [
+      "candidate_count",
+      3,
+      33,
+      33
+    ],
+    "model_path": "marker-center-mask-preserving-v24-p1.onnx",
+    "model_sha256": "7932b008a9c4372c832215f2f8732c59c59012a25aa4ad2d12cfeaed404bbe3c",
+    "negative_sampler_priority": [
+      "hard_existing",
+      "faint_low",
+      "faint_p05",
+      "ocr_heavy",
+      "artifact",
+      "generic"
+    ],
+    "negative_sampler_seed": 20260904,
+    "negative_sampler_sha256": "623ddb69cff4b6c0247d6389bbf803d6fcfe3b3eb9856fc9c83fdf2b469662ee",
+    "output_shape": [
+      "candidate_count",
+      4
+    ],
+    "provider": "CPUExecutionProvider"
+  },
+  "diagnostic_conclusion": "fixed-threshold failure concentration is reported by per-stratum above-threshold rates; no threshold change is proposed",
+  "elapsed_ms": 19323.62,
+  "fixed_threshold_metrics": {
+    "accepted": 2037,
+    "accepted_false_positive_attribution": {
+      "generic": 46
+    },
+    "false_negatives": 13,
+    "false_positives": 46,
+    "precision": 0.9774177712322042,
+    "prohibited_structure_hits": 0,
+    "recall": 0.9935129740518962,
+    "true_positives": 1991
+  },
+  "prohibited_hit_attribution": {
+    "by_prohibited_kind": {},
+    "by_source_group": {},
+    "total": 0
+  },
+  "proposals": {
+    "negative_strata": {
+      "artifact": {
+        "above_threshold": 81,
+        "above_threshold_rate": 0.0047432218773789305,
+        "capacity": 17077,
+        "raw_probability": {
+          "count": 17077,
+          "maximum": 0.9336172342300415,
+          "median": 9.208917617797852e-06,
+          "minimum": 0.0,
+          "p05": 0.0,
+          "p90": 0.0011512041091918945,
+          "p95": 0.005562841892242422
+        }
+      },
+      "faint_low": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 8598,
+        "raw_probability": {
+          "count": 8598,
+          "maximum": 0.005560547113418579,
+          "median": 0.0002664625644683838,
+          "minimum": 0.0,
+          "p05": 5.960464477539063e-08,
+          "p90": 0.0007308125495910645,
+          "p95": 0.001274019479751587
+        }
+      },
+      "faint_p05": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 5127,
+        "raw_probability": {
+          "count": 5127,
+          "maximum": 0.0024468600749969482,
+          "median": 0.0001793205738067627,
+          "minimum": 0.0,
+          "p05": 4.172325134277344e-07,
+          "p90": 0.0006700754165649414,
+          "p95": 0.0008739948272705076
+        }
+      },
+      "generic": {
+        "above_threshold": 1664,
+        "above_threshold_rate": 0.009626677003002551,
+        "capacity": 172853,
+        "raw_probability": {
+          "count": 172853,
+          "maximum": 0.9948577284812927,
+          "median": 5.2034854888916016e-05,
+          "minimum": 0.0,
+          "p05": 5.960464477539063e-08,
+          "p90": 0.0034243702888488775,
+          "p95": 0.013072842359542845
+        }
+      },
+      "hard_existing": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 6012,
+        "raw_probability": {
+          "count": 6012,
+          "maximum": 0.04044803977012634,
+          "median": 0.0002728402614593506,
+          "minimum": 0.0,
+          "p05": 1.996755599975586e-06,
+          "p90": 0.003098306059837345,
+          "p95": 0.004142880439758301
+        }
+      },
+      "ocr_heavy": {
+        "above_threshold": 1,
+        "above_threshold_rate": 4.641663572224285e-05,
+        "capacity": 21544,
+        "raw_probability": {
+          "count": 21544,
+          "maximum": 0.5160508155822754,
+          "median": 0.0002779662609100342,
+          "minimum": 8.940696716308594e-08,
+          "p05": 1.4488399028778079e-05,
+          "p90": 0.0012350976467132568,
+          "p95": 0.0018165960907936087
+        }
+      }
+    },
+    "negative_total": 231211,
+    "positive_raw_probability": {
+      "count": 3258,
+      "maximum": 0.9999992251396179,
+      "median": 0.9933367967605591,
+      "minimum": 0.6186650991439819,
+      "p05": 0.9437092751264572,
+      "p90": 0.9992033481597901,
+      "p95": 0.999666154384613
+    }
+  },
+  "retry7_attribution": {
+    "above_threshold": {
+      "artifact": 80,
+      "connector_anchor": 9,
+      "generic": 1651,
+      "ocr_heavy": 1,
+      "topology_fragment": 1,
+      "topology_junction": 4
+    },
+    "accepted_false_positives": {
+      "connector_anchor": 0,
+      "generic": 46,
+      "topology_fragment": 0,
+      "topology_junction": 0
+    },
+    "connector": {
+      "connector_anchor": 9
+    },
+    "connector_anchor_capacity": 3666,
+    "connector_anchor_max_distance_px": 4.0,
+    "connector_endpoint_offset_px": 8.0,
+    "legacy_strata": {
+      "artifact": 80,
+      "faint_low": 0,
+      "faint_p05": 0,
+      "generic": 1651,
+      "hard_existing": 0,
+      "ocr_heavy": 1
+    },
+    "topology": {
+      "topology_fragment": 1,
+      "topology_junction": 4
+    },
+    "topology_capacity": {
+      "topology_fragment": 8049,
+      "topology_junction": 8331
+    },
+    "topology_sampler_radius_px": 12.0
+  },
+  "revision": "marker-center-mask-preserving-v24",
+  "schema": "graphreader.marker-center-mask-preserving-v24-retry7-diagnosis.v1",
+  "scope": {
+    "case_ids_or_pixels_emitted": false,
+    "label_positive_distance_px": 3.0,
+    "optimizer_steps": 0,
+    "private_data": false,
+    "real_dev_reads": 0,
+    "real_sealed_reads": 0,
+    "retry_mode": "retry7",
+    "scene_count": 167,
+    "split": "real-range-generator-v1-dev",
+    "synthetic_only": true,
+    "threshold": 0.25,
+    "truth_count": 2004
+  },
+  "topology": {
+    "above_threshold": {
+      "topology_fragment": 1,
+      "topology_junction": 4
+    },
+    "accepted_false_positive_attribution": {
+      "topology_fragment": 0,
+      "topology_junction": 0
+    },
+    "capacity": {
+      "topology_fragment": 8049,
+      "topology_junction": 8331
+    },
+    "radius_px": 16.0
+  },
+  "truth_mask_scenarios": {
+    "artifact_mask": {
+      "fn": 1,
+      "recall": 0.9968847352024922,
+      "tp": 320,
+      "truth": 321
+    },
+    "both_masks": {
+      "fn": 0,
+      "recall": 1.0,
+      "tp": 11,
+      "truth": 11
+    },
+    "ocr_mask": {
+      "fn": 0,
+      "recall": 1.0,
+      "tp": 64,
+      "truth": 64
+    },
+    "unmasked": {
+      "fn": 12,
+      "recall": 0.9925373134328358,
+      "tp": 1596,
+      "truth": 1608
+    }
+  }
+}
