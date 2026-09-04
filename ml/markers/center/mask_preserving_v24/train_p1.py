@@ -9,7 +9,7 @@ import numpy as np
 import onnx, onnxruntime as ort, torch
 from ml.markers.center.focal_confidence_v21.focal_loss import v21_loss
 from ml.markers.center.scale_classifier_v16.model import ModelConfig, ScaleClassifierNet
-from ml.markers.center.real_range_generator_v1.generator import audit as generator_audit, build_split
+from ml.markers.center.real_range_generator_v1.generator import ANTI_ALIAS_BLUR_RADII, audit as generator_audit, build_split
 from ml.markers.center.real_range_generator_v1.negative_sampler import CONNECTOR_ANCHOR_MAX_DISTANCE_PX, CONNECTOR_ENDPOINT_OFFSET_PX, TOPOLOGY_HARD_RADIUS_PX, TOPOLOGY_KINDS, TOPOLOGY_RADIUS_PX, TOPOLOGY_SAMPLER_RADIUS_PX, SampledNegatives, sample_negatives
 from ml.markers.center.metrics import center_metrics
 from ml.markers.gate_seal import canonical_json_bytes, sha256_file
@@ -36,11 +36,14 @@ RUNNER_SOURCE_PATHS = (
     Path("docs/GOAL-22-PHASE-4R-V24-NEGATIVE-PATCH-GAP.json"),
     Path("docs/GOAL-22-PHASE-4R-V24-MORPHOLOGY-GAP.json"),
     Path("docs/GOAL-22-PHASE-4R-V24-RETRY3-MORPHOLOGY-GAP.json"),
+    Path("docs/GOAL-22-PHASE-4R-V24-RETRY7-MORPHOLOGY-GAP.json"),
     Path("ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY4_DIAGNOSIS.json"),
     Path("ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY4_GENERIC_FP_DIAGNOSIS.json"),
     Path("ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY5_DIAGNOSIS.json"),
     Path("ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY5_GENERIC_FP_DIAGNOSIS.json"),
     Path("ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY6_DIAGNOSIS.json"),
+    Path("ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY7_DIAGNOSIS.json"),
+    Path("ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY7_MORPHOLOGY_DIAGNOSIS.json"),
     Path("ml/markers/center/metrics.py"),
     Path("ml/policy/evidence-policy.json"),
     Path("ml/policy/acceptance-bars.json"),
@@ -131,9 +134,12 @@ def run(output_dir: Path, checkpoint: Path, v21_onnx: Path) -> dict:
     config=json.loads((REPO_ROOT/CONFIG_PATH).read_text(encoding="utf-8"))
     if _sha(checkpoint) != config["checkpoint_sha256"]: raise ValueError("V21 checkpoint hash changed")
     if _sha(v21_onnx) != config["v21_onnx_sha256"]: raise ValueError("V21 ONNX hash changed")
-    for path_key, hash_key in (("feasibility_path","feasibility_sha256"),("retry_diagnosis_path","retry_diagnosis_sha256"),("morphology_diagnosis_path","morphology_diagnosis_sha256"),("morphology_gap_path","morphology_gap_sha256"),("retry3_morphology_gap_path","retry3_morphology_gap_sha256"),("retry4_diagnosis_path","retry4_diagnosis_sha256"),("retry4_generic_fp_diagnosis_path","retry4_generic_fp_diagnosis_sha256"),("retry5_diagnosis_path","retry5_diagnosis_sha256"),("retry5_generic_fp_diagnosis_path","retry5_generic_fp_diagnosis_sha256"),("retry6_diagnosis_path","retry6_diagnosis_sha256"),("generator_audit_path","generator_audit_sha256"),("negative_audit_path","negative_audit_sha256"),("negative_gap_path","negative_gap_sha256"),("evidence_policy_path","evidence_policy_sha256"),("acceptance_bars_path","acceptance_bars_sha256")):
+    for path_key, hash_key in (("feasibility_path","feasibility_sha256"),("retry_diagnosis_path","retry_diagnosis_sha256"),("morphology_diagnosis_path","morphology_diagnosis_sha256"),("morphology_gap_path","morphology_gap_sha256"),("retry3_morphology_gap_path","retry3_morphology_gap_sha256"),("retry4_diagnosis_path","retry4_diagnosis_sha256"),("retry4_generic_fp_diagnosis_path","retry4_generic_fp_diagnosis_sha256"),("retry5_diagnosis_path","retry5_diagnosis_sha256"),("retry5_generic_fp_diagnosis_path","retry5_generic_fp_diagnosis_sha256"),("retry6_diagnosis_path","retry6_diagnosis_sha256"),("retry7_diagnosis_path","retry7_diagnosis_sha256"),("retry7_morphology_diagnosis_path","retry7_morphology_diagnosis_sha256"),("retry7_morphology_gap_path","retry7_morphology_gap_sha256"),("generator_audit_path","generator_audit_sha256"),("negative_audit_path","negative_audit_sha256"),("negative_gap_path","negative_gap_sha256"),("evidence_policy_path","evidence_policy_sha256"),("acceptance_bars_path","acceptance_bars_sha256")):
         if _sha(REPO_ROOT/str(config[path_key])) != config[hash_key]: raise ValueError(f"bound input changed: {config[path_key]}")
     if _sha(REPO_ROOT/config["negative_sampler"]["source_path"]) != config["negative_sampler"]["source_sha256"]: raise ValueError("negative sampler source changed")
+    anti_aliasing = config.get("anti_aliasing")
+    if anti_aliasing is None or tuple(float(value) for value in anti_aliasing.get("blur_radii_px", ())) != ANTI_ALIAS_BLUR_RADII or anti_aliasing.get("scene_index_schedule") != "ANTI_ALIAS_BLUR_RADII[index % len(ANTI_ALIAS_BLUR_RADII)]":
+        raise ValueError("anti-aliasing schedule does not match generator constant")
     authorization=acquire_training_candidate(REPO_ROOT,task=protocol.TASK,revision=protocol.TRAINING_REVISION,candidate_id=protocol.TRAINING_CANDIDATE_ID,config_path=CONFIG_PATH,runner_source_paths=RUNNER_SOURCE_PATHS)
     output_dir.mkdir(parents=True); report_path=output_dir/"candidate-report.json"; started=time.perf_counter(); phase="initialization"
     try:
