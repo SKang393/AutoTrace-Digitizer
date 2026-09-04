@@ -1409,7 +1409,7 @@ internal static class Program
             ProductionProposalMarkerCenterAdapter.ExpectedMultiradiusModelSha256 != "0b413db48f8e6707ee5ec99afff4cd8ec3d25c6b8a8d9f165bd416deb4578a38" ||
             ProductionProposalMarkerCenterAdapter.MaskPreservingCandidateRevision != "marker-center-mask-preserving-v24" ||
             ProductionProposalMarkerCenterAdapter.MaskPreservingCandidateId != "P1" ||
-            ProductionProposalMarkerCenterAdapter.ExpectedMaskPreservingModelSha256 != "7932b008a9c4372c832215f2f8732c59c59012a25aa4ad2d12cfeaed404bbe3c")
+            ProductionProposalMarkerCenterAdapter.ExpectedMaskPreservingModelSha256 != "4dece2eeb87229d5d57e0d2d714c1915ebecf8e9475b0d466a03dd970993fdb4")
         {
             throw new InvalidOperationException("SELF_TEST_CALIBRATION_FAILED");
         }
