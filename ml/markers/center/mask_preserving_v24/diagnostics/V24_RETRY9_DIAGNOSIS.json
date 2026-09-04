@@ -1,0 +1,273 @@
+{
+  "binding": {
+    "configuration_sha256": "9d6f9da5c3f0526cb2719c3425bb2bb64a98cdbf78bfb6b7162ab0adefba239c",
+    "generator_audit_sha256": "1d71d76956e24f0c1a230c9c27e59aecc0d0cd64a04ca9c0d26ef171838ce26b",
+    "generator_dev_split_sha256": "72dda9b9031f3050d72f5946105576cad89fe938f36f619f84ef4c9cafa8e566",
+    "input_shape": [
+      "candidate_count",
+      3,
+      33,
+      33
+    ],
+    "model_path": "marker-center-mask-preserving-v24-p1.onnx",
+    "model_sha256": "4dece2eeb87229d5d57e0d2d714c1915ebecf8e9475b0d466a03dd970993fdb4",
+    "negative_sampler_priority": [
+      "hard_existing",
+      "faint_low",
+      "faint_p05",
+      "ocr_heavy",
+      "artifact",
+      "generic",
+      "generic_connector_band"
+    ],
+    "negative_sampler_seed": 20260904,
+    "negative_sampler_sha256": "98f970c90943d30a334c951ac3084db5fa62e56eebade252ecd3042e43f22286",
+    "opened_seal_path": "ml/markers/training-seals/marker-center/marker-center-mask-preserving-v24/P1/opened.json",
+    "opened_seal_sha256": "0fc36f3ec59d2ff1c785f926d33aa762a67c336c5f50a97ab5eb195540b6d611",
+    "opened_seal_status": "opened",
+    "output_shape": [
+      "candidate_count",
+      4
+    ],
+    "provider": "CPUExecutionProvider",
+    "runner_source_bundle_sha256": "b8736824df79aadeacded8fec996c932b92f8c1802fd6aced73907958c6f1cf3",
+    "seal_budget_status": "pending_sealed_read"
+  },
+  "diagnostic_conclusion": "fixed-threshold failure concentration is reported by per-stratum above-threshold rates; no threshold change is proposed",
+  "elapsed_ms": 18151.783,
+  "fixed_threshold_metrics": {
+    "accepted": 2061,
+    "accepted_false_positive_attribution": {
+      "generic": 40,
+      "generic_connector_band": 28,
+      "topology_junction": 1
+    },
+    "false_negatives": 12,
+    "false_positives": 69,
+    "precision": 0.9665211062590975,
+    "prohibited_structure_hits": 0,
+    "recall": 0.9940119760479041,
+    "true_positives": 1992
+  },
+  "prohibited_hit_attribution": {
+    "by_prohibited_kind": {},
+    "by_source_group": {},
+    "total": 0
+  },
+  "proposals": {
+    "negative_strata": {
+      "artifact": {
+        "above_threshold": 80,
+        "above_threshold_rate": 0.006140620202640466,
+        "capacity": 13028,
+        "raw_probability": {
+          "count": 13028,
+          "maximum": 0.928166389465332,
+          "median": 2.7641654014587402e-05,
+          "minimum": 0.0,
+          "p05": 2.9802322387695312e-08,
+          "p90": 0.0012344241142273069,
+          "p95": 0.008127935230731959
+        }
+      },
+      "faint_low": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 8384,
+        "raw_probability": {
+          "count": 8384,
+          "maximum": 0.004655361175537109,
+          "median": 5.519390106201172e-05,
+          "minimum": 0.0,
+          "p05": 4.172325134277344e-07,
+          "p90": 0.0005132555961608887,
+          "p95": 0.001456618309020996
+        }
+      },
+      "faint_p05": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 5515,
+        "raw_probability": {
+          "count": 5515,
+          "maximum": 0.004854977130889893,
+          "median": 5.8650970458984375e-05,
+          "minimum": 0.0,
+          "p05": 4.172325134277344e-07,
+          "p90": 0.000464308261871338,
+          "p95": 0.0013329356908798223
+        }
+      },
+      "generic": {
+        "above_threshold": 466,
+        "above_threshold_rate": 0.0035587188612099642,
+        "capacity": 130946,
+        "raw_probability": {
+          "count": 130946,
+          "maximum": 0.9954479932785034,
+          "median": 4.67449426651001e-05,
+          "minimum": 0.0,
+          "p05": 8.940696716308594e-08,
+          "p90": 0.0035585612058639526,
+          "p95": 0.009395115077495575
+        }
+      },
+      "generic_connector_band": {
+        "above_threshold": 965,
+        "above_threshold_rate": 0.019207420234469856,
+        "capacity": 50241,
+        "raw_probability": {
+          "count": 50241,
+          "maximum": 0.9946964979171753,
+          "median": 0.0001398921012878418,
+          "minimum": 0.0,
+          "p05": 1.1920928955078125e-07,
+          "p90": 0.01431339979171753,
+          "p95": 0.050781846046447754
+        }
+      },
+      "hard_existing": {
+        "above_threshold": 0,
+        "above_threshold_rate": 0.0,
+        "capacity": 6012,
+        "raw_probability": {
+          "count": 6012,
+          "maximum": 0.003604203462600708,
+          "median": 3.3527612686157227e-05,
+          "minimum": 0.0,
+          "p05": 5.364418029785156e-07,
+          "p90": 0.0003008246421813965,
+          "p95": 0.000496920943260192
+        }
+      },
+      "ocr_heavy": {
+        "above_threshold": 1,
+        "above_threshold_rate": 5.358769626493757e-05,
+        "capacity": 18661,
+        "raw_probability": {
+          "count": 18661,
+          "maximum": 0.6099321842193604,
+          "median": 2.759695053100586e-05,
+          "minimum": 0.0,
+          "p05": 2.980232238769531e-07,
+          "p90": 0.00015604496002197266,
+          "p95": 0.00025278329849243164
+        }
+      }
+    },
+    "negative_total": 232787,
+    "positive_raw_probability": {
+      "count": 3258,
+      "maximum": 0.9999960660934448,
+      "median": 0.9931110143661499,
+      "minimum": 0.38478007912635803,
+      "p05": 0.9417693734169006,
+      "p90": 0.9992284953594208,
+      "p95": 0.9996361851692199
+    }
+  },
+  "retry9_attribution": {
+    "above_threshold": {
+      "artifact": 80,
+      "connector_anchor": 15,
+      "generic": 447,
+      "generic_connector_band": 965,
+      "ocr_heavy": 1,
+      "topology_fragment": 0,
+      "topology_junction": 4
+    },
+    "accepted_false_positives": {
+      "connector_anchor": 0,
+      "generic": 40,
+      "generic_connector_band": 28,
+      "topology_fragment": 0,
+      "topology_junction": 1
+    },
+    "connector": {
+      "connector_anchor": 15
+    },
+    "connector_anchor_capacity": 3666,
+    "connector_anchor_max_distance_px": 4.0,
+    "connector_endpoint_offset_px": 8.0,
+    "generic_connector_band": {
+      "above_threshold": 965,
+      "accepted_false_positives": 28
+    },
+    "generic_connector_band_radius_px": 4.0,
+    "legacy_strata": {
+      "artifact": 80,
+      "faint_low": 0,
+      "faint_p05": 0,
+      "generic": 447,
+      "hard_existing": 0,
+      "ocr_heavy": 1
+    },
+    "topology": {
+      "topology_fragment": 0,
+      "topology_junction": 4
+    },
+    "topology_capacity": {
+      "topology_fragment": 8050,
+      "topology_junction": 8331
+    },
+    "topology_sampler_radius_px": 12.0
+  },
+  "revision": "marker-center-mask-preserving-v24",
+  "schema": "graphreader.marker-center-mask-preserving-v24-retry9-diagnosis.v1",
+  "scope": {
+    "case_ids_or_pixels_emitted": false,
+    "label_positive_distance_px": 3.0,
+    "optimizer_steps": 0,
+    "private_data": false,
+    "real_dev_reads": 0,
+    "real_sealed_reads": 0,
+    "retry_mode": "retry9",
+    "scene_count": 167,
+    "sealed_runs": 0,
+    "split": "real-range-generator-v1-dev",
+    "synthetic_only": true,
+    "threshold": 0.25,
+    "truth_count": 2004
+  },
+  "topology": {
+    "above_threshold": {
+      "topology_fragment": 0,
+      "topology_junction": 4
+    },
+    "accepted_false_positive_attribution": {
+      "topology_fragment": 0,
+      "topology_junction": 1
+    },
+    "capacity": {
+      "topology_fragment": 8050,
+      "topology_junction": 8331
+    },
+    "radius_px": 16.0
+  },
+  "truth_mask_scenarios": {
+    "artifact_mask": {
+      "fn": 1,
+      "recall": 0.9968847352024922,
+      "tp": 320,
+      "truth": 321
+    },
+    "both_masks": {
+      "fn": 0,
+      "recall": 1.0,
+      "tp": 11,
+      "truth": 11
+    },
+    "ocr_mask": {
+      "fn": 0,
+      "recall": 1.0,
+      "tp": 64,
+      "truth": 64
+    },
+    "unmasked": {
+      "fn": 11,
+      "recall": 0.9931592039800995,
+      "tp": 1597,
+      "truth": 1608
+    }
+  }
+}

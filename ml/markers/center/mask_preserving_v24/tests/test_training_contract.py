@@ -61,9 +61,9 @@ def test_runner_source_bundle_is_relative_and_present():
     ledger = json.loads((ROOT / "ml/markers/training-budgets/production-repair-v1.json").read_text())
     entry = next(item for item in ledger["revisions"] if item["revision"] == config["revision"])
     assert entry["p1_runner_source_bundle_sha256"] == config["expected_runner_source_bundle_sha256"]
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
-    assert entry["status"] == "candidate_1_preregistered"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
+    assert entry["status"] == "dev_passed_retry9_unconsumed"
     if entry["execution_authorized"]:
         assert source_bundle_sha256(ROOT, RUNNER_SOURCE_PATHS) == config["expected_runner_source_bundle_sha256"]
 
@@ -99,20 +99,20 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["synthetic_negative_proposal_count"] == 232798
     assert entry["morphology_diagnosis_sha256"] == config["morphology_diagnosis_sha256"]
     assert entry["morphology_gap_sha256"] == config["morphology_gap_sha256"]
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["status"] == "dev_passed_retry9_unconsumed"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["real_dev_authorized"] is False
     assert entry["real_sealed_authorized"] is False
     assert entry["real_sealed_reads"] == 0
     assert entry["sealed_runs"] == 0
     assert entry["consumed_candidate_ids"] == []
-    assert entry["dev_passed_candidate_ids"] == []
+    assert entry["dev_passed_candidate_ids"] == ["P1"]
     assert entry["candidate_consumed"] is False
-    assert entry["p1_result_path"].endswith("P1_RETRY8_RESULT.json")
+    assert entry["p1_result_path"].endswith("P1_RETRY9_RESULT.json")
     assert digest(ROOT / entry["p1_result_path"]) == entry["p1_result_sha256"]
-    assert entry["p1_result_sha256"] == "483f5f989ad73d5280da4cf248cc71c2c2f315dec24827b5cb7a2a59512f37cf"
-    assert entry["p1_candidate_report_path"].endswith("marker-v24-retry8/P1-run/candidate-report.json")
+    assert entry["p1_result_sha256"] == "5dee4ac84639597faac2d2bdf4f74db10d8225e858d8f884f34b7c5725dc2255"
+    assert entry["p1_candidate_report_path"].endswith("marker-v24-retry9/P1-rerun/candidate-report.json")
     assert digest(ROOT / entry["p1_candidate_report_path"]) == entry["p1_candidate_report_sha256"]
     assert entry["p1_candidate_report_sha256"] == entry["p1_result_sha256"]
     assert entry["retry3_p1_result_path"].endswith("P1_RETRY3_RESULT.json")
@@ -152,20 +152,20 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["retry4_p1_onnx_sha256"] == "697fbcfb961e4c2af36a1a3d68cf5be874412b2939b03c42b59aaa82c4b0de96"
     assert entry["retry5_p1_checkpoint_sha256"] == "a7eaba24b5e65e19c97f303aaf1c5622e5a68a1dabbf44e1df11386c15489832"
     assert entry["retry5_p1_onnx_sha256"] == "d3445f0b1bf0e97a98942133d45341cae75548887be853743e887832cacad7bd"
-    assert entry["p1_checkpoint_sha256"] == "f66e8d83a14d48220468f7af934130660ac78dd901c04e1d48ade157b385e2d2"
-    assert entry["p1_onnx_sha256"] == "d6f8e9bc64c34f1bb646b6d150e1ccead45e26684836a413a5b904da7f40b5ab"
-    assert entry["p1_true_positives"] == 1990
-    assert entry["p1_false_positives"] == 179
-    assert entry["p1_false_negatives"] == 14
-    assert entry["p1_precision"] == 0.9174734900875979
-    assert entry["p1_recall"] == 0.9930139720558883
-    assert entry["p1_f1"] == 0.953750299544692
+    assert entry["p1_checkpoint_sha256"] == "357119c66f0c6fba2c73478d458f900521b475c1af8722814fac4e758c61a3b1"
+    assert entry["p1_onnx_sha256"] == "4dece2eeb87229d5d57e0d2d714c1915ebecf8e9475b0d466a03dd970993fdb4"
+    assert entry["p1_true_positives"] == 1992
+    assert entry["p1_false_positives"] == 69
+    assert entry["p1_false_negatives"] == 12
+    assert entry["p1_precision"] == 0.9665211062590975
+    assert entry["p1_recall"] == 0.9940119760479041
+    assert entry["p1_f1"] == 0.9800738007380074
     assert entry["p1_prohibited_structure_hits"] == 0
-    assert entry["p1_onnx_parity_maximum_absolute_error"] == 1.430511474609375e-06
+    assert entry["p1_onnx_parity_maximum_absolute_error"] == 9.5367431640625e-07
     assert entry["retry5_p1_opened_seal_sha256"] == "db3c4ded697e108a7af55d3eada605c6bbe3cc0dd17775727fc401c885c41386"
     assert entry["retry5_p1_result_seal_sha256"] == "117bb7a12b5b742a47eb8a3fb3cd8e5899692ba1ec5119a48d5c0432e21a7c40"
-    assert entry["p1_opened_seal_sha256"] == "7d462c8c400a5d2b021ee239e5e192d96dfebdf2415c82d5a5e5fadff1a9832a"
-    assert entry["p1_result_seal_sha256"] == "bf3a08ade1ebce70cda5028424c8233f2dcce1f0b35bbf42de756d60d5dd3633"
+    assert entry["p1_opened_seal_sha256"] == "0fc36f3ec59d2ff1c785f926d33aa762a67c336c5f50a97ab5eb195540b6d611"
+    assert entry["p1_result_seal_sha256"] == "da9b5bcac78e99923689511b7ea2bc9772644ad0c1e953d4acc9bbfb8ffb12ca"
     assert digest(ROOT / entry["retry6_diagnosis_path"]) == entry["retry6_diagnosis_sha256"]
     assert entry["retry6_accepted_false_positive_generic"] == 85
     assert entry["retry6_accepted_false_positive_topology_junction"] == 1
@@ -213,7 +213,7 @@ def test_current_evidence_bindings_and_authorization_match_files():
     assert entry["retry5_generic_root_cause_masked_context"] == 23
     assert entry["retry5_generic_root_cause_marker_field"] == 45
     assert entry["retry5_generic_root_cause_exhaustive_count"] == 183
-    assert entry["p1_dev_gate_passed"] is False
+    assert entry["p1_dev_gate_passed"] is True
     assert entry["negative_sampler_selected_index_sha256"] == "d7460b95bbdbb89d79a12cafe7632604f02b8087e9986fb7a9d3ea940287567f"
     assert entry["negative_sampler_connector_endpoint_offset_px"] == 8.0
     assert entry["negative_sampler_connector_anchor_max_distance_px"] == 4.0
@@ -308,13 +308,13 @@ def test_retry8_failed_dev_binding_is_unconsumed_and_closed():
     assert result["real_dev_reads"] == 0
     assert result["real_sealed_reads"] == 0
     assert result["sealed_runs"] == 0
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["status"] == "dev_passed_retry9_unconsumed"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["consumed_candidate_ids"] == []
-    assert entry["dev_passed_candidate_ids"] == []
+    assert entry["dev_passed_candidate_ids"] == ["P1"]
     assert entry["candidate_consumed"] is False
-    assert entry["p1_dev_gate_passed"] is False
+    assert entry["p1_dev_gate_passed"] is True
     assert entry["real_dev_reads"] == 0
     assert entry["real_dev_authorized"] is False
     assert entry["real_sealed_reads"] == 0
@@ -323,11 +323,11 @@ def test_retry8_failed_dev_binding_is_unconsumed_and_closed():
     assert entry["public_gate_authorized"] is False
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
-    assert entry["p1_result_sha256"] == "483f5f989ad73d5280da4cf248cc71c2c2f315dec24827b5cb7a2a59512f37cf"
-    assert entry["p1_checkpoint_sha256"] == "f66e8d83a14d48220468f7af934130660ac78dd901c04e1d48ade157b385e2d2"
-    assert entry["p1_onnx_sha256"] == "d6f8e9bc64c34f1bb646b6d150e1ccead45e26684836a413a5b904da7f40b5ab"
-    assert entry["p1_opened_seal_sha256"] == "7d462c8c400a5d2b021ee239e5e192d96dfebdf2415c82d5a5e5fadff1a9832a"
-    assert entry["p1_result_seal_sha256"] == "bf3a08ade1ebce70cda5028424c8233f2dcce1f0b35bbf42de756d60d5dd3633"
+    assert entry["retry8_p1_result_sha256"] == "483f5f989ad73d5280da4cf248cc71c2c2f315dec24827b5cb7a2a59512f37cf"
+    assert entry["retry8_p1_checkpoint_sha256"] == "f66e8d83a14d48220468f7af934130660ac78dd901c04e1d48ade157b385e2d2"
+    assert entry["retry8_p1_onnx_sha256"] == "d6f8e9bc64c34f1bb646b6d150e1ccead45e26684836a413a5b904da7f40b5ab"
+    assert entry["retry8_p1_opened_seal_sha256"] == "7d462c8c400a5d2b021ee239e5e192d96dfebdf2415c82d5a5e5fadff1a9832a"
+    assert entry["retry8_p1_result_seal_sha256"] == "bf3a08ade1ebce70cda5028424c8233f2dcce1f0b35bbf42de756d60d5dd3633"
     assert entry["retry8_p1_runner_source_bundle_sha256"] == "ffd479f41f0fe6525b24e1ac6df1d2e2acd187d58313b526feea3e1c4008dab7"
     diagnosis_path = ROOT / "ml/markers/center/mask_preserving_v24/diagnostics/V24_RETRY8_DIAGNOSIS.json"
     diagnosis = json.loads(diagnosis_path.read_text())
@@ -373,7 +373,7 @@ def test_retry9_void_records_sampler_capacity_mismatch_without_consuming_budget(
     assert config["negative_sampler"]["source_sha256"] == "98f970c90943d30a334c951ac3084db5fa62e56eebade252ecd3042e43f22286"
     assert entry["retry9_void_report_path"].endswith("marker-v24-retry9/P1-run/candidate-report.json")
     assert entry["retry9_void_report_sha256"] == "2ff09a580e132555b5b6536e632cdc082710420921c8ba131c92ee0d8fdf486e"
-    assert entry["retry9_void_seal_path"].endswith("marker-center-mask-preserving-v24/P1/void.json")
+    assert entry["retry9_void_seal_path"].endswith("P1/void-attempts/daafc116b94145f784240a8d824d5955/void.json")
     assert entry["retry9_void_seal_sha256"] == "5e6554a33929075606c948a95a595f8be163a10d72e6502ae2361582f5a746d8"
     assert entry["retry9_void_phase"] == "initialization"
     assert entry["retry9_void_exception_type"] == "RuntimeError"
@@ -383,13 +383,13 @@ def test_retry9_void_records_sampler_capacity_mismatch_without_consuming_budget(
     assert entry["retry9_void_optimizer_steps"] == 0
     assert entry["retry9_void_configured_generic_capacity"] == 177889
     assert entry["retry9_void_actual_generic_capacity"] == 127516
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["status"] == "dev_passed_retry9_unconsumed"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["candidate_consumed"] is False
     assert entry["consumed_candidate_ids"] == []
-    assert entry["dev_passed_candidate_ids"] == []
-    assert entry["p1_dev_gate_passed"] is False
+    assert entry["dev_passed_candidate_ids"] == ["P1"]
+    assert entry["p1_dev_gate_passed"] is True
     assert entry["real_dev_reads"] == 0
     assert entry["real_sealed_reads"] == 0
     assert entry["sealed_runs"] == 0
@@ -453,12 +453,12 @@ def test_retry7_records_unconsumed_synthetic_dev_pass():
     assert result["real_sealed_reads"] == 0
     assert result["sealed_runs"] == 0
     assert digest(result_path) == "6fc74bc7e0aa6c36d7dd0aac51af014ad5875261f9e7a1cb113e13727287d9be"
-    assert entry["status"] == "candidate_1_preregistered"
-    assert entry["dev_passed_candidate_ids"] == []
+    assert entry["status"] == "dev_passed_retry9_unconsumed"
+    assert entry["dev_passed_candidate_ids"] == ["P1"]
     assert entry["consumed_candidate_ids"] == []
     assert entry["candidate_consumed"] is False
-    assert entry["execution_authorized"] is True
-    assert entry["authorized_candidate_id"] == "P1"
+    assert entry["execution_authorized"] is False
+    assert entry["authorized_candidate_id"] is None
     assert entry["real_dev_authorized"] is False
     assert entry["real_dev_reads"] == 0
     assert entry["real_dev_gate_passed"] is False
@@ -469,13 +469,13 @@ def test_retry7_records_unconsumed_synthetic_dev_pass():
     assert entry["public_gate_evaluations"] == 0
     assert entry["production_approval"] is False
     assert entry["release_eligible"] is False
-    assert entry["p1_result_path"].endswith("P1_RETRY8_RESULT.json")
-    assert entry["p1_result_sha256"] == "483f5f989ad73d5280da4cf248cc71c2c2f315dec24827b5cb7a2a59512f37cf"
+    assert entry["p1_result_path"].endswith("P1_RETRY9_RESULT.json")
+    assert entry["p1_result_sha256"] == "5dee4ac84639597faac2d2bdf4f74db10d8225e858d8f884f34b7c5725dc2255"
     assert digest(ROOT / entry["p1_result_path"]) == entry["p1_result_sha256"]
-    assert entry["p1_checkpoint_sha256"] == "f66e8d83a14d48220468f7af934130660ac78dd901c04e1d48ade157b385e2d2"
-    assert entry["p1_onnx_sha256"] == "d6f8e9bc64c34f1bb646b6d150e1ccead45e26684836a413a5b904da7f40b5ab"
-    assert entry["p1_opened_seal_sha256"] == "7d462c8c400a5d2b021ee239e5e192d96dfebdf2415c82d5a5e5fadff1a9832a"
-    assert entry["p1_result_seal_sha256"] == "bf3a08ade1ebce70cda5028424c8233f2dcce1f0b35bbf42de756d60d5dd3633"
+    assert entry["p1_checkpoint_sha256"] == "357119c66f0c6fba2c73478d458f900521b475c1af8722814fac4e758c61a3b1"
+    assert entry["p1_onnx_sha256"] == "4dece2eeb87229d5d57e0d2d714c1915ebecf8e9475b0d466a03dd970993fdb4"
+    assert entry["p1_opened_seal_sha256"] == "0fc36f3ec59d2ff1c785f926d33aa762a67c336c5f50a97ab5eb195540b6d611"
+    assert entry["p1_result_seal_sha256"] == "da9b5bcac78e99923689511b7ea2bc9772644ad0c1e953d4acc9bbfb8ffb12ca"
     assert entry["retry6_p1_result_sha256"] == "610487133e59a71b457c261cbffa0af9d64ddbdac96e5e5697b3f411a761c3a7"
     assert entry["retry6_p1_checkpoint_sha256"] == "e23503d79ca58c535fcdcff5cf344d87205e3e2ad901c208d7a4049dc530d5e8"
     assert entry["retry6_p1_onnx_sha256"] == "31d473d6c24bf21edc1cbfb25f7da35eabfed7cbf8afc13bf52bef23d06bfeb9"

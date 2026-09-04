@@ -88,6 +88,7 @@ def test_retry8_opened_seal_hash_mismatch_fails_closed(monkeypatch: pytest.Monke
         return real_sha(path)
 
     monkeypatch.setattr(diagnose_retry, "_sha", fake_sha)
+    monkeypatch.setattr(diagnose_retry, "RETRY8_RUNNER_SOURCE_BUNDLE_SHA256", "b8736824df79aadeacded8fec996c932b92f8c1802fd6aced73907958c6f1cf3")
     with pytest.raises(ValueError, match="retry8 opened seal hash mismatch"):
         summarize(model, retry8=True)
 
