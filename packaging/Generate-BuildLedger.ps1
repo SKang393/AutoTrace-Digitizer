@@ -54,6 +54,12 @@ function Get-OptionalString {
     if ($null -eq $rawValue) {
         return $null
     }
+    if ($rawValue -is [DateTime]) {
+        return $rawValue.ToString('o', [Globalization.CultureInfo]::InvariantCulture)
+    }
+    if ($rawValue -is [DateTimeOffset]) {
+        return $rawValue.ToString('o', [Globalization.CultureInfo]::InvariantCulture)
+    }
     $value = ([string]$rawValue).Trim()
     if ([string]::IsNullOrWhiteSpace($value)) {
         return $null

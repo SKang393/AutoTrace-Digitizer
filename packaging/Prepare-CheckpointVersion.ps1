@@ -117,10 +117,12 @@ function Get-CheckpointLedgerState {
 function Test-HistoricalLedgerCorrection {
     param(
         [object]$Ledger,
-        [Parameter(Mandatory)][object]$WorkingVersion
+        [Parameter(Mandatory)][object]$WorkingVersion,
+        [Parameter(Mandatory)][string]$HeadCommit
     )
 
-    return $null -ne $Ledger -and
+    return $HeadCommit -ceq '1a1f4aa87329ec0040bff68d03d0855281d5078f' -and
+        $null -ne $Ledger -and
         $Ledger.Count -eq 432 -and
         $Ledger.MaxBuildNumber -eq 432 -and
         $Ledger.MaxVersion.Value -ceq '0.4.32' -and
@@ -129,7 +131,8 @@ function Test-HistoricalLedgerCorrection {
 
 if ($CheckHead.IsPresent) {
     $ledger = Get-CheckpointLedgerState
-    if (Test-HistoricalLedgerCorrection -Ledger $ledger -WorkingVersion $workingVersion) {
+    $headCommit = Invoke-GitText -Arguments @('rev-parse', 'HEAD')
+    if (Test-HistoricalLedgerCorrection -Ledger $ledger -WorkingVersion $workingVersion -HeadCommit $headCommit) {
         Write-Host 'Checkpoint version verified: 0.4.32 (historical 432-build ledger correction)'
         exit 0
     }
