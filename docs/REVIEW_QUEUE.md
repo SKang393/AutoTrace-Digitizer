@@ -40,18 +40,18 @@ Items stay here until resolved. Newest items are appended last.
 
 ## REV-003 — reauthenticate GitHub as SKang393
 
-- **Status:** open
-- **Blocks:** pushing completed Goal 22 phase commits to `origin/main`
-- **Effort:** about 2 minutes
-- **Action:** sign in to GitHub on this computer as `SKang393`, then confirm
-  `gh auth status` reports that account as valid
-- **Why:** the active cached `XpressPeach` credential was denied access to
-  `SKang393/Graph-auto-reader`, while both GitHub CLI account tokens report as
-  invalid; the local repository identity, branch, and remote are correct
+- **Status:** resolved
+- **Resolution:** GitHub CLI was reauthenticated as active account `SKang393`
+  on 2026-09-04, and the 61 committed Goal 22 changes were pushed from
+  `58e1e63` through `847c80b` to `origin/main`.
+- **Blocks:** none
+- **Effort:** complete
+- **Action:** no maintainer action remains
+- **Why:** the repository now uses the authorized `SKang393` credential and
+  local `main` matches `origin/main`
 - **Files:** [Goal 22 readiness](1.0-READINESS.md),
   [review queue](REVIEW_QUEUE.md)
-- **Unblocks when:** `git push origin main` succeeds and `origin/main` matches
-  the local `main` commit
+- **Unblocks when:** resolved by successful authenticated push
 
 ## REV-004 — approve a pre-OCR structural provider design
 
@@ -68,3 +68,18 @@ Items stay here until resolved. Newest items are appended last.
   [current readiness](1.0-READINESS.md)
 - **Unblocks when:** the maintainer approves one pre-OCR input contract or
   explicitly rejects this direction
+
+## REV-005 — renew Git write approval after service failure
+
+- **Status:** resolved
+- **Resolution:** the maintainer explicitly approved staging and committing
+  the prepared Goal 22 changes on 2026-09-04.
+- **Blocks:** none
+- **Effort:** complete
+- **Action:** no maintainer action remains
+- **Why:** the renewed approval authorizes the normal Git write path after the
+  prior managed approval-service failure
+- **Files:** [review queue](REVIEW_QUEUE.md),
+  [retry6 result](../ml/markers/center/mask_preserving_v24/P1_RETRY6_RESULT.json),
+  [retry7 config](../ml/markers/center/mask_preserving_v24/training/p1.json)
+- **Unblocks when:** resolved by explicit maintainer approval
