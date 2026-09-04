@@ -17,7 +17,7 @@ from typing import Iterable
 
 import numpy as np
 import torch
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 
 from ml.markers.center.dataset import _artifact_geometry, _draw_marker
 
@@ -26,6 +26,10 @@ SCENE_COUNT = 167
 MARKERS_PER_SCENE = 12
 SEED_BASE = {"train": 4100, "dev": 5100}
 MASK_THRESHOLD = 0.35
+# Fixed scene-index schedule: scene 0 is the unblurred control.  The modest
+# Gaussian radii are applied to source ink after all drawing and before the
+# bounded print-noise perturbation; masks, centers, and labels stay unchanged.
+ANTI_ALIAS_BLUR_RADII = (0.0, 0.25, 0.25, 0.25, 0.35, 0.57, 0.57)
 
 # Aggregate-only topology targets measured from real-dev morphology diagnosis.
 # These are envelopes, not model-selection thresholds.
@@ -54,6 +58,7 @@ TOPOLOGY_TARGETS = {
         "foreground_extent_balance_median": 0.78947,
         "covariance_eigen_ratio_median": 2.464,
         "max_ring_support_3_12_median": 8.0,
+        "gray_band_fraction_median": 0.06152433425160702,
     },
 }
 MARKER_MORPHOLOGY_REVISION = "filled-elongated-range-v1"
@@ -276,10 +281,15 @@ def _scene(split: str, index: int, diameters: list[float]) -> Scene:
         draw.line((8, yy, 220, yy), fill=226, width=3)
     negatives.append(("ocr_heavy", float(ocr_heavy_center[0]), float(ocr_heavy_center[1])))
 
+    blur_radius = ANTI_ALIAS_BLUR_RADII[index % len(ANTI_ALIAS_BLUR_RADII)]
+    if blur_radius:
+        image = image.filter(ImageFilter.GaussianBlur(radius=blur_radius))
     array = np.asarray(image, dtype=np.float32) / 255.0
     # A deterministic, bounded print perturbation keeps both families useful.
+    noise = np.zeros(array.shape, dtype=np.float64)
     if index % 2:
-        array = np.clip(array + rng.normal(0.0, 0.006, array.shape), 0.0, 1.0)
+        noise = rng.normal(0.0, 0.006, array.shape)
+    array = np.clip(array + noise, 0.0, 1.0)
     array = array.astype(np.float32, copy=False)
     tensor = torch.from_numpy(np.stack((1.0 - array,
                                         np.asarray(ocr, dtype=np.float32) / 255.0,
@@ -417,6 +427,13 @@ def audit() -> dict[str, object]:
                     "patch_shape": [3, PATCH, PATCH],
                     "marker_morphology_revision": MARKER_MORPHOLOGY_REVISION,
                     "marker_morphology_modes": {"base_primitive_only_modes": 2, "filled_overlay_modes": 3, "elongated_overlay_modes": 2}},
+        "anti_aliasing": {"method": "Pillow ImageFilter.GaussianBlur",
+                           "blur_radii_px": list(ANTI_ALIAS_BLUR_RADII),
+                           "scene_index_schedule": "ANTI_ALIAS_BLUR_RADII[index % len(ANTI_ALIAS_BLUR_RADII)]",
+                           "scope": "source ink after drawing and before bounded print noise",
+                           "unblurred_control_scene_indices": [index for index in range(SCENE_COUNT)
+                                                                if ANTI_ALIAS_BLUR_RADII[index % len(ANTI_ALIAS_BLUR_RADII)] == 0.0],
+                           "masks_centers_labels_unchanged": True},
         "splits": {"train": train_record, "dev": dev_record},
         "mask_overlap_scenarios": {"markers_per_split": dev_markers,
             "ocr_hard_hits": dev_record["mask_center_hits"]["ocr"],

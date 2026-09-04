@@ -15,7 +15,7 @@ import torch
 
 from ml.markers.center.mask_preserving_v24.mask_preserving import extract_proposals
 
-from .generator import PATCH, TOPOLOGY_TARGETS, _quantiles, build_split
+from .generator import ANTI_ALIAS_BLUR_RADII, PATCH, SCENE_COUNT, TOPOLOGY_TARGETS, _quantiles, build_split
 from .negative_sampler import CONNECTOR_ANCHOR_MAX_DISTANCE_PX, CONNECTOR_ENDPOINT_OFFSET_PX, TOPOLOGY_HARD_RADIUS_PX, TOPOLOGY_KINDS, TOPOLOGY_SAMPLER_RADIUS_PX, sample_negatives
 
 REAL_NEGATIVE_GATES = {
@@ -26,6 +26,7 @@ REAL_NEGATIVE_GATES = {
 
 MORPHOLOGY_KEYS = (
     "dark_fraction_ge_012", "dark_fraction_ge_05", "center5x5_mean",
+    "gray_band_fraction",
     "max_row_dark_fraction_ge_012", "max_col_dark_fraction_ge_012",
     "foreground_extent_balance", "covariance_eigen_ratio",
     "border_dark_fraction_ge_012", "max_ring_support_3_12",
@@ -62,6 +63,7 @@ def _patch_morphology(patch: torch.Tensor) -> dict[str, float]:
         "dark_fraction_ge_012": float(dark012.mean()),
         "dark_fraction_ge_05": float(dark05.mean()),
         "center5x5_mean": float(ink[14:19, 14:19].mean()),
+        "gray_band_fraction": float(dark012.mean() - dark05.mean()),
         "max_row_dark_fraction_ge_012": float(dark012.mean(1).max()),
         "max_col_dark_fraction_ge_012": float(dark012.mean(0).max()),
         "foreground_extent_balance": float(extent),
@@ -157,6 +159,7 @@ def _positive_gates(positives: dict[str, object]) -> dict[str, bool]:
         "extent_covers_real_median": covered("foreground_extent_balance", "foreground_extent_balance_median"),
         "covariance_covers_real_median": covered("covariance_eigen_ratio", "covariance_eigen_ratio_median"),
         "ring_covers_real_median": covered("max_ring_support_3_12", "max_ring_support_3_12_median"),
+        "gray_band_covers_real_median": covered("gray_band_fraction", "gray_band_fraction_median"),
     }
 
 
@@ -248,6 +251,15 @@ def audit() -> dict[str, object]:
             "pixels_emitted": False,
         },
         "extractor": "mask-preserving-v24 ink-supported full grid",
+        "anti_aliasing": {
+            "method": "Pillow ImageFilter.GaussianBlur",
+            "blur_radii_px": list(ANTI_ALIAS_BLUR_RADII),
+            "scene_index_schedule": "ANTI_ALIAS_BLUR_RADII[index % len(ANTI_ALIAS_BLUR_RADII)]",
+            "scope": "source ink after drawing and before bounded print noise",
+            "unblurred_control_scene_indices": [index for index in range(SCENE_COUNT)
+                                                 if ANTI_ALIAS_BLUR_RADII[index % len(ANTI_ALIAS_BLUR_RADII)] == 0.0],
+            "masks_centers_labels_unchanged": True,
+        },
         "splits": {"train": train, "dev": dev},
         "distribution_gates": {
             split: _distribution_gates(record) for split, record in (("train", train), ("dev", dev))
