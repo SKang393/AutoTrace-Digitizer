@@ -1,4 +1,6 @@
 * text=auto eol=lf
+# The consumed structure-consensus evidence binds this source's CRLF bytes.
+src/GraphReader.Ocr/ConnectedComponentTextRegionDetector.cs text eol=crlf
 
 packaging/pdfium-source/native/pdfium-windows-hdc.patch whitespace=-blank-at-eol
 packaging/pdfium-source/review/third-party-notices.dependency-mapped.txt text eol=lf whitespace=-blank-at-eol,-blank-at-eof
