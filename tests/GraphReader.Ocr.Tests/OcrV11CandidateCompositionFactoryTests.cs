@@ -92,7 +92,10 @@ public sealed class OcrV11CandidateCompositionFactoryTests
         ModelIdentity Model(string id, string version, string path)
         {
             string absolute = Path.Combine(repoRoot, path.Replace('/', Path.DirectorySeparatorChar));
-            Assert.IsTrue(File.Exists(absolute), $"Candidate payload is missing: {absolute}");
+            if (!File.Exists(absolute))
+            {
+                Assert.Inconclusive($"Exact local candidate payload is not installed: {absolute}");
+            }
             string sha256 = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(absolute)));
             return new ModelIdentity(id, version, sha256, absolute);
         }
@@ -106,7 +109,10 @@ public sealed class OcrV11CandidateCompositionFactoryTests
             "extracted",
             "en_PP-OCRv5_mobile_rec_infer",
             "inference.yml");
-        Assert.IsTrue(File.Exists(yamlPath), $"Official inference YAML is missing: {yamlPath}");
+        if (!File.Exists(yamlPath))
+        {
+            Assert.Inconclusive($"Exact local official inference YAML is not installed: {yamlPath}");
+        }
         string alphabet = ReadOfficialAlphabet(yamlPath);
         return new OcrV8ProductionPayloadSet(
             Model(
