@@ -30,6 +30,24 @@ def test_determinism_and_disjoint_seeds() -> None:
     assert set(s.seed for s in a).isdisjoint(s.seed for s in build_split("dev"))
 
 
+def test_independent_layouts_are_repeatable_and_do_not_reuse_training_geometry():
+    from ml.markers.center.real_range_generator_v1.generator import _hash_scenes
+
+    train = build_split("train", independent_layout=True)
+    dev = build_split("dev", independent_layout=True)
+    historical_train = build_split("train")
+    assert {scene.centers for scene in train}.isdisjoint(scene.centers for scene in dev)
+    assert {scene.centers for scene in historical_train}.isdisjoint(scene.centers for scene in dev)
+    assert [scene.diameters for scene in dev] == [scene.diameters for scene in historical_train]
+    expected_hash = _hash_scenes(dev)
+    build_split.cache_clear()
+    assert _hash_scenes(build_split("dev", independent_layout=True)) == expected_hash
+    for scene in dev:
+        xs = [x for x, _ in scene.centers]
+        assert xs == sorted(xs)
+        assert all(0 <= x < 224 and 0 <= y < 168 for x, y in scene.centers)
+
+
 def test_range_and_masks_match_required_aggregate() -> None:
     result = audit()
     for split in result["splits"].values():

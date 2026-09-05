@@ -170,9 +170,11 @@ def _measure_rendered_diameter(diameter: float) -> float:
     return float(max(xs.max() - xs.min() + 1, ys.max() - ys.min() + 1))
 
 
-def _scene(split: str, index: int, diameters: list[float], *, sparse_fragments: bool = False) -> Scene:
+def _scene(split: str, index: int, diameters: list[float], *, sparse_fragments: bool = False,
+           independent_layout: bool = False) -> Scene:
     seed = SEED_BASE[split] + index
     rng = np.random.default_rng(seed)
+    layout_rng = np.random.default_rng(seed + 20000) if independent_layout else None
     image = Image.new("L", (WIDTH, HEIGHT), 255)
     draw = ImageDraw.Draw(image)
     ocr = Image.new("L", (WIDTH, HEIGHT), 0)
@@ -184,6 +186,11 @@ def _scene(split: str, index: int, diameters: list[float], *, sparse_fragments: 
     for local in range(per_scene):
         x = 18 + ((local * 29 + index * 17) % (WIDTH - 36))
         y = 18 + ((local * 37 + index * 11) % (HEIGHT - 60))
+        if layout_rng is not None:
+            # Ordered session positions with seed-specific jitter and values.
+            # Keep historical index-based layouts unchanged unless requested.
+            x = int(round(18 + local * (WIDTH - 37) / max(1, per_scene - 1))) + int(layout_rng.integers(-3, 4))
+            y = int(layout_rng.integers(18, HEIGHT - 42))
         centers.append((float(x), float(y)))
         radius = max(1, int(round(diameters[local] / 2.0)))
         if diameters[local] == 1.0:
@@ -317,14 +324,16 @@ def _scene(split: str, index: int, diameters: list[float], *, sparse_fragments: 
 
 
 @lru_cache(maxsize=4)
-def build_split(split: str, *, scene_count: int = SCENE_COUNT, sparse_fragments: bool = False) -> tuple[Scene, ...]:
+def build_split(split: str, *, scene_count: int = SCENE_COUNT, sparse_fragments: bool = False,
+                independent_layout: bool = False) -> tuple[Scene, ...]:
     if split not in SEED_BASE:
         raise ValueError(f"unknown split: {split}")
     if scene_count <= 0 or 2004 % scene_count:
         raise ValueError("scene_count must be a positive divisor of 2004")
     per_scene = 2004 // scene_count
     values = _diameters(2004)
-    return tuple(_scene(split, index, values[index * per_scene:(index + 1) * per_scene], sparse_fragments=sparse_fragments)
+    return tuple(_scene(split, index, values[index * per_scene:(index + 1) * per_scene],
+                        sparse_fragments=sparse_fragments, independent_layout=independent_layout)
                  for index in range(scene_count))
 
 

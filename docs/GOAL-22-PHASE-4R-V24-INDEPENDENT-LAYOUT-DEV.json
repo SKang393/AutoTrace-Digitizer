@@ -1,0 +1,33 @@
+{
+  "acceptance_bars_path": "ml/policy/acceptance-bars.json",
+  "elapsed_ms": 21669.153,
+  "historical_train_center_geometry_overlap": 0,
+  "layout_seed_offset": 20000,
+  "model_sha256": "4dece2eeb87229d5d57e0d2d714c1915ebecf8e9475b0d466a03dd970993fdb4",
+  "production_approval": false,
+  "schema": "graphreader.marker-v24-retry9-independent-layout-dev.v1",
+  "scope": {
+    "candidate_selection": false,
+    "optimizer_steps": 0,
+    "private_reads": 0,
+    "sealed_reads": 0,
+    "synthetic_only": true
+  },
+  "selected": {
+    "duplicate_count": 0,
+    "f1": 0.8855036855036855,
+    "false_negatives": 202,
+    "false_positives": 264,
+    "precision": 0.872216844143272,
+    "prohibited_structure_hits": 1,
+    "proposal_recall": 1,
+    "proposal_true_positives": 2004,
+    "recall": 0.8992015968063872,
+    "scene_count": 167,
+    "threshold": 0.25,
+    "true_positives": 1802
+  },
+  "sparse_fragments": true,
+  "split_sha256": "764f8ec225de9b6069f4a871613154f8f291ac35487a64a80e079f97d52e9abf",
+  "tier1_center_passed": false
+}
