@@ -282,13 +282,18 @@ def _scene(split: str, index: int, diameters: list[float], *, sparse_fragments: 
     negatives.append(("ocr_heavy", float(ocr_heavy_center[0]), float(ocr_heavy_center[1])))
 
     if sparse_fragments:
-        # The fragment occupies y=132..138, outside truth-center windows and
-        # above the OCR-heavy band. Vary orientation and shade independently
-        # of model scores; the existing blur schedule supplies print softness.
+        # The fragments occupy approximately y=127..143, below truth centers.
+        # Vary orientation, thickness, and shade
+        # independently of model scores; the existing blur schedule supplies
+        # print softness. The thicker cases cover the measured real-dev
+        # center-fill tail without changing the default generator.
         x = 96 + index % 12
-        rise = (0, 3, -3)[index % 3]
+        style = index % 6
+        rise = (0, 3, -3, 6, -6, 2)[style]
+        width = (1, 1, 2, 3, 4, 5)[style]
+        shade = (96, 150, 190, 72, 128, 176)[style]
         draw.line((x - 10, 135 - rise, x + 10, 135 + rise),
-                  fill=(96, 150, 190)[(index // 3) % 3], width=1)
+                  fill=shade, width=width)
         negatives.append(("sparse_fragment", float(x), 135.0))
 
     blur_radius = ANTI_ALIAS_BLUR_RADII[index % len(ANTI_ALIAS_BLUR_RADII)]

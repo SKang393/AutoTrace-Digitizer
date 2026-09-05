@@ -15,7 +15,9 @@ def test_sparse_fragment_variant_preserves_truths_and_reserves_coverage():
     for split in ("train", "dev"):
         record = result["splits"][split]
         assert record["sparse_proposal_count"] == 2087
-        assert record["morphology"]["center5x5_mean"]["median"] < 0.1
+        reference = result["input_range_coverage"]["reference_median"]
+        assert record["morphology"]["center5x5_mean"]["median"] < reference
+        assert result["input_range_coverage"]["within_synthetic_p05_to_p95"][split]
         assert record["morphology"]["gray_band_fraction"]["median"] > 0.1
         assert record["morphology"]["covariance_eigen_ratio"]["p95"] > 10
     assert result["splits"]["train"]["aggregate_sha256"] != result["splits"]["dev"]["aggregate_sha256"]

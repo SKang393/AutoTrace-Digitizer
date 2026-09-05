@@ -1,0 +1,38 @@
+{
+  "above_threshold_proposals_reclassified": 1016,
+  "binding": {
+    "dev_sha256": "72dda9b9031f3050d72f5946105576cad89fe938f36f619f84ef4c9cafa8e566",
+    "diagnostic_source_sha256": "04810291519c675b5893fc9407c8d472826ac08eb01f429f75be52453a47dbdd",
+    "model_sha256": "4dece2eeb87229d5d57e0d2d714c1915ebecf8e9475b0d466a03dd970993fdb4",
+    "provider": "CPUExecutionProvider",
+    "threshold": 0.25
+  },
+  "counts_by_radius_px": {
+    "3": {
+      "negative_above_threshold": 1512,
+      "negative_above_threshold_rate": 0.006495208065742503,
+      "negative_below_threshold": 231275,
+      "positive": 3258
+    },
+    "5": {
+      "negative_above_threshold": 496,
+      "negative_above_threshold_rate": 0.0021871320789660508,
+      "negative_below_threshold": 226285,
+      "positive": 9264
+    }
+  },
+  "elapsed_ms": 16298.41,
+  "historical_3px_control_reproduced": true,
+  "limitation": "Isolates label-radius effects on this synthetic stream only; does not establish the cause of real-image failure.",
+  "proposals_reclassified_as_positive": 6006,
+  "schema": "graphreader.marker-v24-retry9-label-radius-audit.v1",
+  "scope": {
+    "case_ids_or_pixels_emitted": false,
+    "model_or_threshold_selection": false,
+    "optimizer_steps": 0,
+    "private_reads": 0,
+    "scene_count": 167,
+    "sealed_reads": 0,
+    "synthetic_only": true
+  }
+}

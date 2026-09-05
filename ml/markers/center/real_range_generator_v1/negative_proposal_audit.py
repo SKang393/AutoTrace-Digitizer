@@ -321,6 +321,8 @@ def sparse_fragment_audit() -> dict[str, object]:
     """Audit the optional input variant without a model or private corpus."""
     from .generator import _hash_scenes
 
+    # A measured image-property reference, not a model-acceptance threshold.
+    reference_center_fill = 0.42729412317276005
     splits = {}
     for split in ("train", "dev"):
         scenes = build_split(split, sparse_fragments=True)
@@ -357,6 +359,19 @@ def sparse_fragment_audit() -> dict[str, object]:
                   "private_data": False, "real_sealed_reads": 0, "optimizer_steps": 0,
                   "case_ids_or_pixels_emitted": False},
         "variant": "sparse_fragments",
+        "input_range_coverage": {
+            "reference_path": "docs/GOAL-22-PHASE-4R-V24-RETRY9-MORPHOLOGY-GAP.json",
+            "reference_population": "real negative above-threshold proposals, 5px labels",
+            "metric": "center5x5_mean",
+            "reference_median": reference_center_fill,
+            "synthetic_label_radius_px": 3.0,
+            "within_synthetic_p05_to_p95": {
+                name: record["morphology"]["center5x5_mean"]["p05"] <= reference_center_fill
+                <= record["morphology"]["center5x5_mean"]["p95"]
+                for name, record in splits.items()
+            },
+            "limitation": "Input-range coverage only. The differently labelled and model-conditioned reference population does not establish distribution equivalence or model accuracy.",
+        },
         "splits": splits,
         "sampler": {"radius_px": SPARSE_FRAGMENT_RADIUS_PX,
                     "total": sampled.total, "counts": sampled.counts,

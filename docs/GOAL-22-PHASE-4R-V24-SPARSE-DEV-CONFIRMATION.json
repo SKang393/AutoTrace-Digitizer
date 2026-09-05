@@ -1,0 +1,33 @@
+{
+  "acceptance_bars_path": "ml/policy/acceptance-bars.json",
+  "elapsed_ms": 19977.954,
+  "model_sha256": "4dece2eeb87229d5d57e0d2d714c1915ebecf8e9475b0d466a03dd970993fdb4",
+  "production_approval": false,
+  "schema": "graphreader.marker-v24-retry9-sparse-dev-confirmation.v1",
+  "scope": {
+    "candidate_selection": false,
+    "optimizer_steps": 0,
+    "private_reads": 0,
+    "sealed_reads": 0,
+    "synthetic_only": true
+  },
+  "selected": {
+    "duplicate_count": 0,
+    "f1": 0.9803149606299213,
+    "false_negatives": 12,
+    "false_positives": 68,
+    "precision": 0.9669902912621359,
+    "prohibited_structure_hits": 0,
+    "proposal_recall": 1,
+    "proposal_true_positives": 2004,
+    "recall": 0.9940119760479041,
+    "scene_count": 167,
+    "threshold": 0.25,
+    "true_positives": 1992
+  },
+  "split_sha256": "6e36eaa1fe3682572b02bfbe7fcfc48f7cdcd852c34137c5c32af771448cf6dd",
+  "tier1_center_passed": true,
+  "evaluator": "ml.markers.center.mask_preserving_v24.train_p1._evaluate",
+  "model_adapter": "CPU ONNX session output converted to torch.Tensor; no optimizer or training-candidate acquisition",
+  "input_audit_sha256": "ce8096e335a87e0a4a15125fbd11c29af9c689fee09eb2a07050cd2746f0b97b"
+}
