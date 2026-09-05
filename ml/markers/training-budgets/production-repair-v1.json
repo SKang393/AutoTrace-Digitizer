@@ -8774,7 +8774,7 @@
       "retry9_morphology_synthetic_negative_below_threshold": 231275,
       "retry9_morphology_synthetic_negative_above_threshold": 1512,
       "retry9_morphology_gap_path": "docs/GOAL-22-PHASE-4R-V24-RETRY9-MORPHOLOGY-GAP.json",
-      "retry9_morphology_gap_sha256": "39be76515633016310fcccc1baabb06c4379c43cbdb3485537f65aee628047d0",
+      "retry9_morphology_gap_sha256": "d6a137fd50c84a5442f42f1e80e0b951d3c66a82822b0b4c33455791593ef56a",
       "retry9_morphology_real_positive_label_distance_px": 5.0,
       "retry9_morphology_real_dev_projects": 120,
       "retry9_morphology_real_dev_failures": 0,

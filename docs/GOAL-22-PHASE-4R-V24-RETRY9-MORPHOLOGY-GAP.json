@@ -114,7 +114,7 @@
   },
   "comparison_constraints": {
     "label_radius_difference": "Synthetic proposal labels use a 3-pixel radius from the frozen training contract; the real acceptance diagnostic uses a 5-pixel radius for digitization uncertainty.",
-    "interpretation": "The radius difference can move boundary proposals between buckets, but it cannot explain the 5.50-times threshold-crossing-rate gap or the large center-fill and anisotropy gaps."
+    "interpretation": "The radius difference can move boundary proposals between buckets. These are descriptive comparisons, not an aligned-radius causal test; the contribution of the radius difference has not been quantified."
   },
   "diagnosis": {
     "responsible_subsystem": "synthetic marker proposal generator and train-only negative sampler",

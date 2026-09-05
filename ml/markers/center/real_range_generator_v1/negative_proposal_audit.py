@@ -16,7 +16,7 @@ import torch
 from ml.markers.center.mask_preserving_v24.mask_preserving import extract_proposals
 
 from .generator import ANTI_ALIAS_BLUR_RADII, PATCH, SCENE_COUNT, TOPOLOGY_TARGETS, _quantiles, build_split
-from .negative_sampler import CONNECTOR_ANCHOR_MAX_DISTANCE_PX, CONNECTOR_ENDPOINT_OFFSET_PX, GENERIC_CONNECTOR_BAND_RADIUS_PX, TOPOLOGY_HARD_RADIUS_PX, TOPOLOGY_KINDS, TOPOLOGY_SAMPLER_RADIUS_PX, sample_negatives
+from .negative_sampler import CONNECTOR_ANCHOR_MAX_DISTANCE_PX, CONNECTOR_ENDPOINT_OFFSET_PX, GENERIC_CONNECTOR_BAND_RADIUS_PX, SPARSE_FRAGMENT_RADIUS_PX, TOPOLOGY_HARD_RADIUS_PX, TOPOLOGY_KINDS, TOPOLOGY_SAMPLER_RADIUS_PX, _sparse_fragment_indices, sample_negatives
 
 REAL_NEGATIVE_GATES = {
     "ink_max_minimum": 0.11372548341751099,
@@ -163,9 +163,9 @@ def _positive_gates(positives: dict[str, object]) -> dict[str, bool]:
     }
 
 
-def _train_sampler_records() -> list[tuple[object, object, torch.Tensor, torch.Tensor]]:
+def _train_sampler_records(*, sparse_fragments: bool = False) -> list[tuple[object, object, torch.Tensor, torch.Tensor]]:
     records = []
-    for scene in build_split("train"):
+    for scene in build_split("train", sparse_fragments=sparse_fragments):
         batch = extract_proposals(scene.tensor)
         centers = torch.tensor(scene.centers, dtype=batch.coordinates.dtype)
         labels = torch.cdist(batch.coordinates, centers).min(dim=1).values.le(3.0).float()
@@ -317,11 +317,74 @@ def audit() -> dict[str, object]:
     }
 
 
+def sparse_fragment_audit() -> dict[str, object]:
+    """Audit the optional input variant without a model or private corpus."""
+    from .generator import _hash_scenes
+
+    splits = {}
+    for split in ("train", "dev"):
+        scenes = build_split(split, sparse_fragments=True)
+        original = build_split(split)
+        values = {key: [] for key in MORPHOLOGY_KEYS}
+        positive_count = 0
+        for scene in scenes:
+            batch = extract_proposals(scene.tensor)
+            centers = torch.tensor(scene.centers, dtype=batch.coordinates.dtype)
+            labels = torch.cdist(batch.coordinates, centers).amin(dim=1).le(3.0)
+            positive_count += int(labels.sum())
+            for index in sorted(_sparse_fragment_indices(scene, batch.coordinates, labels)):
+                for key, value in _patch_morphology(batch.patches[index]).items():
+                    values[key].append(value)
+        splits[split] = {
+            "scene_count": len(scenes),
+            "aggregate_sha256": _hash_scenes(scenes),
+            "positive_proposal_count": positive_count,
+            "sparse_proposal_count": len(values[MORPHOLOGY_KEYS[0]]),
+            "morphology": {key: _quantiles(items) for key, items in values.items()},
+            "truths_unchanged": all(a.centers == b.centers and a.diameters == b.diameters
+                                    for a, b in zip(scenes, original)),
+            "masks_unchanged": all(torch.equal(a.tensor[1:], b.tensor[1:])
+                                   for a, b in zip(scenes, original)),
+            "truth_center_pixels_unchanged": all(
+                torch.equal(a.tensor[0, int(y)-2:int(y)+3, int(x)-2:int(x)+3],
+                            b.tensor[0, int(y)-2:int(y)+3, int(x)-2:int(x)+3])
+                for a, b in zip(scenes, original) for x, y in a.centers),
+        }
+    sampled = sample_negatives(_train_sampler_records(sparse_fragments=True), split="train")
+    return {
+        "schema": "graphreader.marker-sparse-fragment-input-audit.v1",
+        "scope": {"synthetic_only": True, "model_loaded": False,
+                  "private_data": False, "real_sealed_reads": 0, "optimizer_steps": 0,
+                  "case_ids_or_pixels_emitted": False},
+        "variant": "sparse_fragments",
+        "splits": splits,
+        "sampler": {"radius_px": SPARSE_FRAGMENT_RADIUS_PX,
+                    "total": sampled.total, "counts": sampled.counts,
+                    "capacities": sampled.capacities,
+                    "selected_index_sha256": sampled.selected_index_sha256,
+                    "sparse_capacity": sampled.sparse_fragment_capacity,
+                    "sparse_selected": sampled.sparse_fragment_selected,
+                    "generic_remainder_selected": sampled.generic_remainder_selected,
+                    "hard_training_total": sampled.hard_training_total},
+        "gates": {
+            "truths_masks_and_centers_preserved": all(
+                r["truths_unchanged"] and r["masks_unchanged"] and r["truth_center_pixels_unchanged"]
+                for r in splits.values()),
+            "sparse_generic_pool_retained": sampled.sparse_fragment_capacity > 0
+                and sampled.sparse_fragment_capacity == sampled.sparse_fragment_selected,
+            "negative_budget_preserved": sampled.total == 32580,
+            "hard_training_total_preserved": sampled.hard_training_total == 6856,
+            "positive_count_preserved": all(r["positive_proposal_count"] == 3258 for r in splits.values()),
+        },
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--sparse-fragments", action="store_true")
     args = parser.parse_args()
-    encoded = (json.dumps(audit(), indent=2, sort_keys=True) + "\n").encode("utf-8")
+    encoded = (json.dumps(sparse_fragment_audit() if args.sparse_fragments else audit(), indent=2, sort_keys=True) + "\n").encode("utf-8")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_bytes(encoded)
     print(encoded.decode("utf-8"), end="")

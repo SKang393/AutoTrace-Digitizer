@@ -25,6 +25,7 @@ LEGACY_HARD_RADIUS_PX = 8.0
 CONNECTOR_ENDPOINT_OFFSET_PX = 8.0
 CONNECTOR_ANCHOR_MAX_DISTANCE_PX = 4.0
 GENERIC_CONNECTOR_BAND_RADIUS_PX = 4.0
+SPARSE_FRAGMENT_RADIUS_PX = 8.0
 # Compatibility export for the deferred V24 trainer; endpoint selection no
 # longer consumes these legacy fractional anchors.
 CONNECTOR_ANCHOR_FRACTIONS = (1.0 / 3.0, 2.0 / 3.0)
@@ -60,6 +61,8 @@ class SampledNegatives:
     topology_hard_selected: dict[str, int] | None = None
     hard_training_total: int = 0
     generic_connector_band_selected_index_sha256: str = ""
+    sparse_fragment_capacity: int = 0
+    sparse_fragment_selected: int = 0
 
     @property
     def total(self) -> int:
@@ -133,6 +136,18 @@ def _connector_anchor_indices(scene: Any, coordinates: torch.Tensor, labels: tor
     return selected
 
 
+def _sparse_fragment_indices(scene: Any, coordinates: torch.Tensor, labels: torch.Tensor) -> set[int]:
+    selected: set[int] = set()
+    for kind, x, y in scene.hard_negatives:
+        if kind == "sparse_fragment":
+            distance = torch.linalg.vector_norm(
+                coordinates - coordinates.new_tensor((x, y)), dim=1)
+            selected.update(torch.nonzero(
+                (distance <= SPARSE_FRAGMENT_RADIUS_PX) & (labels <= 0.5)
+            ).flatten().tolist())
+    return selected
+
+
 def _connecting_segment_distances(scene: Any, coordinates: torch.Tensor) -> torch.Tensor:
     """Return each proposal's distance to the nearest center-to-center segment."""
     centers = torch.tensor(scene.centers, dtype=coordinates.dtype, device=coordinates.device)
@@ -196,6 +211,7 @@ def sample_negatives(
     topology_hard_pools: dict[str, set[tuple[str, int, int]]] = {kind: set() for kind in TOPOLOGY_KINDS}
     hard_existing_pool: set[tuple[str, int, int]] = set()
     connector_pools: set[tuple[str, int, int]] = set()
+    sparse_pools: set[tuple[str, int, int]] = set()
     connector_anchor_target_count = 0
     generic_remainder_selected = 0
     generic_connector_band_selected_index_sha256 = ""
@@ -210,6 +226,7 @@ def sample_negatives(
         topology = _topology_indices(scene, proposals.coordinates, labels, radius_px=TOPOLOGY_SAMPLER_RADIUS_PX)
         topology_hard = _topology_indices(scene, proposals.coordinates, labels, radius_px=TOPOLOGY_HARD_RADIUS_PX)
         connector_indices = _connector_anchor_indices(scene, proposals.coordinates, labels)
+        sparse_indices = _sparse_fragment_indices(scene, proposals.coordinates, labels)
         connector_anchor_target_count += max(0, (len(scene.centers) - 1) * 2)
         topology_by_index = {index: kind for kind in TOPOLOGY_KINDS for index in topology[kind]}
         generic_connector_band_indices = _generic_connector_band_indices(
@@ -235,6 +252,8 @@ def sample_negatives(
             else:
                 name = "generic"
             pools[name].append((_stable_key(seed, split, int(scene.seed), index, name), scene_number, index))
+            if index in sparse_indices and name == "generic":
+                sparse_pools.add((_stable_key(seed, split, int(scene.seed), index, name), scene_number, index))
             for kind in TOPOLOGY_KINDS:
                 if index in topology[kind]:
                     topology_pools[kind].add((_stable_key(seed, split, int(scene.seed), index, name), scene_number, index))
@@ -267,19 +286,20 @@ def sample_negatives(
         entry for entry in connector_pools & generic_entries
         if (entry[1], entry[2]) not in selected_hard_pairs
     }
-    retained_generic_entries = topology_entries | connector_entries
+    retained_generic_entries = topology_entries | connector_entries | sparse_pools
     if len(retained_generic_entries) > target["generic"]:
-        raise ValueError("topology plus connector coverage exceeds generic quota")
+        raise ValueError("topology plus connector and sparse coverage exceeds generic quota")
     for name, quota in target.items():
         if name == "hard_existing":
             continue
         if name == "generic":
             ranked_topology = sorted(topology_entries)
             ranked_connectors = sorted(connector_entries - topology_entries)
+            ranked_sparse = sorted(sparse_pools - topology_entries - connector_entries)
             generic_remaining = [item for item in sorted(pools[name]) if item not in retained_generic_entries and (item[1], item[2]) not in selected_hard_pairs]
-            generic_remainder = generic_remaining[: quota - len(ranked_topology) - len(ranked_connectors)]
+            generic_remainder = generic_remaining[: quota - len(ranked_topology) - len(ranked_connectors) - len(ranked_sparse)]
             generic_remainder_selected = len(generic_remainder)
-            ranked = ranked_topology + ranked_connectors + generic_remainder
+            ranked = ranked_topology + ranked_connectors + ranked_sparse + generic_remainder
         elif name == "generic_connector_band":
             ranked = sorted(pools[name])[:quota]
         else:
@@ -351,4 +371,6 @@ def sample_negatives(
         selected_topology_hard,
         len(selected_hard_pairs | set().union(*selected_topology_hard_pairs.values())),
         generic_connector_band_selected_index_sha256,
+        len(sparse_pools),
+        sum(index in selected_sets[scene_number] for _, scene_number, index in sparse_pools),
     )

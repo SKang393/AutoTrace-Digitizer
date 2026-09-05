@@ -170,7 +170,7 @@ def _measure_rendered_diameter(diameter: float) -> float:
     return float(max(xs.max() - xs.min() + 1, ys.max() - ys.min() + 1))
 
 
-def _scene(split: str, index: int, diameters: list[float]) -> Scene:
+def _scene(split: str, index: int, diameters: list[float], *, sparse_fragments: bool = False) -> Scene:
     seed = SEED_BASE[split] + index
     rng = np.random.default_rng(seed)
     image = Image.new("L", (WIDTH, HEIGHT), 255)
@@ -281,6 +281,16 @@ def _scene(split: str, index: int, diameters: list[float]) -> Scene:
         draw.line((8, yy, 220, yy), fill=226, width=3)
     negatives.append(("ocr_heavy", float(ocr_heavy_center[0]), float(ocr_heavy_center[1])))
 
+    if sparse_fragments:
+        # The fragment occupies y=132..138, outside truth-center windows and
+        # above the OCR-heavy band. Vary orientation and shade independently
+        # of model scores; the existing blur schedule supplies print softness.
+        x = 96 + index % 12
+        rise = (0, 3, -3)[index % 3]
+        draw.line((x - 10, 135 - rise, x + 10, 135 + rise),
+                  fill=(96, 150, 190)[(index // 3) % 3], width=1)
+        negatives.append(("sparse_fragment", float(x), 135.0))
+
     blur_radius = ANTI_ALIAS_BLUR_RADII[index % len(ANTI_ALIAS_BLUR_RADII)]
     if blur_radius:
         image = image.filter(ImageFilter.GaussianBlur(radius=blur_radius))
@@ -302,14 +312,14 @@ def _scene(split: str, index: int, diameters: list[float]) -> Scene:
 
 
 @lru_cache(maxsize=4)
-def build_split(split: str, *, scene_count: int = SCENE_COUNT) -> tuple[Scene, ...]:
+def build_split(split: str, *, scene_count: int = SCENE_COUNT, sparse_fragments: bool = False) -> tuple[Scene, ...]:
     if split not in SEED_BASE:
         raise ValueError(f"unknown split: {split}")
     if scene_count <= 0 or 2004 % scene_count:
         raise ValueError("scene_count must be a positive divisor of 2004")
     per_scene = 2004 // scene_count
     values = _diameters(2004)
-    return tuple(_scene(split, index, values[index * per_scene:(index + 1) * per_scene])
+    return tuple(_scene(split, index, values[index * per_scene:(index + 1) * per_scene], sparse_fragments=sparse_fragments)
                  for index in range(scene_count))
 
 

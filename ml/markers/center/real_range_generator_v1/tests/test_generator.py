@@ -4,6 +4,23 @@ from ml.markers.center.real_range_generator_v1.generator import TOPOLOGY_TARGETS
 from ml.markers.center.real_range_generator_v1.negative_proposal_audit import audit as negative_proposal_audit
 
 
+def test_sparse_fragment_variant_preserves_truths_and_reserves_coverage():
+    from ml.markers.center.real_range_generator_v1.negative_proposal_audit import sparse_fragment_audit
+
+    result = sparse_fragment_audit()
+    assert all(result["gates"].values())
+    assert result["sampler"]["sparse_capacity"] == result["sampler"]["sparse_selected"] == 1738
+    assert result["sampler"]["generic_remainder_selected"] == 1500
+    assert result["scope"]["model_loaded"] is False
+    for split in ("train", "dev"):
+        record = result["splits"][split]
+        assert record["sparse_proposal_count"] == 2087
+        assert record["morphology"]["center5x5_mean"]["median"] < 0.1
+        assert record["morphology"]["gray_band_fraction"]["median"] > 0.1
+        assert record["morphology"]["covariance_eigen_ratio"]["p95"] > 10
+    assert result["splits"]["train"]["aggregate_sha256"] != result["splits"]["dev"]["aggregate_sha256"]
+
+
 def test_determinism_and_disjoint_seeds() -> None:
     a, b = build_split("train"), build_split("train")
     assert [s.seed for s in a] == [s.seed for s in b]

@@ -334,13 +334,14 @@ def test_retry9_real_dev_report_is_clone_safe_aggregate_only_and_bound():
 
     gap_path = ROOT / entry["retry9_morphology_gap_path"]
     gap = json.loads(gap_path.read_text())
-    assert digest(gap_path) == "39be76515633016310fcccc1baabb06c4379c43cbdb3485537f65aee628047d0"
+    assert digest(gap_path) == entry["retry9_morphology_gap_sha256"] == "d6a137fd50c84a5442f42f1e80e0b951d3c66a82822b0b4c33455791593ef56a"
     assert gap["scope"]["real_sealed_reads"] == 0
     assert gap["scope"]["optimizer_steps_on_private_data"] == 0
     assert gap["scope"]["candidate_selected_on_real_dev"] is False
     assert gap["rate_comparison"]["real_to_synthetic_rate_ratio"] == 5.496320014967361
     assert gap["real_dev_morphology_run"]["negative_above_threshold_count"] == 48129
     assert gap["comparison_constraints"]["label_radius_difference"].startswith("Synthetic proposal labels use a 3-pixel radius")
+    assert "not an aligned-radius causal test" in gap["comparison_constraints"]["interpretation"]
     assert entry["retry9_morphology_real_sealed_reads"] == 0
     assert entry["retry9_morphology_threshold_change_proposed"] is False
     assert entry["retry9_morphology_candidate_selection"] is False

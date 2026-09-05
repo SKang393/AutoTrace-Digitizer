@@ -33,6 +33,16 @@ def test_stable_rank_key_is_repeatable_and_stratum_bound():
     assert key != _stable_key(20260904, "train", 4100, 7, "artifact")
 
 
+def test_sparse_fragment_geometry_excludes_positives_and_distant_proposals():
+    from types import SimpleNamespace
+    from ml.markers.center.real_range_generator_v1.negative_sampler import _sparse_fragment_indices
+
+    scene = SimpleNamespace(hard_negatives=(("sparse_fragment", 100.0, 135.0),))
+    coordinates = torch.tensor([[100.0, 135.0], [108.0, 135.0], [109.0, 135.0], [96.0, 135.0]])
+    labels = torch.tensor([1.0, 0.0, 0.0, 0.0])
+    assert _sparse_fragment_indices(scene, coordinates, labels) == {1, 3}
+
+
 def test_sampling_is_train_only_and_fails_closed_on_under_capacity():
     with pytest.raises(ValueError, match="train-only"):
         sample_negatives([], split="dev")
