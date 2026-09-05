@@ -1,7 +1,7 @@
 {
     "schemaVersion":  1,
     "policy":  "one produced build consumes one build number; ordinal equals build number",
-    "assignedUtc":  "2026-08-19T21:03:50.6138068+00:00",
+    "assignedUtc":  "2026-09-05T20:57:42.6345064+00:00",
     "builds":  [
                    {
                        "buildNumber":  1,
@@ -7338,6 +7338,23 @@
                        "commit":  "a44dfa1b5de83c91e095b54d8fc099752d44d23e",
                        "buildTimeUtc":  "2026-08-19T14:36:09.6821817+00:00",
                        "executableSha256":  "9fab0f8f940802e6b06960057995235468acbdd48ec79c46d60aa612ed6b9e30",
+                       "openCvRuntimeSha256":  "1fa122bdb8e94175e7719fb8aa8f2ab211268a756f5d0c7a13c710ed79ae30cd",
+                       "releaseEligible":  false,
+                       "releaseStatus":  "internal",
+                       "retained":  false,
+                       "recordIncomplete":  false,
+                       "missingMetadata":  [
+
+                                           ]
+                   },
+                   {
+                       "buildNumber":  433,
+                       "version":  "0.4.33",
+                       "directory":  "0.4.33-20260905T205607798Z-3c131f8f",
+                       "stampedVersion":  "0.4.33",
+                       "commit":  "3c131f8f2562ae9526de87205cfed85ace1e64a9",
+                       "buildTimeUtc":  "2026-09-05T20:56:07.7984331+00:00",
+                       "executableSha256":  "4f45bdf73adb005a92fadaee56dc6f698e876e707a2961b676cf449e3216600e",
                        "openCvRuntimeSha256":  "1fa122bdb8e94175e7719fb8aa8f2ab211268a756f5d0c7a13c710ed79ae30cd",
                        "releaseEligible":  false,
                        "releaseStatus":  "internal",
