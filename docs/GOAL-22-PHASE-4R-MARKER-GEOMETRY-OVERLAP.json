@@ -1,0 +1,37 @@
+{
+  "schema": "graphreader.marker-generator-geometry-overlap.v1",
+  "scope": {
+    "synthetic_only": true,
+    "private_reads": 0,
+    "sealed_reads": 0,
+    "optimizer_steps": 0,
+    "case_ids_or_pixels_emitted": false
+  },
+  "geometry_fields": [
+    "centers",
+    "diameters",
+    "hard_negatives"
+  ],
+  "variants": {
+    "baseline": {
+      "train_scenes": 167,
+      "dev_scenes": 167,
+      "unique_train_geometries": 167,
+      "unique_dev_geometries": 167,
+      "shared_geometries": 167,
+      "corresponding_identical_geometry": 167,
+      "corresponding_identical_tensors": 0
+    },
+    "sparse_fragments": {
+      "train_scenes": 167,
+      "dev_scenes": 167,
+      "unique_train_geometries": 167,
+      "unique_dev_geometries": 167,
+      "shared_geometries": 167,
+      "corresponding_identical_geometry": 167,
+      "corresponding_identical_tensors": 0
+    }
+  },
+  "finding": "Different pixel bytes do not imply independent graph geometry. Both dev variants repeat all training layouts.",
+  "next_action": "Create deterministic independently seeded dev layouts and verify the frozen model there before further training or private confirmation."
+}

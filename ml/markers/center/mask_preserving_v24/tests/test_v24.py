@@ -3,10 +3,30 @@
 import math
 import json
 from pathlib import Path
+from types import SimpleNamespace
+
+import numpy as np
+import pytest
+import torch
 
 from ml.markers.center.mask_preserving_v24.mask_preserving import extract_proposals
 from ml.markers.center.mask_preserving_v24 import protocol
 from ml.markers.center.real_range_generator_v1.generator import build_split
+
+
+@pytest.mark.parametrize("distance,radius,expected", [(4.5, 2.5, 1), (5.0, 2.5, 2), (5.5, 2.5, 2), (9.5, 8.0, 1), (10.0, 8.0, 2)])
+def test_nms_shared_csharp_distance_and_radius_boundaries(distance, radius, expected):
+    from ml.markers.center.mask_preserving_v24.mask_preserving import postprocess
+
+    tensor = torch.zeros((3, 32, 32))
+    tensor[0] = 1
+    proposals = extract_proposals(tensor)
+    assert len(proposals.coordinates) == 64
+    assert proposals.coordinates[18:20].tolist() == [[8, 8], [12, 8]]
+    output = np.zeros((64, 4), dtype=np.float32)
+    output[18] = [.9, 0, 0, radius]
+    output[19] = [.8, (distance-4)/4, 0, radius]
+    assert len(postprocess(SimpleNamespace(tensor=tensor), proposals, output)) == expected
 
 def test_masks_do_not_remove_ink_supported_proposals():
     scene = build_split("dev")[0]

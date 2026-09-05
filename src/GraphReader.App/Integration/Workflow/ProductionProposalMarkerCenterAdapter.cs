@@ -873,10 +873,13 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
         return support >= 3 || (count > 0 && sum / count >= 0.28);
     }
 
-    private static List<ProposalMarkerPrediction> ApplyNms(
+    private List<ProposalMarkerPrediction> ApplyNms(
         IEnumerable<ProposalMarkerPrediction> values,
         out int suppressions)
     {
+        // V24's Python postprocessor uses a 5px floor; keep the older
+        // candidates' 6.5px behavior unchanged.
+        double minimumSeparation = maskPreservingCandidate ? 5.0 : MinimumCenterSeparation;
         var accepted = new List<ProposalMarkerPrediction>();
         suppressions = 0;
         var buckets = new Dictionary<(int X, int Y), List<ProposalMarkerPrediction>>();
@@ -885,8 +888,8 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                      .ThenBy(static item => item.Center.Y)
                      .ThenBy(static item => item.Center.X))
         {
-            int bucketX = (int)Math.Floor(candidate.Center.X / MinimumCenterSeparation);
-            int bucketY = (int)Math.Floor(candidate.Center.Y / MinimumCenterSeparation);
+            int bucketX = (int)Math.Floor(candidate.Center.X / minimumSeparation);
+            int bucketY = (int)Math.Floor(candidate.Center.Y / minimumSeparation);
             bool suppressed = false;
             for (int y = bucketY - 2; y <= bucketY + 2 && !suppressed; y++)
             {
@@ -898,7 +901,7 @@ public sealed class ProductionProposalMarkerCenterAdapter : IProductionMarkerCen
                     }
 
                     suppressed = neighbors.Any(current => Distance(candidate.Center, current.Center) <
-                        Math.Max(MinimumCenterSeparation, RadiusSuppressionScale * Math.Max(candidate.Radius, current.Radius)));
+                        Math.Max(minimumSeparation, RadiusSuppressionScale * Math.Max(candidate.Radius, current.Radius)));
                 }
             }
             if (suppressed)

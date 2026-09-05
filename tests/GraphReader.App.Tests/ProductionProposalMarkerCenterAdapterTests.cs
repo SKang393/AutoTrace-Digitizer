@@ -330,6 +330,39 @@ public sealed class ProductionProposalMarkerCenterAdapterTests
     }
 
     [TestMethod]
+    [DataRow(4.5, 2.5, 1)]
+    [DataRow(5.0, 2.5, 2)]
+    [DataRow(5.5, 2.5, 2)]
+    [DataRow(9.5, 8.0, 1)]
+    [DataRow(10.0, 8.0, 2)]
+    public async Task MaskPreservingNmsMatchesPythonDistanceAndRadiusBoundaries(
+        double distance, double radius, int expectedCount)
+    {
+        // Shared with Python's synthetic regression: a 32x32 ink plane,
+        // proposals (8,8) and (12,8), and decoded separation `distance`.
+        var runner = new FakeRunner(count =>
+        {
+            Assert.AreEqual(64, count);
+            float[] output = new float[count * 4];
+            output[18 * 4] = 0.9f;
+            output[18 * 4 + 3] = (float)radius;
+            output[19 * 4] = 0.8f;
+            output[19 * 4 + 1] = (float)((distance - 4) / 4);
+            output[19 * 4 + 3] = (float)radius;
+            return output;
+        });
+        var frame = new MarkerImageFrame(32, 32, 1, new float[32 * 32],
+            MarkerSourceImage.Original, MarkerAffineTransform.Identity,
+            MarkerMask.Empty(32, 32), MarkerMask.Empty(32, 32));
+        var result = await CreateMaskPreservingAdapter(runner).DetectCandidateWithDiagnosticsAsync(
+            frame, MarkerPolygon.FromRectangle(new(0, 0, 32, 32)), CancellationToken.None);
+
+        Assert.AreEqual(2, result.StageCounters.CandidatesBeforeNms);
+        Assert.AreEqual(expectedCount, result.Candidates.Count);
+        Assert.AreEqual(2 - expectedCount, result.StageCounters.NmsSuppressions);
+    }
+
+    [TestMethod]
     public void NegativePatchDiagnosticSummarizesWithoutInferenceOrPixels()
     {
         MarkerImageFrame frame = FrameWithOuterRadiusMarker() with
